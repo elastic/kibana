@@ -1,0 +1,52 @@
+---
+# This file is used to generate "Logs settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Logs settings in Kibana
+id: logs-ui-settings-kb
+page_description: |
+  You do not need to configure any settings to use the Logs app in Kibana. It is enabled by default.
+
+  The Kibana logs can be found per operating system under:
+
+  * Linux, DEB or RPM package: `/var/log/kibana/kibana.log`
+  * Linux, tar.gz package: `$KIBANA_HOME/log/kibana.log`
+  * Windows: `$KIBANA_HOME\log\kibana.log`
+
+groups:
+  - group: General Logs settings
+    id: general-logs-ui-settings-kb
+
+    settings:
+
+      - setting: xpack.infra.sources.default.fields.message
+        description: |
+          Fields used to display messages in the Logs app.
+        datatype: string
+        default: "`['message', '@message']`"
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: xpack.infra.alerting.inventory_threshold.group_by_page_size
+        description: |
+          Controls the size of the composite aggregations used by the Inventory Threshold to retrieve all the hosts.
+        datatype: int
+        default: 10000
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: xpack.infra.alerting.metric_threshold.group_by_page_size
+        description: |
+          Controls the size of the composite aggregations used by the Metric Threshold group by feature.
+        datatype: int
+        default: 10000
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable

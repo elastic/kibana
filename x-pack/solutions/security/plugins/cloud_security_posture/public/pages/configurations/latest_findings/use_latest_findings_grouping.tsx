@@ -22,7 +22,6 @@ import {
 import type { FindingsGroupingAggregation } from '@kbn/cloud-security-posture';
 import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
 import {
-  CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS,
   FINDINGS_GROUPING_OPTIONS,
   LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
 } from '../../../common/constants';
@@ -99,6 +98,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
     case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return [
         ...aggMetrics,
+        getTermAggregation('cloudProvider', 'cloud.provider'),
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkId', 'rule.benchmark.id'),
         getTermAggregation('accountName', 'cloud.account.name'),
@@ -112,28 +112,6 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       ];
   }
   return aggMetrics;
-};
-
-/**
- * Get runtime mappings for the given group field
- * Some fields require additional runtime mappings to aggregate additional information
- * Fallback to keyword type to support custom fields grouping
- */
-const getRuntimeMappingsByGroupField = (
-  field: string
-): Record<string, { type: 'keyword' }> | undefined => {
-  if (CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS?.[field]) {
-    return CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS[field].reduce(
-      (acc, runtimeField) => ({
-        ...acc,
-        [runtimeField]: {
-          type: 'keyword',
-        },
-      }),
-      {}
-    );
-  }
-  return {};
 };
 
 /**
@@ -213,7 +191,6 @@ export const useLatestFindingsGrouping = ({
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }, { complianceScore: { order: 'asc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
-    runtimeMappings: getRuntimeMappingsByGroupField(currentSelectedGroup),
     rootAggregations: [
       {
         failedFindings: {

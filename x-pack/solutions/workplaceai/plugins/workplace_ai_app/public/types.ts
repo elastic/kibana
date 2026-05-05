@@ -6,7 +6,6 @@
  */
 
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
-import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -18,9 +17,8 @@ export interface WorkplaceAIAppPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkplaceAIAppPluginStart {}
 
-export interface WorkplaceAIAppPluginSetupDependencies {
-  dataSourcesRegistry: DataSourcesRegistryPluginSetup;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface WorkplaceAIAppPluginSetupDependencies {}
 
 export interface WorkplaceAIAppPluginStartDependencies {
   inference: InferencePublicStart;
@@ -28,4 +26,15 @@ export interface WorkplaceAIAppPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cloud?: CloudStart;
   share?: SharePluginStart;
+}
+
+/**
+ * Client-side config exposed from server via exposeToBrowser
+ */
+export interface WorkplaceAIClientConfig {
+  ears: {
+    url?: string;
+    ui_enabled: boolean;
+    allow_insecure: boolean;
+  };
 }

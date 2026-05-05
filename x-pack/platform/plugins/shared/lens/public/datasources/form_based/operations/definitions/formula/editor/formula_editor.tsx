@@ -103,7 +103,7 @@ export function FormulaEditor({
   columnId,
   indexPattern,
   operationDefinitionMap,
-  unifiedSearch,
+  kql,
   dataViews,
   toggleFullscreen,
   isFullscreen,
@@ -457,7 +457,7 @@ export function FormulaEditor({
             context,
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
-            unifiedSearch,
+            kql,
             dataViews,
             dateHistogramInterval: baseIntervalRef.current,
             timefilter: data.query.timefilter.timefilter,
@@ -470,7 +470,7 @@ export function FormulaEditor({
           context,
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
-          unifiedSearch,
+          kql,
           dataViews,
           dateHistogramInterval: baseIntervalRef.current,
           timefilter: data.query.timefilter.timefilter,
@@ -489,7 +489,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, data.query.timefilter.timefilter]
+    [indexPattern, visibleOperationsMap, kql, dataViews, data.query.timefilter.timefilter]
   );
 
   const provideSignatureHelp = useCallback(
@@ -865,8 +865,11 @@ export function FormulaEditor({
                       color="text"
                       onClick={() => setIsHelpOpen(!isHelpOpen)}
                     >
-                      <EuiIcon type="documentation" />
-                      <EuiIcon type={isHelpOpen ? 'arrowDown' : 'arrowUp'} />
+                      <EuiIcon type="documentation" aria-hidden={true} />
+                      <EuiIcon
+                        type={isHelpOpen ? 'chevronSingleDown' : 'chevronSingleUp'}
+                        aria-hidden={true}
+                      />
                     </EuiLink>
                   </EuiToolTip>
                 ) : (
@@ -893,6 +896,12 @@ export function FormulaEditor({
               {errorCount || warningCount ? (
                 <EuiFlexItem grow={false}>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.lens.formula.editorWarningsPopoverAriaLabel',
+                      {
+                        defaultMessage: 'Formula errors and warnings',
+                      }
+                    )}
                     ownFocus={false}
                     isOpen={isWarningOpen}
                     closePopover={() => setIsWarningOpen(false)}

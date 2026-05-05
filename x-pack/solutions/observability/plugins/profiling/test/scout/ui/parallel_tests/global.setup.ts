@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import { APM_AGENT_POLICY_ID } from '../../common/fixtures/constants';
 
 globalSetupHook(
   'Set up Profiling Resources and Data',
-  { tag: ['@ess'] },
+  { tag: tags.stateful.classic },
   async ({ profilingSetup, apiServices, log }) => {
     try {
       // Create APM agent policy via Fleet API
@@ -28,15 +28,15 @@ globalSetupHook(
       );
 
       if (!apmPolicyData) {
-        await apiServices.fleet.agent_policies.create(
-          'Elastic APM',
-          'default',
-          false, // sysMonitoring
-          {
+        await apiServices.fleet.agent_policies.create({
+          policyName: 'Elastic APM',
+          policyNamespace: 'default',
+          sysMonitoring: false,
+          params: {
             id: APM_AGENT_POLICY_ID,
             description: 'Elastic APM agent policy created via Fleet API',
-          }
-        );
+          },
+        });
         log.info(`APM agent policy '${APM_AGENT_POLICY_ID}' is created`);
       } else {
         log.info(`APM agent policy '${APM_AGENT_POLICY_ID}' already exists`);

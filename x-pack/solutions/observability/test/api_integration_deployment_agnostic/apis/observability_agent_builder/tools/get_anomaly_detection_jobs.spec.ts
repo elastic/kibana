@@ -6,24 +6,27 @@
  */
 
 import expect from '@kbn/expect';
+import { timerange } from '@kbn/synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { generateApmDataWithAnomalies } from '@kbn/synthtrace';
 import type { GetAnomalyDetectionJobsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_anomaly_detection_jobs/tool';
 import { OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_anomaly_detection_jobs/tool';
 import datemath from '@elastic/datemath';
-import moment from 'moment';
+import { duration as momentDuration } from 'moment';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import { createSyntheticApmDataWithAnomalies } from '../utils/synthtrace_scenarios/create_synthetic_apm_data_with_anomalies';
 
-const SERVICE_NAME = 'service-a';
+const SERVICE_A = 'service-a';
+const SERVICE_B = 'service-b';
 const ENVIRONMENT = 'production';
 const START = 'now-12h';
 const END = 'now';
 
 const startUnix = datemath.parse(START)!;
 const endUnix = datemath.parse(END)!;
-const SPIKE_START = endUnix.valueOf() - moment.duration(2, 'hours').asMilliseconds();
-const SPIKE_END = endUnix.valueOf() - moment.duration(1, 'hours').asMilliseconds();
+
+// The generator places the spike in the last 2 hours of the range
+const SPIKE_START = endUnix.valueOf() - momentDuration(2, 'hours').asMilliseconds();
 
 const START_ISO = new Date(startUnix.valueOf()).toISOString();
 const END_ISO = new Date(endUnix.valueOf()).toISOString();
@@ -43,19 +46,42 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       agentBuilderApiClient = createAgentBuilderApiClient(supertest);
       apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
-      await createSyntheticApmDataWithAnomalies({
-        getService,
-        apmSynthtraceEsClient,
-        serviceName: SERVICE_NAME,
+      // Clean up before generating data
+      await Promise.all([apmSynthtraceEsClient.clean(), ml.api.cleanMlIndices()]);
+      await ml.api.deleteAllAnomalyDetectionJobs();
+
+      // Generate APM data with anomalies using timerange
+      const range = timerange(startUnix.toDate(), endUnix.toDate());
+      const serviceA = generateApmDataWithAnomalies({
+        apmEsClient: apmSynthtraceEsClient,
+        range,
+        serviceName: SERVICE_A,
         environment: ENVIRONMENT,
         language: 'nodejs',
-        start: startUnix,
-        end: endUnix,
-        spikeStart: SPIKE_START,
-        spikeEnd: SPIKE_END,
+      });
+      await serviceA.client.index(serviceA.generator);
+
+      const serviceB = generateApmDataWithAnomalies({
+        apmEsClient: apmSynthtraceEsClient,
+        range,
+        serviceName: SERVICE_B,
+        environment: ENVIRONMENT,
+        language: 'dotnet',
+      });
+      await serviceB.client.index(serviceB.generator);
+
+      // Create anomaly detection job
+      const editorClient = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
+        withInternalHeaders: true,
+        useCookieHeader: true,
       });
 
-      await retry.waitFor('ML job to have anomalies', async () => {
+      await editorClient
+        .post('/internal/apm/settings/anomaly-detection/jobs')
+        .send({ environments: [ENVIRONMENT] })
+        .expect(200);
+
+      await retry.waitFor('ML job to have anomalies for both services', async () => {
         const toolResults =
           await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
             id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
@@ -63,14 +89,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
         const { topAnomalies } = toolResults[0].data.jobs[0];
-        const hasLatencyAnomaly = topAnomalies.some(
-          ({ fieldName }) => fieldName === 'transaction_latency'
+
+        const hasServiceAAnomalies = topAnomalies.some((a) =>
+          a.influencers?.some(
+            (inf) => inf.fieldName === 'service.name' && inf.fieldValues.includes(SERVICE_A)
+          )
         );
-        const hasThroughputAnomaly = topAnomalies.some(
-          ({ fieldName }) => fieldName === 'transaction_throughput'
+        const hasServiceBAnomalies = topAnomalies.some((a) =>
+          a.influencers?.some(
+            (inf) => inf.fieldName === 'service.name' && inf.fieldValues.includes(SERVICE_B)
+          )
         );
 
-        return hasLatencyAnomaly && hasThroughputAnomaly;
+        return hasServiceAAnomalies && hasServiceBAnomalies;
       });
     });
 
@@ -122,7 +153,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(throughputAnomaly?.byFieldName).to.be('transaction.type');
         expect(throughputAnomaly?.byFieldValue).to.be('request');
         expect(throughputAnomaly?.partitionFieldName).to.be('service.name');
-        expect(throughputAnomaly?.partitionFieldValue).to.be('service-a');
+        expect(throughputAnomaly?.partitionFieldValue).to.be(SERVICE_A);
         expect(throughputAnomaly?.fieldName).to.be('transaction_throughput');
         expect(throughputAnomaly?.anomalyScore).to.be.greaterThan(10);
       });
@@ -146,6 +177,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             fieldName: 'failed_transaction_rate',
           },
         ]);
+      });
+
+      it('should include job stats', async () => {
+        const jobs = toolResults[0].data.jobs;
+        const job = jobs[0];
+
+        // jobStats should be present with state and data coverage
+        expect(job).to.have.property('jobStats');
+        expect(job.jobStats.state).to.be('opened');
+
+        expect(job.jobStats.lastRecordTimestamp).to.be.a('number');
+        expect(job.jobStats.lastRecordTimestamp).to.be.greaterThan(0);
+
+        expect(job.jobStats.processedRecordCount).to.be.a('number');
+        expect(job.jobStats.processedRecordCount).to.be.greaterThan(0);
       });
     });
 
@@ -174,18 +220,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
       expect(toolResults[0].data.jobs).to.be.empty();
-      expect(toolResults[0].data.message).to.contain(
-        'No anomaly detection jobs found for the provided filters'
-      );
+      expect(toolResults[0].data.total).to.be(0);
     });
 
     it('returns job without anomalies when time range excludes them', async () => {
       // Start check 4 hours before spike to avoid start of dataset initialization noise
       const EARLY_START_ISO = new Date(
-        SPIKE_START - moment.duration(4, 'hours').asMilliseconds()
+        SPIKE_START - momentDuration(4, 'hours').asMilliseconds()
       ).toISOString();
       const EARLY_END_ISO = new Date(
-        SPIKE_START - moment.duration(30, 'minutes').asMilliseconds()
+        SPIKE_START - momentDuration(30, 'minutes').asMilliseconds()
       ).toISOString();
 
       const toolResults =
@@ -201,6 +245,305 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Job should exist (it was created), but no anomalies in this window
       expect(jobs).to.have.length(1);
       expect(jobs[0].topAnomalies).to.be.empty();
+    });
+
+    it('filters anomalies by minAnomalyScore', async () => {
+      // With very high threshold, should return fewer or no anomalies
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, minAnomalyScore: 99 },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      // All returned anomalies should have score >= 99
+      topAnomalies.forEach((anomaly) => {
+        expect(anomaly.anomalyScore).to.be.greaterThan(98);
+      });
+    });
+
+    it('excludes anomalyScoreExplanation by default', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies.length).to.be.greaterThan(0);
+      topAnomalies.forEach((anomaly) => {
+        expect(anomaly).not.to.have.property('anomalyScoreExplanation');
+      });
+    });
+
+    it('includes anomalyScoreExplanation when includeExplanation is true', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, includeExplanation: true },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies.length).to.be.greaterThan(0);
+      topAnomalies.forEach((anomaly) => {
+        expect(anomaly).to.have.property('anomalyScoreExplanation');
+      });
+    });
+
+    it('filters by group', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, group: 'apm' },
+        });
+
+      expect(toolResults[0].data.jobs).to.have.length(1);
+      expect(toolResults[0].data.jobs[0].jobId).to.contain('apm');
+    });
+
+    it('returns empty response for non-existent group', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, group: 'nonexistent-group' },
+        });
+
+      expect(toolResults[0].data.jobs).to.be.empty();
+    });
+
+    describe('influencerFilter', () => {
+      function getServiceNames(
+        anomalies: GetAnomalyDetectionJobsToolResult['data']['jobs'][0]['topAnomalies']
+      ) {
+        return [
+          ...new Set(
+            anomalies.flatMap(
+              (a) =>
+                a.influencers
+                  ?.filter((inf) => inf.fieldName === 'service.name')
+                  .flatMap((inf) => inf.fieldValues) ?? []
+            )
+          ),
+        ].sort();
+      }
+
+      it('filters by single service', async () => {
+        const toolResults =
+          await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+            id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+            params: {
+              start: START_ISO,
+              end: END_ISO,
+              influencerFilter: `service.name: "${SERVICE_A}"`,
+            },
+          });
+
+        const { topAnomalies } = toolResults[0].data.jobs[0];
+        expect(topAnomalies.length).to.be.greaterThan(0);
+
+        const serviceNames = getServiceNames(topAnomalies);
+        expect(serviceNames).to.eql([SERVICE_A]);
+      });
+
+      it('OR: returns anomalies for both services', async () => {
+        const toolResults =
+          await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+            id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+            params: {
+              start: START_ISO,
+              end: END_ISO,
+              influencerFilter: `service.name: "${SERVICE_A}" OR service.name: "${SERVICE_B}"`,
+            },
+          });
+
+        const { topAnomalies } = toolResults[0].data.jobs[0];
+        expect(topAnomalies.length).to.be.greaterThan(0);
+
+        const serviceNames = getServiceNames(topAnomalies);
+        expect(serviceNames).to.eql([SERVICE_A, SERVICE_B]);
+      });
+
+      it('AND: narrows results to anomalies matching both conditions', async () => {
+        const toolResults =
+          await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+            id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+            params: {
+              start: START_ISO,
+              end: END_ISO,
+              influencerFilter: `service.name: "${SERVICE_A}" AND transaction.type: "request"`,
+            },
+          });
+
+        const { topAnomalies } = toolResults[0].data.jobs[0];
+        expect(topAnomalies.length).to.be.greaterThan(0);
+
+        const serviceNames = getServiceNames(topAnomalies);
+        expect(serviceNames).to.eql([SERVICE_A]);
+      });
+
+      it('NOT: excludes service-a, returns only service-b', async () => {
+        const toolResults =
+          await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+            id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+            params: {
+              start: START_ISO,
+              end: END_ISO,
+              influencerFilter: `NOT service.name: "${SERVICE_A}"`,
+            },
+          });
+
+        const { topAnomalies } = toolResults[0].data.jobs[0];
+        expect(topAnomalies.length).to.be.greaterThan(0);
+
+        const serviceNames = getServiceNames(topAnomalies);
+        expect(serviceNames).to.eql([SERVICE_B]);
+      });
+
+      it('wildcard: matches both services', async () => {
+        const toolResults =
+          await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+            id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+            params: {
+              start: START_ISO,
+              end: END_ISO,
+              influencerFilter: 'service.name: service*',
+            },
+          });
+
+        const { topAnomalies } = toolResults[0].data.jobs[0];
+        expect(topAnomalies.length).to.be.greaterThan(0);
+
+        const serviceNames = getServiceNames(topAnomalies);
+        expect(serviceNames).to.eql([SERVICE_A, SERVICE_B]);
+      });
+
+      it('exists (field: *): returns anomalies that have a service.name influencer', async () => {
+        const toolResults =
+          await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+            id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+            params: {
+              start: START_ISO,
+              end: END_ISO,
+              influencerFilter: 'service.name: *',
+            },
+          });
+
+        const { topAnomalies } = toolResults[0].data.jobs[0];
+        expect(topAnomalies.length).to.be.greaterThan(0);
+
+        const serviceNames = getServiceNames(topAnomalies);
+        expect(serviceNames).to.eql([SERVICE_A, SERVICE_B]);
+      });
+
+      it('parenthesized OR shorthand: returns only the listed services', async () => {
+        const toolResults =
+          await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+            id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+            params: {
+              start: START_ISO,
+              end: END_ISO,
+              influencerFilter: `service.name: ("${SERVICE_A}" OR "${SERVICE_B}")`,
+            },
+          });
+
+        const { topAnomalies } = toolResults[0].data.jobs[0];
+        expect(topAnomalies.length).to.be.greaterThan(0);
+
+        const serviceNames = getServiceNames(topAnomalies);
+        expect(serviceNames).to.eql([SERVICE_A, SERVICE_B]);
+      });
+
+      it('unquoted value', async () => {
+        const toolResults =
+          await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+            id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+            params: {
+              start: START_ISO,
+              end: END_ISO,
+              influencerFilter: `service.name: ${SERVICE_B}`,
+            },
+          });
+
+        const { topAnomalies } = toolResults[0].data.jobs[0];
+        expect(topAnomalies.length).to.be.greaterThan(0);
+
+        const serviceNames = getServiceNames(topAnomalies);
+        expect(serviceNames).to.eql([SERVICE_B]);
+      });
+
+      it('AND + NOT: includes service-a, excludes service-b', async () => {
+        const toolResults =
+          await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+            id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+            params: {
+              start: START_ISO,
+              end: END_ISO,
+              influencerFilter: `service.name: "${SERVICE_A}" AND NOT service.name: "${SERVICE_B}"`,
+            },
+          });
+
+        const { topAnomalies } = toolResults[0].data.jobs[0];
+        expect(topAnomalies.length).to.be.greaterThan(0);
+
+        const serviceNames = getServiceNames(topAnomalies);
+        expect(serviceNames).to.eql([SERVICE_A]);
+      });
+
+      it('returns empty anomalies when filter matches nothing', async () => {
+        const toolResults =
+          await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+            id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+            params: {
+              start: START_ISO,
+              end: END_ISO,
+              influencerFilter: 'service.name: "nonexistent-service"',
+            },
+          });
+
+        const { topAnomalies } = toolResults[0].data.jobs[0];
+        expect(topAnomalies).to.be.empty();
+      });
+    });
+
+    it('includes influencers in anomaly response', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies.length).to.be.greaterThan(0);
+      topAnomalies.forEach((anomaly) => {
+        expect(anomaly).to.have.property('influencers');
+        expect(anomaly.influencers).to.be.an('array');
+        anomaly.influencers?.forEach((inf) => {
+          expect(inf).to.have.property('fieldName');
+          expect(inf).to.have.property('fieldValues');
+        });
+      });
+    });
+
+    it('limits anomaly records per job with anomalyRecordsLimit', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, anomalyRecordsLimit: 3 },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies.length).to.be.lessThan(4);
+    });
+
+    it('returns no anomalies when anomalyRecordsLimit is 0', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, anomalyRecordsLimit: 0 },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies).to.be.empty();
     });
   });
 }

@@ -20,13 +20,13 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 import { getSimpleQuery } from '../../utils/queries';
 import {
   noKibanaPrivileges,
-  securitySolutionAllNoAttackIndices,
-  securitySolutionAllNoDetectionIndices,
-  securitySolutionAllNoIndices,
-  securitySolutionOnlyAll,
+  alertsReadNoAttackIndices,
+  alertsReadNoDetectionIndices,
+  alertsReadNoIndices,
+  alertsRead,
 } from '../../utils/auth/roles';
 import {
-  getMissingSecurityKibanaPrivilegesError,
+  getMissingAlertsReadPrivilegesError,
   getServerlessMissingReadIndexPrivilegesErrorPattern,
 } from '../../utils/privileges_errors';
 import { expectedAttackAlerts, expectedDetectionAlerts } from '../../mocks';
@@ -67,8 +67,8 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('RBAC', () => {
       describe('Kibana privileges', () => {
-        it('should return all alerts with security solution privileges', async () => {
-          const testAgent = await utils.createSuperTestWithCustomRole(securitySolutionOnlyAll);
+        it('should return all alerts with alerts read privileges', async () => {
+          const testAgent = await utils.createSuperTestWithCustomRole(alertsRead);
 
           const { body } = await testAgent
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.hits.hits).toEqual([...expectedDetectionAlerts, ...expectedAttackAlerts]);
         });
 
-        it('should not return alerts without security kibana privileges', async () => {
+        it('should not return alerts without alerts read privileges', async () => {
           const testAgent = await utils.createSuperTestWithCustomRole(noKibanaPrivileges);
 
           const { body } = await testAgent
@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(403);
 
           expect(body).toEqual(
-            getMissingSecurityKibanaPrivilegesError({
+            getMissingAlertsReadPrivilegesError({
               routeDetails: `POST ${DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL}`,
             })
           );
@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('Elasticsearch privileges', () => {
         it('should not return alerts without index privileges', async () => {
-          const testAgent = await utils.createSuperTestWithCustomRole(securitySolutionAllNoIndices);
+          const testAgent = await utils.createSuperTestWithCustomRole(alertsReadNoIndices);
 
           const { body } = await testAgent
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
@@ -116,9 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should return only attack alerts without detection alerts index privileges', async () => {
-          const testAgent = await utils.createSuperTestWithCustomRole(
-            securitySolutionAllNoDetectionIndices
-          );
+          const testAgent = await utils.createSuperTestWithCustomRole(alertsReadNoDetectionIndices);
 
           const { body } = await testAgent
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
@@ -133,9 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should return only detection alerts without attack alerts index privileges', async () => {
-          const testAgent = await utils.createSuperTestWithCustomRole(
-            securitySolutionAllNoAttackIndices
-          );
+          const testAgent = await utils.createSuperTestWithCustomRole(alertsReadNoAttackIndices);
 
           const { body } = await testAgent
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)

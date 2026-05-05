@@ -16,7 +16,9 @@ import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import userEvent from '@testing-library/user-event';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+
+const ENDPOINT_EVENT_FILTERS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EventFiltersForm } from './form';

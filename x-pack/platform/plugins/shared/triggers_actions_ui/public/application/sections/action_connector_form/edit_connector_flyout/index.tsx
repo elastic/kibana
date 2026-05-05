@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -49,6 +50,9 @@ export interface EditConnectorFlyoutProps {
   tab?: EditConnectorTabs;
   onConnectorUpdated?: (connector: ActionConnector) => void;
   isServerless?: boolean;
+  icon?: IconType;
+  hideRulesTab?: boolean;
+  isTestable?: boolean;
 }
 
 const getConnectorWithoutSecrets = (
@@ -57,6 +61,7 @@ const getConnectorWithoutSecrets = (
   ...connector,
   isMissingSecrets: connector.isMissingSecrets ?? false,
   secrets: {},
+  authMode: connector.authMode ?? 'shared',
 });
 
 const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
@@ -65,6 +70,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   onClose,
   tab = EditConnectorTabs.Configuration,
   onConnectorUpdated,
+  icon,
+  hideRulesTab = false,
+  isTestable: isTestableProp,
 }) => {
   const confirmModalTitleId = useGeneratedHtmlId();
 
@@ -129,6 +137,14 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
   const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
   const disabled = !isFormModified || hasErrors || isSaving;
+
+  const connectorWithoutSecrets = useMemo(
+    () =>
+      getConnectorWithoutSecrets(
+        connector as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
+      ),
+    [connector]
+  );
 
   const onExecutionAction = useCallback(async () => {
     try {
@@ -265,7 +281,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
               )}
               <ConnectorForm
                 actionTypeModel={actionTypeModel}
-                connector={getConnectorWithoutSecrets(connector)}
+                connector={connectorWithoutSecrets}
                 isEdit={isEdit}
                 onChange={setFormState}
                 onFormModifiedChange={onFormModifiedChange}
@@ -287,6 +303,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     );
   }, [
     connector,
+    connectorWithoutSecrets,
     docLinks.links.alerting.preconfiguredConnectors,
     actionTypeModel,
     isEdit,
@@ -336,7 +353,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   }, [actionTypeModel, connector]);
 
   const isTestable =
-    !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
+    isTestableProp ??
+    (!actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack);
 
   return (
     <>
@@ -354,10 +372,11 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           }
           setTab={handleSetTab}
           selectedTab={selectedTab}
-          icon={actionTypeModel?.iconClass}
+          icon={icon ?? actionTypeModel?.iconClass}
           isExperimental={isExperimental}
           subFeature={actionTypeModel?.subFeature}
           isTestable={isTestable}
+          hideRulesTab={hideRulesTab}
         />
         <EuiFlyoutBody>
           {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-lifecycle-server-internal'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-lifecycle-server-internal'
+  title: '@kbn/core-lifecycle-server-internal'
   description: Moon project for @kbn/core-lifecycle-server-internal
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/core/packages/lifecycle/server-internal
+  sourceRoot: src/core/packages/lifecycle/server-internal
 dependsOn:
   - '@kbn/core-logging-server-internal'
   - '@kbn/core-analytics-server'
@@ -48,6 +47,7 @@ dependsOn:
   - '@kbn/core-pricing-server'
   - '@kbn/core-di-internal'
   - '@kbn/core-data-streams-server'
+  - '@kbn/core-user-activity-server-internal'
 tags:
   - shared-server
   - package
@@ -59,16 +59,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

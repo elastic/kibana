@@ -43,8 +43,8 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
   ECH_AGENTLESS_OUTPUT_ID,
   ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
-  SERVERLESS_DEFAULT_OUTPUT_ID,
-  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  SERVERLESS_AGENTLESS_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID,
 } from '../../constants';
 
 import { appContextService } from '../app_context';
@@ -89,12 +89,12 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const isCloud = cloudSetup?.isCloudEnabled;
     const isServerless = cloudSetup?.isServerlessEnabled;
     const outputId = isServerless
-      ? SERVERLESS_DEFAULT_OUTPUT_ID
+      ? SERVERLESS_AGENTLESS_OUTPUT_ID
       : isCloud
       ? ECH_AGENTLESS_OUTPUT_ID
       : undefined;
     const fleetServerId = isServerless
-      ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+      ? SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID
       : isCloud
       ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
       : undefined;
@@ -191,6 +191,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const cloudSetup = appContextService.getCloud();
     if (!cloudSetup?.isServerlessEnabled) {
       requestConfig.data.stack_version = appContextService.getKibanaVersion();
+      requestConfig.data.is_elastic_staff_owned = cloudSetup?.isElasticStaffOwned ?? false;
     }
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
@@ -527,7 +528,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           'fleet_url',
           'labels',
           'resources',
-          'cloud_connectors'
+          'cloud_connectors',
+          'is_elastic_staff_owned'
         ),
         agent_policy: '[REDACTED]',
         fleet_token: '[REDACTED]',

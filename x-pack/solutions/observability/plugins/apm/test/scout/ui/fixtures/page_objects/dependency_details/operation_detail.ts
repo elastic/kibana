@@ -24,7 +24,8 @@ export class OperationDetailSubpage {
     private readonly page: ScoutPage,
     private readonly kbnUrl: KibanaUrl,
     private readonly defaultDependencyName: string,
-    private readonly defaultSpanName: string
+    private readonly defaultSpanName: string,
+    private readonly defaultServiceName: string
   ) {
     this.breadcrumb = this.page.getByTestId('apmDetailViewHeaderLink');
     this.latencyChart = this.page.getByTestId('latencyChart');
@@ -35,6 +36,14 @@ export class OperationDetailSubpage {
     this.waterfallInvestigatePopup = this.page.getByTestId('apmActionMenuInvestigateButtonPopup');
     this.waterfallPaginationLastButton = this.page.getByTestId('pagination-button-last');
     this.waterfallSpanLinksBadge = this.page.testSubj.locator('^spanLinksBadge_');
+  }
+
+  public async clickWaterfallServiceBadge(): Promise<void> {
+    const badge = this.page
+      .getByRole('row', { name: `View details for ${this.defaultSpanName}` })
+      .getByTestId('apmBarDetailsServiceNameBadge')
+      .filter({ hasText: this.defaultServiceName });
+    await badge.click();
   }
 
   private async waitForWaterfallToLoad() {
@@ -63,8 +72,8 @@ export class OperationDetailSubpage {
       `${this.kbnUrl.app('apm')}/dependencies/operation?${new URLSearchParams({
         dependencyName: this.defaultDependencyName,
         spanName: this.defaultSpanName,
-        rangeFrom: testData.OPBEANS_START_DATE,
-        rangeTo: testData.OPBEANS_END_DATE,
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
         ...overrides,
       })}`
     );

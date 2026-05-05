@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type {
@@ -28,6 +29,7 @@ import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
+  API_KEY_ATTRIBUTES_TO_STRIP,
 } from '../../../../rules_client/common';
 import type { SanitizedRule } from '../../../../../common';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -37,6 +39,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
@@ -235,26 +238,39 @@ const bulkEnableRulesWithOCC = async (
               });
             }
 
-            const updatedAttributes = updateMetaAttributes(context, {
-              ...rule.attributes,
-              ...(!rule.attributes.apiKey &&
-                (await createNewAPIKeySet(context, {
+            const nowIso = new Date().toISOString();
+            const newApiKeyAttributes = !rule.attributes.apiKey
+              ? await createNewAPIKeySet(context, {
                   id: rule.attributes.alertTypeId,
                   ruleName,
                   username,
                   shouldUpdateApiKey: true,
-                }))),
+                  apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
+                })
+              : undefined;
+
+            const updatedAttributes = updateMetaAttributes(context, {
+              ...(newApiKeyAttributes
+                ? {
+                    ...omit(rule.attributes, API_KEY_ATTRIBUTES_TO_STRIP),
+                    ...newApiKeyAttributes,
+                  }
+                : rule.attributes),
               enabled: true,
               updatedBy: username,
-              updatedAt: new Date().toISOString(),
+              updatedAt: nowIso,
+              ...(!rule.attributes.enabled ? { lastEnabledAt: nowIso } : {}),
               executionStatus: {
                 status: 'pending',
                 lastDuration: 0,
-                lastExecutionDate: new Date().toISOString(),
+                lastExecutionDate: nowIso,
                 error: null,
                 warning: null,
               },
               scheduledTaskId: rule.id,
+              ...(rule.attributes.lastRun
+                ? { lastRun: migrateLegacyLastRunOutcomeMsg(rule.attributes.lastRun) }
+                : {}),
             });
 
             const shouldScheduleTask = await getShouldScheduleTask(

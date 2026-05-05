@@ -15,6 +15,29 @@ import yaml from 'js-yaml';
 import path from 'path';
 import type { ModuleDiscoveryInfo } from './types';
 
+interface ScoutCiConfig {
+  plugins: {
+    enabled?: string[];
+    disabled?: string[];
+  };
+  packages: {
+    enabled?: string[];
+    disabled?: string[];
+  };
+  excluded_configs?: string[];
+}
+
+const readScoutCiConfig = (): ScoutCiConfig => {
+  const scoutCiConfigRelPath = path.join('.buildkite', 'scout_ci_config.yml');
+  const scoutCiConfigPath = path.resolve(REPO_ROOT, scoutCiConfigRelPath);
+  return yaml.load(fs.readFileSync(scoutCiConfigPath, 'utf8')) as ScoutCiConfig;
+};
+
+export const getScoutCiExcludedConfigs = (): string[] => {
+  const ciConfig = readScoutCiConfig();
+  return ciConfig.excluded_configs ?? [];
+};
+
 /**
  * Filters modules based on Scout CI configuration.
  * Validates that all modules are registered in the CI config ('scout_ci_config.yml') and
@@ -30,17 +53,7 @@ export const filterModulesByScoutCiConfig = (
   modulesWithTests: ModuleDiscoveryInfo[]
 ): ModuleDiscoveryInfo[] => {
   const scoutCiConfigRelPath = path.join('.buildkite', 'scout_ci_config.yml');
-  const scoutCiConfigPath = path.resolve(REPO_ROOT, scoutCiConfigRelPath);
-  const ciConfig = yaml.load(fs.readFileSync(scoutCiConfigPath, 'utf8')) as {
-    plugins: {
-      enabled?: string[];
-      disabled?: string[];
-    };
-    packages: {
-      enabled?: string[];
-      disabled?: string[];
-    };
-  };
+  const ciConfig = readScoutCiConfig();
 
   const enabledPlugins = new Set(ciConfig.plugins.enabled || []);
   const disabledPlugins = new Set(ciConfig.plugins.disabled || []);

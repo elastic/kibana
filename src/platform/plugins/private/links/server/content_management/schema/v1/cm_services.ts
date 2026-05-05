@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   savedObjectSchema,
@@ -16,6 +17,8 @@ import {
   createOptionsSchemas,
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
+import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../../common/constants';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
 import {
   LINKS_HORIZONTAL_LAYOUT,
@@ -23,13 +26,9 @@ import {
 } from '../../../../common/content_management/v1/constants';
 
 const baseLinkSchema = {
-  id: schema.string({ meta: { description: 'The unique ID of the link' } }),
   label: schema.maybe(
     schema.string({ meta: { description: 'The label of the link to be displayed in the UI' } })
   ),
-  order: schema.number({
-    meta: { description: 'The position this link should appear in the order of the list' },
-  }),
 };
 
 export const dashboardLinkSchema = schema.object({
@@ -38,68 +37,39 @@ export const dashboardLinkSchema = schema.object({
     meta: { description: 'Linked dashboard saved object id' },
   }),
   type: schema.literal(DASHBOARD_LINK_TYPE),
-  options: schema.maybe(
-    schema.object(
-      {
-        openInNewTab: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to open this link in a new tab when clicked',
-            },
-          })
-        ),
-        useCurrentFilters: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to use the filters and query from the origin dashboard',
-            },
-          })
-        ),
-        useCurrentDateRange: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to use the date range from the origin dashboard',
-            },
-          })
-        ),
-      },
-      { unknowns: 'forbid' }
-    )
-  ),
+  options: dashboardNavigationOptionsSchema,
 });
+
+export const externalLinkOptionsSchema = schema.object(
+  {
+    open_in_new_tab: schema.boolean({
+      meta: {
+        description: 'Whether to open this link in a new tab when clicked',
+      },
+      defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS.open_in_new_tab,
+    }),
+    encode_url: schema.boolean({
+      meta: {
+        description: 'Whether to escape the URL with percent encoding',
+      },
+      defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS.encode_url,
+    }),
+  },
+  { defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS, unknowns: 'forbid' }
+);
 
 export const externalLinkSchema = schema.object({
   ...baseLinkSchema,
   type: schema.literal(EXTERNAL_LINK_TYPE),
   destination: schema.string({ meta: { description: 'The external URL to link to' } }),
-  options: schema.maybe(
-    schema.object(
-      {
-        openInNewTab: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to open this link in a new tab when clicked',
-            },
-          })
-        ),
-        encodeUrl: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to escape the URL with percent encoding',
-            },
-          })
-        ),
-      },
-      { unknowns: 'forbid' }
-    )
-  ),
+  options: externalLinkOptionsSchema,
 });
 
-// Shared schema for links array - used by both saved objects and embeddables
 export const linksArraySchema = schema.arrayOf(
   schema.oneOf([dashboardLinkSchema, externalLinkSchema]),
   {
     meta: { description: 'The list of links to display' },
+    maxSize: 9999, // For DoS prevention, no actual user will insert this many links
   }
 );
 
@@ -112,10 +82,8 @@ export const layoutSchema = schema.maybe(
   })
 );
 
-export const linksSchema = schema.object(
+export const linksSchema = serializedTitlesSchema.extends(
   {
-    title: schema.string({ meta: { description: 'A human-readable title' } }),
-    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     links: linksArraySchema,
     layout: layoutSchema,
   },

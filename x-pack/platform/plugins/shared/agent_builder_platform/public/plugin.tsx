@@ -31,10 +31,11 @@ export class AgentBuilderPlatformPlugin
   }
 
   start(coreStart: CoreStart, startDeps: PluginStartDependencies): AgentBuilderPlatformPluginStart {
-    const { onechat } = startDeps;
+    const { agentBuilder, share } = startDeps;
 
     registerAttachmentUiDefinitions({
-      attachments: onechat.attachments,
+      attachments: agentBuilder.attachments,
+      locators: share.url.locators,
     });
 
     return {};

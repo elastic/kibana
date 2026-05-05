@@ -13,7 +13,7 @@ import {
   buildGenericEntityFlyoutPreviewQuery,
   buildMisconfigurationEntityFlyoutPreviewQuery,
   buildVulnerabilityEntityFlyoutPreviewQuery,
-  getEnrichPolicyId,
+  getEntitiesLatestIndexName,
 } from './helpers';
 
 const fallbackMessage = 'thisIsAFallBackMessage';
@@ -462,37 +462,56 @@ describe('test helper methods', () => {
         getExpectedAlertsQuery(size, 'low', sortField, sortDirection)
       );
     });
+
+    it('should use entityFilter instead of a term on field when entityFilter is provided', () => {
+      const entityFilter = {
+        bool: {
+          filter: [{ term: { 'host.entity.id': 'entity-store-id' } }],
+        },
+      };
+      const size = 50;
+      const result = buildEntityAlertsQuery({
+        field,
+        to,
+        from,
+        queryValue: query,
+        size,
+        entityFilter,
+      });
+
+      expect(result.query.bool.filter[0]).toEqual(entityFilter);
+    });
   });
 
-  describe('getEnrichPolicyId', () => {
-    it('should return the default policy ID when no space is provided', () => {
-      const policyId = getEnrichPolicyId();
-      const expected = 'entity_store_field_retention_generic_default_v1.0.0';
-      expect(policyId).toEqual(expected);
+  describe('getEntitiesLatestIndexName', () => {
+    it('should return the index name with the provided spaceId', () => {
+      const indexName = getEntitiesLatestIndexName('default');
+      const expected = '.entities.v2.latest.security_default-00001';
+      expect(indexName).toEqual(expected);
     });
 
-    it('should return a policy ID with the provided space', () => {
+    it('should return a index name with a custom space', () => {
       const space = 'test-space';
-      const policyId = getEnrichPolicyId(space);
-      const expected = 'entity_store_field_retention_generic_test-space_v1.0.0';
-      expect(policyId).toEqual(expected);
+      const indexName = getEntitiesLatestIndexName(space);
+      const expected = '.entities.v2.latest.security_test-space-00001';
+      expect(indexName).toEqual(expected);
     });
 
     it('should handle special characters in space IDs', () => {
       const space = 'special-chars_123';
-      const policyId = getEnrichPolicyId(space);
-      const expected = 'entity_store_field_retention_generic_special-chars_123_v1.0.0';
-      expect(policyId).toEqual(expected);
+      const indexName = getEntitiesLatestIndexName(space);
+      const expected = '.entities.v2.latest.security_special-chars_123-00001';
+      expect(indexName).toEqual(expected);
     });
 
-    it('should produce a different ID for each space', () => {
+    it('should produce a different index name for each space', () => {
       const space1 = 'space1';
       const space2 = 'space2';
-      const policyId1 = getEnrichPolicyId(space1);
-      const policyId2 = getEnrichPolicyId(space2);
-      expect(policyId1).not.toEqual(policyId2);
-      expect(policyId1).toEqual('entity_store_field_retention_generic_space1_v1.0.0');
-      expect(policyId2).toEqual('entity_store_field_retention_generic_space2_v1.0.0');
+      const indexName1 = getEntitiesLatestIndexName(space1);
+      const indexName2 = getEntitiesLatestIndexName(space2);
+      expect(indexName1).not.toEqual(indexName2);
+      expect(indexName1).toEqual('.entities.v2.latest.security_space1-00001');
+      expect(indexName2).toEqual('.entities.v2.latest.security_space2-00001');
     });
   });
 });

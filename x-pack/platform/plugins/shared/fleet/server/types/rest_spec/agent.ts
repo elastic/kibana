@@ -18,13 +18,30 @@ import { NewAgentActionSchema } from '../models';
 import { validateKuery } from '../../routes/utils/filter_utils';
 import { ListResponseSchema } from '../../routes/schema/utils';
 
+const ActionIdSchema = schema.object({
+  actionId: schema.string(),
+});
+
+const ActionIdOrMessageSchema = schema.oneOf([
+  schema.object({
+    actionId: schema.string(),
+  }),
+  schema.object({
+    message: schema.string(),
+  }),
+]);
+
 export const GetAgentsRequestSchema = {
   query: schema.object(
     {
-      page: schema.maybe(schema.number()),
-      perPage: schema.number({ defaultValue: 20 }),
+      page: schema.maybe(schema.number({ meta: { description: 'Page number' } })),
+      perPage: schema.number({
+        defaultValue: 20,
+        meta: { description: 'Number of results per page' },
+      }),
       kuery: schema.maybe(
         schema.string({
+          meta: { description: 'A KQL query string to filter results' },
           validate: (value: string) => {
             const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
             if (validationObj?.error) {
@@ -33,17 +50,50 @@ export const GetAgentsRequestSchema = {
           },
         })
       ),
-      showAgentless: schema.boolean({ defaultValue: true }),
-      showInactive: schema.boolean({ defaultValue: false }),
-      withMetrics: schema.boolean({ defaultValue: false }),
-      showUpgradeable: schema.boolean({ defaultValue: false }),
-      getStatusSummary: schema.boolean({ defaultValue: false }),
-      sortField: schema.maybe(schema.string()),
-      sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-      searchAfter: schema.maybe(schema.string()),
-      openPit: schema.maybe(schema.boolean()),
-      pitId: schema.maybe(schema.string()),
-      pitKeepAlive: schema.maybe(schema.string()),
+      showAgentless: schema.boolean({
+        defaultValue: true,
+        meta: { description: 'When true, include agentless agents in the results' },
+      }),
+      showInactive: schema.boolean({
+        defaultValue: false,
+        meta: { description: 'When true, include inactive agents in the results' },
+      }),
+      withMetrics: schema.boolean({
+        defaultValue: false,
+        meta: { description: 'When true, include CPU and memory metrics in the response' },
+      }),
+      showUpgradeable: schema.boolean({
+        defaultValue: false,
+        meta: { description: 'When true, only return agents that are upgradeable' },
+      }),
+      getStatusSummary: schema.boolean({
+        defaultValue: false,
+        meta: { description: 'When true, return a summary of agent statuses in the response' },
+      }),
+      sortField: schema.maybe(schema.string({ meta: { description: 'Field to sort results by' } })),
+      sortOrder: schema.maybe(
+        schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+          meta: { description: 'Sort order, ascending or descending' },
+        })
+      ),
+      searchAfter: schema.maybe(
+        schema.string({
+          meta: { description: 'JSON-encoded array of sort values for `search_after` pagination' },
+        })
+      ),
+      openPit: schema.maybe(
+        schema.boolean({
+          meta: { description: 'When true, opens a new point-in-time for pagination' },
+        })
+      ),
+      pitId: schema.maybe(
+        schema.string({ meta: { description: 'Point-in-time ID for pagination' } })
+      ),
+      pitKeepAlive: schema.maybe(
+        schema.string({
+          meta: { description: 'Duration to keep the point-in-time alive, for example, `1m`' },
+        })
+      ),
     },
     {
       validate: (request) => {
@@ -87,6 +137,7 @@ export const GetAgentsRequestSchema = {
     }
   ),
 };
+
 export const MigrateOptionsSchema = {
   ca_sha256: schema.maybe(schema.string()),
   certificate_authorities: schema.maybe(schema.string()),
@@ -99,9 +150,10 @@ export const MigrateOptionsSchema = {
   proxy_headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   proxy_url: schema.maybe(schema.string()),
   staging: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   replace_token: schema.maybe(schema.string()),
 };
+
 export const BulkMigrateOptionsSchema = {
   ca_sha256: schema.maybe(schema.string()),
   certificate_authorities: schema.maybe(schema.string()),
@@ -114,8 +166,9 @@ export const BulkMigrateOptionsSchema = {
   proxy_headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   proxy_url: schema.maybe(schema.string()),
   staging: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
 };
+
 export const AgentComponentStateSchema = schema.oneOf([
   schema.literal('STARTING'),
   schema.literal('CONFIGURING'),
@@ -125,6 +178,7 @@ export const AgentComponentStateSchema = schema.oneOf([
   schema.literal('STOPPING'),
   schema.literal('STOPPED'),
 ]);
+
 export const AgentUpgradeStateTypeSchema = schema.oneOf([
   schema.literal('UPG_REQUESTED'),
   schema.literal('UPG_SCHEDULED'),
@@ -136,6 +190,7 @@ export const AgentUpgradeStateTypeSchema = schema.oneOf([
   schema.literal('UPG_WATCHING'),
   schema.literal('UPG_ROLLBACK'),
 ]);
+
 export const AgentStatusSchema = schema.oneOf([
   schema.literal('offline'),
   schema.literal('error'),
@@ -163,7 +218,8 @@ export const AgentResponseSchema = schema.object({
         {
           meta: { deprecated: true },
         }
-      )
+      ),
+      { maxSize: 100 }
     )
   ),
   outputs: schema.maybe(
@@ -177,7 +233,8 @@ export const AgentResponseSchema = schema.object({
             schema.object({
               id: schema.string(),
               retired_at: schema.string(),
-            })
+            }),
+            { maxSize: 100 }
           )
         ),
       })
@@ -185,8 +242,8 @@ export const AgentResponseSchema = schema.object({
   ),
   status: schema.maybe(AgentStatusSchema),
   last_known_status: schema.maybe(AgentStatusSchema),
-  packages: schema.arrayOf(schema.string()),
-  sort: schema.maybe(schema.arrayOf(schema.any())), // ES can return many different types for `sort` array values, including unsafe numbers
+  packages: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+  sort: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 10 })), // ES can return many different types for `sort` array values, including unsafe numbers
   metrics: schema.maybe(
     schema.object({
       cpu_avg: schema.maybe(schema.number()),
@@ -197,6 +254,7 @@ export const AgentResponseSchema = schema.object({
     schema.literal('PERMANENT'),
     schema.literal('EPHEMERAL'),
     schema.literal('TEMPORARY'),
+    schema.literal('OPAMP'),
   ]),
   active: schema.boolean(),
   enrolled_at: schema.string(),
@@ -221,13 +279,14 @@ export const AgentResponseSchema = schema.object({
             error_msg: schema.maybe(schema.string()),
             retry_error_msg: schema.maybe(schema.string()),
             retry_until: schema.maybe(schema.string()),
+            reason: schema.maybe(schema.string()),
           })
         ),
       }),
     ])
   ),
   upgrade_attempts: schema.maybe(
-    schema.oneOf([schema.literal(null), schema.arrayOf(schema.string())])
+    schema.oneOf([schema.literal(null), schema.arrayOf(schema.string(), { maxSize: 10000 })])
   ),
   access_api_key_id: schema.maybe(schema.string()),
   default_api_key: schema.maybe(schema.string()),
@@ -242,12 +301,13 @@ export const AgentResponseSchema = schema.object({
       schema.literal('degraded'),
       schema.literal('updating'),
       schema.literal('starting'),
+      schema.literal('disconnected'),
     ])
   ),
   last_checkin_message: schema.maybe(schema.string()),
   user_provided_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   local_metadata: schema.recordOf(schema.string(), schema.any()),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   components: schema.maybe(
     schema.arrayOf(
       schema.object({
@@ -267,10 +327,12 @@ export const AgentResponseSchema = schema.object({
               status: AgentComponentStateSchema,
               message: schema.string(),
               payload: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-            })
+            }),
+            { maxSize: 10000 }
           )
         ),
-      })
+      }),
+      { maxSize: 10000 }
     )
   ),
   agent: schema.maybe(
@@ -278,6 +340,7 @@ export const AgentResponseSchema = schema.object({
       .object({
         id: schema.string(),
         version: schema.string(),
+        type: schema.maybe(schema.string()),
       })
       .extendsDeep({
         unknowns: 'allow',
@@ -287,11 +350,33 @@ export const AgentResponseSchema = schema.object({
     schema.oneOf([
       schema.literal(null),
       schema.arrayOf(
-        schema.oneOf([schema.literal('input'), schema.literal('output'), schema.literal('other')])
+        schema.oneOf([schema.literal('input'), schema.literal('output'), schema.literal('other')]),
+        { maxSize: 3 }
       ),
     ])
   ),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  upgrade: schema.maybe(
+    schema.object({
+      rollbacks: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            valid_until: schema.string(),
+            version: schema.string(),
+          }),
+          {
+            maxSize: 100,
+          }
+        )
+      ),
+    })
+  ),
+  identifying_attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  non_identifying_attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  sequence_num: schema.maybe(schema.number()),
+  capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  health: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  effective_config: schema.maybe(schema.any()),
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({
@@ -306,19 +391,34 @@ export const GetAgentResponseSchema = schema.object({
 
 export const GetOneAgentRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({ meta: { description: 'The agent ID' } }),
   }),
   query: schema.object({
-    withMetrics: schema.boolean({ defaultValue: false }),
+    withMetrics: schema.boolean({
+      defaultValue: false,
+      meta: { description: 'When true, include CPU and memory metrics in the response' },
+    }),
   }),
 };
+
+export const GetAgentEffectiveConfigRequestSchema = {
+  params: schema.object({
+    agentId: schema.string({
+      meta: { description: 'The agent ID to get effective config of' },
+    }),
+  }),
+};
+
+export const GetAgentEffectiveConfigResponseSchema = schema.object({
+  effective_config: schema.maybe(schema.any()),
+});
 
 export const PostNewAgentActionRequestSchema = {
   body: schema.object({
     action: NewAgentActionSchema,
   }),
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({ meta: { description: 'The agent ID' } }),
   }),
 };
 
@@ -330,8 +430,8 @@ export const PostNewAgentActionResponseSchema = schema.object({
     sent_at: schema.maybe(schema.string()),
     created_at: schema.string(),
     ack_data: schema.maybe(schema.any()),
-    agents: schema.maybe(schema.arrayOf(schema.string())),
-    namespaces: schema.maybe(schema.arrayOf(schema.string())),
+    agents: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+    namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
     expiration: schema.maybe(schema.string()),
     start_time: schema.maybe(schema.string()),
     minimum_execution_duration: schema.maybe(schema.number()),
@@ -343,23 +443,23 @@ export const PostNewAgentActionResponseSchema = schema.object({
 
 export const PostCancelActionRequestSchema = {
   params: schema.object({
-    actionId: schema.string(),
+    actionId: schema.string({ meta: { description: 'The ID of the action to cancel' } }),
   }),
 };
 
 export const PostRetrieveAgentsByActionsRequestSchema = {
   body: schema.object({
-    actionIds: schema.arrayOf(schema.string()),
+    actionIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
   }),
 };
 
 export const PostRetrieveAgentsByActionsResponseSchema = schema.object({
-  items: schema.arrayOf(schema.string()),
+  items: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });
 
 export const PostAgentUnenrollRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({ meta: { description: 'The agent ID' } }),
   }),
   body: schema.nullable(
     schema.object({
@@ -375,13 +475,14 @@ export const PostBulkAgentUnenrollRequestSchema = {
       schema.arrayOf(
         schema.string({
           meta: {
-            description: 'KQL query string, leave empty to action all agents',
+            description: 'list of agent IDs',
           },
-        })
+        }),
+        { maxSize: 10000 }
       ),
       schema.string({
         meta: {
-          description: 'list of agent IDs',
+          description: 'KQL query string, leave empty to action all agents',
         },
       }),
     ]),
@@ -418,7 +519,7 @@ function validateVersion(s: string) {
 
 export const PostAgentUpgradeRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({ meta: { description: 'The agent ID' } }),
   }),
   body: schema.object({
     source_uri: schema.maybe(schema.string()),
@@ -432,7 +533,7 @@ export const PostAgentUpgradeRequestSchema = {
 
 export const PostBulkAgentUpgradeRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
     source_uri: schema.maybe(schema.string()),
     version: schema.string({ validate: validateVersion }),
     force: schema.maybe(schema.boolean()),
@@ -454,7 +555,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
 
 export const PostAgentReassignRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({ meta: { description: 'The agent ID' } }),
   }),
   body: schema.object({
     policy_id: schema.string(),
@@ -463,12 +564,14 @@ export const PostAgentReassignRequestSchema = {
 
 export const PostRequestDiagnosticsActionRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({ meta: { description: 'The agent ID' } }),
   }),
   body: schema.nullable(
     schema.object({
       additional_metrics: schema.maybe(
-        schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
+        schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]), {
+          maxSize: 1,
+        })
       ),
     })
   ),
@@ -476,17 +579,19 @@ export const PostRequestDiagnosticsActionRequestSchema = {
 
 export const PostBulkRequestDiagnosticsActionRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
     batchSize: schema.maybe(schema.number()),
     additional_metrics: schema.maybe(
-      schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
+      schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]), {
+        maxSize: 1,
+      })
     ),
   }),
 };
 
 export const ListAgentUploadsRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({ meta: { description: 'The agent ID' } }),
   }),
 };
 
@@ -507,20 +612,21 @@ export const ListAgentUploadsResponseSchema = schema.object({
       ]),
       actionId: schema.string(),
       error: schema.maybe(schema.string()),
-    })
+    }),
+    { maxSize: 10000 }
   ),
 });
 
 export const GetAgentUploadFileRequestSchema = {
   params: schema.object({
-    fileId: schema.string(),
-    fileName: schema.string(),
+    fileId: schema.string({ meta: { description: 'The ID of the uploaded file' } }),
+    fileName: schema.string({ meta: { description: 'The name of the uploaded file' } }),
   }),
 };
 
 export const DeleteAgentUploadFileRequestSchema = {
   params: schema.object({
-    fileId: schema.string(),
+    fileId: schema.string({ meta: { description: 'The ID of the uploaded file' } }),
   }),
 };
 
@@ -532,7 +638,7 @@ export const DeleteAgentUploadFileResponseSchema = schema.object({
 export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
     policy_id: schema.string(),
-    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
   }),
@@ -540,7 +646,7 @@ export const PostBulkAgentReassignRequestSchema = {
 
 export const DeleteAgentRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({ meta: { description: 'The agent ID' } }),
   }),
 };
 
@@ -550,16 +656,17 @@ export const DeleteAgentResponseSchema = schema.object({
 
 export const UpdateAgentRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({ meta: { description: 'The agent ID' } }),
   }),
   body: schema.object({
     user_provided_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    tags: schema.maybe(schema.arrayOf(schema.string())),
+    tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   }),
 };
+
 export const MigrateSingleAgentRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({ meta: { description: 'The agent ID' } }),
   }),
   body: schema.object({
     uri: schema.uri(),
@@ -567,43 +674,44 @@ export const MigrateSingleAgentRequestSchema = {
     settings: schema.maybe(schema.object(MigrateOptionsSchema)),
   }),
 };
-export const MigrateSingleAgentResponseSchema = schema.object({
-  actionId: schema.string(),
-});
+
+export const MigrateSingleAgentResponseSchema = ActionIdSchema;
 
 export const BulkMigrateAgentsRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
     uri: schema.uri(),
     enrollment_token: schema.string(),
     settings: schema.maybe(schema.object(BulkMigrateOptionsSchema)),
     batchSize: schema.maybe(schema.number()),
   }),
 };
-export const BulkMigrateAgentsResponseSchema = schema.object({
-  actionId: schema.string(),
-});
+
+export const BulkMigrateAgentsResponseSchema = ActionIdSchema;
 
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
-    tagsToAdd: schema.maybe(schema.arrayOf(schema.string())),
-    tagsToRemove: schema.maybe(schema.arrayOf(schema.string())),
+    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    tagsToAdd: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+    tagsToRemove: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 
-export const PostBulkActionResponseSchema = schema.object({
-  actionId: schema.string(),
-});
+export const PostBulkActionResponseSchema = ActionIdSchema;
 
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
-    policyId: schema.maybe(schema.string()),
-    policyIds: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
+    policyId: schema.maybe(schema.string({ meta: { description: 'Filter by agent policy ID' } })),
+    policyIds: schema.maybe(
+      schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 1000 }), schema.string()], {
+        meta: { description: 'Filter by one or more agent policy IDs' },
+      })
+    ),
     kuery: schema.maybe(
       schema.string({
+        meta: { description: 'A KQL query string to filter results' },
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
           if (validationObj?.error) {
@@ -634,10 +742,22 @@ export const GetAgentStatusResponseSchema = schema.object({
 
 export const GetAgentDataRequestSchema = {
   query: schema.object({
-    agentsIds: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
-    pkgName: schema.maybe(schema.string()),
-    pkgVersion: schema.maybe(schema.string()),
-    previewData: schema.boolean({ defaultValue: false }),
+    agentsIds: schema.oneOf(
+      [schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()],
+      {
+        meta: { description: 'Agent IDs to check data for, as an array or comma-separated string' },
+      }
+    ),
+    pkgName: schema.maybe(
+      schema.string({ meta: { description: 'Filter by integration package name' } })
+    ),
+    pkgVersion: schema.maybe(
+      schema.string({ meta: { description: 'Filter by integration package version' } })
+    ),
+    previewData: schema.boolean({
+      defaultValue: false,
+      meta: { description: 'When true, return a preview of the ingested data' },
+    }),
   }),
 };
 
@@ -648,17 +768,22 @@ export const GetAgentDataResponseSchema = schema.object({
       schema.object({
         data: schema.boolean(),
       })
-    )
+    ),
+    { maxSize: 10000 }
   ),
-  dataPreview: schema.arrayOf(schema.any()),
+  dataPreview: schema.arrayOf(schema.any(), { maxSize: 10000 }),
 });
 
 export const GetActionStatusRequestSchema = {
   query: schema.object({
-    page: schema.number({ defaultValue: 0 }),
-    perPage: schema.number({ defaultValue: 20 }),
+    page: schema.number({ defaultValue: 0, meta: { description: 'Page number' } }),
+    perPage: schema.number({
+      defaultValue: 20,
+      meta: { description: 'Number of results per page' },
+    }),
     date: schema.maybe(
       schema.string({
+        meta: { description: 'Return actions created before this date' },
         validate: (v: string) => {
           if (!moment(v).isValid()) {
             return 'not a valid date';
@@ -666,8 +791,13 @@ export const GetActionStatusRequestSchema = {
         },
       })
     ),
-    latest: schema.maybe(schema.number()),
-    errorSize: schema.number({ defaultValue: 5 }),
+    latest: schema.maybe(
+      schema.number({ meta: { description: 'Return only the latest N actions' } })
+    ),
+    errorSize: schema.number({
+      defaultValue: 5,
+      meta: { description: 'Number of error details to include per action' },
+    }),
   }),
 };
 
@@ -719,6 +849,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('INPUT_ACTION'),
         schema.literal('MIGRATE'),
         schema.literal('PRIVILEGE_LEVEL_CHANGE'),
+        schema.literal('ROLLBACK'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {
@@ -763,7 +894,8 @@ export const GetActionStatusResponseSchema = schema.object({
                 description: 'latest errors that happened when the agents executed the action',
               },
             }
-          )
+          ),
+          { maxSize: 10 }
         )
       ),
       revision: schema.maybe(
@@ -780,17 +912,20 @@ export const GetActionStatusResponseSchema = schema.object({
           },
         })
       ),
-    })
+    }),
+    { maxSize: 10000 }
   ),
 });
 
 export const GetAvailableAgentVersionsResponseSchema = schema.object({
-  items: schema.arrayOf(schema.string()),
+  items: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });
 
 export const ChangeAgentPrivilegeLevelRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({
+      meta: { description: 'The agent ID to change privilege level for' },
+    }),
   }),
   body: schema.nullable(
     schema.object({
@@ -805,22 +940,11 @@ export const ChangeAgentPrivilegeLevelRequestSchema = {
   ),
 };
 
-/**
- * Returns an object with either the actionId (if an action was created),
- * or an information message (if no action was needed).
- */
-export const ChangeAgentPrivilegeLevelResponseSchema = schema.oneOf([
-  schema.object({
-    actionId: schema.string(),
-  }),
-  schema.object({
-    message: schema.string(),
-  }),
-]);
+export const ChangeAgentPrivilegeLevelResponseSchema = ActionIdOrMessageSchema;
 
 export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
     batchSize: schema.maybe(schema.number()),
     user_info: schema.maybe(
       schema.object({
@@ -831,3 +955,55 @@ export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
     ),
   }),
 };
+
+export const BulkChangeAgentsPrivilegeLevelResponseSchema = ActionIdSchema;
+
+export const PostAgentRollbackRequestSchema = {
+  params: schema.object({
+    agentId: schema.string({
+      meta: { description: 'The agent ID to rollback' },
+    }),
+  }),
+};
+
+export const PostAgentRollbackResponseSchema = ActionIdOrMessageSchema;
+
+export const PostBulkAgentRollbackRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const PostBulkAgentRollbackResponseSchema = schema.object({
+  actionIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+});
+
+export const PostGenerateAgentsReportRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([
+      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.string({
+        validate: (value: string) => {
+          const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+          if (validationObj?.error) {
+            return validationObj?.error;
+          }
+        },
+      }),
+    ]),
+    fields: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    timezone: schema.maybe(schema.string()),
+    sort: schema.maybe(
+      schema.object({
+        field: schema.maybe(schema.string()),
+        direction: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+      })
+    ),
+  }),
+};
+
+export const PostGenerateAgentsReportResponseSchema = schema.object({
+  url: schema.string(),
+});

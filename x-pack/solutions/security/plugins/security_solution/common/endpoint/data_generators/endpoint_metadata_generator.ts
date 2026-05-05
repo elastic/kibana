@@ -157,6 +157,11 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       }
     }
 
+    // v9.4.0 introduced runscript capability
+    if (gte(agentVersion, '9.4.0')) {
+      capabilities.push('runscript');
+    }
+
     const hostMetadataDoc: HostMetadataInterface = {
       '@timestamp': ts,
       event: {

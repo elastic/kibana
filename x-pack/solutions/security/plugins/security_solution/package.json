@@ -5,7 +5,7 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "extract-mitre-attacks": "node scripts/extract_tactics_techniques_mitre.js && node ../../../../../scripts/eslint ./public/detections/mitre/mitre_tactics_techniques.ts --fix",
+    "extract-mitre-attacks": "node scripts/extract_tactics_techniques_mitre.js && node ../../../../../scripts/eslint ./common/detection_engine/mitre/mitre_tactics_techniques.ts --fix",
     "build-beat-doc": "node scripts/beat_docs/build.js && node ../../../../../scripts/eslint ../timelines/server/utils/beat_schema/fields.ts --fix",
     "cypress": "../../../../../node_modules/.bin/cypress",
     "cypress:burn": "yarn cypress:dw run --env burn=2 --headed",

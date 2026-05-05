@@ -3,9 +3,121 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "cloudConnect",
+        "id": "def-public.UseCloudConnectStatusResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseCloudConnectStatusResult",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/cloud_connect/public/hooks/use_cloud_connect_status.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudConnect",
+            "id": "def-public.UseCloudConnectStatusResult.isCloudConnected",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudConnected",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/cloud_connect/public/hooks/use_cloud_connect_status.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudConnect",
+            "id": "def-public.UseCloudConnectStatusResult.isCloudConnectEisEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudConnectEisEnabled",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/cloud_connect/public/hooks/use_cloud_connect_status.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudConnect",
+            "id": "def-public.UseCloudConnectStatusResult.isCloudConnectAutoopsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudConnectAutoopsEnabled",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/cloud_connect/public/hooks/use_cloud_connect_status.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudConnect",
+            "id": "def-public.UseCloudConnectStatusResult.isLoading",
+            "type": "boolean",
+            "tags": [],
+            "label": "isLoading",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/cloud_connect/public/hooks/use_cloud_connect_status.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudConnect",
+            "id": "def-public.UseCloudConnectStatusResult.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | null"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud_connect/public/hooks/use_cloud_connect_status.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "cloudConnect",
+        "id": "def-public.UseCloudConnectStatusHook",
+        "type": "Type",
+        "tags": [],
+        "label": "UseCloudConnectStatusHook",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "cloudConnect",
+            "scope": "public",
+            "docId": "kibCloudConnectPluginApi",
+            "section": "def-public.UseCloudConnectStatusResult",
+            "text": "UseCloudConnectStatusResult"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/cloud_connect/public/hooks/use_cloud_connect_status.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "cloudConnect",
@@ -15,6 +127,8 @@
       "label": "CloudConnectedPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/cloud_connect/public/types.ts",
+      "lineNumber": 17,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -29,6 +143,8 @@
             "string | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/cloud_connect/public/types.ts",
+          "lineNumber": 18,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -44,9 +160,36 @@
       "label": "CloudConnectedPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/cloud_connect/public/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "cloudConnect",
+          "id": "def-public.CloudConnectedPluginStart.hooks",
+          "type": "Object",
+          "tags": [],
+          "label": "hooks",
+          "description": [],
+          "signature": [
+            "{ useCloudConnectStatus: ",
+            {
+              "pluginId": "cloudConnect",
+              "scope": "public",
+              "docId": "kibCloudConnectPluginApi",
+              "section": "def-public.UseCloudConnectStatusHook",
+              "text": "UseCloudConnectStatusHook"
+            },
+            "; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud_connect/public/types.ts",
+          "lineNumber": 22,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -68,6 +211,8 @@
           "{ readonly enabled: boolean; readonly cloudUrl: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/cloud_connect/server/config.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -82,6 +227,8 @@
       "label": "CloudConnectedPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/cloud_connect/server/plugin.ts",
+      "lineNumber": 33,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -96,6 +243,8 @@
       "label": "CloudConnectedPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/cloud_connect/server/plugin.ts",
+      "lineNumber": 36,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -117,6 +266,8 @@
         "label": "PLUGIN_NAME",
         "description": [],
         "path": "x-pack/platform/plugins/shared/cloud_connect/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

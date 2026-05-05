@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ElasticsearchClient,
-  SavedObjectsClient,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import semverEq from 'semver/functions/eq';
 import semverGte from 'semver/functions/gte';
@@ -212,7 +207,7 @@ async function installPackageIfNotInstalled(
 
 async function uninstallPackageIfInstalled(
   esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClient,
+  savedObjectsClient: SavedObjectsClientContract,
   pkg: { package_name: string; package_version: string },
   logger: Logger
 ) {
@@ -253,7 +248,7 @@ async function uninstallPackageIfInstalled(
 
 export const syncIntegrationsOnRemote = async (
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClient,
+  soClient: SavedObjectsClientContract,
   packageClient: PackageClient,
   abortController: AbortController,
   logger: Logger

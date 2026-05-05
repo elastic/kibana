@@ -24,7 +24,12 @@ import {
   validateActions,
   addGeneratedActionValues,
 } from '../../../../rules_client/lib';
-import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
+import {
+  generateAPIKeyName,
+  apiKeyAsRuleDomainProperties,
+  addMissingUiamKeyTagIfNeeded,
+  resolveRuleAPIKey,
+} from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { RuleDomain, RuleParams } from '../../types';
@@ -136,19 +141,10 @@ export async function createRule<Params extends RuleParams = never>(
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
-    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
-    const name = generateAPIKeyName(ruleType.id, data.name);
-    createdAPIKey = data.enabled
-      ? isAuthTypeApiKey
-        ? context.getAuthenticationAPIKey(`${name}-user-created`)
-        : await withSpan(
-            {
-              name: 'createAPIKey',
-              type: 'rules',
-            },
-            () => context.createAPIKey(name)
-          )
-      : null;
+    const apiKeyName = generateAPIKeyName(ruleType.id, data.name);
+    const resolved = await resolveRuleAPIKey(context, apiKeyName, data.enabled);
+    createdAPIKey = resolved.createdAPIKey;
+    isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
   }
@@ -197,15 +193,26 @@ export async function createRule<Params extends RuleParams = never>(
   const throttle = data.throttle ?? null;
 
   const { systemActions, actions: actionToNotUse, ...restData } = data;
+
+  const apiKeyProps = apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey);
+  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    data.tags,
+    apiKeyProps.uiamApiKey,
+    apiKeyProps.apiKeyCreatedByUser,
+    context.isServerless,
+    context.featureFlags
+  );
+
   // Convert domain rule object to ES rule attributes
   const ruleAttributes = transformRuleDomainToRuleAttributes({
     actionsWithRefs,
     artifactsWithRefs,
     rule: {
       ...restData,
+      tags: tagsWithUiamCheck,
       // TODO (http-versioning) create a rule domain version of this function
       // Right now this works because the 2 types can interop but it's not ideal
-      ...apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey),
+      ...apiKeyProps,
       id,
       createdBy: username,
       updatedBy: username,
@@ -226,6 +233,10 @@ export async function createRule<Params extends RuleParams = never>(
       paramsWithRefs: updatedParams,
     },
   });
+
+  if (data.enabled) {
+    ruleAttributes.lastEnabledAt = new Date(createTime).toISOString();
+  }
 
   const createdRuleSavedObject: SavedObject<RawRule> = await withSpan(
     { name: 'createRuleSavedObject', type: 'rules' },

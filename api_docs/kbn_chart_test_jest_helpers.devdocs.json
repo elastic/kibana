@@ -30,6 +30,8 @@
           "() => void"
         ],
         "path": "src/platform/packages/shared/chart-test-jest-helpers/canvas_mock.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -49,6 +51,8 @@
           "() => void"
         ],
         "path": "src/platform/packages/shared/chart-test-jest-helpers/resize_observer_mock.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -74,6 +78,8 @@
           " | undefined; }>"
         ],
         "path": "src/platform/packages/shared/chart-test-jest-helpers/render_chart.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -90,7 +96,10 @@
               "P"
             ],
             "path": "src/platform/packages/shared/chart-test-jest-helpers/render_chart.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -107,6 +116,8 @@
               "React.FC<P>"
             ],
             "path": "src/platform/packages/shared/chart-test-jest-helpers/render_chart.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -124,6 +135,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/chart-test-jest-helpers/render_chart.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -145,6 +158,8 @@
           "() => void"
         ],
         "path": "src/platform/packages/shared/chart-test-jest-helpers/canvas_mock.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -164,6 +179,8 @@
           "() => void"
         ],
         "path": "src/platform/packages/shared/chart-test-jest-helpers/resize_observer_mock.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -183,6 +200,8 @@
           "(renderComplete: () => void) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/chart-test-jest-helpers/render_chart.tsx",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -199,6 +218,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/chart-test-jest-helpers/render_chart.tsx",
+            "lineNumber": 69,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

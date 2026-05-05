@@ -28,7 +28,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('tool: retrieve_elastic_doc', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/246824
+  describe.skip('tool: retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['skipCloud']);
     // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
@@ -90,6 +91,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     // Calling `retrieve_elastic_doc` via the chat/complete endpoint
     describe('POST /internal/observability_ai_assistant/chat/complete', function () {
+      // FLAKY on Serverless: https://github.com/elastic/kibana/issues/246371
+      this.tags(['skipServerless']);
       let llmProxy: LlmProxy;
       let connectorId: string;
       let messageAddedEvents: MessageAddEvent[];

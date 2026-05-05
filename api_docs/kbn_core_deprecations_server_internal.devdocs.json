@@ -22,6 +22,8 @@
           "\nDeprecation Service: Internal Start contract"
         ],
         "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,7 +34,15 @@
             "tags": [],
             "label": "asScopedToClient",
             "description": [
-              "\nCreates a {@link DeprecationsClient} with provided SO client and ES client."
+              "\nCreates a ",
+              {
+                "pluginId": "@kbn/core-deprecations-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerInternalPluginApi",
+                "section": "def-server.DeprecationsClient",
+                "text": "DeprecationsClient"
+              },
+              " with provided SO client and ES client."
             ],
             "signature": [
               "(esClient: ",
@@ -45,6 +55,8 @@
               "DeprecationsClient"
             ],
             "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -61,7 +73,10 @@
                   "IScopedClusterClient"
                 ],
                 "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
+                "lineNumber": 42,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IScopedClusterClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -78,7 +93,10 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
+                "lineNumber": 43,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -94,7 +112,10 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }

@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import type {
   FieldDefinition,
   OnFieldChangeFn,
@@ -18,11 +18,9 @@ import type {
 import { ChatExperience } from './chat_experience';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
-import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
 
 jest.mock('../../contexts/settings_context');
 jest.mock('../../hooks/use_kibana');
-jest.mock('@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled');
 
 let lastFieldRowProps: unknown;
 
@@ -38,28 +36,8 @@ jest.mock('@kbn/management-settings-components-field-row', () => {
   };
 });
 
-jest.mock('@kbn/ai-agent-confirmation-modal/ai_agent_confirmation_modal', () => {
-  return {
-    AIAgentConfirmationModal: ({
-      onConfirm,
-      onCancel,
-    }: {
-      onConfirm: () => void;
-      onCancel: () => void;
-    }) => (
-      <div data-test-subj="confirmModal">
-        <button data-test-subj="confirmModalConfirm" onClick={onConfirm} />
-        <button data-test-subj="confirmModalCancel" onClick={onCancel} />
-      </div>
-    ),
-  };
-});
-
 const mockUseSettingsContext = useSettingsContext as jest.MockedFunction<typeof useSettingsContext>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockGetIsAiAgentsEnabled = getIsAiAgentsEnabled as jest.MockedFunction<
-  typeof getIsAiAgentsEnabled
->;
 
 type ReportEvent = (eventType: string, payload: Record<string, unknown>) => void;
 
@@ -68,11 +46,9 @@ interface CapturedFieldRowProps {
 }
 
 const setup = ({
-  isAiAgentsEnabled = true,
   savedValue,
   hasField = true,
 }: {
-  isAiAgentsEnabled?: boolean;
   savedValue?: unknown;
   hasField?: boolean;
 } = {}) => {
@@ -88,7 +64,6 @@ const setup = ({
       }
     : {};
 
-  mockGetIsAiAgentsEnabled.mockReturnValue(isAiAgentsEnabled);
   mockUseSettingsContext.mockReturnValue({
     fields,
     handleFieldChange,
@@ -134,16 +109,8 @@ describe('ChatExperience', () => {
     }
   });
 
-  it('returns null when AI agents are disabled', () => {
-    const { renderResult } = setup({
-      isAiAgentsEnabled: false,
-      savedValue: AIChatExperience.Classic,
-    });
-    expect(renderResult.container.firstChild).toBeNull();
-  });
-
   it('returns null when the field is missing', () => {
-    const { renderResult } = setup({ isAiAgentsEnabled: true, hasField: false });
+    const { renderResult } = setup({ hasField: false });
     expect(renderResult.container.firstChild).toBeNull();
   });
 
@@ -210,35 +177,6 @@ describe('ChatExperience', () => {
     });
   });
 
-  it('returns a confirmation modal when selecting Agent', () => {
-    const { fieldRowProps } = setup({ savedValue: AIChatExperience.Classic });
-
-    act(() => {
-      fieldRowProps().onFieldChange(AI_CHAT_EXPERIENCE_TYPE, {
-        unsavedValue: AIChatExperience.Agent,
-        type: 'string',
-      });
-    });
-
-    expect(screen.getByTestId('confirmModal')).toBeInTheDocument();
-  });
-
-  it('returns confirmation_shown telemetry when selecting Agent', () => {
-    const { reportEvent, fieldRowProps } = setup({ savedValue: AIChatExperience.Classic });
-
-    act(() => {
-      fieldRowProps().onFieldChange(AI_CHAT_EXPERIENCE_TYPE, {
-        unsavedValue: AIChatExperience.Agent,
-        type: 'string',
-      });
-    });
-
-    expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
-      action: 'confirmation_shown',
-      source: 'stack_management',
-    });
-  });
-
   it('returns no telemetry when switching from Agent to Classic', () => {
     const { reportEvent, fieldRowProps } = setup({ savedValue: AIChatExperience.Agent });
 
@@ -247,42 +185,6 @@ describe('ChatExperience', () => {
         unsavedValue: AIChatExperience.Classic,
         type: 'string',
       });
-    });
-
-    expect(reportEvent).not.toHaveBeenCalled();
-  });
-
-  it('returns a cleared unsaved change when canceling the confirmation modal', () => {
-    const { handleFieldChange, fieldRowProps } = setup({ savedValue: AIChatExperience.Classic });
-
-    act(() => {
-      fieldRowProps().onFieldChange(AI_CHAT_EXPERIENCE_TYPE, {
-        unsavedValue: AIChatExperience.Agent,
-        type: 'string',
-      });
-    });
-
-    act(() => {
-      screen.getByTestId('confirmModalCancel').click();
-    });
-
-    expect(handleFieldChange).toHaveBeenCalledWith(AI_CHAT_EXPERIENCE_TYPE, undefined);
-  });
-
-  it('returns no additional telemetry when confirming the modal', () => {
-    const { reportEvent, fieldRowProps } = setup({ savedValue: AIChatExperience.Classic });
-
-    act(() => {
-      fieldRowProps().onFieldChange(AI_CHAT_EXPERIENCE_TYPE, {
-        unsavedValue: AIChatExperience.Agent,
-        type: 'string',
-      });
-    });
-
-    reportEvent.mockClear();
-
-    act(() => {
-      screen.getByTestId('confirmModalConfirm').click();
     });
 
     expect(reportEvent).not.toHaveBeenCalled();

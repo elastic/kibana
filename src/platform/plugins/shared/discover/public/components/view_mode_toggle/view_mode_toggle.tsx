@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
 import React, { useMemo, useEffect, useState, type ReactElement, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,26 +17,29 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { HitsCounter, HitsCounterMode } from '../hits_counter';
 
 export const DocumentViewModeToggle = ({
   viewMode,
   isEsqlMode,
   prepend,
-  stateContainer,
   setDiscoverViewMode,
   patternCount,
   dataView,
+  hitCounterLabel,
+  hitCounterPluralLabel,
+  hitsTotalToDisplay,
 }: {
   viewMode: VIEW_MODE;
   isEsqlMode: boolean;
   prepend?: ReactElement;
-  stateContainer: DiscoverStateContainer;
   setDiscoverViewMode: (viewMode: VIEW_MODE, replace?: boolean) => Promise<VIEW_MODE>;
   patternCount?: number;
   dataView: DataView;
-}) => {
+} & Pick<
+  ComponentProps<typeof HitsCounter>,
+  'hitCounterLabel' | 'hitCounterPluralLabel' | 'hitsTotalToDisplay'
+>) => {
   const { euiTheme } = useEuiTheme();
   const {
     uiSettings,
@@ -129,7 +133,12 @@ export const DocumentViewModeToggle = ({
       )}
       <EuiFlexItem grow={false}>
         {showFieldStatisticsTab === false && showPatternAnalysisTab === false ? (
-          <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
+          <HitsCounter
+            mode={HitsCounterMode.standalone}
+            hitCounterLabel={hitCounterLabel}
+            hitCounterPluralLabel={hitCounterPluralLabel}
+            hitsTotalToDisplay={hitsTotalToDisplay}
+          />
         ) : (
           <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
             <EuiTab
@@ -145,7 +154,12 @@ export const DocumentViewModeToggle = ({
                   defaultMessage="Documents"
                 />
               )}
-              <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
+              <HitsCounter
+                mode={HitsCounterMode.appended}
+                hitCounterLabel={hitCounterLabel}
+                hitCounterPluralLabel={hitCounterPluralLabel}
+                hitsTotalToDisplay={hitsTotalToDisplay}
+              />
             </EuiTab>
 
             {showPatternAnalysisTab ? (

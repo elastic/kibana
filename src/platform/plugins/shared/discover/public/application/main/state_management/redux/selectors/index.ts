@@ -7,5 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { selectAllTabs, selectRecentlyClosedTabs, selectTab, selectIsTabsBarHidden } from './tabs';
-export { type HasUnsavedChangesResult, selectHasUnsavedChanges } from './unsaved_changes';
+export {
+  selectAllTabs,
+  selectRecentlyClosedTabs,
+  selectPersistedDiscoverSession,
+  selectSavedDataViews,
+  selectTab,
+  selectTabAppState,
+  selectTabCombinedFilters,
+  selectIsTabsBarHidden,
+} from './tabs';
+export {
+  type HasUnsavedChangesResult,
+  selectHasUnsavedChanges,
+  searchSourceComparator,
+} from './unsaved_changes';
+export { selectTabSavedSearch, selectTabSavedSearchByValueAttributes } from './saved_search';

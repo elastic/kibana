@@ -18,6 +18,8 @@
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
         ],
         "path": "src/core/packages/plugins/browser/src/plugin.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,6 +36,8 @@
               "<TPluginsStart, TStart>, plugins: TPluginsSetup) => TSetup"
             ],
             "path": "src/core/packages/plugins/browser/src/plugin.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -49,7 +53,10 @@
                   "<TPluginsStart, TStart>"
                 ],
                 "path": "src/core/packages/plugins/browser/src/plugin.ts",
+                "lineNumber": 24,
+                "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -64,7 +71,10 @@
                   "TPluginsSetup"
                 ],
                 "path": "src/core/packages/plugins/browser/src/plugin.ts",
+                "lineNumber": 24,
+                "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPluginsSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -84,6 +94,8 @@
               ", plugins: TPluginsStart) => TStart"
             ],
             "path": "src/core/packages/plugins/browser/src/plugin.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -98,7 +110,10 @@
                   "CoreStart"
                 ],
                 "path": "src/core/packages/plugins/browser/src/plugin.ts",
+                "lineNumber": 26,
+                "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -113,7 +128,10 @@
                   "TPluginsStart"
                 ],
                 "path": "src/core/packages/plugins/browser/src/plugin.ts",
+                "lineNumber": 26,
+                "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPluginsStart",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -139,6 +157,8 @@
               "<void>) | undefined"
             ],
             "path": "src/core/packages/plugins/browser/src/plugin.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -161,6 +181,8 @@
           "<ConfigSchema>"
         ],
         "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -177,6 +199,8 @@
               "symbol"
             ],
             "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -204,9 +228,11 @@
                 "section": "def-server.PackageInfo",
                 "text": "PackageInfo"
               },
-              ">; }"
+              ">; airgapped: boolean; }"
             ],
             "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -227,6 +253,8 @@
               }
             ],
             "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -241,6 +269,8 @@
               "{ get: <T extends object = ConfigSchema>() => T; }"
             ],
             "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -267,6 +297,8 @@
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
         ],
         "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -283,7 +315,10 @@
               "<object>"
             ],
             "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
+            "lineNumber": 26,
+            "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "PluginInitializerContext",
             "trackAdoption": false
           }
         ],

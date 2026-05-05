@@ -42,7 +42,7 @@ export const mockStoreDeps = ({
 
 export function mockDatasourceStates() {
   return {
-    testDatasource: {
+    formBased: {
       state: {},
       isLoading: false,
     },
@@ -58,7 +58,7 @@ export const defaultState = {
   isSaveable: false,
   isLoading: false,
   isLinkedToOriginatingApp: false,
-  activeDatasourceId: 'testDatasource',
+  activeDatasourceId: 'formBased',
   visualization: {
     state: {},
     activeId: 'testVis',

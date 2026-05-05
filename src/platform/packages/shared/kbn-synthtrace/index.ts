@@ -16,6 +16,7 @@ export {
 
 export {
   SynthtraceClientsManager,
+  type SynthtraceClients,
   type SynthtraceClientTypes,
   type GetClientsReturn,
 } from './src/cli/utils/clients_manager';
@@ -27,3 +28,19 @@ export {
   addObserverVersionTransform,
   deleteSummaryFieldTransform,
 } from './src/lib/utils/transform_helpers';
+export { indexAll } from './src/lib/utils/with_client';
+export * from './src/scenarios/agent_builder';
+
+export { sigEvents } from './src/lib/service_graph_logs';
+
+export {
+  APM_METRICS_SERVICE_NAMES,
+  APM_METRICS_DASHBOARD_SERVICES,
+  APM_METRICS_NON_DASHBOARD_SERVICES,
+  APM_METRICS_ALL_SERVICES,
+  SYSTEM_METRICS as APM_SYSTEM_METRICS,
+  type ApmMetricsServiceConfig,
+  type ApmMetricsServiceInstance,
+  createMetricsServiceInstance,
+  generateAppMetrics,
+} from './src/scenarios/helpers/apm_metrics_dashboards';

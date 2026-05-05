@@ -19,11 +19,11 @@ import { useTourManager } from './use_tour_manager';
  * @param enabled - Additional condition that must be true for the tour to show
  */
 export function useDismissableTour(tourKey: TourKey, enabled: boolean = true) {
-  const { storage, uiSettings } = useStartServices();
+  const { storage, notifications } = useStartServices();
   const { activeTour, setActiveTour } = useTourManager();
 
   const defaultValue =
-    uiSettings.get('hideAnnouncements', false) ||
+    !notifications.tours.isEnabled() ||
     (storage.get(TOUR_STORAGE_KEYS[tourKey]) as TourConfig | undefined)?.active === false;
 
   const [isHidden, setIsHidden] = React.useState(defaultValue);

@@ -8,7 +8,11 @@
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
-import { isMemoryDumpAction, isProcessesAction } from '../service/response_actions/type_guards';
+import {
+  isMemoryDumpAction,
+  isProcessesAction,
+  isRunScriptAction,
+} from '../service/response_actions/type_guards';
 import {
   ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
   ENDPOINT_ACTION_RESPONSES_DS,
@@ -468,6 +472,31 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
     }
 
+    if (isRunScriptAction(details)) {
+      if (details.isCompleted) {
+        if (!details.outputs) {
+          details.outputs = {};
+        }
+
+        if (details.agentType === 'endpoint') {
+          if (!details.parameters) {
+            details.parameters = {
+              scriptId: 'script-123',
+              scriptInput: 'foo',
+            };
+          }
+
+          for (const agentId of details.agents) {
+            details.outputs[agentId] = this.generateExecuteActionResponseOutput({
+              content: {
+                output_file_id: getFileDownloadId(details, agentId),
+              },
+            });
+          }
+        }
+      }
+    }
+
     return merge(details, overrides as ActionDetails) as unknown as ActionDetails<
       TOutputContent,
       TParameters
@@ -494,6 +523,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   randomScanFailureCode(): string {
     return this.randomChoice([
       'ra_scan_error_canceled',
+      'ra_scan_error_disabled',
       'ra_scan_error_invalid-input',
       'ra_scan_error_not-found',
       'ra_scan_error_queue-quota',

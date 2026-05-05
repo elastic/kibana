@@ -29,13 +29,15 @@
       "unifiedDocViewer",
       "dashboard",
     ],
-    "optionalPlugins": ["cloud", "spaces"],
+    "optionalPlugins": ["cloud", "cps", "spaces", "indexLifecycleManagement", "evals"],
     "requiredBundles": [
       "discover",
+      "esql",
       "kibanaReact",
       "kibanaUtils",
       "observabilityAIAssistant",
-      "esUiShared"
+      "esUiShared",
+      "stackConnectors"
     ],
     "extraPublicDirs": ["common"]
   }

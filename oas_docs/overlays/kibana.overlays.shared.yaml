@@ -36,20 +36,6 @@ actions:
         description: Connector documentation
         url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
       x-displayName: 'Connectors'
-  - target: '$.tags[?(@.name=="agent builder")]'
-    description: Change tag description and displayName
-    update:
-      description: >
-        Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
-        
-        Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
-      externalDocs:
-        description: Learn about working with Agent Builder programmatically
-        url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
-      # externalDocs:
-        # description: 
-        # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
-      x-displayName: 'Agent Builder'
   - target: '$.tags[?(@.name=="Data streams")]'
     description: Change tag description and displayName
     update:
@@ -196,6 +182,13 @@ actions:
             examples:
               createSpaceRequest:
                 $ref: '../examples/create_space_request.yaml'
+      responses:
+        200:
+          content:
+            application/json:
+              examples:
+                createSpaceResponseExample:
+                  $ref: '../examples/get_space_response.yaml'
   - target: "$.paths['/api/spaces/space/{id}']['put']"
     description: 'Add example to update space API'
     update:
@@ -205,16 +198,6 @@ actions:
             examples:
               updateSpaceRequest:
                 $ref: '../examples/update_space_request.yaml'
-  - target: "$.paths['/api/spaces/space/{id}']['get']"
-    description: 'Add example to get space API'
-    update:
-      responses:
-        200:
-          content:
-            application/json:
-              examples:
-                getSpaceResponseExample:
-                  $ref: '../examples/get_space_response.yaml'
   - target: "$.paths['/api/spaces/space']['get']"
     description: 'Add example to get all spaces API'
     update:

@@ -6,7 +6,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
 >
   <div>
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"
@@ -27,7 +27,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                 <span
                   aria-hidden="true"
                   class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="search"
+                  data-euiicon-type="magnify"
                 />
               </span>
             </div>
@@ -91,303 +91,307 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
       class="euiBasicTable"
       data-test-subj="mlCalendarTable loaded"
     >
-      <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
-        id="__table_generated-id"
-        tabindex="-1"
+      <div
+        class="emotion-euiContainerCSS"
       >
-        <caption
-          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-        />
-        <thead>
-          <tr>
-            <th
-              class="euiTableHeaderCellCheckbox emotion-euiTableHeaderCellCheckbox"
-              scope="col"
-            >
-              <div
-                class="euiTableCellContent"
-              >
-                <div
-                  class="euiCheckbox emotion-euiCheckbox"
-                >
-                  <div
-                    class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
-                  >
-                    <span
-                      class="emotion-euiCheckbox__icon-check"
-                      data-euiicon-type="empty"
-                    />
-                    <input
-                      aria-label="Select all rows"
-                      class="euiCheckbox__input emotion-euiCheckbox__input"
-                      data-test-subj="checkboxSelectAll"
-                      id="_selection_column-checkbox_generated-id"
-                      title="Select all rows"
-                      type="checkbox"
-                    />
-                  </div>
-                </div>
-              </div>
-            </th>
-            <th
-              aria-sort="ascending"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_calendar_id_0"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="ID"
-                    >
-                      ID
-                    </span>
-                    <span
-                      class="euiTableSortIcon"
-                      data-euiicon-type="sortUp"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_job_ids_string_1"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Jobs"
-                    >
-                      Jobs
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_events_length_2"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Events"
-                    >
-                      Events
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="css-0"
+        <table
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+          id="__table_generated-id"
+          tabindex="-1"
         >
-          <tr
-            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-            data-test-subj="mlCalendarListRow row-farequote-calendar"
-          >
-            <td
-              class="euiTableRowCellCheckbox emotion-euiTableRowCellCheckbox-desktop"
-            >
-              <div
-                class="euiTableCellContent"
+          <caption
+            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+          />
+          <thead>
+            <tr>
+              <th
+                class="euiTableHeaderCellCheckbox emotion-euiTableHeaderCellCheckbox"
+                scope="col"
               >
                 <div
-                  class="euiCheckbox emotion-euiCheckbox"
+                  class="euiTableCellContent"
                 >
                   <div
-                    class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                    class="euiCheckbox emotion-euiCheckbox"
                   >
-                    <span
-                      class="emotion-euiCheckbox__icon-check"
-                      data-euiicon-type="empty"
-                    />
-                    <input
-                      aria-label="Select row 1"
-                      class="euiCheckbox__input emotion-euiCheckbox__input"
-                      data-test-subj="checkboxSelectRow-farequote-calendar"
-                      id="__table_generated-id_selection_column_farequote-calendar-checkbox"
-                      title="Select row 1"
-                      type="checkbox"
-                    />
+                    <div
+                      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                    >
+                      <span
+                        class="emotion-euiCheckbox__icon-check"
+                        data-euiicon-type="empty"
+                      />
+                      <input
+                        aria-label="Select all rows"
+                        class="euiCheckbox__input emotion-euiCheckbox__input"
+                        data-test-subj="checkboxSelectAll"
+                        id="_selection_column-checkbox_generated-id"
+                        title="Select all rows"
+                        type="checkbox"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlCalendarListColumnId"
-              scope="row"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-truncateText"
+              </th>
+              <th
+                aria-sort="ascending"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_calendar_id_0"
+                role="columnheader"
+                scope="col"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  <a
-                    data-test-subj="mlEditCalendarLink"
-                    href="/calendars_list/edit_calendar/farequote-calendar"
+                  <button
+                    class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
                   >
-                    farequote-calendar
-                  </a>
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="ID"
+                      >
+                        ID
+                      </span>
+                      <span
+                        class="euiTableSortIcon"
+                        data-euiicon-type="sortUp"
+                      />
+                    </div>
+                  </button>
                 </span>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlCalendarListColumnJobs"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-truncateText"
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_job_ids_string_1"
+                role="columnheader"
+                scope="col"
               >
                 <span
-                  class="euiTableCellContent__text"
-                />
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlCalendarListColumnEvents"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Jobs"
+                      >
+                        Jobs
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_events_length_2"
+                role="columnheader"
+                scope="col"
               >
-                NaN events
-              </div>
-            </td>
-          </tr>
-          <tr
-            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-            data-test-subj="mlCalendarListRow row-this-is-a-new-calendar"
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Events"
+                      >
+                        Events
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="css-0"
           >
-            <td
-              class="euiTableRowCellCheckbox emotion-euiTableRowCellCheckbox-desktop"
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+              data-test-subj="mlCalendarListRow row-farequote-calendar"
             >
-              <div
-                class="euiTableCellContent"
+              <td
+                class="euiTableRowCellCheckbox emotion-euiTableRowCellCheckbox-desktop"
               >
                 <div
-                  class="euiCheckbox emotion-euiCheckbox"
+                  class="euiTableCellContent"
                 >
                   <div
-                    class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                    class="euiCheckbox emotion-euiCheckbox"
                   >
-                    <span
-                      class="emotion-euiCheckbox__icon-check"
-                      data-euiicon-type="empty"
-                    />
-                    <input
-                      aria-label="Select row 2"
-                      class="euiCheckbox__input emotion-euiCheckbox__input"
-                      data-test-subj="checkboxSelectRow-this-is-a-new-calendar"
-                      id="__table_generated-id_selection_column_this-is-a-new-calendar-checkbox"
-                      title="Select row 2"
-                      type="checkbox"
-                    />
+                    <div
+                      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                    >
+                      <span
+                        class="emotion-euiCheckbox__icon-check"
+                        data-euiicon-type="empty"
+                      />
+                      <input
+                        aria-label="Select row 1"
+                        class="euiCheckbox__input emotion-euiCheckbox__input"
+                        data-test-subj="checkboxSelectRow-farequote-calendar"
+                        id="__table_generated-id_selection_column_farequote-calendar-checkbox"
+                        title="Select row 1"
+                        type="checkbox"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlCalendarListColumnId"
-              scope="row"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-truncateText"
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlCalendarListColumnId"
+                scope="row"
               >
-                <span
-                  class="euiTableCellContent__text"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-truncateText"
                 >
-                  <a
-                    data-test-subj="mlEditCalendarLink"
-                    href="/calendars_list/edit_calendar/this-is-a-new-calendar"
+                  <span
+                    class="euiTableCellContent__text"
                   >
-                    this-is-a-new-calendar
-                  </a>
-                </span>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlCalendarListColumnJobs"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-truncateText"
+                    <a
+                      data-test-subj="mlEditCalendarLink"
+                      href="/calendars_list/edit_calendar/farequote-calendar"
+                    >
+                      farequote-calendar
+                    </a>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlCalendarListColumnJobs"
               >
-                <span
-                  class="euiTableCellContent__text"
-                />
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlCalendarListColumnEvents"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-truncateText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  />
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlCalendarListColumnEvents"
               >
-                NaN events
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  NaN events
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+              data-test-subj="mlCalendarListRow row-this-is-a-new-calendar"
+            >
+              <td
+                class="euiTableRowCellCheckbox emotion-euiTableRowCellCheckbox-desktop"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <div
+                    class="euiCheckbox emotion-euiCheckbox"
+                  >
+                    <div
+                      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                    >
+                      <span
+                        class="emotion-euiCheckbox__icon-check"
+                        data-euiicon-type="empty"
+                      />
+                      <input
+                        aria-label="Select row 2"
+                        class="euiCheckbox__input emotion-euiCheckbox__input"
+                        data-test-subj="checkboxSelectRow-this-is-a-new-calendar"
+                        id="__table_generated-id_selection_column_this-is-a-new-calendar-checkbox"
+                        title="Select row 2"
+                        type="checkbox"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlCalendarListColumnId"
+                scope="row"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-truncateText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    <a
+                      data-test-subj="mlEditCalendarLink"
+                      href="/calendars_list/edit_calendar/this-is-a-new-calendar"
+                    >
+                      this-is-a-new-calendar
+                    </a>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlCalendarListColumnJobs"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-truncateText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  />
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlCalendarListColumnEvents"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  NaN events
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div>
         <div
           class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -410,7 +414,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                   >
                     Rows per page
                     : 
@@ -418,7 +422,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                   </span>
                   <span
                     color="inherit"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </span>
               </button>
@@ -428,7 +432,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <nav
-              aria-label="Pagination for table: "
+              aria-label="Pagination for table: Calendars"
               class="euiPagination emotion-euiPagination"
             >
               <span
@@ -450,7 +454,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
                   color="inherit"
-                  data-euiicon-type="arrowLeft"
+                  data-euiicon-type="chevronSingleLeft"
                 />
               </button>
               <ul
@@ -472,7 +476,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                       >
                         1
                       </span>
@@ -491,7 +495,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
                   color="inherit"
-                  data-euiicon-type="arrowRight"
+                  data-euiicon-type="chevronSingleRight"
                 />
               </button>
             </nav>

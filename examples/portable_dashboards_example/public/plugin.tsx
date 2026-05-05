@@ -13,6 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID, PLUGIN_ID } from './constants';
 import img from './portable_dashboard_image.png';
@@ -26,6 +27,7 @@ export interface StartDeps {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  uiActions: UiActionsStart;
   presentationUtil: PresentationUtilPluginStart;
 }
 
@@ -49,7 +51,7 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
       image: img,
     });
 
-    embeddable.registerReactEmbeddableFactory(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
+    embeddable.registerEmbeddablePublicDefinition(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
       const { factory } = await import('./filter_debugger_embeddable');
       return factory;
     });

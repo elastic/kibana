@@ -7,23 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLMessage, ESQLSource } from '../../../../types';
+import type { ESQLSource } from '@elastic/esql/types';
 import type { ICommandContext } from '../../../registry/types';
 import { sourceExists } from '../sources';
 import { errors } from '../errors';
+import type { ESQLMessage } from '../../types';
 
 function hasWildcard(name: string) {
   return /\*/.test(name);
 }
 
-export function validateSources(sources: ESQLSource[], context?: ICommandContext) {
-  const messages: ESQLMessage[] = [];
-  const sourcesMap = new Set<string>(context?.sources?.map((source) => source.name) || []);
+export interface ValidateSourcesOptions {
+  /** When true, use "Unknown data source" error (e.g. for FROM). When false, use "Unknown index" (e.g. for TS). */
+  useGenericDataSourceError?: boolean;
+}
 
-  const knownIndexNames = [];
-  const knownIndexPatterns = [];
-  const unknownIndexNames = [];
-  const unknownIndexPatterns = [];
+export function validateSources(
+  sources: ESQLSource[],
+  context?: ICommandContext,
+  options?: ValidateSourcesOptions
+) {
+  const messages: ESQLMessage[] = [];
+  const sourcesMap = new Set<string>([
+    ...(context?.sources?.map((source) => source.name) ?? []),
+    ...(context?.views?.map((view) => view.name) ?? []),
+  ]);
+  const useGenericDataSourceError = options?.useGenericDataSourceError ?? false;
 
   for (const source of sources) {
     if (source.incomplete) {
@@ -35,29 +44,12 @@ export function validateSources(sources: ESQLSource[], context?: ICommandContext
       const sourceName = source.prefix ? source.name : index?.valueUnquoted;
       if (!sourceName) continue;
 
-      if (sourceExists(sourceName, sourcesMap) && !hasWildcard(sourceName)) {
-        knownIndexNames.push(source);
-      }
-      if (sourceExists(sourceName, sourcesMap) && hasWildcard(sourceName)) {
-        knownIndexPatterns.push(source);
-      }
       if (!sourceExists(sourceName, sourcesMap) && !hasWildcard(sourceName)) {
-        unknownIndexNames.push(source);
-      }
-      if (!sourceExists(sourceName, sourcesMap) && hasWildcard(sourceName)) {
-        unknownIndexPatterns.push(source);
+        messages.push(
+          useGenericDataSourceError ? errors.unknownDataSource(source) : errors.unknownIndex(source)
+        );
       }
     }
-  }
-
-  unknownIndexNames.forEach((source) => {
-    messages.push(errors.unknownIndex(source));
-  });
-
-  if (knownIndexNames.length + unknownIndexNames.length + knownIndexPatterns.length === 0) {
-    unknownIndexPatterns.forEach((source) => {
-      messages.push(errors.unknownIndex(source));
-    });
   }
 
   return messages;

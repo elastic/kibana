@@ -14,7 +14,9 @@ export enum GenAISemanticConventions {
   GenAIUsageOutputTokens = 'gen_ai.usage.output_tokens',
   GenAIOperationName = 'gen_ai.operation.name',
   GenAIResponseModel = 'gen_ai.response.model',
+  GenAIRequestModel = 'gen_ai.request.model',
   GenAISystem = 'gen_ai.system',
+  GenAIProviderName = 'gen_ai.provider.name',
   GenAIOutputType = 'gen_ai.output.type',
   GenAIToolCallId = 'gen_ai.tool.call.id',
   GenAIToolName = 'gen_ai.tool.name',
@@ -23,6 +25,8 @@ export enum GenAISemanticConventions {
   GenAIAssistantMessage = 'gen_ai.assistant.message',
   GenAIToolMessage = 'gen_ai.tool.message',
   GenAIChoice = 'gen_ai.choice',
+  GenAIAgentId = 'gen_ai.agent.id',
+  GenAIConversationId = 'gen_ai.conversation.id',
 }
 
 export enum ElasticGenAIAttributes {
@@ -43,6 +47,7 @@ export interface GenAISemConvAttributes {
   [GenAISemanticConventions.GenAIUsageCachedInputTokens]?: number;
   [GenAISemanticConventions.GenAIUsageOutputTokens]?: number;
   [GenAISemanticConventions.GenAIOperationName]?: 'chat' | 'execute_tool';
+  [GenAISemanticConventions.GenAIRequestModel]?: string;
   [GenAISemanticConventions.GenAIResponseModel]?: string;
   [GenAISemanticConventions.GenAISystem]?: string;
   'error.type'?: string;

@@ -10,6 +10,7 @@
 export const SECURITY_PROFILE_ID = {
   root: 'security-root-profile',
   document: 'security-document-profile',
+  enhanced_document: 'enhanced-security-document-profile',
 };
 
 export const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-';

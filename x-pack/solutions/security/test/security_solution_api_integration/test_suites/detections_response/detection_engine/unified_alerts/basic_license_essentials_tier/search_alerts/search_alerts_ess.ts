@@ -19,14 +19,14 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 import { getSimpleQuery } from '../../utils/queries';
 import {
   noKibanaPrivileges,
-  secOnly,
-  secOnlyNoAttackIndices,
-  secOnlyNoDetectionIndices,
-  secOnlyNoIndices,
+  alertsReadUser,
+  alertsReadNoAttackIndicesUser,
+  alertsReadNoDetectionIndicesUser,
+  alertsReadNoIndicesUser,
 } from '../../utils/auth/users';
 import {
   getMissingReadIndexPrivilegesError,
-  getMissingSecurityKibanaPrivilegesError,
+  getMissingAlertsReadPrivilegesError,
 } from '../../utils/privileges_errors';
 import { expectedAttackAlerts, expectedDetectionAlerts } from '../../mocks';
 
@@ -36,10 +36,10 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess Search Alerts - ESS', () => {
     describe('RBAC', () => {
       describe('Kibana privileges', () => {
-        it('should return all alerts with security solution privileges', async () => {
+        it('should return all alerts with alerts read privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
-            .auth(secOnly.username, secOnly.password)
+            .auth(alertsReadUser.username, alertsReadUser.password)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.hits.hits).toEqual([...expectedDetectionAlerts, ...expectedAttackAlerts]);
         });
 
-        it('should not return alerts without security kibana privileges', async () => {
+        it('should not return alerts without alerts read privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
             .auth(noKibanaPrivileges.username, noKibanaPrivileges.password)
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(403);
 
           expect(body).toEqual(
-            getMissingSecurityKibanaPrivilegesError({
+            getMissingAlertsReadPrivilegesError({
               routeDetails: `POST ${DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL}`,
             })
           );
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should not return alerts without index privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
-            .auth(secOnlyNoIndices.username, secOnlyNoIndices.password)
+            .auth(alertsReadNoIndicesUser.username, alertsReadNoIndicesUser.password)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -80,8 +80,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).toEqual(
             getMissingReadIndexPrivilegesError({
-              username: secOnlyNoIndices.username,
-              roles: secOnlyNoIndices.roles,
+              username: alertsReadNoIndicesUser.username,
+              roles: alertsReadNoIndicesUser.roles,
             })
           );
         });
@@ -89,7 +89,10 @@ export default ({ getService }: FtrProviderContext) => {
         it('should return only attack alerts without detection alerts index privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
-            .auth(secOnlyNoDetectionIndices.username, secOnlyNoDetectionIndices.password)
+            .auth(
+              alertsReadNoDetectionIndicesUser.username,
+              alertsReadNoDetectionIndicesUser.password
+            )
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -103,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should return only detection alerts without attack alerts index privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
-            .auth(secOnlyNoAttackIndices.username, secOnlyNoAttackIndices.password)
+            .auth(alertsReadNoAttackIndicesUser.username, alertsReadNoAttackIndicesUser.password)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

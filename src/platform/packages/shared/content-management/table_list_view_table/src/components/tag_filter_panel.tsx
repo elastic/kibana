@@ -30,11 +30,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { isMac } from '@kbn/shared-ux-utility';
 
 import { useServices } from '../services';
 import type { TagOptionItem } from './use_tag_filter_panel';
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const modifierKeyPrefix = isMac ? '⌘' : '^';
 const shortTagLength = 20;
 const mediumTagLength = 35;
@@ -127,7 +127,7 @@ export const TagFilterPanel: FC<{}> = ({}) => {
         aria-labelledby={titleId}
         button={
           <EuiFilterButton
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={onFilterButtonClick}
             data-test-subj="tagFilterPopoverButton"

@@ -39,6 +39,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -54,6 +56,8 @@
           "KibanaDependencies"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -92,6 +96,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -113,6 +119,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

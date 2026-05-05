@@ -83,4 +83,22 @@ describe('getTableItemClosestToTimestamp with entities filter', () => {
     expect(closestItem.entityName).toBe('category.keyword');
     expect(closestItem.entityValue).toBe("Women's Clothing");
   });
+
+  it('should treat an empty entityFields array like no filter (closest by timestamp)', () => {
+    const anomalyTime = 1725862500000;
+    const closestWithEmptyEntityFields = getTableItemClosestToTimestamp(anomalies, anomalyTime, []);
+
+    const closestWithoutEntityFields = getTableItemClosestToTimestamp(anomalies, anomalyTime);
+
+    expect(closestWithEmptyEntityFields).toBeDefined();
+    expect(closestWithoutEntityFields).toBeDefined();
+
+    if (!closestWithEmptyEntityFields || !closestWithoutEntityFields) {
+      throw new Error('closestItem is undefined');
+    }
+
+    expect(closestWithEmptyEntityFields.source.timestamp).toBe(anomalyTime);
+    expect(closestWithoutEntityFields.source.timestamp).toBe(anomalyTime);
+    expect(closestWithEmptyEntityFields).toEqual(closestWithoutEntityFields);
+  });
 });

@@ -10,10 +10,12 @@ import { testData } from '../..';
 import { OverviewTab } from './overview_tab';
 import { OperationsTab } from './operations_tab';
 import { OperationDetailSubpage } from './operation_detail';
+import { EXTENDED_TIMEOUT } from '../../constants';
 
 export class DependencyDetailsPage {
-  public readonly DEPENDENCY_NAME = 'postgresql';
+  public readonly DEPENDENCY_NAME = testData.DEPENDENCY_POSTGRESQL;
   public readonly SPAN_NAME = 'SELECT * FROM product';
+  public readonly SERVICE_NAME = testData.SERVICE_OPBEANS_JAVA;
 
   public readonly overviewTab: OverviewTab;
   public readonly operationsTab: OperationsTab;
@@ -37,7 +39,8 @@ export class DependencyDetailsPage {
       this.page,
       this.kbnUrl,
       this.DEPENDENCY_NAME,
-      this.SPAN_NAME
+      this.SPAN_NAME,
+      this.SERVICE_NAME
     );
   }
 
@@ -49,11 +52,11 @@ export class DependencyDetailsPage {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/dependencies?${new URLSearchParams({
         dependencyName: this.DEPENDENCY_NAME,
-        rangeFrom: testData.OPBEANS_START_DATE,
-        rangeTo: testData.OPBEANS_END_DATE,
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
         ...overrides,
       })}`
     );
-    await this.page.getByRole('tablist').waitFor();
+    await this.page.getByRole('tablist').waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 }

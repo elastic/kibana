@@ -31,6 +31,7 @@ import {
   SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH,
   SIEM_RULE_MIGRATION_RULES_PATH,
   SIEM_RULE_MIGRATION_QRADAR_RULES_PATH,
+  SIEM_RULE_MIGRATION_SENTINEL_RULES_PATH,
   SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
@@ -47,6 +48,7 @@ import type {
   GetRuleMigrationPrivilegesResponse,
   GetRuleMigrationRulesResponse,
   CreateRuleMigrationRulesRequestBody,
+  CreateSentinelRuleMigrationRulesRequestBody,
   GetRuleMigrationIntegrationsStatsResponse,
   UpdateRuleMigrationRulesResponse,
   UpdateRuleMigrationRequestBody,
@@ -123,6 +125,30 @@ export const addRulesToQRadarMigration = async ({
   );
 };
 
+export interface AddRulesToSentinelMigrationParams {
+  /** `id` of the migration to add the rules to */
+  migrationId: string;
+  /** The body containing the Sentinel ARM template resources */
+  body: CreateSentinelRuleMigrationRulesRequestBody;
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+
+interface AddRulesToSentinelMigrationResponse {
+  count: number;
+}
+
+export const addRulesToSentinelMigration = async ({
+  migrationId,
+  body,
+  signal,
+}: AddRulesToSentinelMigrationParams) => {
+  return KibanaServices.get().http.post<AddRulesToSentinelMigrationResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_SENTINEL_RULES_PATH, { migration_id: migrationId }),
+    { body: JSON.stringify(body), version: '1', signal }
+  );
+};
+
 export interface AddRulesToMigrationParams {
   /** `id` of the migration to add the rules to */
   migrationId: string;
@@ -184,6 +210,7 @@ export const upsertMigrationResources = async ({
 export interface StartRuleMigrationParams {
   /** `id` of the migration to start */
   migrationId: string;
+
   settings: {
     /** The connector id to use for the migration */
     connectorId: string;

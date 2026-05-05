@@ -15,6 +15,7 @@ export interface JsonCodeEditorProps {
   width?: string | number;
   height?: string | number;
   hasLineNumbers?: boolean;
+  enableFindAction?: boolean;
 }
 
 // Required for usage in React.lazy
@@ -24,6 +25,7 @@ export default function JsonCodeEditor({
   width,
   height,
   hasLineNumbers,
+  enableFindAction,
 }: JsonCodeEditorProps) {
   const jsonValue = JSON.stringify(json, null, 2);
 
@@ -35,6 +37,7 @@ export default function JsonCodeEditor({
       hasLineNumbers={hasLineNumbers}
       onEditorDidMount={() => void 0}
       hideCopyButton={true}
+      enableFindAction={enableFindAction}
     />
   );
 }

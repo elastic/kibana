@@ -27,6 +27,7 @@ import { styles as cascadeRowActionsStyles } from './cascade_row_actions.styles'
 const MAX_ACTIONS_VISIBLE = 3;
 
 export const CascadeRowActions = function RowActions({
+  isMobile,
   headerRowActions,
   maxActionCount = MAX_ACTIONS_VISIBLE,
 }: CascadeRowActionProps) {
@@ -43,7 +44,7 @@ export const CascadeRowActions = function RowActions({
   const defaultActionProps = useMemo<Pick<EuiButtonIconProps, 'color' | 'size'>>(
     () => ({
       color: 'text',
-      size: 's',
+      size: 'xs',
     }),
     []
   );
@@ -52,7 +53,6 @@ export const CascadeRowActions = function RowActions({
     () => (
       <EuiButtonIcon
         {...defaultActionProps}
-        iconSize="s"
         aria-label={i18n.translate(
           'sharedUXPackages.dataCascade.expandRowButtonLabel.more_options',
           {
@@ -69,36 +69,46 @@ export const CascadeRowActions = function RowActions({
 
   const visibleActions = useMemo(
     () =>
-      headerRowActions.slice(0, maxActionCount).map(({ label, ...props }, index) => (
-        <EuiFlexItem key={index} grow={false}>
-          {label ? (
-            <EuiButtonEmpty {...defaultActionProps} {...props}>
-              {label}
-            </EuiButtonEmpty>
-          ) : (
-            <EuiButtonIcon {...defaultActionProps} {...props} iconSize="s" />
-          )}
-        </EuiFlexItem>
-      )),
-    [defaultActionProps, headerRowActions, maxActionCount]
+      isMobile
+        ? []
+        : headerRowActions.slice(0, maxActionCount).map(({ label, ...props }, index) => (
+            <EuiFlexItem key={index} grow={false}>
+              {label ? (
+                <EuiButtonEmpty {...defaultActionProps} {...props}>
+                  {label}
+                </EuiButtonEmpty>
+              ) : (
+                <EuiButtonIcon {...defaultActionProps} {...props} iconSize="s" />
+              )}
+            </EuiFlexItem>
+          )),
+    [defaultActionProps, headerRowActions, maxActionCount, isMobile]
   );
 
   const hiddenActions = useMemo(
     () =>
-      headerRowActions.slice(maxActionCount).map(({ label, iconType, ...props }, index) => (
-        <EuiContextMenuItem key={index} icon={iconType} {...props}>
-          {label}
-        </EuiContextMenuItem>
-      )),
-    [headerRowActions, maxActionCount]
+      headerRowActions
+        .slice(isMobile ? 0 : maxActionCount)
+        .map(({ label, iconType, ...props }, index) => (
+          <EuiContextMenuItem key={index} icon={iconType} {...props}>
+            {label}
+          </EuiContextMenuItem>
+        )),
+    [headerRowActions, maxActionCount, isMobile]
   );
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.wrapper}>
       <>{visibleActions}</>
-      {headerRowActions.length > maxActionCount && (
+      {hiddenActions.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={i18n.translate(
+              'sharedUXPackages.dataCascade.expandRowButtonLabel.more_options',
+              {
+                defaultMessage: 'Select row action options',
+              }
+            )}
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
             button={hiddenActionsButton}

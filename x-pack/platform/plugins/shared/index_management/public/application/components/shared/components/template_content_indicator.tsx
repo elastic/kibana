@@ -14,6 +14,7 @@ interface Props {
   settings: boolean;
   aliases: boolean;
   contentWhenEmpty?: JSX.Element | null;
+  isDisabled?: boolean;
 }
 
 const getColor = (flag: boolean) => (flag ? 'primary' : 'hollow');
@@ -23,6 +24,7 @@ export const TemplateContentIndicator = ({
   settings,
   aliases,
   contentWhenEmpty = null,
+  isDisabled = false,
 }: Props) => {
   if (!mappings && !settings && !aliases) {
     return contentWhenEmpty;
@@ -58,27 +60,22 @@ export const TemplateContentIndicator = ({
   const mappingsText = mappings ? texts.mappingsTrue : texts.mappingsFalse;
   const settingsText = settings ? texts.settingsTrue : texts.settingsFalse;
   const aliasesText = aliases ? texts.aliasesTrue : texts.aliasesFalse;
+  const tabIndex = isDisabled ? -1 : 0;
 
   return (
     <>
       <EuiToolTip content={mappingsText}>
-        <>
-          <EuiBadge tabIndex={0} color={getColor(mappings)} aria-label={mappingsText}>
-            M
-          </EuiBadge>
-          &nbsp;
-        </>
-      </EuiToolTip>
+        <EuiBadge tabIndex={tabIndex} color={getColor(mappings)} aria-label={mappingsText}>
+          M
+        </EuiBadge>
+      </EuiToolTip>{' '}
       <EuiToolTip content={settingsText}>
-        <>
-          <EuiBadge tabIndex={0} color={getColor(settings)} aria-label={settingsText}>
-            S
-          </EuiBadge>
-          &nbsp;
-        </>
-      </EuiToolTip>
+        <EuiBadge tabIndex={tabIndex} color={getColor(settings)} aria-label={settingsText}>
+          S
+        </EuiBadge>
+      </EuiToolTip>{' '}
       <EuiToolTip content={aliasesText}>
-        <EuiBadge tabIndex={0} color={getColor(aliases)} aria-label={aliasesText}>
+        <EuiBadge tabIndex={tabIndex} color={getColor(aliases)} aria-label={aliasesText}>
           A
         </EuiBadge>
       </EuiToolTip>

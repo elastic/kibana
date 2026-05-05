@@ -21,11 +21,10 @@ import {
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
-  STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
-  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_TAB_VISITED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE,
 } from './constants';
 import {
   streamsAIGrokSuggestionAcceptedSchema,
@@ -42,11 +41,10 @@ import {
   streamsSignificantEventsCreatedSchema,
   streamsSignificantEventsSuggestionsGeneratedSchema,
   wiredStreamsStatusChangedSchema,
-  streamsFeatureIdentificationIdentifiedSchema,
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
-  streamsDescriptionGeneratedSchema,
   streamsTabVisitedSchema,
+  streamsInsightFeedbackSchema,
 } from './schemas';
 
 const streamsAttachmentCountEventType = {
@@ -119,11 +117,6 @@ const streamsSignificantEventsCreatedEventType = {
   schema: streamsSignificantEventsCreatedSchema,
 };
 
-const streamsFeatureIdentificationIdentifiedEventType = {
-  eventType: STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
-  schema: streamsFeatureIdentificationIdentifiedSchema,
-};
-
 const streamsFeatureIdentificationSavedEventType = {
   eventType: STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   schema: streamsFeatureIdentificationSavedSchema,
@@ -134,11 +127,6 @@ const streamsFeatureIdentificationDeletedEventType = {
   schema: streamsFeatureIdentificationDeletedSchema,
 };
 
-const streamsDescriptionGeneratedEventType = {
-  eventType: STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
-  schema: streamsDescriptionGeneratedSchema,
-};
-
 const wiredStreamsStatusChangedEventType = {
   eventType: STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
   schema: wiredStreamsStatusChangedSchema,
@@ -147,6 +135,11 @@ const wiredStreamsStatusChangedEventType = {
 const streamsTabVisitedEventType = {
   eventType: STREAMS_TAB_VISITED_EVENT_TYPE,
   schema: streamsTabVisitedSchema,
+};
+
+const streamsInsightFeedbackEventType = {
+  eventType: STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE,
+  schema: streamsInsightFeedbackSchema,
 };
 
 export {
@@ -165,9 +158,8 @@ export {
   streamsSignificantEventsSuggestionsGeneratedEventType,
   streamsSignificantEventsCreatedEventType,
   wiredStreamsStatusChangedEventType,
-  streamsFeatureIdentificationIdentifiedEventType,
   streamsFeatureIdentificationSavedEventType,
   streamsFeatureIdentificationDeletedEventType,
-  streamsDescriptionGeneratedEventType,
   streamsTabVisitedEventType,
+  streamsInsightFeedbackEventType,
 };

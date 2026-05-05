@@ -37,6 +37,9 @@ export type SimulationError = BaseSimulationError &
         type: 'reserved_field_failure';
         processor_id: string;
       }
+    | {
+        type: 'validation_error';
+      }
   );
 
 export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed' | 'dropped';
@@ -79,7 +82,7 @@ export interface DocumentsMetrics {
 export interface ProcessingSimulationResponse {
   detected_fields: DetectedField[];
   documents: SimulationDocReport[];
-  processors_metrics: Record<string, ProcessorMetrics>;
+  processors_metrics: Partial<Record<string, ProcessorMetrics>>;
   definition_error: SimulationError | undefined;
   documents_metrics: DocumentsMetrics;
 }

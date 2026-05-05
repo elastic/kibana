@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
-import { BIGGER_TIMEOUT } from '../constants';
+import { EXTENDED_TIMEOUT } from '../constants';
 import { waitForApmMainContainer } from '../page_helpers';
 
 export class AnomalyDetectionPage {
@@ -55,12 +55,14 @@ export class AnomalyDetectionPage {
     await this.selectEnvironment(environmentName);
     await this.clickCreateJobsButton();
 
-    this.page.getByText('Anomaly detection jobs created');
+    await this.page
+      .getByText('Anomaly detection jobs created')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   async deleteMlJob() {
     const manageJobsButton = this.page.testSubj.locator('apmMLManageJobsTextLink');
-    await manageJobsButton.waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    await manageJobsButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await manageJobsButton.click();
     const allActionsButton = this.page.getByLabel('All actions, row 1');
     await allActionsButton.click();

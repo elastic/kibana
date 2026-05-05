@@ -475,6 +475,17 @@ describe('functions arg suggestions', () => {
       expect(fieldSuggestions.length).toBeGreaterThan(0);
     });
 
+    it('IN operator with a started list: keeps suggestions and does not leak marker text', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE integerField IN (1, /)');
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      suggestions.forEach(({ label, text }) => {
+        expect(label).not.toContain('marker_esql_editor');
+        expect(text).not.toContain('marker_esql_editor');
+      });
+    });
+
     it('unary NOT operator in WHERE: suggests boolean fields and boolean-returning functions', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | WHERE NOT /');
@@ -2009,5 +2020,23 @@ describe('functions arg suggestions', () => {
 
       expect(labels).not.toContain(',');
     });
+  });
+});
+
+describe('function renaming respects existing parentheses', () => {
+  it('suggests the function name if the user is only changing the name of the function', async () => {
+    const { suggest } = await setup();
+    const suggestions = await suggest('FROM index | EVAL result = TO_/(');
+    const texts = suggestions.map(({ text }) => text);
+
+    expect(texts).toEqual(expect.arrayContaining(['TO_STRING']));
+  });
+
+  it('suggests the function name with parens if writting the function from scratch', async () => {
+    const { suggest } = await setup();
+    const suggestions = await suggest('FROM index | EVAL result = TO_/');
+    const texts = suggestions.map(({ text }) => text);
+
+    expect(texts).toEqual(expect.arrayContaining(['TO_STRING($0)']));
   });
 });

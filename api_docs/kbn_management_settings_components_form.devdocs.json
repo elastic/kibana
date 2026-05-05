@@ -10,7 +10,15 @@
         "tags": [],
         "label": "Form",
         "description": [
-          "\nComponent for displaying a set of {@link FieldRow} in a form."
+          "\nComponent for displaying a set of ",
+          {
+            "pluginId": "@kbn/management-settings-components-form",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFormPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " in a form."
         ],
         "signature": [
           "(props: ",
@@ -18,6 +26,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/form/form.tsx",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,13 +38,16 @@
             "tags": [],
             "label": "props",
             "description": [
-              "The {@link FormProps } for the {@link Form } component."
+              "The {@link FormProps} for the {@link Form} component."
             ],
             "signature": [
               "FormProps"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/form/form.tsx",
+            "lineNumber": 46,
+            "columnNumber": 22,
             "deprecated": false,
+            "docsReferencedTypeName": "FormProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -49,7 +62,15 @@
         "tags": [],
         "label": "FormKibanaProvider",
         "description": [
-          "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FormProvider}."
+          "\nKibana-specific Provider that maps Kibana plugins and services to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-form",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFormPluginApi",
+            "section": "def-public.FormProvider",
+            "text": "FormProvider"
+          },
+          "."
         ],
         "signature": [
           "({ children, ...deps }: React.PropsWithChildren<",
@@ -63,6 +84,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/form/services.tsx",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,6 +108,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/form/services.tsx",
+            "lineNumber": 45,
+            "columnNumber": 83,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -100,7 +125,15 @@
         "tags": [],
         "label": "FormProvider",
         "description": [
-          "\nReact Provider that provides services to a {@link Form} component and its dependents."
+          "\nReact Provider that provides services to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-form",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFormPluginApi",
+            "section": "def-public.Form",
+            "text": "Form"
+          },
+          " component and its dependents."
         ],
         "signature": [
           "({ children, ...services }: ",
@@ -108,6 +141,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/form/services.tsx",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,7 +157,10 @@
               "FormProviderProps"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/form/services.tsx",
+            "lineNumber": 32,
+            "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "FormProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -141,7 +179,15 @@
         "tags": [],
         "label": "FormKibanaDependencies",
         "description": [
-          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a {@link Form} component and its dependents."
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a ",
+          {
+            "pluginId": "@kbn/management-settings-components-form",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFormPluginApi",
+            "section": "def-public.Form",
+            "text": "Form"
+          },
+          " component and its dependents."
         ],
         "signature": [
           "KibanaDependencies & ",
@@ -162,6 +208,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/form/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -173,7 +221,15 @@
         "tags": [],
         "label": "FormServices",
         "description": [
-          "\nContextual services used by a {@link Form} component and its dependents."
+          "\nContextual services used by a ",
+          {
+            "pluginId": "@kbn/management-settings-components-form",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFormPluginApi",
+            "section": "def-public.Form",
+            "text": "Form"
+          },
+          " component and its dependents."
         ],
         "signature": [
           {
@@ -195,6 +251,8 @@
           "Services"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/form/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

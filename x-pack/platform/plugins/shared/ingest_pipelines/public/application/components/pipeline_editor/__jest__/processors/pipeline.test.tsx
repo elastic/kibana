@@ -5,96 +5,73 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const PIPELINE_TYPE = 'pipeline';
 
 describe('Processor: Pipeline', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
-    testBed.component.update();
-    const {
-      actions: { addProcessor, addProcessorType },
-    } = testBed;
-    // Open the processor flyout
-    addProcessor();
 
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(PIPELINE_TYPE);
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: PIPELINE_TYPE },
+    });
+
+    await screen.findByTestId('addProcessorForm');
+    await screen.findByTestId('pipelineNameField');
   });
 
   test('prevents form submission if required fields are not provided', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Click submit button with only the type defined
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
 
     // Expect form error as "name" is a required parameter
-    expect(form.getErrorsMessages()).toEqual(['A value is required.']);
+    expect(await screen.findByText('A value is required.')).toBeInTheDocument();
   });
 
   test('saves with required parameter values', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Set pipeline name (required)
-    form.setInputValue('pipelineNameField.input', 'my-pipeline');
+    fireEvent.change(within(screen.getByTestId('pipelineNameField')).getByTestId('input'), {
+      target: { value: 'my-pipeline' },
+    });
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    // Save the processor
-    await saveNewProcessor();
-
-    const processors = getProcessorValue(onUpdate, PIPELINE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][PIPELINE_TYPE]).toEqual({
       name: 'my-pipeline',
     });
   });
 
   test('allows optional parameters to be set', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Set pipeline name (required)
-    form.setInputValue('pipelineNameField.input', 'my-pipeline');
+    fireEvent.change(within(screen.getByTestId('pipelineNameField')).getByTestId('input'), {
+      target: { value: 'my-pipeline' },
+    });
 
     // Set optional parameters
-    form.toggleEuiSwitch('ignoreMissingPipelineSwitch.input');
+    fireEvent.click(within(screen.getByTestId('ignoreMissingPipelineSwitch')).getByTestId('input'));
 
     // Save the processor
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, PIPELINE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][PIPELINE_TYPE]).toEqual({
       name: 'my-pipeline',
       ignore_missing_pipeline: true,

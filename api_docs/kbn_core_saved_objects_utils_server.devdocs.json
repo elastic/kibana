@@ -18,6 +18,8 @@
         "label": "SavedObjectsUtils",
         "description": [],
         "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,6 +36,8 @@
               "(namespace?: string | undefined) => string"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -50,6 +54,8 @@
                   "string | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "lineNumber": 39,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -70,6 +76,8 @@
               "(namespace: string) => string | undefined"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -86,6 +94,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "lineNumber": 53,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -110,6 +120,8 @@
               "<T, A>"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -124,7 +136,10 @@
                   "SavedObjectsFindOptions"
                 ],
                 "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "lineNumber": 64,
+                "columnNumber": 50,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsFindOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -144,6 +159,8 @@
               "() => string"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -164,6 +181,8 @@
               "(id: string | undefined) => boolean"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -180,6 +199,8 @@
                   "string | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "lineNumber": 87,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -200,6 +221,8 @@
               "(namespace: string | undefined, type: string, id: string) => string"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -216,6 +239,8 @@
                   "string | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "lineNumber": 99,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -233,6 +258,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "lineNumber": 99,
+                "columnNumber": 69,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -250,6 +277,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "lineNumber": 99,
+                "columnNumber": 83,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -276,6 +305,8 @@
               "<InputAttributes, MigratedAttributes>"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -293,7 +324,10 @@
                   "<InputAttributes, MigratedAttributes>"
                 ],
                 "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "lineNumber": 112,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectMigration",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -315,6 +349,8 @@
               "<unknown>, \"attributes\"> | null | undefined) => string | undefined"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -329,6 +365,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "lineNumber": 118,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -346,6 +384,8 @@
                   "<unknown>, \"attributes\"> | null | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "lineNumber": 119,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -364,6 +404,8 @@
               "(type: string, nameAttribute: string) => string[]"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -378,6 +420,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "lineNumber": 141,
+                "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -393,6 +437,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "lineNumber": 141,
+                "columnNumber": 53,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -418,6 +464,8 @@
           "(mapA: Map<T, T[] | undefined>, mapB: Map<T, T[] | undefined>) => boolean"
         ],
         "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_test_utils.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -434,7 +482,10 @@
               "Map<T, T[] | undefined>"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_test_utils.ts",
+            "lineNumber": 39,
+            "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Map",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -451,7 +502,10 @@
               "Map<T, T[] | undefined>"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_test_utils.ts",
+            "lineNumber": 39,
+            "columnNumber": 69,
             "deprecated": false,
+            "docsReferencedTypeName": "Map",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -479,6 +533,8 @@
           "SavedObjectMigrationMap"
         ],
         "path": "src/core/packages/saved-objects/utils-server/src/merge_migrations.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -495,7 +551,10 @@
               "SavedObjectMigrationMap"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/merge_migrations.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectMigrationMap",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -512,13 +571,23 @@
               "SavedObjectMigrationMap"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/merge_migrations.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectMigrationMap",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "The merged map {@link SavedObjectMigrationMap }"
+          "The merged map ",
+          {
+            "pluginId": "@kbn/core-saved-objects-utils-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+            "section": "def-server.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          }
         ],
         "initialIsOpen": false
       },
@@ -543,6 +612,8 @@
           "<unknown, unknown>"
         ],
         "path": "src/core/packages/saved-objects/utils-server/src/merge_migrations.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -560,7 +631,10 @@
               "<unknown, unknown>"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/merge_migrations.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectMigration",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -578,7 +652,10 @@
               "<unknown, unknown>"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/merge_migrations.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectMigration",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -596,6 +673,8 @@
               "<unknown, unknown>[]"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/merge_migrations.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -619,6 +698,8 @@
           "(mapA: Map<T, Set<T>> | undefined, mapB: Map<T, Set<T>> | undefined) => boolean"
         ],
         "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_test_utils.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -635,6 +716,8 @@
               "Map<T, Set<T>> | undefined"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_test_utils.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -652,6 +735,8 @@
               "Map<T, Set<T>> | undefined"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_test_utils.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -675,6 +760,8 @@
           "(setA: Set<T>, setB: Set<T>) => boolean"
         ],
         "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_test_utils.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -691,7 +778,10 @@
               "Set<T>"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_test_utils.ts",
+            "lineNumber": 19,
+            "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Set",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -708,7 +798,10 @@
               "Set<T>"
             ],
             "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_test_utils.ts",
+            "lineNumber": 19,
+            "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "Set",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -733,6 +826,8 @@
           "\"*\""
         ],
         "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -748,6 +843,8 @@
           "\"default\""
         ],
         "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -763,6 +860,8 @@
           "1"
         ],
         "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -778,6 +877,8 @@
           "20"
         ],
         "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -214,4 +214,31 @@ describe('datatable appearance settings', () => {
       density: DataGridDensity.EXPANDED,
     });
   });
+
+  it('should toggle show row numbers', async () => {
+    const { rerender } = await renderComponent();
+    const showRowNumbersSwitch = screen.getByTestId('lens-table-row-numbers-switch');
+
+    expect(showRowNumbersSwitch).not.toBeChecked();
+
+    fireEvent.click(showRowNumbersSwitch);
+    expect(defaultProps.setState).toHaveBeenCalledWith({
+      ...defaultProps.state,
+      showRowNumbers: true,
+    });
+
+    rerender(
+      <DatatableAppearanceSettings
+        {...defaultProps}
+        state={{ ...defaultProps.state, showRowNumbers: true }}
+      />
+    );
+    expect(showRowNumbersSwitch).toBeChecked();
+
+    fireEvent.click(showRowNumbersSwitch);
+    expect(defaultProps.setState).toHaveBeenCalledWith({
+      ...defaultProps.state,
+      showRowNumbers: false,
+    });
+  });
 });

@@ -207,7 +207,7 @@ export const RelationsParameter = () => {
                         <EuiButtonIcon
                           data-test-subj="removeRelationshipButton"
                           aria-label={label}
-                          iconType="minusInCircle"
+                          iconType="minusCircle"
                           color="danger"
                           onClick={() => removeItem(id)}
                         />
@@ -232,6 +232,12 @@ export const RelationsParameter = () => {
                 items={items}
                 itemId="id"
                 columns={columns}
+                tableCaption={i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.joinType.relationshipTable.caption',
+                  {
+                    defaultMessage: 'Defined relationships',
+                  }
+                )}
                 noItemsMessage={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.joinType.relationshipTable.emptyTableMessage',
                   {
@@ -243,7 +249,7 @@ export const RelationsParameter = () => {
               {/* Add relation button */}
               <EuiButtonEmpty
                 onClick={addItem}
-                iconType="plusInCircleFilled"
+                iconType="plusCircle"
                 data-test-subj="addRelationButton"
               >
                 {i18n.translate(

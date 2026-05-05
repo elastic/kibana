@@ -10,17 +10,16 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { first, skip } from 'rxjs';
 import { dataViewsService } from '../../services/kibana_services';
-import type { ControlGroupApi } from '../../control_group/types';
 import { initializeDataControlManager } from './data_control_manager';
+import { initializeStateManager } from '@kbn/presentation-publishing';
+import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
 describe('initializeDataControlManager', () => {
   const dataControlState = {
-    dataViewId: 'myDataViewId',
-    fieldName: 'myFieldName',
+    ...DEFAULT_DATA_CONTROL_STATE,
+    data_view_id: 'myDataViewId',
+    field_name: 'myFieldName',
   };
-  const getEditorState = () => ({});
-  const setEditorState = () => {};
-  const controlGroupApi = {} as unknown as ControlGroupApi;
 
   dataViewsService.get = async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
@@ -40,21 +39,22 @@ describe('initializeDataControlManager', () => {
     } as unknown as DataView;
   };
 
-  describe('dataViewId subscription', () => {
+  describe('data_view_id subscription', () => {
     describe('no blocking errors', () => {
-      let dataControlManager: undefined | ReturnType<typeof initializeDataControlManager>;
+      let dataControlManager: undefined | Awaited<ReturnType<typeof initializeDataControlManager>>;
       beforeAll((done) => {
-        dataControlManager = initializeDataControlManager(
-          'myControlId',
-          'myControlType',
-          dataControlState,
-          getEditorState,
-          setEditorState,
-          controlGroupApi
-        );
-
-        dataControlManager.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
-          done();
+        initializeDataControlManager({
+          controlId: 'myControlId',
+          controlType: 'myControlType',
+          state: dataControlState,
+          editorStateManager: initializeStateManager({}, {}),
+          parentApi: {},
+          typeDisplayName: 'My Control Type',
+        }).then((controlManager) => {
+          dataControlManager = controlManager;
+          dataControlManager.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
+            done();
+          });
         });
       });
 
@@ -73,22 +73,23 @@ describe('initializeDataControlManager', () => {
     });
 
     describe('data view does not exist', () => {
-      let dataControlManager: undefined | ReturnType<typeof initializeDataControlManager>;
+      let dataControlManager: undefined | Awaited<ReturnType<typeof initializeDataControlManager>>;
       beforeAll((done) => {
-        dataControlManager = initializeDataControlManager(
-          'myControlId',
-          'myControlType',
-          {
+        initializeDataControlManager({
+          controlId: 'myControlId',
+          controlType: 'myControlType',
+          state: {
             ...dataControlState,
-            dataViewId: 'notGonnaFindMeDataViewId',
+            data_view_id: 'notGonnaFindMeDataViewId',
           },
-          getEditorState,
-          setEditorState,
-          controlGroupApi
-        );
-
-        dataControlManager.api.dataViews$.pipe(skip(1), first()).subscribe(() => {
-          done();
+          editorStateManager: initializeStateManager({}, {}),
+          parentApi: {},
+          typeDisplayName: 'My Control Type',
+        }).then((controlManager) => {
+          dataControlManager = controlManager;
+          dataControlManager.api.defaultTitle$!.pipe(first()).subscribe(() => {
+            done();
+          });
         });
       });
 
@@ -111,22 +112,23 @@ describe('initializeDataControlManager', () => {
     });
 
     describe('field does not exist', () => {
-      let dataControlManager: undefined | ReturnType<typeof initializeDataControlManager>;
+      let dataControlManager: undefined | Awaited<ReturnType<typeof initializeDataControlManager>>;
       beforeAll((done) => {
-        dataControlManager = initializeDataControlManager(
-          'myControlId',
-          'myControlType',
-          {
+        initializeDataControlManager({
+          controlId: 'myControlId',
+          controlType: 'myControlType',
+          state: {
             ...dataControlState,
-            fieldName: 'notGonnaFindMeFieldName',
+            field_name: 'notGonnaFindMeFieldName',
           },
-          getEditorState,
-          setEditorState,
-          controlGroupApi
-        );
-
-        dataControlManager!.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
-          done();
+          editorStateManager: initializeStateManager({}, {}),
+          parentApi: {},
+          typeDisplayName: 'My Control Type',
+        }).then((controlManager) => {
+          dataControlManager = controlManager;
+          dataControlManager.api.defaultTitle$!.pipe(first()).subscribe(() => {
+            done();
+          });
         });
       });
 

@@ -19,6 +19,7 @@ import { checkForTripleQuotesAndEsqlQuery } from '@kbn/monaco/src/languages/cons
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
+import { normalizeUrl } from '../../../lib/utils';
 import { sendRequest } from '../../hooks';
 import type { Actions } from '../../stores/request';
 
@@ -110,6 +111,10 @@ export class MonacoEditorActionsProvider {
     editor.onKeyUp((event) => {
       // trigger autocomplete on backspace
       if (event.keyCode === monaco.KeyCode.Backspace) {
+        debouncedTriggerSuggestions();
+      }
+      // trigger autocomplete on dot (period) for nested field suggestions
+      if (event.keyCode === monaco.KeyCode.Period) {
         debouncedTriggerSuggestions();
       }
     });
@@ -292,7 +297,15 @@ export class MonacoEditorActionsProvider {
 
   public async sendRequests(dispatch: Dispatch<Actions>, context: ContextValue): Promise<void> {
     const {
-      services: { notifications, trackUiMetric, http, settings, history, autocompleteInfo },
+      services: {
+        notifications,
+        trackUiMetric,
+        http,
+        settings,
+        history,
+        autocompleteInfo,
+        esHostService,
+      },
       ...startServices
     } = context;
     const { toasts } = notifications;
@@ -353,10 +366,27 @@ export class MonacoEditorActionsProvider {
       setTimeout(() => trackSentRequests(requests, trackUiMetric), 0);
 
       const selectedHost = settings.getSelectedHost();
+
+      // Ensure the host list is available before validating.
+      await esHostService.waitForInitialization();
+      const availableHosts = esHostService.getAllHosts();
+
+      let hostToUse: string | undefined;
+      if (selectedHost) {
+        const normalizedSelected = normalizeUrl(selectedHost);
+        const isValid = availableHosts.some((h) => normalizeUrl(h) === normalizedSelected);
+        if (isValid) {
+          hostToUse = selectedHost;
+        } else {
+          // Stale host in localStorage: clear it and fall back to the server default.
+          settings.setSelectedHost(null);
+        }
+      }
+
       const results = await sendRequest({
         http,
         requests,
-        host: selectedHost || undefined,
+        host: hostToUse,
         isPackagedEnvironment: context.config.isPackagedEnvironment,
       });
 
@@ -473,23 +503,26 @@ export class MonacoEditorActionsProvider {
     return insideComment;
   }
 
-  private async getAutocompleteType(
-    model: monaco.editor.ITextModel,
-    { lineNumber, column }: monaco.Position
-  ): Promise<AutocompleteType | null> {
+  private isPositionInsideComment(model: monaco.editor.ITextModel, lineNumber: number): boolean {
     // Get the content of the current line up until the cursor position
-    const currentLineContent = model.getLineContent(lineNumber);
-    const trimmedContent = currentLineContent.trim();
+    const trimmedContent = model.getLineContent(lineNumber).trim();
 
-    // If we are positioned inside a comment block, no autocomplete should be provided
-    if (
+    return (
       trimmedContent.startsWith('#') ||
       trimmedContent.startsWith('//') ||
       trimmedContent.startsWith('/*') ||
       trimmedContent.startsWith('*') ||
       trimmedContent.includes('*/') ||
       this.isInsideMultilineComment(model, lineNumber)
-    ) {
+    );
+  }
+
+  private async getAutocompleteType(
+    model: monaco.editor.ITextModel,
+    { lineNumber, column }: monaco.Position
+  ): Promise<AutocompleteType | null> {
+    // If we are positioned inside a comment block, no autocomplete should be provided
+    if (this.isPositionInsideComment(model, lineNumber)) {
       return null;
     }
 
@@ -827,6 +860,14 @@ export class MonacoEditorActionsProvider {
     if (!model || !position) {
       return;
     }
+
+    // Don't trigger (and visually open) the suggestions widget inside comments.
+    // Even when our completion provider returns 0 results, Monaco can still surface
+    // an empty suggestions widget, which breaks user expectations and our UI tests.
+    if (this.isPositionInsideComment(model, position.lineNumber)) {
+      return;
+    }
+
     this.isPositionInsideTripleQuotesAndQuery(model, position).then(
       ({ insideTripleQuotes, insideEsqlQuery }) => {
         if (insideTripleQuotes && !insideEsqlQuery) {

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test.describe('Index details page', { tag: ['@ess'] }, () => {
+test.describe('Index details page', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsIndexManagementUser();
     await pageObjects.indexManagement.goto();

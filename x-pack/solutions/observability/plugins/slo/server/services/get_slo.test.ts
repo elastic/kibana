@@ -14,18 +14,18 @@ import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { SummaryClient } from './summary_client';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SloDefinitionClient } from './slo_definition_client';
+import { SLODefinitionClient } from './slo_definition_client';
 
 describe('GetSLO', () => {
   let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let mockSummaryClient: jest.Mocked<SummaryClient>;
   let getSLO: GetSLO;
-  let defintionClient: SloDefinitionClient;
+  let defintionClient: SLODefinitionClient;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockSummaryClient = createSummaryClientMock();
-    defintionClient = new SloDefinitionClient(
+    defintionClient = new SLODefinitionClient(
       mockRepository,
       elasticsearchServiceMock.createElasticsearchClient(),
       loggerMock.create()
@@ -53,6 +53,11 @@ describe('GetSLO', () => {
           oneHourBurnRate: 0,
           oneDayBurnRate: 0,
         },
+        burnRateWindows: [
+          { name: '5m', burnRate: 0, sli: 0.9999 },
+          { name: '1h', burnRate: 0, sli: 0.9999 },
+          { name: '1d', burnRate: 0, sli: 0.9999 },
+        ],
       });
 
       const result = await getSLO.execute(slo.id, 'default');

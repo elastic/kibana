@@ -36,6 +36,8 @@
           ", ServerError, InstallVars, unknown>"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -56,7 +58,10 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ProductDocBasePluginStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -77,7 +82,10 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseInstallProductDocOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -128,6 +136,8 @@
           ", unknown>>; isLoading: boolean; isRefetching: boolean; isSuccess: boolean; isError: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -148,7 +158,10 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ProductDocBasePluginStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -169,7 +182,10 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseProductDocStatusOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -210,6 +226,8 @@
           ", ServerError, UninstallVars, unknown>"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -230,7 +248,10 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ProductDocBasePluginStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -251,7 +272,10 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseUninstallProductDocOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -269,6 +293,8 @@
         "label": "UseInstallProductDocOptions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -285,6 +311,8 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -303,6 +331,8 @@
               "((error: ServerError) => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -317,7 +347,10 @@
                   "ServerError"
                 ],
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+                "lineNumber": 22,
+                "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ServerError",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -335,6 +368,8 @@
         "label": "UseProductDocStatusOptions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -351,6 +386,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -374,6 +411,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -388,6 +427,8 @@
         "label": "UseUninstallProductDocOptions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -404,6 +445,8 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -422,6 +465,8 @@
               "((error: ServerError) => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -436,7 +481,10 @@
                   "ServerError"
                 ],
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+                "lineNumber": 22,
+                "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ServerError",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -463,6 +511,8 @@
           "{ readonly GET_PRODUCT_DOC_STATUS: \"productDocBase.status\"; readonly INSTALL_PRODUCT_DOC: \"productDocBase.install\"; readonly UNINSTALL_PRODUCT_DOC: \"productDocBase.uninstall\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -476,6 +526,8 @@
       "label": "ProductDocBasePluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/types.ts",
+      "lineNumber": 18,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -490,6 +542,8 @@
       "label": "ProductDocBasePluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/types.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -504,6 +558,8 @@
             "InstallationAPI"
           ],
           "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/types.ts",
+          "lineNumber": 21,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -523,9 +579,18 @@
         "tags": [],
         "label": "DocSearchOptions",
         "description": [
-          "\nOptions for the Product documentation {@link SearchApi}"
+          "\nOptions for the Product documentation ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.SearchApi",
+            "text": "SearchApi"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -539,6 +604,8 @@
               "plain text search query"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -555,6 +622,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -571,6 +640,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -587,6 +658,8 @@
               "(\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\")[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -603,6 +676,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -626,6 +701,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -639,9 +716,18 @@
         "tags": [],
         "label": "DocSearchResponse",
         "description": [
-          "\nResponse for the {@link SearchApi}"
+          "\nResponse for the ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.SearchApi",
+            "text": "SearchApi"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -665,6 +751,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -678,9 +766,26 @@
         "tags": [],
         "label": "DocSearchResult",
         "description": [
-          "\nIndividual result returned in a {@link DocSearchResponse} by the {@link SearchApi}"
+          "\nIndividual result returned in a ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.DocSearchResponse",
+            "text": "DocSearchResponse"
+          },
+          " by the ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.SearchApi",
+            "text": "SearchApi"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -694,6 +799,8 @@
               "title of the doc article page"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -707,6 +814,8 @@
               "full url to the online documentation"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -723,6 +832,8 @@
               "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -736,6 +847,8 @@
               "full content of the doc article"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -752,6 +865,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -790,6 +905,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -811,7 +928,10 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "DocSearchOptions",
             "trackAdoption": false
           }
         ],
@@ -827,6 +947,8 @@
       "label": "ProductDocBaseSetupContract",
       "description": [],
       "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
+      "lineNumber": 30,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -841,6 +963,8 @@
       "label": "ProductDocBaseStartContract",
       "description": [],
       "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
+      "lineNumber": 32,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -871,6 +995,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -892,7 +1018,10 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+              "lineNumber": 58,
+              "columnNumber": 26,
               "deprecated": false,
+              "docsReferencedTypeName": "DocSearchOptions",
               "trackAdoption": false
             }
           ]
@@ -908,6 +1037,8 @@
             "DocumentationManagerAPI"
           ],
           "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
+          "lineNumber": 34,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }

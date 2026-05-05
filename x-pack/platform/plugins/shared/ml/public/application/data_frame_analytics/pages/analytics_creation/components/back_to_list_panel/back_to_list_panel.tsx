@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useCreateAndNavigateToManagementMlLink } from '../../../../../contexts/kibana/use_create_url';
 
 export const BackToListPanel: FC = () => {
@@ -22,7 +22,7 @@ export const BackToListPanel: FC = () => {
     <Fragment>
       <EuiCard
         css={{ width: '300px' }}
-        icon={<EuiIcon size="xxl" type="list" />}
+        icon={<EuiIcon size="xxl" type="listBullet" />}
         title={i18n.translate('xpack.ml.dataframe.analytics.create.analyticsListCardTitle', {
           defaultMessage: 'Data Frame Analytics',
         })}

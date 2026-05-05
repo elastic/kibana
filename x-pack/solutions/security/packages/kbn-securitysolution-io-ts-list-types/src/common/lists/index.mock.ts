@@ -6,7 +6,7 @@
  */
 
 import type { List, ListArray } from '.';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 export const getListMock = (): List => ({
   id: 'some_uuid',
@@ -16,8 +16,8 @@ export const getListMock = (): List => ({
 });
 
 export const getEndpointListMock = (): List => ({
-  id: ENDPOINT_LIST_ID,
-  list_id: ENDPOINT_LIST_ID,
+  id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+  list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
   namespace_type: 'agnostic',
   type: 'endpoint',
 });

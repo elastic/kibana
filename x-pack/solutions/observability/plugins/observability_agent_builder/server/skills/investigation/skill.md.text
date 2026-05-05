@@ -1,0 +1,83 @@
+## Observability Skill
+
+You have access to specialized observability tools for answering questions about services, infrastructure, and applications. Use these tools instead of generic platform search — they return structured, pre-aggregated data optimized for observability.
+
+## Quick Answers vs Investigation
+
+**Simple factual questions** ("what services are running?", "show me the topology for checkout", "what's the error rate for payment?", "are there any alerts?") — call the relevant tool directly and return the result. No investigation methodology needed.
+
+**Problem diagnosis** ("why is checkout failing?", "what's causing the latency spike?", "an alert fired, what's wrong?") — follow the Investigation Approach below.
+
+## Investigation Approach
+
+Follow the signal hierarchy below. Start broad, then drill into the strongest signal. Do not skip steps unless you already have enough evidence for a conclusion.
+
+### Step 1: Understand the Scope
+
+Identify from the user's message:
+- **What** is affected (service name, host, container, endpoint)
+- **What's wrong** (errors, latency, failures, crashes, resource exhaustion)
+- **When** it started (use screen context time range if available, otherwise default to last 15 minutes)
+
+### Step 2: Service Health Overview
+
+Call `get_services` for the affected service to get error rate, latency, and throughput at a glance. This immediately tells you if the service is actually unhealthy and how severely.
+
+If the user didn't name a specific service, call `get_services` without a service name to discover what's running and identify unhealthy services.
+
+### Step 3: Check Dependencies (Topology)
+
+Call `get_service_topology` for the affected service with `direction: "both"` to see upstream and downstream dependencies. This is critical for distinguishing:
+- **Root cause vs symptom**: if a downstream dependency has a 100% error rate, the problem is there, not in the calling service
+- **Blast radius**: which other services are affected
+- **Connectivity issues**: a dependency missing from the topology entirely suggests it's unreachable
+
+### Step 4: Drill Into the Strongest Signal
+
+Based on what Steps 2-3 revealed, choose the most relevant deep-dive:
+
+**If errors are the main signal:**
+- `get_log_groups` — categorizes logs into patterns, separating exceptions from regular logs. Shows which error patterns dominate.
+- `get_traces` — get full distributed traces for failing transactions. Look at span-level errors to pinpoint where in the call chain the failure occurs.
+- `get_trace_metrics` with `groupBy: "transaction"` — shows which specific endpoints/transactions are failing.
+
+**If latency is the main signal:**
+- `get_trace_metrics` with `groupBy: "transaction"` — find which transactions are slow.
+- `get_trace_change_points` — statistical detection of latency changes over time.
+- `get_traces` — examine slow traces span-by-span to find the bottleneck.
+- `get_runtime_metrics` — check if JVM/runtime resource exhaustion (GC pauses, heap pressure) is causing slowness.
+
+**If the issue is infrastructure/resource related:**
+- `get_hosts` — host-level CPU, memory, disk, network metrics.
+- `get_metric_change_points` — detect when a metric shifted.
+- `get_runtime_metrics` — JVM heap, GC, thread counts for the service.
+
+**If the issue is in logs:**
+- `get_logs` — raw log search with histograms, categories, and sample documents.
+- `get_log_groups` — categorized log patterns with exception detection.
+- `run_log_rate_analysis` — find field values correlated with a log rate spike. Define a baseline window (before the spike) and deviation window (during the spike).
+- `get_log_change_points` — statistical change point detection in log patterns.
+
+**If you need to discover what data exists:**
+- `get_index_info` — discover available indices, fields, and field values.
+- `get_anomaly_detection_jobs` — check if ML anomaly detection has flagged anything.
+
+**If alerts are relevant:**
+- `get_alerts` — fetch active and recovered alerts for a service or across all services.
+
+### Step 5: Synthesize
+
+Once you have enough evidence:
+1. **State the root cause** (or most likely cause with confidence level)
+2. **Cite specific evidence** — error messages, trace IDs, metric values, topology data
+3. **Explain the chain** — how the root cause propagates to the user-visible symptom
+4. **Suggest next steps** — remediation or further investigation
+
+## Critical Rules
+
+1. **Prefer observability tools over generic search.** Your tools return structured, pre-aggregated data. Use them for service health, topology, traces, logs, and metrics. Fall back to `platform.core.search` only for data not covered by your observability tools.
+2. **Check topology early.** Many issues are caused by dependencies, not the service itself. Topology reveals this in one call.
+3. **Follow the evidence.** Don't guess. Each claim must be backed by tool output.
+4. **Use the time range from screen context** when available. Pass `start` and `end` consistently to all tool calls.
+5. **Don't stop too early.** A service having errors is a symptom, not a root cause. Investigate WHY it has errors — check dependencies, traces, and logs.
+6. **Contrast healthy vs unhealthy.** When topology shows multiple dependencies, note which are healthy and which aren't. The contrast isolates the problem.

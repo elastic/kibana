@@ -1,0 +1,174 @@
+{
+  "sha1": "9c546a87ad4a37cd717a7cfd7fb0651ddd25803f",
+  "tests": [
+    {
+      "id": "8065d296c26f2cd-b37771106c4b8c3",
+      "title": "Breadcrumb navigation clicking the \"Rules\" breadcrumb navigates to the rules list without duplicating the path",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/breadcrumb_navigation.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "9034fd33949a2e3-4b8fd1fab72dd63",
+      "title": "Discover Alerts menu with alerting v2 should show Alerts menu with the v2 ES|QL rule row and hide v1 entries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_alerts_menu.spec.ts",
+        "line": 41,
+        "column": 9
+      }
+    },
+    {
+      "id": "db2a783d1c9ca06-9be44a4fb742275",
+      "title": "Discover query sync — Rule flyout flyout query updates when the Discover query changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_query_sync.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "7aeb81062562639-a7d0ae7c38928c4",
+      "title": "Rule name validation — Discover flyout opens rule form flyout and displays default placeholder name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "7aeb81062562639-a47285aef34cc43",
+      "title": "Rule name validation — Discover flyout shows validation error when saving flyout with empty default name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "7aeb81062562639-f42d35dffb1ebce",
+      "title": "Rule name validation — Discover flyout error callout scrolls into view in flyout on failed submission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
+        "line": 63,
+        "column": 7
+      }
+    },
+    {
+      "id": "e12f6e30742fe83-fce7878b5f39621",
+      "title": "Rule name validation — dedicated page displays \"Untitled rule\" as the default placeholder",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "e12f6e30742fe83-342dc74d66cb7ac",
+      "title": "Rule name validation — dedicated page shows \"Name is required\" error when saving with empty default value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "e12f6e30742fe83-2aa2ef5feef3e9c",
+      "title": "Rule name validation — dedicated page shows validation error when rule name is cleared after editing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "e12f6e30742fe83-31f2fe98d8c1c90",
+      "title": "Rule name validation — dedicated page shows name validation error when saving after confirming the default placeholder text",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "e12f6e30742fe83-2094fd68a6246c9",
+      "title": "Rule name validation — dedicated page error callout scrolls into view on failed submission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "e12f6e30742fe83-64bddd0c59606c2",
+      "title": "Rule name validation — dedicated page no name validation error with a custom rule name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "fb0220bd6f2bd69-8ed8a0399e08cbb",
+      "title": "Rules list bulk actions respect active filters bulk disable applies only to rules matching the list filter, not the full space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rules_list_bulk_respects_filters.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    }
+  ]
+}

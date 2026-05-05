@@ -10,9 +10,16 @@
 import type {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  LastValueIndexPatternColumn,
   TermsIndexPatternColumn,
+  MathIndexPatternColumn,
+  AvgIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
+import type { LensApiConfig } from '../../schema';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 
 export const minimalAttributesXY: LensAttributes = {
   visualizationType: 'lnsXY',
@@ -184,7 +191,7 @@ export const fullBasicXY: LensAttributes = {
       legend: {
         isVisible: true,
         legendSize: 'auto',
-        maxLines: 1,
+        maxLines: 2,
         position: 'right',
         shouldTruncate: true,
         showSingleSeries: true,
@@ -353,9 +360,8 @@ export const multipleMetricsXY: LensAttributes = {
       ],
       legend: {
         isVisible: true,
-        legendSize: 'auto',
-        maxLines: 1,
-        position: 'right',
+        position: 'bottom',
+        layout: 'list',
         shouldTruncate: true,
         showSingleSeries: true,
       },
@@ -450,12 +456,13 @@ export const breakdownXY: LensAttributes = {
           layerType: 'data',
           seriesType: 'line',
           xAccessor: '315033e2-8172-4213-87e0-d4e7f09ccca7',
-          splitAccessor: '315033e2-8172-4213-87e0-d4e7f09cccaX',
+          splitAccessors: ['315033e2-8172-4213-87e0-d4e7f09cccaX'],
         },
       ],
       legend: {
         isVisible: true,
-        position: 'right',
+        position: 'bottom',
+        layout: 'list',
       },
       preferredSeriesType: 'bar_stacked',
     },
@@ -579,7 +586,7 @@ export const barWithTwoLayersAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'line',
           xAccessor: '315033e2-8172-4213-87e0-d4e7f09ccca7',
-          splitAccessor: '315033e2-8172-4213-87e0-d4e7f09cccaX',
+          splitAccessors: ['315033e2-8172-4213-87e0-d4e7f09cccaX'],
         },
         {
           accessors: ['layer2_metric1'],
@@ -588,7 +595,7 @@ export const barWithTwoLayersAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'line',
           xAccessor: 'layer2_date_histogram',
-          splitAccessor: 'layer2_terms',
+          splitAccessors: ['layer2_terms'],
         },
       ],
       legend: {
@@ -764,7 +771,7 @@ export const mixedChartAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'line',
           xAccessor: '315033e2-8172-4213-87e0-d4e7f09ccca7',
-          splitAccessor: '315033e2-8172-4213-87e0-d4e7f09cccaX',
+          splitAccessors: ['315033e2-8172-4213-87e0-d4e7f09cccaX'],
         },
         {
           accessors: ['layer2_metric1'],
@@ -773,21 +780,26 @@ export const mixedChartAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'bar',
           xAccessor: 'layer2_date_histogram',
-          splitAccessor: 'layer2_terms',
+          splitAccessors: ['layer2_terms'],
         },
         {
           accessors: ['layer3_metric1'],
-          isHistogram: true,
+          isHistogram: 'jello',
           layerId: 'layer3',
-          layerType: 'data',
+          layerType: 'xxx',
           seriesType: 'area',
-          xAccessor: 'layer3_date_histogram',
-          splitAccessor: 'layer3_terms',
+          xAccessor: 123,
+          splitAccessors: ['layer3_terms'],
         },
       ],
       legend: {
         isVisible: true,
+        isInside: true,
         position: 'right',
+        shouldTruncate: true,
+        maxLines: 2,
+        verticalAlignment: 'bottom',
+        horizontalAlignment: 'left',
       },
       preferredSeriesType: 'bar_stacked',
     },
@@ -814,4 +826,485 @@ export const mixedChartAttributes: LensAttributes = {
       type: 'index-pattern',
     },
   ],
+};
+
+export const xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes: LensAttributes = {
+  title: 'Formula reference columns and rank_by in the terms bucket operation',
+  visualizationType: 'lnsXY',
+  type: 'lens',
+  references: [
+    {
+      type: 'index-pattern',
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'indexpattern-datasource-layer-1a4354e7-8b60-4b43-b594-dca7f1946996',
+    },
+  ],
+  state: {
+    visualization: {
+      title: 'Empty XY chart',
+      legend: {
+        isVisible: true,
+        position: 'right',
+      },
+      valueLabels: 'hide',
+      preferredSeriesType: 'bar_stacked',
+      layers: [
+        {
+          layerId: '1a4354e7-8b60-4b43-b594-dca7f1946996',
+          accessors: [
+            '8bb98494-44f3-4961-a950-e3ab2ff41caa',
+            '0f26965d-24ea-431b-9bba-7fe581ad52f5',
+            '7bfd43ca-505f-4456-aa68-edf578527112',
+          ],
+          position: 'top',
+          seriesType: 'bar_stacked',
+          showGridlines: false,
+          layerType: 'data',
+          colorMapping: {
+            assignments: [],
+            specialAssignments: [
+              {
+                rules: [
+                  {
+                    type: 'other',
+                  },
+                ],
+                color: {
+                  type: 'loop',
+                },
+                touched: false,
+              },
+            ],
+            paletteId: 'default',
+            colorMode: {
+              type: 'categorical',
+            },
+          },
+          xAccessor: 'a035289e-8808-47f3-9bba-b1c5872cdff1',
+        },
+      ],
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '1a4354e7-8b60-4b43-b594-dca7f1946996': {
+            columns: {
+              'a035289e-8808-47f3-9bba-b1c5872cdff1': {
+                label: 'Top 5 values of geo.dest',
+                dataType: 'string',
+                operationType: 'terms',
+                sourceField: 'geo.dest',
+                isBucketed: true,
+                params: {
+                  size: 5,
+                  orderBy: {
+                    type: 'column',
+                    columnId: '0f26965d-24ea-431b-9bba-7fe581ad52f5',
+                  },
+                  orderDirection: 'desc',
+                  otherBucket: true,
+                  missingBucket: false,
+                  parentFormat: {
+                    id: 'terms',
+                  },
+                  include: [],
+                  exclude: [],
+                  includeIsRegex: false,
+                  excludeIsRegex: false,
+                },
+              } as TermsIndexPatternColumn,
+              '8bb98494-44f3-4961-a950-e3ab2ff41caaX0': {
+                label: 'Part of last_value(bytes)/last_value(bytes_counter)',
+                dataType: 'number',
+                operationType: 'last_value',
+                isBucketed: false,
+                sourceField: 'bytes',
+                filter: {
+                  query: '"bytes": *',
+                  language: 'kuery',
+                },
+                params: {
+                  sortField: 'timestamp',
+                },
+                customLabel: true,
+              } as LastValueIndexPatternColumn,
+              '8bb98494-44f3-4961-a950-e3ab2ff41caaX1': {
+                label: 'Part of last_value(bytes)/last_value(bytes_counter)',
+                dataType: 'number',
+                operationType: 'last_value',
+                isBucketed: false,
+                sourceField: 'bytes_counter',
+                filter: {
+                  query: '"bytes_counter": *',
+                  language: 'kuery',
+                },
+                params: {
+                  sortField: 'timestamp',
+                },
+                customLabel: true,
+              } as LastValueIndexPatternColumn,
+              // @ts-expect-error - because the args is an array of strings
+              '8bb98494-44f3-4961-a950-e3ab2ff41caaX2': {
+                label: 'Part of last_value(bytes)/last_value(bytes_counter)',
+                dataType: 'number',
+                operationType: 'math',
+                isBucketed: false,
+                params: {
+                  tinymathAst: {
+                    type: 'function',
+                    name: 'divide',
+                    args: [
+                      '8bb98494-44f3-4961-a950-e3ab2ff41caaX0',
+                      '8bb98494-44f3-4961-a950-e3ab2ff41caaX1',
+                    ],
+                    location: {
+                      min: 0,
+                      max: 43,
+                    },
+                    text: 'last_value(bytes)/last_value(bytes_counter)',
+                  },
+                },
+                references: [
+                  '8bb98494-44f3-4961-a950-e3ab2ff41caaX0',
+                  '8bb98494-44f3-4961-a950-e3ab2ff41caaX1',
+                ],
+                customLabel: true,
+              } as MathIndexPatternColumn,
+              '8bb98494-44f3-4961-a950-e3ab2ff41caa': {
+                label: 'last_value(bytes)/last_value(bytes_counter)',
+                dataType: 'number',
+                operationType: 'formula',
+                isBucketed: false,
+                params: {
+                  formula: 'last_value(bytes)/last_value(bytes_counter)',
+                  isFormulaBroken: false,
+                },
+                references: ['8bb98494-44f3-4961-a950-e3ab2ff41caaX2'],
+              } as FormulaIndexPatternColumn,
+              '0f26965d-24ea-431b-9bba-7fe581ad52f5': {
+                label: 'Average of bytes',
+                dataType: 'number',
+                operationType: 'average',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  emptyAsNull: true,
+                },
+              } as AvgIndexPatternColumn,
+              '7bfd43ca-505f-4456-aa68-edf578527112X0': {
+                label: 'Part of average(bytes) * 100',
+                dataType: 'number',
+                operationType: 'average',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  emptyAsNull: false,
+                },
+                customLabel: true,
+              } as AvgIndexPatternColumn,
+              '7bfd43ca-505f-4456-aa68-edf578527112X1': {
+                label: 'Part of average(bytes) * 100',
+                dataType: 'number',
+                operationType: 'math',
+                isBucketed: false,
+                params: {
+                  tinymathAst: {
+                    type: 'function',
+                    name: 'multiply',
+                    args: ['7bfd43ca-505f-4456-aa68-edf578527112X0', 100],
+                    location: {
+                      min: 0,
+                      max: 20,
+                    },
+                    text: 'average(bytes) * 100',
+                  },
+                },
+                references: ['7bfd43ca-505f-4456-aa68-edf578527112X0'],
+                customLabel: true,
+              } as MathIndexPatternColumn,
+              '7bfd43ca-505f-4456-aa68-edf578527112': {
+                label: 'average(bytes) * 100',
+                dataType: 'number',
+                operationType: 'formula',
+                isBucketed: false,
+                params: {
+                  formula: 'average(bytes) * 100',
+                  isFormulaBroken: false,
+                },
+                references: ['7bfd43ca-505f-4456-aa68-edf578527112X1'],
+              } as FormulaIndexPatternColumn,
+            },
+            columnOrder: [
+              'a035289e-8808-47f3-9bba-b1c5872cdff1',
+              '8bb98494-44f3-4961-a950-e3ab2ff41caa',
+              '8bb98494-44f3-4961-a950-e3ab2ff41caaX0',
+              '8bb98494-44f3-4961-a950-e3ab2ff41caaX1',
+              '8bb98494-44f3-4961-a950-e3ab2ff41caaX2',
+              '0f26965d-24ea-431b-9bba-7fe581ad52f5',
+              '7bfd43ca-505f-4456-aa68-edf578527112',
+              '7bfd43ca-505f-4456-aa68-edf578527112X0',
+              '7bfd43ca-505f-4456-aa68-edf578527112X1',
+            ],
+            sampling: 1,
+            ignoreGlobalFilters: false,
+            incompleteColumns: {},
+            // @ts-expect-error
+            indexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+          },
+        },
+        currentIndexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      },
+      indexpattern: {
+        layers: {},
+        currentIndexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  version: LENS_ITEM_LATEST_VERSION,
+};
+
+export const apiXYWithNoYTitleAndInsideLegend: LensApiConfig = {
+  title: '',
+  type: 'xy',
+  legend: {
+    visibility: 'visible',
+    placement: 'inside',
+    position: 'top_right',
+  },
+  axis: {
+    x: {
+      title: {
+        visible: true,
+      },
+      ticks: { visible: true },
+      grid: { visible: true },
+      labels: {
+        orientation: 'horizontal',
+      },
+    },
+    y: {
+      title: {
+        visible: false,
+      },
+      ticks: { visible: true },
+      grid: { visible: true },
+      labels: {
+        orientation: 'horizontal',
+      },
+    },
+  },
+  styling: {
+    bars: { data_labels: { visible: false } },
+  },
+  layers: [
+    {
+      type: 'bar_stacked',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+      x: {
+        operation: 'date_histogram',
+        field: 'timestamp',
+        suggested_interval: 'auto',
+        use_original_time_range: false,
+        include_empty_rows: true,
+        drop_partial_intervals: false,
+      },
+      y: [
+        {
+          operation: 'count',
+          empty_as_null: true,
+        },
+      ],
+      breakdown_by: {
+        operation: 'terms',
+        fields: ['clientip'],
+        limit: 9,
+        other_bucket: {
+          include_documents_without_field: false,
+        },
+        rank_by: {
+          type: 'metric',
+          metric_index: 0,
+          direction: 'desc',
+        },
+        aggregate_first: true,
+      },
+    },
+  ],
+  query: {
+    expression: 'test: true',
+    language: 'kql',
+  },
+};
+
+export const apiXYWithTopListWithTruncationLegend: LensApiConfig = {
+  title: '',
+  type: 'xy',
+  legend: {
+    visibility: 'visible',
+    position: 'top',
+    layout: {
+      type: 'list',
+    },
+  },
+  axis: {
+    x: {
+      title: {
+        visible: true,
+      },
+      ticks: { visible: true },
+      grid: { visible: true },
+      labels: {
+        orientation: 'horizontal',
+      },
+    },
+    y: {
+      title: {
+        visible: false,
+      },
+      ticks: { visible: true },
+      grid: { visible: true },
+      labels: {
+        orientation: 'horizontal',
+      },
+    },
+  },
+  styling: {
+    bars: { data_labels: { visible: false } },
+  },
+  layers: [
+    {
+      type: 'bar_stacked',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+      x: {
+        operation: 'date_histogram',
+        field: 'timestamp',
+        suggested_interval: 'auto',
+        use_original_time_range: false,
+        include_empty_rows: true,
+        drop_partial_intervals: false,
+      },
+      y: [
+        {
+          operation: 'count',
+          empty_as_null: true,
+        },
+      ],
+      breakdown_by: {
+        operation: 'terms',
+        fields: ['clientip'],
+        limit: 9,
+        other_bucket: {
+          include_documents_without_field: false,
+        },
+        rank_by: {
+          type: 'metric',
+          metric_index: 0,
+          direction: 'desc',
+        },
+        aggregate_first: true,
+      },
+    },
+  ],
+  query: {
+    expression: 'test: true',
+    language: 'kql',
+  },
+};
+
+export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiConfig = {
+  title: '',
+  type: 'xy',
+  legend: {
+    visibility: 'visible',
+    placement: 'outside',
+    position: 'bottom',
+  },
+  axis: {
+    x: {
+      title: {
+        visible: true,
+      },
+      ticks: { visible: true },
+      grid: { visible: true },
+      labels: {
+        orientation: 'horizontal',
+      },
+    },
+    y: {
+      title: {
+        visible: false,
+      },
+      ticks: { visible: true },
+      grid: { visible: true },
+      labels: {
+        orientation: 'horizontal',
+      },
+    },
+  },
+  styling: {
+    bars: { data_labels: { visible: false } },
+  },
+  layers: [
+    {
+      type: 'bar_stacked',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+      x: {
+        operation: 'date_histogram',
+        field: 'timestamp',
+        suggested_interval: 'auto',
+        use_original_time_range: false,
+        include_empty_rows: true,
+        drop_partial_intervals: false,
+      },
+      y: [
+        {
+          operation: 'count',
+          empty_as_null: true,
+        },
+      ],
+      breakdown_by: {
+        operation: 'terms',
+        fields: ['clientip'],
+        limit: 9,
+        other_bucket: {
+          include_documents_without_field: false,
+        },
+        rank_by: {
+          type: 'metric',
+          metric_index: 0,
+          direction: 'desc',
+        },
+        aggregate_first: true,
+      },
+    },
+  ],
+  query: {
+    expression: 'test: true',
+    language: 'kql',
+  },
 };

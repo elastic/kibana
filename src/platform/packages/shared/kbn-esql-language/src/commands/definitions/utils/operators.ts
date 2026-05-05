@@ -29,7 +29,6 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
     documentation: {
       value: fn.description,
     },
-    sortText: 'D',
   };
   return hasArgs ? withAutoSuggest(suggestion) : suggestion;
 }
@@ -62,7 +61,14 @@ export const getOperatorSuggestions = (
           signatures.some(
             ({ params }) =>
               !params.length ||
-              params.some((pArg) => pArg.type === predicates?.leftParamType || pArg.type === 'any')
+              params.some(
+                (pArg) =>
+                  pArg.type === predicates?.leftParamType ||
+                  pArg.type === 'any' ||
+                  // all ES|QL functions accept null, but this is not reflected
+                  // in our function definitions so we let it through here
+                  predicates?.leftParamType === 'null'
+              )
           )
         )
       : filteredDefinitions

@@ -40,8 +40,8 @@ export class LogsRepository {
   public async createLogs(logEvents: WorkflowLogEvent[]): Promise<void> {
     const dataStreamClient = await initializeDataStreamClient(this.coreDataStreams);
 
-    await dataStreamClient.bulk({
-      operations: logEvents.flatMap((logEvent) => [{ create: {} }, logEvent]),
+    await dataStreamClient.create({
+      documents: logEvents,
     });
   }
 
@@ -120,8 +120,7 @@ export class LogsRepository {
         typeof response.hits.total === 'number'
           ? response.hits.total
           : response.hits.total?.value || 0,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      logs: response.hits.hits.map((hit) => hit._source!),
+      logs: response.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : [])),
     };
   }
 }

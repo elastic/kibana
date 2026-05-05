@@ -9,8 +9,8 @@ import type { Logger } from '@kbn/core/server';
 import type { errors as EsErrors } from '@elastic/elasticsearch';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 
-import type { BackoffFactory } from '../../common/retry_service/types';
-import { RetryService } from '../../common/retry_service';
+import type { BackoffFactory } from '@kbn/response-ops-retry-service';
+import { RetryService } from '@kbn/response-ops-retry-service';
 
 export class CasesAnalyticsRetryService extends RetryService {
   constructor(logger: Logger, backOffFactory: BackoffFactory, maxAttempts: number = 10) {

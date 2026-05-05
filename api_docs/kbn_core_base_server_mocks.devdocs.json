@@ -23,6 +23,8 @@
         "label": "mockCoreContext",
         "description": [],
         "path": "src/core/packages/base/server-mocks/src/core_context.mock.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -65,6 +67,8 @@
               ">"
             ],
             "path": "src/core/packages/base/server-mocks/src/core_context.mock.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -74,7 +78,7 @@
                 "id": "def-server.mockCoreContext.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  env = createTestEnv(),\n  logger = loggerMock.create(),\n  configService = configServiceMock.create(),\n}",
                 "description": [],
                 "signature": [
                   "{ env?: ",
@@ -98,6 +102,8 @@
                   "> | undefined; }"
                 ],
                 "path": "src/core/packages/base/server-mocks/src/core_context.mock.ts",
+                "lineNumber": 18,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
               }

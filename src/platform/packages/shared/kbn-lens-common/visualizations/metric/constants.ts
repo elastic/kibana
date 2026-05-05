@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricVisualizationStateOptionals } from './types';
+import type { MetricLayoutWithDefault, MetricStateDefaults, PrimaryMetricPosition } from './types';
 
 export const LENS_METRIC_ID = 'lnsMetric';
 
@@ -22,25 +22,52 @@ export const LENS_METRIC_GROUP_ID = {
   TREND_BREAKDOWN_BY: 'trendBreakdownBy',
 } as const;
 
+export const LENS_LEGACY_METRIC_STATE_DEFAULTS: Pick<MetricStateDefaults, 'iconAlign'> = {
+  iconAlign: 'left',
+};
+
 /**
  * Defaults for select optional Metric vis state options
  */
-export const LENS_METRIC_STATE_DEFAULTS: Required<
-  Pick<
-    MetricVisualizationStateOptionals,
-    'titlesTextAlign' | 'valuesTextAlign' | 'iconAlign' | 'valueFontMode'
-  >
-> = {
+export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
   titlesTextAlign: 'left',
-  valuesTextAlign: 'right',
-  iconAlign: 'left',
+  primaryAlign: 'right',
+  secondaryAlign: 'right',
+  iconAlign: 'right',
   valueFontMode: 'default',
+  primaryPosition: 'bottom',
+  secondaryLabelPosition: 'before',
+  applyColorTo: 'background',
+};
+
+export const LENS_METRIC_LAYOUT_BY_POSITION: Record<
+  PrimaryMetricPosition,
+  MetricLayoutWithDefault
+> = {
+  bottom: {
+    titlesTextAlign: 'left',
+    primaryAlign: 'right',
+    iconAlign: 'right',
+    secondaryAlign: 'right',
+  },
+  middle: {
+    titlesTextAlign: 'left',
+    primaryAlign: 'center',
+    iconAlign: 'right',
+    secondaryAlign: 'right',
+  },
+  top: {
+    titlesTextAlign: 'left',
+    primaryAlign: 'left',
+    iconAlign: 'right',
+    secondaryAlign: 'left',
+  },
 };
 
 export const LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR = '#E4E8F1';
 
 export const LENS_METRIC_DEFAULT_TRENDLINE_NAME = 'default';
-export const METRIC_TRENDLINE_NAME = 'metricTrendline';
+export const LENS_METRIC_TRENDLINE_NAME = 'metricTrendline';
 
 export const LENS_METRIC_LABEL_POSITION = {
   BOTTOM: 'bottom',
@@ -72,4 +99,4 @@ export const LENS_METRIC_AVAILABLE_METRIC_ICONS = {
   TEMPERATURE: 'temperature',
 } as const;
 
-export const EXPRESSION_METRIC_TRENDLINE_NAME = 'metricTrendline';
+export const LENS_EXPRESSION_METRIC_TRENDLINE_NAME = 'metricTrendline';

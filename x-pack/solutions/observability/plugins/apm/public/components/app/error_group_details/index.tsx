@@ -85,7 +85,7 @@ export function ErrorGroupDetails() {
   const apmRouter = useApmRouter();
   const history = useHistory();
   const { onPageReady } = usePerformanceContext();
-  const { observabilityAIAssistant, onechat } = useApmPluginContext();
+  const { observabilityAIAssistant, agentBuilder } = useApmPluginContext();
 
   const {
     path: { groupId },
@@ -201,11 +201,11 @@ export function ErrorGroupDetails() {
 
   // Configure agent builder global flyout with the error attachment
   useEffect(() => {
-    if (!onechat || !errorId) {
+    if (!agentBuilder || !errorId) {
       return;
     }
 
-    onechat.setConversationFlyoutActiveConfig({
+    agentBuilder.setChatConfig({
       newConversation: true,
       attachments: [
         {
@@ -222,9 +222,9 @@ export function ErrorGroupDetails() {
     });
 
     return () => {
-      onechat.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearChatConfig();
     };
-  }, [onechat, errorId, serviceName, environment, start, end]);
+  }, [agentBuilder, errorId, serviceName, environment, start, end]);
 
   return (
     <>
@@ -237,11 +237,24 @@ export function ErrorGroupDetails() {
         <EuiFlexItem grow={3}>
           <EuiPanel hasBorder={true}>
             <ErrorDistribution
-              fetchStatus={errorDistributionStatus}
-              distribution={errorDistributionData}
               title={i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
                 defaultMessage: 'Error occurrences',
               })}
+              fetchStatus={errorDistributionStatus}
+              distribution={errorDistributionData}
+              discoverParams={{
+                label: i18n.translate('xpack.apm.errorGroupDetails.openErrorGroupInDiscover', {
+                  defaultMessage: 'Open error group in Discover',
+                }),
+                rangeFrom,
+                rangeTo,
+                queryParams: {
+                  kuery,
+                  serviceName,
+                  errorGroupId: groupId,
+                  sortDirection: 'DESC',
+                },
+              }}
             />
           </EuiPanel>
         </EuiFlexItem>

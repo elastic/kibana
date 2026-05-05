@@ -40,6 +40,8 @@
           " | undefined) => object | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/validation/schema_generator.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,7 +52,7 @@
             "tags": [],
             "label": "streamType",
             "description": [
-              "- Optional stream type to filter available actions\nReturns null if schema generation fails, allowing fallback to basic syntax highlighting"
+              "- Optional stream type to filter available actions"
             ],
             "signature": [
               {
@@ -63,7 +65,10 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/validation/schema_generator.ts",
+            "lineNumber": 20,
+            "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -108,6 +113,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,7 +135,10 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StepSummary",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -149,7 +159,10 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "YamlLineMap",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -178,6 +191,8 @@
           " | undefined) => { uri: string; fileMatch: string[]; schema: object; } | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/validation/schema_generator.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -201,7 +216,10 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/validation/schema_generator.ts",
+            "lineNumber": 38,
+            "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -229,6 +247,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,6 +263,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+            "lineNumber": 25,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -270,6 +292,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/streamlang_yaml_editor.tsx",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -290,7 +314,10 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/streamlang_yaml_editor.tsx",
+            "lineNumber": 42,
+            "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangYamlEditorProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -305,7 +332,7 @@
         "tags": [],
         "label": "stripCustomIdentifiers",
         "description": [
-          "\nRecursively removes customIdentifier from all steps in the DSL.\nThis is used to clean the DSL before displaying it to users, as customIdentifiers\nare internal implementation details used for tracking and should not be visible."
+          "\nRecursively removes customIdentifier from all steps in the DSL.\nThis creates a new DSL object without modifying the original.\nUseful for comparing DSLs based on content only, ignoring internal tracking IDs."
         ],
         "signature": [
           "(dsl: ",
@@ -325,7 +352,9 @@
             "text": "StreamlangDSL"
           }
         ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/strip_custom_identifiers.ts",
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -345,8 +374,11 @@
                 "text": "StreamlangDSL"
               }
             ],
-            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/strip_custom_identifiers.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
+            "lineNumber": 21,
+            "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -377,6 +409,8 @@
           "; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/hooks/use_step_decorations.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -392,6 +426,8 @@
               ".IStandaloneCodeEditor | null"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/hooks/use_step_decorations.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -414,6 +450,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/hooks/use_step_decorations.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -432,6 +470,8 @@
         "label": "StepDecoration",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -443,6 +483,8 @@
             "label": "stepId",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -454,6 +496,8 @@
             "label": "lineStart",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -465,6 +509,8 @@
             "label": "lineEnd",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -479,6 +525,8 @@
               "\"disabled\" | \"running\" | \"success\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -493,6 +541,8 @@
         "label": "StreamlangYamlEditorProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -515,6 +565,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -539,6 +591,8 @@
               ", yaml: string) => void) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -559,7 +613,10 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+                "lineNumber": 17,
+                "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "StreamlangDSL",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -574,6 +631,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+                "lineNumber": 17,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -592,6 +651,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -606,6 +667,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -622,6 +685,8 @@
               ".IStandaloneCodeEditor) => void) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -637,6 +702,8 @@
                   ".IStandaloneCodeEditor"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+                "lineNumber": 20,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -655,6 +722,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -676,6 +745,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -687,7 +758,7 @@
             "label": "processorsMetrics",
             "description": [],
             "signature": [
-              "Record<string, ",
+              "Partial<Record<string, ",
               {
                 "pluginId": "@kbn/streams-schema",
                 "scope": "common",
@@ -695,9 +766,11 @@
                 "section": "def-common.ProcessorMetrics",
                 "text": "ProcessorMetrics"
               },
-              "> | undefined"
+              ">> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -714,6 +787,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -730,6 +805,8 @@
               "unknown[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -746,6 +823,8 @@
               "((stepId: string) => void) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -760,6 +839,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+                "lineNumber": 29,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -780,6 +861,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -796,6 +879,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -812,6 +897,8 @@
               "\"complete\" | \"partial\" | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -835,6 +922,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -859,6 +948,8 @@
               "[]> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -873,6 +964,8 @@
         "label": "ValidationError",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -884,6 +977,8 @@
             "label": "message",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -898,6 +993,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -912,6 +1009,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -926,6 +1025,8 @@
               "\"error\" | \"warning\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -940,6 +1041,8 @@
         "label": "YamlLineMap",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -954,6 +1057,8 @@
               "[stepId: string]:  { lineStart: number; lineEnd: number; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -974,6 +1079,8 @@
           "\"disabled\" | \"running\" | \"success\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -997,6 +1104,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

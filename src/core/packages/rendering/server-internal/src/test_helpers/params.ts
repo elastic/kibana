@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -17,6 +18,8 @@ import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 const context = mockCoreContext.create();
+// Mock the airgapped config to return a boolean value
+context.configService.atPath.mockReturnValue(new BehaviorSubject(false));
 const httpPreboot = httpServiceMock.createInternalPrebootContract();
 const httpSetup = httpServiceMock.createInternalSetupContract();
 const status = statusServiceMock.createInternalSetupContract();

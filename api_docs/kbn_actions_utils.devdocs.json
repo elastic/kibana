@@ -30,6 +30,8 @@
           "(opts: GetCustomAgentsOpts) => GetCustomAgentsResponse"
         ],
         "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_custom_agents.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,7 +46,10 @@
               "GetCustomAgentsOpts"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_custom_agents.ts",
+            "lineNumber": 36,
+            "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "GetCustomAgentsOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -81,6 +86,8 @@
           ") => Error | undefined) | undefined; cert?: Buffer | undefined; key?: Buffer | undefined; pfx?: Buffer | undefined; passphrase?: string | undefined; ca?: Buffer | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -101,7 +108,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -116,6 +126,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -138,9 +150,58 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SSLSettings",
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/actions-utils",
+        "id": "def-common.getProxySettings",
+        "type": "Function",
+        "tags": [],
+        "label": "getProxySettings",
+        "description": [],
+        "signature": [
+          "(opts: GetProxySettingsOpts) => ",
+          {
+            "pluginId": "@kbn/actions-utils",
+            "scope": "common",
+            "docId": "kibKbnActionsUtilsPluginApi",
+            "section": "def-common.ProxySettings",
+            "text": "ProxySettings"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_proxy_settings.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.getProxySettings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "GetProxySettingsOpts"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_proxy_settings.ts",
+            "lineNumber": 23,
+            "columnNumber": 34,
+            "deprecated": false,
+            "docsReferencedTypeName": "GetProxySettingsOpts",
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -164,6 +225,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -178,6 +241,8 @@
               "\"none\" | \"full\" | \"certificate\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -193,6 +258,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -211,6 +278,8 @@
         "label": "ProxySettings",
         "description": [],
         "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -222,6 +291,8 @@
             "label": "proxyUrl",
             "description": [],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -236,6 +307,8 @@
               "Set<string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -250,6 +323,8 @@
               "Set<string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -264,6 +339,8 @@
               "Record<string, string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -284,6 +361,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -298,6 +377,8 @@
         "label": "SSLSettings",
         "description": [],
         "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -312,6 +393,8 @@
               "\"none\" | \"full\" | \"certificate\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -326,6 +409,8 @@
               "Buffer | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -340,6 +425,8 @@
               "Buffer | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -354,6 +441,8 @@
               "Buffer | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -368,6 +457,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -382,6 +473,8 @@
               "Buffer | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -402,6 +495,8 @@
           "{ readonly ssl?: Readonly<{ verificationMode?: \"none\" | \"full\" | \"certificate\" | undefined; certificateAuthoritiesFiles?: string | string[] | undefined; certificateAuthoritiesData?: string | undefined; } & {}> | undefined; readonly smtp?: Readonly<{ ignoreTLS?: boolean | undefined; requireTLS?: boolean | undefined; } & {}> | undefined; readonly url: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -450,6 +545,8 @@
           "<Readonly<{ verificationMode?: \"none\" | \"full\" | \"certificate\" | undefined; certificateAuthoritiesFiles?: string | string[] | undefined; certificateAuthoritiesData?: string | undefined; } & {}> | undefined>; }>"
         ],
         "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

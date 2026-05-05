@@ -38,6 +38,8 @@
     "@kbn/expandable-flyout",
     "@kbn/grouping",
     "@kbn/std",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/kql",
+    "@kbn/entity-store"
   ]
 }

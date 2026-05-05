@@ -11,32 +11,32 @@ import { ObservedEntity } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import { mockObservedHostData } from '../../../mocks';
 
-describe('ObservedHost', () => {
+describe('ObservedEntity', () => {
   const mockProps = {
     observedData: mockObservedHostData,
     contextID: '',
     scopeId: '',
-    queryId: 'TEST_QUERY_ID',
     observedFields: [],
   };
 
-  it('renders', () => {
+  it('renders the entity table', () => {
     const { getByTestId } = render(
       <TestProviders>
         <ObservedEntity {...mockProps} />
       </TestProviders>
     );
 
-    expect(getByTestId('observedEntity-accordion')).toBeInTheDocument();
+    expect(getByTestId('entity-table')).toBeInTheDocument();
   });
 
-  it('renders the formatted date', () => {
-    const { getByTestId } = render(
+  it('renders table column headers', () => {
+    const { getByText } = render(
       <TestProviders>
         <ObservedEntity {...mockProps} />
       </TestProviders>
     );
 
-    expect(getByTestId('observedEntity-accordion')).toHaveTextContent('Updated Feb 23, 2023');
+    expect(getByText('Field')).toBeInTheDocument();
+    expect(getByText('Values')).toBeInTheDocument();
   });
 });

@@ -29,6 +29,8 @@
         "label": "AdditionalEmailServices",
         "description": [],
         "path": "x-pack/platform/plugins/shared/stack_connectors/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -46,6 +48,8 @@
           "\"/internal/stack_connectors\""
         ],
         "path": "x-pack/platform/plugins/shared/stack_connectors/common/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -40,11 +40,12 @@
       "fieldsMetadata",
       "esql",
       "savedObjectsTagging",
-      "streams"
+      "streams",
+      "kql"
     ],
     "optionalPlugins": [
       "observabilityAgentBuilder",
-      "onechat",
+      "agentBuilder",
       "aiops",
       "cases",
       "discover",
@@ -55,17 +56,19 @@
       "spaces",
       "serverless",
       "observabilityAIAssistant",
-      "investigate"
+      "investigate",
+      "cps",
+      "ingestHub"
     ],
     "requiredBundles": [
       "aiops",
       "cases",
       "data",
       "discover",
+      "fleet",
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch",
       "stackAlerts",
       "spaces",
       "observabilityAgentBuilder"

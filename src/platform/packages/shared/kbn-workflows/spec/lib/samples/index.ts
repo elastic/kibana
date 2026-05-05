@@ -9,4 +9,4 @@
 
 export { ES_VALID_SAMPLE_STEPS, ES_INVALID_SAMPLE_STEPS } from './es_steps';
 
-export { KIBANA_SAMPLE_STEPS } from './kibana_steps';
+export { KIBANA_VALID_SAMPLE_STEPS, KIBANA_INVALID_SAMPLE_STEPS } from './kibana_steps';

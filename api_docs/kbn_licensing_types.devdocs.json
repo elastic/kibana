@@ -28,6 +28,8 @@
         "label": "ILicense",
         "description": [],
         "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "lineNumber": 99,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -67,6 +71,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -80,6 +86,8 @@
               "\nDetermine if the status of the license is active."
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -96,6 +104,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -112,6 +122,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -130,6 +142,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
@@ -154,6 +168,8 @@
               "\nSignature of the license content."
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -167,6 +183,8 @@
               "\nDetermine if the license container has information."
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -190,6 +208,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -208,6 +228,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -224,6 +246,8 @@
               "() => string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 153,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -242,6 +266,8 @@
               "(minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -258,7 +284,10 @@
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
                 "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+                "lineNumber": 162,
+                "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "LicenseType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -285,6 +314,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -301,6 +332,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+                "lineNumber": 169,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -318,7 +351,10 @@
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
                 "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+                "lineNumber": 169,
+                "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "LicenseType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -345,6 +381,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 171,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -361,6 +399,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+                "lineNumber": 175,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -379,6 +419,8 @@
         "label": "LicenseCheck",
         "description": [],
         "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -395,6 +437,8 @@
               "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -411,6 +455,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -425,6 +471,8 @@
         "label": "LicenseFeature",
         "description": [],
         "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -436,6 +484,8 @@
             "label": "isAvailable",
             "description": [],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -447,6 +497,8 @@
             "label": "isEnabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -463,6 +515,8 @@
           "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
         ],
         "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -476,6 +530,8 @@
               "\nUID for license."
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -492,6 +548,8 @@
               "\"active\" | \"invalid\" | \"expired\""
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -505,6 +563,8 @@
               "\nUnix epoch of the expiration date of the license."
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -521,6 +581,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -539,6 +601,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
@@ -698,6 +762,26 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/availability/availability_updater.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/availability/availability_updater.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/availability/availability_updater.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/utils/with_availability_check.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/utils/with_availability_check.test.ts"
               }
             ]
           }
@@ -714,6 +798,8 @@
           "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
         ],
         "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -735,6 +821,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -756,6 +844,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -767,6 +857,8 @@
             "label": "signature",
             "description": [],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -783,6 +875,8 @@
         "label": "LICENSE_TYPE",
         "description": [],
         "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -800,6 +894,8 @@
           "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
         "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -815,6 +911,8 @@
           "\"active\" | \"invalid\" | \"expired\""
         ],
         "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -830,6 +928,8 @@
           "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
         ],
         "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -855,6 +955,8 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
+        "lineNumber": 66,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

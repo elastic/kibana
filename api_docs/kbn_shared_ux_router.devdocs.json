@@ -32,6 +32,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,7 +48,10 @@
               "BrowserRouterProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
+            "lineNumber": 33,
+            "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "BrowserRouterProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -67,6 +72,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -81,7 +88,10 @@
               "HashRouterProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
+            "lineNumber": 27,
+            "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "HashRouterProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -102,6 +112,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -116,7 +128,10 @@
               "MemoryRouterProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
+            "lineNumber": 39,
+            "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "MemoryRouterProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -139,6 +154,8 @@
           "<string, { [K: string]: string; } & T>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/router/impl/route.tsx",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -154,7 +171,10 @@
               "<string, { [K: string]: string; } & T>"
             ],
             "path": "src/platform/packages/shared/shared-ux/router/impl/route.tsx",
+            "lineNumber": 27,
+            "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -175,6 +195,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -189,7 +211,10 @@
               "RouterProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
+            "lineNumber": 45,
+            "columnNumber": 24,
             "deprecated": false,
+            "docsReferencedTypeName": "RouterProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -208,6 +233,8 @@
           "({ legacySwitch, enableExecutionContextTracking, children, }: { legacySwitch?: boolean | undefined; enableExecutionContextTracking?: boolean | undefined; children: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/router/impl/routes.tsx",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -219,6 +246,8 @@
             "label": "{\n  legacySwitch = true,\n  enableExecutionContextTracking = false,\n  children,\n}",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/router/impl/routes.tsx",
+            "lineNumber": 34,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -233,6 +262,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/router/impl/routes.tsx",
+                "lineNumber": 35,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -247,6 +278,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/router/impl/routes.tsx",
+                "lineNumber": 36,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -258,9 +291,11 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/router/impl/routes.tsx",
+                "lineNumber": 37,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -290,6 +325,8 @@
           ">>>"
         ],
         "path": "src/platform/packages/shared/shared-ux/router/impl/services.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import './helpers/mocks';
+
+import { getRandomString } from '@kbn/test-jest-helpers';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import * as fixtures from '../../test/fixtures';
+import { API_BASE_PATH } from '../../common';
 import {
   SNAPSHOT_REPOSITORY_EXCEPTION_ERROR,
   SNAPSHOT_STATE,
 } from '../../public/application/constants';
-import { API_BASE_PATH } from '../../common';
-import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
-import type { HomeTestBed } from './helpers/home.helpers';
 import { REPOSITORY_NAME } from './helpers/constant';
+import { setupEnvironment } from './helpers/setup_environment';
+import { renderHome } from './helpers/render_home';
 
-const { setup } = pageHelpers.home;
+type Repository = ReturnType<typeof fixtures.getRepository>;
+type Snapshot = ReturnType<typeof fixtures.getSnapshot>;
 
 // Mocking FormattedDate and FormattedTime due to timezone differences on CI
 jest.mock('@kbn/i18n-react', () => {
@@ -31,84 +37,112 @@ jest.mock('@kbn/i18n-react', () => {
   };
 });
 
-const removeWhiteSpaceOnArrayValues = (array: any[]) =>
-  array.map((value) => {
-    if (!value.trim) {
-      return value;
-    }
-    return value.trim();
+interface Deferred<T> {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (reason?: unknown) => void;
+}
+
+const createDeferred = <T>(): Deferred<T> => {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
   });
 
+  return { promise, resolve, reject };
+};
+
 describe('<SnapshotRestoreHome />', () => {
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
-  let testBed: HomeTestBed;
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+
+  const renderHomePage = ({
+    initialEntries = ['/repositories'],
+  }: { initialEntries?: string[] } = {}) => renderHome(httpSetup, { initialEntries });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const env = setupEnvironment();
+    httpSetup = env.httpSetup;
+    httpRequestsMockHelpers = env.httpRequestsMockHelpers;
+  });
 
   describe('on component mount', () => {
-    beforeEach(async () => {
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-      testBed.component.update();
+    test('should set the correct app title', async () => {
+      httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [] });
+      httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [], total: 0, errors: {} });
+      httpRequestsMockHelpers.setLoadPoliciesResponse({ policies: [] });
+
+      renderHomePage();
+
+      const appTitle = await screen.findByTestId('appTitle');
+      expect(appTitle).toHaveTextContent('Snapshot and Restore');
     });
 
-    test('should set the correct app title', () => {
-      const { exists, find } = testBed;
-      expect(exists('appTitle')).toBe(true);
-      expect(find('appTitle').text()).toEqual('Snapshot and Restore');
+    test('should display a loading while fetching the repositories', async () => {
+      const repositoriesDeferred = createDeferred<{ repositories: Repository[] }>();
+
+      // Promise cast needed: mock helper signature doesn't explicitly allow Promise for loading-state tests
+      httpRequestsMockHelpers.setLoadRepositoriesResponse(
+        repositoriesDeferred.promise as unknown as { repositories: Repository[] }
+      );
+      httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [], total: 0, errors: {} });
+      httpRequestsMockHelpers.setLoadPoliciesResponse({ policies: [] });
+
+      renderHomePage();
+
+      const loading = await screen.findByTestId('sectionLoading');
+      expect(loading).toHaveTextContent('Loading repositories…');
+
+      // Resolve to avoid leaving a dangling request.
+      repositoriesDeferred.resolve({ repositories: [] });
+      await screen.findByTestId('emptyPrompt');
     });
 
-    /**
-     * TODO: investigate why we need to skip this test.
-     * My guess is a change in the useRequest() hook and maybe a setTimout() that hasn't been
-     * mocked with jest.useFakeTimers({ legacyFakeTimers: true });
-     * I tested locally and the loading spinner is present in the UI so skipping this test for now.
-     */
-    test.skip('should display a loading while fetching the repositories', () => {
-      const { exists, find } = testBed;
-      expect(exists('sectionLoading')).toBe(true);
-      expect(find('sectionLoading').text()).toEqual('Loading repositories…');
-    });
+    test('should have a link to the documentation', async () => {
+      httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [] });
+      httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [], total: 0, errors: {} });
+      httpRequestsMockHelpers.setLoadPoliciesResponse({ policies: [] });
 
-    test('should have a link to the documentation', () => {
-      const { exists, find } = testBed;
-      expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('Snapshot and Restore docs');
+      renderHomePage();
+
+      const docLink = await screen.findByTestId('documentationLink');
+      expect(docLink).toHaveTextContent('Snapshot and Restore docs');
     });
 
     describe('tabs', () => {
-      test('should have 4 tabs', () => {
-        const { find } = testBed;
+      test('should have 4 tabs', async () => {
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [] });
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [], total: 0, errors: {} });
+        httpRequestsMockHelpers.setLoadPoliciesResponse({ policies: [] });
 
-        const tabs = [
-          find('snapshots_tab'),
-          find('repositories_tab'),
-          find('policies_tab'),
-          find('restore_status_tab'),
-        ];
+        renderHomePage();
 
-        expect(tabs.length).toBe(4);
-        expect(tabs.map((t) => t.text())).toEqual([
-          'Snapshots',
-          'Repositories',
-          'Policies',
-          'Restore Status',
-        ]);
+        const repositoriesTab = await screen.findByTestId('repositories_tab');
+        expect(screen.getByTestId('snapshots_tab')).toHaveTextContent('Snapshots');
+        expect(repositoriesTab).toHaveTextContent('Repositories');
+        expect(screen.getByTestId('policies_tab')).toHaveTextContent('Policies');
+        expect(screen.getByTestId('restore_status_tab')).toHaveTextContent('Restore Status');
       });
 
       test('should navigate to snapshot list tab', async () => {
-        const { exists, actions } = testBed;
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [] });
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [], total: 0, errors: {} });
+        httpRequestsMockHelpers.setLoadPoliciesResponse({ policies: [] });
 
-        expect(exists('repositoryList')).toBe(true);
-        expect(exists('snapshotList')).toBe(false);
+        renderHomePage();
 
-        await act(async () => {
-          actions.selectTab('snapshots');
-        });
+        await screen.findByTestId('emptyPrompt');
+        expect(screen.queryByTestId('snapshotListEmpty')).not.toBeInTheDocument();
 
-        testBed.component.update();
+        const user = userEvent.setup();
+        await user.click(screen.getByTestId('snapshots_tab'));
 
-        expect(exists('repositoryList')).toBe(false);
-        expect(exists('snapshotListEmpty')).toBe(true);
+        await screen.findByTestId('snapshotListEmpty');
+        expect(screen.queryByTestId('emptyPrompt')).not.toBeInTheDocument();
       });
     });
   });
@@ -117,16 +151,15 @@ describe('<SnapshotRestoreHome />', () => {
     describe('when there are no repositories', () => {
       beforeEach(() => {
         httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [] });
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [], total: 0, errors: {} });
+        httpRequestsMockHelpers.setLoadPoliciesResponse({ policies: [] });
       });
 
       test('should display an empty prompt', async () => {
-        const { component, exists } = await setup(httpSetup);
+        renderHomePage();
 
-        component.update();
-
-        expect(exists('sectionLoading')).toBe(false);
-        expect(exists('emptyPrompt')).toBe(true);
-        expect(exists('emptyPrompt.registerRepositoryButton')).toBe(true);
+        const emptyPrompt = await screen.findByTestId('emptyPrompt');
+        expect(within(emptyPrompt).getByTestId('registerRepositoryButton')).toBeInTheDocument();
       });
     });
 
@@ -146,156 +179,177 @@ describe('<SnapshotRestoreHome />', () => {
 
       const repositories = [repo1, repo2, repo3, repo4, repo5, repo6, repo7, repo8];
 
-      beforeEach(async () => {
+      beforeEach(() => {
         httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories });
-
-        await act(async () => {
-          testBed = await setup(httpSetup);
-        });
-        testBed.component.update();
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [], total: 0, errors: {} });
+        httpRequestsMockHelpers.setLoadPoliciesResponse({ policies: [] });
       });
 
       test('should list them in the table', async () => {
-        const { table } = testBed;
-        const mapTypeToText: Record<string, string> = {
-          fs: 'Shared file system',
-          url: 'Read-only URL',
-          s3: 'AWS S3',
-          hdfs: 'Hadoop HDFS',
-          azure: 'Azure',
-          gcs: 'Google Cloud Storage',
-          source: 'Source-only',
-        };
+        renderHomePage();
 
-        const { tableCellsValues } = table.getMetaData('repositoryTable');
-        tableCellsValues.forEach((row, i) => {
-          const repository = repositories[i];
-          if (repository === repo8) {
-            // The "repo8" is source with a delegate type
-            expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
-              '',
-              repository.name,
-              `${mapTypeToText[repository.settings.delegateType]} (Source-only)`,
-              '',
-            ]);
-          } else {
-            expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
-              '',
-              repository.name,
-              mapTypeToText[repository.type],
-              '',
-            ]);
-          }
+        const table = await screen.findByTestId('repositoryTable');
+        const rows = within(table).getAllByTestId('row');
+
+        // Table is sorted by name asc by default.
+        const expected = [
+          { repo: repo1, typeText: 'Shared file system' },
+          { repo: repo2, typeText: 'Read-only URL' },
+          { repo: repo3, typeText: 'AWS S3' },
+          { repo: repo4, typeText: 'Hadoop HDFS' },
+          { repo: repo5, typeText: 'Azure' },
+          { repo: repo6, typeText: 'Google Cloud Storage' },
+          { repo: repo7, typeText: 'Source-only' },
+          { repo: repo8, typeText: 'Google Cloud Storage (Source-only)' },
+        ];
+
+        expected.forEach(({ repo, typeText }, idx) => {
+          expect(rows[idx]).toHaveTextContent(repo.name);
+          expect(rows[idx]).toHaveTextContent(typeText);
         });
       });
 
       test('should have a button to reload the repositories', async () => {
-        const { component, exists, actions } = testBed;
-        expect(exists('reloadButton')).toBe(true);
+        renderHomePage();
 
-        await act(async () => {
-          actions.clickReloadButton();
-        });
-        component.update();
+        await screen.findByTestId('reloadButton');
+        const user = userEvent.setup();
+        await user.click(screen.getByTestId('reloadButton'));
 
-        expect(httpSetup.get).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}repositories`,
-          expect.anything()
-        );
-      });
-
-      test('should have a button to register a new repository', () => {
-        const { exists } = testBed;
-        expect(exists('registerRepositoryButton')).toBe(true);
-      });
-
-      test('should have action buttons on each row to edit and delete a repository', () => {
-        const { table } = testBed;
-        const { rows } = table.getMetaData('repositoryTable');
-        const lastColumn = rows[0].columns[rows[0].columns.length - 1].reactWrapper;
-
-        expect(findTestSubject(lastColumn, 'editRepositoryButton').length).toBe(1);
-        expect(findTestSubject(lastColumn, 'deleteRepositoryButton').length).toBe(1);
-      });
-
-      describe('delete repository', () => {
-        test('should show a confirmation when clicking the delete repository button', async () => {
-          const { actions } = testBed;
-
-          await actions.clickRepositoryActionAt(0, 'delete');
-
-          // We need to read the document "body" as the modal is added there and not inside
-          // the component DOM tree.
-          expect(
-            document.body.querySelector('[data-test-subj="deleteRepositoryConfirmation"]')
-          ).not.toBe(null);
-
-          expect(
-            document.body.querySelector('[data-test-subj="deleteRepositoryConfirmation"]')!
-              .textContent
-          ).toContain(`Remove repository '${repo1.name}'?`);
-        });
-
-        test('should send the correct HTTP request to delete repository', async () => {
-          const { component, actions } = testBed;
-
-          await actions.clickRepositoryActionAt(0, 'delete');
-
-          const modal = document.body.querySelector(
-            '[data-test-subj="deleteRepositoryConfirmation"]'
-          );
-          const confirmButton: HTMLButtonElement | null = modal!.querySelector(
-            '[data-test-subj="confirmModalConfirmButton"]'
-          );
-
-          await act(async () => {
-            confirmButton!.click();
-          });
-          component.update();
-
-          expect(httpSetup.delete).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}repositories/${repo1.name}`,
+        await waitFor(() => {
+          expect(httpSetup.get).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}repositories`,
             expect.anything()
           );
         });
       });
 
-      describe('detail panel', () => {
-        test('should show the detail when clicking on a repository', async () => {
-          const { exists, actions } = testBed;
+      test('should have a button to register a new repository', async () => {
+        renderHomePage();
 
-          expect(exists('repositoryDetail')).toBe(false);
+        await screen.findByTestId('registerRepositoryButton');
+        expect(screen.getByTestId('registerRepositoryButton')).toBeInTheDocument();
+      });
 
-          await act(async () => {
-            await actions.clickRepositoryAt(0);
+      test('should have action buttons on each row to edit and delete a repository', async () => {
+        renderHomePage();
+
+        const table = await screen.findByTestId('repositoryTable');
+        const firstRow = within(table).getAllByTestId('row')[0];
+        expect(within(firstRow).getByTestId('editRepositoryButton')).toBeInTheDocument();
+        expect(within(firstRow).getByTestId('deleteRepositoryButton')).toBeInTheDocument();
+      });
+
+      describe('delete repository', () => {
+        test('should show a confirmation when clicking the delete repository button', async () => {
+          renderHomePage();
+
+          const table = await screen.findByTestId('repositoryTable');
+          const firstRow = within(table).getAllByTestId('row')[0];
+
+          const user = userEvent.setup();
+          await user.click(within(firstRow).getByTestId('deleteRepositoryButton'));
+
+          const modal = await within(document.body).findByTestId('deleteRepositoryConfirmation');
+          expect(modal).toHaveTextContent(`Remove repository '${repo1.name}'?`);
+        });
+
+        test('should send the correct HTTP request to delete repository', async () => {
+          renderHomePage();
+
+          const table = await screen.findByTestId('repositoryTable');
+          const firstRow = within(table).getAllByTestId('row')[0];
+
+          const user = userEvent.setup();
+          await user.click(within(firstRow).getByTestId('deleteRepositoryButton'));
+
+          await within(document.body).findByTestId('deleteRepositoryConfirmation');
+          await user.click(within(document.body).getByTestId('confirmModalConfirmButton'));
+
+          await waitFor(() => {
+            expect(httpSetup.delete).toHaveBeenLastCalledWith(
+              `${API_BASE_PATH}repositories/${encodeURIComponent(repo1.name)}`,
+              expect.anything()
+            );
           });
-          testBed.component.update();
+        });
+      });
 
-          expect(exists('repositoryDetail')).toBe(true);
+      describe('detail panel', () => {
+        beforeEach(() => {
+          httpRequestsMockHelpers.setGetRepositoryResponse(repo1.name, {
+            repository: {
+              name: repo1.name,
+              type: 'fs',
+              settings: { location: '/tmp/es-backups' },
+            },
+            snapshots: { count: 0 },
+          });
+        });
+
+        test('should show the detail when clicking on a repository', async () => {
+          renderHomePage();
+
+          expect(screen.queryByTestId('repositoryDetail')).not.toBeInTheDocument();
+
+          const table = await screen.findByTestId('repositoryTable');
+          const firstRow = within(table).getAllByTestId('row')[0];
+
+          const user = userEvent.setup();
+          await user.click(within(firstRow).getByTestId('repositoryLink'));
+
+          const detail = await screen.findByTestId('repositoryDetail');
+          // Wait for mount-time request to resolve inside act
+          await within(detail).findByTestId('repositoryType');
+          expect(detail).toBeInTheDocument();
         });
 
         test('should set the correct title', async () => {
-          const { find, actions } = testBed;
+          renderHomePage();
 
-          await actions.clickRepositoryAt(0);
+          const table = await screen.findByTestId('repositoryTable');
+          const firstRow = within(table).getAllByTestId('row')[0];
 
-          expect(find('repositoryDetail.title').text()).toEqual(repo1.name);
+          const user = userEvent.setup();
+          await user.click(within(firstRow).getByTestId('repositoryLink'));
+
+          const detail = await screen.findByTestId('repositoryDetail');
+          await within(detail).findByTestId('repositoryType');
+          expect(within(detail).getByTestId('title')).toHaveTextContent(repo1.name);
         });
 
         test('should show a loading state while fetching the repository', async () => {
-          const { find, exists, actions } = testBed;
+          const repositoryDeferred = createDeferred<unknown>();
+          httpRequestsMockHelpers.setGetRepositoryResponse(
+            repo1.name,
+            repositoryDeferred.promise as unknown as Record<string, unknown>
+          );
 
-          // By providing undefined, the "loading section" will be displayed
-          httpRequestsMockHelpers.setGetRepositoryResponse(repo1.name, undefined);
+          renderHomePage();
 
-          await actions.clickRepositoryAt(0);
+          const table = await screen.findByTestId('repositoryTable');
+          const firstRow = within(table).getAllByTestId('row')[0];
 
-          expect(exists('repositoryDetail.sectionLoading')).toBe(true);
-          expect(find('repositoryDetail.sectionLoading').text()).toEqual('Loading repository…');
+          const user = userEvent.setup();
+          await user.click(within(firstRow).getByTestId('repositoryLink'));
+
+          const detail = await screen.findByTestId('repositoryDetail');
+          const loading = await within(detail).findByTestId('sectionLoading');
+          expect(loading).toHaveTextContent('Loading repository…');
+
+          repositoryDeferred.resolve({
+            repository: {
+              name: repo1.name,
+              type: 'fs',
+              settings: { location: '/tmp/es-backups' },
+            },
+            snapshots: { count: 0 },
+          });
+          await within(detail).findByTestId('repositoryType');
         });
 
         describe('when the repository has been fetched', () => {
-          beforeEach(async () => {
+          beforeEach(() => {
             httpRequestsMockHelpers.setGetRepositoryResponse(repo1.name, {
               repository: {
                 name: 'my-repo',
@@ -304,38 +358,59 @@ describe('<SnapshotRestoreHome />', () => {
               },
               snapshots: { count: 0 },
             });
-
-            await testBed.actions.clickRepositoryAt(0);
           });
 
           test('should have a link to the documentation', async () => {
-            const { exists } = testBed;
+            renderHomePage();
 
-            expect(exists('repositoryDetail.documentationLink')).toBe(true);
+            const table = await screen.findByTestId('repositoryTable');
+            const firstRow = within(table).getAllByTestId('row')[0];
+
+            const user = userEvent.setup();
+            await user.click(within(firstRow).getByTestId('repositoryLink'));
+
+            const detail = await screen.findByTestId('repositoryDetail');
+            await within(detail).findByTestId('documentationLink');
+            expect(within(detail).getByTestId('documentationLink')).toBeInTheDocument();
           });
 
-          test('should set the correct repository settings', () => {
-            const { find } = testBed;
+          test('should set the correct repository settings', async () => {
+            renderHomePage();
 
-            expect(find('repositoryDetail.repositoryType').text()).toEqual('Shared file system');
-            expect(find('repositoryDetail.snapshotCount').text()).toEqual(
+            const table = await screen.findByTestId('repositoryTable');
+            const firstRow = within(table).getAllByTestId('row')[0];
+
+            const user = userEvent.setup();
+            await user.click(within(firstRow).getByTestId('repositoryLink'));
+
+            const detail = await screen.findByTestId('repositoryDetail');
+            expect(within(detail).getByTestId('repositoryType')).toHaveTextContent(
+              'Shared file system'
+            );
+            expect(within(detail).getByTestId('snapshotCount')).toHaveTextContent(
               'Repository has no snapshots'
             );
           });
 
           test('should have a button to verify the status of the repository', async () => {
-            const { exists, find, component } = testBed;
-            expect(exists('repositoryDetail.verifyRepositoryButton')).toBe(true);
+            renderHomePage();
 
-            await act(async () => {
-              find('repositoryDetail.verifyRepositoryButton').simulate('click');
+            const table = await screen.findByTestId('repositoryTable');
+            const firstRow = within(table).getAllByTestId('row')[0];
+
+            const user = userEvent.setup();
+            await user.click(within(firstRow).getByTestId('repositoryLink'));
+
+            const detail = await screen.findByTestId('repositoryDetail');
+            await within(detail).findByTestId('verifyRepositoryButton');
+            await user.click(within(detail).getByTestId('verifyRepositoryButton'));
+
+            await waitFor(() => {
+              expect(httpSetup.get).toHaveBeenLastCalledWith(
+                `${API_BASE_PATH}repositories/${encodeURIComponent(repo1.name)}/verify`,
+                expect.anything()
+              );
             });
-            component.update();
-
-            expect(httpSetup.get).toHaveBeenLastCalledWith(
-              `${API_BASE_PATH}repositories/${repo1.name}/verify`,
-              expect.anything()
-            );
           });
 
           describe('clean repository', () => {
@@ -352,19 +427,26 @@ describe('<SnapshotRestoreHome />', () => {
                 },
               });
 
-              const { exists, find, component } = testBed;
-              await act(async () => {
-                find('repositoryDetail.cleanupRepositoryButton').simulate('click');
+              renderHomePage();
+
+              const table = await screen.findByTestId('repositoryTable');
+              const firstRow = within(table).getAllByTestId('row')[0];
+
+              const user = userEvent.setup();
+              await user.click(within(firstRow).getByTestId('repositoryLink'));
+
+              const detail = await screen.findByTestId('repositoryDetail');
+              await user.click(within(detail).getByTestId('cleanupRepositoryButton'));
+
+              await waitFor(() => {
+                expect(httpSetup.post).toHaveBeenLastCalledWith(
+                  `${API_BASE_PATH}repositories/${encodeURIComponent(repo1.name)}/cleanup`,
+                  expect.anything()
+                );
               });
-              component.update();
 
-              expect(httpSetup.post).toHaveBeenLastCalledWith(
-                `${API_BASE_PATH}repositories/${repo1.name}/cleanup`,
-                expect.anything()
-              );
-
-              expect(exists('repositoryDetail.cleanupCodeBlock')).toBe(true);
-              expect(exists('repositoryDetail.cleanupError')).toBe(false);
+              await within(detail).findByTestId('cleanupCodeBlock');
+              expect(within(detail).queryByTestId('cleanupError')).not.toBeInTheDocument();
             });
 
             test('shows error when success fails', async () => {
@@ -378,25 +460,32 @@ describe('<SnapshotRestoreHome />', () => {
                 },
               });
 
-              const { exists, find, component } = testBed;
-              await act(async () => {
-                find('repositoryDetail.cleanupRepositoryButton').simulate('click');
+              renderHomePage();
+
+              const table = await screen.findByTestId('repositoryTable');
+              const firstRow = within(table).getAllByTestId('row')[0];
+
+              const user = userEvent.setup();
+              await user.click(within(firstRow).getByTestId('repositoryLink'));
+
+              const detail = await screen.findByTestId('repositoryDetail');
+              await user.click(within(detail).getByTestId('cleanupRepositoryButton'));
+
+              await waitFor(() => {
+                expect(httpSetup.post).toHaveBeenLastCalledWith(
+                  `${API_BASE_PATH}repositories/${encodeURIComponent(repo1.name)}/cleanup`,
+                  expect.anything()
+                );
               });
-              component.update();
 
-              expect(httpSetup.post).toHaveBeenLastCalledWith(
-                `${API_BASE_PATH}repositories/${repo1.name}/cleanup`,
-                expect.anything()
-              );
-
-              expect(exists('repositoryDetail.cleanupCodeBlock')).toBe(false);
-              expect(exists('repositoryDetail.cleanupError')).toBe(true);
+              await within(detail).findByTestId('cleanupError');
+              expect(within(detail).queryByTestId('cleanupCodeBlock')).not.toBeInTheDocument();
             });
           });
         });
 
         describe('when the repository has been fetched (and has snapshots)', () => {
-          beforeEach(async () => {
+          beforeEach(() => {
             httpRequestsMockHelpers.setGetRepositoryResponse(repo1.name, {
               repository: {
                 name: 'my-repo',
@@ -405,13 +494,21 @@ describe('<SnapshotRestoreHome />', () => {
               },
               snapshots: { count: 2 },
             });
-
-            await testBed.actions.clickRepositoryAt(0);
           });
 
-          test('should indicate the number of snapshots found', () => {
-            const { find } = testBed;
-            expect(find('repositoryDetail.snapshotCount').text()).toEqual('2 snapshots found');
+          test('should indicate the number of snapshots found', async () => {
+            renderHomePage();
+
+            const table = await screen.findByTestId('repositoryTable');
+            const firstRow = within(table).getAllByTestId('row')[0];
+
+            const user = userEvent.setup();
+            await user.click(within(firstRow).getByTestId('repositoryLink'));
+
+            const detail = await screen.findByTestId('repositoryDetail');
+            expect(within(detail).getByTestId('snapshotCount')).toHaveTextContent(
+              '2 snapshots found'
+            );
           });
         });
       });
@@ -419,116 +516,94 @@ describe('<SnapshotRestoreHome />', () => {
   });
 
   describe('snapshots', () => {
+    const goToSnapshotsTab = async () => {
+      const user = userEvent.setup();
+      const tabs = screen.getAllByTestId('snapshots_tab');
+      await user.click(tabs[0]);
+    };
+
     describe('when there are no snapshots nor repositories', () => {
-      beforeAll(() => {
-        httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [] });
-        httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [] });
-      });
-
       beforeEach(async () => {
-        testBed = await setup(httpSetup);
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [], total: 0, errors: {} });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [] });
+        httpRequestsMockHelpers.setLoadPoliciesResponse({ policies: [] });
 
-        await act(async () => {
-          testBed.actions.selectTab('snapshots');
-        });
-
-        testBed.component.update();
+        renderHomePage();
+        await goToSnapshotsTab();
       });
 
-      test('should display an empty prompt', () => {
-        const { exists } = testBed;
-
-        expect(exists('snapshotListEmpty')).toBe(true);
+      test('should display an empty prompt', async () => {
+        await screen.findByTestId('snapshotListEmpty');
+        expect(screen.getByTestId('snapshotListEmpty')).toBeInTheDocument();
       });
 
-      test('should invite the user to first register a repository', () => {
-        const { find, exists } = testBed;
-        expect(find('snapshotListEmpty.title').text()).toBe('Start by registering a repository');
-        expect(exists('snapshotListEmpty.registerRepositoryButton')).toBe(true);
+      test('should invite the user to first register a repository', async () => {
+        const empty = await screen.findByTestId('snapshotListEmpty');
+        expect(within(empty).getByTestId('title')).toHaveTextContent(
+          'Start by registering a repository'
+        );
+        expect(within(empty).getByTestId('registerRepositoryButton')).toBeInTheDocument();
       });
     });
 
     describe('when there are no snapshots but has some repository', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadSnapshotsResponse({
-          snapshots: [],
-          total: 0,
-        });
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [], total: 0, errors: {} });
         httpRequestsMockHelpers.setLoadRepositoriesResponse({
           repositories: [{ name: 'my-repo' }],
         });
+        httpRequestsMockHelpers.setLoadPoliciesResponse({ policies: [] });
 
-        testBed = await setup(httpSetup);
-
-        await act(async () => {
-          testBed.actions.selectTab('snapshots');
-        });
-        testBed.component.update();
+        renderHomePage();
+        await goToSnapshotsTab();
       });
 
-      test('should display an empty prompt', () => {
-        const { find, exists } = testBed;
-
-        expect(exists('emptyPrompt')).toBe(true);
-        expect(find('emptyPrompt.title').text()).toBe(`You don't have any snapshots yet`);
+      test('should display an empty prompt', async () => {
+        const emptyPrompt = await screen.findByTestId('emptyPrompt');
+        expect(within(emptyPrompt).getByTestId('title')).toHaveTextContent(
+          `You don't have any snapshots yet`
+        );
       });
 
-      test('should have a link to the snapshot documentation', () => {
-        const { exists } = testBed;
-        expect(exists('emptyPrompt.documentationLink')).toBe(true);
+      test('should have a link to the snapshot documentation', async () => {
+        const emptyPrompt = await screen.findByTestId('emptyPrompt');
+        expect(within(emptyPrompt).getByTestId('documentationLink')).toBeInTheDocument();
       });
     });
 
     describe('when there are snapshots and repositories', () => {
       const snapshot1 = fixtures.getSnapshot({
         repository: REPOSITORY_NAME,
-        snapshot: `a${getRandomString()}`,
+        snapshot: 'a-snapshot',
         featureStates: ['kibana'],
       });
       const snapshot2 = fixtures.getSnapshot({
         repository: REPOSITORY_NAME,
-        snapshot: `b${getRandomString()}`,
+        snapshot: 'b-snapshot',
         includeGlobalState: false,
       });
       const snapshots = [snapshot1, snapshot2];
 
       beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadSnapshotsResponse({
-          snapshots,
-          total: 2,
-        });
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots, total: 2, errors: {} });
         httpRequestsMockHelpers.setLoadRepositoriesResponse({
           repositories: [{ name: REPOSITORY_NAME }],
         });
+        httpRequestsMockHelpers.setLoadPoliciesResponse({ policies: [] });
 
-        testBed = await setup(httpSetup);
-
-        await act(async () => {
-          testBed.actions.selectTab('snapshots');
-        });
-
-        testBed.component.update();
+        renderHomePage();
+        await goToSnapshotsTab();
       });
 
       test('should list them in the table', async () => {
-        const { table } = testBed;
-        const { tableCellsValues } = table.getMetaData('snapshotTable');
+        const table = await screen.findByTestId('snapshotTable');
+        const rows = within(table).getAllByTestId('row');
 
-        tableCellsValues.forEach((row, i) => {
-          const snapshot = snapshots[i];
-
-          expect(row).toEqual([
-            '', // Checkbox
-            snapshot.snapshot, // Snapshot
-            'Complete', // The displayed message when stats is success
-            REPOSITORY_NAME, // Repository
-            snapshot.indices.length.toString(), // Indices
-            snapshot.shards.total.toString(), // Shards
-            snapshot.shards.failed.toString(), // Failed shards
-            ' ', // Mocked start time
-            `${Math.ceil(snapshot.durationInMillis / 1000).toString()}s`, // Duration
-            '',
-          ]);
+        snapshots.forEach((snap, idx) => {
+          expect(rows[idx]).toHaveTextContent(snap.snapshot);
+          expect(rows[idx]).toHaveTextContent(REPOSITORY_NAME);
+          expect(rows[idx]).toHaveTextContent(String(snap.indices.length));
+          expect(rows[idx]).toHaveTextContent('Complete');
         });
       });
 
@@ -544,62 +619,50 @@ describe('<SnapshotRestoreHome />', () => {
             },
           },
         });
-        httpRequestsMockHelpers.setLoadRepositoriesResponse({
-          repositories: [{ name: REPOSITORY_NAME }],
-        });
+        // Re-run the request to pick up the new mocked response.
+        const user = userEvent.setup();
+        await user.click(screen.getByTestId('reloadButton'));
 
-        testBed = await setup(httpSetup);
-
-        await act(async () => {
-          testBed.actions.selectTab('snapshots');
-        });
-
-        testBed.component.update();
-
-        const { find, exists } = testBed;
-        expect(exists('repositoryErrorsWarning')).toBe(true);
-        expect(find('repositoryErrorsWarning').text()).toContain(
-          'Some repositories contain errors'
-        );
+        const warning = await screen.findByTestId('repositoryErrorsWarning');
+        expect(warning).toHaveTextContent('Some repositories contain errors');
       });
 
       test('each row should have a link to the repository', async () => {
-        const { component, find, exists, table, router } = testBed;
-
-        const { rows } = table.getMetaData('snapshotTable');
-        const repositoryLink = findTestSubject(rows[0].reactWrapper, 'repositoryLink');
-        const { href } = repositoryLink.props();
-
-        await act(async () => {
-          router.navigateTo(href!);
+        httpRequestsMockHelpers.setGetRepositoryResponse(REPOSITORY_NAME, {
+          repository: {
+            name: REPOSITORY_NAME,
+            type: 'fs',
+            settings: { location: '/tmp/es-backups' },
+          },
+          snapshots: { count: 0 },
         });
-        component.update();
 
-        // Make sure that we navigated to the repository list
-        // and opened the detail panel for the repository
-        expect(exists('snapshotList')).toBe(false);
-        expect(exists('repositoryList')).toBe(true);
-        expect(exists('repositoryDetail')).toBe(true);
-        expect(find('repositoryDetail.title').text()).toBe(REPOSITORY_NAME);
+        const table = await screen.findByTestId('snapshotTable');
+        const firstRow = within(table).getAllByTestId('row')[0];
+
+        const user = userEvent.setup();
+        await user.click(within(firstRow).getAllByTestId('repositoryLink')[0]);
+
+        await screen.findByTestId('repositoryList');
+        const repositoryDetail = await screen.findByTestId('repositoryDetail');
+        expect(within(repositoryDetail).getByTestId('title')).toHaveTextContent(REPOSITORY_NAME);
       });
 
       test('should have a button to reload the snapshots', async () => {
-        const { component, exists, actions } = testBed;
-        expect(exists('reloadButton')).toBe(true);
+        await screen.findByTestId('reloadButton');
+        const user = userEvent.setup();
+        await user.click(screen.getByTestId('reloadButton'));
 
-        await act(async () => {
-          actions.clickReloadButton();
+        await waitFor(() => {
+          expect(httpSetup.get).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}snapshots`,
+            expect.anything()
+          );
         });
-        component.update();
-
-        expect(httpSetup.get).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}snapshots`,
-          expect.anything()
-        );
       });
 
       describe('detail panel', () => {
-        beforeEach(async () => {
+        beforeEach(() => {
           httpRequestsMockHelpers.setGetSnapshotResponse(
             snapshot1.repository,
             snapshot1.snapshot,
@@ -607,141 +670,170 @@ describe('<SnapshotRestoreHome />', () => {
           );
         });
 
+        const clickSnapshotAt = async (index: number) => {
+          const table = await screen.findByTestId('snapshotTable');
+          const row = within(table).getAllByTestId('row')[index];
+          const user = userEvent.setup();
+          await user.click(within(row).getByTestId('snapshotLink'));
+          return await screen.findByTestId('snapshotDetail');
+        };
+
         test('should show the detail when clicking on a snapshot', async () => {
-          const { exists, actions } = testBed;
-          expect(exists('snapshotDetail')).toBe(false);
-
-          await actions.clickSnapshotAt(0);
-
-          expect(exists('snapshotDetail')).toBe(true);
+          expect(screen.queryByTestId('snapshotDetail')).not.toBeInTheDocument();
+          const detail = await clickSnapshotAt(0);
+          // Wait for mount-time request to resolve inside act
+          await within(detail).findByTestId('version');
+          expect(detail).toBeInTheDocument();
         });
 
-        // Skipping this test as the server keeps on returning an empty object "{}"
-        // that makes the component crash. I tried a few things with no luck so, as this
-        // is a low impact test, I prefer to skip it and move on.
-        test.skip('should show a loading while fetching the snapshot', async () => {
-          const { find, exists, actions } = testBed;
-          // By providing undefined, the "loading section" will be displayed
+        test('should show a loading while fetching the snapshot', async () => {
+          const snapshotDeferred = createDeferred<Snapshot>();
           httpRequestsMockHelpers.setGetSnapshotResponse(
             snapshot1.repository,
             snapshot1.snapshot,
-            undefined
+            snapshotDeferred.promise as unknown as Snapshot
           );
 
-          await actions.clickSnapshotAt(0);
+          const detail = await clickSnapshotAt(0);
+          const loading = await within(detail).findByTestId('sectionLoading');
+          expect(loading).toHaveTextContent('Loading snapshot…');
 
-          expect(exists('snapshotDetail.sectionLoading')).toBe(true);
-          expect(find('snapshotDetail.sectionLoading').text()).toEqual('Loading snapshot…');
+          snapshotDeferred.resolve(snapshot1);
+          // Wait for the request to resolve to avoid act warnings.
+          await within(detail).findByTestId('version');
         });
 
         describe('on mount', () => {
           beforeEach(async () => {
-            await testBed.actions.clickSnapshotAt(0);
+            const detail = await clickSnapshotAt(0);
+            await within(detail).findByTestId('version');
           });
 
-          test('should set the correct title', () => {
-            const { find } = testBed;
-
-            expect(find('snapshotDetail.detailTitle').text()).toEqual(snapshot1.snapshot);
+          test('should set the correct title', async () => {
+            const detail = await screen.findByTestId('snapshotDetail');
+            expect(within(detail).getByTestId('detailTitle')).toHaveTextContent(snapshot1.snapshot);
           });
 
           test('should have a link to show the repository detail', async () => {
-            const { component, exists, find, router } = testBed;
-            expect(exists('snapshotDetail.repositoryLink')).toBe(true);
-
-            const { href } = find('snapshotDetail.repositoryLink').props();
-
-            await act(async () => {
-              router.navigateTo(href);
+            httpRequestsMockHelpers.setGetRepositoryResponse(REPOSITORY_NAME, {
+              repository: {
+                name: REPOSITORY_NAME,
+                type: 'fs',
+                settings: { location: '/tmp/es-backups' },
+              },
+              snapshots: { count: 0 },
             });
-            component.update();
 
-            // Make sure that we navigated to the repository list
-            // and opened the detail panel for the repository
-            expect(exists('snapshotList')).toBe(false);
-            expect(exists('repositoryList')).toBe(true);
-            expect(exists('repositoryDetail')).toBe(true);
-            expect(find('repositoryDetail.title').text()).toBe(REPOSITORY_NAME);
+            const detail = await screen.findByTestId('snapshotDetail');
+            const link = within(detail).getByTestId('repositoryLink');
+
+            const user = userEvent.setup();
+            await user.click(link);
+
+            await screen.findByTestId('repositoryList');
+            const repositoryDetail = await screen.findByTestId('repositoryDetail');
+            expect(within(repositoryDetail).getByTestId('title')).toHaveTextContent(
+              REPOSITORY_NAME
+            );
           });
 
-          test('should have a button to close the detail panel', () => {
-            const { find, exists } = testBed;
-            expect(exists('snapshotDetail.closeButton')).toBe(true);
+          test('should have a button to close the detail panel', async () => {
+            const detail = await screen.findByTestId('snapshotDetail');
+            const user = userEvent.setup();
+            await user.click(within(detail).getByTestId('closeButton'));
 
-            find('snapshotDetail.closeButton').simulate('click');
-
-            expect(exists('snapshotDetail')).toBe(false);
+            await waitFor(() => {
+              expect(screen.queryByTestId('snapshotDetail')).not.toBeInTheDocument();
+            });
           });
 
           test('should show feature states if include global state is enabled', async () => {
-            const { find } = testBed;
+            const detail = await screen.findByTestId('snapshotDetail');
 
-            // Assert against first snapshot shown in the table, which should have includeGlobalState and a featureState
-            expect(find('includeGlobalState.value').text()).toEqual('Yes');
-            expect(find('snapshotFeatureStatesSummary.featureStatesList').text()).toEqual('kibana');
+            const includeGlobalState = within(detail).getByTestId('includeGlobalState');
+            expect(within(includeGlobalState).getByTestId('value')).toHaveTextContent('Yes');
 
-            // Close the flyout
-            find('snapshotDetail.closeButton').simulate('click');
+            const featureStatesSummary = within(detail).getByTestId('snapshotFeatureStatesSummary');
+            expect(within(featureStatesSummary).getByTestId('featureStatesList')).toHaveTextContent(
+              'kibana'
+            );
 
-            // Replace the get snapshot details api call with the payload of the second snapshot which we're about to click
+            const user = userEvent.setup();
+            await user.click(within(detail).getByTestId('closeButton'));
+
             httpRequestsMockHelpers.setGetSnapshotResponse(
               snapshot2.repository,
               snapshot2.snapshot,
               snapshot2
             );
+            const detail2 = await clickSnapshotAt(1);
+            await within(detail2).findByTestId('version');
+            const includeGlobalState2 = within(detail2).getByTestId('includeGlobalState');
+            expect(within(includeGlobalState2).getByTestId('value')).toHaveTextContent('No');
 
-            // Now we will assert against the second result of the table which shouldnt have includeGlobalState or a featureState
-            await testBed.actions.clickSnapshotAt(1);
-
-            expect(find('includeGlobalState.value').text()).toEqual('No');
-            expect(find('snapshotFeatureStatesSummary.value').text()).toEqual('No');
+            const featureStatesSummary2 = within(detail2).getByTestId(
+              'snapshotFeatureStatesSummary'
+            );
+            expect(within(featureStatesSummary2).getByTestId('value')).toHaveTextContent('No');
           });
 
           describe('tabs', () => {
-            test('should have 2 tabs', () => {
-              const { find } = testBed;
-              const tabs = find('snapshotDetail.tab');
+            test('should have 2 tabs', async () => {
+              const detail = await screen.findByTestId('snapshotDetail');
+              const tabs = within(detail).getAllByTestId('tab');
 
-              expect(tabs.length).toBe(2);
-              expect(tabs.map((t) => t.text())).toEqual(['Summary', 'Failed indices (0)']);
+              expect(tabs).toHaveLength(2);
+              expect(tabs[0]).toHaveTextContent('Summary');
+              expect(tabs[1]).toHaveTextContent('Failed indices (0)');
             });
 
-            test('should have the default tab set on "Summary"', () => {
-              const { find } = testBed;
+            test('should have the default tab set on "Summary"', async () => {
+              const detail = await screen.findByTestId('snapshotDetail');
+              const tabs = within(detail).getAllByTestId('tab');
 
-              const tabs = find('snapshotDetail.tab');
-              const selectedTab = find('snapshotDetail').find('.euiTab-isSelected').last();
-
-              expect(selectedTab.instance()).toBe(tabs.at(0).instance());
+              expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
             });
 
             describe('summary tab', () => {
-              test('should set the correct summary values', () => {
-                const { version, uuid, indices } = snapshot1;
+              test('should set the correct summary values', async () => {
+                const detail = await screen.findByTestId('snapshotDetail');
 
-                const { find } = testBed;
+                const version = within(detail).getByTestId('version');
+                expect(within(version).getByTestId('value')).toHaveTextContent(snapshot1.version);
 
-                expect(find('snapshotDetail.version.value').text()).toBe(version);
-                expect(find('snapshotDetail.uuid.value').text()).toBe(uuid);
-                expect(find('snapshotDetail.state.value').text()).toBe('Complete');
-                expect(find('snapshotDetail.includeGlobalState.value').text()).toEqual('Yes');
-                expect(
-                  find('snapshotDetail.snapshotFeatureStatesSummary.featureStatesList').text()
-                ).toEqual('kibana');
-                expect(find('snapshotDetail.indices.title').text()).toBe(
-                  `Indices (${indices.length})`
+                const uuid = within(detail).getByTestId('uuid');
+                expect(within(uuid).getByTestId('value')).toHaveTextContent(snapshot1.uuid);
+
+                const state = within(detail).getByTestId('state');
+                expect(within(state).getByTestId('value')).toHaveTextContent('Complete');
+
+                const includeGlobalState = within(detail).getByTestId('includeGlobalState');
+                expect(within(includeGlobalState).getByTestId('value')).toHaveTextContent('Yes');
+
+                const featureStatesSummary = within(detail).getByTestId(
+                  'snapshotFeatureStatesSummary'
                 );
-                expect(find('snapshotDetail.indices.value').text()).toContain(
-                  indices.splice(0, 10).join('')
+                expect(
+                  within(featureStatesSummary).getByTestId('featureStatesList')
+                ).toHaveTextContent('kibana');
+
+                const indices = within(detail).getByTestId('indices');
+                expect(within(indices).getByTestId('title')).toHaveTextContent(
+                  `Indices (${snapshot1.indices.length})`
+                );
+                expect(within(indices).getByTestId('value')).toHaveTextContent(
+                  snapshot1.indices[0]
                 );
               });
 
               test('should indicate the different snapshot states', async () => {
-                const { find, actions } = testBed;
+                const mapStateToMessage: Record<string, string> = {
+                  [SNAPSHOT_STATE.IN_PROGRESS]: 'In progress',
+                  [SNAPSHOT_STATE.FAILED]: 'Failed',
+                  [SNAPSHOT_STATE.PARTIAL]: 'Partial',
+                  [SNAPSHOT_STATE.SUCCESS]: 'Complete',
+                };
 
-                // We need to click back and forth between the first table row (0) and  the second row (1)
-                // in order to trigger the HTTP request that loads the snapshot with the new state.
-                // This varible keeps track of it.
                 let itemIndexToClickOn = 1;
 
                 const setSnapshotStateAndUpdateDetail = async (state: string) => {
@@ -751,67 +843,57 @@ describe('<SnapshotRestoreHome />', () => {
                     itemIndexToClickOn === 0 ? snapshot1.snapshot : snapshot2.snapshot,
                     updatedSnapshot
                   );
-                  await actions.clickSnapshotAt(itemIndexToClickOn); // click another snapshot to trigger the HTTP call
+
+                  return await clickSnapshotAt(itemIndexToClickOn);
                 };
 
                 const expectMessageForSnapshotState = async (
                   state: string,
                   expectedMessage: string
                 ) => {
-                  await setSnapshotStateAndUpdateDetail(state);
-
-                  const stateMessage = find('snapshotDetail.state.value').text();
-                  try {
-                    expect(stateMessage).toContain(expectedMessage); // Messages may include the word "Info" to account for the rendered text coming from EuiIcon
-                  } catch {
-                    throw new Error(
-                      `Expected snapshot state message "${expectedMessage}" for state "${state}, but got "${stateMessage}".`
-                    );
-                  }
+                  const detail = await setSnapshotStateAndUpdateDetail(state);
+                  const stateRow = within(detail).getByTestId('state');
+                  expect(within(stateRow).getByTestId('value')).toHaveTextContent(expectedMessage);
 
                   itemIndexToClickOn = itemIndexToClickOn ? 0 : 1;
                 };
 
-                const mapStateToMessage = {
-                  [SNAPSHOT_STATE.IN_PROGRESS]: 'In progress',
-                  [SNAPSHOT_STATE.FAILED]: 'Failed',
-                  [SNAPSHOT_STATE.PARTIAL]: 'Partial',
-                  [SNAPSHOT_STATE.SUCCESS]: 'Complete',
-                };
-
-                // Call sequentially each state and verify that the message is ok
-                return Object.entries(mapStateToMessage).reduce(
-                  async (promise, [state, message]) => {
-                    return promise.then(async () => expectMessageForSnapshotState(state, message));
-                  },
-                  Promise.resolve()
-                );
+                for (const [state, msg] of Object.entries(mapStateToMessage)) {
+                  await expectMessageForSnapshotState(state, msg);
+                }
               });
             });
 
             describe('failed indices tab', () => {
-              test('should display a message when snapshot created successfully', () => {
-                const { find, actions } = testBed;
-                actions.selectSnapshotDetailTab('failedIndices');
+              test('should display a message when snapshot created successfully', async () => {
+                const detail = await screen.findByTestId('snapshotDetail');
+                const tabs = within(detail).getAllByTestId('tab');
 
-                expect(find('snapshotDetail.content').text()).toBe(
+                const user = userEvent.setup();
+                await user.click(tabs[1]);
+
+                expect(within(detail).getByTestId('content')).toHaveTextContent(
                   'All indices were stored successfully.'
                 );
               });
 
               test('should display a message when snapshot in progress ', async () => {
-                const { find, actions } = testBed;
-                const updatedSnapshot = { ...snapshot2, state: 'IN_PROGRESS' };
+                const updatedSnapshot = { ...snapshot2, state: SNAPSHOT_STATE.IN_PROGRESS };
                 httpRequestsMockHelpers.setGetSnapshotResponse(
                   snapshot2.repository,
                   snapshot2.snapshot,
                   updatedSnapshot
                 );
 
-                await actions.clickSnapshotAt(1); // click another snapshot to trigger the HTTP call
-                actions.selectSnapshotDetailTab('failedIndices');
+                const detail = await clickSnapshotAt(1);
+                const tabs = within(detail).getAllByTestId('tab');
 
-                expect(find('snapshotDetail.content').text()).toBe('Snapshot is being created.');
+                const user = userEvent.setup();
+                await user.click(tabs[1]);
+
+                expect(within(detail).getByTestId('content')).toHaveTextContent(
+                  'Snapshot is being created.'
+                );
               });
             });
           });
@@ -830,43 +912,46 @@ describe('<SnapshotRestoreHome />', () => {
             updatedSnapshot.snapshot,
             updatedSnapshot
           );
-          await testBed.actions.clickSnapshotAt(0);
-          testBed.actions.selectSnapshotDetailTab('failedIndices');
+
+          const table = await screen.findByTestId('snapshotTable');
+          const row = within(table).getAllByTestId('row')[0];
+          const user = userEvent.setup();
+          await user.click(within(row).getByTestId('snapshotLink'));
+
+          const detail = await screen.findByTestId('snapshotDetail');
+          const tabs = within(detail).getAllByTestId('tab');
+          await user.click(tabs[1]);
         });
 
-        test('should update the tab label', () => {
-          const { find } = testBed;
-          expect(find('snapshotDetail.tab').at(1).text()).toBe(
-            `Failed indices (${indexFailures.length})`
+        test('should update the tab label', async () => {
+          const detail = await screen.findByTestId('snapshotDetail');
+          const tabs = within(detail).getAllByTestId('tab');
+          expect(tabs[1]).toHaveTextContent(`Failed indices (${indexFailures.length})`);
+        });
+
+        test('should display the failed indices', async () => {
+          const detail = await screen.findByTestId('snapshotDetail');
+          const failures = within(detail).getAllByTestId('indexFailure');
+          expect(failures).toHaveLength(2);
+
+          const found = failures.map((node) => within(node).getByTestId('index').textContent ?? '');
+          expect(found).toEqual([failure1.index, failure2.index]);
+        });
+
+        test('should detail the failure for each index', async () => {
+          const detail = await screen.findByTestId('snapshotDetail');
+          const firstIndexFailure = within(detail).getAllByTestId('indexFailure')[0];
+
+          const failuresFound = within(firstIndexFailure).getAllByTestId('failure');
+          expect(failuresFound).toHaveLength(failure1.failures.length);
+
+          const failure0 = failuresFound[0];
+          expect(within(failure0).getByTestId('shard')).toHaveTextContent(
+            `Shard ${failure1.failures[0].shard_id}`
           );
-        });
-
-        test('should display the failed indices', () => {
-          const { find } = testBed;
-
-          const expected = indexFailures.map((failure) => failure.index);
-          const found = find('snapshotDetail.indexFailure.index').map((wrapper) => wrapper.text());
-
-          expect(find('snapshotDetail.indexFailure').length).toBe(2);
-          expect(found).toEqual(expected);
-        });
-
-        test('should detail the failure for each index', () => {
-          const { find } = testBed;
-          const index0Failure = find('snapshotDetail.indexFailure').at(0);
-          const failuresFound = findTestSubject(index0Failure, 'failure');
-
-          expect(failuresFound.length).toBe(failure1.failures.length);
-
-          const failure0 = failuresFound.at(0);
-          const shardText = findTestSubject(failure0, 'shard').text();
-          // EUI data-test-subj alteration to be updated (eui#3483)
-          // const reasonText = findTestSubject(failure0, 'reason').text();
-          const reasonText = failure0.find('code').at(0).text();
-          const [mockedFailure] = failure1.failures;
-
-          expect(shardText).toBe(`Shard ${mockedFailure.shard_id}`);
-          expect(reasonText).toBe(`${mockedFailure.status}: ${mockedFailure.reason}`);
+          expect(within(failure0).getByTestId('reason')).toHaveTextContent(
+            `${failure1.failures[0].status}: ${failure1.failures[0].reason}`
+          );
         });
       });
     });
@@ -880,25 +965,18 @@ describe('<SnapshotRestoreHome />', () => {
         httpRequestsMockHelpers.setLoadRepositoriesResponse({
           repositories: [{ name: REPOSITORY_NAME }, { name: 'repository_with_errors' }],
         });
+        httpRequestsMockHelpers.setLoadPoliciesResponse({ policies: [] });
 
-        testBed = await setup(httpSetup);
-
-        await act(async () => {
-          testBed.actions.selectTab('snapshots');
-        });
-
-        testBed.component.update();
+        renderHomePage();
+        await goToSnapshotsTab();
       });
 
       test('should show a generic error prompt if snapshots request fails while still showing the search bar', async () => {
-        const { find, exists } = testBed;
+        await screen.findByTestId('snapshotListSearch');
+        expect(screen.getByTestId('snapshotListSearch')).toBeInTheDocument();
 
-        // Check that the search bar is still present
-        expect(exists('snapshotListSearch')).toBe(true);
-
-        // Check that the error message is displayed
-        expect(exists('snapshotsLoadingError')).toBe(true);
-        expect(find('snapshotsLoadingError').text()).toContain('Error loading snapshots');
+        const error = await screen.findByTestId('snapshotsLoadingError');
+        expect(error).toHaveTextContent('Error loading snapshots');
       });
 
       test('should show a repository error prompt if snapshots request fails due to repository exception while still showing the search bar', async () => {
@@ -914,23 +992,17 @@ describe('<SnapshotRestoreHome />', () => {
         httpRequestsMockHelpers.setLoadRepositoriesResponse({
           repositories: [{ name: REPOSITORY_NAME }, { name: 'repository_with_errors' }],
         });
+        httpRequestsMockHelpers.setLoadPoliciesResponse({ policies: [] });
 
-        testBed = await setup(httpSetup);
+        await screen.findByTestId('snapshotListSearch');
+        expect(screen.getByTestId('snapshotListSearch')).toBeInTheDocument();
 
-        await act(async () => {
-          testBed.actions.selectTab('snapshots');
-        });
+        // Re-run the request to pick up the new mocked response.
+        const user = userEvent.setup();
+        await user.click(screen.getByTestId('reloadButton'));
 
-        testBed.component.update();
-
-        const { find, exists } = testBed;
-
-        // Check that the search bar is still present
-        expect(exists('snapshotListSearch')).toBe(true);
-
-        // Check that the error message is displayed
-        expect(exists('repositoryErrorsPrompt')).toBe(true);
-        expect(find('repositoryErrorsPrompt').text()).toContain('Some repositories contain errors');
+        const prompt = await screen.findByTestId('repositoryErrorsPrompt');
+        expect(prompt).toHaveTextContent('Some repositories contain errors');
       });
     });
   });

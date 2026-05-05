@@ -24,9 +24,7 @@ export function AlertSearchBar({
 }) {
   const {
     data: { query },
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = useKibana<ClientPluginsStart>().services;
 
   const dataView = useSyntheticsDataView();
@@ -55,7 +53,7 @@ export function AlertSearchBar({
     >
       <QueryStringInput
         appName="synthetics"
-        iconType="search"
+        iconType="magnify"
         placeholder={PLACEHOLDER}
         indexPatterns={[dataView]}
         onChange={(queryN) => {

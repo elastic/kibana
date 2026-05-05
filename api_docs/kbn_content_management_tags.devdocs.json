@@ -10,7 +10,15 @@
         "tags": [],
         "label": "ContentManagementTagsKibanaProvider",
         "description": [
-          "\nKibana-integrated context provider for content management tags services.\n\nThis provider adapts Kibana's saved objects tagging plugin API to the content management\ntags interface. It automatically handles tag list retrieval, search query parsing with\nEUI Query syntax support, and error reporting via toast notifications.\n\nUse this provider in Kibana plugins that need tag functionality. For standalone usage\nwithout Kibana dependencies, use {@link ContentManagementTagsProvider} instead.\n"
+          "\nKibana-integrated context provider for content management tags services.\n\nThis provider adapts Kibana's saved objects tagging plugin API to the content management\ntags interface. It automatically handles tag list retrieval, search query parsing with\nEUI Query syntax support, and error reporting via toast notifications.\n\nUse this provider in Kibana plugins that need tag functionality. For standalone usage\nwithout Kibana dependencies, use ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.ContentManagementTagsProvider",
+            "text": "ContentManagementTagsProvider"
+          },
+          " instead.\n"
         ],
         "signature": [
           "(props: React.PropsWithChildren<",
@@ -24,6 +32,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+        "lineNumber": 236,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,7 +56,10 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+            "lineNumber": 238,
+            "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "PropsWithChildren",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -61,12 +74,22 @@
         "tags": [],
         "label": "ContentManagementTagsProvider",
         "description": [
-          "\nContext provider for content management tags services.\n\nUse this provider when you want to supply custom tag services directly,\nwithout integrating with Kibana's saved objects tagging plugin.\n\nFor Kibana plugin integration, use {@link ContentManagementTagsKibanaProvider} instead.\n"
+          "\nContext provider for content management tags services.\n\nUse this provider when you want to supply custom tag services directly,\nwithout integrating with Kibana's saved objects tagging plugin.\n\nFor Kibana plugin integration, use ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.ContentManagementTagsKibanaProvider",
+            "text": "ContentManagementTagsKibanaProvider"
+          },
+          " instead.\n"
         ],
         "signature": [
           "(props: React.PropsWithChildren<Services>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+        "lineNumber": 203,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -81,7 +104,10 @@
               "React.PropsWithChildren<Services>"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+            "lineNumber": 204,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PropsWithChildren",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -110,6 +136,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -130,7 +158,10 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+            "lineNumber": 61,
+            "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "TagBadgeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -145,7 +176,47 @@
         "tags": [],
         "label": "TagList",
         "description": [
-          "\nConnected component that renders a list of tags by resolving tag IDs to tag objects.\n\nThis component uses the {@link useTagServices | useServices} hook to access the tag list\nfrom context and resolves the provided tag IDs to full {@link Tag} objects. The resolved\ntags are then rendered using {@link TagListComponent}.\n\nMust be used within a {@link ContentManagementTagsProvider} or {@link ContentManagementTagsKibanaProvider}.\nIf no provider is present, the component renders nothing.\n"
+          "\nConnected component that renders a list of tags by resolving tag IDs to tag objects.\n\nThis component uses the ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.useTagServices",
+            "text": "useServices"
+          },
+          " hook to access the tag list\nfrom context and resolves the provided tag IDs to full ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.Tag",
+            "text": "Tag"
+          },
+          " objects. The resolved\ntags are then rendered using ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagListComponent",
+            "text": "TagListComponent"
+          },
+          ".\n\nMust be used within a ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.ContentManagementTagsProvider",
+            "text": "ContentManagementTagsProvider"
+          },
+          " or ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.ContentManagementTagsKibanaProvider",
+            "text": "ContentManagementTagsKibanaProvider"
+          },
+          ".\nIf no provider is present, the component renders nothing.\n"
         ],
         "signature": [
           "(props: ",
@@ -159,6 +230,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.tsx",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -179,13 +252,24 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.tsx",
+            "lineNumber": 46,
+            "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "TagListProps",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "The rendered tag list, or an empty {@link TagListComponent } if services are unavailable."
+          "The rendered tag list, or an empty ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagListComponent",
+            "text": "TagListComponent"
+          },
+          " if services are unavailable."
         ],
         "initialIsOpen": false
       },
@@ -196,7 +280,23 @@
         "tags": [],
         "label": "TagListComponent",
         "description": [
-          "\nPure component that renders a horizontal list of tag badges.\n\nThis is a presentational component that accepts pre-resolved tag objects.\nFor a connected version that resolves tag IDs via context, use {@link TagList}.\n\nThe tags are rendered as {@link TagBadge} components in a flexbox layout\nwith wrapping enabled for responsive display.\n"
+          "\nPure component that renders a horizontal list of tag badges.\n\nThis is a presentational component that accepts pre-resolved tag objects.\nFor a connected version that resolves tag IDs via context, use ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagList",
+            "text": "TagList"
+          },
+          ".\n\nThe tags are rendered as ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagBadge",
+            "text": "TagBadge"
+          },
+          " components in a flexbox layout\nwith wrapping enabled for responsive display.\n"
         ],
         "signature": [
           "(props: ",
@@ -210,6 +310,8 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -230,7 +332,10 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+            "lineNumber": 49,
+            "columnNumber": 61,
             "deprecated": false,
+            "docsReferencedTypeName": "TagListComponentProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -253,6 +358,8 @@
           "() => Services | undefined"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+        "lineNumber": 317,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -289,6 +396,8 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+        "lineNumber": 80,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -310,7 +419,10 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseTagsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -329,9 +441,19 @@
         "tags": [],
         "label": "ContentManagementTagsKibanaDependencies",
         "description": [
-          "\nDependencies required from Kibana plugins to enable content management tags functionality.\n\nThis interface defines the contract between the content management tags package and\nthe Kibana plugin ecosystem. Consumers should provide these dependencies when using\n{@link ContentManagementTagsKibanaProvider}.\n"
+          "\nDependencies required from Kibana plugins to enable content management tags functionality.\n\nThis interface defines the contract between the content management tags package and\nthe Kibana plugin ecosystem. Consumers should provide these dependencies when using\n",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.ContentManagementTagsKibanaProvider",
+            "text": "ContentManagementTagsKibanaProvider"
+          },
+          ".\n"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -356,6 +478,8 @@
               ", \"getTagList\" | \"parseSearchQuery\" | \"getSearchBarFilter\" | \"getTagIdFromName\">; }"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -374,6 +498,8 @@
               ", \"addError\">; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -390,6 +516,8 @@
           "\nRepresents the result of parsing a search query that may contain tag filters.\n\nUsed to separate the text search component from tag-based filtering when processing\nuser search input in the format `tag:tagName` or `-tag:tagName`.\n"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -403,6 +531,8 @@
               "The search query text with tag clauses removed."
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -419,6 +549,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -435,6 +567,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -451,6 +585,8 @@
           "\nRepresents a content tag with display properties for categorizing and filtering saved objects."
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,6 +603,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -480,6 +618,8 @@
               "The display name of the tag shown in the UI."
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -493,6 +633,8 @@
               "A brief description of the tag's purpose."
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -506,6 +648,8 @@
               "The hex color code used for visual representation (e.g., badge background)."
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -519,6 +663,8 @@
               "Indicates whether the tag is system-managed (true) or user-created (false)."
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -532,9 +678,19 @@
         "tags": [],
         "label": "TagBadgeProps",
         "description": [
-          "\nProps for the {@link TagBadge} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagBadge",
+            "text": "TagBadge"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -557,6 +713,8 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -581,6 +739,8 @@
               ", withModifierKey: boolean) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -603,7 +763,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+                "lineNumber": 29,
+                "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tag",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -620,6 +783,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+                "lineNumber": 29,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -637,9 +802,19 @@
         "tags": [],
         "label": "TagListComponentProps",
         "description": [
-          "\nProps for the {@link TagListComponent}."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagListComponent",
+            "text": "TagListComponent"
+          },
+          "."
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -663,6 +838,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -673,7 +850,15 @@
             "tags": [],
             "label": "onClick",
             "description": [
-              "\nOptional click handler passed to each {@link TagBadge}. Called with the clicked tag and modifier key state."
+              "\nOptional click handler passed to each ",
+              {
+                "pluginId": "@kbn/content-management-tags",
+                "scope": "public",
+                "docId": "kibKbnContentManagementTagsPluginApi",
+                "section": "def-public.TagBadge",
+                "text": "TagBadge"
+              },
+              ". Called with the clicked tag and modifier key state."
             ],
             "signature": [
               "((tag: ",
@@ -687,6 +872,8 @@
               ", withModifierKey: boolean) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -709,7 +896,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+                "lineNumber": 27,
+                "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tag",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -726,6 +916,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+                "lineNumber": 27,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -743,7 +935,15 @@
         "tags": [],
         "label": "TagListProps",
         "description": [
-          "\nProps for the {@link TagList} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.TagList",
+            "text": "TagList"
+          },
+          " component."
         ],
         "signature": [
           {
@@ -764,6 +964,8 @@
           ", \"onClick\">"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -780,6 +982,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -793,7 +997,15 @@
         "tags": [],
         "label": "UseTagsParams",
         "description": [
-          "\nParameters for the {@link useTags} hook.\n"
+          "\nParameters for the ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.useTags",
+            "text": "useTags"
+          },
+          " hook.\n"
         ],
         "signature": [
           {
@@ -806,6 +1018,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -822,6 +1036,8 @@
               "Query"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -840,6 +1056,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -856,7 +1074,10 @@
                   "Query"
                 ],
                 "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+                "lineNumber": 26,
+                "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "Query",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -876,6 +1097,8 @@
               "T[]"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -889,9 +1112,19 @@
         "tags": [],
         "label": "UseTagsReturn",
         "description": [
-          "\nReturn value from the {@link useTags} hook."
+          "\nReturn value from the ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.useTags",
+            "text": "useTags"
+          },
+          " hook."
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -916,6 +1149,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -938,7 +1173,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+                "lineNumber": 39,
+                "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tag",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -966,6 +1204,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -988,7 +1228,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+                "lineNumber": 44,
+                "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tag",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1008,6 +1251,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1026,6 +1271,8 @@
               "{ [tagId: string]: string[]; }"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1042,12 +1289,22 @@
         "tags": [],
         "label": "ContentManagementTagsServices",
         "description": [
-          "\nPublic type alias for the content management tags services interface.\n\nUse this type when implementing custom service providers or when type-checking\nservice objects passed to {@link ContentManagementTagsProvider}."
+          "\nPublic type alias for the content management tags services interface.\n\nUse this type when implementing custom service providers or when type-checking\nservice objects passed to ",
+          {
+            "pluginId": "@kbn/content-management-tags",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTagsPluginApi",
+            "section": "def-public.ContentManagementTagsProvider",
+            "text": "ContentManagementTagsProvider"
+          },
+          "."
         ],
         "signature": [
           "Services"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

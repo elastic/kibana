@@ -162,7 +162,7 @@ describe('Authentication Routes', () => {
         getClusterDetails: jest.fn(),
         onboardCluster: jest.fn(),
         onboardClusterWithKeyGeneration: jest.fn(),
-        updateClusterServices: jest.fn(),
+        updateCluster: jest.fn(),
         deleteCluster: jest.fn(),
       } as any;
 

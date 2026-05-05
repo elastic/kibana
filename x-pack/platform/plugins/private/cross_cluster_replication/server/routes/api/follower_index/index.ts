@@ -13,6 +13,7 @@ import { registerPauseRoute } from './register_pause_route';
 import { registerResumeRoute } from './register_resume_route';
 import { registerUnfollowRoute } from './register_unfollow_route';
 import { registerUpdateRoute } from './register_update_route';
+import { registerGetFollowerInfoRoute } from './register_get_follower_info';
 
 export function registerFollowerIndexRoutes(dependencies: RouteDependencies) {
   registerCreateRoute(dependencies);
@@ -22,4 +23,5 @@ export function registerFollowerIndexRoutes(dependencies: RouteDependencies) {
   registerResumeRoute(dependencies);
   registerUnfollowRoute(dependencies);
   registerUpdateRoute(dependencies);
+  registerGetFollowerInfoRoute(dependencies);
 }

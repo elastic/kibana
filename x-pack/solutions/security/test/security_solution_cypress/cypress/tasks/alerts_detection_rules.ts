@@ -7,6 +7,7 @@
 
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import type {
+  ADD_ELASTIC_RULES_TABLE,
   RULES_MONITORING_TABLE,
   RULES_UPDATES_TABLE,
 } from '../screens/alerts_detection_rules';
@@ -16,6 +17,7 @@ import {
   COLLAPSED_ACTION_BTN,
   CONFIRM_DELETE_RULE_BTN,
   CONFIRM_DUPLICATE_RULE,
+  CONFIRM_BULK_MANUAL_RULE_RUN_BTN,
   CUSTOM_RULES_BTN,
   DELETE_RULE_ACTION_BTN,
   DISABLED_RULES_BTN,
@@ -61,12 +63,14 @@ import {
   TOASTER_BODY,
   TOASTER_CLOSE_ICON,
   TOASTER_ERROR_BTN,
+  CONFIRM_BULK_GAP_FILL_BTN,
 } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import {
   MODIFIED_PREBUILT_RULE_BADGE,
   MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE,
   POPOVER_ACTIONS_TRIGGER_BUTTON,
+  RULE_FILL_ALL_GAPS_BUTTON,
   RULE_NAME_HEADER,
 } from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
@@ -77,11 +81,17 @@ import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
 import { setKibanaSetting } from './api_calls/kibana_advanced_settings';
 import { REVERT_MODAL_CONFIRMATION_BTN } from '../screens/rule_updates';
+import { BULK_FILL_RULE_GAPS_BTN, BULK_MANUAL_RULE_RUN_BTN } from '../screens/rules_bulk_actions';
+import { assertSuccessToast, assertToast } from '../screens/common/toast';
 
 export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 
 export const enableRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click();
+};
+
+export const assertEnableRuleToggleDisabled = (rulePosition: number) => {
+  cy.get(RULE_SWITCH).eq(rulePosition).should('be.disabled');
 };
 
 export const editFirstRule = () => {
@@ -152,6 +162,30 @@ export const manualRuleRunFromDetailsPage = () => {
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).click();
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).should('not.exist');
   cy.get(MODAL_CONFIRMATION_BTN).click();
+};
+
+export const bulkGapFillFromDetailsPage = () => {
+  cy.get(RULE_FILL_ALL_GAPS_BUTTON).click();
+  cy.get(MODAL_CONFIRMATION_BTN).click();
+  cy.get(MODAL_CONFIRMATION_BTN).should('not.exist');
+  assertToast('No gap fills were scheduled', 'No gaps were detected for the selected time range.');
+};
+
+export const bulkManualRuleRunFromRulesTablePage = (ruleCount: number) => {
+  cy.get(BULK_MANUAL_RULE_RUN_BTN).click();
+  cy.get(CONFIRM_BULK_MANUAL_RULE_RUN_BTN).click();
+  cy.get(CONFIRM_BULK_MANUAL_RULE_RUN_BTN).should('not.exist');
+  assertSuccessToast(
+    'Rules scheduled',
+    `Successfully scheduled manual rule run for ${ruleCount} rule`
+  );
+};
+
+export const bulkGapFillFromRulesTablePage = () => {
+  cy.get(BULK_FILL_RULE_GAPS_BTN).click();
+  cy.get(CONFIRM_BULK_GAP_FILL_BTN).click();
+  cy.get(CONFIRM_BULK_GAP_FILL_BTN).should('not.exist');
+  assertToast('No gap fills were scheduled', 'No gaps were detected for the selected time range.');
 };
 
 export const revertRuleFromDetailsPage = () => {
@@ -376,11 +410,24 @@ export const expectToContainRule = (
   tableSelector:
     | typeof RULES_MANAGEMENT_TABLE
     | typeof RULES_MONITORING_TABLE
-    | typeof RULES_UPDATES_TABLE,
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
   ruleName: string
 ) => {
   cy.log(`Expecting rules table to contain '${ruleName}'`);
   cy.get(tableSelector).find(RULES_ROW).should('include.text', ruleName);
+};
+
+export const expectVisibleRulesCount = (
+  tableSelector:
+    | typeof RULES_MANAGEMENT_TABLE
+    | typeof RULES_MONITORING_TABLE
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
+  expectedCount: number
+) => {
+  cy.log(`Expecting rules table page to contain ${expectedCount} rules`);
+  cy.get(tableSelector).find(RULES_ROW).should('have.length', expectedCount);
 };
 
 export const expectModifiedRuleBadgeToBeDisplayed = () => {
@@ -424,6 +471,28 @@ export const expectRulesInTable = (
   for (const ruleName of ruleNames) {
     expectToContainRule(tableSelector, ruleName);
   }
+};
+
+export const expectFirstRuleInTable = (
+  tableSelector:
+    | typeof RULES_MANAGEMENT_TABLE
+    | typeof RULES_MONITORING_TABLE
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
+  ruleName: string
+): void => {
+  cy.get(tableSelector).find(RULES_ROW).first().should('contain.text', ruleName);
+};
+
+export const expectLastRuleInTable = (
+  tableSelector:
+    | typeof RULES_MANAGEMENT_TABLE
+    | typeof RULES_MONITORING_TABLE
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
+  ruleName: string
+): void => {
+  cy.get(tableSelector).find(RULES_ROW).last().should('contain.text', ruleName);
 };
 
 export const expectToContainModifiedBadge = (ruleName: string) => {

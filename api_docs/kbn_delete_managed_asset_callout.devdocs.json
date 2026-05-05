@@ -38,6 +38,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/delete_managed_assets_callout/src/callout.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +60,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/delete_managed_assets_callout/src/callout.tsx",
+            "lineNumber": 20,
+            "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "DeleteManagedAssetsCalloutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -87,6 +92,8 @@
           "EuiCallOutProps"
         ],
         "path": "src/platform/packages/shared/kbn-management/delete_managed_assets_callout/src/callout.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -98,6 +105,8 @@
             "label": "assetName",
             "description": [],
             "path": "src/platform/packages/shared/kbn-management/delete_managed_assets_callout/src/callout.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -112,6 +121,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/delete_managed_assets_callout/src/callout.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

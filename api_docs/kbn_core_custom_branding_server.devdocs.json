@@ -20,6 +20,8 @@
         "label": "CustomBrandingSetup",
         "description": [],
         "path": "src/core/packages/custom-branding/server/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,6 +38,8 @@
               ") => void"
             ],
             "path": "src/core/packages/custom-branding/server/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -50,7 +54,10 @@
                   "CustomBrandingFetchFn"
                 ],
                 "path": "src/core/packages/custom-branding/server/types.ts",
+                "lineNumber": 25,
+                "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomBrandingFetchFn",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -72,6 +79,8 @@
               ">"
             ],
             "path": "src/core/packages/custom-branding/server/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -87,7 +96,10 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/custom-branding/server/types.ts",
+                "lineNumber": 27,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -99,6 +111,8 @@
                 "label": "options",
                 "description": [],
                 "path": "src/core/packages/custom-branding/server/types.ts",
+                "lineNumber": 28,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -113,6 +127,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/core/packages/custom-branding/server/types.ts",
+                    "lineNumber": 28,
+                    "columnNumber": 16,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -132,6 +148,8 @@
         "label": "CustomBrandingStart",
         "description": [],
         "path": "src/core/packages/custom-branding/server/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -163,6 +181,8 @@
           ">"
         ],
         "path": "src/core/packages/custom-branding/server/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -179,7 +199,10 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/core/packages/custom-branding/server/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           },
           {
@@ -190,6 +213,8 @@
             "label": "unauthenticated",
             "description": [],
             "path": "src/core/packages/custom-branding/server/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

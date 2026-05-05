@@ -6,11 +6,15 @@
  */
 
 import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { GroupedStatsResult } from '@kbn/slo-schema';
 import type { ServiceHealthStatus } from './service_health_status';
+
+export type SloStatus = keyof GroupedStatsResult['summary'];
 
 export interface ServiceListItem {
   serviceName: string;
   healthStatus?: ServiceHealthStatus;
+  anomalyScore?: number;
   transactionType?: string;
   agentName?: AgentName;
   throughput?: number;
@@ -19,15 +23,19 @@ export interface ServiceListItem {
   environments?: string[];
   alertsCount?: number;
   overflowCount?: number | null;
+  sloStatus?: SloStatus;
+  sloCount?: number;
 }
 
 export enum ServiceInventoryFieldName {
   ServiceName = 'serviceName',
   HealthStatus = 'healthStatus',
+  AnomalyScore = 'anomalyScore',
   Environments = 'environments',
   TransactionType = 'transactionType',
   Throughput = 'throughput',
   Latency = 'latency',
   TransactionErrorRate = 'transactionErrorRate',
   AlertsCount = 'alertsCount',
+  SloStatus = 'sloStatus',
 }

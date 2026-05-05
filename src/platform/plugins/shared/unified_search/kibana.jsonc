@@ -13,9 +13,9 @@
   "plugin": {
     "id": "unifiedSearch",
     "browser": true,
-    "server": true,
+    "server": false,
     "configPath": [
-      "unifiedSearch"
+      "unifiedSearchDeprecatedSettings"
     ],
     "requiredPlugins": [
       "dataViews",
@@ -23,7 +23,8 @@
       "uiActions",
       "screenshotMode",
       "savedObjectsManagement",
-      "cps"
+      "cps",
+      "kql"
     ],
     "optionalPlugins": [
       "usageCollection"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionType as ConnectorType } from '@kbn/actions-plugin/server/types';
+import type { ClassicActionType as ConnectorType } from '@kbn/actions-plugin/server/types';
 import type { ActionTypeExecutorOptions as ConnectorTypeExecutorOptions } from '@kbn/actions-plugin/server/types';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import type {

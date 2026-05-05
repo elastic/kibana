@@ -40,6 +40,8 @@
           "<Args, Result>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/use_async/index.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -56,13 +58,23 @@
               "(...args: Args) => Promise<Result>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/use_async/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "An {@link Task } containing the task's current state along with a\nstart callback"
+          "An ",
+          {
+            "pluginId": "@kbn/securitysolution-hook-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionHookUtilsPluginApi",
+            "section": "def-common.Task",
+            "text": "Task"
+          },
+          " containing the task's current state along with a\nstart callback"
         ],
         "initialIsOpen": false
       },
@@ -79,11 +91,21 @@
           "() => GetIsMounted"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/use_is_mounted/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
         "returnComment": [
-          "A {@link GetIsMounted } getter function returning whether the component is currently mounted"
+          "A ",
+          {
+            "pluginId": "@kbn/securitysolution-hook-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionHookUtilsPluginApi",
+            "section": "def-common.GetIsMounted",
+            "text": "GetIsMounted"
+          },
+          " getter function returning whether the component is currently mounted"
         ],
         "initialIsOpen": false
       },
@@ -110,6 +132,8 @@
           "<Args, Result>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,13 +152,23 @@
               "<Result>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "An {@link Async } containing the underlying task's state along with a start callback"
+          "An ",
+          {
+            "pluginId": "@kbn/securitysolution-hook-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionHookUtilsPluginApi",
+            "section": "def-common.Async",
+            "text": "Async"
+          },
+          " containing the underlying task's state along with a start callback"
         ],
         "initialIsOpen": false
       },
@@ -159,6 +193,8 @@
           "<Args>) => Result"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -175,6 +211,8 @@
               "(args: Args) => Result"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -207,6 +245,8 @@
           "<Args, Result>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -218,6 +258,8 @@
             "label": "loading",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -232,6 +274,8 @@
               "unknown"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -246,6 +290,8 @@
               "Result | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -260,6 +306,8 @@
               "(...args: Args) => void"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -274,7 +322,10 @@
                   "Args"
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/types.ts",
+                "lineNumber": 16,
+                "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Args",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -298,6 +349,8 @@
           "{ type: \"setResult\"; result: T; } | { type: \"setError\"; error: unknown; } | { type: \"load\"; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -313,6 +366,8 @@
           "Omit<Args, \"signal\"> & Partial<SignalArgs>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

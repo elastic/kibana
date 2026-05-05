@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
 const testIndexName = `index-test-${Math.random()}`;
 
-test.describe('Home page', { tag: ['@ess'] }, () => {
+test.describe('Home page', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsIndexManagementUser();
     await pageObjects.indexManagement.goto();

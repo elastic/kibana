@@ -26,6 +26,8 @@
         "label": "RRule",
         "description": [],
         "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -54,7 +58,10 @@
                   "ConstructorOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+                "lineNumber": 37,
+                "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConstructorOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -72,6 +79,8 @@
               "(start: Date, end: Date) => Date[]"
             ],
             "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -86,7 +95,10 @@
                   "Date"
                 ],
                 "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+                "lineNumber": 110,
+                "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Date",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -101,7 +113,10 @@
                   "Date"
                 ],
                 "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+                "lineNumber": 110,
+                "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "Date",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -119,6 +134,8 @@
               "(dt: Date) => Date"
             ],
             "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -133,7 +150,10 @@
                   "Date"
                 ],
                 "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+                "lineNumber": 115,
+                "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "Date",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -151,6 +171,8 @@
               "(dt: Date) => Date | null"
             ],
             "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -165,7 +187,10 @@
                   "Date"
                 ],
                 "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+                "lineNumber": 120,
+                "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "Date",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -183,6 +208,8 @@
               "(limit?: number) => AllResult"
             ],
             "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -197,6 +224,8 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+                "lineNumber": 125,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -217,6 +246,8 @@
               ") => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -231,7 +262,10 @@
                   "ConstructorOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+                "lineNumber": 143,
+                "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConstructorOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -253,6 +287,8 @@
         "label": "Frequency",
         "description": [],
         "path": "src/platform/packages/shared/kbn-rrule/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -265,6 +301,8 @@
         "label": "Weekday",
         "description": [],
         "path": "src/platform/packages/shared/kbn-rrule/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -292,6 +330,8 @@
           " | undefined; interval?: number | undefined; until?: Date | null | undefined; count?: number | undefined; tzid: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-rrule/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -307,6 +347,8 @@
           "\"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\""
         ],
         "path": "src/platform/packages/shared/kbn-rrule/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

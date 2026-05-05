@@ -30,6 +30,8 @@
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,6 +83,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,12 +100,21 @@
         "tags": [],
         "label": "isRequestAbortedError",
         "description": [
-          "\nChecks if the provided `error` is an {@link errors.RequestAbortedError | elasticsearch request aborted error}"
+          "\nChecks if the provided `error` is an ",
+          {
+            "pluginId": "@kbn/es-errors",
+            "scope": "common",
+            "docId": "kibKbnEsErrorsPluginApi",
+            "section": "def-common.errors.RequestAbortedError",
+            "text": "elasticsearch request aborted error"
+          }
         ],
         "signature": [
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -112,6 +129,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+            "lineNumber": 46,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -127,12 +146,21 @@
         "tags": [],
         "label": "isResponseError",
         "description": [
-          "\nChecks if the provided `error` is an {@link errors.ResponseError | elasticsearch response error}"
+          "\nChecks if the provided `error` is an ",
+          {
+            "pluginId": "@kbn/es-errors",
+            "scope": "common",
+            "docId": "kibKbnEsErrorsPluginApi",
+            "section": "def-common.errors.ResponseError",
+            "text": "elasticsearch response error"
+          }
         ],
         "signature": [
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -147,6 +175,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+            "lineNumber": 24,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -162,12 +192,21 @@
         "tags": [],
         "label": "isUnauthorizedError",
         "description": [
-          "\nChecks if the provided `error` is an {@link UnauthorizedError | elasticsearch unauthorized error}"
+          "\nChecks if the provided `error` is an ",
+          {
+            "pluginId": "@kbn/es-errors",
+            "scope": "common",
+            "docId": "kibKbnEsErrorsPluginApi",
+            "section": "def-common.UnauthorizedError",
+            "text": "elasticsearch unauthorized error"
+          }
         ],
         "signature": [
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -182,6 +221,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+            "lineNumber": 38,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -202,6 +243,8 @@
           "\nDetail information about an elasticsearch error."
         ],
         "path": "src/platform/packages/shared/kbn-es-errors/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -216,6 +259,8 @@
               "{ type: string; reason?: string | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-errors/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -239,6 +284,8 @@
           " & { statusCode: 401; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

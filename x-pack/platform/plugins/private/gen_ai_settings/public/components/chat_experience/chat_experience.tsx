@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { EuiSpacer, EuiLink } from '@elastic/eui';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
-import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal/ai_agent_confirmation_modal';
-import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -68,11 +66,9 @@ const consumeSkipStepReachedOnce = (
 export const ChatExperience: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
   const {
-    services: { settings, notifications, docLinks, application, featureFlags, analytics },
+    services: { settings, notifications, docLinks, application, analytics },
   } = useKibana();
 
-  const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
-  const isAiAgentsEnabled = getIsAiAgentsEnabled(featureFlags);
   const field = fields[AI_CHAT_EXPERIENCE_TYPE];
   const canEditAdvancedSettings = Boolean(application.capabilities.advancedSettings?.save);
   const savedValue = isAIChatExperience(field?.savedValue) ? field.savedValue : undefined;
@@ -81,7 +77,7 @@ export const ChatExperience: React.FC = () => {
   useEffect(() => {
     if (hasTrackedInitialStep.current) return;
     if (!field) return;
-    // don’t track the opt-in step if the default experience is already Agent
+    // don't track the opt-in step if the default experience is already Agent
     if (!savedValue && field?.defaultValue === 'agent') return;
     if (savedValue && savedValue !== 'classic') return;
 
@@ -95,42 +91,6 @@ export const ChatExperience: React.FC = () => {
     });
     hasTrackedInitialStep.current = true;
   }, [analytics, field, savedValue]);
-
-  // Show confirmation modal for AI Agents selection
-  const wrappedHandleFieldChange: typeof handleFieldChange = useCallback(
-    (id, change) => {
-      if (id === AI_CHAT_EXPERIENCE_TYPE) {
-        const newValue = isAIChatExperience(change?.unsavedValue) ? change.unsavedValue : undefined;
-        if (newValue === AIChatExperience.Agent) {
-          reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
-            action: 'confirmation_shown',
-            source: TELEMETRY_SOURCE,
-          });
-        }
-
-        // Handle modal display logic
-        if (newValue === AIChatExperience.Agent) {
-          setConfirmModalOpen(true);
-        }
-      }
-      handleFieldChange(id, change);
-    },
-    [handleFieldChange, analytics]
-  );
-
-  const handleConfirmAgent = useCallback(() => {
-    setConfirmModalOpen(false);
-  }, []);
-
-  const handleCancelAgent = useCallback(() => {
-    setConfirmModalOpen(false);
-    reportTelemetryEvent(analytics, AGENT_BUILDER_EVENT_TYPES.OptInAction, {
-      action: 'canceled',
-      source: TELEMETRY_SOURCE,
-    });
-    // Clear the unsaved change by passing undefined
-    handleFieldChange(AI_CHAT_EXPERIENCE_TYPE, undefined);
-  }, [handleFieldChange, analytics]);
 
   const description = useMemo(
     () => (
@@ -156,7 +116,7 @@ export const ChatExperience: React.FC = () => {
     [docLinks.links.agentBuilder.learnMore]
   );
 
-  if (!isAiAgentsEnabled || !field) {
+  if (!field) {
     return null;
   }
 
@@ -176,18 +136,10 @@ export const ChatExperience: React.FC = () => {
         <FieldRow
           field={fieldWithDescription}
           isSavingEnabled={canEditAdvancedSettings}
-          onFieldChange={wrappedHandleFieldChange}
+          onFieldChange={handleFieldChange}
           unsavedChange={unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]}
         />
       </FieldRowProvider>
-
-      {isConfirmModalOpen && (
-        <AIAgentConfirmationModal
-          onConfirm={handleConfirmAgent}
-          onCancel={handleCancelAgent}
-          docLinks={docLinks.links}
-        />
-      )}
     </>
   );
 };

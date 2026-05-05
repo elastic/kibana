@@ -43,6 +43,8 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,6 +59,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -68,6 +72,8 @@
                 "label": "deps",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+                "lineNumber": 35,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -82,6 +88,8 @@
                       "HttpSetup"
                     ],
                     "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+                    "lineNumber": 36,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -109,6 +117,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -123,6 +133,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+                "lineNumber": 40,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -157,6 +169,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -177,7 +191,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+                "lineNumber": 50,
+                "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChangeAccesModeParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -203,6 +220,8 @@
               ") => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -223,7 +242,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+                "lineNumber": 66,
+                "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "CanManageContentControlParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -249,6 +271,8 @@
               ") => boolean"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -269,7 +293,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+                "lineNumber": 81,
+                "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckUserAccessControlParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -289,6 +316,8 @@
               "> | undefined) => boolean"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -305,7 +334,10 @@
                   "> | undefined"
                 ],
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+                "lineNumber": 101,
+                "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -323,6 +355,8 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -344,6 +378,8 @@
           "({ onChangeAccessMode, getActiveSpace, getCurrentUser, accessControlClient, contentTypeId, accessControl, createdBy, }: Props) => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/components/access_mode_container.tsx",
+        "lineNumber": 83,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -358,7 +394,10 @@
               "Props"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/components/access_mode_container.tsx",
+            "lineNumber": 83,
+            "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -376,6 +415,8 @@
         "label": "AccessControlClientPublic",
         "description": [],
         "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -398,6 +439,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -412,6 +455,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+                "lineNumber": 22,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -446,6 +491,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -466,7 +513,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+                "lineNumber": 23,
+                "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChangeAccesModeParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -492,6 +542,8 @@
               ") => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -512,7 +564,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+                "lineNumber": 27,
+                "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "CanManageContentControlParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -538,6 +593,8 @@
               ") => boolean"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -558,7 +615,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+                "lineNumber": 28,
+                "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckUserAccessControlParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -578,6 +638,8 @@
               "> | undefined) => boolean"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -594,7 +656,10 @@
                   "> | undefined"
                 ],
                 "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+                "lineNumber": 29,
+                "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -612,6 +677,8 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/access_control_client.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -645,6 +712,8 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -656,6 +725,8 @@
             "label": "contentTypeId",
             "description": [],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -670,6 +741,8 @@
         "label": "ChangeAccesModeParameters",
         "description": [],
         "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -684,6 +757,8 @@
               "{ type: string; id: string; }[]"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -698,6 +773,8 @@
               "\"default\" | \"write_restricted\""
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -712,6 +789,8 @@
         "label": "ChangeAccessModeResponse",
         "description": [],
         "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -726,6 +805,8 @@
               "SavedObjectsChangeAccessControlResponse"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -740,6 +821,8 @@
         "label": "CheckGlobalPrivilegeResponse",
         "description": [],
         "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -751,6 +834,8 @@
             "label": "isGloballyAuthorized",
             "description": [],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -765,6 +850,8 @@
         "label": "CheckUserAccessControlParameters",
         "description": [],
         "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -781,6 +868,8 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -795,6 +884,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -809,6 +900,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

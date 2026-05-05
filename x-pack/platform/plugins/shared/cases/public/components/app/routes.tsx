@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import React, { lazy, Suspense, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -23,14 +24,27 @@ import {
   getCaseViewWithCommentPath,
   useAllCasesNavigation,
   useCaseViewNavigation,
+  getCasesConfigureCreateTemplatePath,
+  getCasesConfigureEditTemplatePath,
 } from '../../common/navigation';
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 import type { CaseViewProps } from '../case_view/types';
 import type { CreateCaseFormProps } from '../create/form';
+import type { CreateTemplatePageProps } from '../templates_v2/pages/create_template/page';
+import type { EditTemplatePageProps } from '../templates_v2/pages/edit_template/page';
+import { KibanaServices } from '../../common/lib/kibana/services';
 
-const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
+const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view'));
+
+const CreateTemplateLazy: FC<CreateTemplatePageProps> = lazy(
+  () => import('../templates_v2/pages/create_template/page')
+);
+
+const EditTemplateLazy: FC<EditTemplatePageProps> = lazy(
+  () => import('../templates_v2/pages/edit_template/page')
+);
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   actionsNavigation,
@@ -41,17 +55,19 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   refreshRef,
   timelineIntegration,
   renderAlertsTable,
-  renderEventsTable,
 }) => {
   const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();
+
   useReadonlyHeader();
 
   const onCreateCaseSuccess: CreateCaseFormProps['onSuccess'] = useCallback(
     async ({ id }) => navigateToCaseView({ detailName: id }),
     [navigateToCaseView]
   );
+  const config = KibanaServices.getConfig();
+  const isTemplatesEnabled = config?.templates?.enabled ?? false;
 
   return (
     <>
@@ -73,6 +89,30 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           )}
         </Route>
 
+        {isTemplatesEnabled && (
+          <Route exact path={getCasesConfigureCreateTemplatePath(basePath)}>
+            {permissions.manageTemplates ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <CreateTemplateLazy />
+              </Suspense>
+            ) : (
+              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+            )}
+          </Route>
+        )}
+
+        {isTemplatesEnabled && (
+          <Route exact path={getCasesConfigureEditTemplatePath(basePath)}>
+            {permissions.manageTemplates ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <EditTemplateLazy />
+              </Suspense>
+            ) : (
+              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+            )}
+          </Route>
+        )}
+
         <Route path={getCasesConfigurePath(basePath)}>
           {permissions.settings ? (
             <ConfigureCases />
@@ -93,7 +133,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
               refreshRef={refreshRef}
               timelineIntegration={timelineIntegration}
               renderAlertsTable={renderAlertsTable}
-              renderEventsTable={renderEventsTable}
             />
           </Suspense>
         </Route>

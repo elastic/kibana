@@ -1,0 +1,303 @@
+{
+  "id": "alertingVTwo",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "alertingVTwo",
+        "id": "def-public.AlertingV2PublicStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertingV2PublicStart",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting_v2/public/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-public.AlertingV2PublicStart.DynamicRuleFormFlyout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "DynamicRuleFormFlyout",
+            "description": [],
+            "signature": [
+              "React.ComponentClass<",
+              {
+                "pluginId": "alertingVTwo",
+                "scope": "public",
+                "docId": "kibAlertingVTwoPluginApi",
+                "section": "def-public.CreateRuleFormFlyoutProps",
+                "text": "CreateRuleFormFlyoutProps"
+              },
+              ", any> | React.FunctionComponent<",
+              {
+                "pluginId": "alertingVTwo",
+                "scope": "public",
+                "docId": "kibAlertingVTwoPluginApi",
+                "section": "def-public.CreateRuleFormFlyoutProps",
+                "text": "CreateRuleFormFlyoutProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alertingVTwo",
+        "id": "def-public.CreateRuleFormFlyoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateRuleFormFlyoutProps",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-public.CreateRuleFormFlyoutProps.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-public.CreateRuleFormFlyoutProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-public.CreateRuleFormFlyoutProps.push",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "push",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-public.CreateRuleFormFlyoutProps.includeYaml",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeYaml",
+            "description": [
+              "Whether to include the Form/YAML edit mode toggle (default: true)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "alertingVTwo",
+        "id": "def-public.module",
+        "type": "Object",
+        "tags": [],
+        "label": "module",
+        "description": [],
+        "signature": [
+          "ContainerModule"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting_v2/public/index.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "alertingVTwo",
+        "id": "def-server.AlertingServerStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertingServerStart",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-server.AlertingServerStart.getRulesClientWithRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "getRulesClientWithRequest",
+            "description": [],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>) => Promise<",
+              {
+                "pluginId": "alertingVTwo",
+                "scope": "server",
+                "docId": "kibAlertingVTwoPluginApi",
+                "section": "def-server.RulesClientApi",
+                "text": "RulesClientApi"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alertingVTwo",
+                "id": "def-server.AlertingServerStart.getRulesClientWithRequest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
+                "lineNumber": 35,
+                "columnNumber": 29,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "alertingVTwo",
+        "id": "def-server.PluginConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "PluginConfig",
+        "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; readonly invalidateApiKeysTask: Readonly<{} & { interval: string; removalDelay: string; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting_v2/server/config.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alertingVTwo",
+        "id": "def-server.RulesClientApi",
+        "type": "Type",
+        "tags": [],
+        "label": "RulesClientApi",
+        "description": [],
+        "signature": [
+          "{ bulkDeleteRules: (params: ",
+          "BulkRulesParams",
+          ") => Promise<{ rules: { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }[]; errors: { id: string; error: { message: string; statusCode: number; }; }[]; truncated?: boolean | undefined; totalMatched?: number | undefined; }>; bulkEnableRules: (params: ",
+          "BulkRulesParams",
+          ") => Promise<{ rules: { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }[]; errors: { id: string; error: { message: string; statusCode: number; }; }[]; truncated?: boolean | undefined; totalMatched?: number | undefined; }>; bulkDisableRules: (params: ",
+          "BulkRulesParams",
+          ") => Promise<{ rules: { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }[]; errors: { id: string; error: { message: string; statusCode: number; }; }[]; truncated?: boolean | undefined; totalMatched?: number | undefined; }>; disableRule: ({ id }: { id: string; }) => Promise<{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }>; enableRule: ({ id }: { id: string; }) => Promise<{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }>; getTags: () => Promise<string[]>; createRule: (params: ",
+          "CreateRuleParams",
+          ") => Promise<{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }>; updateRule: ({ id, data, }: { id: string; data: { metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: { every?: string | undefined; lookback?: string | undefined; } | null | undefined; evaluation?: { query?: { base?: string | undefined; } | undefined; } | undefined; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | null | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | null | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | null | undefined; artifacts?: { id: string; type: string; value: string; }[] | null | undefined; enabled?: boolean | undefined; }; }) => Promise<{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }>; getRule: ({ id }: { id: string; }) => Promise<{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }>; getRules: (ids: string[]) => Promise<{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }[]>; deleteRule: ({ id }: { id: string; }) => Promise<void>; findRules: (params?: ",
+          "FindRulesParams",
+          ") => Promise<{ items: { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }[]; total: number; page: number; perPage: number; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "alertingVTwo",
+        "id": "def-server.module",
+        "type": "Object",
+        "tags": [],
+        "label": "module",
+        "description": [],
+        "signature": [
+          "ContainerModule"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting_v2/server/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

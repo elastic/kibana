@@ -6,9 +6,9 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
-import { ADD_SLO_ALERTS_ACTION_ID } from '../embeddable/slo/alerts/constants';
+import { ADD_SLO_ALERTS_ACTION_ID } from '../../common/embeddables/alerts/constants';
 import type { SLOPublicPluginsStart } from '..';
 import type { SLORepositoryClient } from '../types';
 import { ADD_SLO_ERROR_BUDGET_ACTION_ID } from '../embeddable/slo/error_budget/constants';

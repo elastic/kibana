@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type { DashboardMigrationsDataClient } from '../../data/dashboard_migrations_data_client';
 import { DashboardResourceRetriever } from './dashboard_resource_retriever';
 
-export interface DashboardMigrationsRetrieverClients {
+export interface DashboardMigrationsRetrieverDeps {
   data: DashboardMigrationsDataClient;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -20,8 +22,11 @@ export interface DashboardMigrationsRetrieverClients {
 export class DashboardMigrationsRetriever {
   public readonly resources: DashboardResourceRetriever;
 
-  constructor(migrationId: string, clients: DashboardMigrationsRetrieverClients) {
-    this.resources = new DashboardResourceRetriever(migrationId, clients.data.resources);
+  constructor(migrationId: string, deps: DashboardMigrationsRetrieverDeps) {
+    this.resources = new DashboardResourceRetriever(migrationId, {
+      experimentalFeatures: deps.experimentalFeatures,
+      resourcesDataClient: deps.data.resources,
+    });
   }
 
   public async initialize() {

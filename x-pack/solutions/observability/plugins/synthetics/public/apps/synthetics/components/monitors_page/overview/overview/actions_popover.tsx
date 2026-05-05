@@ -20,7 +20,7 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';
 import { useCreateSLO } from '../../hooks/use_create_slo';
 import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
 import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
@@ -39,7 +39,7 @@ import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locato
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import { useAddToDashboard } from '../../../common/components/add_to_dashboard';
-import { selectOverviewState } from '../../../../state';
+import { selectOverviewView } from '../../../../state';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -75,6 +75,7 @@ interface Props {
   iconHasPanel?: boolean;
   iconSize?: 's' | 'xs';
   locationId: string;
+  renderButton?: (onClick: () => void) => NonNullable<React.ReactNode>;
 }
 
 const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
@@ -107,16 +108,18 @@ export function ActionsPopover({
   iconHasPanel = true,
   iconSize = 's',
   locationId,
+  renderButton,
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
   const locationName = useLocationName(monitor);
 
   const { http } = useKibana().services;
+  const locationLabel = monitor.locations[0]?.label ?? '';
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: locationId ?? monitor.locationId,
+    locationId: locationId || monitor.locations[0]?.id || '',
     spaces: monitor.spaces,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });
@@ -154,7 +157,7 @@ export function ActionsPopover({
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
 
-  const { view } = useSelector(selectOverviewState);
+  const view = useSelector(selectOverviewView);
 
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
@@ -173,10 +176,10 @@ export function ActionsPopover({
       if (locationName) {
         dispatch(
           setFlyoutConfig({
+            locationId,
             configId: monitor.configId,
             location: locationName,
             id: monitor.configId,
-            locationId: monitor.locationId,
           })
         );
         setIsPopoverOpen(false);
@@ -188,15 +191,15 @@ export function ActionsPopover({
     type: SYNTHETICS_MONITORS_EMBEDDABLE,
     embeddableInput: {
       filters: {
-        monitorIds: [{ label: monitor.name, value: monitor.configId }],
+        monitor_ids: [{ label: monitor.name, value: monitor.configId }],
         tags: [],
-        locations: [{ label: monitor.locationLabel, value: monitor.locationId }],
-        monitorTypes: [],
+        locations: [{ label: locationLabel, value: locationId }],
+        monitor_types: [],
         projects: [],
       },
       view,
     },
-    documentTitle: `${monitor.name} - ${monitor.locationLabel}`,
+    documentTitle: `${monitor.name} - ${locationLabel}`,
     objectType: i18n.translate('xpack.synthetics.overview.actions.addToDashboard.objectTypeLabel', {
       defaultMessage: 'Monitor Overview',
     }),
@@ -224,7 +227,7 @@ export function ActionsPopover({
           {runTestManually}
         </NoPermissionsTooltip>
       ),
-      icon: 'beaker',
+      icon: 'flask',
       disabled: testInProgress || !canUsePublicLocations || !isServiceAllowed,
       onClick: () => {
         dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
@@ -260,7 +263,7 @@ export function ActionsPopover({
           {CREATE_SLO}
         </NoPermissionsTooltip>
       ),
-      icon: 'visGauge',
+      icon: 'chartGauge',
       disabled: !canEditSynthetics || !isServiceAllowed,
       onClick: () => {
         setIsPopoverOpen(false);
@@ -277,7 +280,7 @@ export function ActionsPopover({
           {enableLabel}
         </NoPermissionsTooltip>
       ),
-      icon: 'invert',
+      icon: 'contrast',
       disabled: !canEditSynthetics || !canUsePublicLocations,
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
@@ -334,18 +337,22 @@ export function ActionsPopover({
       <Container boxShadow={euiShadow} position={position}>
         <EuiPopover
           button={
-            <IconPanel hasPanel={iconHasPanel}>
-              <EuiButtonIcon
-                data-test-subj="syntheticsActionsPopoverButton"
-                aria-label={openActionsMenuAria}
-                iconType="boxesHorizontal"
-                color="primary"
-                size={iconSize}
-                display="empty"
-                onClick={() => setIsPopoverOpen((b: boolean) => !b)}
-                title={openActionsMenuAria}
-              />
-            </IconPanel>
+            renderButton ? (
+              renderButton(() => setIsPopoverOpen((b: boolean) => !b))
+            ) : (
+              <IconPanel hasPanel={iconHasPanel}>
+                <EuiButtonIcon
+                  data-test-subj="syntheticsActionsPopoverButton"
+                  aria-label={openActionsMenuAria}
+                  iconType="boxesVertical"
+                  color="primary"
+                  size={iconSize}
+                  display="empty"
+                  onClick={() => setIsPopoverOpen((b: boolean) => !b)}
+                  title={openActionsMenuAria}
+                />
+              </IconPanel>
+            )
           }
           color="lightestShade"
           isOpen={isPopoverOpen}

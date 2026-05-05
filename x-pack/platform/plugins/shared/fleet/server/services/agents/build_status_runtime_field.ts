@@ -20,6 +20,16 @@ export type InactivityTimeouts = Awaited<
   ReturnType<(typeof agentPolicyService)['getInactivityTimeouts']>
 >;
 
+type StatusRuntimeMapping = NonNullable<estypes.MappingRuntimeFields> & {
+  status: {
+    type: 'keyword';
+    script: {
+      lang: 'painless';
+      source: string;
+    };
+  };
+};
+
 let inactivityTimeoutsDisabled = false;
 const _buildInactiveCondition = (opts: {
   now: number;
@@ -131,6 +141,11 @@ function _buildSource(
     ) {
       emit('offline');
     } else if (
+      ${field('last_checkin_status')}.size() > 0 &&
+      ${field('last_checkin_status')}.value.toLowerCase() == 'disconnected'
+    ) {
+      emit('offline');
+    } else if (
       ${field('policy_revision_idx')}.size() == 0 || (
         ${field('upgrade_started_at')}.size() > 0 &&
         ${field('upgraded_at')}.size() == 0
@@ -162,7 +177,7 @@ export function _buildStatusRuntimeField(opts: {
   maxAgentPoliciesWithInactivityTimeout?: number;
   pathPrefix?: string;
   logger?: Logger;
-}): NonNullable<estypes.SearchRequest['runtime_mappings']> {
+}): StatusRuntimeMapping {
   const {
     inactivityTimeouts,
     maxAgentPoliciesWithInactivityTimeout = DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,

@@ -29,10 +29,11 @@
       "inference",
       "logsDataAccess",
       "spaces",
-      "llmTasks"
+      "llmTasks",
+      "searchInferenceEndpoints"
     ],
-    "optionalPlugins": ["cloud", "onechat"],
-    "requiredBundles": ["kibanaReact", "esqlDataGrid"],
+    "optionalPlugins": ["cloud", "agentBuilder"],
+    "requiredBundles": ["kibanaReact", "esqlDataGrid", "esUiShared"],
     "extraPublicDirs": []
   }
 }

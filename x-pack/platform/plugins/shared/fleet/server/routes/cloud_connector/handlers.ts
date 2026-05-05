@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { buildPackagePolicyFilterExcludingHiddenPackages } from '../../../common/constants/cloud_connector';
 import { cloudConnectorService, packagePolicyService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services/app_context';
@@ -171,7 +172,9 @@ export const deleteCloudConnectorHandler: FleetRequestHandler<
   TypeOf<typeof DeleteCloudConnectorRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
+  const coreContext = await context.core;
   const { internalSoClient } = fleetContext;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const cloudConnectorId = request.params.cloudConnectorId;
   const force = request.query.force || false;
   const logger = appContextService
@@ -180,7 +183,12 @@ export const deleteCloudConnectorHandler: FleetRequestHandler<
 
   try {
     logger.info(`Deleting cloud connector ${cloudConnectorId} (force: ${force})`);
-    const result = await cloudConnectorService.delete(internalSoClient, cloudConnectorId, force);
+    const result = await cloudConnectorService.delete(
+      internalSoClient,
+      esClient,
+      cloudConnectorId,
+      force
+    );
     logger.info(`Successfully deleted cloud connector ${cloudConnectorId}`);
     const body: DeleteCloudConnectorResponse = {
       id: result.id,
@@ -219,15 +227,19 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
     // First, verify the cloud connector exists
     await cloudConnectorService.getById(internalSoClient, cloudConnectorId);
 
-    // Query package policies that use this cloud connector with pagination
-    logger.debug(
-      `Querying package policies with kuery: ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`
+    // Build a kuery that fetches policies for this connector while excluding
+    // internal/hidden packages (e.g. verifier_otel) at the query level so that
+    // result.total is accurate across all pages.
+    const kuery = buildPackagePolicyFilterExcludingHiddenPackages(
+      `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`
     );
+
+    logger.debug(`Querying package policies with kuery: ${kuery}`);
 
     const result = await packagePolicyService.list(internalSoClient, {
       page,
       perPage,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`,
+      kuery,
     });
 
     logger.debug(`Found ${result?.total || 0} total package policies using cloud connector`);

@@ -10,9 +10,11 @@
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { v4 as generateUuid } from 'uuid';
+import YAML from 'yaml';
 import {
   selectWorkflowDefinition,
   selectWorkflowGraph,
+  selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useSpaceId } from '../../../hooks/use_space_id';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
@@ -27,11 +29,24 @@ export function useContextOverrideData() {
   // Redux selectors, use only current workflow data, not execution data
   const workflowGraph = useSelector(selectWorkflowGraph);
   const workflowDefinition = useSelector(selectWorkflowDefinition);
+  const yamlString = useSelector(selectYamlString);
 
   const getContextOverrideData = useCallback(
     (stepId: string): ContextOverrideData | null => {
       if (!workflowGraph || !workflowDefinition || !spaceId) {
         return null;
+      }
+
+      // Try to get inputs from workflowDefinition first, fallback to parsing YAML directly
+      let inputsDefinition = workflowDefinition.inputs;
+      if (!inputsDefinition && yamlString) {
+        try {
+          const yamlDoc = YAML.parseDocument(yamlString);
+          const parsed = yamlDoc.toJSON() as Record<string, unknown>;
+          inputsDefinition = parsed.inputs as typeof inputsDefinition;
+        } catch (error) {
+          // Ignore YAML parsing errors
+        }
       }
 
       const stepSubGraph = workflowGraph.getStepGraph(stepId);
@@ -43,9 +58,10 @@ export function useContextOverrideData() {
           enabled: workflowDefinition.enabled || true,
           spaceId,
         },
+        inputsDefinition,
       });
     },
-    [workflowGraph, workflowDefinition, spaceId]
+    [workflowGraph, workflowDefinition, spaceId, yamlString]
   );
 
   return getContextOverrideData;

@@ -346,6 +346,10 @@ export default function (providerContext: FtrProviderContext) {
           installed_kibana: sortBy(
             [
               {
+                id: 'fleet-all_assets-inactivity-monitoring',
+                type: 'alerting_rule_template',
+              },
+              {
                 id: 'sample_alerting_rule_template',
                 type: 'alerting_rule_template',
               },
@@ -658,6 +662,10 @@ export default function (providerContext: FtrProviderContext) {
             )
           ).to.not.be(undefined);
         });
+
+        const installedAsDependency = res.attributes.installed_as_dependency;
+        delete res.attributes.installed_as_dependency;
+        expect(Boolean(installedAsDependency)).eql(false);
 
         expect({
           ...res.attributes,

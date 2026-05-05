@@ -26,6 +26,8 @@
           ") => CloudDefendLinkItem<TId>"
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +44,10 @@
               "CloudDefendPage"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CloudDefendPage",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -60,6 +65,8 @@
         "label": "CloudDefendSecuritySolutionContext",
         "description": [],
         "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -76,6 +83,8 @@
               "() => React.ComponentType<{ children: React.ReactNode; }>"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -102,6 +111,8 @@
               "; state?: Record<string, string | undefined> | undefined; }>"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -126,6 +137,8 @@
           "\"/cloud_defend\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -143,6 +156,8 @@
           "\"cloud_defend-policies\" | \"kubernetes_security-dashboard\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -159,6 +174,8 @@
         "\ncloud_defend plugin types"
       ],
       "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -173,6 +190,8 @@
       "label": "CloudDefendPluginStart",
       "description": [],
       "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
+      "lineNumber": 27,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -191,6 +210,8 @@
             ">"
           ],
           "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
+          "lineNumber": 28,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -216,6 +237,8 @@
       "label": "CloudDefendPluginSetup",
       "description": [],
       "path": "x-pack/solutions/security/plugins/cloud_defend/server/types.ts",
+      "lineNumber": 34,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -230,6 +253,8 @@
       "label": "CloudDefendPluginStart",
       "description": [],
       "path": "x-pack/solutions/security/plugins/cloud_defend/server/types.ts",
+      "lineNumber": 36,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -249,6 +274,8 @@
         "label": "CloudDefendPolicy",
         "description": [],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -269,6 +296,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -291,6 +320,8 @@
               ", \"id\" | \"name\"> & { agents: number; }"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -305,6 +336,8 @@
         "label": "IndexDetails",
         "description": [],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -316,6 +349,8 @@
             "label": "index",
             "description": [],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -330,6 +365,8 @@
               "\"empty\" | \"not-empty\" | \"unprivileged\""
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -344,6 +381,8 @@
         "label": "Response",
         "description": [],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+        "lineNumber": 110,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -358,6 +397,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -372,6 +413,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -393,6 +436,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -404,9 +449,11 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"process\" | \"file\""
+              "\"file\" | \"process\""
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -421,6 +468,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -435,6 +484,8 @@
         "label": "Selector",
         "description": [],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -446,6 +497,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -460,6 +513,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -474,6 +529,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -488,6 +545,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -502,6 +561,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -516,6 +577,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -530,6 +593,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -544,6 +609,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -558,6 +625,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -572,6 +641,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -586,6 +657,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -600,6 +673,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -614,6 +689,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -628,6 +705,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -642,6 +721,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -656,6 +737,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -667,9 +750,11 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"process\" | \"file\""
+              "\"file\" | \"process\""
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -684,6 +769,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -712,6 +799,8 @@
           ", \"id\" | \"name\"> & { agents: number; }"
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -727,6 +816,8 @@
           "CloudDefendSetupInstalledStatus | CloudDefendSetupNotInstalledStatus"
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -739,9 +830,11 @@
         "label": "CloudDefendStatusCode",
         "description": [],
         "signature": [
-          "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\""
+          "\"indexed\" | \"unprivileged\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -757,6 +850,8 @@
           "\"empty\" | \"not-empty\" | \"unprivileged\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -772,6 +867,8 @@
           "{ readonly policy_name?: string | undefined; readonly per_page: number; readonly page: number; readonly sort_field: \"package_policy.id\" | \"package_policy.name\" | \"package_policy.policy_id\" | \"package_policy.namespace\" | \"package_policy.updated_at\" | \"package_policy.updated_by\" | \"package_policy.created_at\" | \"package_policy.created_by\" | \"package_policy.package.name\" | \"package_policy.package.title\"; readonly sort_order: \"asc\" | \"desc\"; }"
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/schemas/v1.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -787,6 +884,8 @@
           "\"log\" | \"alert\" | \"block\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -802,6 +901,8 @@
           "\"operation\" | \"containerImageFullName\" | \"containerImageName\" | \"containerImageTag\" | \"kubernetesClusterId\" | \"kubernetesClusterName\" | \"kubernetesNamespace\" | \"kubernetesPodLabel\" | \"kubernetesPodName\" | \"targetFilePath\" | \"ignoreVolumeFiles\" | \"ignoreVolumeMounts\" | \"processExecutable\" | \"processName\" | \"sessionLeaderInteractive\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -816,9 +917,11 @@
           "\ncloud_defend/control types"
         ],
         "signature": [
-          "\"process\" | \"file\""
+          "\"file\" | \"process\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -883,6 +986,8 @@
           "<string | undefined>; }>"
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/schemas/v1.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

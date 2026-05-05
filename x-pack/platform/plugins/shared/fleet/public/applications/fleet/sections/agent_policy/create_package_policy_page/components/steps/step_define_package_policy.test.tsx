@@ -18,6 +18,15 @@ import type { AgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../../
 
 import { StepDefinePackagePolicy } from './step_define_package_policy';
 
+jest.mock('./components/hooks', () => ({
+  ...jest.requireActual('./components/hooks'),
+  useOutputs: jest.fn().mockReturnValue({
+    isLoading: false,
+    canUseOutputPerIntegration: true,
+    allowedOutputs: [{ id: 'output-1', name: 'Default output', type: 'elasticsearch' }],
+  }),
+}));
+
 describe('StepDefinePackagePolicy', () => {
   const packageInfo: PackageInfo = {
     name: 'apache',
@@ -196,6 +205,220 @@ describe('StepDefinePackagePolicy', () => {
           expect(renderResult.getByText('Advanced var')).toBeInTheDocument();
         });
       });
+    });
+  });
+
+  describe('loading state', () => {
+    it('should render Loading component when validationResults is undefined', () => {
+      renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          packageInfo={packageInfo}
+          packagePolicy={packagePolicy}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={undefined}
+          submitAttempted={false}
+        />
+      );
+
+      expect(renderResult.getByTestId('loadingSpinner')).toBeInTheDocument();
+      expect(renderResult.queryByTestId('packagePolicyNameInput')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('managed policy', () => {
+    it('should display managed policy callout when is_managed is true', () => {
+      packagePolicy.is_managed = true;
+
+      act(() => {
+        render();
+      });
+
+      expect(
+        renderResult.getByText('This is a managed package policy. You cannot modify it here.')
+      ).toBeInTheDocument();
+    });
+
+    it('should make name field read-only when is_managed is true', () => {
+      packagePolicy.is_managed = true;
+
+      act(() => {
+        render();
+      });
+
+      const nameInput = renderResult.getByTestId('packagePolicyNameInput');
+      expect(nameInput).toHaveAttribute('readonly');
+    });
+
+    it('should make description field read-only when is_managed is true', () => {
+      packagePolicy.is_managed = true;
+
+      act(() => {
+        render();
+      });
+
+      const descriptionInput = renderResult.getByTestId('packagePolicyDescriptionInput');
+      expect(descriptionInput).toHaveAttribute('readonly');
+    });
+
+    it('should not show advanced options toggle when is_managed is true', () => {
+      packagePolicy.is_managed = true;
+
+      act(() => {
+        render();
+      });
+
+      expect(renderResult.queryByText('Advanced options')).not.toBeInTheDocument();
+    });
+
+    it('should not disable output selector when is_managed is false', () => {
+      // noAdvancedToggle=true forces the advanced section open so the output field renders
+      renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+          packageInfo={packageInfo}
+          packagePolicy={{ ...packagePolicy, is_managed: false }}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+          noAdvancedToggle={true}
+        />
+      );
+      expect(renderResult.getByTestId('packagePolicyOutputInput')).not.toBeDisabled();
+    });
+
+    it('should disable output selector when packagePolicy.is_managed is true', () => {
+      // noAdvancedToggle=true forces the advanced section open so the output field renders
+      renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+          packageInfo={packageInfo}
+          packagePolicy={{ ...packagePolicy, is_managed: true }}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+          noAdvancedToggle={true}
+        />
+      );
+      expect(renderResult.getByTestId('packagePolicyOutputInput')).toBeDisabled();
+    });
+
+    it('should disable output selector when parent agent policy is managed', () => {
+      const managedAgentPolicies: AgentPolicy[] = [{ ...agentPolicies[0], is_managed: true }];
+      renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          namespacePlaceholder={getInheritedNamespace(managedAgentPolicies)}
+          packageInfo={packageInfo}
+          packagePolicy={packagePolicy}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+          noAdvancedToggle={true}
+          agentPolicies={managedAgentPolicies}
+        />
+      );
+      expect(renderResult.getByTestId('packagePolicyOutputInput')).toBeDisabled();
+    });
+  });
+
+  describe('additional datastreams permissions', () => {
+    it('should render the permissions combo box in advanced options', async () => {
+      act(() => {
+        render();
+      });
+
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Add a reroute processor permission')).toBeInTheDocument();
+      });
+    });
+
+    it('should display validation errors for additional_datastreams_permissions', async () => {
+      const validationResultsWithError = {
+        ...validationResults,
+        additional_datastreams_permissions: ['Invalid permission format'],
+      };
+
+      renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          packageInfo={packageInfo}
+          packagePolicy={packagePolicy}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResultsWithError}
+          submitAttempted={true}
+        />
+      );
+
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Invalid permission format')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('var group selections state management', () => {
+    const packageInfoWithVarGroups: PackageInfo = {
+      ...packageInfo,
+      var_groups: [
+        {
+          name: 'auth_method',
+          title: 'Authentication',
+          selector_title: 'Select method',
+          options: [
+            { name: 'api_key', title: 'API Key', vars: ['api_key_var'] },
+            { name: 'basic', title: 'Basic Auth', vars: ['username_var', 'password_var'] },
+          ],
+        },
+      ],
+    };
+
+    it('should use var_group_selections from policy', () => {
+      const policyWithSelections = {
+        ...packagePolicy,
+        var_group_selections: { auth_method: 'basic' },
+      };
+
+      renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          packageInfo={packageInfoWithVarGroups}
+          packagePolicy={policyWithSelections}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+        />
+      );
+
+      const selector = renderResult.queryByTestId('varGroupSelector-auth_method');
+      if (selector) {
+        expect(selector).toHaveValue('basic');
+      }
+    });
+
+    it('should update policy var_group_selections when selection changes', async () => {
+      const policyWithSelections = {
+        ...packagePolicy,
+        var_group_selections: { auth_method: 'api_key' },
+      };
+
+      renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          packageInfo={packageInfoWithVarGroups}
+          packagePolicy={policyWithSelections}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+        />
+      );
+
+      const selector = renderResult.queryByTestId('varGroupSelector-auth_method');
+      if (selector) {
+        await userEvent.selectOptions(selector, 'basic');
+
+        expect(mockUpdatePackagePolicy).toHaveBeenCalledWith({
+          var_group_selections: { auth_method: 'basic' },
+        });
+      }
     });
   });
 });

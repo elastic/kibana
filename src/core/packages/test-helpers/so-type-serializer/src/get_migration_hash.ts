@@ -63,7 +63,7 @@ export const getTypeHashes = (soType: SavedObjectsType): SavedObjectTypeMigratio
 };
 
 const getTypeGlobalHash = (migInfo: SavedObjectTypeMigrationInfo): string => {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha1');
   const globalData = [
     migInfo.name,
     migInfo.namespaceType,
@@ -77,13 +77,13 @@ const getTypeGlobalHash = (migInfo: SavedObjectTypeMigrationInfo): string => {
 };
 
 const getTypeMappingsHash = (migInfo: SavedObjectTypeMigrationInfo): string => {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha1');
   const mappingData = JSON.stringify(migInfo.mappings, Object.keys(migInfo.mappings).sort());
   return hash.update(mappingData).digest('hex');
 };
 
 const getTypeSchemasHash = (migInfo: SavedObjectTypeMigrationInfo): string => {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha1');
   const schemaData = migInfo.schemaVersions.join('|');
   return hash.update(schemaData).digest('hex');
 };
@@ -93,7 +93,7 @@ const getMigrationsHashes = (soType: SavedObjectsType): string[] => {
     typeof soType.migrations === 'function' ? soType.migrations() : soType.migrations!;
 
   return Object.entries(migrations).map(([version, migration]) => {
-    const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+    const hash = createHash('sha1');
     const migrationData =
       typeof migration === 'function'
         ? migration.toString()

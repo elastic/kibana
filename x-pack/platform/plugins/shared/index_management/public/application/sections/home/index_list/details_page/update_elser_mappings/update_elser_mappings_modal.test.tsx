@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as mappingsContext from '../../../../../components/mappings_editor/mappings_state_context';
@@ -15,13 +14,18 @@ import {
   prepareFieldsForEisUpdate,
   isElserOnMlNodeSemanticField,
 } from '../../../../../components/mappings_editor/lib/utils';
-import {
-  UpdateElserMappingsModal,
-  type UpdateElserMappingsModalProps,
-} from './update_elser_mappings_modal';
 import * as apiService from '../../../../../services/api';
-import { notificationService } from '../../../../../services/notification';
-import type { NormalizedFields } from '../../../../../components/mappings_editor/types';
+import type { NormalizedFields, State } from '../../../../../components/mappings_editor/types';
+import { UpdateElserMappingsModal } from './update_elser_mappings_modal';
+import { AppContextProvider } from '../../../../../app_context';
+import type { AppDependencies } from '../../../../../app_context';
+import { NotificationService } from '../../../../../services/notification';
+import {
+  createMappingViewFieldsFixture,
+  defaultDenormalizedMappings,
+  refetchMapping,
+  setIsModalOpen,
+} from './update_elser_mappings_modal.test_helpers';
 
 jest.mock('../../../../../components/mappings_editor/lib/utils', () => ({
   deNormalize: jest.fn(),
@@ -49,75 +53,52 @@ jest.mock('../../../../../services', () => ({
   },
 }));
 
-jest.mock('../../../../../services/notification', () => ({
-  notificationService: { showSuccessToast: jest.fn(), showDangerToast: jest.fn() },
-}));
-
 const deNormalizeMock = jest.mocked(deNormalize);
 const prepareFieldsForEisUpdateMock = jest.mocked(prepareFieldsForEisUpdate);
 const isElserOnMlNodeSemanticFieldMock = jest.mocked(isElserOnMlNodeSemanticField);
 const mappingsContextMock = jest.mocked(mappingsContext);
-const notificationServiceMock = jest.mocked(notificationService);
-const updateIndexMappingsMock = apiService.updateIndexMappings as jest.MockedFunction<
-  typeof apiService.updateIndexMappings
->;
+const updateIndexMappingsMock = jest.mocked(apiService.updateIndexMappings);
 
-const setIsModalOpen = jest.fn();
-const refetchMapping = jest.fn();
+let notificationService: NotificationService;
+let showSuccessToastSpy: jest.SpyInstance;
+let showDangerToastSpy: jest.SpyInstance;
 
-const renderEisUpdateCallout = (props?: Partial<UpdateElserMappingsModalProps>) => {
+const renderEisUpdateCallout = ({
+  hasUpdatePrivileges = true,
+}: {
+  hasUpdatePrivileges?: boolean;
+} = {}) => {
+  const ctx = {
+    services: {
+      notificationService,
+    },
+  } as unknown as AppDependencies;
+
   return render(
-    <IntlProvider>
+    <AppContextProvider value={ctx}>
       <UpdateElserMappingsModal
         indexName="test-index"
-        setIsModalOpen={setIsModalOpen}
         refetchMapping={refetchMapping}
-        hasUpdatePrivileges={props?.hasUpdatePrivileges ?? true}
+        setIsModalOpen={setIsModalOpen}
+        hasUpdatePrivileges={hasUpdatePrivileges}
+        modalId="test-modal-id"
       />
-    </IntlProvider>
+    </AppContextProvider>
   );
 };
 
 describe('UpdateElserMappingsModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    const fieldsById: NormalizedFields = {
-      byId: {
-        first: {
-          id: 'first',
-          nestedDepth: 0,
-          isMultiField: false,
-          path: ['name'],
-          source: { name: 'name', type: 'semantic_text', inference_id: '.elser-2-elasticsearch' },
-          childFieldsName: 'fields',
-          canHaveChildFields: false,
-          hasChildFields: false,
-          canHaveMultiFields: true,
-          hasMultiFields: false,
-          isExpanded: false,
-        },
-        second: {
-          id: 'second',
-          nestedDepth: 0,
-          isMultiField: false,
-          path: ['text'],
-          source: { name: 'text', type: 'semantic_text', inference_id: '.elser-2-elasticsearch' },
-          childFieldsName: 'fields',
-          canHaveChildFields: false,
-          hasChildFields: false,
-          canHaveMultiFields: true,
-          hasMultiFields: false,
-          isExpanded: false,
-        },
-      },
-      aliases: {},
-      rootLevelFields: ['first', 'second'],
-      maxNestedDepth: 0,
-    };
+    const toasts = { add: jest.fn() } as any;
+    notificationService = new NotificationService(toasts);
+    showSuccessToastSpy = jest.spyOn(notificationService, 'showSuccessToast');
+    showDangerToastSpy = jest.spyOn(notificationService, 'showDangerToast');
+    const fieldsById: NormalizedFields = createMappingViewFieldsFixture();
 
     mappingsContextMock.useMappingsState.mockReturnValue({
       mappingViewFields: fieldsById,
-    } as any);
+    } as unknown as State);
 
     isElserOnMlNodeSemanticFieldMock.mockImplementation((field) => {
       return field.source.inference_id === '.elser-2-elasticsearch';
@@ -125,16 +106,7 @@ describe('UpdateElserMappingsModal', () => {
 
     prepareFieldsForEisUpdateMock.mockReturnValue(fieldsById);
 
-    deNormalizeMock.mockReturnValue({
-      name: {
-        type: 'semantic_text',
-        inference_id: '.elser-2-elastic',
-      },
-      text: {
-        type: 'semantic_text',
-        inference_id: '.elser-2-elastic',
-      },
-    });
+    deNormalizeMock.mockReturnValue(defaultDenormalizedMappings);
   });
 
   it('should render modal and load options', () => {
@@ -185,7 +157,7 @@ describe('UpdateElserMappingsModal', () => {
     await userEvent.click(applyBtn);
 
     expect(updateIndexMappingsMock).toHaveBeenCalledTimes(1);
-    expect(notificationServiceMock.showSuccessToast).toHaveBeenCalledTimes(1);
+    expect(showSuccessToastSpy).toHaveBeenCalledTimes(1);
     expect(setIsModalOpen).toHaveBeenCalledWith(false);
     expect(refetchMapping).toHaveBeenCalled();
   });
@@ -207,7 +179,7 @@ describe('UpdateElserMappingsModal', () => {
     await userEvent.click(applyBtn);
 
     expect(updateIndexMappingsMock).toHaveBeenCalledTimes(1);
-    expect(notificationServiceMock.showDangerToast).toHaveBeenCalledTimes(1);
+    expect(showDangerToastSpy).toHaveBeenCalledTimes(1);
     expect(setIsModalOpen).toHaveBeenCalledWith(false);
   });
 

@@ -7,13 +7,16 @@
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
-import { PrivilegedAccessDetectionSeverityFilter } from './pad_chart_severity_filter';
+import {
+  AnomalySeverityFilter,
+  AnomalyHeatmap,
+  useAnomalyBands,
+} from '../../../../recent_anomalies';
 import { usePrivilegedAccessDetectionAnomaliesQuery } from './hooks/pad_query_hooks';
-import { useAnomalyBands } from './pad_anomaly_bands';
 import { UserNameList } from './pad_user_name_list';
-import { PrivilegedAccessDetectionHeatmap } from './pad_heatmap';
 import { useQueryInspector } from '../../../../../../common/components/page/manage_query';
 import { PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID } from '..';
+import { PrivilegedAccessDetectionHeatmapNoResults } from './pad_heatmap_no_results';
 
 export interface PrivilegedAccessDetectionChartProps {
   jobIds: string[];
@@ -47,18 +50,18 @@ export const PrivilegedAccessDetectionChart: React.FC<PrivilegedAccessDetectionC
 
   return (
     <>
-      <PrivilegedAccessDetectionSeverityFilter
-        anomalyBands={bands}
-        toggleHiddenBand={toggleHiddenBand}
-      />
+      <AnomalySeverityFilter anomalyBands={bands} toggleHiddenBand={toggleHiddenBand} />
       <EuiFlexGroup>
         <UserNameList userNames={data?.userNames ?? []} />
-        <PrivilegedAccessDetectionHeatmap
+        <AnomalyHeatmap
           anomalyBands={bands}
           records={data?.anomalyRecords ?? []}
-          userNames={data?.userNames ?? []}
+          entityNames={data?.userNames ?? []}
+          entityAccessor="user.name"
+          heatmapId="privileged-access-detection-heatmap-chart"
           isLoading={isLoading}
           isError={isError}
+          noResultsComponent={<PrivilegedAccessDetectionHeatmapNoResults />}
         />
       </EuiFlexGroup>
     </>

@@ -50,7 +50,15 @@ interface MockCallToolResult {
 
 interface MockCallToolError {
   isError: true;
-  error: string | { message?: string; code?: number };
+  content: Array<
+    | {
+        type: string;
+        text?: string | null | number | object;
+        [key: string]: unknown;
+      }
+    | null
+    | undefined
+  >;
 }
 
 type MockCallToolResponse = MockCallToolResult | MockCallToolError;
@@ -190,6 +198,25 @@ describe('McpClient', () => {
       );
     });
 
+    it('creates transport with custom fetch when provided', () => {
+      const customFetch = jest.fn();
+      new McpClient(mockLogger, clientDetails, { fetch: customFetch });
+
+      expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
+        expect.objectContaining({ href: 'https://example.com/mcp' }),
+        expect.objectContaining({
+          fetch: customFetch,
+        })
+      );
+    });
+
+    it('does not include fetch in transport options when not provided', () => {
+      new McpClient(mockLogger, clientDetails);
+
+      const transportCallArgs = (StreamableHTTPClientTransport as jest.Mock).mock.calls[0][1];
+      expect(transportCallArgs).not.toHaveProperty('fetch');
+    });
+
     it('creates client with correct name and version', () => {
       new McpClient(mockLogger, clientDetails);
 
@@ -218,10 +245,10 @@ describe('McpClient', () => {
       });
       const connectStatus = await client.isConnected();
       expect(connectStatus).toEqual(true);
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
-      expect(mockLogger.info).toHaveBeenCalledWith('Connected to MCP server test-client, 1.0.0');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Connected to MCP server test-client, 1.0.0');
     });
 
     it('returns undefined capabilities when not available', async () => {
@@ -263,7 +290,7 @@ describe('McpClient', () => {
       // The SDK formats the message as "Streamable HTTP error: Connection failed"
       // Our client just passes through the message without adding a prefix
       await expect(client.connect()).rejects.toThrow('Streamable HTTP error: Connection failed');
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -277,7 +304,7 @@ describe('McpClient', () => {
       mockClient.connect.mockRejectedValue(error);
 
       await expect(client.connect()).rejects.toThrow('Unauthorized error: Unauthorized');
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -293,11 +320,22 @@ describe('McpClient', () => {
       await expect(client.connect()).rejects.toThrow(
         'Error connecting to MCP server: Generic error'
       );
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Error connecting to MCP server test-client, 1.0.0: Generic error'
+      );
+    });
+
+    it('includes error cause in the message when available', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      const cause = new Error('unable to get local issuer certificate');
+      const error = new TypeError('fetch failed', { cause });
+      mockClient.connect.mockRejectedValue(error);
+
+      await expect(client.connect()).rejects.toThrow(
+        'Error connecting to MCP server: fetch failed (cause: unable to get local issuer certificate)'
       );
     });
 
@@ -337,10 +375,10 @@ describe('McpClient', () => {
 
       expect(mockClient.close).toHaveBeenCalled();
       expect(connectStatus).toEqual(false);
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to disconnect from MCP server test-client, 1.0.0'
       );
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Disconnected from MCP client test-client, 1.0.0'
       );
     });
@@ -392,7 +430,7 @@ describe('McpClient', () => {
         description: 'Tool 2',
         inputSchema: {},
       });
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Listing tools from MCP server test-client, 1.0.0'
       );
     });
@@ -538,7 +576,7 @@ describe('McpClient', () => {
         { type: 'text', text: 'Result 1' },
         { type: 'text', text: 'Result 2' },
       ]);
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Calling tool test-tool on MCP server test-client, 1.0.0'
       );
     });
@@ -585,7 +623,7 @@ describe('McpClient', () => {
       expect(result.content).toEqual([{ type: 'text', text: 'Text result' }]);
     });
 
-    it('filters out resource_link content parts', async () => {
+    it('preserves resource_link content parts', async () => {
       const client = await createConnectedClient();
 
       mockClient.callTool.mockResolvedValue({
@@ -601,7 +639,46 @@ describe('McpClient', () => {
         arguments: {},
       });
 
-      expect(result.content).toEqual([{ type: 'text', text: 'Text result' }]);
+      expect(result.content).toEqual([
+        { type: 'text', text: 'Text result' },
+        { type: 'resource_link', uri: 'https://example.com', name: 'Resource' },
+      ]);
+    });
+
+    it('preserves embedded resource content parts', async () => {
+      const client = await createConnectedClient();
+
+      mockClient.callTool.mockResolvedValue({
+        isError: false,
+        content: [
+          { type: 'text', text: 'Text result' },
+          {
+            type: 'resource',
+            resource: {
+              uri: 'file:///project/src/main.rs',
+              mimeType: 'text/x-rust',
+              text: 'fn main() {\\n  println!("Hello world!");\\n}',
+            },
+          },
+        ],
+      });
+
+      const result = await client.callTool({
+        name: 'test-tool',
+        arguments: {},
+      });
+
+      expect(result.content).toEqual([
+        { type: 'text', text: 'Text result' },
+        {
+          type: 'resource',
+          resource: {
+            uri: 'file:///project/src/main.rs',
+            mimeType: 'text/x-rust',
+            text: 'fn main() {\\n  println!("Hello world!");\\n}',
+          },
+        },
+      ]);
     });
 
     it('handles empty content array', async () => {
@@ -704,24 +781,42 @@ describe('McpClient', () => {
 
       mockClient.callTool.mockResolvedValue({
         isError: true,
-        error: 'Tool execution failed',
+        content: [{ type: 'text', text: 'Tool execution failed' }],
       });
 
-      await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
-        'Error calling tool test-tool with [object Object]: Tool execution failed'
+      await expect(
+        client.callTool({ name: 'test-tool', arguments: { arg1: 'value1' } })
+      ).rejects.toThrow(
+        `Error calling tool 'test-tool' with arguments '{"arg1":"value1"}': Tool execution failed`
       );
     });
 
-    it('handles error response with non-string error', async () => {
+    it('throws error with multiple text parts joined by newlines', async () => {
       const client = await createConnectedClient();
 
       mockClient.callTool.mockResolvedValue({
         isError: true,
-        error: { message: 'Error message', code: 500 },
+        content: [
+          { type: 'text', text: 'Error line 1' },
+          { type: 'text', text: 'Error line 2' },
+        ],
       });
 
       await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
-        'Error calling tool test-tool with [object Object]: [object Object]'
+        `Error calling tool 'test-tool' with arguments '{}': Error line 1\nError line 2`
+      );
+    });
+
+    it('throws error with default message when no text content parts', async () => {
+      const client = await createConnectedClient();
+
+      mockClient.callTool.mockResolvedValue({
+        isError: true,
+        content: [{ type: 'image', data: 'base64data' }],
+      });
+
+      await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
+        `Error calling tool 'test-tool' with arguments '{}': Unknown tool error`
       );
     });
 

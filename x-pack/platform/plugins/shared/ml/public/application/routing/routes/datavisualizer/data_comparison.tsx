@@ -9,8 +9,8 @@ import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { DataSourceContextProvider } from '../../../contexts/ml';
-import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
@@ -30,7 +30,7 @@ export const dataDriftRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  id: 'data_drift',
+  id: 'dataDriftPage',
   path: createPath(ML_PAGES.DATA_DRIFT),
   title: i18n.translate('xpack.ml.dataVisualizer.dataDrift.docTitle', {
     defaultMessage: 'Data Drift',

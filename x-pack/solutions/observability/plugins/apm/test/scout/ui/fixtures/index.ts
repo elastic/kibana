@@ -12,8 +12,9 @@ import type {
   KibanaUrl,
   BrowserAuthFixture,
 } from '@kbn/scout-oblt';
-import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
-import { AlertsTab } from './page_objects/alerts_tab';
+import { mergeTests, test as base, createLazyPageObject } from '@kbn/scout-oblt';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
 import { ServiceMapPage } from './page_objects/service_map';
 import { ServiceInventoryPage } from './page_objects/service_inventory';
 import { StorageExplorerPage } from './page_objects/storage_explorer';
@@ -32,6 +33,8 @@ import { ServiceDetailsPage } from './page_objects/service_details/service_detai
 import { DependenciesInventoryPage } from './page_objects/dependencies_inventory';
 import { APM_ROLES } from './constants';
 import { DependencyDetailsPage } from './page_objects/dependency_details/dependency_details';
+import { AlertDetailsPage } from './page_objects/alert_details';
+import { AlertsControls } from './page_objects/alerts_controls/alerts_controls';
 
 export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
   loginAsApmAllPrivilegesWithoutWriteSettings: () => Promise<void>;
@@ -41,7 +44,6 @@ export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
-    alertsTab: AlertsTab;
     serviceMapPage: ServiceMapPage;
     serviceInventoryPage: ServiceInventoryPage;
     storageExplorerPage: StorageExplorerPage;
@@ -59,11 +61,18 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     serviceDetailsPage: ServiceDetailsPage;
     dependenciesInventoryPage: DependenciesInventoryPage;
     dependencyDetailsPage: DependencyDetailsPage;
+    alertDetailsPage: AlertDetailsPage;
+    alertsControls: AlertsControls;
   };
   browserAuth: ApmBrowserAuthFixture;
 }
 
-export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
+const baseWithSynthtrace = mergeTests(base, synthtraceFixture);
+
+export const test = baseWithSynthtrace.extend<
+  ExtendedScoutTestFixtures,
+  ObltWorkerFixtures & SynthtraceFixture
+>({
   pageObjects: async (
     {
       pageObjects,
@@ -78,7 +87,6 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
-      alertsTab: createLazyPageObject(AlertsTab, page, kbnUrl),
       serviceMapPage: createLazyPageObject(ServiceMapPage, page, kbnUrl),
       serviceInventoryPage: createLazyPageObject(ServiceInventoryPage, page, kbnUrl),
       storageExplorerPage: createLazyPageObject(StorageExplorerPage, page, kbnUrl),
@@ -96,6 +104,8 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       serviceDetailsPage: createLazyPageObject(ServiceDetailsPage, page, kbnUrl),
       dependenciesInventoryPage: createLazyPageObject(DependenciesInventoryPage, page, kbnUrl),
       dependencyDetailsPage: createLazyPageObject(DependencyDetailsPage, page, kbnUrl),
+      alertDetailsPage: createLazyPageObject(AlertDetailsPage, page),
+      alertsControls: createLazyPageObject(AlertsControls, page),
     };
 
     await use(extendedPageObjects);

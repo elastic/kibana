@@ -13,6 +13,7 @@
   "kbn_references": [
     "@kbn/dev-utils",
     "@kbn/optimizer",
+    "@kbn/rspack-optimizer",
     "@kbn/tooling-log",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
@@ -20,6 +21,7 @@
     "@kbn/jest-serializers",
     "@kbn/repo-packages",
     "@kbn/stdio-dev-helpers",
+    "@kbn/utils",
   ],
   "exclude": [
     "target/**/*",

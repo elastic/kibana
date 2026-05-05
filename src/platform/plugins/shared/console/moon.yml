@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/console-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/console-plugin'
+  title: '@kbn/console-plugin'
   description: Moon project for @kbn/console-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/console
+  sourceRoot: src/platform/plugins/shared/console
 dependsOn:
   - '@kbn/scout'
   - '@kbn/core'
@@ -61,6 +60,8 @@ dependsOn:
   - '@kbn/core-injected-metadata-browser-internal'
   - '@kbn/node-libs-browser-webpack-plugin'
   - '@kbn/esql-types'
+  - '@kbn/core-application-common'
+  - '@kbn/core-chrome-layout-constants'
 tags:
   - plugin
   - prod
@@ -75,16 +76,6 @@ fileGroups:
     - packaging/**/*
     - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -9,13 +9,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { isMac } from '@kbn/shared-ux-utility';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 const quickSearchLabel = i18n.translate('esqlEditor.visor.quickSearchLabel', {
   defaultMessage: 'Quick search',
 });
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
 const shortCut = COMMAND_KEY + ' K';
 
@@ -36,7 +36,7 @@ export function QuickSearchAction({
           <EuiToolTip position="top" content={quickSearchWithShortcut} disableScreenReaderOutput>
             <EuiButtonIcon
               onClick={toggleVisor}
-              iconType="search"
+              iconType="magnify"
               data-test-subj="toggle-quick-search-visor"
               aria-label={quickSearchWithShortcut}
             />

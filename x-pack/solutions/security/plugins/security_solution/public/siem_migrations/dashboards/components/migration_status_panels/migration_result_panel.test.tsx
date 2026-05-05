@@ -64,7 +64,11 @@ const renderTestComponent = (
   return render(<DashboardMigrationResultPanel {...baseProps} {...props} />, {
     wrapper: ({ children }) => (
       <TestProviders>
-        <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+        <MigrationDataInputContextProvider
+          openFlyout={jest.fn()}
+          closeFlyout={jest.fn()}
+          isFlyoutOpen={false}
+        >
           {children}
         </MigrationDataInputContextProvider>
       </TestProviders>

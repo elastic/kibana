@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import pRetry from 'p-retry';
 import type { ChatClient, ConverseParams, ConverseResponse } from './types';
 
@@ -37,7 +37,7 @@ export class AgentBuilderClient implements ChatClient {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({
-          agent_id: this.agentId ?? oneChatDefaultAgentId,
+          agent_id: this.agentId ?? agentBuilderDefaultAgentId,
           connector_id: this.connectorId,
           conversation_id: conversationId,
           input: messages,

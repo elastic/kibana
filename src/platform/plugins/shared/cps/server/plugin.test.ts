@@ -19,9 +19,11 @@ describe('CPSServerPlugin', () => {
   let plugin: CPSServerPlugin;
   let mockInitContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
   let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
+    mockCoreStart = coreMock.createStart();
   });
 
   describe('when cpsEnabled is true', () => {
@@ -36,9 +38,12 @@ describe('CPSServerPlugin', () => {
       expect(setup.getCpsEnabled()).toBe(true);
     });
 
-    it('should call setCpsFeatureFlag with true', () => {
+    it('should return CPSServerStart from start()', () => {
       plugin.setup(mockCoreSetup);
-      expect(mockCoreSetup.elasticsearch.setCpsFeatureFlag).toHaveBeenCalledWith(true);
+      const start = plugin.start(mockCoreStart);
+      expect(start).toBeDefined();
+      expect(start?.createNpreClient).toBeDefined();
+      expect(typeof start?.createNpreClient).toBe('function');
     });
   });
 
@@ -54,9 +59,10 @@ describe('CPSServerPlugin', () => {
       expect(setup.getCpsEnabled()).toBe(false);
     });
 
-    it('should call setCpsFeatureFlag with false', () => {
+    it('should return undefined from start()', () => {
       plugin.setup(mockCoreSetup);
-      expect(mockCoreSetup.elasticsearch.setCpsFeatureFlag).toHaveBeenCalledWith(false);
+      const start = plugin.start(mockCoreStart);
+      expect(start).toBeUndefined();
     });
   });
 

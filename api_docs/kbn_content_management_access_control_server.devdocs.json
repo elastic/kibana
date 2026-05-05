@@ -38,6 +38,8 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +60,10 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts",
+            "lineNumber": 14,
+            "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "CheckGlobalAccessControlPrivilegeDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -76,6 +81,8 @@
         "label": "CheckGlobalAccessControlPrivilegeDependencies",
         "description": [],
         "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -95,6 +102,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -106,6 +115,8 @@
             "label": "isAccessControlEnabled",
             "description": [],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -128,6 +139,8 @@
               " | undefined; }>"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

@@ -13,12 +13,12 @@ import type {
 } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import type { LensApi } from '@kbn/lens-plugin/public';
-import { apiIsOfType, hasBlockingError } from '@kbn/presentation-publishing';
-import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
+import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { type ServiceDependencies } from './rule_flyout_component';
 
 interface Context {
@@ -47,7 +47,8 @@ export class AlertRuleFromVisAction implements Action<Context> {
   public getIconType = () => 'bell';
 
   public async isCompatible({ embeddable }: Context) {
-    const isLensApi = apiIsOfType(embeddable, 'lens');
+    const { apiIsOfType, hasBlockingError } = await import('@kbn/presentation-publishing');
+    const isLensApi = apiIsOfType(embeddable, LENS_EMBEDDABLE_TYPE);
     if (!isLensApi || hasBlockingError(embeddable)) return false;
     const query = embeddable.query$.getValue();
     return Boolean(query && 'esql' in query);

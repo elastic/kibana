@@ -21,14 +21,22 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListItemSchema,
+  EntriesArray,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { useCreateOrUpdateArtifact } from '../../../../components/artifact_list_page/hooks/use_artifact_update_or_create';
+import {
+  addGlobalPolicyTag,
+  removeGlobalPolicyTag,
+} from '../../../../../../common/endpoint/service/artifacts/utils';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { prepareToCloseAlerts } from '../../../../../detection_engine/rule_exceptions/components/add_exception_flyout/helpers';
 import { useCloseAlertsFromExceptions } from '../../../../../detection_engine/rule_exceptions/logic/use_close_alerts';
 import { ExceptionItemsFlyoutAlertsActions } from '../../../../../detection_engine/rule_exceptions/components/flyout_components/alerts_actions';
 import { ARTIFACT_FLYOUT_LABELS } from '../../../../components/artifact_list_page/components/artifact_flyout';
 import type { AddExceptionFlyoutProps } from '../../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { ArtifactConfirmModal } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
-import { useCreateArtifact } from '../../../../hooks/artifacts';
 import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import type {
   ArtifactConfirmModalLabelProps,
@@ -41,6 +49,7 @@ import {
 import { EndpointExceptionsForm } from './endpoint_exceptions_form';
 import { EndpointExceptionsApiClient } from '../../service/api_client';
 import { ENDPOINT_EXCEPTIONS_PAGE_LABELS, getCreationErrorMessage } from '../../translations';
+import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 export type EndpointExceptionsFlyoutProps = Pick<
   AddExceptionFlyoutProps,
@@ -65,12 +74,14 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
   );
   const toasts = useToasts();
   const http = useHttp();
-  const { isLoading: isSubmittingData, mutateAsync: submitData } = useCreateArtifact(
+  const { isLoading: isSubmittingData, createOrUpdateArtifact } = useCreateOrUpdateArtifact(
     EndpointExceptionsApiClient.getInstance(http)
   );
+
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
 
   const [exception, setException] = useState<CreateExceptionListItemSchema>();
+  const [additionalEntries, setAdditionalEntries] = useState<EntriesArray[]>();
   const exceptionArrayWrapper = useMemo(() => (exception ? [exception] : []), [exception]);
   const [isFormValid, setIsFormValid] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
@@ -81,22 +92,29 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
   const [bulkCloseAlerts, setBulkCloseAlerts] = useState(false);
   const [disableBulkClose, setDisableBulkCloseAlerts] = useState(false);
   const [bulkCloseIndex, setBulkCloseIndex] = useState<string[] | undefined>();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
+  const { canManageGlobalArtifacts } = useUserPrivileges().endpointPrivileges;
 
   useEffect(() => {
     if (!isAlertDataLoading && alertData) {
+      const defaultException = defaultEndpointExceptionItems(
+        ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+        '',
+        alertData
+      )[0] as CreateExceptionListItemSchema;
+
       const initialException = {
-        ...(defaultEndpointExceptionItems(
-          ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
-          '',
-          alertData
-        )[0] as CreateExceptionListItemSchema),
+        ...defaultException,
 
         os_types: retrieveAlertOsTypes(alertData),
+        tags: canManageGlobalArtifacts
+          ? addGlobalPolicyTag(defaultException.tags ?? [])
+          : removeGlobalPolicyTag(defaultException.tags ?? []),
       };
 
       setException(initialException);
     }
-  }, [alertData, isAlertDataLoading]);
+  }, [alertData, canManageGlobalArtifacts, isAlertDataLoading]);
 
   const handleCloseFlyout = useCallback((): void => {
     onCancel(false);
@@ -106,12 +124,18 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
     if (!formState) return;
     setIsFormValid(formState.isValid);
     setException(formState.item);
+    setAdditionalEntries(formState.additionalEntries);
     setConfirmModalLabels(formState.confirmModalLabels);
   }, []);
 
   const submitException = useCallback(async (): Promise<void> => {
+    if (!createOrUpdateArtifact) return;
+
     try {
-      const addedException = await submitData(exception as CreateExceptionListItemSchema);
+      const addedExceptions = await createOrUpdateArtifact(
+        exception as CreateExceptionListItemSchema,
+        additionalEntries
+      );
 
       const { shouldCloseAlerts, alertIdToClose, ruleStaticIds } = prepareToCloseAlerts({
         alertData,
@@ -122,25 +146,28 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
         selectedRulesToAddTo: [],
       });
 
-      if (closeAlerts != null && shouldCloseAlerts) {
-        await closeAlerts(ruleStaticIds, [addedException], alertIdToClose, bulkCloseIndex);
+      if (closeAlerts != null && shouldCloseAlerts && addedExceptions) {
+        await closeAlerts(ruleStaticIds, addedExceptions, alertIdToClose, bulkCloseIndex);
       }
 
-      toasts.addSuccess(ENDPOINT_EXCEPTIONS_PAGE_LABELS.flyoutCreateSubmitSuccess(addedException));
+      toasts.addSuccess(
+        ENDPOINT_EXCEPTIONS_PAGE_LABELS.flyoutCreateSubmitSuccess(addedExceptions[0])
+      );
       onConfirm(true, closeSingleAlert, bulkCloseAlerts);
     } catch (error) {
       toasts.addError(error, getCreationErrorMessage(error));
     }
   }, [
+    additionalEntries,
     alertData,
     bulkCloseAlerts,
     bulkCloseIndex,
     closeAlerts,
     closeSingleAlert,
+    createOrUpdateArtifact,
     exception,
     onConfirm,
     rules,
-    submitData,
     toasts,
   ]);
 
@@ -162,12 +189,11 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 id={endpointExceptionsFlyoutTitleId}>
+          <h2 id={endpointExceptionsFlyoutTitleId} data-test-subj="exceptionFlyoutTitle">
             {ENDPOINT_EXCEPTIONS_PAGE_LABELS.flyoutCreateTitle}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      {isFormValid}
 
       <EuiFlyoutBody>
         {exception && (
@@ -176,27 +202,32 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
             error={undefined}
             disabled={false}
             item={exception}
+            additionalEntries={additionalEntries}
             mode="create"
             onChange={handleOnChange}
           />
         )}
 
-        <EuiHorizontalRule />
+        {hasAlertsUpdate && (
+          <>
+            <EuiHorizontalRule />
 
-        <ExceptionItemsFlyoutAlertsActions
-          exceptionListType="endpoint"
-          shouldCloseSingleAlert={closeSingleAlert}
-          onSingleAlertCloseCheckboxChange={setCloseSingleAlert}
-          shouldBulkCloseAlert={bulkCloseAlerts}
-          onBulkCloseCheckboxChange={setBulkCloseAlerts}
-          disableBulkClose={disableBulkClose}
-          onDisableBulkClose={setDisableBulkCloseAlerts}
-          exceptionListItems={exceptionArrayWrapper}
-          onUpdateBulkCloseIndex={setBulkCloseIndex}
-          alertData={alertData}
-          isAlertDataLoading={isAlertDataLoading ?? false}
-          alertStatus={alertStatus}
-        />
+            <ExceptionItemsFlyoutAlertsActions
+              exceptionListType="endpoint"
+              shouldCloseSingleAlert={closeSingleAlert}
+              onSingleAlertCloseCheckboxChange={setCloseSingleAlert}
+              shouldBulkCloseAlert={bulkCloseAlerts}
+              onBulkCloseCheckboxChange={setBulkCloseAlerts}
+              disableBulkClose={disableBulkClose}
+              onDisableBulkClose={setDisableBulkCloseAlerts}
+              exceptionListItems={exceptionArrayWrapper}
+              onUpdateBulkCloseIndex={setBulkCloseIndex}
+              alertData={alertData}
+              isAlertDataLoading={isAlertDataLoading ?? false}
+              alertStatus={alertStatus}
+            />
+          </>
+        )}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

@@ -160,8 +160,8 @@ describe('[Index management API Routes] fetch indices lib function', () => {
             health: undefined,
             status: undefined,
             documents: 0,
-            size: '0b',
-            primary_size: '0b',
+            size: 0,
+            primary_size: 0,
           }),
         ],
       });
@@ -198,7 +198,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
             hidden: false,
             data_stream: undefined,
             documents: 100,
-            size: '1000b',
+            size: 1000,
           },
         ],
       });

@@ -22,7 +22,7 @@ function getVisibility(
   isServerless?: boolean
 ) {
   // If AI Agents are enabled, hide the nav control
-  // OnechatNavControl will be used instead
+  // AgentBuilderNavControl will be used instead
   if (chatExperience === AIChatExperience.Agent) {
     return false;
   }

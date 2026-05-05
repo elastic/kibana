@@ -15,7 +15,7 @@ import type {
   MigrateFunctionsObject,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import type { ObjectType } from '@kbn/config-schema';
+import type { ObjectType, Type } from '@kbn/config-schema';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
@@ -26,106 +26,79 @@ import {
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
 import type { EmbeddableTransforms } from '../common';
-import { EnhancementsRegistry } from '../common/enhancements/registry';
-import type { EnhancementRegistryDefinition } from '../common/enhancements/types';
+import type { DrilldownSetup, DrilldownState } from './drilldowns/types';
+import { getDrilldownRegistry } from './drilldowns/registry';
+import type { EmbeddableServerDefinition } from './embeddable_transforms/types';
+import { getEmbeddableServerRegistry } from './embeddable_transforms/registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   /*
-   * Use registerTransforms to register transforms and schema for an embeddable type.
-   * Transforms decouple REST API state from stored state,
-   * allowing embeddables to have one shape for REST APIs and another for storage.
-   * Embeddable containers, such as dashboard, use transforms to convert EmbeddableState into StoreEmbeddableState and vice versa.
-   * On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
-   * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
+   * Use registerDrilldown to register transforms and schema for a drilldown type.
    */
-  registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
-  registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+  registerDrilldown: <
+    StoredState extends DrilldownState = DrilldownState,
+    State extends DrilldownState = DrilldownState
+  >(
+    type: string,
+    drilldown: DrilldownSetup<StoredState, State>
+  ) => void;
+  /**
+   * Registers an embeddable server defintion.
+   * Be sure to register an embeddable public definition for this type.
+   */
+  registerEmbeddableServerDefinition: (
+    type: string,
+    transforms: EmbeddableServerDefinition<any, any>
+  ) => void;
   getAllMigrations: () => MigrateFunctionsObject;
-  transformEnhancementsIn: EnhancementsRegistry['transformIn'];
-  transformEnhancementsOut: EnhancementsRegistry['transformOut'];
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
   /**
-   * Returns all embeddable schemas registered with registerTransforms.
+   * Returns all embeddable schemas registered with registerEmbeddableServerDefinition.
    */
-  getEmbeddableSchemas: () => ObjectType[];
+  getAllEmbeddableSchemas: () => { [key: string]: { schema: ObjectType; title: string } };
 
-  getTransforms: (type: string) => EmbeddableTransforms | undefined;
+  getTransforms: (type: string) =>
+    | (EmbeddableTransforms & {
+        schema?: Type<object>;
+        throwOnUnmappedPanel?: EmbeddableServerDefinition['throwOnUnmappedPanel'];
+      })
+    | undefined;
 };
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private enhancementsRegistry = new EnhancementsRegistry();
   private migrateFn: PersistableStateMigrateFn | undefined;
-  private transformsRegistry: { [key: string]: EmbeddableTransforms<any, any> } = {};
+  private drilldownRegistry = getDrilldownRegistry();
+  private transformsRegistry = getEmbeddableServerRegistry(this.drilldownRegistry);
 
-  public setup(core: CoreSetup) {
-    this.migrateFn = getMigrateFunction(
-      this.getEmbeddableFactory,
-      this.enhancementsRegistry.getEnhancement
-    );
+  public setup(core: CoreSetup): EmbeddableSetup {
+    this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
-      registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => {
-        if (this.transformsRegistry[type]) {
-          throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
-        }
-
-        this.transformsRegistry[type] = transforms;
-      },
-      registerEnhancement: this.enhancementsRegistry.registerEnhancement,
-      transformEnhancementsIn: this.enhancementsRegistry.transformIn,
-      transformEnhancementsOut: this.enhancementsRegistry.transformOut,
-      telemetry: getTelemetryFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
-      extract: getExtractFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
-      inject: getInjectFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
+      registerDrilldown: this.drilldownRegistry
+        .registerDrilldown as EmbeddableSetup['registerDrilldown'],
+      registerEmbeddableServerDefinition:
+        this.transformsRegistry.registerEmbeddableServerDefinition,
+      telemetry: getTelemetryFunction(this.getEmbeddableFactory),
+      extract: getExtractFunction(this.getEmbeddableFactory),
+      inject: getInjectFunction(this.getEmbeddableFactory),
       getAllMigrations: () =>
-        getAllMigrations(
-          Array.from(this.embeddableFactories.values()),
-          this.enhancementsRegistry.getEnhancements(),
-          this.migrateFn!
-        ),
+        getAllMigrations(Array.from(this.embeddableFactories.values()), this.migrateFn!),
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): EmbeddableStart {
     return {
-      getEmbeddableSchemas: () =>
-        Object.values(this.transformsRegistry)
-          .map((transforms) => transforms.schema)
-          .filter((schema) => Boolean(schema)) as ObjectType[],
-      getTransforms: (type: string) => {
-        return this.transformsRegistry[type];
-      },
-      telemetry: getTelemetryFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
-      extract: getExtractFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
-      inject: getInjectFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
+      getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
+      getTransforms: this.transformsRegistry.getEmbeddableTransforms,
+      telemetry: getTelemetryFunction(this.getEmbeddableFactory),
+      extract: getExtractFunction(this.getEmbeddableFactory),
+      inject: getInjectFunction(this.getEmbeddableFactory),
       getAllMigrations: () =>
-        getAllMigrations(
-          Array.from(this.embeddableFactories.values()),
-          this.enhancementsRegistry.getEnhancements(),
-          this.migrateFn!
-        ),
+        getAllMigrations(Array.from(this.embeddableFactories.values()), this.migrateFn!),
     };
   }
 

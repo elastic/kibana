@@ -8,7 +8,7 @@
 import { isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -17,6 +17,7 @@ import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type {
   ActionParamsType,
@@ -38,6 +39,7 @@ export type XmattersConnectorType = ConnectorType<
   ActionParamsType,
   unknown
 >;
+
 export type XmattersConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
@@ -54,6 +56,7 @@ export function getConnectorType(): XmattersConnectorType {
       AlertingConnectorFeatureId,
       SecurityConnectorFeatureId,
       WorkflowsConnectorFeatureId,
+      AgentBuilderConnectorFeatureId,
     ],
     validate: {
       config: {

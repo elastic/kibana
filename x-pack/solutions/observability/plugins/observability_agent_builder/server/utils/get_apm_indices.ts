@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
 
 export async function getApmIndices({
@@ -19,10 +18,7 @@ export async function getApmIndices({
   plugins,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }): Promise<APMIndices> {

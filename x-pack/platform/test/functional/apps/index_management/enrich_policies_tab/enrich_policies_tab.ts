@@ -15,7 +15,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
+  const flyout = getService('flyout');
   const es = getService('es');
+  const retry = getService('retry');
 
   const ENRICH_INDEX_NAME = 'test-policy-1';
   const ENRICH_POLICY_NAME = 'test-policy-1';
@@ -87,15 +89,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Assert that flyout is opened
       expect(await testSubjects.exists('policyDetailsFlyout')).to.be(true);
       // Close flyout
-      await testSubjects.click('closeFlyoutButton');
+      await flyout.closeFlyout();
     });
 
     it('can execute a policy', async () => {
       await pageObjects.indexManagement.clickExecuteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();
 
-      const successToast = await toasts.getElementByIndex(1);
-      expect(await successToast.getVisibleText()).to.contain(`Executed ${ENRICH_POLICY_NAME}`);
+      await retry.try(async () => {
+        const successToast = await toasts.getElementByIndex(1);
+        const text = await successToast.getVisibleText();
+        expect(text).to.contain(`Executed ${ENRICH_POLICY_NAME}`);
+      });
     });
 
     it('can delete a policy', async () => {
@@ -110,8 +115,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickDeleteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();
 
-      const successToast = await toasts.getElementByIndex(1);
-      expect(await successToast.getVisibleText()).to.contain(`Deleted ${ENRICH_POLICY_NAME}`);
+      await retry.try(async () => {
+        const successToast = await toasts.getElementByIndex(1);
+        expect(await successToast.getVisibleText()).to.contain(`Deleted ${ENRICH_POLICY_NAME}`);
+      });
     });
 
     describe('access', function () {

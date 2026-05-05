@@ -11,7 +11,7 @@ import type {
   PatchUpdateRequestBody,
   PatchUpdateRequestParams,
 } from '../../../../common/api/endpoint/scripts_library';
-import { PatchUpdateRequestSchema } from '../../../../common/api/endpoint/scripts_library';
+import { PatchUpdateScriptRequestSchema } from '../../../../common/api/endpoint/scripts_library';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type {
   SecuritySolutionPluginRouter,
@@ -39,9 +39,11 @@ export const getPatchUpdateScriptRequestHandler = (
     try {
       const spaceId = (await context.securitySolution).getSpaceId();
       const user = (await context.core).security.authc.getCurrentUser();
+      const rulesClient = await (await context.alerting).getRulesClient();
       const scriptsClient = endpointAppServices.getScriptsLibraryClient(
         spaceId,
-        user?.username || 'unknown'
+        user?.username || 'unknown',
+        rulesClient
       );
       const response: EndpointScriptApiResponse = {
         data: await scriptsClient.update({ ...req.body, id: req.params.script_id }),
@@ -78,7 +80,7 @@ export const registerPatchUpdateScriptRoute = (
       {
         version: '2023-10-31',
         validate: {
-          request: PatchUpdateRequestSchema,
+          request: PatchUpdateScriptRequestSchema,
         },
       },
       withEndpointAuthz(

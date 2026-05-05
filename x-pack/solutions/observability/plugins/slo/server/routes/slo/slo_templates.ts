@@ -10,6 +10,7 @@ import {
   getSLOTemplateParamsSchema,
   sloTemplateSchema,
   type FindSLOTemplatesResponse,
+  type FindSLOTemplateTagsResponse,
   type GetSLOTemplateResponse,
 } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../errors';
@@ -79,5 +80,27 @@ export const findSLOTemplatesRoute = createSloServerRoute({
       ...templatesPaginated,
       results: templatesPaginated.results.map((template) => sloTemplateSchema.encode(template)),
     };
+  },
+});
+
+export const findSLOTemplateTagsRoute = createSloServerRoute({
+  endpoint: 'GET /api/observability/slo_templates/_tags',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
+  },
+  handler: async ({
+    request,
+    logger,
+    plugins,
+    getScopedClients,
+  }): Promise<FindSLOTemplateTagsResponse> => {
+    await assertPlatinumLicense(plugins);
+    const { templateRepository } = await getScopedClients({ request, logger });
+
+    const tags = await templateRepository.tags();
+    return { tags };
   },
 });

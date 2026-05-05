@@ -97,10 +97,10 @@ export const EXCEPTION_DELETE_ERROR = i18n.translate(
   }
 );
 
-export const exceptionDeleteSuccessMessage = (listId: string) =>
+export const exceptionDeleteSuccessMessage = (listName: string) =>
   i18n.translate('xpack.securitySolution.exceptions.referenceModalSuccessDescription', {
-    defaultMessage: 'Exception list - {listId} - deleted successfully.',
-    values: { listId },
+    defaultMessage: 'Exception list "{listName}" deleted successfully.',
+    values: { listName },
   });
 
 export const REFERENCE_MODAL_TITLE = i18n.translate(
@@ -213,6 +213,14 @@ export const IMPORT_EXCEPTION_LIST_AS_NEW_LIST = i18n.translate(
   }
 );
 
+export const IMPORT_ENDPOINT_ARTIFACTS_ERROR_TEXT = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.importEndpointArtifactsErrorText',
+  {
+    defaultMessage:
+      'You can only import shared exception lists here, but at least one of the imported files contains endpoint artifacts. Import endpoint artifacts from their dedicated pages instead.',
+  }
+);
+
 export const IMPORT_EXCEPTION_ENDPOINT_LIST_WARNING = i18n.translate(
   'xpack.securitySolution.exceptionsTable.importExceptionEndpointListWarning',
   {
@@ -237,6 +245,13 @@ export const IMPORT_PROMPT = i18n.translate(
   'xpack.securitySolution.exceptions.exceptionListsFilePickerPrompt',
   {
     defaultMessage: 'Select or drag and drop multiple files',
+  }
+);
+
+export const IMPORT_FILE_PICKER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionListsFilePickerAriaLabel',
+  {
+    defaultMessage: 'Select exception list files to import',
   }
 );
 
@@ -394,3 +409,9 @@ export const EXPIRED_EXCEPTIONS_MODAL_CONFIRM_EXPORT_BUTTON = i18n.translate(
     defaultMessage: 'Export',
   }
 );
+
+export const EXCEPTION_LIST_CARD_ACTIONS_ARIA_LABEL = (listName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.listCardActionsAriaLabel', {
+    values: { listName },
+    defaultMessage: 'Actions for {listName}',
+  });

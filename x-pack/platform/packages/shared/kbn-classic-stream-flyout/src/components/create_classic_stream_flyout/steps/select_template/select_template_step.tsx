@@ -11,18 +11,13 @@ import {
   EuiSpacer,
   EuiSelectable,
   type EuiSelectableOption,
-  EuiBadge,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   useEuiTheme,
-  EuiTextTruncate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
-
-import { formatDataRetention } from '../../../../utils';
 import { ErrorState } from './error_state';
 import { EmptyState } from './empty_state';
 
@@ -30,76 +25,34 @@ interface SelectTemplateStepProps {
   templates: IndexTemplate[];
   selectedTemplate: string | null;
   onTemplateSelect: (templateName: string | null) => void;
+  onTemplateConfirm: (templateName: string) => void;
   onCreateTemplate: () => void;
   hasErrorLoadingTemplates?: boolean;
   onRetryLoadTemplates: () => void;
-  showDataRetention?: boolean;
 }
 
 export const SelectTemplateStep = ({
   templates,
   selectedTemplate,
   onTemplateSelect,
+  onTemplateConfirm,
   onCreateTemplate,
   hasErrorLoadingTemplates = false,
   onRetryLoadTemplates,
-  showDataRetention = true,
 }: SelectTemplateStepProps) => {
   const { euiTheme } = useEuiTheme();
 
   const selectableOptions = useMemo(
     () =>
       templates.map((template) => {
-        const hasIlmPolicy = Boolean(template.ilmPolicy?.name);
-        const dataRetention = !hasIlmPolicy ? formatDataRetention(template) : undefined;
-
-        const getAppendContent = () => {
-          if (!showDataRetention) {
-            return undefined;
-          }
-
-          if (hasIlmPolicy) {
-            return (
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    <EuiTextTruncate text={template.ilmPolicy?.name ?? ''} width={250} />
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">
-                    {i18n.translate(
-                      'xpack.createClassicStreamFlyout.selectTemplateStep.ilmBadgeLabel',
-                      {
-                        defaultMessage: 'ILM',
-                      }
-                    )}
-                  </EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            );
-          }
-
-          if (dataRetention) {
-            return (
-              <EuiText size="s" color="subdued">
-                {dataRetention}
-              </EuiText>
-            );
-          }
-
-          return undefined;
-        };
-
         return {
           label: template.name,
           checked: template.name === selectedTemplate ? 'on' : undefined,
           'data-test-subj': `template-option-${template.name}`,
           template,
-          append: getAppendContent(),
         } as EuiSelectableOption<{ template: IndexTemplate }>;
       }),
-    [templates, selectedTemplate, showDataRetention]
+    [templates, selectedTemplate]
   );
 
   const renderOption = (option: EuiSelectableOption<{ template: IndexTemplate }>) => {
@@ -108,9 +61,7 @@ export const SelectTemplateStep = ({
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          {showDataRetention ? <EuiTextTruncate text={option.label} width={250} /> : option.label}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
         {isManaged && (
           <EuiFlexItem grow={false}>
             <EuiIconTip
@@ -131,9 +82,15 @@ export const SelectTemplateStep = ({
   const handleTemplateChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
       const selected = newOptions.find((option) => option.checked === 'on');
-      onTemplateSelect(selected?.label ?? null);
+      const templateName = selected?.label ?? null;
+      onTemplateSelect(templateName);
+
+      // Auto-advance to next step when a template is selected
+      if (templateName) {
+        onTemplateConfirm(templateName);
+      }
     },
-    [onTemplateSelect]
+    [onTemplateSelect, onTemplateConfirm]
   );
 
   if (hasErrorLoadingTemplates) {

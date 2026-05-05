@@ -470,17 +470,11 @@ export class TagManagementPageObject extends FtrService {
     if (!(await this.isActionMenuButtonDisplayed())) {
       return false;
     }
-    const menuWasOpened = await this.isActionMenuOpened();
-    if (!menuWasOpened) {
+    if (!(await this.isActionMenuOpened())) {
       await this.openActionMenu();
     }
 
-    if (!menuWasOpened) {
-      await this.toggleActionMenu();
-    }
-
-    const actionExists = await this.testSubjects.exists(`actionBar-button-${actionId}`);
-    return actionExists;
+    return await this.testSubjects.exists(`actionBar-button-${actionId}`);
   }
 
   /**
@@ -502,7 +496,7 @@ export class TagManagementPageObject extends FtrService {
    * Return true if the bulk action menu is opened, false otherwise.
    */
   async isActionMenuOpened() {
-    return this.testSubjects.exists('actionBar-contextMenuPopover');
+    return this.testSubjects.exists('actionBar-contextMenu');
   }
 
   /**

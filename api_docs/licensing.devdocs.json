@@ -15,6 +15,8 @@
       "label": "LicensingPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+      "lineNumber": 13,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -27,7 +29,15 @@
           ],
           "label": "license$",
           "description": [
-            "\nSteam of licensing information {@link ILicense}."
+            "\nSteam of licensing information ",
+            {
+              "pluginId": "licensing",
+              "scope": "public",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-public.ILicense",
+              "text": "ILicense"
+            },
+            "."
           ],
           "signature": [
             "Observable",
@@ -42,6 +52,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 15,
+          "columnNumber": 3,
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
@@ -63,12 +75,16 @@
               "path": "x-pack/platform/plugins/private/cross_cluster_replication/public/plugin.ts"
             },
             {
-              "plugin": "logstash",
-              "path": "x-pack/platform/plugins/private/logstash/public/plugin.ts"
+              "plugin": "grokdebugger",
+              "path": "x-pack/platform/plugins/private/grokdebugger/public/plugin.ts"
             },
             {
-              "plugin": "monitoring",
-              "path": "x-pack/platform/plugins/private/monitoring/public/plugin.ts"
+              "plugin": "grokdebugger",
+              "path": "x-pack/platform/plugins/private/grokdebugger/public/plugin.ts"
+            },
+            {
+              "plugin": "logstash",
+              "path": "x-pack/platform/plugins/private/logstash/public/plugin.ts"
             },
             {
               "plugin": "painlessLab",
@@ -96,7 +112,7 @@
             },
             {
               "plugin": "slo",
-              "path": "x-pack/solutions/observability/plugins/slo/public/plugin.ts"
+              "path": "x-pack/solutions/observability/plugins/slo/public/register_embeddables.ts"
             },
             {
               "plugin": "securitySolution",
@@ -127,10 +143,25 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 21,
+          "columnNumber": 3,
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
-          "references": [],
+          "references": [
+            {
+              "plugin": "licenseManagement",
+              "path": "x-pack/platform/plugins/shared/license_management/public/application/store/actions/upload_license.ts"
+            },
+            {
+              "plugin": "licenseManagement",
+              "path": "x-pack/platform/plugins/shared/license_management/public/application/store/actions/start_basic.ts"
+            },
+            {
+              "plugin": "licenseManagement",
+              "path": "x-pack/platform/plugins/shared/license_management/public/application/store/actions/start_trial.ts"
+            }
+          ],
           "children": [],
           "returnComment": []
         },
@@ -147,6 +178,8 @@
             "FeatureUsageServiceSetup"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 27,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -162,6 +195,8 @@
       "label": "LicensingPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+      "lineNumber": 33,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -172,7 +207,15 @@
           "tags": [],
           "label": "license$",
           "description": [
-            "\nSteam of licensing information {@link ILicense}."
+            "\nSteam of licensing information ",
+            {
+              "pluginId": "licensing",
+              "scope": "public",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-public.ILicense",
+              "text": "ILicense"
+            },
+            "."
           ],
           "signature": [
             "Observable",
@@ -187,6 +230,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 35,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -197,7 +242,14 @@
           "tags": [],
           "label": "getLicense",
           "description": [
-            "\nRetrieves the {@link ILicense | licensing information}"
+            "\nRetrieves the ",
+            {
+              "pluginId": "licensing",
+              "scope": "public",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-public.ILicense",
+              "text": "licensing information"
+            }
           ],
           "signature": [
             "() => Promise<",
@@ -211,6 +263,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -237,6 +291,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 43,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -255,6 +311,8 @@
             "FeatureUsageServiceStart"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 47,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -293,6 +351,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -313,7 +373,10 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CheckLicense",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -331,7 +394,10 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RequestHandler",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -359,6 +425,8 @@
           " extends Error"
         ],
         "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -373,6 +441,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -387,6 +457,8 @@
         "label": "FeatureUsageServiceSetup",
         "description": [],
         "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -397,12 +469,22 @@
             "tags": [],
             "label": "register",
             "description": [
-              "\nRegister a feature to be able to notify of it's usages using the {@link FeatureUsageServiceStart | service start contract}."
+              "\nRegister a feature to be able to notify of it's usages using the ",
+              {
+                "pluginId": "licensing",
+                "scope": "server",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-server.FeatureUsageServiceStart",
+                "text": "service start contract"
+              },
+              "."
             ],
             "signature": [
               "(featureId: string, licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => void"
             ],
             "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -417,6 +499,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+                "lineNumber": 16,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -432,7 +516,10 @@
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
                 "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+                "lineNumber": 16,
+                "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "LicenseType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -450,6 +537,8 @@
         "label": "FeatureUsageServiceStart",
         "description": [],
         "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -466,6 +555,8 @@
               "(featureId: string, usedAt?: number | Date | undefined) => void"
             ],
             "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -482,6 +573,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+                "lineNumber": 33,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -499,6 +592,8 @@
                   "number | Date | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+                "lineNumber": 33,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -521,6 +616,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -536,9 +633,19 @@
         "tags": [],
         "label": "LicensingApiRequestHandlerContext",
         "description": [
-          "\nThe APIs exposed on the `licensing` key of {@link RequestHandlerContext} for plugins that depend on licensing."
+          "\nThe APIs exposed on the `licensing` key of ",
+          {
+            "pluginId": "licensing",
+            "scope": "server",
+            "docId": "kibLicensingPluginApi",
+            "section": "def-server.RequestHandlerContext",
+            "text": "RequestHandlerContext"
+          },
+          " for plugins that depend on licensing."
         ],
         "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -559,6 +666,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -579,6 +688,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -607,6 +718,8 @@
           ") => { valid: false; message: string; } | { valid: true; message: null; }"
         ],
         "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -628,7 +741,10 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ILicense",
             "trackAdoption": false
           }
         ],
@@ -644,6 +760,8 @@
       "label": "LicensingPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+      "lineNumber": 49,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -656,7 +774,15 @@
           ],
           "label": "license$",
           "description": [
-            "\nSteam of licensing information {@link ILicense}."
+            "\nSteam of licensing information ",
+            {
+              "pluginId": "licensing",
+              "scope": "server",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-server.ILicense",
+              "text": "ILicense"
+            },
+            "."
           ],
           "signature": [
             "Observable",
@@ -671,6 +797,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 51,
+          "columnNumber": 3,
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
@@ -710,6 +838,10 @@
             {
               "plugin": "graph",
               "path": "x-pack/platform/plugins/private/graph/server/plugin.ts"
+            },
+            {
+              "plugin": "grokdebugger",
+              "path": "x-pack/platform/plugins/private/grokdebugger/server/plugin.ts"
             },
             {
               "plugin": "indexLifecycleManagement",
@@ -836,6 +968,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 58,
+          "columnNumber": 3,
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
@@ -862,6 +996,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 65,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -877,6 +1013,8 @@
       "label": "LicensingPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+      "lineNumber": 71,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -887,7 +1025,15 @@
           "tags": [],
           "label": "license$",
           "description": [
-            "\nSteam of licensing information {@link ILicense}."
+            "\nSteam of licensing information ",
+            {
+              "pluginId": "licensing",
+              "scope": "server",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-server.ILicense",
+              "text": "ILicense"
+            },
+            "."
           ],
           "signature": [
             "Observable",
@@ -902,6 +1048,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 73,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -912,7 +1060,14 @@
           "tags": [],
           "label": "getLicense",
           "description": [
-            "\nRetrieves the {@link ILicense | licensing information}"
+            "\nRetrieves the ",
+            {
+              "pluginId": "licensing",
+              "scope": "server",
+              "docId": "kibLicensingPluginApi",
+              "section": "def-server.ILicense",
+              "text": "licensing information"
+            }
           ],
           "signature": [
             "() => Promise<",
@@ -926,6 +1081,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 78,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -952,6 +1109,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 83,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -990,6 +1149,8 @@
             ">; }"
           ],
           "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 88,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1004,7 +1165,10 @@
                 "IClusterClient"
               ],
               "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+              "lineNumber": 94,
+              "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "IClusterClient",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -1019,6 +1183,8 @@
                 "number"
               ],
               "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+              "lineNumber": 95,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1045,6 +1211,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 97,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }

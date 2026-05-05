@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { PanelSettingsGetter } from './types';
 
 const registry = new Map<string, PanelSettingsGetter<object>>();
@@ -33,7 +32,7 @@ export const registerPanelPlacementSettings = <SerializedState extends object = 
  */
 export const getPanelPlacementSettings = async <SerializedState extends object = object>(
   embeddableType: string,
-  serializedState?: SerializedPanelState<SerializedState>
+  serializedState?: SerializedState
 ) => {
   const panelSettingsGetter = registry.get(embeddableType);
   if (!panelSettingsGetter) return undefined;

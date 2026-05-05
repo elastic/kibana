@@ -19,7 +19,13 @@ import type {
   OutputPreset,
   AgentlessPolicy,
 } from '../../common/types';
-import type { AgentStatus, AgentType, FleetServerAgentComponent } from '../../common/types/models';
+import type {
+  AgentStatus,
+  AgentType,
+  AgentUpgrade,
+  FleetServerAgentComponent,
+} from '../../common/types/models';
+import type { AgentPolicyAgentVersionCondition } from '../../common/types/models/agent_policy';
 
 import type {
   PackagePolicy,
@@ -39,6 +45,7 @@ import type {
   CloudProvider,
   CloudConnectorVars,
   AccountType,
+  VerificationStatus,
 } from '../../common/types/models/cloud_connector';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
@@ -73,6 +80,10 @@ export interface AgentPolicySOAttributes {
   global_data_tags?: Array<{ name: string; value: string | number }>;
   agentless?: AgentlessPolicy;
   version?: string;
+  has_agent_version_conditions?: boolean;
+  is_verifier?: boolean;
+  min_agent_version?: string | null;
+  package_agent_version_conditions?: AgentPolicyAgentVersionCondition[] | null;
 }
 
 export interface AgentSOAttributes {
@@ -92,13 +103,14 @@ export interface AgentSOAttributes {
   policy_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'disconnected';
   last_checkin_message?: string;
   tags?: string[];
   components?: FleetServerAgentComponent[];
   packages?: string[];
   namespaces?: string[];
   last_known_status?: AgentStatus;
+  upgrade?: AgentUpgrade;
 }
 
 export interface FleetProxySOAttributes {
@@ -147,6 +159,7 @@ export interface PackagePolicySOAttributes {
   secret_references?: SecretReference[];
   package?: PackagePolicyPackage;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   elasticsearch?: {
     privileges?: {
       cluster?: string[];
@@ -156,6 +169,8 @@ export interface PackagePolicySOAttributes {
   overrides?: any | null;
   bump_agent_policy_revision?: boolean;
   latest_revision?: boolean;
+  inputs_for_versions?: Record<string, PackagePolicyInput[]>;
+  package_agent_version_condition?: string;
 }
 
 export interface OutputSoBaseAttributes {
@@ -168,6 +183,8 @@ export interface OutputSoBaseAttributes {
   is_internal?: boolean;
   is_preconfigured?: boolean;
   config_yaml?: string | null;
+  otel_exporter_config_yaml?: string | null;
+  otel_disable_beatsauth?: boolean | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
@@ -268,6 +285,7 @@ export interface SettingsSOAttributes {
   output_secret_storage_requirements_met?: boolean;
   action_secret_storage_requirements_met?: boolean;
   ssl_secret_storage_requirements_met?: boolean;
+  download_source_auth_secret_storage_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
   delete_unenrolled_agents?: {
@@ -294,9 +312,14 @@ export interface DownloadSourceSOAttributes {
   source_id?: string;
   proxy_id?: string | null;
   ssl?: string | null; // encrypted ssl field
+  auth?: string | null; // encrypted auth field
   secrets?: {
     ssl?: {
       key?: { id: string };
+    };
+    auth?: {
+      password?: { id: string };
+      api_key?: { id: string };
     };
   };
 }
@@ -308,7 +331,9 @@ export interface CloudConnectorSOAttributes {
   cloudProvider: CloudProvider;
   accountType?: AccountType;
   vars: CloudConnectorVars;
-  packagePolicyCount: number;
   created_at: string;
   updated_at: string;
+  verification_status?: VerificationStatus;
+  verification_started_at?: string;
+  verification_failed_at?: string;
 }

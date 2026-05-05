@@ -18,6 +18,8 @@
         "label": "License",
         "description": [],
         "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               "({ pluginName, logger }: SetupSettings) => void"
             ],
             "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -46,7 +50,10 @@
                   "SetupSettings"
                 ],
                 "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
+                "lineNumber": 46,
+                "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetupSettings",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -64,6 +71,8 @@
               "({ pluginId, minimumLicenseType, licensing }: StartSettings) => void"
             ],
             "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -78,7 +87,10 @@
                   "StartSettings"
                 ],
                 "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
+                "lineNumber": 51,
+                "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "StartSettings",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -110,6 +122,8 @@
               "<any>>"
             ],
             "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -127,7 +141,10 @@
                   ">"
                 ],
                 "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
+                "lineNumber": 98,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -142,6 +159,8 @@
             "label": "isEsSecurityEnabled",
             "description": [],
             "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

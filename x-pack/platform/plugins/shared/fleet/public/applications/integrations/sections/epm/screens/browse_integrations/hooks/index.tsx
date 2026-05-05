@@ -10,105 +10,171 @@ import { useCallback, useMemo } from 'react';
 import { searchIdField, useLocalSearch } from '../../../../../hooks';
 
 import { useAvailablePackages } from '../../home/hooks/use_available_packages';
-import type { ExtendedIntegrationCategory } from '../../home/category_facets';
 import type { IntegrationCardItem } from '../../home';
+
+import { useUrlFilters } from './url_filters';
+import { useUrlCategories, useSetUrlCategory } from './url_categories';
 
 export function useBrowseIntegrationHook({
   prereleaseIntegrationsEnabled,
 }: {
   prereleaseIntegrationsEnabled: boolean;
 }) {
+  const { category: selectedCategory, subCategory: selectedSubCategory } = useUrlCategories();
+  const setUrlCategory = useSetUrlCategory();
   const {
     initialSelectedCategory,
-    selectedCategory,
-    setCategory,
     allCategories,
-    mainCategories,
-    onlyAgentlessFilter,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    searchTerm,
-    setSearchTerm: setSearchTermState,
-    setUrlandPushHistory,
-    setUrlandReplaceHistory,
-    filteredCards: originalFilteredCards,
-    availableSubCategories,
-    selectedSubCategory,
-    setSelectedSubCategory,
+    allCards: originalFilteredCards,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
-  const localSearch = useLocalSearch(originalFilteredCards, !!isLoading);
+  const urlFilters = useUrlFilters();
 
-  const filteredCards = useMemo(() => {
+  const localSearch = useLocalSearch(originalFilteredCards, !!isLoading);
+  const searchTerm = urlFilters.q ?? urlFilters.q !== '' ? urlFilters.q : undefined;
+
+  const sortedCards: IntegrationCardItem[] = useMemo(() => {
+    const sortKey = urlFilters.sort ?? 'recent-old';
+
+    if (sortKey === 'a-z') {
+      return [...originalFilteredCards].sort((a, b) => {
+        return a.title.localeCompare(b.title);
+      });
+    } else if (sortKey === 'z-a') {
+      return [...originalFilteredCards].sort((a, b) => {
+        return b.title.localeCompare(a.title);
+      });
+    } else {
+      // TODO implement recent-old and old-recent sorting when we have a date field
+      return originalFilteredCards;
+    }
+  }, [originalFilteredCards, urlFilters.sort]);
+
+  // Cards filtered by non-category filters (search, status, setup method, signal).
+  // Used to compute accurate category counts in the sidebar.
+  const nonCategoryFilteredCards = useMemo(() => {
     const searchResults = searchTerm
       ? (localSearch?.search(searchTerm) as IntegrationCardItem[])?.map(
           (match) => match[searchIdField]
         ) ?? []
       : [];
 
-    return searchTerm
-      ? originalFilteredCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
-      : originalFilteredCards;
-  }, [localSearch, searchTerm, originalFilteredCards]);
+    let cards = searchTerm
+      ? sortedCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
+      : sortedCards;
+
+    // Apply status filters
+    const statusFilters = urlFilters.status;
+    if (statusFilters && statusFilters.length > 0) {
+      const filterDeprecated = statusFilters.includes('deprecated');
+
+      if (filterDeprecated) {
+        cards = cards.filter((card) => {
+          return 'isDeprecated' in card && card.isDeprecated === true;
+        });
+      }
+    }
+
+    // Apply setup method filters (union: show cards matching ANY selected method)
+    const setupMethodFilters = urlFilters.setupMethod;
+    if (setupMethodFilters && setupMethodFilters.length > 0) {
+      cards = cards.filter((card) => {
+        return setupMethodFilters.some((method) => {
+          switch (method) {
+            case 'agentless':
+              return card.supportsAgentless === true;
+            case 'elastic_agent':
+              return card.type === 'integration' || card.type === 'input';
+            default:
+              return false;
+          }
+        });
+      });
+    }
+
+    // Apply signal filters (union: show cards matching ANY selected signal)
+    const signalFilters = urlFilters.signal;
+    if (signalFilters && signalFilters.length > 0) {
+      cards = cards.filter((card) => signalFilters.some((s) => card.signalTypes?.includes(s)));
+    }
+
+    return cards;
+  }, [
+    localSearch,
+    searchTerm,
+    sortedCards,
+    urlFilters.status,
+    urlFilters.setupMethod,
+    urlFilters.signal,
+  ]);
+
+  // Apply category filter on top of non-category filters
+  const filteredCards = useMemo(() => {
+    if (selectedCategory || selectedSubCategory) {
+      return nonCategoryFilteredCards.filter((c) => {
+        if (selectedCategory === '') {
+          return true;
+        }
+        if (!selectedSubCategory) return c.categories.includes(selectedCategory);
+
+        return c.categories.includes(selectedSubCategory);
+      });
+    }
+
+    return nonCategoryFilteredCards;
+  }, [nonCategoryFilteredCards, selectedCategory, selectedSubCategory]);
+
+  // Recompute category counts based on non-category filtered cards so
+  // sidebar counts reflect active filters (e.g. agentless, search, signal).
+  const filteredAllCategories = useMemo(() => {
+    return allCategories.map((category) => {
+      if (category.id === '') {
+        return { ...category, count: nonCategoryFilteredCards.length };
+      }
+      const count = nonCategoryFilteredCards.filter((card) =>
+        card.categories.includes(category.id)
+      ).length;
+      return { ...category, count };
+    });
+  }, [allCategories, nonCategoryFilteredCards]);
+
+  const filteredMainCategories = useMemo(() => {
+    return filteredAllCategories.filter((category) => category.parent_id === undefined);
+  }, [filteredAllCategories]);
+
+  const availableSubCategories = useMemo(() => {
+    return filteredAllCategories?.filter((c) => c.parent_id === selectedCategory);
+  }, [filteredAllCategories, selectedCategory]);
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
-      setCategory(id as ExtendedIntegrationCategory);
-      setSearchTermState('');
-      setSelectedSubCategory(undefined);
-      setUrlandPushHistory({
-        searchString: '',
-        categoryId: id,
-        subCategoryId: '',
-        onlyAgentless: onlyAgentlessFilter,
-      });
+      setUrlCategory({ category: id });
     },
-    [
-      setCategory,
-      setSearchTermState,
-      setSelectedSubCategory,
-      setUrlandPushHistory,
-      onlyAgentlessFilter,
-    ]
+    [setUrlCategory]
   );
 
-  const setSearchTerm = useCallback(
-    (term: string) => {
-      setSearchTermState(term);
-      setUrlandReplaceHistory({
-        searchString: term,
-        categoryId: selectedCategory,
-        subCategoryId: selectedSubCategory || '',
-      });
-    },
-    [setSearchTermState, selectedCategory, selectedSubCategory, setUrlandReplaceHistory]
-  );
+  const onSortChange = useCallback((sortKey: string) => {}, []);
 
   return {
     initialSelectedCategory,
     selectedCategory,
-    setCategory,
-    allCategories,
-    mainCategories,
-    onlyAgentlessFilter,
+    allCategories: filteredAllCategories,
+    mainCategories: filteredMainCategories,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    searchTerm,
-    setSearchTerm,
-    setUrlandPushHistory,
-    setUrlandReplaceHistory,
     filteredCards,
     availableSubCategories,
-    selectedSubCategory,
-    setSelectedSubCategory,
     onCategoryChange,
+    onSortChange,
   };
 }

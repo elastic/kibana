@@ -25,6 +25,8 @@
           "{ readonly tiers: Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; } & { enabled: boolean; }>; }"
         ],
         "path": "src/core/packages/pricing/server-internal/src/pricing_config.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -39,6 +41,8 @@
         "label": "pricingConfig",
         "description": [],
         "path": "src/core/packages/pricing/server-internal/src/pricing_config.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,6 +54,8 @@
             "label": "path",
             "description": [],
             "path": "src/core/packages/pricing/server-internal/src/pricing_config.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -95,6 +101,8 @@
               "<(Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined>; }>; }>"
             ],
             "path": "src/core/packages/pricing/server-internal/src/pricing_config.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

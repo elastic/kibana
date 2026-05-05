@@ -81,6 +81,16 @@ export const getLegendAction = (
       return null;
     }
 
+    // Don't show filter actions for computed columns
+    const hasComputedColumn = filterActionData.some((data) => {
+      const column = data.table.columns[data.column];
+      return column?.isComputedColumn === true;
+    });
+
+    if (hasComputedColumn) {
+      return null;
+    }
+
     const filterHandler = ({ negate }: { negate?: boolean } = {}) => {
       onFilter({ data: filterActionData, negate });
     };

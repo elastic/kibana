@@ -165,7 +165,7 @@ describe('useGetCases', () => {
       filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         search: '123',
-        searchFields: ['incremental_id.text'],
+        searchFields: ['cases.incremental_id.text'],
         owner: ['securitySolution'],
       },
       queryParams: DEFAULT_QUERY_PARAMS,

@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import useEvent from 'react-use/lib/useEvent';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { SharedConversationCallout } from './shared_conversation_callout';
 import { AssistantBody } from './assistant_body';
 import { useCurrentConversation } from './use_current_conversation';
@@ -35,7 +36,6 @@ import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
-import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeader } from './assistant_header';
@@ -124,6 +124,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Connector details
   const { data: connectors, isFetchedAfterMount: isFetchedConnectors } = useLoadConnectors({
     http,
+    featureId: 'elastic_assistant',
     settings,
   });
   const defaultConnector = useMemo(
@@ -192,10 +193,8 @@ const AssistantComponent: React.FC<Props> = ({
         : (connectors?.length ?? 0) === 0,
     [connectors?.length, conversations]
   );
-  const isDisabled = useMemo(
-    () => isWelcomeSetup || !isAssistantEnabled || isInitialLoad,
-    [isWelcomeSetup, isAssistantEnabled, isInitialLoad]
-  );
+
+  const isChatDisabled = isWelcomeSetup || !isAssistantEnabled || isInitialLoad;
 
   // Settings modal state (so it isn't shared between assistant instances like Timeline)
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
@@ -242,8 +241,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEvent('keydown', onKeyDown);
 
-  // Show missing connector callout if no connectors are configured
-
+  // Show missing connector callout if the current conversation's connector doesn't exist in the connectors list
   const showMissingConnectorCallout = useMemo(() => {
     if (
       !isLoadingCurrentUserConversations &&
@@ -263,9 +261,7 @@ const AssistantComponent: React.FC<Props> = ({
     return false;
   }, [isFetchedConnectors, connectors, currentConversation, isLoadingCurrentUserConversations]);
 
-  const isSendingDisabled = useMemo(() => {
-    return isDisabled || showMissingConnectorCallout;
-  }, [showMissingConnectorCallout, isDisabled]);
+  const isSendingDisabled = isChatDisabled || showMissingConnectorCallout;
 
   // Fixes initial render not showing buttons as code block controls are added to the DOM really late
   useEffect(() => {
@@ -307,6 +303,8 @@ const AssistantComponent: React.FC<Props> = ({
     setSelectedPromptContexts,
     setCurrentConversation,
   });
+
+  const isHeaderDisabled = !isAssistantEnabled || isInitialLoad || isLoadingChatSend;
 
   useEffect(() => {
     if (
@@ -484,7 +482,7 @@ const AssistantComponent: React.FC<Props> = ({
                     defaultConnector={defaultConnector}
                     isAssistantEnabled={isAssistantEnabled}
                     isConversationOwner={isConversationOwner}
-                    isDisabled={isDisabled || isLoadingChatSend}
+                    isDisabled={isHeaderDisabled}
                     isLoading={isInitialLoad}
                     isSettingsModalVisible={isSettingsModalVisible}
                     onChatCleared={handleOnChatCleared}
@@ -524,7 +522,7 @@ const AssistantComponent: React.FC<Props> = ({
                     }
                   `}
                   banner={
-                    !isDisabled &&
+                    !isChatDisabled &&
                     isFetchedConnectors && (
                       <AssistantConversationBanner
                         isSettingsModalVisible={isSettingsModalVisible}
@@ -573,7 +571,7 @@ const AssistantComponent: React.FC<Props> = ({
                           overflow: auto;
                         `}
                       >
-                        {!isDisabled &&
+                        {!isChatDisabled &&
                           Object.keys(promptContexts).length !== selectedPromptContextsCount && (
                             <EuiFlexGroup>
                               <EuiFlexItem>
@@ -618,7 +616,7 @@ const AssistantComponent: React.FC<Props> = ({
                         </EuiFlexGroup>
                       </EuiPanel>
 
-                      {!isDisabled && (
+                      {!isChatDisabled && (
                         <EuiPanel
                           css={css`
                             background: ${euiTheme.colors.backgroundBaseSubdued};

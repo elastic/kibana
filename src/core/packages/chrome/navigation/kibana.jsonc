@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/core-chrome-navigation",
-  "owner": "@elastic/eui-team",
-  "group": "platform",
-  "visibility": "private"
-}

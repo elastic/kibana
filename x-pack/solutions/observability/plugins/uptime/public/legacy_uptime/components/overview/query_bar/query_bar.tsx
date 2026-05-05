@@ -37,9 +37,7 @@ export const QueryBar = () => {
 
   const {
     appName,
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = services;
   const { query, setQuery, submitImmediately } = useQueryBar();
 
@@ -59,7 +57,7 @@ export const QueryBar = () => {
       <QueryStringInput
         indexPatterns={dataView ? [dataView] : []}
         nonKqlMode="text"
-        iconType="search"
+        iconType="magnify"
         isClearable={true}
         onChange={(queryN) => {
           if (queryN?.language === SyntaxType.text) {

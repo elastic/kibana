@@ -9,8 +9,8 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { usePhaseColors } from '@kbn/data-lifecycle-phases';
 import type { Phases } from '../../../../../../common/types';
-import { usePhaseColors } from '../../../../lib';
 
 const useStyles = ({ enabled, phase }: { enabled: boolean; phase: string }) => {
   const { euiTheme } = useEuiTheme();
@@ -30,10 +30,6 @@ const useStyles = ({ enabled, phase }: { enabled: boolean; phase: string }) => {
         : phaseIconColors[phase as keyof typeof phaseIconColors]};
       ${!enabled && `margin: ${euiTheme.size.s};`}
     `,
-    icon:
-      phase === 'delete'
-        ? euiTheme.colors.backgroundFilledText
-        : euiTheme.colors.backgroundBasePlain,
   };
 };
 interface Props {
@@ -46,9 +42,9 @@ export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
   return (
     <div css={styles.container}>
       {enabled ? (
-        <EuiIcon color={styles.icon} type={phase === 'delete' ? 'trash' : 'check'} />
+        <EuiIcon type={phase === 'delete' ? 'trash' : 'check'} aria-hidden={true} />
       ) : (
-        <EuiIcon type={'dot'} size={'s'} />
+        <EuiIcon type={'dot'} size={'s'} aria-hidden={true} />
       )}
     </div>
   );

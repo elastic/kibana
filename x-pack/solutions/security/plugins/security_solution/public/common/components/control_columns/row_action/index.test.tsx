@@ -8,6 +8,7 @@
 import { TableId } from '@kbn/securitysolution-data-table';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import type { RowActionProps } from '.';
 import { RowAction } from '.';
 import { defaultHeaders, TestProviders } from '../../../mock';
 import { getDefaultControlColumn } from '../../../../timelines/components/timeline/body/control_columns';
@@ -21,6 +22,7 @@ import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandabl
 import { createExpandableFlyoutApiMock } from '../../../mock/expandable_flyout';
 import { useUserPrivileges } from '../../user_privileges';
 import { initialUserPrivilegesState } from '../../user_privileges/user_privileges_context';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -33,11 +35,18 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../utils/route/use_route_spy');
+jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 const mockOpenFlyout = jest.fn();
 jest.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
+const mockOpenSystemFlyout = jest.fn();
+const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
+  <div>{'MockDocumentFlyoutWrapper'}</div>
+));
 jest.mock('../../../lib/kibana', () => {
   const original = jest.requireActual('../../../lib/kibana');
   return {
@@ -47,10 +56,20 @@ jest.mock('../../../lib/kibana', () => {
       services: {
         ...original.useKibana().services,
         telemetry: mockedTelemetry,
+        overlays: {
+          ...original.useKibana().services.overlays,
+          openSystemFlyout: mockOpenSystemFlyout,
+        },
       },
     }),
   };
 });
+jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+}));
+jest.mock('../../../../flyout_v2/document/document_flyout_wrapper', () => ({
+  DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
+}));
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -59,6 +78,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 jest.mock('../../user_privileges');
+jest.mock('../../../hooks/use_experimental_features');
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -75,7 +95,12 @@ describe('RowAction', () => {
       _id: '1',
     },
   };
-  const defaultProps = {
+  const defaultProps: RowActionProps = {
+    esHitRecord: {
+      _id: '1',
+      _index: 'test-index',
+      _source: {},
+    },
     columnHeaders: defaultHeaders,
     controlColumn: getDefaultControlColumn(5)[0],
     data: sampleData,
@@ -85,6 +110,7 @@ describe('RowAction', () => {
     loadingEventIds: [],
     onRowSelected: jest.fn(),
     onRuleChange: jest.fn(),
+    refetch: jest.fn(),
     selectedEventIds: {},
     tableId: TableId.test,
     width: 100,
@@ -109,6 +135,7 @@ describe('RowAction', () => {
     });
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
     (useRouteSpy as jest.Mock).mockReturnValue([mockRouteSpy]);
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
     jest.clearAllMocks();
   });
 
@@ -142,6 +169,42 @@ describe('RowAction', () => {
         },
       },
     });
+  });
+
+  test('should open expandable flyout when newFlyoutSystemEnabled is disabled', () => {
+    const wrapper = render(
+      <TestProviders>
+        <RowAction {...defaultProps} />
+      </TestProviders>
+    );
+
+    fireEvent.click(wrapper.getByTestId('expand-event'));
+
+    expect(mockOpenFlyout).toHaveBeenCalled();
+    expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
+  });
+
+  test('should open system flyout when newFlyoutSystemEnabled is enabled', () => {
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    const refetch = jest.fn();
+
+    const wrapper = render(
+      <TestProviders>
+        <RowAction {...defaultProps} refetch={refetch} />
+      </TestProviders>
+    );
+
+    fireEvent.click(wrapper.getByTestId('expand-event'));
+
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
+    expect(mockOpenSystemFlyout).toHaveBeenCalled();
+    const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
+    expect(flyoutElement.props.documentId).toBe('1');
+    expect(flyoutElement.props.indexName).toBeUndefined();
+    expect(flyoutElement.props.renderCellActions).toBeDefined();
+    expect(flyoutElement.props.onAlertUpdated).toEqual(expect.any(Function));
+    flyoutElement.props.onAlertUpdated();
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   describe('privileges', () => {

@@ -137,7 +137,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -201,431 +201,435 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       class="euiBasicTable c3"
       data-test-subj="paginated-basic-table"
     >
-      <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
-        id="__table_generated-id"
-        tabindex="-1"
+      <div
+        class="emotion-euiContainerCSS"
       >
-        <caption
-          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-        />
-        <thead>
-          <tr>
-            <th
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_IP_0"
-              role="columnheader"
-              scope="col"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-              >
-                <span
-                  class="eui-textTruncate"
-                  title="IP"
-                >
-                  IP
-                </span>
-              </div>
-            </th>
-            <th
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Domain_1"
-              role="columnheader"
-              scope="col"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-              >
-                <span
-                  class="eui-textTruncate"
-                  title="Domain"
-                >
-                  Domain
-                </span>
-              </div>
-            </th>
-            <th
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Autonomous system_2"
-              role="columnheader"
-              scope="col"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-              >
-                <span
-                  class="eui-textTruncate"
-                  title="Autonomous system"
-                >
-                  Autonomous system
-                </span>
-              </div>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.network.bytes_in_3"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Bytes in"
-                    >
-                      Bytes in
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="descending"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.network.bytes_out_4"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Bytes out"
-                    >
-                      Bytes out
-                    </span>
-                    <span
-                      class="euiTableSortIcon"
-                      data-euiicon-type="sortDown"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.source.flows_5"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Flows"
-                    >
-                      Flows
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="css-0"
+        <table
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+          id="__table_generated-id"
+          tabindex="-1"
         >
-          <tr
-            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-          >
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+          <caption
+            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+          />
+          <thead>
+            <tr>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_IP_0"
+                role="columnheader"
+                scope="col"
+                style="width: 20%;"
               >
                 <div
-                  data-test-subj="cellActions-renderContent-source.ip"
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                 >
-                  <div>
-                    <div
-                      class="euiPopover emotion-euiPopover-inline-block"
-                    >
-                      <div>
-                        <button
-                          class="euiLink emotion-euiLink-primary"
-                          data-test-subj="network-details"
-                          type="button"
-                        >
-                          8.8.8.8
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <span
+                    class="eui-textTruncate"
+                    title="IP"
+                  >
+                    IP
+                  </span>
                 </div>
-                 
+              </th>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Domain_1"
+                role="columnheader"
+                scope="col"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Domain"
+                  >
+                    Domain
+                  </span>
+                </div>
+              </th>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Autonomous system_2"
+                role="columnheader"
+                scope="col"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Autonomous system"
+                  >
+                    Autonomous system
+                  </span>
+                </div>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.network.bytes_in_3"
+                role="columnheader"
+                scope="col"
+              >
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
-                  data-test-subj="country-flag"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  🇺🇸
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Bytes in"
+                      >
+                        Bytes in
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
                 </span>
-                 
-                US
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </th>
+              <th
+                aria-sort="descending"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.network.bytes_out_4"
+                role="columnheader"
+                scope="col"
               >
-                test.domain.com
-                 
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-              >
-                <div
-                  data-test-subj="cellActions-renderContent-source.as.organization.name"
-                >
-                  <div>
-                    <div
-                      class="euiPopover emotion-euiPopover-inline-block"
-                    >
-                      <div>
-                        Google, Inc
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                 
-                 
-                <div
-                  data-test-subj="cellActions-renderContent-source.as.number"
-                >
-                  <div>
-                    <div
-                      class="euiPopover emotion-euiPopover-inline-block"
-                    >
-                      <div>
-                        15169
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                 
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                3.6GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                1GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                12,345
-              </div>
-            </td>
-          </tr>
-          <tr
-            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-          >
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-              >
-                <div
-                  data-test-subj="cellActions-renderContent-source.ip"
-                >
-                  <div>
-                    <div
-                      class="euiPopover emotion-euiPopover-inline-block"
-                    >
-                      <div>
-                        <button
-                          class="euiLink emotion-euiLink-primary"
-                          data-test-subj="network-details"
-                          type="button"
-                        >
-                          9.9.9.9
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                 
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
-                  data-test-subj="country-flag"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  🇲🇾
+                  <button
+                    class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Bytes out"
+                      >
+                        Bytes out
+                      </span>
+                      <span
+                        class="euiTableSortIcon"
+                        data-euiicon-type="sortDown"
+                      />
+                    </div>
+                  </button>
                 </span>
-                 
-                MY
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.source.flows_5"
+                role="columnheader"
+                scope="col"
               >
-                test.domain.net
-                 
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Flows"
+                      >
+                        Flows
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="css-0"
+          >
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
+              >
                 <div
-                  class="css-19lowmu-subtext"
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <div
-                    class="euiPopover emotion-euiPopover-inline-block"
-                    id="networkTopSourceFlow-top-talkers-table-9_9_9_9-popover"
+                    data-test-subj="cellActions-renderContent-source.ip"
                   >
-                    <button
-                      class="euiLink emotion-euiLink-primary"
-                      data-test-subj="overflow-button"
-                      type="button"
-                    >
-                      +1 More
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-              >
-                <div
-                  data-test-subj="cellActions-renderContent-source.as.organization.name"
-                >
-                  <div>
-                    <div
-                      class="euiPopover emotion-euiPopover-inline-block"
-                    >
-                      <div>
-                        TM Net, Internet Service Provider
+                    <div>
+                      <div
+                        class="euiPopover emotion-euiPopover-inline-block"
+                      >
+                        <div>
+                          <button
+                            class="euiLink emotion-euiLink-primary"
+                            data-test-subj="network-details"
+                            type="button"
+                          >
+                            8.8.8.8
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
+                   
+                  <span
+                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    data-test-subj="country-flag"
+                  >
+                    🇺🇸
+                  </span>
+                   
+                  US
                 </div>
-                 
-                 
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
+              >
                 <div
-                  data-test-subj="cellActions-renderContent-source.as.number"
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  <div>
-                    <div
-                      class="euiPopover emotion-euiPopover-inline-block"
-                    >
-                      <div>
-                        4788
+                  test.domain.com
+                   
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <div
+                    data-test-subj="cellActions-renderContent-source.as.organization.name"
+                  >
+                    <div>
+                      <div
+                        class="euiPopover emotion-euiPopover-inline-block"
+                      >
+                        <div>
+                          Google, Inc
+                        </div>
                       </div>
                     </div>
                   </div>
+                   
+                   
+                  <div
+                    data-test-subj="cellActions-renderContent-source.as.number"
+                  >
+                    <div>
+                      <div
+                        class="euiPopover emotion-euiPopover-inline-block"
+                      >
+                        <div>
+                          15169
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                   
                 </div>
-                 
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
               >
-                3.6GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  3.6GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
               >
-                1GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  1GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
               >
-                12,345
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  12,345
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <div
+                    data-test-subj="cellActions-renderContent-source.ip"
+                  >
+                    <div>
+                      <div
+                        class="euiPopover emotion-euiPopover-inline-block"
+                      >
+                        <div>
+                          <button
+                            class="euiLink emotion-euiLink-primary"
+                            data-test-subj="network-details"
+                            type="button"
+                          >
+                            9.9.9.9
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                   
+                  <span
+                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    data-test-subj="country-flag"
+                  >
+                    🇲🇾
+                  </span>
+                   
+                  MY
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  test.domain.net
+                   
+                  <div
+                    class="css-19lowmu-subtext"
+                  >
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                      id="networkTopSourceFlow-top-talkers-table-9_9_9_9-popover"
+                    >
+                      <button
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="overflow-button"
+                        type="button"
+                      >
+                        +1 More
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <div
+                    data-test-subj="cellActions-renderContent-source.as.organization.name"
+                  >
+                    <div>
+                      <div
+                        class="euiPopover emotion-euiPopover-inline-block"
+                      >
+                        <div>
+                          TM Net, Internet Service Provider
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                   
+                   
+                  <div
+                    data-test-subj="cellActions-renderContent-source.as.number"
+                  >
+                    <div>
+                      <div
+                        class="euiPopover emotion-euiPopover-inline-block"
+                      >
+                        <div>
+                          4788
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                   
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  3.6GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  1GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  12,345
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <div
-      class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup c4 emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -643,13 +647,13 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
               >
                 Rows per page: 10
               </span>
               <span
                 color="inherit"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </button>
@@ -682,7 +686,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowLeft"
+              data-euiicon-type="chevronSingleLeft"
             />
           </button>
           <ul
@@ -703,7 +707,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     1
                   </span>
@@ -723,7 +727,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     2
                   </span>
@@ -743,7 +747,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     3
                   </span>
@@ -763,7 +767,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     4
                   </span>
@@ -783,7 +787,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     5
                   </span>
@@ -802,7 +806,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowRight"
+              data-euiicon-type="chevronSingleRight"
             />
           </button>
         </nav>
@@ -949,7 +953,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -1013,483 +1017,487 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       class="euiBasicTable c3"
       data-test-subj="paginated-basic-table"
     >
-      <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
-        id="__table_generated-id"
-        tabindex="-1"
+      <div
+        class="emotion-euiContainerCSS"
       >
-        <caption
-          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-        />
-        <thead>
-          <tr>
-            <th
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_IP_0"
-              role="columnheader"
-              scope="col"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-              >
-                <span
-                  class="eui-textTruncate"
-                  title="IP"
-                >
-                  IP
-                </span>
-              </div>
-            </th>
-            <th
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Domain_1"
-              role="columnheader"
-              scope="col"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-              >
-                <span
-                  class="eui-textTruncate"
-                  title="Domain"
-                >
-                  Domain
-                </span>
-              </div>
-            </th>
-            <th
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Autonomous system_2"
-              role="columnheader"
-              scope="col"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-              >
-                <span
-                  class="eui-textTruncate"
-                  title="Autonomous system"
-                >
-                  Autonomous system
-                </span>
-              </div>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.network.bytes_in_3"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Bytes in"
-                    >
-                      Bytes in
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="descending"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.network.bytes_out_4"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Bytes out"
-                    >
-                      Bytes out
-                    </span>
-                    <span
-                      class="euiTableSortIcon"
-                      data-euiicon-type="sortDown"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.source.flows_5"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Flows"
-                    >
-                      Flows
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.source.destination_ips_6"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Destination IPs"
-                    >
-                      Destination IPs
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="css-0"
+        <table
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+          id="__table_generated-id"
+          tabindex="-1"
         >
-          <tr
-            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-          >
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+          <caption
+            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+          />
+          <thead>
+            <tr>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_IP_0"
+                role="columnheader"
+                scope="col"
+                style="width: 20%;"
               >
                 <div
-                  data-test-subj="cellActions-renderContent-source.ip"
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                 >
-                  <div>
-                    <div
-                      class="euiPopover emotion-euiPopover-inline-block"
-                    >
-                      <div>
-                        <button
-                          class="euiLink emotion-euiLink-primary"
-                          data-test-subj="network-details"
-                          type="button"
-                        >
-                          8.8.8.8
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <span
+                    class="eui-textTruncate"
+                    title="IP"
+                  >
+                    IP
+                  </span>
                 </div>
-                 
+              </th>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Domain_1"
+                role="columnheader"
+                scope="col"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Domain"
+                  >
+                    Domain
+                  </span>
+                </div>
+              </th>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Autonomous system_2"
+                role="columnheader"
+                scope="col"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Autonomous system"
+                  >
+                    Autonomous system
+                  </span>
+                </div>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.network.bytes_in_3"
+                role="columnheader"
+                scope="col"
+              >
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
-                  data-test-subj="country-flag"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  🇺🇸
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Bytes in"
+                      >
+                        Bytes in
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
                 </span>
-                 
-                US
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </th>
+              <th
+                aria-sort="descending"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.network.bytes_out_4"
+                role="columnheader"
+                scope="col"
               >
-                test.domain.com
-                 
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-              >
-                <div
-                  data-test-subj="cellActions-renderContent-source.as.organization.name"
-                >
-                  <div>
-                    <div
-                      class="euiPopover emotion-euiPopover-inline-block"
-                    >
-                      <div>
-                        Google, Inc
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                 
-                 
-                <div
-                  data-test-subj="cellActions-renderContent-source.as.number"
-                >
-                  <div>
-                    <div
-                      class="euiPopover emotion-euiPopover-inline-block"
-                    >
-                      <div>
-                        15169
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                 
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                3.6GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                1GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                12,345
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                12
-              </div>
-            </td>
-          </tr>
-          <tr
-            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-          >
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-              >
-                <div
-                  data-test-subj="cellActions-renderContent-source.ip"
-                >
-                  <div>
-                    <div
-                      class="euiPopover emotion-euiPopover-inline-block"
-                    >
-                      <div>
-                        <button
-                          class="euiLink emotion-euiLink-primary"
-                          data-test-subj="network-details"
-                          type="button"
-                        >
-                          9.9.9.9
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                 
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
-                  data-test-subj="country-flag"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  🇲🇾
+                  <button
+                    class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Bytes out"
+                      >
+                        Bytes out
+                      </span>
+                      <span
+                        class="euiTableSortIcon"
+                        data-euiicon-type="sortDown"
+                      />
+                    </div>
+                  </button>
                 </span>
-                 
-                MY
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.source.flows_5"
+                role="columnheader"
+                scope="col"
               >
-                test.domain.net
-                 
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Flows"
+                      >
+                        Flows
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.source.destination_ips_6"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Destination IPs"
+                      >
+                        Destination IPs
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="css-0"
+          >
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
+              >
                 <div
-                  class="css-19lowmu-subtext"
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <div
-                    class="euiPopover emotion-euiPopover-inline-block"
-                    id="networkTopSourceFlow-top-talkers-table-9_9_9_9-popover"
+                    data-test-subj="cellActions-renderContent-source.ip"
                   >
-                    <button
-                      class="euiLink emotion-euiLink-primary"
-                      data-test-subj="overflow-button"
-                      type="button"
-                    >
-                      +1 More
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-              >
-                <div
-                  data-test-subj="cellActions-renderContent-source.as.organization.name"
-                >
-                  <div>
-                    <div
-                      class="euiPopover emotion-euiPopover-inline-block"
-                    >
-                      <div>
-                        TM Net, Internet Service Provider
+                    <div>
+                      <div
+                        class="euiPopover emotion-euiPopover-inline-block"
+                      >
+                        <div>
+                          <button
+                            class="euiLink emotion-euiLink-primary"
+                            data-test-subj="network-details"
+                            type="button"
+                          >
+                            8.8.8.8
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
+                   
+                  <span
+                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    data-test-subj="country-flag"
+                  >
+                    🇺🇸
+                  </span>
+                   
+                  US
                 </div>
-                 
-                 
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
+              >
                 <div
-                  data-test-subj="cellActions-renderContent-source.as.number"
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  <div>
-                    <div
-                      class="euiPopover emotion-euiPopover-inline-block"
-                    >
-                      <div>
-                        4788
+                  test.domain.com
+                   
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <div
+                    data-test-subj="cellActions-renderContent-source.as.organization.name"
+                  >
+                    <div>
+                      <div
+                        class="euiPopover emotion-euiPopover-inline-block"
+                      >
+                        <div>
+                          Google, Inc
+                        </div>
                       </div>
                     </div>
                   </div>
+                   
+                   
+                  <div
+                    data-test-subj="cellActions-renderContent-source.as.number"
+                  >
+                    <div>
+                      <div
+                        class="euiPopover emotion-euiPopover-inline-block"
+                      >
+                        <div>
+                          15169
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                   
                 </div>
-                 
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
               >
-                3.6GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  3.6GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
               >
-                1GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  1GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
               >
-                12,345
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  12,345
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
               >
-                12
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  12
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <div
+                    data-test-subj="cellActions-renderContent-source.ip"
+                  >
+                    <div>
+                      <div
+                        class="euiPopover emotion-euiPopover-inline-block"
+                      >
+                        <div>
+                          <button
+                            class="euiLink emotion-euiLink-primary"
+                            data-test-subj="network-details"
+                            type="button"
+                          >
+                            9.9.9.9
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                   
+                  <span
+                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    data-test-subj="country-flag"
+                  >
+                    🇲🇾
+                  </span>
+                   
+                  MY
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  test.domain.net
+                   
+                  <div
+                    class="css-19lowmu-subtext"
+                  >
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                      id="networkTopSourceFlow-top-talkers-table-9_9_9_9-popover"
+                    >
+                      <button
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="overflow-button"
+                        type="button"
+                      >
+                        +1 More
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <div
+                    data-test-subj="cellActions-renderContent-source.as.organization.name"
+                  >
+                    <div>
+                      <div
+                        class="euiPopover emotion-euiPopover-inline-block"
+                      >
+                        <div>
+                          TM Net, Internet Service Provider
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                   
+                   
+                  <div
+                    data-test-subj="cellActions-renderContent-source.as.number"
+                  >
+                    <div>
+                      <div
+                        class="euiPopover emotion-euiPopover-inline-block"
+                      >
+                        <div>
+                          4788
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                   
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  3.6GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  1GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  12,345
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  12
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <div
-      class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup c4 emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1507,13 +1515,13 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
               >
                 Rows per page: 10
               </span>
               <span
                 color="inherit"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </button>
@@ -1546,7 +1554,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowLeft"
+              data-euiicon-type="chevronSingleLeft"
             />
           </button>
           <ul
@@ -1567,7 +1575,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     1
                   </span>
@@ -1587,7 +1595,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     2
                   </span>
@@ -1607,7 +1615,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     3
                   </span>
@@ -1627,7 +1635,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     4
                   </span>
@@ -1647,7 +1655,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     5
                   </span>
@@ -1666,7 +1674,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowRight"
+              data-euiicon-type="chevronSingleRight"
             />
           </button>
         </nav>

@@ -92,10 +92,10 @@ export const MappingsFilter: React.FC<Props> = ({
   );
   const filterByFieldTypeButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       isDisabled={isJSONVisible}
-      onClick={() => setIsFilterPopoverVisible(!isFilterByPopoverVisible)}
+      onClick={() => setIsFilterPopoverVisible((v) => !v)}
       numFilters={
         !isAddingFields
           ? state.filter.selectedOptions.length
@@ -138,7 +138,7 @@ export const MappingsFilter: React.FC<Props> = ({
       <EuiPopover
         button={filterByFieldTypeButton}
         isOpen={isFilterByPopoverVisible}
-        closePopover={() => setIsFilterPopoverVisible(!isFilterByPopoverVisible)}
+        closePopover={() => setIsFilterPopoverVisible(false)}
         anchorPosition="downCenter"
         data-test-subj="indexDetailsMappingsFilter"
         panelPaddingSize="none"

@@ -35,6 +35,7 @@
       "usageCollection",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "presentationUtil",
       "charts",
       "fieldsMetadata"
@@ -52,7 +53,8 @@
       "telemetry",
       "licenseManagement",
       "observabilityAIAssistant",
-      "embeddableEnhanced",
+      "agentBuilder",
+      "observabilityAgentBuilder",
       "maintenanceWindows"
     ],
     "requiredBundles": [
@@ -62,7 +64,8 @@
       "kibanaUtils",
       "observability",
       "spaces",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
+      "observabilityAgentBuilder"
     ]
   }
 }

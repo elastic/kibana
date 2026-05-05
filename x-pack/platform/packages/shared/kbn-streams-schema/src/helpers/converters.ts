@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash';
 import { Streams } from '../models/streams';
+import { QueryStream } from '../models/query';
 
 /**
  * Parses a stream upsert request and converts it into the corresponding stream definition.
@@ -22,14 +23,6 @@ export const convertUpsertRequestIntoDefinition = (
   request: Streams.all.UpsertRequest
 ): Streams.all.Definition => {
   const now = new Date().toISOString();
-
-  if (Streams.GroupStream.UpsertRequest.is(request)) {
-    return {
-      ...request.stream,
-      name,
-      updated_at: now,
-    };
-  }
 
   if (Streams.WiredStream.UpsertRequest.is(request)) {
     return {
@@ -61,6 +54,14 @@ export const convertUpsertRequestIntoDefinition = (
     };
   }
 
+  if (QueryStream.UpsertRequest.is(request)) {
+    return {
+      ...request.stream,
+      name,
+      updated_at: now,
+    };
+  }
+
   const _exhaustiveCheck: never = request;
   throw new Error(
     `Couldn't parse stream upsert request. Please ensure you're passing a valid request. Received: ${JSON.stringify(
@@ -79,15 +80,6 @@ export const convertUpsertRequestIntoDefinition = (
 export const convertGetResponseIntoUpsertRequest = (
   getResponse: Streams.all.GetResponse
 ): Streams.all.UpsertRequest => {
-  if (Streams.GroupStream.GetResponse.is(getResponse)) {
-    return {
-      dashboards: getResponse.dashboards,
-      queries: getResponse.queries,
-      rules: getResponse.rules,
-      stream: omit(getResponse.stream, ['name', 'updated_at']),
-    };
-  }
-
   if (Streams.WiredStream.GetResponse.is(getResponse)) {
     return {
       dashboards: getResponse.dashboards,
@@ -115,6 +107,15 @@ export const convertGetResponseIntoUpsertRequest = (
           processing: omit(getResponse.stream.ingest.processing, ['updated_at']),
         },
       },
+    };
+  }
+
+  if (QueryStream.GetResponse.is(getResponse)) {
+    return {
+      dashboards: getResponse.dashboards,
+      queries: getResponse.queries,
+      rules: getResponse.rules,
+      stream: omit(getResponse.stream, ['name', 'updated_at']),
     };
   }
 

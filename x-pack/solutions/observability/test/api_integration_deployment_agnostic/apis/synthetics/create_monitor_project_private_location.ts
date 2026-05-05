@@ -25,7 +25,10 @@ import {
 } from './sample_data/test_project_monitor_policy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 import { comparePolicies } from './sample_data/test_policy';
 
@@ -37,6 +40,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
+    const config = getService('config');
+    const kibanaProtocol = config.get('servers.kibana.protocol') as string;
+    const kibanaHostname = config.get('servers.kibana.hostname') as string;
+    const kibanaPort = config.get('servers.kibana.port') as number;
+    // Omit default ports (80 for http, 443 for https) to match server.publicBaseUrl behavior
+    const isDefaultPort =
+      (kibanaProtocol === 'https' && kibanaPort === 443) ||
+      (kibanaProtocol === 'http' && kibanaPort === 80);
+    const kibanaServerUrl = isDefaultPort
+      ? `${kibanaProtocol}://${kibanaHostname}`
+      : `${kibanaProtocol}://${kibanaHostname}:${kibanaPort}`;
 
     let projectMonitors: ProjectMonitorsRequest;
     let httpProjectMonitors: ProjectMonitorsRequest;
@@ -60,7 +74,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       viewerUser = await samlAuth.createM2mApiKeyWithRoleScope('viewer');
 
@@ -87,7 +101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
     });
 
     beforeEach(async () => {
@@ -1384,6 +1398,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           projectId: project,
           locationName: testPrivateLocationName,
           locationId: testPolicyId,
+          kibanaUrl: kibanaServerUrl,
         })
       );
     });
@@ -1692,7 +1707,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
-          monitors: [{ ...httpProjectMonitors.monitors[1], id: projectMonitors.monitors[0].id }],
+          monitors: [
+            {
+              ...httpProjectMonitors.monitors[1],
+              id: projectMonitors.monitors[0].id,
+              maintenance_windows: [],
+            },
+          ],
         })
         .expect(200);
       expect(body).eql({
@@ -1719,6 +1740,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               hash: 'ekrjelkjrelkjre',
               id: projectMonitors.monitors[0].id,
               locations: [],
+              maintenance_windows: [],
               privateLocations: [testPrivateLocationName],
               name: 'My Monitor 3',
               response: {
@@ -1810,6 +1832,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               ...httpProjectMonitors.monitors[1],
               locations: ['does not exist'],
+              maintenance_windows: [],
             },
           ],
         })
@@ -1845,6 +1868,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               hash: 'ekrjelkjrelkjre',
               id: httpProjectMonitors.monitors[1].id,
               locations: ['does not exist'],
+              maintenance_windows: [],
               privateLocations: [testPrivateLocationName],
               name: 'My Monitor 3',
               response: {
@@ -1889,6 +1913,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...httpProjectMonitors.monitors[1],
               locations: [],
               privateLocations: ['does not exist'],
+              maintenance_windows: [],
             },
           ],
         })
@@ -1937,6 +1962,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               type: 'http',
               urls: ['http://localhost:9200'],
               locations: [],
+              maintenance_windows: [],
               params: {
                 testGlobalParam2: 'testGlobalParamOverwrite',
                 testLocal1: 'testLocalParamsValue',
@@ -1968,6 +1994,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...httpProjectMonitors.monitors[1],
               privateLocations: [],
               locations: [],
+              maintenance_windows: [],
             },
           ],
         })
@@ -2014,6 +2041,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               type: 'http',
               urls: ['http://localhost:9200'],
               locations: [],
+              maintenance_windows: [],
               params: {
                 testGlobalParam2: 'testGlobalParamOverwrite',
                 testLocal1: 'testLocalParamsValue',
@@ -2073,7 +2101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(resp.status).to.eql(403);
         expect(resp.body.message).to.eql(
-          'You do not have sufficient permissions to update monitors in all required spaces.'
+          'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.'
         );
       } finally {
         await monitorTestService.deleteMonitorByJourney(
@@ -2133,7 +2161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(resp.status).to.eql(403);
         expect(resp.body.message).to.eql(
-          'You do not have sufficient permissions to update monitors in all required spaces.'
+          'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.'
         );
       } finally {
         await monitorTestService.deleteMonitorByJourney(
@@ -2154,19 +2182,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_ID_2 = `test-space-2-${uuidv4()}`;
       const SPACE_NAME_1 = `test-space-name-1-${uuidv4()}`;
       const SPACE_NAME_2 = `test-space-name-2-${uuidv4()}`;
-      const spaceScopedPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation(
-        SPACE_ID_1
-      );
 
       await kibanaServer.spaces.create({ id: SPACE_ID_1, name: SPACE_NAME_1 });
       await kibanaServer.spaces.create({ id: SPACE_ID_2, name: SPACE_NAME_2 });
+
+      const allSpacesPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation([
+        '*',
+      ]);
 
       try {
         // Use a monitor with spaces: ['*']
         const monitorId = uuidv4();
         const monitor = {
           ...httpProjectMonitors.monitors[1],
-          privateLocations: [spaceScopedPrivateLocation.label],
+          privateLocations: [allSpacesPrivateLocation.label],
           id: monitorId,
           name: `All spaces Monitor ${monitorId}`,
           spaces: ['*'],

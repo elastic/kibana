@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { indexExplorer } from '@kbn/onechat-genai-utils';
+import { indexExplorer } from '@kbn/agent-builder-genai-utils';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import type { GraphNode, TranslatePanelGraphParams } from '../../types';
 import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
@@ -27,6 +27,7 @@ export const getSelectIndexPatternNode = (params: TranslatePanelGraphParams): Gr
       nlQuery,
       limit: 1,
       esClient: params.esScopedClient.asInternalUser,
+      indexPattern: '*,-lookup*',
       model: {
         chatModel: params.model,
         connector: await params.inference.getConnectorById(params.connectorId, params.request),

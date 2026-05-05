@@ -13,8 +13,10 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiMarkdownFormat,
+  EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import {
@@ -25,7 +27,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { EntityHighlightsResponse } from '../types';
-import { useGradientStyles } from './entity_highlights_gradients';
 
 interface EntityHighlightsResultProps {
   assistantResult: {
@@ -43,8 +44,6 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   generatedAt,
   onRefresh,
 }) => {
-  const { gradientPanelStyle } = useGradientStyles();
-
   const anonymizedResult = useAnonymizedResponse(assistantResult, showAnonymizedValues);
   const textToCopy = useMemo(() => formatTextToCopy(anonymizedResult), [anonymizedResult]);
 
@@ -53,7 +52,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   }
 
   return (
-    <div css={gradientPanelStyle}>
+    <EuiPanel hasBorder={true}>
       {anonymizedResult.highlights.length > 0 ? (
         anonymizedResult.highlights.map((highlight, index) => (
           <React.Fragment key={index}>
@@ -61,7 +60,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
               <strong>{highlight.title}</strong>
             </EuiText>
             <EuiSpacer size="xs" />
-            <EuiMarkdownFormat textSize="xs" color="subdued">
+            <EuiMarkdownFormat textSize="xs" color="default">
               {highlight.text}
             </EuiMarkdownFormat>
             {index < anonymizedResult.highlights.length - 1 && <EuiSpacer size="m" />}
@@ -80,28 +79,28 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
           <EuiHorizontalRule margin="m" />
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="documentation" size="m" />
+              <EuiIcon type="documentation" size="m" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="default">
-                <strong>
+              <EuiTitle size="xxs">
+                <h4>
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.entityDetails.highlights.recommendedActions"
                     defaultMessage="Recommended actions"
                   />
-                </strong>
-              </EuiText>
+                </h4>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-          <EuiMarkdownFormat textSize="xs" color="subdued">
+          <EuiMarkdownFormat textSize="xs" color="default">
             {anonymizedResult.recommendedActions.map((action) => `- ${action}`).join('\n')}
           </EuiMarkdownFormat>
         </>
       )}
-
       <>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="xs" />
+        <EuiHorizontalRule margin="m" />
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             {generatedAt && anonymizedResult.highlights.length > 0 && (
@@ -127,7 +126,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
                     { defaultMessage: 'Regenerate summary' }
                   )}
                   onClick={onRefresh}
-                  size="s"
+                  size="xs"
                 />
               </EuiFlexItem>
               {textToCopy && (
@@ -141,7 +140,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
                           { defaultMessage: 'Copy summary' }
                         )}
                         onClick={copy}
-                        size="s"
+                        size="xs"
                       />
                     )}
                   </EuiCopy>
@@ -151,7 +150,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
-    </div>
+    </EuiPanel>
   );
 };
 

@@ -10,7 +10,15 @@
         "tags": [],
         "label": "CoreSetup",
         "description": [
-          "\nThe service identifier of {@link CoreSetupContext}."
+          "\nThe service identifier of ",
+          {
+            "pluginId": "@kbn/core-di-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreDiBrowserPluginApi",
+            "section": "def-public.CoreSetupContext",
+            "text": "CoreSetupContext"
+          },
+          "."
         ],
         "signature": [
           "<K extends keyof ",
@@ -22,6 +30,8 @@
           "<{}, unknown>[K]>"
         ],
         "path": "src/core/packages/di/browser/src/services/lifecycle.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -39,7 +49,10 @@
               "K"
             ],
             "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "lineNumber": 24,
+            "columnNumber": 63,
             "deprecated": false,
+            "docsReferencedTypeName": "K",
             "trackAdoption": false
           }
         ],
@@ -52,7 +65,15 @@
         "tags": [],
         "label": "CoreStart",
         "description": [
-          "\nThe service identifier of {@link CoreStartContext}."
+          "\nThe service identifier of ",
+          {
+            "pluginId": "@kbn/core-di-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreDiBrowserPluginApi",
+            "section": "def-public.CoreStartContext",
+            "text": "CoreStartContext"
+          },
+          "."
         ],
         "signature": [
           "<K extends keyof ",
@@ -64,6 +85,8 @@
           "[K]>"
         ],
         "path": "src/core/packages/di/browser/src/services/lifecycle.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -81,7 +104,10 @@
               "K"
             ],
             "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "lineNumber": 24,
+            "columnNumber": 63,
             "deprecated": false,
+            "docsReferencedTypeName": "K",
             "trackAdoption": false
           }
         ],
@@ -94,7 +120,15 @@
         "tags": [],
         "label": "PluginInitializer",
         "description": [
-          "\nThe service identifier of {@link PluginInitializerContext}."
+          "\nThe service identifier of ",
+          {
+            "pluginId": "@kbn/core-di-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreDiBrowserPluginApi",
+            "section": "def-public.PluginInitializerContext",
+            "text": "PluginInitializerContext"
+          },
+          "."
         ],
         "signature": [
           "<K extends keyof ",
@@ -106,6 +140,8 @@
           "<object>[K]>"
         ],
         "path": "src/core/packages/di/browser/src/services/lifecycle.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -123,7 +159,10 @@
               "K"
             ],
             "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "lineNumber": 24,
+            "columnNumber": 63,
             "deprecated": false,
+            "docsReferencedTypeName": "K",
             "trackAdoption": false
           }
         ],
@@ -146,6 +185,8 @@
           " | undefined"
         ],
         "path": "src/core/packages/di/browser/src/react.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -171,6 +212,8 @@
           " | undefined) => T"
         ],
         "path": "src/core/packages/di/browser/src/react.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -188,7 +231,10 @@
               "<T>"
             ],
             "path": "src/core/packages/di/browser/src/react.ts",
+            "lineNumber": 35,
+            "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "ServiceIdentifier",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -206,7 +252,10 @@
               " | undefined"
             ],
             "path": "src/core/packages/di/browser/src/react.ts",
+            "lineNumber": 35,
+            "columnNumber": 62,
             "deprecated": false,
+            "docsReferencedTypeName": "GetOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -233,6 +282,8 @@
           ") => T | undefined"
         ],
         "path": "src/core/packages/di/browser/src/react.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -250,7 +301,10 @@
               "<T>"
             ],
             "path": "src/core/packages/di/browser/src/react.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ServiceIdentifier",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -267,7 +321,10 @@
               "OptionalGetOptions"
             ],
             "path": "src/core/packages/di/browser/src/react.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OptionalGetOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -297,6 +354,8 @@
           "<HistoryLocationState>, any[]>"
         ],
         "path": "src/core/packages/di/browser/src/services/application.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -316,6 +375,8 @@
           "<HistoryLocationState>"
         ],
         "path": "src/core/packages/di/browser/src/services/application.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -326,7 +387,15 @@
             "tags": [],
             "label": "mount",
             "description": [
-              "\nThe mount function that will be called when the application is mounted.\nThe mount parameters can be injected using {@link ApplicationParameters}."
+              "\nThe mount function that will be called when the application is mounted.\nThe mount parameters can be injected using ",
+              {
+                "pluginId": "@kbn/core-di-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreDiBrowserPluginApi",
+                "section": "def-public.ApplicationParameters",
+                "text": "ApplicationParameters"
+              },
+              "."
             ],
             "signature": [
               "() => ",
@@ -336,6 +405,8 @@
               ">"
             ],
             "path": "src/core/packages/di/browser/src/services/application.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -384,6 +455,8 @@
           "<unknown>, any[]>), any[]>"
         ],
         "path": "src/core/packages/di/browser/src/services/application.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -409,6 +482,8 @@
           "<unknown>, any[]>"
         ],
         "path": "src/core/packages/di/browser/src/services/application.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -430,6 +505,8 @@
           " | undefined>"
         ],
         "path": "src/core/packages/di/browser/src/react.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -37,6 +37,8 @@
           "IVersion"
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,6 +53,8 @@
               "(version: string) => void"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -65,6 +69,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+                "lineNumber": 21,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -84,6 +90,8 @@
               "node_modules/@types/semver/classes/semver"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -100,6 +108,8 @@
               "() => number"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -116,6 +126,8 @@
               "() => number"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -132,6 +144,8 @@
               "() => number"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -152,6 +166,8 @@
         "label": "ReindexStatus",
         "description": [],
         "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -169,6 +185,8 @@
           "\"upgrade-assistant-ml-upgrade-operation\""
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -184,6 +202,8 @@
           "\"upgrade-assistant-reindex-operation\""
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -199,6 +219,8 @@
           "\"/api/upgrade_assistant\""
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

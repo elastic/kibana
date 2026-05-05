@@ -23,17 +23,17 @@ import type {
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
 
+import type { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import type {
-  lensItemAttributesSchema,
+  lensItemAttributesSchemaV1,
   lensCMCreateOptionsSchema,
   lensCMUpdateOptionsSchema,
   lensCMSearchOptionsSchema,
-  lensItemSchema,
+  lensItemSchemaV1,
 } from './schema';
-import type { LENS_CONTENT_TYPE } from '../../../common/constants';
 
-export type LensAttributes = TypeOf<typeof lensItemAttributesSchema>;
-export type LensItem = TypeOf<typeof lensItemSchema>;
+export type LensAttributes = TypeOf<typeof lensItemAttributesSchemaV1>;
+export type LensItem = TypeOf<typeof lensItemSchemaV1>;
 
 export type LensCreateOptions = TypeOf<typeof lensCMCreateOptionsSchema>;
 export type LensUpdateOptions = TypeOf<typeof lensCMUpdateOptionsSchema>;

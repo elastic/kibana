@@ -95,7 +95,7 @@ class LicenseStatus extends React.PureComponent<LicenseStatusProps> {
         />
       );
     } else {
-      icon = <EuiIcon color="success" type="checkInCircleFilled" size="l" />;
+      icon = <EuiIcon color="success" type="checkCircleFill" size="l" />;
       message = expiryDate ? (
         <Fragment>
           <FormattedMessage

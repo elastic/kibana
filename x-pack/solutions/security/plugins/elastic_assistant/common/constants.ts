@@ -11,6 +11,9 @@ export {
 } from '@kbn/security-solution-features/constants';
 
 export const PLUGIN_ID = 'elasticAssistant';
+
+export const AI_ASSISTANT_INFERENCE_FEATURE_ID = 'ai_assistant';
+export const ELASTIC_AI_ASSISTANT_INFERENCE_FEATURE_ID = 'elastic_assistant';
 export const PLUGIN_NAME = 'elasticAssistant';
 
 export const BASE_PATH = '/internal/elastic_assistant';

@@ -25,12 +25,11 @@ import type {
   StreamsSignificantEventsSuggestionsGeneratedEventProps,
   WiredStreamsStatusChangedProps,
   StreamsFeatureIdentificationSavedProps,
-  StreamsFeatureIdentificationIdentifiedProps,
   StreamsFeatureIdentificationDeletedProps,
-  StreamsDescriptionGeneratedProps,
   StreamsProcessingSimulationSamplesFetchLatencyProps,
   StreamsPartitioningSamplesFetchLatencyProps,
   StreamsTabVisitedProps,
+  StreamsInsightFeedbackProps,
 } from './types';
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
@@ -50,13 +49,12 @@ import {
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
-  STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
-  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
   STREAMS_PARTITIONING_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
   STREAMS_TAB_VISITED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE,
 } from './constants';
 
 export class StreamsTelemetryClient {
@@ -128,10 +126,6 @@ export class StreamsTelemetryClient {
     this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE, params);
   }
 
-  public trackFeaturesIdentified(params: StreamsFeatureIdentificationIdentifiedProps) {
-    this.analytics.reportEvent(STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE, params);
-  }
-
   public trackFeaturesSaved(params: StreamsFeatureIdentificationSavedProps) {
     this.analytics.reportEvent(STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE, params);
   }
@@ -140,12 +134,12 @@ export class StreamsTelemetryClient {
     this.analytics.reportEvent(STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE, params);
   }
 
-  public trackStreamDescriptionGenerated(params: StreamsDescriptionGeneratedProps) {
-    this.analytics.reportEvent(STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE, params);
-  }
-
   public trackTabVisited(params: StreamsTabVisitedProps) {
     this.analytics.reportEvent(STREAMS_TAB_VISITED_EVENT_TYPE, params);
+  }
+
+  public trackInsightFeedback(params: StreamsInsightFeedbackProps) {
+    this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE, params);
   }
 
   public startTrackingAIDissectSuggestionLatency(

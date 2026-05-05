@@ -38,6 +38,8 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_bundler.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +60,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_bundler.ts",
+            "lineNumber": 42,
+            "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "BundlerConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -85,6 +90,8 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_merger.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -105,7 +112,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_merger.ts",
+            "lineNumber": 36,
+            "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "MergerConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -123,6 +133,8 @@
         "label": "BundlerConfig",
         "description": [],
         "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_bundler.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -134,6 +146,8 @@
             "label": "sourceGlob",
             "description": [],
             "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_bundler.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -145,6 +159,8 @@
             "label": "outputFilePath",
             "description": [],
             "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_bundler.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -159,6 +175,8 @@
               "BundleOptions | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_bundler.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -173,6 +191,8 @@
         "label": "MergerConfig",
         "description": [],
         "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_merger.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -187,6 +207,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_merger.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -198,6 +220,8 @@
             "label": "outputFilePath",
             "description": [],
             "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_merger.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -212,6 +236,8 @@
               "MergerOptions | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_merger.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

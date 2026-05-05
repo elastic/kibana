@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { createErrorResult } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common';
+import { z } from '@kbn/zod/v4';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
+import { ToolResultType } from '@kbn/agent-builder-common';
 import type { CoreSetup } from '@kbn/core/server';
 import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
 

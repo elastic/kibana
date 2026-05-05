@@ -186,6 +186,9 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, chartsService }) => {
       onTableChange={onTableChange}
       pagination={pagination}
       sorting={sorting}
+      tableCaption={i18n.translate('xpack.ml.overview.anomalyDetection.tableCaption', {
+        defaultMessage: 'Anomaly detection groups',
+      })}
       data-test-subj="mlOverviewTableAnomalyDetection"
     />
   );

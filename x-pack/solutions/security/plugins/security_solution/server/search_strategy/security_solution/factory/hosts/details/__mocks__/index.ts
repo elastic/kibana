@@ -450,11 +450,7 @@ export const formattedSearchStrategyResponse = {
               aggs: { timestamp: { max: { field: '@timestamp' } } },
             },
             host_ip: {
-              terms: {
-                script: { source: "doc['host.ip']", lang: 'painless' },
-                size: 10,
-                order: { timestamp: 'desc' },
-              },
+              terms: { field: 'host.ip', value_type: 'ip', size: 10, order: { timestamp: 'desc' } },
               aggs: { timestamp: { max: { field: '@timestamp' } } },
             },
             host_mac: {
@@ -515,7 +511,23 @@ export const formattedSearchStrategyResponse = {
           query: {
             bool: {
               filter: [
-                { term: { 'host.name': 'bastion00.siem.estc.dev' } },
+                {
+                  bool: {
+                    must: [],
+                    filter: [
+                      { match_all: {} },
+                      {
+                        match_phrase: {
+                          'host.name': {
+                            query: 'bastion00.siem.estc.dev',
+                          },
+                        },
+                      },
+                    ],
+                    should: [],
+                    must_not: [],
+                  },
+                },
                 {
                   range: {
                     '@timestamp': {
@@ -623,10 +635,8 @@ export const expectedDsl = {
     },
     host_ip: {
       terms: {
-        script: {
-          source: "doc['host.ip']",
-          lang: 'painless',
-        },
+        field: 'host.ip',
+        value_type: 'ip',
         size: 10,
         order: {
           timestamp: 'desc',
@@ -805,8 +815,22 @@ export const expectedDsl = {
     bool: {
       filter: [
         {
-          term: {
-            'host.name': 'bastion00.siem.estc.dev',
+          bool: {
+            filter: [
+              {
+                match_all: {},
+              },
+              {
+                match_phrase: {
+                  'host.name': {
+                    query: 'bastion00.siem.estc.dev',
+                  },
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
           },
         },
         {

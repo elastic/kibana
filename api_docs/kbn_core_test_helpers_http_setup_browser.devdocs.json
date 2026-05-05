@@ -40,6 +40,8 @@
           "; }"
         ],
         "path": "src/core/packages/test-helpers/http-setup-browser/src/http_test_setup.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -54,7 +56,10 @@
               "SetupTap"
             ],
             "path": "src/core/packages/test-helpers/http-setup-browser/src/http_test_setup.ts",
+            "lineNumber": 26,
+            "columnNumber": 23,
             "deprecated": false,
+            "docsReferencedTypeName": "SetupTap",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -81,6 +86,8 @@
           ">) => void"
         ],
         "path": "src/core/packages/test-helpers/http-setup-browser/src/http_test_setup.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -107,7 +114,10 @@
               "InternalInjectedMetadataSetup"
             ],
             "path": "src/core/packages/test-helpers/http-setup-browser/src/http_test_setup.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ReturnType",
             "trackAdoption": false
           },
           {
@@ -126,7 +136,10 @@
               "FatalErrorsSetup"
             ],
             "path": "src/core/packages/test-helpers/http-setup-browser/src/http_test_setup.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ReturnType",
             "trackAdoption": false
           }
         ],

@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { getFunctionsSuggestions } from '../../definitions/utils';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import {
@@ -18,6 +18,7 @@ import {
 } from '../complete_items';
 import { Location } from '../types';
 import { isRestartingExpression } from '../../definitions/utils/shared';
+import { endsWithAssignment } from '../../definitions/utils/regex';
 
 export async function autocomplete(
   query: string,
@@ -28,7 +29,7 @@ export async function autocomplete(
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   // ROW col0 = /
-  if (/=\s*$/.test(innerText)) {
+  if (endsWithAssignment(innerText)) {
     return getFunctionsSuggestions({
       location: Location.ROW,
       types: ['any'],

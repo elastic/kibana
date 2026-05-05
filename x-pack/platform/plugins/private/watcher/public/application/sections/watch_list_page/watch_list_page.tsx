@@ -172,7 +172,7 @@ export const WatchListPage = () => {
         <EuiButton
           fill
           data-test-subj="createWatchButton"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopOverOpen(!isPopoverOpen)}
         >
@@ -495,6 +495,9 @@ export const WatchListPage = () => {
     content = (
       <div data-test-subj="watchesTableContainer">
         <EuiInMemoryTable
+          tableCaption={i18n.translate('xpack.watcher.sections.watchList.watchTable.caption', {
+            defaultMessage: 'List of watches and their status',
+          })}
           onTableChange={({ page: { index, size } }: CriteriaWithPagination<never>) =>
             setPagination({ pageIndex: index, pageSize: size })
           }

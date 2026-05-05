@@ -38,13 +38,38 @@ function determineCachePrefix() {
   return Crypto.createHash('sha256').update(json).digest('hex').slice(0, 10);
 }
 
+/** @type {boolean} */
+let lmdbDisabledLogged = false;
+/** @type {string | undefined} */
+let lmdbDisabledReason;
+
 function lmdbAvailable() {
   try {
+    if (process.env.CODEX_SANDBOX) {
+      // Codex sandbox disallows LMDB-backed caches, so skip them entirely here.
+      lmdbDisabledReason = 'CODEX_SANDBOX is set';
+      return false;
+    }
+
     require('lmdb');
     return true;
-  } catch (error) {
+  } catch {
+    lmdbDisabledReason = 'LMDB module unavailable';
     return false;
   }
+}
+
+/**
+ * @param {string | undefined} reason
+ */
+function logLmdbDisabledOnce(reason) {
+  if (lmdbDisabledLogged) {
+    return;
+  }
+
+  lmdbDisabledLogged = true;
+  const detail = reason ? ` (${reason})` : '';
+  console.warn(`LMDB cache disabled for @kbn/babel-register${detail}`);
 }
 
 /**
@@ -70,7 +95,7 @@ function getCache() {
   }
 
   log?.end('lmdb is unavailable, disabling cache\n');
-  console.error('unable to load LMDB in this env, disabling babel/register cache');
+  logLmdbDisabledOnce(lmdbDisabledReason);
   return new (require('./no_cache_cache').NoCacheCache)();
 }
 

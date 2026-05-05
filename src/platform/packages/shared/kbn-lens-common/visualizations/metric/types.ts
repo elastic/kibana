@@ -9,6 +9,7 @@
 
 import type { LayoutDirection, MetricStyle, SecondaryMetricProps } from '@elastic/charts';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type { OptionalKeys } from 'utility-types';
 import type { CollapseFunction, LensLayerType } from '../types';
 
@@ -25,7 +26,7 @@ export type SecondaryTrend =
   | {
       type: 'dynamic';
       visuals: 'icon' | 'value' | 'both';
-      paletteId: string;
+      paletteId: KbnPaletteId;
       reversed: boolean;
       baselineValue: number | 'primary';
     };
@@ -41,19 +42,31 @@ export interface MetricVisualizationState {
   // computed by collapsing all rows
   collapseFn?: CollapseFunction;
   subtitle?: string;
-  secondaryPrefix?: string; // legacy state property
+  /**
+   * legacy state property
+   * @deprecated
+   */
+  secondaryPrefix?: string;
   secondaryLabel?: string;
   secondaryTrend?: SecondaryTrend;
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   titlesTextAlign?: MetricStyle['titlesTextAlign'];
-  valuesTextAlign?: 'left' | 'right' | 'center'; // legacy state property
+  /**
+   * legacy state property
+   * @deprecated
+   */
+  valuesTextAlign?: MetricStyle['valueTextAlign'];
   secondaryAlign?: MetricStyle['extraTextAlign'];
   primaryAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
-  titleWeight?: MetricStyle['titleWeight'];
-  primaryPosition?: MetricStyle['valuePosition'];
+  /**
+   * legacy state property
+   * @deprecated
+   */
+  titleWeight?: Extract<MetricStyle['titleWeight'], string>;
+  primaryPosition?: PrimaryMetricPosition;
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
   icon?: string;
@@ -74,7 +87,27 @@ export type MetricVisualizationStateOptionals = Pick<
   MetricVisualizationState,
   OptionalKeys<MetricVisualizationState>
 >;
-export type TitleFontWeight = MetricStyle['titleWeight'];
+
+export type MetricStateOptinalsWithDefault = Pick<
+  MetricVisualizationStateOptionals,
+  | 'titlesTextAlign'
+  | 'primaryAlign'
+  | 'secondaryAlign'
+  | 'iconAlign'
+  | 'valueFontMode'
+  | 'primaryPosition'
+  | 'secondaryLabelPosition'
+  | 'applyColorTo'
+>;
+
+export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;
+
+export type MetricLayoutWithDefault = Required<
+  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'primaryAlign'>
+> & {
+  iconAlign?: MetricStateOptinalsWithDefault['iconAlign'];
+  secondaryAlign?: MetricStateOptinalsWithDefault['secondaryAlign'];
+};
 
 export type IconPosition = MetricStyle['iconAlign'];
 

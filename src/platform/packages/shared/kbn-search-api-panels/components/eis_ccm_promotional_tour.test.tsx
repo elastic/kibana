@@ -15,6 +15,7 @@ import { EisCloudConnectPromoTour } from './eis_ccm_promotional_tour';
 import { useKibana } from '../hooks/use_kibana';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 import * as i18n from '../translations';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
 jest.mock('../hooks/use_kibana');
@@ -37,6 +38,7 @@ const mockUseKibana = (overrides?: Partial<any>) => {
           },
         },
       },
+      notifications: notificationServiceMock.createStartContract(),
       ...overrides,
     },
   });
@@ -44,7 +46,7 @@ const mockUseKibana = (overrides?: Partial<any>) => {
 
 describe('EisCloudConnectPromoTour', () => {
   const promoId = 'cloudConnectPromo';
-  const dataId = `${promoId}-cloud-connect-promo-tour`;
+  const dataId = `${promoId}-cloud-connect-tour`;
   const childTestId = 'tourChild';
 
   const renderComponent = (
@@ -70,7 +72,7 @@ describe('EisCloudConnectPromoTour', () => {
   it('renders children only when promo is not visible', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: false,
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderComponent();
@@ -82,7 +84,7 @@ describe('EisCloudConnectPromoTour', () => {
   it('renders children and does not render the tour when isReady is false', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true, // would normally show the tour
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderComponent({ isReady: false });
@@ -94,7 +96,7 @@ describe('EisCloudConnectPromoTour', () => {
   it('renders children and does not render the tour when isSelfManaged is false', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderComponent({ isSelfManaged: false });
@@ -103,10 +105,29 @@ describe('EisCloudConnectPromoTour', () => {
     expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();
   });
 
+  it('renders children and does not render the tour when tours is disabled', () => {
+    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+      isPromoVisible: true,
+      onDismissPromo: jest.fn(),
+    });
+    mockUseKibana({
+      notifications: {
+        tours: {
+          isEnabled: jest.fn().mockReturnValue(false),
+        },
+      },
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId(childTestId)).toBeInTheDocument();
+    expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();
+  });
+
   it('renders the tour when promo is visible', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderComponent();
@@ -119,7 +140,7 @@ describe('EisCloudConnectPromoTour', () => {
   it('renders CTA button and calls navigateToApp when clicked', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderComponent();
@@ -135,7 +156,7 @@ describe('EisCloudConnectPromoTour', () => {
 
   it('removes the tour from DOM after clicking Dismiss, children remain', () => {
     let visible = true;
-    const mockOnDismissTour = jest.fn(() => {
+    const mockOnDismissPromo = jest.fn(() => {
       visible = false;
     });
 
@@ -143,7 +164,7 @@ describe('EisCloudConnectPromoTour', () => {
       get isPromoVisible() {
         return visible;
       },
-      onDismissTour: mockOnDismissTour,
+      onDismissPromo: mockOnDismissPromo,
     }));
 
     const { rerender } = renderComponent();
@@ -151,7 +172,7 @@ describe('EisCloudConnectPromoTour', () => {
     expect(screen.getByTestId(dataId)).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('eisCloudConnectPromoTourCloseBtn'));
-    expect(mockOnDismissTour).toHaveBeenCalledTimes(1);
+    expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
 
     rerender(
       <EisCloudConnectPromoTour

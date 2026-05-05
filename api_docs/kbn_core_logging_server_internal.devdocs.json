@@ -24,6 +24,8 @@
           "(currentTime: number, interval: moment.Duration, modulate: boolean) => number"
         ],
         "path": "src/core/packages/logging/server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,6 +40,8 @@
               "number"
             ],
             "path": "src/core/packages/logging/server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -53,7 +57,10 @@
               "moment.Duration"
             ],
             "path": "src/core/packages/logging/server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Duration",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -68,6 +75,8 @@
               "boolean"
             ],
             "path": "src/core/packages/logging/server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -86,6 +95,8 @@
         "label": "PrebootDeps",
         "description": [],
         "path": "src/core/packages/logging/server-internal/src/logging_service.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -100,6 +111,8 @@
               "ILoggingSystem"
             ],
             "path": "src/core/packages/logging/server-internal/src/logging_service.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -117,7 +130,23 @@
         "tags": [],
         "label": "appendersSchema",
         "description": [
-          "\nConfig schema for validting the shape of the `appenders` key in in {@link LoggerContextConfigType} or\n{@link LoggingConfigType}.\n"
+          "\nConfig schema for validting the shape of the `appenders` key in in ",
+          {
+            "pluginId": "@kbn/core-logging-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerInternalPluginApi",
+            "section": "def-server.LoggerContextConfigType",
+            "text": "LoggerContextConfigType"
+          },
+          " or\n",
+          {
+            "pluginId": "@kbn/core-logging-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerInternalPluginApi",
+            "section": "def-server.LoggingConfigType",
+            "text": "LoggingConfigType"
+          },
+          ".\n"
         ],
         "signature": [
           {
@@ -127,7 +156,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; fileName: string; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{ retention?: Readonly<{ maxFiles?: number | undefined; maxAccumulatedFileSize?: ",
+          "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; fileName: string; }> | Readonly<{ attributes?: Record<string, string> | undefined; layout?: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }> | undefined; } & { type: \"otel\"; url: string; headers: Record<string, string>; protocol: \"http\" | \"proto\" | \"grpc\"; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{ retention?: Readonly<{ maxFiles?: number | undefined; maxAccumulatedFileSize?: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -135,19 +164,21 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          " | undefined; removeOlderThan?: moment.Duration | undefined; } & {}> | undefined; } & { type: \"rolling-file\"; policy: Readonly<{} & { type: \"size-limit\"; size: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ByteSizeValue",
-            "text": "ByteSizeValue"
-          },
-          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; fileName: string; strategy: ",
+          " | undefined; removeOlderThan?: moment.Duration | undefined; } & {}> | undefined; } & { type: \"rolling-file\"; strategy: ",
           "NumericRollingStrategyConfig",
-          "; }>>"
+          "; policy: Readonly<{} & { type: \"size-limit\"; size: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; fileName: string; }>>"
         ],
         "path": "src/core/packages/logging/server-internal/src/appenders/appenders.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -159,7 +190,23 @@
         "tags": [],
         "label": "loggerContextConfigSchema",
         "description": [
-          "\nConfig schema for validating the inputs to the {@link LoggingServiceStart.configure} API.\nSee {@link LoggerContextConfigType}.\n"
+          "\nConfig schema for validating the inputs to the ",
+          {
+            "pluginId": "@kbn/core-logging-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerInternalPluginApi",
+            "section": "def-server.LoggingServiceStart.configure",
+            "text": "LoggingServiceStart.configure"
+          },
+          " API.\nSee ",
+          {
+            "pluginId": "@kbn/core-logging-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerInternalPluginApi",
+            "section": "def-server.LoggerContextConfigType",
+            "text": "LoggerContextConfigType"
+          },
+          ".\n"
         ],
         "signature": [
           {
@@ -187,9 +234,11 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { name: string; level: \"error\" | \"info\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\"; appenders: string[]; }>[]>; }>"
+          "<Readonly<{} & { name: string; level: \"info\" | \"error\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\"; appenders: string[]; }>[]>; }>"
         ],
         "path": "src/core/packages/logging/server-internal/src/logging_config.ts",
+        "lineNumber": 105,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -201,7 +250,23 @@
         "tags": [],
         "label": "loggerSchema",
         "description": [
-          "\nConfig schema for validating the `loggers` key in {@link LoggerContextConfigType} or {@link LoggingConfigType}.\n"
+          "\nConfig schema for validating the `loggers` key in ",
+          {
+            "pluginId": "@kbn/core-logging-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerInternalPluginApi",
+            "section": "def-server.LoggerContextConfigType",
+            "text": "LoggerContextConfigType"
+          },
+          " or ",
+          {
+            "pluginId": "@kbn/core-logging-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerInternalPluginApi",
+            "section": "def-server.LoggingConfigType",
+            "text": "LoggingConfigType"
+          },
+          ".\n"
         ],
         "signature": [
           {
@@ -235,9 +300,11 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"error\" | \"info\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\">; }>"
+          "<\"info\" | \"error\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\">; }>"
         ],
         "path": "src/core/packages/logging/server-internal/src/logging_config.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

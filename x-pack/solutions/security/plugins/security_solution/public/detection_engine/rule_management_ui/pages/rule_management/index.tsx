@@ -30,40 +30,50 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
-import { BlogPostPrebuiltRuleCustomizationCallout } from '../../components/blog_post_prebuilt_rule_customization_callout';
+import { useDeprecatedRulesTableCallout } from '../../../rule_management/components/rule_deprecation';
 import { RuleImportModal } from '../../components/rule_import_modal/rule_import_modal';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import {
-  CREATE_NEW_RULE_TOUR_ANCHOR,
-  RuleFeatureTour,
-} from '../../components/rules_table/feature_tour/rules_feature_tour';
+import { CreateRuleMenu } from '../../components/create_rule_menu';
 import { RuleSettingsModal } from '../../../rule_gaps/components/rule_settings_modal';
-import { useGapAutoFillCapabilities } from '../../../rule_gaps/logic/use_gap_auto_fill_capabilities';
+import {
+  GapAutoFillSchedulerProvider,
+  useGapAutoFillSchedulerContext,
+} from '../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { CpsMlRuleCallout } from '../../components/cps_ml_rule_callout/callout';
 
-const RulesPageComponent: React.FC = () => {
+const RulesPageContent = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const [isRuleSettingsModalOpen, openRuleSettingsModal, closeRuleSettingsModal] = useBoolState();
   const kibanaServices = useKibana().services;
-  const { navigateToApp } = kibanaServices.application;
+  const { application } = kibanaServices;
+  const { navigateToApp } = application;
 
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
-  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges;
+  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges.rules;
+  const canEditRulesManagementSettings =
+    useUserPrivileges().rulesPrivileges.rulesManagementSettings?.edit ?? false;
   const {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,
-    canCreateIndex: canCreateListsIndex,
     needsConfiguration: needsListsConfiguration,
     needsIndex: needsListsIndex,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
-  const { canAccessGapAutoFill } = useGapAutoFillCapabilities();
+  const { canEditGapAutoFill } = useGapAutoFillSchedulerContext();
+  const gapReasonDetectionEnabled = useIsExperimentalFeatureEnabled('gapReasonDetectionEnabled');
+  const canSaveAdvancedSettings = application.capabilities.advancedSettings?.save === true;
+  const canAccessRuleSettings =
+    canEditRulesManagementSettings &&
+    (canEditGapAutoFill || (gapReasonDetectionEnabled && canSaveAdvancedSettings));
 
-  const isDoesNotMatchForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
-    'doesNotMatchForIndicatorMatchRuleEnabled'
-  );
+  const aiRuleCreationEnabled = useIsExperimentalFeatureEnabled('aiRuleCreationEnabled');
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const isAiRuleCreationAvailable = aiRuleCreationEnabled && isAgentBuilderEnabled;
+  const deprecatedRulesCallout = useDeprecatedRulesTableCallout();
 
   if (
     redirectToDetections(
@@ -79,19 +89,14 @@ const RulesPageComponent: React.FC = () => {
     });
     return null;
   }
-
-  // - if lists data stream does not exist and user doesn't have enough privileges to create it,
-  // lists button should be disabled
-  // - if data stream exists and user doesn't have enough privileges to create it,
-  // user still can import value lists, so button should not be disabled if user has enough other privileges
-  const cantCreateNonExistentListIndex = needsListsIndex && !canCreateListsIndex;
   const isImportValueListDisabled =
-    cantCreateNonExistentListIndex || !canWriteListsIndex || !canEditRules || loading;
+    needsListsIndex || !canWriteListsIndex || !canEditRules || loading;
 
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingDetectionsPrivilegesCallOut />
+      <CpsMlRuleCallout />
       <MlJobCompatibilityCallout />
       <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
       <RuleImportModal
@@ -103,7 +108,7 @@ const RulesPageComponent: React.FC = () => {
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-              {canAccessGapAutoFill && (
+              {canAccessRuleSettings && (
                 <EuiButtonEmpty
                   data-test-subj="rules-settings-button"
                   iconType="gear"
@@ -116,19 +121,13 @@ const RulesPageComponent: React.FC = () => {
                 <AddElasticRulesButton isDisabled={!canReadRules || loading} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={
-                    cantCreateNonExistentListIndex
-                      ? i18n.UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP
-                      : i18n.UPLOAD_VALUE_LISTS_TOOLTIP
-                  }
-                >
+                <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>
                   <EuiButtonEmpty
                     data-test-subj="open-value-lists-modal-button"
-                    iconType="importAction"
+                    iconType="download"
                     isDisabled={isImportValueListDisabled}
                     onClick={showValueListFlyout}
+                    aria-label={`${i18n.IMPORT_VALUE_LISTS}: ${i18n.UPLOAD_VALUE_LISTS_TOOLTIP}`}
                   >
                     {i18n.IMPORT_VALUE_LISTS}
                   </EuiButtonEmpty>
@@ -137,37 +136,40 @@ const RulesPageComponent: React.FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="rules-import-modal-button"
-                  iconType="importAction"
+                  iconType="download"
                   isDisabled={!canEditRules || loading}
                   onClick={showImportModal}
                 >
                   {i18n.IMPORT_RULE}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiFlexItem grow={false} id={CREATE_NEW_RULE_TOUR_ANCHOR}>
-                <SecuritySolutionLinkButton
-                  data-test-subj="create-new-rule"
-                  fill
-                  iconType="plusInCircle"
-                  isDisabled={!canEditRules || loading}
-                  deepLinkId={SecurityPageName.rulesCreate}
-                >
-                  {i18n.ADD_NEW_RULE}
-                </SecuritySolutionLinkButton>
+              <EuiFlexItem grow={false}>
+                {isAiRuleCreationAvailable ? (
+                  <CreateRuleMenu loading={loading} isDisabled={!canEditRules || loading} />
+                ) : (
+                  <SecuritySolutionLinkButton
+                    data-test-subj="create-new-rule"
+                    fill
+                    iconType="plusCircle"
+                    isDisabled={!canEditRules || loading}
+                    deepLinkId={SecurityPageName.rulesCreate}
+                  >
+                    {i18n.ADD_NEW_RULE}
+                  </SecuritySolutionLinkButton>
+                )}
               </EuiFlexItem>
-              {isDoesNotMatchForIndicatorMatchRuleEnabled && <RuleFeatureTour />}
             </EuiFlexGroup>
           </HeaderPage>
-          {isRuleSettingsModalOpen && canAccessGapAutoFill && (
+          {isRuleSettingsModalOpen && canAccessRuleSettings && (
             <RuleSettingsModal isOpen={isRuleSettingsModalOpen} onClose={closeRuleSettingsModal} />
           )}
           <RuleUpdateCallouts shouldShowUpdateRulesCallout={canEditRules} />
           <EuiSpacer size="s" />
+          {deprecatedRulesCallout}
           <MaintenanceWindowCallout
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
-          <BlogPostPrebuiltRuleCustomizationCallout />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>
@@ -176,5 +178,11 @@ const RulesPageComponent: React.FC = () => {
     </>
   );
 };
+
+const RulesPageComponent = () => (
+  <GapAutoFillSchedulerProvider>
+    <RulesPageContent />
+  </GapAutoFillSchedulerProvider>
+);
 
 export const RulesPage = React.memo(RulesPageComponent);

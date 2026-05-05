@@ -46,6 +46,13 @@ const tableTitle = i18n.translate('indexPatternManagement.dataViewTable.tableTit
   defaultMessage: 'Data views selected for deletion',
 });
 
+const relationshipsTableCaption = i18n.translate(
+  'indexPatternManagement.dataViewTable.relationshipsTableCaption',
+  {
+    defaultMessage: 'Kibana objects using this data view',
+  }
+);
+
 export const spacesWarningText = i18n.translate(
   'indexPatternManagement.dataViewTable.deleteWarning',
   {
@@ -124,7 +131,11 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
               <EuiSpacer size="xs" />
             </>
           )}
-          <EuiBasicTable items={relationships[id]} columns={relationsColumns} />
+          <EuiBasicTable
+            tableCaption={relationshipsTableCaption}
+            items={relationships[id]}
+            columns={relationsColumns}
+          />
         </div>
       );
       itemIdToExpandedRowMapValues[id] = relationsTable;
@@ -190,7 +201,11 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
                       <EuiSpacer size="xs" />
                     </>
                   )}
-                  <EuiIcon type={itemIdToExpandedRowMapValues[id] ? 'arrowDown' : 'arrowRight'} />
+                  <EuiIcon
+                    type={
+                      itemIdToExpandedRowMapValues[id] ? 'chevronSingleDown' : 'chevronSingleRight'
+                    }
+                  />
                 </EuiFlexGroup>
               </EuiButtonEmpty>
             ) : (

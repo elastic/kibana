@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
@@ -42,17 +43,28 @@ interface Props {
   children: React.ReactChild;
   selectedTabKey: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
+  bottomHeaderContent?: React.ComponentType;
+  contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }
 
 export function MobileServiceTemplate(props: Props) {
   return (
-    <ApmServiceContextProvider>
-      <TemplateWithContext {...props} />
-    </ApmServiceContextProvider>
+    <ApmIndexSettingsContextProvider>
+      <ApmServiceContextProvider>
+        <TemplateWithContext {...props} />
+      </ApmServiceContextProvider>
+    </ApmIndexSettingsContextProvider>
   );
 }
 
-function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions }: Props) {
+function TemplateWithContext({
+  title,
+  children,
+  selectedTabKey,
+  searchBarOptions,
+  bottomHeaderContent: BottomHeaderContent,
+  contentWrapper: ContentWrapper = React.Fragment,
+}: Props) {
   const {
     path: { serviceName },
     query,
@@ -101,39 +113,48 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
   );
 
   return (
-    <ApmMainTemplate
-      pageHeader={{
-        tabs,
-        pageTitle: (
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="l">
-                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ServiceIcons
-                    serviceName={serviceName}
-                    environment={environment}
-                    start={start}
-                    end={end}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+    <ContentWrapper>
+      <ApmMainTemplate
+        searchBar={
+          <>
+            {BottomHeaderContent && <BottomHeaderContent />}
+            <MobileSearchBar {...searchBarOptions} />
+          </>
+        }
+        pageHeader={{
+          tabs,
+          pageTitle: (
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l">
+                      <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ServiceIcons
+                      serviceName={serviceName}
+                      environment={environment}
+                      start={start}
+                      end={end}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <AnalyzeDataButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      }}
-    >
-      <MobileSearchBar {...searchBarOptions} />
-      <ServiceAnomalyTimeseriesContextProvider>{children}</ServiceAnomalyTimeseriesContextProvider>
-    </ApmMainTemplate>
+              <EuiFlexItem grow={false}>
+                <AnalyzeDataButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        }}
+      >
+        <ServiceAnomalyTimeseriesContextProvider>
+          {children}
+        </ServiceAnomalyTimeseriesContextProvider>
+      </ApmMainTemplate>
+    </ContentWrapper>
   );
 }
 
@@ -211,7 +232,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append: <TechnicalPreviewBadge icon="flask" />,
     },
     {
       key: 'alerts',
@@ -230,7 +251,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append: <TechnicalPreviewBadge icon="flask" />,
       label: i18n.translate('xpack.apm.mobileServiceDetails.dashboardsTabLabel', {
         defaultMessage: 'Dashboards',
       }),

@@ -7,16 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document, Pair, YAMLMap } from 'yaml';
+import type { Document, Pair, Scalar, YAMLMap } from 'yaml';
 import { isMap, isPair, isScalar, visit } from 'yaml';
 
+/**
+ * Finds the triggers pair in the YAML document, even if it's empty or has empty items
+ * @returns The triggers pair if found, null otherwise
+ */
+export function getTriggersPair(yamlDocument: Document): Pair | null {
+  if (!yamlDocument?.contents || !isMap(yamlDocument.contents)) {
+    return null;
+  }
+
+  const contents = yamlDocument.contents;
+  if (!('items' in contents) || !contents.items) {
+    return null;
+  }
+
+  const triggersPair = contents.items.find(
+    (item) => isPair(item) && isScalar(item.key) && item.key.value === 'triggers'
+  );
+
+  return isPair(triggersPair) ? triggersPair : null;
+}
+
+/**
+ * Finds all trigger nodes in the YAML document
+ * @param yamlDocument The YAML document to search for trigger nodes
+ * @returns An array of objects containing the trigger node, trigger type, and type pair
+ */
 export function getTriggerNodes(
   yamlDocument: Document
-): Array<{ node: YAMLMap; triggerType: string; typePair: Pair }> {
+): Array<{ node: YAMLMap; triggerType: string; typePair: Pair<Scalar, Scalar> }> {
   const triggerNodes: Array<{
     node: YAMLMap;
     triggerType: string;
-    typePair: Pair;
+    typePair: Pair<Scalar, Scalar>;
   }> = [];
 
   if (!yamlDocument?.contents) {
@@ -50,7 +76,7 @@ export function getTriggerNodes(
           triggerNodes.push({
             node: triggerMapNode,
             triggerType,
-            typePair: pair, // Store the actual type pair for precise positioning
+            typePair: pair as Pair<Scalar, Scalar>,
           });
         }
       }

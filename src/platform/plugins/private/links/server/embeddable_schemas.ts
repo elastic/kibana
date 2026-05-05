@@ -9,7 +9,11 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import {
+  BY_REF_SCHEMA_META,
+  BY_VALUE_SCHEMA_META,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 import { linksArraySchema, layoutSchema } from './content_management/schema/v1/cm_services';
 
 // Links by-value state schema (contains layout and links)
@@ -18,10 +22,13 @@ const linksByValueStateSchema = schema.object({
   links: linksArraySchema,
 });
 
-// Links by-reference state schema (contains savedObjectId)
+// Links by-reference state schema (contains ref_id)
 const linksByReferenceStateSchema = schema.object({
-  savedObjectId: schema.string({
-    meta: { description: 'The ID of the saved links object' },
+  ref_id: schema.string({
+    meta: {
+      title: 'Reference ID',
+      description: 'The unique identifier of the Links library item',
+    },
   }),
 });
 
@@ -29,9 +36,7 @@ const linksByReferenceStateSchema = schema.object({
 const linksByValueEmbeddableSchema = schema.allOf(
   [linksByValueStateSchema, serializedTitlesSchema],
   {
-    meta: {
-      description: 'Links by-value embeddable schema',
-    },
+    meta: BY_VALUE_SCHEMA_META,
   }
 );
 
@@ -39,9 +44,7 @@ const linksByValueEmbeddableSchema = schema.allOf(
 const linksByReferenceEmbeddableSchema = schema.allOf(
   [linksByReferenceStateSchema, serializedTitlesSchema],
   {
-    meta: {
-      description: 'Links by-reference embeddable schema',
-    },
+    meta: BY_REF_SCHEMA_META,
   }
 );
 

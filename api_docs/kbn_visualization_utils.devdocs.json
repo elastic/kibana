@@ -46,6 +46,8 @@
           ") => string"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-utils/src/compute_interval.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,7 +68,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualization-utils/src/compute_interval.ts",
+            "lineNumber": 54,
+            "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRange",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -87,7 +92,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualization-utils/src/compute_interval.ts",
+            "lineNumber": 54,
+            "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "DataPublicPluginStart",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -106,6 +114,8 @@
           "(datasourceStates: Record<string, unknown>) => \"formBased\" | \"textBased\" | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_datasource_id.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -120,7 +130,10 @@
               "Record<string, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_datasource_id.ts",
+            "lineNumber": 10,
+            "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -170,33 +183,11 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined; }) => { references: { name: string; id: string; type: string; }[]; visualizationType: string; state: { visualization: {}; datasourceStates: Record<string, unknown>; query: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; }; title: string; version: 1; }"
+          " | undefined; }) => LensAttributesFromSuggestion"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -208,6 +199,8 @@
             "label": "{\n  filters,\n  query,\n  suggestion,\n  dataView,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
+            "lineNumber": 37,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -229,6 +222,8 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "lineNumber": 38,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -257,6 +252,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "lineNumber": 39,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -272,6 +269,8 @@
                   "<unknown, unknown> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "lineNumber": 40,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -293,6 +292,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
+                "lineNumber": 41,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -317,6 +318,8 @@
           ") => string"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_timezone.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -331,7 +334,10 @@
               "IUiSettingsClient"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_timezone.ts",
+            "lineNumber": 16,
+            "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "IUiSettingsClient",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -358,6 +364,8 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-utils/src/map_vis_to_chart_type.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -372,6 +380,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-utils/src/map_vis_to_chart_type.ts",
+            "lineNumber": 29,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -391,6 +401,8 @@
           "({ children, condition, tooltipContent, ...tooltipProps }: TooltipWrapperProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-utils/src/tooltip_wrapper.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -405,6 +417,8 @@
               "TooltipWrapperProps"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-utils/src/tooltip_wrapper.tsx",
+            "lineNumber": 20,
+            "columnNumber": 78,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -426,6 +440,8 @@
           "<T>({ onChange, value, defaultValue, }: { onChange: (val: T) => void; value: T; defaultValue?: T | undefined; }, { allowFalsyValue, wait }?: { allowFalsyValue?: boolean | undefined; wait?: number | undefined; }) => { inputValue: T; handleInputChange: (val: T) => void; initialValue: T; }"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -437,6 +453,8 @@
             "label": "{\n    onChange,\n    value,\n    defaultValue,\n  }",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
+            "lineNumber": 27,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -451,6 +469,8 @@
                   "(val: T) => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
+                "lineNumber": 28,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -465,7 +485,10 @@
                       "T"
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
+                    "lineNumber": 28,
+                    "columnNumber": 16,
                     "deprecated": false,
+                    "docsReferencedTypeName": "T",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -483,6 +506,8 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
+                "lineNumber": 29,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -497,6 +522,8 @@
                   "T | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
+                "lineNumber": 30,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -510,6 +537,8 @@
             "label": "{ allowFalsyValue, wait = DEFAULT_TIMEOUT }",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
+            "lineNumber": 32,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -524,6 +553,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
+                "lineNumber": 32,
+                "columnNumber": 50,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -538,6 +569,8 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/debounced_value.ts",
+                "lineNumber": 32,
+                "columnNumber": 77,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -558,6 +591,8 @@
         "label": "ChartType",
         "description": [],
         "path": "src/platform/packages/shared/kbn-visualization-utils/src/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

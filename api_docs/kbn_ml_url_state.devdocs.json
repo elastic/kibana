@@ -38,6 +38,8 @@
           "<T>"
         ],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 212,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -56,6 +58,8 @@
               "<T>"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 219,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -72,6 +76,8 @@
               "() => T | null"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 226,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -88,6 +94,8 @@
               "(update: Partial<T>, replaceState?: boolean | undefined) => void"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 230,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -102,7 +110,10 @@
                   "Partial<T>"
                 ],
                 "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+                "lineNumber": 230,
+                "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -117,6 +128,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+                "lineNumber": 230,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -137,6 +150,8 @@
               "(currentState: T) => void"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 237,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -151,7 +166,10 @@
                   "T"
                 ],
                 "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+                "lineNumber": 241,
+                "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -171,6 +189,8 @@
               "(callback: (update: Partial<T>, replaceState?: boolean | undefined) => void) => void"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 245,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -185,6 +205,8 @@
                   "(update: Partial<T>, replaceState?: boolean | undefined) => void"
                 ],
                 "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+                "lineNumber": 249,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -210,6 +232,8 @@
           "(queryParam: string) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -224,6 +248,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 66,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -251,6 +277,8 @@
           "<any>"
         ],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -265,6 +293,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 70,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -286,6 +316,8 @@
           ">>"
         ],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 104,
+        "columnNumber": 16,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -301,7 +333,10 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -318,6 +353,8 @@
           "({ children }: { children?: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 106,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -332,6 +369,8 @@
               "{ children?: React.ReactNode; }"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 106,
+            "columnNumber": 66,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -369,6 +408,8 @@
           "<T[\"pageUrlState\"]>]"
         ],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 366,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -383,6 +424,8 @@
               "T[\"pageKey\"]"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 367,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -398,6 +441,8 @@
               "T[\"pageUrlState\"] | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 368,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -433,6 +478,8 @@
           "<unknown>, value?: unknown, replaceState?: boolean | undefined) => void]"
         ],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 187,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -453,7 +500,10 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Accessor",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -481,6 +531,8 @@
           "<TValue>"
         ],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -495,6 +547,8 @@
               "[id: string]:  TValue"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -509,6 +563,8 @@
         "label": "ListingPageUrlState",
         "description": [],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -520,6 +576,8 @@
             "label": "pageSize",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -531,6 +589,8 @@
             "label": "pageIndex",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -542,6 +602,8 @@
             "label": "sortField",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -553,6 +615,8 @@
             "label": "sortDirection",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -567,6 +631,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -581,6 +647,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -595,6 +663,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -609,6 +679,8 @@
         "label": "PageUrlState",
         "description": [],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 254,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -620,6 +692,8 @@
             "label": "pageKey",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 255,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -634,6 +708,8 @@
               "object"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 256,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -651,9 +727,11 @@
         "label": "Accessor",
         "description": [],
         "signature": [
-          "\"_a\" | \"_g\""
+          "\"_g\" | \"_a\""
         ],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -685,6 +763,8 @@
           "<any>, value?: any, replaceState?: boolean | undefined) => void"
         ],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -697,10 +777,13 @@
             "label": "accessor",
             "description": [],
             "signature": [
-              "\"_a\" | \"_g\""
+              "\"_g\" | \"_a\""
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Accessor",
             "trackAdoption": false
           },
           {
@@ -722,6 +805,8 @@
               "<any>"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -736,6 +821,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -750,6 +837,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

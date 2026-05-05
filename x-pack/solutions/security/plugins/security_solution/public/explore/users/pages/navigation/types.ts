@@ -24,4 +24,9 @@ export type UsersComponentsQueryProps = QueryTabBodyProps & {
   indexNames: string[];
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];
+  /**
+   * User details: serialized ES query built with entity identity filters (Entity Store v2).
+   * Used by {@link AuthenticationsQueryTabBody} and {@link RiskDetailsTabBody} when set.
+   */
+  identityScopedFilterQuery?: string;
 };

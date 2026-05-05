@@ -22,15 +22,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 
 const getJobTypeList = () => (
-  <>
-    <EuiListGroup flush>
-      <EuiListGroupItem iconType="outlierDetectionJob" label="Outlier detection" size="xs" />
-
-      <EuiListGroupItem iconType="regressionJob" label="Regression" size="xs" />
-
-      <EuiListGroupItem iconType="classificationJob" label="Classification" size="xs" />
-    </EuiListGroup>
-  </>
+  <EuiListGroup flush>
+    <EuiListGroupItem iconType="outlierDetectionJob" label="Outlier detection" size="xs" />
+    <EuiListGroupItem iconType="regressionJob" label="Regression" size="xs" />
+    <EuiListGroupItem iconType="classificationJob" label="Classification" size="xs" />
+  </EuiListGroup>
 );
 
 export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJobNode }) => {
@@ -41,7 +37,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
   const euiSizeM = euiTheme.size.m;
   const euiSizeS = euiTheme.size.s;
   const euiColorFullShade = euiTheme.colors.fullShade;
-  const euiColorGhost = euiTheme.colors.ghost;
+  const euiColorPlainLight = euiTheme.colors.plainLight;
   const euiColorWarning = euiTheme.colors.warning;
   const euiBorderThin = euiTheme.border.thin;
   const euiBorderRadius = euiTheme.border.radius.medium;
@@ -61,10 +57,10 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
     () => ({
       height: euiSizeM,
       width: euiSizeM,
-      backgroundColor: euiColorGhost,
+      backgroundColor: euiColorPlainLight,
       display: 'inline-block',
     }),
-    [euiSizeM, euiColorGhost]
+    [euiSizeM, euiColorPlainLight]
   );
 
   return (
@@ -158,7 +154,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
             <span
-              style={{
+              css={{
                 display: 'inline-block',
                 width: '0px',
                 height: '0px',
@@ -231,7 +227,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
                     <EuiButtonIcon
                       iconSize="s"
                       onClick={() => setShowJobTypes(!showJobTypes)}
-                      iconType={showJobTypes ? 'arrowUp' : 'arrowDown'}
+                      iconType={showJobTypes ? 'chevronSingleUp' : 'chevronSingleDown'}
                       aria-label={i18n.translate(
                         'xpack.ml.dataframe.analyticsMap.legend.showJobTypesAriaLabel',
                         {

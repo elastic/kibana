@@ -14,6 +14,8 @@
           "(visContext: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/utils/external_vis_context.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/utils/external_vis_context.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -55,6 +59,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,435 +83,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.getBreakdownField",
-        "type": "Function",
-        "tags": [],
-        "label": "getBreakdownField",
-        "description": [
-          "\nGet the breakdown field from local storage"
-        ],
-        "signature": [
-          "(storage: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.Storage",
-            "text": "Storage"
-          },
-          ", localStorageKeyPrefix: string) => string | undefined"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.getBreakdownField.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.Storage",
-                "text": "Storage"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.getBreakdownField.$2",
-            "type": "string",
-            "tags": [],
-            "label": "localStorageKeyPrefix",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.getChartHidden",
-        "type": "Function",
-        "tags": [],
-        "label": "getChartHidden",
-        "description": [
-          "\nGet the chart hidden state from local storage"
-        ],
-        "signature": [
-          "(storage: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.Storage",
-            "text": "Storage"
-          },
-          ", localStorageKeyPrefix: string) => boolean | undefined"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.getChartHidden.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.Storage",
-                "text": "Storage"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.getChartHidden.$2",
-            "type": "string",
-            "tags": [],
-            "label": "localStorageKeyPrefix",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.getTopPanelHeight",
-        "type": "Function",
-        "tags": [],
-        "label": "getTopPanelHeight",
-        "description": [
-          "\nGet the top panel height from local storage"
-        ],
-        "signature": [
-          "(storage: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.Storage",
-            "text": "Storage"
-          },
-          ", localStorageKeyPrefix: string) => number | \"max-content\" | undefined"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.getTopPanelHeight.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.Storage",
-                "text": "Storage"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.getTopPanelHeight.$2",
-            "type": "string",
-            "tags": [],
-            "label": "localStorageKeyPrefix",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.setBreakdownField",
-        "type": "Function",
-        "tags": [],
-        "label": "setBreakdownField",
-        "description": [
-          "\nSet the breakdown field in local storage"
-        ],
-        "signature": [
-          "(storage: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.Storage",
-            "text": "Storage"
-          },
-          ", localStorageKeyPrefix: string, breakdownField: string | undefined) => false | void"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setBreakdownField.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.Storage",
-                "text": "Storage"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setBreakdownField.$2",
-            "type": "string",
-            "tags": [],
-            "label": "localStorageKeyPrefix",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setBreakdownField.$3",
-            "type": "string",
-            "tags": [],
-            "label": "breakdownField",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.setChartHidden",
-        "type": "Function",
-        "tags": [],
-        "label": "setChartHidden",
-        "description": [
-          "\nSet the chart hidden state in local storage"
-        ],
-        "signature": [
-          "(storage: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.Storage",
-            "text": "Storage"
-          },
-          ", localStorageKeyPrefix: string, chartHidden: boolean | undefined) => false | void"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setChartHidden.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.Storage",
-                "text": "Storage"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setChartHidden.$2",
-            "type": "string",
-            "tags": [],
-            "label": "localStorageKeyPrefix",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setChartHidden.$3",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "chartHidden",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.setTopPanelHeight",
-        "type": "Function",
-        "tags": [],
-        "label": "setTopPanelHeight",
-        "description": [
-          "\nSet the top panel height in local storage"
-        ],
-        "signature": [
-          "(storage: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.Storage",
-            "text": "Storage"
-          },
-          ", localStorageKeyPrefix: string, topPanelHeight: number | \"max-content\") => false | void"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setTopPanelHeight.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "storage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.Storage",
-                "text": "Storage"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setTopPanelHeight.$2",
-            "type": "string",
-            "tags": [],
-            "label": "localStorageKeyPrefix",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.setTopPanelHeight.$3",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "topPanelHeight",
-            "description": [],
-            "signature": [
-              "number | \"max-content\""
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/utils/local_storage_utils.ts",
+            "lineNumber": 32,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -543,6 +122,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/lazy.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -558,7 +139,10 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -572,7 +156,7 @@
         "label": "UnifiedHistogramChart",
         "description": [],
         "signature": [
-          "({\n  isChartAvailable,\n  services,\n  hits,\n  chart,\n  lensVisService,\n  lensVisServiceState,\n  renderCustomChartToggleActions,\n  fetch$,\n  fetchParams,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  ...histogramProps\n}: ",
+          "({\n  isChartAvailable,\n  services,\n  hits,\n  chart,\n  lensVisService,\n  lensVisServiceState,\n  renderToggleActions,\n  fetch$,\n  fetchParams,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  ...histogramProps\n}: ",
           {
             "pluginId": "@kbn/unified-histogram",
             "scope": "public",
@@ -583,6 +167,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+        "lineNumber": 81,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -591,7 +177,7 @@
             "id": "def-public.UnifiedHistogramChart.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isChartAvailable,\n  services,\n  hits,\n  chart,\n  lensVisService,\n  lensVisServiceState,\n  renderCustomChartToggleActions,\n  fetch$,\n  fetchParams,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  ...histogramProps\n}",
+            "label": "{\n  isChartAvailable,\n  services,\n  hits,\n  chart,\n  lensVisService,\n  lensVisServiceState,\n  renderToggleActions,\n  fetch$,\n  fetchParams,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  ...histogramProps\n}",
             "description": [],
             "signature": [
               {
@@ -603,7 +189,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 81,
+            "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedHistogramChartProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -619,7 +208,7 @@
         "label": "UnifiedHistogramLayout",
         "description": [],
         "signature": [
-          "({ unifiedHistogramChart, chart, isChartAvailable, hits, topPanelHeight, defaultTopPanelHeight: originalDefaultTopPanelHeight, onTopPanelHeightChange, children, }: ",
+          "({ unifiedHistogramChart, chart, isChartAvailable, hits, topPanelHeight, defaultTopPanelHeight: originalDefaultTopPanelHeight, isMainPanelHidden, onTopPanelHeightChange, children, }: ",
           {
             "pluginId": "@kbn/unified-histogram",
             "scope": "public",
@@ -630,6 +219,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/layout/layout.tsx",
+        "lineNumber": 64,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -638,7 +229,7 @@
             "id": "def-public.UnifiedHistogramLayout.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  unifiedHistogramChart,\n  chart,\n  isChartAvailable,\n  hits,\n  topPanelHeight,\n  defaultTopPanelHeight: originalDefaultTopPanelHeight,\n  onTopPanelHeightChange,\n  children,\n}",
+            "label": "{\n  unifiedHistogramChart,\n  chart,\n  isChartAvailable,\n  hits,\n  topPanelHeight,\n  defaultTopPanelHeight: originalDefaultTopPanelHeight,\n  isMainPanelHidden,\n  onTopPanelHeightChange,\n  children,\n}",
             "description": [],
             "signature": [
               {
@@ -650,44 +241,12 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/layout/layout.tsx",
+            "lineNumber": 64,
+            "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedHistogramLayoutProps",
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.useStableCallback",
-        "type": "Function",
-        "tags": [],
-        "label": "useStableCallback",
-        "description": [
-          "\nAccepts a callback and returns a function with a stable identity\nthat will always call the latest version of the callback when invoked"
-        ],
-        "signature": [
-          "<T extends (...args: any[]) => any>(fn: T | undefined) => (...args: Parameters<T>) => any"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_stable_callback.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.useStableCallback.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "fn",
-            "description": [],
-            "signature": [
-              "T | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_stable_callback.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -713,6 +272,8 @@
           "UseUnifiedHistogramResult"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
+        "lineNumber": 101,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -733,7 +294,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
+            "lineNumber": 101,
+            "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "UseUnifiedHistogramProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -751,6 +315,8 @@
         "label": "BreakdownFieldSelectorProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/breakdown_field_selector.tsx",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -771,6 +337,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/breakdown_field_selector.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -785,6 +353,8 @@
               "UnifiedHistogramBreakdownContext"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/breakdown_field_selector.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -806,6 +376,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/breakdown_field_selector.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -828,6 +400,8 @@
               " | undefined) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/breakdown_field_selector.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -849,6 +423,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/breakdown_field_selector.tsx",
+                "lineNumber": 35,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -867,6 +443,8 @@
         "label": "ChartSectionTemplateProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -878,6 +456,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -893,6 +473,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -904,7 +486,7 @@
             "label": "toolbar",
             "description": [],
             "signature": [
-              "{ toggleActions?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; leftSide?: React.ReactNode; rightSide?: ",
+              "{ toggleActions?: React.ReactElement<any> | undefined; leftSide?: React.ReactNode; rightSide?: ",
               {
                 "pluginId": "@kbn/shared-ux-button-toolbar",
                 "scope": "public",
@@ -915,6 +497,8 @@
               "[] | undefined; additionalControls?: { prependRight?: React.ReactNode; } | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -926,9 +510,11 @@
             "label": "toolbarWrapAt",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | \"xxl\" | undefined"
+              "\"m\" | \"s\" | \"xs\" | \"l\" | \"xl\" | \"xxl\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -945,6 +531,8 @@
           "\nEmitted when the histogram loading status changes"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -985,6 +573,8 @@
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1000,14 +590,16 @@
             "signature": [
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PublishingSubject",
+                "section": "def-common.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<boolean | undefined> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1022,6 +614,8 @@
         "label": "UnifiedHistogramChartProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1033,6 +627,8 @@
             "label": "isChartAvailable",
             "description": [],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1047,6 +643,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1067,6 +665,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1081,6 +681,8 @@
               "LensVisService"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1095,6 +697,8 @@
               "LensVisServiceState"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1110,6 +714,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1125,20 +731,24 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.UnifiedHistogramChartProps.renderCustomChartToggleActions",
+            "id": "def-public.UnifiedHistogramChartProps.renderToggleActions",
             "type": "Function",
             "tags": [],
-            "label": "renderCustomChartToggleActions",
+            "label": "renderToggleActions",
             "description": [],
             "signature": [
-              "(() => React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined) | undefined"
+              "() => React.ReactElement<any> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1155,6 +765,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1169,6 +781,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1186,6 +800,8 @@
               "$Arguments>"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1272,6 +888,8 @@
               " | undefined; } | undefined; timeInterval: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1294,6 +912,8 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1307,14 +927,16 @@
             "signature": [
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PublishingSubject",
+                "section": "def-common.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<boolean | undefined> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1329,6 +951,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1343,6 +967,8 @@
               "((chartHidden: boolean) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1357,6 +983,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+                "lineNumber": 68,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1375,6 +1003,8 @@
               "((timeInterval: string) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1389,6 +1019,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+                "lineNumber": 69,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1415,6 +1047,8 @@
               " | undefined) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1436,6 +1070,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+                "lineNumber": 70,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1462,6 +1098,8 @@
               ", result?: number | Error | undefined) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1482,7 +1120,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+                "lineNumber": 71,
+                "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnifiedHistogramFetchStatus",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1497,6 +1138,8 @@
                   "number | Error | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+                "lineNumber": 71,
+                "columnNumber": 61,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1523,6 +1166,8 @@
               ") => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1543,7 +1188,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+                "lineNumber": 72,
+                "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnifiedHistogramChartLoadEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1585,6 +1233,8 @@
               " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1607,6 +1257,8 @@
               "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1621,6 +1273,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1635,6 +1289,8 @@
         "label": "UnifiedHistogramFetchParamsExternal",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "lineNumber": 183,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1658,6 +1314,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1674,6 +1332,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1690,6 +1350,8 @@
               "AbortController | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1712,6 +1374,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1743,6 +1407,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1766,6 +1432,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 204,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1789,6 +1457,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 208,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1812,6 +1482,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1835,6 +1507,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 216,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1849,23 +1523,17 @@
             ],
             "signature": [
               {
-                "pluginId": "controls",
-                "scope": "common",
-                "docId": "kibControlsPluginApi",
-                "section": "def-common.ControlPanelsState",
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlPanelsState",
                 "text": "ControlPanelsState"
               },
-              "<",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLControlState",
-                "text": "ESQLControlState"
-              },
-              "> | undefined"
+              "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 220,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1889,6 +1557,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1912,6 +1582,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 228,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1928,6 +1600,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 232,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1944,6 +1618,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 236,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1967,6 +1643,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 240,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1980,7 +1658,7 @@
               "\nCallback to modify the default Lens vis attributes used in the chart"
             ],
             "signature": [
-              "((attributes: { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "((attributes: { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -1988,7 +1666,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsXY\"; state: { query: ",
+              "[]; visualizationType: \"lnsXY\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2004,15 +1690,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2049,10 +1727,10 @@
                 "pluginId": "@kbn/lens-common",
                 "scope": "common",
                 "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.XYState",
-                "text": "XYState"
+                "section": "def-common.XYPersistedState",
+                "text": "XYPersistedState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2060,7 +1738,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsPie\"; state: { query: ",
+              "[]; visualizationType: \"lnsPie\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2076,15 +1762,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2124,7 +1802,7 @@
                 "section": "def-common.LensPartitionVisualizationState",
                 "text": "LensPartitionVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2132,7 +1810,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
+              "[]; visualizationType: \"lnsHeatmap\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2148,15 +1834,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2196,7 +1874,7 @@
                 "section": "def-common.HeatmapVisualizationState",
                 "text": "HeatmapVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2204,7 +1882,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsGauge\"; state: { query: ",
+              "[]; visualizationType: \"lnsGauge\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2220,15 +1906,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2268,7 +1946,7 @@
                 "section": "def-common.GaugeVisualizationState",
                 "text": "GaugeVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2276,7 +1954,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
+              "[]; visualizationType: \"lnsDatatable\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2292,15 +1978,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2340,7 +2018,7 @@
                 "section": "def-common.DatatableVisualizationState",
                 "text": "DatatableVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2348,7 +2026,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
+              "[]; visualizationType: \"lnsLegacyMetric\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2364,15 +2050,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2454,7 +2132,7 @@
                 "section": "def-common.CustomPaletteParams",
                 "text": "CustomPaletteParams"
               },
-              "> | undefined; }; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "> | undefined; }; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2462,7 +2140,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsMetric\"; state: { query: ",
+              "[]; visualizationType: \"lnsMetric\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2478,15 +2164,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2526,7 +2204,7 @@
                 "section": "def-common.MetricVisualizationState",
                 "text": "MetricVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2534,7 +2212,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsChoropleth\"; state: { query: ",
+              "[]; visualizationType: \"lnsChoropleth\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2550,15 +2236,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2598,7 +2276,7 @@
                 "section": "def-common.ChoroplethChartState",
                 "text": "ChoroplethChartState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2606,7 +2284,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsTagcloud\"; state: { query: ",
+              "[]; visualizationType: \"lnsTagcloud\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2622,15 +2308,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2670,7 +2348,7 @@
                 "section": "def-common.LensTagCloudState",
                 "text": "LensTagCloudState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2678,7 +2356,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: string; state: { query: ",
+              "[]; visualizationType: string; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2694,15 +2380,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2734,7 +2412,7 @@
                 "section": "def-common.TextBasedPersistedState",
                 "text": "TextBasedPersistedState"
               },
-              " | undefined; }; visualization: unknown; }; }) => { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              " | undefined; }; visualization: unknown; }; }) => { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2742,7 +2420,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsXY\"; state: { query: ",
+              "[]; visualizationType: \"lnsXY\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2758,15 +2444,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2803,10 +2481,10 @@
                 "pluginId": "@kbn/lens-common",
                 "scope": "common",
                 "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.XYState",
-                "text": "XYState"
+                "section": "def-common.XYPersistedState",
+                "text": "XYPersistedState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2814,7 +2492,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsPie\"; state: { query: ",
+              "[]; visualizationType: \"lnsPie\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2830,15 +2516,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2878,7 +2556,7 @@
                 "section": "def-common.LensPartitionVisualizationState",
                 "text": "LensPartitionVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2886,7 +2564,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
+              "[]; visualizationType: \"lnsHeatmap\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2902,15 +2588,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2950,7 +2628,7 @@
                 "section": "def-common.HeatmapVisualizationState",
                 "text": "HeatmapVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2958,7 +2636,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsGauge\"; state: { query: ",
+              "[]; visualizationType: \"lnsGauge\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2974,15 +2660,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3022,7 +2700,7 @@
                 "section": "def-common.GaugeVisualizationState",
                 "text": "GaugeVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3030,7 +2708,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
+              "[]; visualizationType: \"lnsDatatable\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -3046,15 +2732,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3094,7 +2772,7 @@
                 "section": "def-common.DatatableVisualizationState",
                 "text": "DatatableVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3102,7 +2780,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
+              "[]; visualizationType: \"lnsLegacyMetric\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -3118,15 +2804,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3208,7 +2886,7 @@
                 "section": "def-common.CustomPaletteParams",
                 "text": "CustomPaletteParams"
               },
-              "> | undefined; }; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "> | undefined; }; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3216,7 +2894,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsMetric\"; state: { query: ",
+              "[]; visualizationType: \"lnsMetric\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -3232,15 +2918,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3280,7 +2958,7 @@
                 "section": "def-common.MetricVisualizationState",
                 "text": "MetricVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3288,7 +2966,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsChoropleth\"; state: { query: ",
+              "[]; visualizationType: \"lnsChoropleth\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -3304,15 +2990,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3352,7 +3030,7 @@
                 "section": "def-common.ChoroplethChartState",
                 "text": "ChoroplethChartState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3360,7 +3038,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsTagcloud\"; state: { query: ",
+              "[]; visualizationType: \"lnsTagcloud\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -3376,15 +3062,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3424,7 +3102,7 @@
                 "section": "def-common.LensTagCloudState",
                 "text": "LensTagCloudState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3432,7 +3110,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: string; state: { query: ",
+              "[]; visualizationType: string; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -3448,15 +3134,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3491,6 +3169,8 @@
               " | undefined; }; visualization: unknown; }; }) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 244,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3502,7 +3182,7 @@
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "{ version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "{ version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -3510,7 +3190,15 @@
                     "section": "def-server.Reference",
                     "text": "Reference"
                   },
-                  "[]; visualizationType: \"lnsXY\"; state: { query: ",
+                  "[]; visualizationType: \"lnsXY\"; state: { filters: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]; query: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -3526,15 +3214,7 @@
                     "section": "def-common.AggregateQuery",
                     "text": "AggregateQuery"
                   },
-                  "; filters: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+                  "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -3571,10 +3251,10 @@
                     "pluginId": "@kbn/lens-common",
                     "scope": "common",
                     "docId": "kibKbnLensCommonPluginApi",
-                    "section": "def-common.XYState",
-                    "text": "XYState"
+                    "section": "def-common.XYPersistedState",
+                    "text": "XYPersistedState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -3582,7 +3262,15 @@
                     "section": "def-server.Reference",
                     "text": "Reference"
                   },
-                  "[]; visualizationType: \"lnsPie\"; state: { query: ",
+                  "[]; visualizationType: \"lnsPie\"; state: { filters: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]; query: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -3598,15 +3286,7 @@
                     "section": "def-common.AggregateQuery",
                     "text": "AggregateQuery"
                   },
-                  "; filters: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+                  "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -3646,7 +3326,7 @@
                     "section": "def-common.LensPartitionVisualizationState",
                     "text": "LensPartitionVisualizationState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -3654,7 +3334,15 @@
                     "section": "def-server.Reference",
                     "text": "Reference"
                   },
-                  "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
+                  "[]; visualizationType: \"lnsHeatmap\"; state: { filters: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]; query: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -3670,15 +3358,7 @@
                     "section": "def-common.AggregateQuery",
                     "text": "AggregateQuery"
                   },
-                  "; filters: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+                  "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -3718,7 +3398,7 @@
                     "section": "def-common.HeatmapVisualizationState",
                     "text": "HeatmapVisualizationState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -3726,7 +3406,15 @@
                     "section": "def-server.Reference",
                     "text": "Reference"
                   },
-                  "[]; visualizationType: \"lnsGauge\"; state: { query: ",
+                  "[]; visualizationType: \"lnsGauge\"; state: { filters: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]; query: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -3742,15 +3430,7 @@
                     "section": "def-common.AggregateQuery",
                     "text": "AggregateQuery"
                   },
-                  "; filters: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+                  "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -3790,7 +3470,7 @@
                     "section": "def-common.GaugeVisualizationState",
                     "text": "GaugeVisualizationState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -3798,7 +3478,15 @@
                     "section": "def-server.Reference",
                     "text": "Reference"
                   },
-                  "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
+                  "[]; visualizationType: \"lnsDatatable\"; state: { filters: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]; query: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -3814,15 +3502,7 @@
                     "section": "def-common.AggregateQuery",
                     "text": "AggregateQuery"
                   },
-                  "; filters: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+                  "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -3862,7 +3542,7 @@
                     "section": "def-common.DatatableVisualizationState",
                     "text": "DatatableVisualizationState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -3870,7 +3550,15 @@
                     "section": "def-server.Reference",
                     "text": "Reference"
                   },
-                  "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
+                  "[]; visualizationType: \"lnsLegacyMetric\"; state: { filters: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]; query: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -3886,15 +3574,7 @@
                     "section": "def-common.AggregateQuery",
                     "text": "AggregateQuery"
                   },
-                  "; filters: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+                  "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -3976,7 +3656,7 @@
                     "section": "def-common.CustomPaletteParams",
                     "text": "CustomPaletteParams"
                   },
-                  "> | undefined; }; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "> | undefined; }; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -3984,7 +3664,15 @@
                     "section": "def-server.Reference",
                     "text": "Reference"
                   },
-                  "[]; visualizationType: \"lnsMetric\"; state: { query: ",
+                  "[]; visualizationType: \"lnsMetric\"; state: { filters: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]; query: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -4000,15 +3688,7 @@
                     "section": "def-common.AggregateQuery",
                     "text": "AggregateQuery"
                   },
-                  "; filters: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+                  "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -4048,7 +3728,7 @@
                     "section": "def-common.MetricVisualizationState",
                     "text": "MetricVisualizationState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -4056,7 +3736,15 @@
                     "section": "def-server.Reference",
                     "text": "Reference"
                   },
-                  "[]; visualizationType: \"lnsChoropleth\"; state: { query: ",
+                  "[]; visualizationType: \"lnsChoropleth\"; state: { filters: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]; query: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -4072,15 +3760,7 @@
                     "section": "def-common.AggregateQuery",
                     "text": "AggregateQuery"
                   },
-                  "; filters: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+                  "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -4120,7 +3800,7 @@
                     "section": "def-common.ChoroplethChartState",
                     "text": "ChoroplethChartState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -4128,7 +3808,15 @@
                     "section": "def-server.Reference",
                     "text": "Reference"
                   },
-                  "[]; visualizationType: \"lnsTagcloud\"; state: { query: ",
+                  "[]; visualizationType: \"lnsTagcloud\"; state: { filters: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]; query: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -4144,15 +3832,7 @@
                     "section": "def-common.AggregateQuery",
                     "text": "AggregateQuery"
                   },
-                  "; filters: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+                  "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -4192,7 +3872,7 @@
                     "section": "def-common.LensTagCloudState",
                     "text": "LensTagCloudState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -4200,7 +3880,15 @@
                     "section": "def-server.Reference",
                     "text": "Reference"
                   },
-                  "[]; visualizationType: string; state: { query: ",
+                  "[]; visualizationType: string; state: { filters: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]; query: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -4216,15 +3904,7 @@
                     "section": "def-common.AggregateQuery",
                     "text": "AggregateQuery"
                   },
-                  "; filters: ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+                  "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -4259,6 +3939,8 @@
                   " | undefined; }; visualization: unknown; }; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+                "lineNumber": 248,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4279,6 +3961,8 @@
           "\nThe services required by the Unified Histogram components"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4299,6 +3983,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4310,17 +3996,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
+              "{ readonly getTrigger: (triggerId: string) => ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4328,15 +4012,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4344,23 +4020,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<any>>) => void; readonly getAction: (id: string) => Promise<",
+              "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4368,7 +4028,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+              "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4376,7 +4036,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4384,7 +4044,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4392,11 +4052,13 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               "UiActionsService",
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4411,6 +4073,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4441,6 +4105,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4461,6 +4127,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4481,6 +4149,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4501,6 +4171,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4515,6 +4187,8 @@
               "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4535,6 +4209,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4556,6 +4232,25 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "AnalyticsServiceStart",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4572,6 +4267,8 @@
           "\nThe current state of the container"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4585,6 +4282,8 @@
               "\nWhether or not the chart is hidden"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4608,6 +4307,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4632,6 +4333,8 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4647,14 +4350,16 @@
             "signature": [
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PublishingSubject",
+                "section": "def-common.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<boolean | undefined> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4671,6 +4376,8 @@
               "number | \"max-content\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4693,6 +4400,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4709,6 +4418,8 @@
               "number | Error | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/services/state_service.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4725,6 +4436,8 @@
           "\nUnified Histogram type for recreating a stored Lens vis"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "lineNumber": 174,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4736,7 +4449,7 @@
             "label": "attributes",
             "description": [],
             "signature": [
-              "{ version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "{ version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -4744,7 +4457,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsXY\"; state: { query: ",
+              "[]; visualizationType: \"lnsXY\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -4760,15 +4481,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4805,10 +4518,10 @@
                 "pluginId": "@kbn/lens-common",
                 "scope": "common",
                 "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.XYState",
-                "text": "XYState"
+                "section": "def-common.XYPersistedState",
+                "text": "XYPersistedState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -4816,7 +4529,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsPie\"; state: { query: ",
+              "[]; visualizationType: \"lnsPie\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -4832,15 +4553,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4880,7 +4593,7 @@
                 "section": "def-common.LensPartitionVisualizationState",
                 "text": "LensPartitionVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -4888,7 +4601,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
+              "[]; visualizationType: \"lnsHeatmap\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -4904,15 +4625,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4952,7 +4665,7 @@
                 "section": "def-common.HeatmapVisualizationState",
                 "text": "HeatmapVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -4960,7 +4673,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsGauge\"; state: { query: ",
+              "[]; visualizationType: \"lnsGauge\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -4976,15 +4697,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5024,7 +4737,7 @@
                 "section": "def-common.GaugeVisualizationState",
                 "text": "GaugeVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5032,7 +4745,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
+              "[]; visualizationType: \"lnsDatatable\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -5048,15 +4769,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5096,7 +4809,7 @@
                 "section": "def-common.DatatableVisualizationState",
                 "text": "DatatableVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5104,7 +4817,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
+              "[]; visualizationType: \"lnsLegacyMetric\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -5120,15 +4841,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5210,7 +4923,7 @@
                 "section": "def-common.CustomPaletteParams",
                 "text": "CustomPaletteParams"
               },
-              "> | undefined; }; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "> | undefined; }; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5218,7 +4931,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsMetric\"; state: { query: ",
+              "[]; visualizationType: \"lnsMetric\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -5234,15 +4955,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5282,7 +4995,7 @@
                 "section": "def-common.MetricVisualizationState",
                 "text": "MetricVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5290,7 +5003,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsChoropleth\"; state: { query: ",
+              "[]; visualizationType: \"lnsChoropleth\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -5306,15 +5027,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5354,7 +5067,7 @@
                 "section": "def-common.ChoroplethChartState",
                 "text": "ChoroplethChartState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5362,7 +5075,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: \"lnsTagcloud\"; state: { query: ",
+              "[]; visualizationType: \"lnsTagcloud\"; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -5378,15 +5099,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5426,7 +5139,7 @@
                 "section": "def-common.LensTagCloudState",
                 "text": "LensTagCloudState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5434,7 +5147,15 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; visualizationType: string; state: { query: ",
+              "[]; visualizationType: string; state: { filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; query: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -5450,15 +5171,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5493,6 +5206,8 @@
               " | undefined; }; visualization: unknown; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5507,6 +5222,8 @@
               "LensRequestData"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 179,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5521,6 +5238,8 @@
               "UnifiedHistogramSuggestionType"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5537,6 +5256,8 @@
         "label": "UnifiedHistogramExternalVisContextStatus",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "lineNumber": 137,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5551,6 +5272,8 @@
           "\nThe fetch status of a Unified Histogram request"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5594,6 +5317,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5616,9 +5341,11 @@
           },
           ") => void; } & Pick<",
           "UnifiedHistogramStateService",
-          ", \"state$\" | \"setChartHidden\" | \"setTopPanelHeight\" | \"setTotalHits\">"
+          ", \"state$\" | \"setLensRequestAdapter\" | \"setChartHidden\" | \"setTopPanelHeight\" | \"setTotalHits\">"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5635,9 +5362,11 @@
           "UnifiedHistogramChartContext",
           " | undefined; isChartAvailable?: boolean | undefined; hits?: ",
           "UnifiedHistogramHitsContext",
-          " | undefined; topPanelHeight?: number | \"max-content\" | undefined; defaultTopPanelHeight?: number | \"max-content\" | undefined; onTopPanelHeightChange?: ((topPanelHeight: number | \"max-content\") => void) | undefined; } & { children?: React.ReactNode; }"
+          " | undefined; topPanelHeight?: number | \"max-content\" | undefined; defaultTopPanelHeight?: number | \"max-content\" | undefined; isMainPanelHidden?: boolean | undefined; onTopPanelHeightChange?: ((topPanelHeight: number | \"max-content\") => void) | undefined; } & { children?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/layout/layout.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5654,9 +5383,11 @@
           "UnifiedHistogramHitsContext",
           " | undefined; chart?: ",
           "UnifiedHistogramChartContext",
-          " | undefined; isChartAvailable?: boolean | undefined; topPanelHeight?: number | \"max-content\" | undefined; defaultTopPanelHeight?: number | \"max-content\" | undefined; onTopPanelHeightChange?: ((topPanelHeight: number | \"max-content\") => void) | undefined; }"
+          " | undefined; isChartAvailable?: boolean | undefined; topPanelHeight?: number | \"max-content\" | undefined; defaultTopPanelHeight?: number | \"max-content\" | undefined; isMainPanelHidden?: boolean | undefined; onTopPanelHeightChange?: ((topPanelHeight: number | \"max-content\") => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5730,6 +5461,8 @@
           ") => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_unified_histogram.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

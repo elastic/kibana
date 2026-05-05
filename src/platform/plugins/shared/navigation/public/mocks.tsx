@@ -10,7 +10,7 @@ import React from 'react';
 import { of } from 'rxjs';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Plugin } from '.';
-import { createTopNav, createTopNavBeta } from './top_nav_menu';
+import { createTopNav } from './top_nav_menu';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
@@ -44,7 +44,6 @@ const createStartContract = (): jest.Mocked<Start> => {
     ui: {
       TopNavMenu: jest.fn().mockImplementation(createTopNav(unifiedSearchMock, [])),
       AggregateQueryTopNavMenu: jest.fn().mockImplementation(createTopNav(unifiedSearchMock, [])),
-      TopNavMenuBeta: jest.fn().mockImplementation(createTopNavBeta()),
       createTopNavWithCustomContext: jest
         .fn()
         .mockImplementation(createTopNav(unifiedSearchMock, [])),

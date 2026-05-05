@@ -15,6 +15,7 @@ import { RuleDetailsRoute, getRuleData } from './rule_details_route';
 import type { Rule } from '../../../../types';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
@@ -26,6 +27,21 @@ jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => (
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
+
+jest.mock('react-router-dom', () => ({
+  useHistory: () => ({
+    push: jest.fn(),
+  }),
+  useLocation: () => ({
+    pathname: '/triggersActions/rules/',
+  }),
+}));
+
+jest.mock('@kbn/cps-utils', () => ({
+  ...jest.requireActual('@kbn/cps-utils'),
+  useRouteBasedCpsPickerAccess: jest.fn(),
+}));
+const mockUseRouteBasedCpsPickerAccess = jest.mocked(useRouteBasedCpsPickerAccess);
 
 function renderWithIntl(ui: React.ReactElement) {
   return render(
@@ -119,6 +135,37 @@ describe('rule_details_route', () => {
       otherObjectId: rule.id,
       otherObjectPath: `insightsAndAlerting/triggersActions/rule/${rule.id}`,
     });
+  });
+
+  it('sets the CPS picker access to READONLY', async () => {
+    await setup();
+    const rule = mockRule();
+    const ruleType = {
+      id: rule.ruleTypeId,
+      name: 'type name',
+      authorizedConsumers: ['consumer'],
+    };
+    const { loadRuleTypes, loadActionTypes, resolveRule } = mockApis();
+
+    loadRuleTypes.mockImplementationOnce(async () => [ruleType]);
+    loadActionTypes.mockImplementation(async () => []);
+    resolveRule.mockImplementationOnce(async () => ({ ...rule, uiamApiKey: 'uiam_api_key' }));
+
+    renderWithIntl(
+      <RuleDetailsRoute
+        {...mockRouterProps(rule)}
+        {...{ ...mockApis(), loadRuleTypes, loadActionTypes, resolveRule }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(resolveRule).toHaveBeenCalledWith(rule.id);
+    });
+
+    expect(mockUseRouteBasedCpsPickerAccess).toHaveBeenCalledWith(
+      ProjectRoutingAccess.READONLY,
+      expect.any(Object)
+    );
   });
 });
 

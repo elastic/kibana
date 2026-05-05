@@ -85,6 +85,7 @@ describe('utils/kbn_field_types', () => {
         KBN_FIELD_TYPES.IP_RANGE,
         KBN_FIELD_TYPES.MURMUR3,
         KBN_FIELD_TYPES.NESTED,
+        KBN_FIELD_TYPES.NULL,
         KBN_FIELD_TYPES.NUMBER,
         KBN_FIELD_TYPES.NUMBER_RANGE,
         KBN_FIELD_TYPES.OBJECT,

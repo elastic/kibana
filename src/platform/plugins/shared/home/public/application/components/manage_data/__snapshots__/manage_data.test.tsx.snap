@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ManageData hide dev tools and stack management links if unavailable 1`] = `
-<_EuiPageSection
+<EuiPageTemplate.Section
   aria-labelledby="homeDataManage__title"
   bottomBorder={true}
   data-test-subj="homeDataManage"
@@ -82,11 +82,11 @@ exports[`ManageData hide dev tools and stack management links if unavailable 1`]
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</_EuiPageSection>
+</EuiPageTemplate.Section>
 `;
 
 exports[`ManageData render 1`] = `
-<_EuiPageSection
+<EuiPageTemplate.Section
   aria-labelledby="homeDataManage__title"
   bottomBorder={true}
   data-test-subj="homeDataManage"
@@ -207,7 +207,7 @@ exports[`ManageData render 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</_EuiPageSection>
+</EuiPageTemplate.Section>
 `;
 
 exports[`ManageData render null without any features 1`] = `""`;

@@ -55,8 +55,7 @@ import type { NormalizedFields, State } from '../../../../components/mappings_ed
 import { MappingsFilter } from './details_page_filter_fields';
 
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
-import { updateIndexMappings } from '../../../../services/api';
-import { notificationService } from '../../../../services/notification';
+import { updateIndexMappings, useUserPrivileges } from '../../../../services/api';
 import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
 import { parseMappings } from '../../../../shared/parse_mappings';
@@ -71,8 +70,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   showAboutMappings: boolean;
   jsonData: any;
   refetchMapping: () => void;
-  hasUpdateMappingsPrivilege?: boolean;
-}> = ({ index, data, jsonData, refetchMapping, showAboutMappings, hasUpdateMappingsPrivilege }) => {
+}> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
   const {
     core: {
       application: { capabilities, navigateToUrl },
@@ -82,7 +80,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     config,
     overlays,
     history,
+    services: { notificationService },
   } = useAppContext();
+  const { data: userPrivilege } = useUserPrivileges(index.name);
+  const hasUpdateMappingsPrivilege = userPrivilege?.privileges?.canManageIndex === true;
+
   const pendingFieldsRef = useRef<HTMLDivElement>(null);
   const state = useMappingsState();
   const dispatch = useDispatch();
@@ -197,8 +199,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       let inferenceToModelIdMap = state.inferenceToModelIdMap;
       setIsUpdatingMappings(true);
       try {
-        await ml?.mlApi?.savedObjects.syncSavedObjects();
         if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText && !forceSaveMappings) {
+          await ml?.mlApi?.savedObjects.syncSavedObjects();
           inferenceToModelIdMap = await fetchInferenceToModelIdMap();
         }
         const fields = hasSemanticText ? getStateWithCopyToFields(state).fields : state.fields;
@@ -367,6 +369,15 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     height: 100%;
     ${useEuiBreakpoint(['xl'])} {
       flex-wrap: nowrap;
+    }
+  `;
+
+  const mappingsListPanelStyles = css`
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+    ${useEuiBreakpoint(['m', 'l', 'xl'])} {
+      min-width: 600px;
     }
   `;
 
@@ -560,13 +571,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             </EuiFlexItem>
           )}
           {hasMappings && (
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                min-width: 600px;
-                height: 100%;
-              `}
-            >
+            <EuiFlexItem grow={false} css={mappingsListPanelStyles}>
               <EuiPanel hasShadow={false} paddingSize="none">
                 {isJSONVisible ? jsonBlock : treeViewBlock}
               </EuiPanel>

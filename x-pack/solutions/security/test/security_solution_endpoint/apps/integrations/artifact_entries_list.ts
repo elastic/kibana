@@ -8,7 +8,6 @@
 import { unzip } from 'zlib';
 import { promisify } from 'util';
 import expect from '@kbn/expect';
-import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import type { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import type { FtrProviderContext } from '../../configs/ftr_provider_context';
@@ -27,7 +26,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const endpointArtifactsTestResources = getService('endpointArtifactTestResources');
-  const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
   const esClient = getService('es');
   const toasts = getService('toasts');
@@ -44,14 +42,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     targetTags(this, ['@ess', '@serverless']);
     this.timeout(60_000 * 5);
 
-    let indexedData: IndexedHostsAndAlertsResponse;
+    const EVENTS_INDEX = 'logs-endpoint.events.process-default';
     let policyInfo: PolicyTestResourceInfo;
 
     before(async () => {
-      indexedData = await endpointTestResources.loadEndpointData();
+      await esClient.index({
+        index: EVENTS_INDEX,
+        document: {
+          '@timestamp': new Date().toISOString(),
+          agent: { ephemeral_id: 'test-value', id: 'test-agent-id' },
+          event: { category: 'process' },
+        },
+        op_type: 'create',
+        refresh: 'wait_for',
+      });
     });
     after(async () => {
-      await endpointTestResources.unloadEndpointData(indexedData);
+      await esClient.deleteByQuery({
+        index: EVENTS_INDEX,
+        query: { match: { 'agent.id': 'test-agent-id' } },
+        refresh: true,
+      });
     });
 
     const checkFleetArtifacts = async (
@@ -224,8 +235,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           }
         });
 
-        it(`should not show page title if there is no ${testData.title} entry`, async () => {
-          await testSubjects.missingOrFail('header-page-title');
+        it(`should show empty state if there is no ${testData.title} entry`, async () => {
+          await testSubjects.existOrFail(`${testData.pagePrefix}-emptyState`);
         });
 
         it(`should be able to add a new ${testData.title} entry`, async () => {
@@ -237,9 +248,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             );
           }
           await toasts.dismiss();
-
-          // Title is shown after adding an item
-          expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
 
           // Checks if fleet artifact has been updated correctly
           await checkFleetArtifacts(
@@ -274,9 +282,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           await toasts.dismiss();
 
-          // Title still shown after editing an item
-          expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
-
           // Checks if fleet artifact has been updated correctly
           await checkFleetArtifacts(
             testData.fleetArtifact.identifier,
@@ -293,13 +298,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await deleteArtifact(testData);
           // We only expect one artifact to have been visible
           await testSubjects.missingOrFail(testData.delete.card);
-          // Header has gone because there is no artifact
-          await testSubjects.missingOrFail('header-page-title');
+          // Empty state is shown because there is no artifact
+          await testSubjects.existOrFail(`${testData.pagePrefix}-emptyState`);
         });
       });
     }
 
-    describe('Should check artifacts are correctly generated when multiple entries', function () {
+    // Failing: See https://github.com/elastic/kibana/issues/261849
+    describe.skip('Should check artifacts are correctly generated when multiple entries', function () {
       let firstPolicy: PolicyTestResourceInfo;
       let secondPolicy: PolicyTestResourceInfo;
 

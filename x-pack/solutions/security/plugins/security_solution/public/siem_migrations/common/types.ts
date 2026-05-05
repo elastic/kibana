@@ -61,6 +61,7 @@ export type OnMissingResourcesFetched = (missingResources: SiemMigrationResource
 export enum MigrationSource {
   SPLUNK = 'splunk',
   QRADAR = 'qradar',
+  SENTINEL = 'microsoft-sentinel',
 }
 export interface MigrationStepProps {
   dataInputStep: number;
@@ -68,7 +69,7 @@ export interface MigrationStepProps {
   migrationStats?: MigrationStats;
   onMigrationCreated: (createdMigrationStats: MigrationStats) => void;
   onMissingResourcesFetched: OnMissingResourcesFetched;
-  setDataInputStep: (step: number) => void;
+  setDataInputStep: React.Dispatch<React.SetStateAction<number>>;
   missingResourcesIndexed?: MissingResourcesIndexed;
 }
 
@@ -81,3 +82,10 @@ export interface Step<
 }
 
 export type Steps = Array<Step<MigrationStepProps>>;
+export type HandleMissingResourcesIndexed = ({
+  migrationSource,
+  newMissingResourcesIndexed,
+}: {
+  migrationSource: MigrationSource;
+  newMissingResourcesIndexed?: MissingResourcesIndexed;
+}) => void;

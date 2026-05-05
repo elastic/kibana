@@ -34,6 +34,10 @@ import { getConnectorType as getTeamsConnectorType } from './teams';
 import { getConnectorType as getD3SecurityConnectorType } from './d3security';
 import { getConnectorType as getTheHiveConnectorType } from './thehive';
 import { getConnectorType as getXSOARConnectorType } from './xsoar';
+import {
+  getConnectorType as getHttpConnectorType,
+  getSystemConnectorType as getHttpSystemConnectorType,
+} from './http';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
@@ -59,6 +63,8 @@ export function registerConnectorTypes({
   actions.registerType(getSlackWebhookConnectorType({}));
   actions.registerType(getSlackApiConnectorType());
   actions.registerType(getWebhookConnectorType());
+  actions.registerType(getHttpConnectorType());
+  actions.registerType(getHttpSystemConnectorType());
   actions.registerType(getCasesWebhookConnectorType());
   actions.registerType(getXmattersConnectorType());
   actions.registerType(getServiceNowITSMConnectorType());
@@ -78,10 +84,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
   actions.registerSubActionConnectorType(getXSOARConnectorType());
-
-  if (experimentalFeatures.agentBuilderExternalMcpOn) {
-    actions.registerSubActionConnectorType(getMcpConnectorType());
-  }
+  actions.registerSubActionConnectorType(getMcpConnectorType());
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());

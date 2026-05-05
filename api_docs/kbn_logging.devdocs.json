@@ -30,6 +30,8 @@
           "\nLogger exposes all the necessary methods to log any type of information and\nthis is the interface used by the logging consumers including plugins.\n"
         ],
         "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -70,6 +72,8 @@
               ", meta?: Meta | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -92,7 +96,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 35,
+                "columnNumber": 41,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogMessageSource",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -109,7 +116,10 @@
                   "Meta | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 35,
+                "columnNumber": 68,
                 "deprecated": false,
+                "docsReferencedTypeName": "Meta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -153,6 +163,8 @@
               ", meta?: Meta | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -175,7 +187,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 46,
+                "columnNumber": 41,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogMessageSource",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -192,7 +207,10 @@
                   "Meta | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 46,
+                "columnNumber": 68,
                 "deprecated": false,
+                "docsReferencedTypeName": "Meta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -236,6 +254,8 @@
               ", meta?: Meta | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -258,7 +278,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 57,
+                "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogMessageSource",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -275,7 +298,10 @@
                   "Meta | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 57,
+                "columnNumber": 67,
                 "deprecated": false,
+                "docsReferencedTypeName": "Meta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -319,6 +345,8 @@
               ", meta?: Meta | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -342,6 +370,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 68,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -359,7 +389,10 @@
                   "Meta | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 68,
+                "columnNumber": 82,
                 "deprecated": false,
+                "docsReferencedTypeName": "Meta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -403,6 +436,8 @@
               ", meta?: Meta | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -426,6 +461,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 80,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -443,7 +480,10 @@
                   "Meta | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 81,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Meta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -487,6 +527,8 @@
               ", meta?: Meta | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -510,6 +552,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 94,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -527,7 +571,10 @@
                   "Meta | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 95,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Meta",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -549,6 +596,8 @@
               ") => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -565,7 +614,10 @@
                   "LogLevelId"
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 115,
+                "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogLevelId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -579,7 +631,15 @@
             "tags": [],
             "label": "get",
             "description": [
-              "\nReturns a new {@link Logger} instance extending the current logger context.\n"
+              "\nReturns a new ",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              },
+              " instance extending the current logger context.\n"
             ],
             "signature": [
               "(...childContextPaths: string[]) => ",
@@ -592,6 +652,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -606,6 +668,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 126,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -626,6 +690,8 @@
           "\nThe single purpose of `LoggerFactory` interface is to define a way to\nretrieve a context-based logger instance.\n"
         ],
         "path": "src/platform/packages/shared/kbn-logging/src/logger_factory.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -649,6 +715,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-logging/src/logger_factory.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -659,12 +727,14 @@
                 "tags": [],
                 "label": "contextParts",
                 "description": [
-                  "- Parts of the context to return logger for. For example\nget('plugins', 'pid') will return a logger for the `plugins.pid` context."
+                  "- Parts of the context to return logger for. For example"
                 ],
                 "signature": [
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-logging/src/logger_factory.ts",
+                "lineNumber": 25,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -689,6 +759,8 @@
           "string | (() => string)"
         ],
         "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -772,6 +844,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-logging/src/log_meta.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -13,7 +13,7 @@ export const RangeSliderStrings = {
   control: {
     getDisplayName: () =>
       i18n.translate('controls.rangeSliderControl.displayName', {
-        defaultMessage: 'Range slider',
+        defaultMessage: 'range slider',
       }),
     getInvalidSelectionWarningLabel: () =>
       i18n.translate('controls.rangeSlider.control.invalidSelectionWarningLabel', {

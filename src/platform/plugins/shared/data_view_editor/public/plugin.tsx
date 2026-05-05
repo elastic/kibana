@@ -29,7 +29,7 @@ export class DataViewEditorPlugin
 
   public start(core: CoreStart, plugins: StartPlugins) {
     const { application, uiSettings, docLinks, http, notifications, overlays } = core;
-    const { data, dataViews } = plugins;
+    const { data, dataViews, cps } = plugins;
 
     return {
       /**
@@ -41,6 +41,7 @@ export class DataViewEditorPlugin
         core,
         dataViews,
         searchClient: data.search.search,
+        cps,
       }),
       /**
        * Data view editor flyout via react component
@@ -58,6 +59,7 @@ export class DataViewEditorPlugin
             overlays,
             dataViews,
             searchClient: data.search.search,
+            cps,
           }}
           {...props}
         />

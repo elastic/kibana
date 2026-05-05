@@ -27,8 +27,8 @@ const createMiddleware = (data: DataPublicPluginStart, state?: Partial<LensAppSt
     getState: jest.fn(() => ({
       lens: state || {
         ...initialState,
-        activeDatasourceId: 'testDatasource',
-        datasourceStates: { testDatasource: { state: {} } },
+        activeDatasourceId: 'formBased',
+        datasourceStates: { formBased: { state: {} } },
       },
     })),
     dispatch: jest.fn(),
@@ -45,7 +45,7 @@ describe('contextMiddleware', () => {
   describe('time update', () => {
     it('does update the searchSessionId when the state changes and too much time passed', () => {
       const data = mockDataPlugin();
-      storeDeps.datasourceMap.testDatasource.isTimeBased = () => true;
+      storeDeps.datasourceMap.formBased.isTimeBased = () => true;
       (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
       (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
         from: 'now-2m',
@@ -81,7 +81,7 @@ describe('contextMiddleware', () => {
     });
     it('does not update the searchSessionId when current state is not time based', () => {
       const data = mockDataPlugin();
-      storeDeps.datasourceMap.testDatasource.isTimeBased = () => false;
+      storeDeps.datasourceMap.formBased.isTimeBased = () => false;
       (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
       (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
         from: 'now-2m',
@@ -119,7 +119,7 @@ describe('contextMiddleware', () => {
       it('only updates searchSessionId when user applies changes', () => {
         // setup
         const data = mockDataPlugin();
-        storeDeps.datasourceMap.testDatasource.isTimeBased = () => true;
+        storeDeps.datasourceMap.formBased.isTimeBased = () => true;
         (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
         (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
           from: 'now-2m',
@@ -131,8 +131,8 @@ describe('contextMiddleware', () => {
         });
         const { invoke, store } = createMiddleware(data, {
           ...initialState,
-          activeDatasourceId: 'testDatasource',
-          datasourceStates: { testDatasource: { state: {}, isLoading: false } },
+          activeDatasourceId: 'formBased',
+          datasourceStates: { formBased: { state: {}, isLoading: false } },
           autoApplyDisabled: true,
         });
 

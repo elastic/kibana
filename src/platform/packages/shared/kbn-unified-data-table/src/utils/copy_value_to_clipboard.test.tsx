@@ -185,14 +185,14 @@ describe('copyValueToClipboard', () => {
   });
 
   const textOutputTabular = '"bool_enabled"\t"keyword_key"\nfalse\tabcd1';
-  const textOutputEscapedTabular = `"text_message"\n"Hi there! I am a sample string."\n"I'm multiline\n*&%$#|@"`;
+  const textOutputEscapedTabular = `"text_message"\n"Hi there! I am a sample string."\n"I'm multiline\n*&%$\\#|@"`;
   const textOutputMarkdown = `| bool_enabled | keyword_key |
 | --- | --- |
 | false | abcd1 |`;
   const textOutputEscapedMarkdown = `| text_message |
 | --- |
 | Hi there! I am a sample string. |
-| I'm multiline *&%$#\\|@ |`;
+| I'm multiline *&%$\\\\#\\|@ |`;
   describe.each([
     [CopyAsTextFormat.tabular, textOutputTabular, textOutputEscapedTabular],
     [CopyAsTextFormat.markdown, textOutputMarkdown, textOutputEscapedMarkdown],

@@ -8,25 +8,33 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import { unflattenObject } from '@kbn/object-utils';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { pickBy, identity } from 'lodash';
 import { resolve } from 'path';
 
-interface ElasticsearchConfig {
+export interface ElasticsearchConfig {
   hosts: string;
   username: string;
   password: string;
 }
 
-interface KibanaServerConfig {
+export interface KibanaServerConfig {
   host: string;
   port: number;
+  basePath: string;
 }
 
-interface KibanaConfig {
+interface KibanaCredentials {
+  username: string;
+  password: string;
+}
+
+export interface KibanaConfig {
   elasticsearch: ElasticsearchConfig;
   server: KibanaServerConfig;
+  kibanaCredentials: KibanaCredentials;
 }
 
 /**
@@ -41,10 +49,11 @@ export const readKibanaConfig = (log: ToolingLog, configPath?: string): KibanaCo
   let serverConfigValues = {};
 
   if (fs.existsSync(configPathToUse)) {
-    const config = (yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {}) as Record<
+    const loaded = (yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {}) as Record<
       string,
-      any
+      unknown
     >;
+    const config = unflattenObject(loaded);
     esConfigValues = config.elasticsearch || {};
     serverConfigValues = config.server || {};
   } else {
@@ -82,9 +91,18 @@ export const readKibanaConfig = (log: ToolingLog, configPath?: string): KibanaCo
   const serverConfig = {
     host: 'localhost',
     port: 5601,
+    basePath: '',
     ...serverConfigValues,
     ...serverEnvOverrides,
   };
 
-  return { elasticsearch: elasticsearchConfig, server: serverConfig };
+  // Kibana API credentials - for admin operations like enabling streams.
+  // Defaults to elastic superuser which has all Kibana privileges.
+  // Can be overridden via KIBANA_USERNAME/KIBANA_PASSWORD env vars.
+  const kibanaCredentials = {
+    username: process.env.KIBANA_USERNAME || 'elastic',
+    password: process.env.KIBANA_PASSWORD || 'changeme',
+  };
+
+  return { elasticsearch: elasticsearchConfig, server: serverConfig, kibanaCredentials };
 };

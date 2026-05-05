@@ -8,14 +8,17 @@
  */
 
 import { omit } from 'lodash';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
+import { mockControlState } from '../../../__mocks__/esql_controls';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import {
   createTabsStorageManager,
   TABS_LOCAL_STORAGE_KEY,
   type TabsInternalStatePayload,
 } from './tabs_storage_manager';
-import type { RecentlyClosedTabState, TabState } from './redux/types';
+import type { RecentlyClosedTabState, TabState } from './redux';
 import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
 import { DEFAULT_TAB_STATE, fromSavedSearchToSavedObjectTab } from './redux';
 import {
@@ -23,6 +26,7 @@ import {
   getTabStateMock,
 } from './redux/__mocks__/internal_state.mocks';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
@@ -39,6 +43,10 @@ const mockTab1 = getTabStateMock({
   },
   appState: {
     columns: ['a', 'b'],
+  },
+  attributes: {
+    visContext: { someKey: 'test' } as unknown as UnifiedHistogramVisContext,
+    controlGroupState: undefined,
   },
 });
 
@@ -105,6 +113,7 @@ describe('TabsStorageManager', () => {
     internalState: tab.id.startsWith('closedTab')
       ? tab.initialInternalState
       : mockGetInternalState(),
+    attributes: tab.attributes,
     appState: tab.appState,
     globalState: tab.globalState,
     ...('closedAt' in tab ? { closedAt: tab.closedAt } : {}),
@@ -114,6 +123,8 @@ describe('TabsStorageManager', () => {
     ...DEFAULT_TAB_STATE,
     id: storedTab.id,
     label: storedTab.label,
+    initialInternalState: storedTab.initialInternalState,
+    attributes: storedTab.attributes,
     appState: storedTab.appState,
     globalState: storedTab.globalState,
     ...('closedAt' in storedTab ? { closedAt: storedTab.closedAt } : {}),
@@ -260,6 +271,124 @@ describe('TabsStorageManager', () => {
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
     expect(urlStateStorage.set).not.toHaveBeenCalled();
     expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it('should load tabs state from local storage and migrate the legacy props from internalState', () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+    jest.spyOn(urlStateStorage, 'get');
+    jest.spyOn(storage, 'get');
+
+    const storedSerializedSearchSource = { index: 'test-index' };
+    const storedSearchSessionId = 'test-session-id';
+    const legacyVisContext = { legacyVis: 'legacyValue' };
+    const legacyControlGroupState = mockControlState;
+
+    const toLegacyStoredTab = (tab: TabState | RecentlyClosedTabState) => {
+      const storedTab = { ...toStoredTab(tab), attributes: undefined };
+      storedTab.internalState = {
+        serializedSearchSource: storedSerializedSearchSource as SerializedSearchSourceFields,
+        searchSessionId: storedSearchSessionId,
+        visContext: legacyVisContext as unknown as UnifiedHistogramVisContext,
+        controlGroupJson: JSON.stringify(legacyControlGroupState),
+      };
+      return storedTab;
+    };
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [toLegacyStoredTab(mockTab1), toLegacyStoredTab(mockTab2)],
+      closedTabs: [toLegacyStoredTab(mockRecentlyClosedTab)],
+    });
+
+    urlStateStorage.set(TAB_STATE_URL_KEY, {
+      tabId: 'tab2',
+    });
+
+    jest.spyOn(urlStateStorage, 'set');
+    jest.spyOn(storage, 'set');
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    const loadedTab = loadedProps.allTabs[0];
+    expect(loadedTab.attributes).toStrictEqual({
+      visContext: legacyVisContext,
+      controlGroupState: {
+        ...legacyControlGroupState,
+        panel1: {
+          ...legacyControlGroupState.panel1,
+          type: ESQL_CONTROL,
+        },
+      },
+      timeRestore: false,
+    });
+    expect(loadedTab.esqlVariables).toStrictEqual([
+      {
+        key: 'foo',
+        type: 'values',
+        value: 'bar',
+      },
+    ]);
+    expect(loadedTab.initialInternalState).toStrictEqual({
+      serializedSearchSource: storedSerializedSearchSource,
+      searchSessionId: storedSearchSessionId,
+    });
+  });
+
+  it('should normalize legacy controlGroupState stored in attributes', async () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [
+        {
+          ...toStoredTab(mockTab1),
+          attributes: {
+            ...mockTab1.attributes,
+            controlGroupState: mockControlState,
+          },
+        },
+      ],
+      closedTabs: [],
+    });
+
+    await urlStateStorage.set(TAB_STATE_URL_KEY, {
+      tabId: mockTab1.id,
+    });
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(loadedProps.allTabs[0]?.attributes.controlGroupState).toStrictEqual({
+      ...mockControlState,
+      panel1: {
+        ...mockControlState.panel1,
+        type: ESQL_CONTROL,
+      },
+    });
+    expect(loadedProps.allTabs[0]?.esqlVariables).toStrictEqual([
+      {
+        key: 'foo',
+        type: 'values',
+        value: 'bar',
+      },
+    ]);
   });
 
   it('should clear tabs and select a default one', () => {
@@ -485,6 +614,11 @@ describe('TabsStorageManager', () => {
 
     const updatedTabState = {
       internalState: {},
+      attributes: {
+        visContext: { someKey: 'updatedValue' } as unknown as UnifiedHistogramVisContext,
+        controlGroupState: {},
+        timeRestore: false,
+      },
       appState: {
         columns: ['a', 'b', 'c'],
       },

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import { coreServices } from '../../services/kibana_services';
 import { dashboardClient } from '../../dashboard_client';
 import type { SaveDashboardProps, SaveDashboardReturn } from './types';
@@ -17,15 +17,14 @@ export const saveDashboard = async ({
   lastSavedId,
   saveOptions,
   dashboardState,
-  references,
   accessMode,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
 
   try {
     const result = idToSaveTo
-      ? await dashboardClient.update(idToSaveTo, dashboardState, references)
-      : await dashboardClient.create(dashboardState, references, accessMode);
+      ? await dashboardClient.update(idToSaveTo, dashboardState)
+      : await dashboardClient.create(dashboardState, accessMode);
 
     const newId = result.id;
 
@@ -44,10 +43,10 @@ export const saveDashboard = async ({
        */
       if (newId !== lastSavedId) {
         getDashboardBackupService().clearState(lastSavedId);
-        return { redirectRequired: true, id: newId, references };
+        return { redirectRequired: true, id: newId };
       }
     }
-    return { id: newId, references };
+    return { id: newId };
   } catch (error) {
     coreServices.notifications.toasts.addDanger({
       title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {

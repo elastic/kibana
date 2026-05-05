@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObjectsClient } from '@kbn/core/server';
 import type {
   CoreSetup,
   ElasticsearchClient,
@@ -173,7 +172,7 @@ export class AutomaticAgentUpgradeTask {
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     try {
       await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient, abortController);
@@ -281,14 +280,16 @@ export class AutomaticAgentUpgradeTask {
         (totalActiveAgents * requiredVersion.percentage) / 100
       );
 
-      // Subtract the total number of agents already or on or updating to target version.
+      // Subtract the total number of agents already on or updating to target version.
+      // Both conditions must be scoped to policy_id to avoid counting upgrading agents
+      // from other policies, which would cause a false "target percentage already reached".
       const updatingToKuery = `(upgrade_details.target_version:${requiredVersion.version} AND NOT upgrade_details.state:UPG_FAILED)`;
       const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
         esClient,
         soClient,
-        `((policy_id:${agentPolicy.id} AND agent.version:${
+        `policy_id:${agentPolicy.id} AND (agent.version:${
           requiredVersion.version
-        }) OR ${updatingToKuery}) AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
+        } OR ${updatingToKuery}) AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
       );
 
       numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
