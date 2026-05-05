@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
@@ -114,15 +113,15 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   }, [setBreadcrumbs, showAiBreadcrumb]);
 
   const handleNavigateToSpaces = useCallback(() => {
-    const basePath = http.basePath.get();
-    const { spaceId } = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
-    const spacesPath = `/kibana/spaces/edit/${spaceId}${isPermissionsBased ? '/roles' : ''}`;
+    const spacesPath = `/kibana/spaces/edit/${http.basePath.spaceId}${
+      isPermissionsBased ? '/roles' : ''
+    }`;
 
     application.navigateToApp('management', {
       path: spacesPath,
       openInNewTab: true,
     });
-  }, [application, http.basePath, isPermissionsBased]);
+  }, [application, http.basePath.spaceId, isPermissionsBased]);
 
   const connectorDescription = useMemo(() => {
     if (!hasElasticManagedLlm) {
