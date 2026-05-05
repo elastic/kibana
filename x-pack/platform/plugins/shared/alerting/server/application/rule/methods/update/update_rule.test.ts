@@ -80,6 +80,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -1413,7 +1414,7 @@ describe('update()', () => {
         ],
         "alertTypeId": "myType",
         "apiKey": "MTIzOmFiYw==",
-        "apiKeyCreatedByUser": undefined,
+        "apiKeyCreatedByUser": false,
         "apiKeyOwner": "elastic",
         "artifacts": Object {
           "dashboards": Array [],

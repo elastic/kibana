@@ -55,6 +55,8 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   minimumScheduleIntervalInMs: 1,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
+  cloneApiKeysOnCreate: false,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
@@ -113,7 +115,7 @@ describe('createNewAPIKeySet', () => {
     });
     expect(apiKey).toEqual({
       apiKey: 'MTIzOmFiYw==',
-      apiKeyCreatedByUser: undefined,
+      apiKeyCreatedByUser: false,
       apiKeyOwner: 'test',
     });
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledTimes(1);
