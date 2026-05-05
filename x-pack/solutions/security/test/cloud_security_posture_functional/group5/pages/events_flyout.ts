@@ -107,8 +107,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
       await expandedFlyoutGraph.toggleSearchBar();
 
@@ -223,8 +221,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
@@ -248,8 +244,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
 
       // Add filter for actor entity
       await expandedFlyoutGraph.showSearchBar();
@@ -294,8 +288,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.addFilter({
@@ -329,8 +321,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
@@ -534,7 +524,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             );
 
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
-            await expandedFlyoutGraph.dismissCallout();
 
             // Expected nodes:
             // - 1 actor node (gcp-admin-user)
@@ -653,8 +642,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             // Total: 4 nodes
             const expectedTotalNodes = 4;
             await expandedFlyoutGraph.assertGraphNodesNumber(expectedTotalNodes);
-
-            await expandedFlyoutGraph.dismissCallout();
 
             // Verify root user (actor) node
             const rootNodeId = 'user:rel-hierarchy-root-user@gcp';
