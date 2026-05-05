@@ -8,9 +8,9 @@
 import React, { useMemo } from 'react';
 import { type FlyoutPanelProps, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
-import {
+import type {
+  EntityDetailsPath,
   LeftPanelHeader,
-  type CspInsightLeftPanelSubTab,
   type EntityDetailsLeftPanelTab,
   type LeftPanelTabsType,
 } from '../shared/components/left_panel/left_panel_header';
@@ -29,10 +29,7 @@ interface BaseGenericEntityDetailsPanelProps {
   hasMisconfigurationFindings?: boolean;
   hasVulnerabilitiesFindings?: boolean;
   hasNonClosedAlerts?: boolean;
-  path?: {
-    tab?: EntityDetailsLeftPanelTab;
-    subTab?: CspInsightLeftPanelSubTab;
-  };
+  path?: Partial<EntityDetailsPath>;
 }
 
 export type GenericEntityDetailsPanelProps = BaseGenericEntityDetailsPanelProps &

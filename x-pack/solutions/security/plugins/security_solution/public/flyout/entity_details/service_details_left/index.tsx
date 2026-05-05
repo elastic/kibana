@@ -44,7 +44,7 @@ export const ServiceDetailsPanel = ({
     () => getServiceNameFromEntityIdentifiers(identityFields ?? {}),
     [identityFields]
   );
-  const tabs = useTabs(serviceName, scopeId, entityStoreEntityId);
+  const tabs = useTabs(serviceName, scopeId, entityStoreEntityId, path?.subTab);
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(
     isRiskScoreExist,
