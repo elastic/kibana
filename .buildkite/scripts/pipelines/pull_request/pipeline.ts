@@ -644,7 +644,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     // Run Saved Objects checks conditionally
     if (
-      !GITHUB_PR_LABELS.includes('skip-so-check') &&
+      !GITHUB_PR_LABELS.includes('ci:skip-so-check') &&
       (await doAnyChangesMatch([
         /^packages\/kbn-check-saved-objects-cli\/current_fields.json/,
         /^packages\/kbn-check-saved-objects-cli\/current_mappings.json/,
