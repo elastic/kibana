@@ -31,15 +31,20 @@ const DEFAULT_NAME_COLUMN_TITLE = i18n.translate(
  * column actually stops at this size on wide pages — `max-width` is ignored
  * by browsers on `<th>` / `<td>` regardless of `table-layout`, so a `width`
  * is the only way to lock the column. The `ContentListTable` then appends
- * a trailing spacer column to absorb the leftover slack, putting the
- * trailing whitespace after the populated columns instead of inside the
- * Name cell. See the package README's "Defaults" section for the full
- * width / minWidth / maxWidth contract.
+ * a trailing CSS pseudo-cell (`tr::after { display: table-cell; }`) to
+ * absorb the leftover slack, putting the trailing whitespace after the
+ * populated columns instead of inside the Name cell. See the package
+ * README's "Defaults" section for the full width / minWidth / maxWidth
+ * contract.
  *
  * On viewports narrower than the sum of all column widths, the browser
  * shrinks `Column.Name` first (because it has the most slack to give up
  * before it hits {@link DEFAULT_NAME_MIN_WIDTH}), so the floor is what
- * keeps the cell readable on small screens.
+ * keeps the cell readable on small screens. On viewports ≥ 2560px (~4K)
+ * `ContentListTable` widens the column past this preferred footprint via
+ * a media-query CSS override (`cssWideViewportNameWidth` in
+ * `content_list_table.tsx`) so users with wide displays see more of the
+ * title — the trailing pseudo-cell still absorbs whatever remains.
  */
 const DEFAULT_NAME_WIDTH = '64em';
 
@@ -60,7 +65,7 @@ const DEFAULT_NAME_MIN_WIDTH = '18em';
  * which all pin `width === maxWidth`. The cap itself is dead weight on
  * `<th>` / `<td>` (browsers ignore `max-width` on table cells per the CSS
  * Tables spec); the visible footprint is enforced by `width` plus the
- * trailing spacer column injected by `ContentListTable`.
+ * trailing CSS pseudo-cell injected by `ContentListTable`.
  *
  * Intentionally not `'max-content'`: `Column.Name` cells render user-supplied
  * titles whose intrinsic width can be arbitrarily large, so an intrinsic-size
