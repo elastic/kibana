@@ -11,44 +11,44 @@ import { InstanceTaskCost } from '../../task';
 type Attributes = Record<string, unknown>;
 type ForwardCompatibilityFn = (attributes: Attributes) => Attributes;
 
-const forwardCompatibilityV9 = taskModelVersions['9']!.schemas!
+const forwardCompatibilityV10 = taskModelVersions['10']!.schemas!
   .forwardCompatibility as ForwardCompatibilityFn;
 
-describe('taskModelVersions v9 forwardCompatibility', () => {
+describe('taskModelVersions v10 forwardCompatibility', () => {
   it('keeps cost unchanged when cost is undefined', () => {
     const attributes = { taskType: 'test', state: {} };
-    const result = forwardCompatibilityV9(attributes);
+    const result = forwardCompatibilityV10(attributes);
     expect(result.cost).toBeUndefined();
   });
 
   it('keeps cost unchanged when cost is "tiny"', () => {
     const attributes = { taskType: 'test', cost: InstanceTaskCost.Tiny };
-    const result = forwardCompatibilityV9(attributes);
+    const result = forwardCompatibilityV10(attributes);
     expect(result.cost).toBe(InstanceTaskCost.Tiny);
   });
 
   it('keeps cost unchanged when cost is "normal"', () => {
     const attributes = { taskType: 'test', cost: InstanceTaskCost.Normal };
-    const result = forwardCompatibilityV9(attributes);
+    const result = forwardCompatibilityV10(attributes);
     expect(result.cost).toBe(InstanceTaskCost.Normal);
   });
 
   it('resets cost to "normal" when cost is an unknown string', () => {
     const attributes = { taskType: 'test', cost: 'unknown_cost' };
-    const result = forwardCompatibilityV9(attributes);
+    const result = forwardCompatibilityV10(attributes);
     expect(result.cost).toBe(InstanceTaskCost.Normal);
   });
 
   it('returns the same object reference when cost is valid', () => {
     const attributes = { taskType: 'test', cost: InstanceTaskCost.Tiny };
-    const result = forwardCompatibilityV9(attributes);
+    const result = forwardCompatibilityV10(attributes);
     expect(result).toBe(attributes);
   });
 
   it('does not mutate the input attributes when cost is unknown', () => {
     const attributes = { taskType: 'test', cost: 'unknown_cost' };
     const originalAttributes = { ...attributes };
-    const result = forwardCompatibilityV9(attributes);
+    const result = forwardCompatibilityV10(attributes);
     expect(result).not.toBe(attributes);
     expect(result.cost).toBe(InstanceTaskCost.Normal);
     expect(attributes).toEqual(originalAttributes);
