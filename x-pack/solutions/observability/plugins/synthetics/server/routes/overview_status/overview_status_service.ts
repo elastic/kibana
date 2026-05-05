@@ -139,6 +139,7 @@ export class OverviewStatusService {
       tags,
       monitorTypes,
       projects,
+      remoteNames,
       showFromAllSpaces,
     } = params;
     const { locationIds } = this.filterData;
@@ -169,6 +170,21 @@ export class OverviewStatusService {
       ...getTermFilter('tags', tags),
       ...getTermFilter('monitor.project.id', projects),
     ];
+
+    // `remoteNames` filters pings to those originating from the selected
+    // remote clusters. Cluster alias is encoded in the `_index` metadata field
+    // as `<alias>:<index>` (CCS convention). `_index` does not support
+    // `terms`/`regexp`, so we use a `bool.should` of `wildcard` filters — one
+    // per selected alias.
+    if (ccsEnabled && remoteNames?.length) {
+      const aliases = Array.isArray(remoteNames) ? remoteNames : [remoteNames];
+      filters.push({
+        bool: {
+          should: aliases.map((alias) => ({ wildcard: { _index: `${alias}:*` } })),
+          minimum_should_match: 1,
+        },
+      });
+    }
 
     if (query) {
       filters.push({
@@ -743,14 +759,24 @@ export class OverviewStatusService {
   }
 
   async getMonitorConfigs() {
-    const { request } = this.routeContext;
-    const { query, showFromAllSpaces } = request.query || {};
+    const { request, server } = this.routeContext;
+    const { query, showFromAllSpaces, remoteNames } = request.query || {};
     /**
      * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
      *
      * Track max period to make sure the snapshot query should reach back far enough to catch
      * latest ping for all enabled monitors.
      */
+
+    // When the user has narrowed the overview to specific remote clusters,
+    // skip the local saved-object lookup entirely. Local monitors don't belong
+    // to any remote cluster, so a remote-cluster filter implies "remote-only".
+    // Returning an empty list here also avoids dragging local monitors through
+    // `processOverviewStatus`, where the filtered ping query has no rows for
+    // them and they would otherwise surface as misleading "Pending" entries.
+    if (isCCSEnabled(server) && remoteNames?.length) {
+      return [];
+    }
 
     const { filtersStr } = this.filterData;
 
