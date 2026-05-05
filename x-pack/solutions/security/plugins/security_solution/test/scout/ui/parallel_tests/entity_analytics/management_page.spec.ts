@@ -81,9 +81,11 @@ spaceTest.describe(
 
       await spaceTest.step('Toggle off and verify disabled state', async () => {
         await managementPage.toggleEntityAnalytics();
-        // Symmetric backend sync for the disable path: wait until the entity
-        // store is fully cleaned up before asserting the UI flip.
-        await apiServices.entityAnalytics.waitForEntityStoreCleanup(180000);
+        // Toggle OFF stops the engines (status `stopped`) — it does not delete
+        // them. Full deletion to `not_installed` only happens in afterEach via
+        // deleteEntityStoreEngines. Wait for the post-stop backend state, then
+        // assert the UI flip.
+        await apiServices.entityAnalytics.waitForEntityStoreStatus('stopped', 60000);
         await managementPage.waitForStatusLoaded();
         await expect(managementPage.entityAnalyticsHealth).toContainText('Off', {
           timeout: 30000,
