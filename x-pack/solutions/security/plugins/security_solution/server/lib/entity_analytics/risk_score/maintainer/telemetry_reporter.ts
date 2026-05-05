@@ -14,7 +14,6 @@ import {
 
 const ERROR_MESSAGE_MAX_LENGTH = 500;
 
-type MaintainerStatus = 'success' | 'error' | 'skipped' | 'aborted';
 type GlobalSkipReason = 'feature_disabled' | 'license_insufficient';
 type StageSkipReason = 'reset_to_zero_disabled' | 'lookup_empty' | 'resolution_disabled';
 export type MaintainerErrorKind =
@@ -36,10 +35,15 @@ interface GlobalSkipInput {
   idBasedRiskScoringEnabled: boolean;
 }
 
-type LocalStageSummaryEvent<TStage extends RiskScoreMaintainerStageSummaryEvent['stage']> = Omit<
-  Extract<RiskScoreMaintainerStageSummaryEvent, { stage: TStage }>,
-  'namespace' | 'entityType' | 'idBasedRiskScoringEnabled'
->;
+type StageContextFields = 'namespace' | 'entityType' | 'idBasedRiskScoringEnabled';
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+type LocalStageSummaryEvent<TStage extends RiskScoreMaintainerStageSummaryEvent['stage']> =
+  DistributiveOmit<
+    Extract<RiskScoreMaintainerStageSummaryEvent, { stage: TStage }>,
+    StageContextFields
+  >;
 
 type RunStageSummaryEvent = LocalStageSummaryEvent<
   'phase1_base_scoring' | 'phase2_resolution_scoring' | 'reset_to_zero'
