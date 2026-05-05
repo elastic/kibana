@@ -507,6 +507,65 @@ describe('AttachmentService', () => {
           })
         );
       });
+
+      it('update strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
+        // `update` first resolves the SO type via `resolveAttachmentSavedObjectType`,
+        // which probes `cases-attachments` then falls back to `cases-comments`.
+        // Simulate the legacy-only state: 404 on the unified type, hit on the legacy type.
+        unsecuredSavedObjectsClient.get.mockImplementation((type: string) => {
+          if (type === CASE_ATTACHMENT_SAVED_OBJECT) {
+            return Promise.reject(Object.assign(new Error('Not found'), { statusCode: 404 }));
+          }
+          return Promise.resolve(createUserAttachment());
+        });
+
+        unsecuredSavedObjectsClient.update.mockResolvedValue(createUserAttachment());
+
+        await service.update({
+          savedObjectId: '1',
+          updatedAttributes: unifiedEndpointAttrs,
+          options: { references: [] },
+        });
+
+        const [soType, , persistedAttributes] = unsecuredSavedObjectsClient.update.mock.calls[0];
+        expect(soType).toBe(CASE_COMMENT_SAVED_OBJECT);
+        expectNoUnifiedOrphans(persistedAttributes);
+        expect(persistedAttributes).toEqual(
+          expect.objectContaining({
+            type: 'externalReference',
+            externalReferenceId: 'sec-endpoint-1',
+            externalReferenceAttachmentTypeId: 'endpoint',
+          })
+        );
+      });
+
+      it('bulkUpdate strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [createUserAttachment()],
+        });
+
+        await service.bulkUpdate({
+          comments: [
+            {
+              savedObjectId: '1',
+              updatedAttributes: unifiedEndpointAttrs,
+              options: { references: [] },
+            },
+          ],
+        });
+
+        const persistedSos = unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0];
+        expect(persistedSos).toHaveLength(1);
+        expect(persistedSos[0].type).toBe(CASE_COMMENT_SAVED_OBJECT);
+        expectNoUnifiedOrphans(persistedSos[0].attributes);
+        expect(persistedSos[0].attributes).toEqual(
+          expect.objectContaining({
+            type: 'externalReference',
+            externalReferenceId: 'sec-endpoint-1',
+            externalReferenceAttachmentTypeId: 'endpoint',
+          })
+        );
+      });
     });
   });
 
