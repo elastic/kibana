@@ -23,7 +23,6 @@ const makeHash = (yaml: string): string => createHash('sha256').update(yaml.trim
 const BUNDLED_YAMLS: Record<AllDefaultWorkflowKey, string> = {
   custom_validation_example: 'custom_validation_example: bundled yaml',
   default_alert_retrieval: 'default_alert_retrieval: bundled yaml',
-  esql_example_alert_retrieval: 'esql_example_alert_retrieval: bundled yaml',
   generation: 'generation: bundled yaml',
   run_example: 'run_example: bundled yaml',
   validate: 'validate: bundled yaml',
@@ -42,7 +41,6 @@ const BUNDLED_YAML_ENTRIES: ReadonlyMap<AllDefaultWorkflowKey, BundledYamlEntry>
 const DEFAULT_WORKFLOW_IDS: DefaultWorkflowIds = {
   custom_validation_example: 'wf-custom-validation-id',
   default_alert_retrieval: 'wf-alert-id',
-  esql_example_alert_retrieval: 'wf-esql-id',
   generation: 'wf-gen-id',
   run_example: 'wf-run-example-id',
   validate: 'wf-validate-id',
@@ -526,9 +524,9 @@ describe('verifyAndRepairWorkflows', () => {
 
     it('puts invalid optional workflow repair failure in optionalWarnings, not unrepairableErrors', async () => {
       mockGetWorkflowsByIds.mockImplementation((_ids: string[]) => {
-        if (_ids[0] === 'wf-esql-id') {
+        if (_ids[0] === 'wf-run-example-id') {
           return Promise.resolve([
-            makeStoredWorkflow(BUNDLED_YAMLS.esql_example_alert_retrieval, true, false),
+            makeStoredWorkflow(BUNDLED_YAMLS.run_example, true, false),
           ]);
         }
         return allIntactGetWorkflowsByIds(_ids);
@@ -542,8 +540,8 @@ describe('verifyAndRepairWorkflows', () => {
       expect(result.optionalWarnings).toEqual([
         {
           error: 'optional update failed',
-          key: 'esql_example_alert_retrieval',
-          workflowId: 'wf-esql-id',
+          key: 'run_example',
+          workflowId: 'wf-run-example-id',
         },
       ]);
     });
@@ -690,8 +688,8 @@ describe('verifyAndRepairWorkflows', () => {
 
     it('puts optional workflow repair failure in optionalWarnings, not unrepairableErrors', async () => {
       mockGetWorkflowsByIds.mockImplementation((_ids: string[]) => {
-        if (_ids[0] === 'wf-esql-id') {
-          return Promise.resolve([makeStoredWorkflow('esql_example_alert_retrieval: modified')]);
+        if (_ids[0] === 'wf-run-example-id') {
+          return Promise.resolve([makeStoredWorkflow('run_example: modified')]);
         }
         return allIntactGetWorkflowsByIds(_ids);
       });
@@ -704,8 +702,8 @@ describe('verifyAndRepairWorkflows', () => {
       expect(result.optionalWarnings).toEqual([
         {
           error: 'optional update failed',
-          key: 'esql_example_alert_retrieval',
-          workflowId: 'wf-esql-id',
+          key: 'run_example',
+          workflowId: 'wf-run-example-id',
         },
       ]);
     });
@@ -884,17 +882,16 @@ describe('verifyAndRepairWorkflows', () => {
   });
 
   describe('parallel execution', () => {
-    it('calls getWorkflowsByIds for all 6 workflows in parallel when all IDs present', async () => {
+    it('calls getWorkflowsByIds for all 5 workflows in parallel when all IDs present', async () => {
       mockGetWorkflowsByIds.mockImplementation(allIntactGetWorkflowsByIds);
 
       await callVerifyAndRepair();
 
-      expect(mockGetWorkflowsByIds).toHaveBeenCalledTimes(6);
+      expect(mockGetWorkflowsByIds).toHaveBeenCalledTimes(5);
       expect(mockGetWorkflowsByIds).toHaveBeenCalledWith(['wf-alert-id'], 'default');
       expect(mockGetWorkflowsByIds).toHaveBeenCalledWith(['wf-gen-id'], 'default');
       expect(mockGetWorkflowsByIds).toHaveBeenCalledWith(['wf-validate-id'], 'default');
       expect(mockGetWorkflowsByIds).toHaveBeenCalledWith(['wf-custom-validation-id'], 'default');
-      expect(mockGetWorkflowsByIds).toHaveBeenCalledWith(['wf-esql-id'], 'default');
       expect(mockGetWorkflowsByIds).toHaveBeenCalledWith(['wf-run-example-id'], 'default');
     });
 

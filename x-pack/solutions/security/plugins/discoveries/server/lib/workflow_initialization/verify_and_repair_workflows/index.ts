@@ -27,7 +27,6 @@ const REQUIRED_WORKFLOW_KEYS: ReadonlyArray<RequiredDefaultWorkflowKey> = [
 
 const OPTIONAL_WORKFLOW_KEYS: ReadonlyArray<OptionalDefaultWorkflowKey> = [
   'custom_validation_example',
-  'esql_example_alert_retrieval',
   'run_example',
 ];
 

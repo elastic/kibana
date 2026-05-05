@@ -20,7 +20,6 @@ const mockLogger = loggerMock.create();
 const mockRequest = {} as never;
 const mockWorkflowIds = {
   default_alert_retrieval: 'legacy-id',
-  esql_example_alert_retrieval: 'esql-id',
   generation: 'orch-id',
   validate: 'validate-id',
 };

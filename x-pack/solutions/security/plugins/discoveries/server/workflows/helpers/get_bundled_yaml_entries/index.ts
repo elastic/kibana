@@ -12,10 +12,7 @@ import { join } from 'path';
 import type { Logger } from '@kbn/core/server';
 
 export type RequiredDefaultWorkflowKey = 'default_alert_retrieval' | 'generation' | 'validate';
-export type OptionalDefaultWorkflowKey =
-  | 'custom_validation_example'
-  | 'esql_example_alert_retrieval'
-  | 'run_example';
+export type OptionalDefaultWorkflowKey = 'custom_validation_example' | 'run_example';
 export type AllDefaultWorkflowKey = RequiredDefaultWorkflowKey | OptionalDefaultWorkflowKey;
 
 export interface BundledYamlEntry {
@@ -37,10 +34,6 @@ const ALL_WORKFLOW_YAML_PATHS: ReadonlyArray<{
     yamlPath: 'default_attack_discovery_alert_retrieval.workflow.yaml',
   },
   {
-    key: 'esql_example_alert_retrieval',
-    yamlPath: 'attack_discovery_esql_example.workflow.yaml',
-  },
-  {
     key: 'generation',
     yamlPath: 'attack_discovery_generation.workflow.yaml',
   },
@@ -57,7 +50,7 @@ const ALL_WORKFLOW_YAML_PATHS: ReadonlyArray<{
 let cachedEntries: ReadonlyMap<AllDefaultWorkflowKey, BundledYamlEntry> | null = null;
 
 /**
- * Reads all bundled workflow YAML files from disk (3 required + 3 optional) and
+ * Reads all bundled workflow YAML files from disk (3 required + 2 optional) and
  * computes SHA-256 hashes for efficient comparison. Results are cached in a
  * module-level variable since bundled files never change at runtime.
  *
