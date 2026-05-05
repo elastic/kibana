@@ -246,6 +246,7 @@ describe('getFullAgentPolicy', () => {
         host: 'http://default-registry.co',
       },
       downloadSourceProxy: undefined,
+      securityArtifactsProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
         id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -514,6 +515,7 @@ describe('getFullAgentPolicy', () => {
         host: 'http://default-registry.co',
       },
       downloadSourceProxy: undefined,
+      securityArtifactsProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
         id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -569,6 +571,7 @@ describe('getFullAgentPolicy', () => {
         host: 'http://default-registry.co',
       },
       downloadSourceProxy: undefined,
+      securityArtifactsProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
         id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -632,6 +635,7 @@ describe('getFullAgentPolicy', () => {
         host: 'http://default-registry.co',
       },
       downloadSourceProxy: undefined,
+      securityArtifactsProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
         id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -705,6 +709,7 @@ describe('getFullAgentPolicy', () => {
         host: 'http://default-registry.co',
       },
       downloadSourceProxy: undefined,
+      securityArtifactsProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
         id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -773,6 +778,7 @@ describe('getFullAgentPolicy', () => {
         host: 'http://default-registry.co',
       },
       downloadSourceProxy: undefined,
+      securityArtifactsProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
         id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -944,6 +950,7 @@ describe('getFullAgentPolicy', () => {
         host: 'http://default-registry.co',
       },
       downloadSourceProxy: undefined,
+      securityArtifactsProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
         id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -1112,6 +1119,7 @@ describe('getFullAgentPolicy', () => {
         },
       },
       downloadSourceProxy: undefined,
+      securityArtifactsProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
         id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -1203,6 +1211,7 @@ describe('getFullAgentPolicy', () => {
         },
       },
       downloadSourceProxy: undefined,
+      securityArtifactsProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
         id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -1584,6 +1593,7 @@ describe('getFullAgentPolicy', () => {
         host: 'http://default-registry.co',
       },
       downloadSourceProxy: undefined,
+      securityArtifactsProxy: undefined,
       fleetServerHost: {
         name: 'default Fleet Server',
         id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -1746,6 +1756,7 @@ describe('getFullAgentPolicy', () => {
         host: 'http://default-registry.co',
       },
       downloadSourceProxy: undefined,
+      securityArtifactsProxy: undefined,
       fleetServerHost: fleetServerHostWithSSL,
     });
 
@@ -2175,6 +2186,7 @@ describe('getFullAgentPolicy', () => {
           host: 'http://default-registry.co',
         },
         downloadSourceProxy: undefined,
+        securityArtifactsProxy: undefined,
         fleetServerHost: {
           name: 'default Fleet Server',
           id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -2243,6 +2255,7 @@ describe('getFullAgentPolicy', () => {
           host: 'http://default-registry.co',
         },
         downloadSourceProxy: undefined,
+        securityArtifactsProxy: undefined,
         fleetServerHost: {
           name: 'default Fleet Server',
           id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
