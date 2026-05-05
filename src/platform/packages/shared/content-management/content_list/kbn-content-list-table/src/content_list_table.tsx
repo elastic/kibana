@@ -136,7 +136,8 @@ const cssStickyCellRowStateSync = (euiTheme: EuiThemeComputed) => css`
 
 /**
  * Render a trailing spacer column purely in CSS, via a `::after`
- * pseudo-cell on every `<tr>`.
+ * pseudo-cell on every `<tr>`, activated only at viewports ≥
+ * {@link WIDE_VIEWPORT_NAME_BREAKPOINT_PX}.
  *
  * Browsers ignore `max-width` on table cells (per the
  * [CSS Tables spec](https://drafts.csswg.org/css-tables/#computing-the-table-width)),
@@ -151,10 +152,10 @@ const cssStickyCellRowStateSync = (euiTheme: EuiThemeComputed) => css`
  * the pseudo-cell is the only column without one, so the browser hands it
  * all the leftover horizontal space — populated columns sit left-aligned at
  * their preferred widths and the trailing whitespace lives after the last
- * populated column. On viewports too narrow to fit all preferred widths,
- * the pseudo-cell collapses to `0` and the browser shrinks the populated
- * columns proportionally (with `Column.Name` shrinking first because it
- * has the most range between its `width` and `minWidth`).
+ * populated column.
+ *
+ * The rule is scoped to the wide-viewport media query so the pseudo-cell
+ * does not appear on narrower viewports where the spacer is not needed.
  *
  * Why a pseudo-cell rather than a real `<td>` column:
  * - **No DOM impact** — the rendered table has exactly the columns the
@@ -175,11 +176,13 @@ const cssStickyCellRowStateSync = (euiTheme: EuiThemeComputed) => css`
  * `Column.Name` ships with an explicit `width`.
  */
 const cssTrailingSpacer = (euiTheme: EuiThemeComputed) => css`
-  thead tr::after,
-  tbody tr::after {
-    content: '';
-    display: table-cell;
-    border-block: ${euiTheme.border.thin};
+  @media (min-width: ${WIDE_VIEWPORT_NAME_BREAKPOINT_PX}px) {
+    thead tr::after,
+    tbody tr::after {
+      content: '';
+      display: table-cell;
+      border-block: ${euiTheme.border.thin};
+    }
   }
 `;
 
@@ -192,7 +195,7 @@ const cssTrailingSpacer = (euiTheme: EuiThemeComputed) => css`
  * Not tied to a named EUI breakpoint because EUI tops out at `xl` (~1200px),
  * so the value would have to be a hard-coded magic number either way.
  */
-const WIDE_VIEWPORT_NAME_BREAKPOINT_PX = 2560;
+export const WIDE_VIEWPORT_NAME_BREAKPOINT_PX = 2560;
 
 /**
  * Preferred {@link DEFAULT_NAME_WIDTH} bump applied at viewports
