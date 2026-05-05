@@ -56,11 +56,7 @@ spaceTest.describe(
       await expect(managementPage.assetCriticalityTab).toBeVisible();
     });
 
-    // TODO: Fix flaky test - backend race condition when toggling entity analytics
-    // The entity store cleanup is async and may still be in progress when re-enabling
-    // See: https://github.com/elastic/security-team/issues/16300
-    // eslint-disable-next-line playwright/no-skipped-test
-    spaceTest.skip('should init and disable entity analytics', async ({ pageObjects }) => {
+    spaceTest('should init and disable entity analytics', async ({ pageObjects }) => {
       spaceTest.setTimeout(180000);
       const managementPage = pageObjects.entityAnalyticsManagementPage;
 
