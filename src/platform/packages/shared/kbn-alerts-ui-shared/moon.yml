@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/licensing-types'
   - '@kbn/test-jest-helpers'
+  - '@kbn/zod'
 tags:
   - shared-browser
   - package
