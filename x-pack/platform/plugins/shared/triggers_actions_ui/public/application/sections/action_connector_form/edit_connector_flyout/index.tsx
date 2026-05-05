@@ -147,6 +147,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 
   useEffect(() => {
     let cancelled = false;
+    const fallbackName = connector.name ?? '';
     setActionTypesLoadError(null);
     (async () => {
       try {
@@ -159,7 +160,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           match ??
             ({
               id: connector.actionTypeId,
-              name: connector.name ?? '',
+              name: fallbackName,
               enabled: true,
               enabledInConfig: true,
               enabledInLicense: true,
@@ -167,6 +168,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
               supportedFeatureIds: [],
               isSystemActionType: false,
               isDeprecated: false,
+              source: connector.source ?? ACTION_TYPE_SOURCES.spec,
             } as ActionType)
         );
       } catch (err) {
@@ -179,7 +181,10 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [http, connector.actionTypeId, connector.name]);
+    // connector.name is only used as a display fallback in the synthetic ActionType object;
+    // it does not affect which type is loaded, so it must not be a dep.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [http, connector.actionTypeId]);
 
   const {
     actionTypeModel,

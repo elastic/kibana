@@ -11,9 +11,11 @@ import {
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { ActionConnectorMode, useActionTypeModel } from '@kbn/alerts-ui-shared';
@@ -100,7 +102,34 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
       : selectedActionGroup?.defaultActionMessage ?? selectedRuleTypeModel.defaultActionMessage;
   }, [isSystemAction, action, selectedRuleTypeModel, selectedActionGroup]);
 
-  if (isLoading || error || !actionTypeModel || !ParamsFieldsComponent) {
+  if (isLoading) {
+    return <EuiLoadingSpinner size="m" />;
+  }
+
+  if (error) {
+    return (
+      <EuiCallOut
+        color="danger"
+        iconType="error"
+        size="s"
+        title={i18n.translate('xpack.responseOps.ruleForm.ruleActionsMessage.specLoadErrorTitle', {
+          defaultMessage: 'Failed to load action configuration',
+        })}
+      >
+        <p>
+          {i18n.translate(
+            'xpack.responseOps.ruleForm.ruleActionsMessage.specLoadErrorDescription',
+            {
+              defaultMessage:
+                'The connector configuration could not be loaded. Try reopening the rule.',
+            }
+          )}
+        </p>
+      </EuiCallOut>
+    );
+  }
+
+  if (!actionTypeModel || !ParamsFieldsComponent) {
     return null;
   }
 

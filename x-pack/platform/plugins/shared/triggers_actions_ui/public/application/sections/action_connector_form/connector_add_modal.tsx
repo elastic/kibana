@@ -28,6 +28,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import type {
@@ -39,7 +40,6 @@ import type {
 } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useCreateConnector } from '../../hooks/use_create_connector';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import type { ConnectorFormState, ResetForm } from './connector_form';
 import { ConnectorForm } from './connector_form';
 import { loadActionTypes } from '../../lib/action_connector_api';
@@ -84,6 +84,7 @@ const ConnectorAddModal = ({
     actionTypeModel,
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
+    refetch: refetchConnectorSpec,
   } = useActionTypeModel({ actionTypeRegistry, actionType, http, uiSettings });
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> = actionTypeModel
@@ -330,7 +331,25 @@ const ConnectorAddModal = ({
                       }
                     )}
                   >
-                    <p>{actionTypeModelError.message}</p>
+                    <p>
+                      {i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorDescription',
+                        {
+                          defaultMessage:
+                            'There was an error loading the connector configuration. Check your connection and try again.',
+                        }
+                      )}
+                    </p>
+                    <EuiSpacer size="s" />
+                    <EuiButton
+                      data-test-subj="connector-spec-load-retry"
+                      onClick={() => refetchConnectorSpec()}
+                    >
+                      {i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadErrorRetry',
+                        { defaultMessage: 'Retry' }
+                      )}
+                    </EuiButton>
                   </EuiCallOut>
                   <EuiSpacer size="m" />
                 </>

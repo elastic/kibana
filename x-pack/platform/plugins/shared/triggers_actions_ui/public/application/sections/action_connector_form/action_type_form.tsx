@@ -28,6 +28,7 @@ import {
   EuiSplitPanel,
   useEuiTheme,
   EuiCallOut,
+  EuiLoadingSpinner,
   EuiSwitch,
   EuiFormPrepend,
 } from '@elastic/eui';
@@ -52,6 +53,7 @@ import {
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import type {
@@ -71,7 +73,6 @@ import { ConnectorsSelection } from './connectors_selection';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { validateActionFilterQuery } from '../../lib/value_validators';
 import { useRuleTypeAlertFields } from '../../hooks/use_rule_alert_fields';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -433,15 +434,53 @@ export const ActionTypeForm = ({
     />
   );
 
-  const { actionTypeModel: actionTypeRegistered, isLoading: isLoadingActionTypeModel } =
-    useActionTypeModel({
-      actionTypeRegistry,
-      actionType: actionTypesIndex[actionConnector.actionTypeId] ?? null,
-      http,
-      uiSettings,
-    });
+  const {
+    actionTypeModel: actionTypeRegistered,
+    isLoading: isLoadingActionTypeModel,
+    error: actionTypeModelError,
+  } = useActionTypeModel({
+    actionTypeRegistry,
+    actionType: actionTypesIndex[actionConnector.actionTypeId] ?? null,
+    http,
+    uiSettings,
+  });
 
-  if (isLoadingActionTypeModel || !actionTypeRegistered) return null;
+  if (isLoadingActionTypeModel) {
+    return (
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" data-test-subj="actionTypeFormLoading" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (actionTypeModelError) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        size="s"
+        color="danger"
+        iconType="error"
+        title={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionTypeForm.specLoadErrorTitle',
+          { defaultMessage: 'Failed to load connector configuration' }
+        )}
+      >
+        <p>
+          {i18n.translate(
+            'xpack.triggersActionsUI.sections.actionTypeForm.specLoadErrorDescription',
+            {
+              defaultMessage:
+                'The connector configuration could not be loaded. Try reopening the rule.',
+            }
+          )}
+        </p>
+      </EuiCallOut>
+    );
+  }
+
+  if (!actionTypeRegistered) return null;
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
 
   const showActionGroupErrorIcon = (): boolean => {

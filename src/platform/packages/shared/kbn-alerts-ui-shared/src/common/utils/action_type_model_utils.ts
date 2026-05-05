@@ -105,7 +105,7 @@ export function transformSpecToActionTypeModel(
     actionConnectorFields: lazy(() => {
       const parsedZodSchema = fromConnectorSpecSchema(spec.schema);
       if (!parsedZodSchema) {
-        throw new Error(`Invalid connector spec schema for "${spec.metadata.id}"`);
+        return Promise.reject(new Error(`Invalid connector spec schema for "${spec.metadata.id}"`));
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
       function SpecConnectorFormFields({ readOnly, isEdit, authMode }: ActionConnectorFieldsProps) {
@@ -169,7 +169,7 @@ function createConnectorFormDeserializer() {
     const config = apiData?.config as Record<string, unknown> | undefined;
     const secrets = apiData?.secrets as Record<string, unknown> | undefined;
 
-    if (!config?.authType || secrets?.authType) {
+    if (!config?.authType || (secrets?.authType && secrets.authType === config.authType)) {
       return apiData;
     }
 
