@@ -896,6 +896,38 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  registered_domain: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.name', {
+      defaultMessage: 'Registered Domain',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.description', {
+      defaultMessage: 'Extract the domain components from a FQDN string',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.usage', {
+      defaultMessage:
+        'Provide `expression` field containing the FQDN and `prefix` for the target field prefix where the extracted components will be stored (e.g. `prefix.subdomain`)',
+    }),
+    examples: [
+      {
+        description: i18n.translate(
+          'xpack.streamlang.actionMetadata.registeredDomain.examples.simple',
+          {
+            defaultMessage: 'Extract the domain components from a FQDN string',
+          }
+        ),
+        yaml: `- action: registered_domain
+  expression: fqdn
+  prefix: url`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.tips.components', {
+        defaultMessage:
+          'Extracts the following components: domain, registered_domain, top_level_domain, subdomain',
+      }),
+    ],
+  },
+
   manual_ingest_pipeline: {
     name: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.name', {
       defaultMessage: 'Manual Ingest Pipeline',

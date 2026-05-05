@@ -745,6 +745,24 @@ export const enrichProcessorSchema = processorBaseWithWhereSchema.extend({
   override: z.optional(z.boolean()),
 }) satisfies z.Schema<EnrichProcessor>;
 
+/**
+ * Registered domain processor
+ */
+
+export interface RegisteredDomainProcessor extends ProcessorBaseWithWhere {
+  action: 'registered_domain';
+  expression: string;
+  prefix: string;
+  ignore_missing?: boolean;
+}
+
+export const registeredDomainSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('registered_domain'),
+  expression: StreamlangSourceField,
+  prefix: NonEmptyString,
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<RegisteredDomainProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -769,6 +787,7 @@ export type StreamlangProcessorDefinition =
   | NetworkDirectionProcessor
   | JsonExtractProcessor
   | EnrichProcessor
+  | RegisteredDomainProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -795,6 +814,7 @@ export const streamlangProcessorSchema = z.union([
   networkDirectionProcessorSchema,
   jsonExtractProcessorSchema,
   enrichProcessorSchema,
+  registeredDomainSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
@@ -816,6 +836,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     splitProcessorSchema,
     jsonExtractProcessorSchema,
     enrichProcessorSchema,
+    registeredDomainSchema,
   ])
 );
 
