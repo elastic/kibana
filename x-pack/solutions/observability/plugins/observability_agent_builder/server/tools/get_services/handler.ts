@@ -28,33 +28,6 @@ interface ServiceFromIndex {
 
 const MAX_SERVICES_FROM_INDICES = 500;
 
-/**
- * Note: `healthStatus` is only a **tool input** (see `tool.ts` schema), not a field on
- * `ServicesItemsItem`. APM no longer returns `healthStatus` on merged service rows; it exposes
- * `anomalyScore` instead. We keep the optional `healthStatus` filter so existing agents, prompts,
- * and API tests can still pass the same four buckets; matching is done by mapping
- * `anomalyScore` → ML severity → the same legacy buckets this filter always implied.
- */
-type ServiceHealthBucket = 'healthy' | 'warning' | 'critical' | 'unknown';
-
-function getHealthBucketFromAnomalyScore(anomalyScore: number | undefined): ServiceHealthBucket {
-  const severity =
-    anomalyScore === undefined ? ML_ANOMALY_SEVERITY.UNKNOWN : getSeverityType(anomalyScore);
-  switch (severity) {
-    case ML_ANOMALY_SEVERITY.CRITICAL:
-    case ML_ANOMALY_SEVERITY.MAJOR:
-      return 'critical';
-    case ML_ANOMALY_SEVERITY.MINOR:
-    case ML_ANOMALY_SEVERITY.WARNING:
-      return 'warning';
-    case ML_ANOMALY_SEVERITY.LOW:
-      return 'healthy';
-    case ML_ANOMALY_SEVERITY.UNKNOWN:
-    default:
-      return 'unknown';
-  }
-}
-
 async function getServicesFromLogsAndMetricsIndices({
   esClient,
   logsIndices,
@@ -157,7 +130,7 @@ export async function getToolHandler({
   logger,
   start,
   end,
-  healthStatus,
+  anomalySeverities,
   kqlFilter,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
@@ -168,7 +141,7 @@ export async function getToolHandler({
   logger: Logger;
   start: string;
   end: string;
-  healthStatus?: string[];
+  anomalySeverities?: ML_ANOMALY_SEVERITY[];
   kqlFilter?: string;
 }): Promise<{
   services: ServicesItemsItem[];
@@ -203,28 +176,24 @@ export async function getToolHandler({
 
   const apmServices = apmResponse?.items ?? [];
 
-  // Optional `healthStatus` tool filter (see file-level note): derive bucket from `anomalyScore`, then normalize latency
-  const normalizedApmServices = apmServices.flatMap((service) => {
-    if (healthStatus && healthStatus.length) {
-      const bucket = getHealthBucketFromAnomalyScore(service.anomalyScore);
-      if (!healthStatus.includes(bucket)) {
-        return [];
-      }
-    }
-
-    return [
-      {
-        ...service,
-        latency: toMilliseconds(service.latency ?? null),
-      },
-    ];
-  });
+  const normalizedApmServices = apmServices
+    .filter((service) => {
+      if (!anomalySeverities?.length) return true;
+      const severity =
+        service.anomalyScore === undefined
+          ? ML_ANOMALY_SEVERITY.UNKNOWN
+          : getSeverityType(service.anomalyScore);
+      return anomalySeverities.includes(severity);
+    })
+    .map((service) => ({
+      ...service,
+      latency: toMilliseconds(service.latency ?? null),
+    }));
 
   // Merge all services from different sources
-  // When the `healthStatus` tool filter is set, omit logs/metrics-only services (no `anomalyScore` to evaluate)
   const services = mergeServices({
     apmServices: normalizedApmServices,
-    logsAndMetricsServices: healthStatus ? [] : logsAndMetricsServices,
+    logsAndMetricsServices: anomalySeverities?.length ? [] : logsAndMetricsServices,
   });
 
   return {

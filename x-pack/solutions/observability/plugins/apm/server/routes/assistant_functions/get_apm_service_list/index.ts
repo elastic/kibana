@@ -9,7 +9,6 @@ import datemath from '@elastic/datemath';
 import type { Logger } from '@kbn/core/server';
 import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import type { ServiceHealthStatus } from '../../../../common/service_health_status';
 import { RollupInterval } from '../../../../common/rollup';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { getSeverity } from '../../../../common/anomaly_detection';
@@ -18,7 +17,6 @@ import type { APMEventClient } from '../../../lib/helpers/create_es_client/creat
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getServicesItems } from '../../services/get_services/get_services_items';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
-import { resolveFilterSeverities } from './resolve_filter_severities';
 
 export interface ApmServicesListItem {
   'service.name': string;
@@ -39,9 +37,7 @@ export async function getApmServiceList({
 }: {
   arguments: {
     serviceEnvironment?: string | undefined;
-    mlSeverities?: ML_ANOMALY_SEVERITY[] | undefined;
-    /** @deprecated Prefer `mlSeverities`; kept for backward compatibility with older assistant calls. */
-    healthStatus?: ServiceHealthStatus[] | undefined;
+    anomalySeverities?: ML_ANOMALY_SEVERITY[] | undefined;
     start: string;
     end: string;
   };
@@ -51,8 +47,6 @@ export async function getApmServiceList({
   logger: Logger;
   randomSampler: RandomSampler;
 }): Promise<ApmServicesListItem[]> {
-  const filterSeverities = resolveFilterSeverities(args);
-
   const start = datemath.parse(args.start)?.valueOf()!;
   const end = datemath.parse(args.end)?.valueOf()!;
 
@@ -83,9 +77,9 @@ export async function getApmServiceList({
     };
   });
 
-  if (filterSeverities?.length) {
+  if (args.anomalySeverities?.length) {
     mappedItems = mappedItems.filter((item) =>
-      filterSeverities.includes(getSeverity(item.anomalyScore))
+      args.anomalySeverities!.includes(getSeverity(item.anomalyScore))
     );
   }
 

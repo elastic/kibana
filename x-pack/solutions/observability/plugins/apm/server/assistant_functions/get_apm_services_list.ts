@@ -12,7 +12,6 @@ import type { FunctionRegistrationParameters } from '.';
 import { getApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
 import { getMlClient } from '../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../lib/helpers/get_random_sampler';
-import { ServiceHealthStatus } from '../../common/service_health_status';
 import { getApmServiceList } from '../routes/assistant_functions/get_apm_service_list';
 import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
 
@@ -47,10 +46,10 @@ export function registerGetApmServicesListFunction({
             ...NON_EMPTY_STRING,
             description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
-          mlSeverities: {
+          anomalySeverities: {
             type: 'array',
             description:
-              'Filter services by ML anomaly severity bands (derived from each service’s max anomaly score in the time range). Takes precedence over healthStatus when both are set.',
+              'Filter services by ML anomaly severity bands (derived from each service’s max anomaly score in the time range).',
             items: {
               type: 'string',
               enum: [
@@ -60,20 +59,6 @@ export function registerGetApmServicesListFunction({
                 ML_ANOMALY_SEVERITY.WARNING,
                 ML_ANOMALY_SEVERITY.LOW,
                 ML_ANOMALY_SEVERITY.UNKNOWN,
-              ],
-            },
-          },
-          healthStatus: {
-            type: 'array',
-            description:
-              'Deprecated. Prefer mlSeverities. When mlSeverities is omitted, filters using legacy healthy / warning / critical / unknown buckets derived from the same anomaly scores (backward compatible with older assistant calls).',
-            items: {
-              type: 'string',
-              enum: [
-                ServiceHealthStatus.unknown,
-                ServiceHealthStatus.healthy,
-                ServiceHealthStatus.warning,
-                ServiceHealthStatus.critical,
               ],
             },
           },
