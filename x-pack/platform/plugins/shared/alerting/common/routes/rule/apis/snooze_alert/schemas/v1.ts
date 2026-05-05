@@ -112,17 +112,14 @@ export const snoozeAlertBodySchema = schema.object(
           description:
             'Logical operator applied to the conditions array. ' +
             '"any" expires the snooze when at least one condition is met; ' +
-            '"all" requires every condition to be met. Requires conditions to be set.',
+            '"all" requires every condition to be met. ' +
+            'When conditions are provided but this field is omitted, defaults to "any".',
         },
       })
     ),
   },
   {
     validate: (value) => {
-      if (value.condition_operator !== undefined && value.conditions === undefined) {
-        return '[condition_operator] requires [conditions]';
-      }
-
       if (value.expires_at === undefined && value.conditions === undefined) {
         return 'either [expires_at] or [conditions] must be provided';
       }

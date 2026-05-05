@@ -118,7 +118,7 @@ async function snoozeAlertInstanceWithOCC(
   const snapshotFields = getPerAlertSnoozeSnapshotFields(body);
   let snoozeSnapshot: Record<string, unknown> | undefined;
 
-  if (snapshotFields.length > 0) {
+  if (indices.length > 0 && snapshotFields.length > 0) {
     if (!context.alertsService) {
       throw Boom.internal('Alerts service is unavailable');
     }
@@ -136,7 +136,7 @@ async function snoozeAlertInstanceWithOCC(
         `Alert instance with id "${alertInstanceId}" does not exist for rule with id "${ruleId}"`
       );
     }
-  } else if (validateAlertsExistence) {
+  } else if (indices.length > 0 && validateAlertsExistence) {
     if (!context.alertsService) {
       throw Boom.internal('Alerts service is unavailable');
     }

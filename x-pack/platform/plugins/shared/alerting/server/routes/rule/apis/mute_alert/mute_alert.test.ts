@@ -51,15 +51,19 @@ describe('muteAlertRoute', () => {
     expect(await handler(context, req, res)).toEqual(undefined);
 
     expect(rulesClient.muteInstance).toHaveBeenCalledTimes(1);
-    expect(rulesClient.muteInstance).toHaveBeenCalledWith({
-      params: {
-        alertId: '1',
-        alertInstanceId: '2',
-      },
-      query: {
-        validateAlertsExistence: true,
-      },
-    });
+    expect(rulesClient.muteInstance.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "params": Object {
+            "alertId": "1",
+            "alertInstanceId": "2",
+          },
+          "query": Object {
+            "validateAlertsExistence": true,
+          },
+        },
+      ]
+    `);
 
     expect(res.noContent).toHaveBeenCalled();
   });

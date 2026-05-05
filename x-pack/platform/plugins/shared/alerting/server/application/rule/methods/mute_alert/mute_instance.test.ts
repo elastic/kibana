@@ -155,7 +155,7 @@ describe('mute alert instance', () => {
     expect(authorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
     expect(actionsAuthorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
     expect(ruleTypeRegistryMock.ensureRuleTypeEnabled).toHaveBeenCalledTimes(1);
-    expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(1);
+    expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(2);
     expect(alertsServiceMock.isExistingAlert).toHaveBeenCalledTimes(1);
     expect(alertsServiceMock.muteAlertInstance).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
@@ -216,37 +216,5 @@ describe('mute alert instance', () => {
         query: { validateAlertsExistence: true },
       })
     ).rejects.toThrow('Alert instance with id "instance1" does not exist for rule with id "1"');
-  });
-
-  it('throws 500 when alertsService is null and validateAlertsExistence is true', async () => {
-    const contextWithoutAlertsService = {
-      ...context,
-      alertsService: null,
-    } as unknown as RulesClientContext;
-
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'test-rule-type',
-      attributes: {
-        alertTypeId: '123',
-        schedule: { interval: '10s' },
-        params: { bar: true },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        actions: [],
-        notifyWhen: 'onActiveAlert',
-      },
-      references: [],
-      version: 'v1',
-    });
-
-    await expect(() =>
-      muteInstance(contextWithoutAlertsService, {
-        params: { alertId: '1', alertInstanceId: 'instance1' },
-        query: { validateAlertsExistence: true },
-      })
-    ).rejects.toThrow('Alerts service is unavailable');
-
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 });

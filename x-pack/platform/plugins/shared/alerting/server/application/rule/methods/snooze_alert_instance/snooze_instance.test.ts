@@ -166,7 +166,7 @@ describe('snooze alert instance', () => {
     expect(alertsServiceMock.isExistingAlert).toHaveBeenCalledTimes(1);
   });
 
-  it('rejects an invalid conditional snooze body', async () => {
+  it('rejects conditionOperator when conditions are absent', async () => {
     await expect(() =>
       snoozeAlertInstance(context, {
         params: { alertId: '1', alertInstanceId: 'instance1' },
@@ -178,6 +178,62 @@ describe('snooze alert instance', () => {
     ).rejects.toThrow('Failed to validate body: [conditionOperator] requires [conditions]');
 
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects a body with neither expiresAt nor conditions', async () => {
+    await expect(() =>
+      snoozeAlertInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: false },
+        body: {} as never,
+      })
+    ).rejects.toThrow(
+      'Failed to validate body: either [expiresAt] or [conditions] must be provided'
+    );
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('defaults conditionOperator to "any" when conditions are provided without an operator', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        consumer: 'test-consumer',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+        mutedInstanceIds: [],
+        snoozedInstances: [],
+      },
+      references: [],
+      version: 'v1',
+    });
+
+    await snoozeAlertInstance(context, {
+      params: { alertId: '1', alertInstanceId: 'instance1' },
+      query: { validateAlertsExistence: false },
+      body: {
+        expiresAt: '2099-12-31T23:59:59.000Z',
+        conditions: [{ type: 'severity_change' }],
+        conditionOperator: 'any',
+      },
+    });
+
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(String),
+      expect.objectContaining({
+        snoozedInstances: expect.arrayContaining([
+          expect.objectContaining({ conditionOperator: 'any' }),
+        ]),
+      }),
+      expect.any(Object)
+    );
   });
 
   it('rejects expiresAt that is in the past', async () => {
@@ -223,6 +279,7 @@ describe('snooze alert instance', () => {
         body: {
           expiresAt: '2099-12-31T23:59:59.000Z',
           conditions: [{ type: 'field_change', field: 'host.name' }],
+          conditionOperator: 'any',
         },
       })
     ).rejects.toThrow('Alerts service is unavailable');
@@ -273,6 +330,7 @@ describe('snooze alert instance', () => {
         body: {
           expiresAt: '2026-04-14',
           conditions: [{ type: 'field_change', field: 'host.name' }],
+          conditionOperator: 'any',
         },
       })
     ).rejects.toThrow('Failed to validate body');
@@ -288,6 +346,7 @@ describe('snooze alert instance', () => {
         body: {
           expiresAt: '2026-04-14T12:00:00Z',
           conditions: [{ type: 'field_change', field: 'host.name' }],
+          conditionOperator: 'any',
         },
       })
     ).rejects.toThrow('Failed to validate body');

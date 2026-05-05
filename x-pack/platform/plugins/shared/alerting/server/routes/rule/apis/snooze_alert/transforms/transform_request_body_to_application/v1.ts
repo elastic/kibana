@@ -13,5 +13,7 @@ export const transformRequestBodyToApplication = (
 ): SnoozeAlertInstanceBody => ({
   expiresAt: body.expires_at,
   conditions: body.conditions,
-  conditionOperator: body.condition_operator,
+  // Default conditionOperator to 'any' only when conditions are present but the
+  // operator was not explicitly supplied.
+  conditionOperator: body.conditions ? body.condition_operator ?? 'any' : undefined,
 });

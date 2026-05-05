@@ -43,10 +43,12 @@ const alertsService = {
   createAlertsClient: jest.fn(),
   muteAlertInstance: jest.fn(),
   unmuteAlertInstance: jest.fn(),
+  getAlertSnoozeSnapshot: jest.fn(),
   muteAllAlerts: jest.fn(),
   unmuteAllAlerts: jest.fn(),
   getContextInitializationPromise: jest.fn(),
   register: jest.fn(),
+  isExistingAlert: jest.fn(),
   setAlertsToUntracked: jest.fn(),
   clearAlertFlappingHistory: jest.fn(),
 } as unknown as jest.Mocked<AlertsService>;
@@ -84,15 +86,15 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
-  alertsService.muteAlertInstance.mockClear();
-  alertsService.unmuteAlertInstance.mockClear();
+  alertsService.getAlertSnoozeSnapshot.mockClear();
+  alertsService.getAlertSnoozeSnapshot.mockResolvedValue({ 'host.name': 'web-01' });
   (rulesClientParams.getAlertIndicesAlias as jest.Mock).mockReturnValue(['.alerts-default']);
 });
 
 setGlobalDate();
 
-describe('muteInstance()', () => {
-  test('mutes an alert instance', async () => {
+describe('snoozeAlertInstance()', () => {
+  test('writes a conditional snooze entry', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -103,63 +105,63 @@ describe('muteInstance()', () => {
         alertTypeId: '2',
         enabled: true,
         scheduledTaskId: 'task-123',
-        mutedInstanceIds: [],
+        mutedInstanceIds: ['still-muted'],
+        snoozedInstances: [
+          {
+            instanceId: 'existing-snooze',
+            snoozedAt: '2026-04-14T10:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
       },
       version: '123',
       references: [],
     });
 
-    await rulesClient.muteInstance({
+    await rulesClient.snoozeAlertInstance({
       params: { alertId: '1', alertInstanceId: '2' },
       query: { validateAlertsExistence: false },
+      body: {
+        expiresAt: '2099-12-31T23:59:59.000Z',
+        conditions: [{ type: 'field_change', field: 'host.name' }],
+        conditionOperator: 'all',
+      },
     });
 
-    expect(alertsService.muteAlertInstance).toHaveBeenCalledWith({
-      ruleId: '1',
-      alertInstanceId: '2',
+    expect(alertsService.getAlertSnoozeSnapshot).toHaveBeenCalledWith({
       indices: ['.alerts-default'],
-      logger: rulesClientParams.logger,
+      alertId: '2',
+      ruleId: '1',
+      fields: ['host.name'],
     });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       '1',
       {
-        mutedInstanceIds: ['2'],
+        snoozedInstances: [
+          {
+            instanceId: 'existing-snooze',
+            snoozedAt: '2026-04-14T10:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+          {
+            instanceId: '2',
+            expiresAt: '2099-12-31T23:59:59.000Z',
+            conditions: [{ type: 'field_change', field: 'host.name' }],
+            conditionOperator: 'all',
+            snoozeSnapshot: { 'host.name': 'web-01' },
+            snoozedAt: '2019-02-12T21:01:22.479Z',
+            snoozedBy: 'elastic',
+          },
+        ],
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },
-      {
-        version: '123',
-      }
+      { version: '123' }
     );
   });
 
-  test('skips muting when alert instance already muted', async () => {
-    const rulesClient = new RulesClient(rulesClientParams);
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: RULE_SAVED_OBJECT_TYPE,
-      attributes: {
-        actions: [],
-        schedule: { interval: '10s' },
-        alertTypeId: '2',
-        enabled: true,
-        scheduledTaskId: 'task-123',
-        mutedInstanceIds: ['2'],
-      },
-      references: [],
-    });
-
-    await rulesClient.muteInstance({
-      params: { alertId: '1', alertInstanceId: '2' },
-      query: { validateAlertsExistence: false },
-    });
-
-    expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
-  });
-
-  test('skips muting when alert is muted', async () => {
+  test('writes a time-only snooze entry when no conditions provided', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -171,17 +173,41 @@ describe('muteInstance()', () => {
         enabled: true,
         scheduledTaskId: 'task-123',
         mutedInstanceIds: [],
-        muteAll: true,
+        snoozedInstances: [],
       },
+      version: '123',
       references: [],
     });
 
-    await rulesClient.muteInstance({
+    await rulesClient.snoozeAlertInstance({
       params: { alertId: '1', alertInstanceId: '2' },
       query: { validateAlertsExistence: false },
+      body: {
+        expiresAt: '2099-12-31T23:59:59.000Z',
+      },
     });
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
-    expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
+
+    expect(alertsService.getAlertSnoozeSnapshot).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        snoozedInstances: [
+          {
+            instanceId: '2',
+            expiresAt: '2099-12-31T23:59:59.000Z',
+            conditions: undefined,
+            conditionOperator: undefined,
+            snoozeSnapshot: undefined,
+            snoozedAt: '2019-02-12T21:01:22.479Z',
+            snoozedBy: 'elastic',
+          },
+        ],
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      { version: '123' }
+    );
   });
 
   describe('authorization', () => {
@@ -196,9 +222,7 @@ describe('muteInstance()', () => {
               id: '1',
               actionTypeId: '1',
               actionRef: '1',
-              params: {
-                foo: true,
-              },
+              params: { foo: true },
             },
           ],
           schedule: { interval: '10s' },
@@ -207,54 +231,57 @@ describe('muteInstance()', () => {
           enabled: true,
           scheduledTaskId: 'task-123',
           mutedInstanceIds: [],
+          snoozedInstances: [],
         },
         version: '123',
         references: [],
       });
     });
 
-    test('ensures user is authorised to muteInstance this type of alert under the consumer', async () => {
+    test('ensures user is authorised to snoozeAlert this type of alert under the consumer', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
-      await rulesClient.muteInstance({
+      await rulesClient.snoozeAlertInstance({
         params: { alertId: '1', alertInstanceId: '2' },
         query: { validateAlertsExistence: false },
+        body: { expiresAt: '2099-12-31T23:59:59.000Z' },
       });
 
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',
-        operation: 'muteAlert',
+        operation: 'snoozeAlert',
         ruleTypeId: 'myType',
       });
     });
 
-    test('throws when user is not authorised to muteInstance this type of alert', async () => {
+    test('throws when user is not authorised to snoozeAlert this type of alert', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
       authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to muteAlert a "myType" alert for "myApp"`)
+        new Error(`Unauthorized to snoozeAlert a "myType" alert for "myApp"`)
       );
 
       await expect(
-        rulesClient.muteInstance({
+        rulesClient.snoozeAlertInstance({
           params: { alertId: '1', alertInstanceId: '2' },
           query: { validateAlertsExistence: false },
+          body: { expiresAt: '2099-12-31T23:59:59.000Z' },
         })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to muteAlert a "myType" alert for "myApp"]`
+        `[Error: Unauthorized to snoozeAlert a "myType" alert for "myApp"]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',
-        operation: 'muteAlert',
+        operation: 'snoozeAlert',
         ruleTypeId: 'myType',
       });
     });
   });
 
   describe('auditLogger', () => {
-    test('logs audit event when muting an alert', async () => {
+    test('logs audit event when snoozeing an alert', async () => {
       const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
@@ -266,14 +293,18 @@ describe('muteInstance()', () => {
           enabled: true,
           scheduledTaskId: 'task-123',
           mutedInstanceIds: [],
+          snoozedInstances: [],
         },
         version: '123',
         references: [],
       });
-      await rulesClient.muteInstance({
+
+      await rulesClient.snoozeAlertInstance({
         params: { alertId: '1', alertInstanceId: '2' },
         query: { validateAlertsExistence: false },
+        body: { expiresAt: '2099-12-31T23:59:59.000Z' },
       });
+
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -285,7 +316,7 @@ describe('muteInstance()', () => {
       );
     });
 
-    test('logs audit event when not authorised to mute an alert', async () => {
+    test('logs audit event when not authorised to snooze an alert', async () => {
       const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
@@ -297,6 +328,7 @@ describe('muteInstance()', () => {
           enabled: true,
           scheduledTaskId: 'task-123',
           mutedInstanceIds: [],
+          snoozedInstances: [],
         },
         version: '123',
         references: [],
@@ -304,23 +336,20 @@ describe('muteInstance()', () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
       await expect(
-        rulesClient.muteInstance({
+        rulesClient.snoozeAlertInstance({
           params: { alertId: '1', alertInstanceId: '2' },
           query: { validateAlertsExistence: false },
+          body: { expiresAt: '2099-12-31T23:59:59.000Z' },
         })
       ).rejects.toThrow();
+
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
             action: 'rule_alert_mute',
             outcome: 'failure',
           }),
-          kibana: {
-            saved_object: {
-              id: '1',
-              type: RULE_SAVED_OBJECT_TYPE,
-            },
-          },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
           error: {
             code: 'Error',
             message: 'Unauthorized',
@@ -331,7 +360,7 @@ describe('muteInstance()', () => {
   });
 
   describe('elasticsearch operations', () => {
-    test('does not call ES updateByQuery when no alert indices exist', async () => {
+    test('does not call getAlertSnoozeSnapshot when no alert indices exist', async () => {
       (rulesClientParams.getAlertIndicesAlias as jest.Mock).mockReturnValue([]);
       const rulesClient = new RulesClient(rulesClientParams);
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -344,24 +373,31 @@ describe('muteInstance()', () => {
           enabled: true,
           scheduledTaskId: 'task-123',
           mutedInstanceIds: [],
+          snoozedInstances: [],
         },
         version: '123',
         references: [],
       });
 
-      await rulesClient.muteInstance({
+      await rulesClient.snoozeAlertInstance({
         params: { alertId: '1', alertInstanceId: '2' },
         query: { validateAlertsExistence: false },
+        body: {
+          expiresAt: '2099-12-31T23:59:59.000Z',
+          conditions: [{ type: 'field_change', field: 'host.name' }],
+          conditionOperator: 'any',
+        },
       });
 
-      expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
+      expect(alertsService.getAlertSnoozeSnapshot).not.toHaveBeenCalled();
       expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     });
 
-    test('throws error and does not update rule when alertsService fails', async () => {
-      const loggerMock = loggingSystemMock.create().get();
-      const rulesClient = new RulesClient({ ...rulesClientParams, logger: loggerMock });
-      alertsService.muteAlertInstance.mockRejectedValueOnce(new Error('ES connection failed'));
+    test('throws error and does not update rule when getAlertSnoozeSnapshot fails', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+      alertsService.getAlertSnoozeSnapshot.mockRejectedValueOnce(
+        new Error('ES connection failed')
+      );
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: RULE_SAVED_OBJECT_TYPE,
@@ -372,17 +408,25 @@ describe('muteInstance()', () => {
           enabled: true,
           scheduledTaskId: 'task-123',
           mutedInstanceIds: [],
+          snoozedInstances: [],
         },
         version: '123',
         references: [],
       });
 
       await expect(
-        rulesClient.muteInstance({
+        rulesClient.snoozeAlertInstance({
           params: { alertId: '1', alertInstanceId: '2' },
           query: { validateAlertsExistence: false },
+            body: {
+            expiresAt: '2099-12-31T23:59:59.000Z',
+            conditions: [{ type: 'field_change', field: 'host.name' }],
+            conditionOperator: 'any',
+          },
         })
       ).rejects.toThrow('ES connection failed');
+
+      expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
     });
   });
 });

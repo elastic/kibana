@@ -10,7 +10,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
 import { muteAlertQuerySchema, muteAlertParamsSchema } from './schemas';
 import type { MuteAlertQuery, MuteAlertParams } from './types';
-import type { RawRule } from '../../../../saved_objects/schemas/raw_rule';
+import type { Rule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -31,7 +31,7 @@ export async function muteInstance(
   try {
     muteAlertQuerySchema.validate(query);
   } catch (error) {
-    throw Boom.badRequest(`Failed to validate query: ${error.message}`);
+    throw Boom.badRequest(`Failed to validate body: ${error.message}`);
   }
 
   return await retryIfConflicts(
@@ -46,7 +46,7 @@ async function muteInstanceWithOCC(
   { alertId: ruleId, alertInstanceId }: MuteAlertParams,
   { validateAlertsExistence }: MuteAlertQuery
 ) {
-  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
+  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
     RULE_SAVED_OBJECT_TYPE,
     ruleId
   );
@@ -83,16 +83,9 @@ async function muteInstanceWithOCC(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-  const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
-  const updatedAt = new Date().toISOString();
-  const updatedBy = await context.getUserName();
-
   if (validateAlertsExistence) {
-    if (!context.alertsService) {
-      throw Boom.internal('Alerts service is unavailable');
-    }
-
-    const isExistingAlert = await context.alertsService.isExistingAlert({
+    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+    const isExistingAlert = await context.alertsService?.isExistingAlert({
       indices,
       alertId: alertInstanceId,
       ruleId,
@@ -109,14 +102,16 @@ async function muteInstanceWithOCC(
   if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
     mutedInstanceIds.push(alertInstanceId);
 
+    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       savedObjectsUpdateOptions: { version },
       id: ruleId,
       updateRuleAttributes: updateMeta(context, {
         mutedInstanceIds,
-        updatedBy,
-        updatedAt,
+        updatedBy: await context.getUserName(),
+        updatedAt: new Date().toISOString(),
       }),
     });
 
