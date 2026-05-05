@@ -1198,6 +1198,26 @@
     "updated",
     "version"
   ],
+  "security:endpoint-scripts-library": [
+    "created_at",
+    "created_by",
+    "description",
+    "example",
+    "file_hash_sha256",
+    "file_id",
+    "file_name",
+    "file_size",
+    "file_type",
+    "id",
+    "instructions",
+    "name",
+    "path_to_executable",
+    "platform",
+    "requires_input",
+    "tags",
+    "updated_at",
+    "updated_by"
+  ],
   "security:reference-data": [
     "id",
     "owner",
