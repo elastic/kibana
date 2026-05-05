@@ -7,6 +7,7 @@
 
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { registerKibanaFunction } from './kibana';
 import type { FunctionRegistrationParameters } from '.';
 
@@ -18,6 +19,7 @@ function registerFunction(overrides: {
   requestUrl?: URL;
   rewrittenUrl?: URL;
   headers?: Record<string, string>;
+  spaceId?: string;
 }) {
   const logger = { info: jest.fn(), error: jest.fn() };
   const coreStart = {
@@ -36,6 +38,7 @@ function registerFunction(overrides: {
         overrides.requestUrl ??
         new URL('https://source.example/internal/observability_ai_assistant/chat/complete'),
       rewrittenUrl: overrides.rewrittenUrl,
+      spaceId: overrides.spaceId ? asSpaceId(overrides.spaceId) : DEFAULT_SPACE_ID,
       headers: {
         'content-type': 'application/json',
         host: 'attacker.example',
@@ -91,11 +94,9 @@ describe('kibana tool', () => {
     expect(forwardedRequest.url).not.toContain('malicious-host');
   });
 
-  it('builds the forwarded url using the space from the incoming request path', async () => {
+  it('builds the forwarded url using the space from the incoming request', async () => {
     const { handler } = registerFunction({
-      requestUrl: new URL(
-        'https://source.example/s/my-space/internal/observability_ai_assistant/chat/complete'
-      ),
+      spaceId: 'my-space',
     });
 
     await handler({

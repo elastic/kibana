@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { last, merge, omit } from 'lodash';
 import type { Observable } from 'rxjs';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   catchError,
   defer,
@@ -232,7 +232,10 @@ export class ObservabilityAIAssistantClient {
 
       if (persist && !isConversationUpdate && kibanaPublicUrl) {
         const { namespace } = this.dependencies;
-        const spaceAwarePath = addSpaceIdToPath('/', namespace, '/app/observabilityAIAssistant');
+        const spaceAwarePath =
+          namespace === DEFAULT_SPACE_ID
+            ? '/app/observabilityAIAssistant'
+            : `/s/${namespace}/app/observabilityAIAssistant`;
 
         const conversationUrl = `${kibanaPublicUrl}${spaceAwarePath}/conversations/${conversationId}`;
 
