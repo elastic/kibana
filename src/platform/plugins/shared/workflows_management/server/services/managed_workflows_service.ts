@@ -287,7 +287,7 @@ export class ManagedWorkflowsService {
     if (customId) {
       if (!customId.startsWith(`${id}-`) && customId !== id) {
         throw new Error(
-          `Managed workflow '${id}' custom workflowId must equal '${id}' or start with '${id}--'`
+          `Managed workflow '${id}' custom workflowId must equal '${id}' or start with '${id}-'`
         );
       }
       return customId;
