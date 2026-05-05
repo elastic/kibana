@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { usePhaseColors } from '@kbn/data-lifecycle-phases';
 import { useDownsamplingColors } from '../../hooks/use_downsampling_colors';
 import type { DownsamplingSegment } from './data_lifecycle_segments';
 import { DownsamplingPhase } from './downsampling_phase';
@@ -95,6 +96,7 @@ export const DownsamplingBar = ({
   isEditLifecycleFlyoutOpen,
 }: DownsamplingBarProps) => {
   const { euiTheme } = useEuiTheme();
+  const phaseColors = usePhaseColors();
   const { getDownsamplingColor } = useDownsamplingColors();
 
   if (!segments) {
@@ -173,7 +175,7 @@ export const DownsamplingBar = ({
                     hasBorder={false}
                     hasShadow={false}
                     css={{
-                      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                      backgroundColor: phaseColors.delete,
                       borderRadius: euiTheme.border.radius.small,
                       minHeight: '30px',
                       height: '100%',
