@@ -33,7 +33,10 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
-import type { ExecuteManagedWorkflowOptions } from '@kbn/workflows/server/types';
+import type {
+  ExecuteManagedWorkflowOptions,
+  ManagedWorkflowOperationOptions,
+} from '@kbn/workflows/server/types';
 import type {
   ChildWorkflowExecutionItem,
   GetAvailableConnectorsResponse,
@@ -390,7 +393,7 @@ export class WorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options?: { spaceId?: string; isStartupReconcile?: boolean },
+    options?: ManagedWorkflowOperationOptions & { isStartupReconcile?: boolean },
     registeredPluginId?: string
   ): Promise<void> {
     await this.ensureInitialized();
@@ -399,7 +402,7 @@ export class WorkflowsService {
 
   public async uninstallManagedWorkflow(
     id: ManagedWorkflowId,
-    options?: { spaceId?: string },
+    options?: ManagedWorkflowOperationOptions,
     registeredPluginId?: string
   ): Promise<void> {
     await this.ensureInitialized();

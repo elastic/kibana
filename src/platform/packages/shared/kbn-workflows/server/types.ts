@@ -12,6 +12,7 @@ import type { ManagedWorkflowId } from '../managed';
 
 export interface ManagedWorkflowOperationOptions {
   spaceId?: string;
+  workflowId?: string;
 }
 
 export interface ExecuteManagedWorkflowOptions extends ManagedWorkflowOperationOptions {

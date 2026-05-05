@@ -16,7 +16,10 @@ import {
   type ManagedWorkflowId,
   type ResolvedManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
-import type { ExecuteManagedWorkflowOptions } from '@kbn/workflows/server/types';
+import type {
+  ExecuteManagedWorkflowOptions,
+  ManagedWorkflowOperationOptions,
+} from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { parseYamlToJSONWithoutValidation, updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
@@ -29,6 +32,10 @@ const MANAGED_WORKFLOW_SYSTEM_USER = 'system';
 interface ManagedWorkflowsServiceDeps {
   crudService: WorkflowCrudService;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
+}
+
+interface InstallManagedWorkflowOptions extends ManagedWorkflowOperationOptions {
+  isStartupReconcile?: boolean;
 }
 
 export class ManagedWorkflowsService {
@@ -57,7 +64,7 @@ export class ManagedWorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options?: { spaceId?: string; isStartupReconcile?: boolean },
+    options?: InstallManagedWorkflowOptions,
     registeredPluginId?: string
   ): Promise<void> {
     const definition = getManagedWorkflowDefinition(id);
@@ -66,10 +73,14 @@ export class ManagedWorkflowsService {
     }
     this.assertPluginRegistration(definition, registeredPluginId);
 
+    const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
     const spaceId = options?.spaceId ?? DEFAULT_MANAGED_WORKFLOW_SPACE_ID;
     const now = new Date().toISOString();
     const definitionHash = computeDefinitionHash(definition.yaml);
-    const existing = await this.deps.crudService.getWorkflowDocumentSource(id, spaceId);
+    const existing = await this.deps.crudService.getWorkflowDocumentSource(
+      workflowDocumentId,
+      spaceId
+    );
 
     if (!existing) {
       const document = this.buildManagedWorkflowDocument({
@@ -78,13 +89,13 @@ export class ManagedWorkflowsService {
         now,
         definitionHash,
       });
-      await this.deps.crudService.indexWorkflowDocument(id, document);
+      await this.deps.crudService.indexWorkflowDocument(workflowDocumentId, document);
       return;
     }
 
     if (!existing.managed) {
       throw new Error(
-        `Cannot install managed workflow '${id}' because a user workflow with the same id already exists`
+        `Cannot install managed workflow '${id}' as '${workflowDocumentId}' because a user workflow with the same id already exists`
       );
     }
 
@@ -105,12 +116,12 @@ export class ManagedWorkflowsService {
       enabled,
       createdAt: existing.created_at,
     });
-    await this.deps.crudService.indexWorkflowDocument(id, document);
+    await this.deps.crudService.indexWorkflowDocument(workflowDocumentId, document);
   }
 
   public async uninstallManagedWorkflow(
     id: ManagedWorkflowId,
-    options?: { spaceId?: string },
+    options?: ManagedWorkflowOperationOptions,
     registeredPluginId?: string
   ): Promise<void> {
     const definition = getManagedWorkflowDefinition(id);
@@ -119,15 +130,20 @@ export class ManagedWorkflowsService {
     }
     this.assertPluginRegistration(definition, registeredPluginId);
 
+    const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
     const spaceId = options?.spaceId ?? DEFAULT_MANAGED_WORKFLOW_SPACE_ID;
-    const existing = await this.deps.crudService.getWorkflowDocumentSource(id, spaceId, {
-      includeDeleted: true,
-    });
+    const existing = await this.deps.crudService.getWorkflowDocumentSource(
+      workflowDocumentId,
+      spaceId,
+      {
+        includeDeleted: true,
+      }
+    );
     if (!existing || !existing.managed) {
       return;
     }
 
-    await this.deps.crudService.deleteWorkflows([id], spaceId, { force: true });
+    await this.deps.crudService.deleteWorkflows([workflowDocumentId], spaceId, { force: true });
   }
 
   public async executeManagedWorkflow(
@@ -142,13 +158,19 @@ export class ManagedWorkflowsService {
     }
     this.assertPluginRegistration(definition, registeredPluginId);
 
+    const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
     const spaceId = options?.spaceId ?? DEFAULT_MANAGED_WORKFLOW_SPACE_ID;
-    const existing = await this.deps.crudService.getWorkflowDocumentSource(id, spaceId);
+    const existing = await this.deps.crudService.getWorkflowDocumentSource(
+      workflowDocumentId,
+      spaceId
+    );
     if (!existing || !existing.managed) {
-      throw new Error(`Managed workflow '${id}' not found`);
+      throw new Error(`Managed workflow '${id}' as '${workflowDocumentId}' not found`);
     }
     if (!existing.definition) {
-      throw new Error(`Managed workflow '${id}' has no valid definition`);
+      throw new Error(
+        `Managed workflow '${id}' as '${workflowDocumentId}' has no valid definition`
+      );
     }
 
     const context: Record<string, unknown> = {
@@ -162,7 +184,7 @@ export class ManagedWorkflowsService {
 
     const response = await this.deps.workflowsExecutionEngine.executeWorkflow(
       {
-        id,
+        id: workflowDocumentId,
         name: existing.name,
         enabled: existing.enabled,
         definition: existing.definition,
@@ -243,6 +265,13 @@ export class ManagedWorkflowsService {
         `Managed workflow '${definition.id}' is owned by plugin '${definition.pluginId}' but was registered by '${registeredPluginId}'`
       );
     }
+  }
+
+  private resolveWorkflowDocumentId(
+    id: ManagedWorkflowId,
+    options?: ManagedWorkflowOperationOptions
+  ): string {
+    return options?.workflowId ?? id;
   }
 
   private async cleanupOrphanManagedWorkflows(options?: { spaceId?: string }): Promise<void> {
