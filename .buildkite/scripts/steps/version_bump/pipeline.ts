@@ -28,6 +28,7 @@ if (!BUMP_TYPE) {
       );
 
       // Step 2: Wait for ES build to complete, then bump package.json and other files on the release branch
+      pipeline.push('  - wait');
       pipeline.push(
         getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions.yml')
       );
