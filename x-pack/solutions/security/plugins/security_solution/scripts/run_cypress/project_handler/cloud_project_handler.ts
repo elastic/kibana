@@ -161,6 +161,17 @@ export class CloudHandler extends ProjectHandler {
 
   // Wait until Project is initialized
   waitForProjectInitialized(projectId: string): Promise<void> {
+    if (process.env.MKI_FORCE_PROJECT_INIT_TIMEOUT === '1') {
+      return Promise.reject(
+        new ProjectInitTimeoutError({
+          projectId,
+          lastPhase: 'initializing',
+          attempts: 1,
+          cause: new Error('Forced timeout for CI workflow validation'),
+        })
+      );
+    }
+
     let lastPhase: string | undefined;
     let attempts = 0;
 
