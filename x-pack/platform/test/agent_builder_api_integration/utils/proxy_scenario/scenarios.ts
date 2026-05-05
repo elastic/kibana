@@ -115,6 +115,7 @@ export const setupAgentCallSearchToolWithNoIndexSelectedThenAnswer = async ({
     toolName: 'platform_core_search',
     toolArg: {
       query: 'just a query',
+      index: 'agent-builder-test-no-match-*',
     },
   });
 
