@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { uniq } from 'lodash';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type {
@@ -19,6 +20,7 @@ import { getConnectionMetrics, finalizeConnections } from './get_connection_metr
 import { filterDownstreamConnections, filterUpstreamConnections } from './filter_connections';
 import { getTraceIdsFromExitSpansTargetingDependency } from './get_trace_ids_from_exit_spans';
 import { getImmediateDownstreamDependencies } from './get_immediate_downstream_dependencies';
+import { findMessagingDependencies } from './find_messaging_dependencies';
 
 interface TopologyResources {
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
@@ -210,34 +212,27 @@ async function getUpstreamTopology({
   });
 }
 
-/**
- * Find messaging dependencies (Kafka topics, RabbitMQ queues, etc.) from a set of connections.
- * These are external nodes with span.type === 'messaging'.
- */
-export function findMessagingDependencies(connections: ConnectionWithKey[]): string[] {
-  const messagingDeps = new Set<string>();
-  for (const conn of connections) {
-    const target = conn.target;
-    if ('span.type' in target && target['span.type'] === 'messaging') {
-      messagingDeps.add(conn._dependencyName);
-    }
-  }
-  return Array.from(messagingDeps);
-}
+const MAX_MESSAGING_DEPS_TO_EXPAND = 5;
 
 /**
  * For each messaging dependency, find other services that also connect to it.
  * This reveals the other side of the pipeline (e.g., the producer when we started
  * from a consumer, or vice versa). Only returns connections not already present
  * in existingConnections.
+ *
+ * Caps expansion to MAX_MESSAGING_DEPS_TO_EXPAND to bound the number of ES queries.
+ * Each dependency triggers two queries (trace IDs + exit spans), so this prevents
+ * unbounded latency when many messaging topics appear in the topology.
  */
 async function expandMessagingConnections({
+  apmEventClient,
   resources,
   messagingDeps,
   existingConnections,
   startMs,
   endMs,
 }: {
+  apmEventClient: APMEventClient;
   resources: TopologyResources;
   messagingDeps: string[];
   existingConnections: ConnectionWithKey[];
@@ -248,55 +243,56 @@ async function expandMessagingConnections({
     return [];
   }
 
-  const { apmEventClient } = await buildApmResources({
-    core: resources.core,
-    plugins: resources.plugins,
-    request: resources.request,
-    logger: resources.logger,
-  });
-
-  const existingKeys = new Set(existingConnections.map((c) => c._key));
-  const allNewConnections: ConnectionWithKey[] = [];
-
-  for (const depName of messagingDeps) {
-    resources.logger.debug(
-      `Expanding messaging dependency "${depName}" to find other connected services`
+  const capped = messagingDeps.slice(0, MAX_MESSAGING_DEPS_TO_EXPAND);
+  if (capped.length < messagingDeps.length) {
+    resources.logger.warn(
+      `Capping messaging expansion to ${MAX_MESSAGING_DEPS_TO_EXPAND} of ${messagingDeps.length} dependencies`
     );
-
-    const depTraceIds = await getTraceIdsFromExitSpansTargetingDependency({
-      apmEventClient,
-      dependencyName: depName,
-      start: startMs,
-      end: endMs,
-    });
-
-    if (depTraceIds.length === 0) {
-      continue;
-    }
-
-    const spans = await resources.dataRegistry.getData('apmExitSpanSamples', {
-      request: resources.request,
-      traceIds: depTraceIds,
-      start: startMs,
-      end: endMs,
-    });
-
-    if (!spans) {
-      continue;
-    }
-
-    const newConnections = buildConnectionsFromSpans(spans).filter(
-      (c) => c._dependencyName === depName && !existingKeys.has(c._key)
-    );
-
-    resources.logger.debug(
-      `Found ${newConnections.length} additional connections to messaging dependency "${depName}"`
-    );
-
-    allNewConnections.push(...newConnections);
   }
 
-  return allNewConnections;
+  const existingKeys = new Set(existingConnections.map((c) => c._key));
+
+  const perDepResults = await Promise.all(
+    capped.map(async (depName) => {
+      resources.logger.debug(
+        `Expanding messaging dependency "${depName}" to find other connected services`
+      );
+
+      const depTraceIds = await getTraceIdsFromExitSpansTargetingDependency({
+        apmEventClient,
+        dependencyName: depName,
+        start: startMs,
+        end: endMs,
+      });
+
+      if (depTraceIds.length === 0) {
+        return [];
+      }
+
+      const spans = await resources.dataRegistry.getData('apmExitSpanSamples', {
+        request: resources.request,
+        traceIds: depTraceIds,
+        start: startMs,
+        end: endMs,
+      });
+
+      if (!spans) {
+        return [];
+      }
+
+      const newConnections = buildConnectionsFromSpans(spans).filter(
+        (c) => c._dependencyName === depName && !existingKeys.has(c._key)
+      );
+
+      resources.logger.debug(
+        `Found ${newConnections.length} additional connections to messaging dependency "${depName}"`
+      );
+
+      return newConnections;
+    })
+  );
+
+  return perDepResults.flat();
 }
 
 /**
@@ -323,12 +319,20 @@ async function getBothTopology({
   endMs: number;
   maxDepth?: number;
 }): Promise<ServiceTopologyResponse> {
-  const result = await resources.dataRegistry.getData('apmTraceSampleIds', {
-    request: resources.request,
-    serviceName,
-    start: startMs,
-    end: endMs,
-  });
+  const [result, { apmEventClient }] = await Promise.all([
+    resources.dataRegistry.getData('apmTraceSampleIds', {
+      request: resources.request,
+      serviceName,
+      start: startMs,
+      end: endMs,
+    }),
+    buildApmResources({
+      core: resources.core,
+      plugins: resources.plugins,
+      request: resources.request,
+      logger: resources.logger,
+    }),
+  ]);
 
   const traceIds = result?.traceIds ?? [];
 
@@ -338,13 +342,6 @@ async function getBothTopology({
     resources.logger.debug(
       `No transactions found for "${serviceName}", falling back to exit span search (external dependency)`
     );
-
-    const { apmEventClient } = await buildApmResources({
-      core: resources.core,
-      plugins: resources.plugins,
-      request: resources.request,
-      logger: resources.logger,
-    });
 
     const depTraceIds = await getTraceIdsFromExitSpansTargetingDependency({
       apmEventClient,
@@ -370,7 +367,6 @@ async function getBothTopology({
 
   resources.logger.debug(`Found ${traceIds.length} traces for both-direction topology`);
 
-  // Fetch exit spans once, build connection graph once
   const spans = await resources.dataRegistry.getData('apmExitSpanSamples', {
     request: resources.request,
     traceIds,
@@ -388,9 +384,9 @@ async function getBothTopology({
 
   const combinedConnections = [...downFiltered, ...upFiltered];
 
-  // Auto-expand through messaging dependencies to reveal the other side of the pipeline
   const messagingDeps = findMessagingDependencies(combinedConnections);
   const messagingConnections = await expandMessagingConnections({
+    apmEventClient,
     resources,
     messagingDeps,
     existingConnections: combinedConnections,
@@ -398,7 +394,6 @@ async function getBothTopology({
     endMs,
   });
 
-  // Single metrics query with union of service names from all connections
   const serviceNames = uniq([
     ...combinedConnections.map((c) => c._sourceName),
     ...messagingConnections.map((c) => c._sourceName),

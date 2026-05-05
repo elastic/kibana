@@ -5,39 +5,8 @@
  * 2.0.
  */
 
-import type { ConnectionWithKey } from './types';
-import { findMessagingDependencies } from './get_service_topology';
-
-function makeExternalConnection(
-  source: string,
-  resource: string,
-  spanType: string,
-  spanSubtype: string
-): ConnectionWithKey {
-  return {
-    source: { 'service.name': source },
-    target: {
-      'span.destination.service.resource': resource,
-      'span.type': spanType,
-      'span.subtype': spanSubtype,
-    },
-    metrics: undefined,
-    _key: `${source}::${resource}`,
-    _sourceName: source,
-    _dependencyName: resource,
-  };
-}
-
-function makeServiceConnection(source: string, target: string): ConnectionWithKey {
-  return {
-    source: { 'service.name': source },
-    target: { 'service.name': target },
-    metrics: undefined,
-    _key: `${source}::${target}`,
-    _sourceName: source,
-    _dependencyName: target,
-  };
-}
+import { findMessagingDependencies } from './find_messaging_dependencies';
+import { makeExternalConnection, makeServiceConnection } from './test_helpers';
 
 describe('findMessagingDependencies', () => {
   it('returns empty array when no connections exist', () => {
