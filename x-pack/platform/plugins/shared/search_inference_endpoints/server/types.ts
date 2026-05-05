@@ -59,6 +59,13 @@ export interface InferenceEndpointsContract {
     featureId: string,
     request: KibanaRequest
   ) => Promise<ResolvedInferenceApiEndpoints>;
+  /**
+   * Upserts the admin override for a feature's inference endpoint.
+   * Pass `null` for `endpointId` to clear the override (reverts to recommended/default).
+   */
+  setForFeature: (featureId: string, endpointId: string | null) => Promise<void>;
+  /** Returns all inference connectors available in this deployment. */
+  listAll: (request: KibanaRequest) => Promise<InferenceConnector[]>;
 }
 
 export interface SearchInferenceEndpointsPluginStart {

@@ -13,7 +13,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 
 import type { SearchInferenceEndpointsConfig } from './config';
@@ -33,11 +33,13 @@ import {
   DYNAMIC_CONNECTORS_POLLING_START_DELAY,
   ELASTIC_INFERENCE_SERVICE_APP_ID,
   INFERENCE_ENDPOINTS_APP_ID,
+  INFERENCE_SETTINGS_ID,
   INFERENCE_SETTINGS_SO_TYPE,
   MODEL_SETTINGS_APP_ID,
   PLUGIN_ID,
   PLUGIN_NAME,
 } from '../common/constants';
+import type { InferenceSettingsAttributes } from '../common/types';
 
 export class SearchInferenceEndpointsPlugin
   implements
@@ -178,6 +180,36 @@ export class SearchInferenceEndpointsPlugin
         register: featureRegistry.register.bind(featureRegistry),
       },
       endpoints: {
+        setForFeature: async (featureId: string, endpointId: string | null) => {
+          const soClient = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
+          let currentFeatures: InferenceSettingsAttributes['features'] = [];
+          try {
+            const so = await soClient.get<InferenceSettingsAttributes>(
+              INFERENCE_SETTINGS_SO_TYPE,
+              INFERENCE_SETTINGS_ID
+            );
+            currentFeatures = so.attributes.features ?? [];
+          } catch (e) {
+            if (!SavedObjectsErrorHelpers.isNotFoundError(e)) throw e;
+          }
+          const idx = currentFeatures.findIndex((f) => f.feature_id === featureId);
+          const entry = {
+            feature_id: featureId,
+            endpoints: endpointId ? [{ id: endpointId }] : [],
+          };
+          const updatedFeatures =
+            idx >= 0
+              ? currentFeatures.map((f, i) => (i === idx ? entry : f))
+              : [...currentFeatures, entry];
+          await soClient.create<InferenceSettingsAttributes>(
+            INFERENCE_SETTINGS_SO_TYPE,
+            { features: updatedFeatures },
+            { id: INFERENCE_SETTINGS_ID, overwrite: true }
+          );
+        },
+        listAll: async (request: KibanaRequest) => {
+          return plugins.inference.getConnectorList(request);
+        },
         getForFeature: async (featureId: string, request: KibanaRequest) => {
           const soClient = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
           const uiSettingsClient = core.uiSettings.asScopedToClient(

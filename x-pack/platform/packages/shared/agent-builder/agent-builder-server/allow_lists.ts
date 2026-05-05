@@ -75,6 +75,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Search
   `${internalNamespaces.search}.list_inference_features`,
+  `${internalNamespaces.search}.set_inference_feature_endpoint`,
+  `${internalNamespaces.search}.list_inference_endpoints`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
