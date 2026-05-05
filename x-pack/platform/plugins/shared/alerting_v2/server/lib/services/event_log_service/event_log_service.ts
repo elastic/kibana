@@ -44,11 +44,23 @@ export interface FindActionPolicyExecutionEventsResult {
   total: number;
 }
 
+export interface CountActionPolicyExecutionEventsSinceParams {
+  request: KibanaRequest;
+  since: string;
+}
+
+export interface CountActionPolicyExecutionEventsSinceResult {
+  count: number;
+}
+
 export interface EventLogServiceContract {
   logEvent(event: IEvent, id?: string): void;
   findActionPolicyExecutionEvents(
     params: FindActionPolicyExecutionEventsParams
   ): Promise<FindActionPolicyExecutionEventsResult>;
+  countActionPolicyExecutionEventsSince(
+    params: CountActionPolicyExecutionEventsSinceParams
+  ): Promise<CountActionPolicyExecutionEventsSinceResult>;
 }
 
 @injectable()
@@ -90,5 +102,27 @@ export class EventLogService implements EventLogServiceContract {
       perPage: result.per_page,
       total: result.total,
     };
+  }
+
+  public async countActionPolicyExecutionEventsSince({
+    request,
+    since,
+  }: CountActionPolicyExecutionEventsSinceParams): Promise<CountActionPolicyExecutionEventsSinceResult> {
+    const client = this.clientService.getClient(request);
+
+    const result = await client.findEventsWithAuthFilter(
+      ACTION_POLICY_SAVED_OBJECT_TYPE,
+      [],
+      EXECUTION_HISTORY_AUTH_FILTER,
+      undefined,
+      {
+        page: 1,
+        per_page: 0,
+        sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
+        start: since,
+      }
+    );
+
+    return { count: result.total };
   }
 }

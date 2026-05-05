@@ -59,6 +59,7 @@ const createMocks = () => {
   const eventLogService: jest.Mocked<EventLogServiceContract> = {
     logEvent: jest.fn(),
     findActionPolicyExecutionEvents: jest.fn(),
+    countActionPolicyExecutionEventsSince: jest.fn(),
   };
   const actionPolicyClient = {
     getActionPolicies: jest.fn().mockResolvedValue([]),

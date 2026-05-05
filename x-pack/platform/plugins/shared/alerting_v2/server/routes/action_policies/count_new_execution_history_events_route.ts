@@ -1,0 +1,79 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest, RouteSecurity } from '@kbn/core/server';
+import { Request } from '@kbn/core-di-server';
+import { z } from '@kbn/zod/v4';
+import { injectable, inject } from 'inversify';
+import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
+import { EventLogServiceToken } from '../../lib/services/event_log_service/tokens';
+import type { EventLogServiceContract } from '../../lib/services/event_log_service/event_log_service';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH } from '../constants';
+import { buildRouteValidationWithZod } from '../route_validation';
+
+const countNewExecutionHistoryEventsQuerySchema = z.object({
+  since: z.string().describe('ISO timestamp; count events with @timestamp greater than this.'),
+});
+
+const countNewExecutionHistoryEventsResponseSchema = z.object({
+  count: z.number(),
+});
+
+@injectable()
+export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
+  static method = 'get' as const;
+  static path = ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH;
+  static security: RouteSecurity = {
+    authz: {
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
+    },
+  };
+  static routeOptions = {
+    summary: 'Count new action policy execution events since a timestamp',
+    description:
+      'Returns the count of dispatcher summary events with @timestamp greater than the given ISO timestamp.',
+  } as const;
+  static validate = {
+    request: {
+      query: buildRouteValidationWithZod(countNewExecutionHistoryEventsQuerySchema),
+    },
+    response: {
+      200: {
+        body: () => countNewExecutionHistoryEventsResponseSchema,
+        description: 'Indicates a successful call.',
+      },
+    },
+  };
+
+  protected readonly routeName = 'count new action policy execution events';
+
+  constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
+    @inject(Request)
+    private readonly request: KibanaRequest<
+      unknown,
+      z.infer<typeof countNewExecutionHistoryEventsQuerySchema>,
+      unknown
+    >,
+    @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract
+  ) {
+    super(ctx);
+  }
+
+  protected async execute() {
+    const { since } = this.request.query ?? { since: new Date().toISOString() };
+
+    const result = await this.eventLogService.countActionPolicyExecutionEventsSince({
+      request: this.request,
+      since,
+    });
+
+    return this.ctx.response.ok({ body: result });
+  }
+}

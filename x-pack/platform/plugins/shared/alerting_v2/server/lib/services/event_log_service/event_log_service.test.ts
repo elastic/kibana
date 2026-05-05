@@ -181,4 +181,84 @@ describe('EventLogService', () => {
       );
     });
   });
+
+  describe('countActionPolicyExecutionEventsSince', () => {
+    const buildResult = (total: number) => ({ data: [], page: 1, per_page: 0, total });
+
+    it('queries findEventsWithAuthFilter with per_page=0 and the given since as start', async () => {
+      const { eventLogService, mockEventLogClient } = createEventLogService();
+      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult(0) as any);
+      const request = httpServerMock.createKibanaRequest();
+      const since = '2026-05-05T10:00:00.000Z';
+
+      await eventLogService.countActionPolicyExecutionEventsSince({ request, since });
+
+      const [type, ids, , namespace, options] =
+        mockEventLogClient.findEventsWithAuthFilter.mock.calls[0];
+      expect(type).toBe(ACTION_POLICY_SAVED_OBJECT_TYPE);
+      expect(ids).toEqual([]);
+      expect(namespace).toBeUndefined();
+      expect(options).toEqual(
+        expect.objectContaining({
+          page: 1,
+          per_page: 0,
+          start: since,
+          sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
+        })
+      );
+    });
+
+    it('reuses the dispatched/throttled provider auth filter', async () => {
+      const { eventLogService, mockEventLogClient } = createEventLogService();
+      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult(0) as any);
+      const request = httpServerMock.createKibanaRequest();
+
+      await eventLogService.countActionPolicyExecutionEventsSince({
+        request,
+        since: '2026-05-05T10:00:00.000Z',
+      });
+
+      const authFilter = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][2];
+      expect(authFilter).toMatchObject({ type: 'function', function: 'and' });
+    });
+
+    it('returns the total reported by the client as count', async () => {
+      const { eventLogService, mockEventLogClient } = createEventLogService();
+      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult(42) as any);
+      const request = httpServerMock.createKibanaRequest();
+
+      const result = await eventLogService.countActionPolicyExecutionEventsSince({
+        request,
+        since: '2026-05-05T10:00:00.000Z',
+      });
+
+      expect(result).toEqual({ count: 42 });
+    });
+
+    it('uses the request-scoped event log client', async () => {
+      const { eventLogService, mockEventLogClient, mockClientService } = createEventLogService();
+      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult(0) as any);
+      const request = httpServerMock.createKibanaRequest();
+
+      await eventLogService.countActionPolicyExecutionEventsSince({
+        request,
+        since: '2026-05-05T10:00:00.000Z',
+      });
+
+      expect(mockClientService.getClient).toHaveBeenCalledWith(request);
+    });
+
+    it('propagates errors from the underlying client', async () => {
+      const { eventLogService, mockEventLogClient } = createEventLogService();
+      mockEventLogClient.findEventsWithAuthFilter.mockRejectedValue(new Error('boom'));
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        eventLogService.countActionPolicyExecutionEventsSince({
+          request,
+          since: '2026-05-05T10:00:00.000Z',
+        })
+      ).rejects.toThrow('boom');
+    });
+  });
 });
