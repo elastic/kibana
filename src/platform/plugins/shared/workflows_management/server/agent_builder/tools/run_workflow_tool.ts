@@ -13,10 +13,10 @@ import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { workflowTools } from '../../../common/agent_builder/constants';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
-import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { AgentBuilderPluginSetup } from '../../types';
 
 export function registerRunWorkflowTool(
-  agentBuilder: AgentBuilderPluginSetupContract,
+  agentBuilder: AgentBuilderPluginSetup,
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
