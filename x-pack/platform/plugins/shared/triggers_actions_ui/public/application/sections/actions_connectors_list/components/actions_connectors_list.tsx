@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
@@ -32,6 +32,12 @@ import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import {
+  DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+  DEPRECATED_LABEL,
+  DEPRECATED_LLM_CONNECTOR_INFO,
+} from '@kbn/response-ops-rule-form/src/translations';
+import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
 import {
   useConnectorOAuthConnect,
   OAuthRedirectMode,
@@ -166,19 +172,21 @@ const ActionsConnectorsList = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const actionConnectorTableItems: ActionConnectorTableItem[] = actionTypesIndex
-    ? actions.map((action) => {
-        return {
-          ...action,
-          actionType: actionTypesIndex[action.actionTypeId]
-            ? actionTypesIndex[action.actionTypeId].name
-            : action.actionTypeId,
-          compatibility: actionTypesIndex[action.actionTypeId]
-            ? getConnectorCompatibility(actionTypesIndex[action.actionTypeId].supportedFeatureIds)
-            : [],
-        };
-      })
-    : [];
+  const actionConnectorTableItems: ActionConnectorTableItem[] = useMemo(() => {
+    return actionTypesIndex
+      ? actions.map((action) => {
+          return {
+            ...action,
+            actionType: actionTypesIndex[action.actionTypeId]
+              ? actionTypesIndex[action.actionTypeId].name
+              : action.actionTypeId,
+            compatibility: actionTypesIndex[action.actionTypeId]
+              ? getConnectorCompatibility(actionTypesIndex[action.actionTypeId].supportedFeatureIds)
+              : [],
+          };
+        })
+      : [];
+  }, [actions, actionTypesIndex]);
 
   const actionTypesList: Array<{ value: string; name: string }> = actionTypesIndex
     ? Object.values(actionTypesIndex)
@@ -223,6 +231,9 @@ const ActionsConnectorsList = ({
     setConnectorsToDelete(itemIds);
     setDeleteConnectorWarning(itemIds);
   }
+  const hasDeprecatedConnectors = useMemo(() => {
+    return actionConnectorTableItems.some((item) => item.isConnectorTypeDeprecated);
+  }, [actionConnectorTableItems]);
 
   const actionsTableColumns = [
     {
@@ -315,6 +326,38 @@ const ActionsConnectorsList = ({
         );
       },
     },
+    ...(hasDeprecatedConnectors
+      ? [
+          {
+            name: '',
+            render: (item: ActionConnectorTableItem) => {
+              if (!item.isConnectorTypeDeprecated) return null;
+              return (
+                <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label={DEPRECATED_LABEL}
+                      tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
+                      color="warning"
+                      size="s"
+                    />
+                  </EuiFlexItem>
+                  {isLLMConnectorTypeId(item.actionTypeId) && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="info"
+                        color="subdued"
+                        content={DEPRECATED_LLM_CONNECTOR_INFO}
+                        data-test-subj={`deprecatedLLMConnectorInfo-${item.id}`}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              );
+            },
+          },
+        ]
+      : []),
     {
       field: 'actionType',
       'data-test-subj': 'connectorsTableCell-actionType',
