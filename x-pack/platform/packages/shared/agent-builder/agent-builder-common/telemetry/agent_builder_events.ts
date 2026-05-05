@@ -27,7 +27,6 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   RoundError: `${TELEMETRY_PREFIX}_round_error`,
   ToolCallSuccess: `${TELEMETRY_PREFIX}_tool_call_success`,
   ToolCallError: `${TELEMETRY_PREFIX}_tool_call_error`,
-  EmbeddedFullScreenUnavailable: `${TELEMETRY_PREFIX}_embedded_full_screen_unavailable`,
 } as const;
 
 export type OptInSource =
@@ -61,14 +60,6 @@ export interface ReportOptOutParams {
 export interface ReportAddToChatClickedParams {
   pathway: string;
   attachments?: string[];
-}
-
-export type EmbeddedFullScreenUnavailableSignal =
-  | 'more_actions_opened_without_conversation'
-  | 'disabled_tooltip_displayed';
-
-export interface ReportEmbeddedFullScreenUnavailableParams {
-  signal: EmbeddedFullScreenUnavailableSignal;
 }
 
 export interface ReportRoundCompleteParams {
@@ -238,7 +229,6 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
   [AGENT_BUILDER_EVENT_TYPES.AddToChatClicked]: ReportAddToChatClickedParams;
-  [AGENT_BUILDER_EVENT_TYPES.EmbeddedFullScreenUnavailable]: ReportEmbeddedFullScreenUnavailableParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentCreated]: ReportAgentCreatedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentUpdated]: ReportAgentUpdatedParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCreated]: ReportToolCreatedParams;
@@ -262,7 +252,6 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportOptInActionParams>
   | EventTypeOpts<ReportOptOutParams>
   | EventTypeOpts<ReportAddToChatClickedParams>
-  | EventTypeOpts<ReportEmbeddedFullScreenUnavailableParams>
   | EventTypeOpts<ReportAgentCreatedParams>
   | EventTypeOpts<ReportAgentUpdatedParams>
   | EventTypeOpts<ReportToolCreatedParams>
@@ -280,7 +269,6 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
   | typeof AGENT_BUILDER_EVENT_TYPES.OptOut
   | typeof AGENT_BUILDER_EVENT_TYPES.AddToChatClicked
-  | typeof AGENT_BUILDER_EVENT_TYPES.EmbeddedFullScreenUnavailable
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentCreated
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentUpdated
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCreated
@@ -380,20 +368,6 @@ const ADD_TO_CHAT_CLICKED_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description: 'Types of attachments',
         optional: true,
-      },
-    },
-  },
-};
-
-const EMBEDDED_FULL_SCREEN_UNAVAILABLE_EVENT: AgentBuilderTelemetryEvent = {
-  eventType: AGENT_BUILDER_EVENT_TYPES.EmbeddedFullScreenUnavailable,
-  schema: {
-    signal: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Signal describing how the user encountered unavailable full-screen (more_actions_opened_without_conversation|disabled_tooltip_displayed)',
-        optional: false,
       },
     },
   },
@@ -1013,7 +987,6 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
   ADD_TO_CHAT_CLICKED_EVENT,
-  EMBEDDED_FULL_SCREEN_UNAVAILABLE_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
