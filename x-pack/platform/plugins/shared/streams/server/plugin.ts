@@ -11,7 +11,6 @@ import type {
   KibanaRequest,
   Logger,
   Plugin,
-  PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
@@ -23,11 +22,10 @@ import {
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { StreamsConfig } from '../common/config';
-import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
@@ -97,11 +95,6 @@ export interface StreamsPluginStart {
 }
 
 export type { StreamsKnowledgeIndicatorsReader };
-
-export const config: PluginConfigDescriptor<StreamsConfig> = {
-  schema: configSchema,
-  exposeToBrowser: exposeToBrowserConfig,
-};
 
 export class StreamsPlugin
   implements
@@ -180,8 +173,10 @@ export class StreamsPlugin
     // resolver the route handlers use, avoiding parallel construction logic.
     const getScopedClients = async ({
       request,
+      rulesClientOptions,
     }: {
       request: KibanaRequest;
+      rulesClientOptions?: RulesClientCreateOptions;
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
 
@@ -221,7 +216,8 @@ export class StreamsPlugin
         queryClientPromise ??= (async () => {
           const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
             request,
-            DEFAULT_SPACE_ID
+            DEFAULT_SPACE_ID,
+            rulesClientOptions
           );
           return queryService.getClient({
             esClient: coreStart.elasticsearch.client.asInternalUser,

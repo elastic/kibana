@@ -14,6 +14,7 @@ import type {
 } from './plugin';
 import { config } from './plugin';
 import type { StreamsRouteRepository } from './routes';
+import { config } from './config';
 
 export type {
   StreamsConfig,
