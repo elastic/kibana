@@ -32,6 +32,13 @@ describe(
         resetRulesTableState();
         deleteAlertsAndRules();
 
+        login();
+      });
+
+      it('installs prebuilt rules from the "security_detection_engine" Fleet package', () => {
+        // Register the intercept after login so it captures the call fired by
+        // visitAddRulesPage's provider mount, not earlier calls from the login
+        // redirect chain whose responses can be lost across navigations.
         cy.intercept('POST', INITIALIZE_SECURITY_SOLUTION_URL, (req) => {
           // Only alias the call that includes the prebuilt rules package flow.
           // The frontend fires multiple initialization calls with different flows
@@ -42,10 +49,6 @@ describe(
           req.alias = 'initializeSecuritySolution';
         });
 
-        login();
-      });
-
-      it('installs prebuilt rules from the "security_detection_engine" Fleet package', () => {
         visitAddRulesPage();
 
         // Expect the initialization endpoint to install the prebuilt rules package
