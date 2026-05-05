@@ -577,6 +577,7 @@ src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appe
 src/platform/packages/shared/kbn-ftr-llm-proxy @elastic/appex-ai-infra
 src/platform/packages/shared/kbn-grok-ui @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
+src/platform/packages/shared/kbn-human-readable-id @elastic/workflows-eng
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
 src/platform/packages/shared/kbn-i18n-react @elastic/kibana-core
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations

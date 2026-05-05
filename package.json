@@ -721,6 +721,7 @@
     "@kbn/home-sample-data-card": "link:src/platform/packages/shared/home/sample_data_card",
     "@kbn/home-sample-data-tab": "link:src/platform/packages/shared/home/sample_data_tab",
     "@kbn/home-sample-data-types": "link:src/platform/packages/shared/home/sample_data_types",
+    "@kbn/human-readable-id": "link:src/platform/packages/shared/kbn-human-readable-id",
     "@kbn/i18n": "link:src/platform/packages/shared/kbn-i18n",
     "@kbn/i18n-react": "link:src/platform/packages/shared/kbn-i18n-react",
     "@kbn/iframe-embedded-plugin": "link:x-pack/platform/test/functional_embedded/plugins/iframe_embedded",
