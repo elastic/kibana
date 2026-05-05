@@ -27,25 +27,24 @@ import {
   noItemsStrings,
 } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { notifyUnsavedDashboardsChanged, useUnsavedDashboardIds } from './use_unsaved_dashboards';
 import type { DashboardListingProps } from './types';
 
 export interface DashboardListingEmptyPromptProps {
   createItem: () => void;
   disableCreateDashboardButton?: boolean;
-  unsavedDashboardIds: string[];
   goToDashboard: DashboardListingProps['goToDashboard'];
-  setUnsavedDashboardIds: React.Dispatch<React.SetStateAction<string[]>>;
   useSessionStorageIntegration: DashboardListingProps['useSessionStorageIntegration'];
 }
 
 export const DashboardListingEmptyPrompt = ({
   useSessionStorageIntegration,
-  setUnsavedDashboardIds,
-  unsavedDashboardIds,
   goToDashboard,
   createItem,
   disableCreateDashboardButton,
 }: DashboardListingEmptyPromptProps) => {
+  const unsavedDashboardIds = useUnsavedDashboardIds();
+
   const isEditingFirstDashboard = useMemo(
     () => useSessionStorageIntegration && unsavedDashboardIds.length === 1,
     [unsavedDashboardIds.length, useSessionStorageIntegration]
@@ -73,9 +72,8 @@ export const DashboardListingEmptyPrompt = ({
             color="danger"
             onClick={() =>
               confirmDiscardUnsavedChanges(() => {
-                const dashboardBackupService = getDashboardBackupService();
-                dashboardBackupService.clearState(DASHBOARD_PANELS_UNSAVED_ID);
-                setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
+                getDashboardBackupService().clearState(DASHBOARD_PANELS_UNSAVED_ID);
+                notifyUnsavedDashboardsChanged();
               })
             }
             data-test-subj="discardDashboardPromptButton"
@@ -98,13 +96,7 @@ export const DashboardListingEmptyPrompt = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [
-    isEditingFirstDashboard,
-    createItem,
-    disableCreateDashboardButton,
-    goToDashboard,
-    setUnsavedDashboardIds,
-  ]);
+  }, [isEditingFirstDashboard, createItem, disableCreateDashboardButton, goToDashboard]);
 
   if (!getDashboardCapabilities().showWriteControls) {
     return (

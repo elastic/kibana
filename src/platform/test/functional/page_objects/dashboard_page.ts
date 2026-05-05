@@ -45,7 +45,6 @@ export class DashboardPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
   private readonly renderable = this.ctx.getService('renderable');
-  private readonly listingTable = this.ctx.getService('listingTable');
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
@@ -238,7 +237,9 @@ export class DashboardPageObject extends FtrService {
 
   public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
     this.log.debug('gotoDashboardLandingPage');
-    if (await this.onDashboardLandingPage()) return;
+    if (await this.onDashboardLandingPage()) {
+      return;
+    }
 
     const breadcrumbLink = this.config.get('serverless')
       ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
@@ -361,7 +362,9 @@ export class DashboardPageObject extends FtrService {
 
   public async clickCancelOutOfEditMode(accept = true) {
     this.log.debug('clickCancelOutOfEditMode');
-    if (!(await this.getIsInEditMode())) return;
+    if (!(await this.getIsInEditMode())) {
+      return;
+    }
 
     await this.appMenu.clickMenuItem('dashboardViewOnlyMode');
 
@@ -460,7 +463,9 @@ export class DashboardPageObject extends FtrService {
         await this.common.clickConfirmOnModal();
       }
     }
-    await this.listingTable.clickNewButton();
+    // The header create button and the empty-state CTA both share the
+    // `newItemButton` test subject — `click` resolves to whichever is visible.
+    await this.testSubjects.click('newItemButton');
     if (expectWarning) {
       await this.testSubjects.existOrFail('dashboardCreateConfirm');
     }
@@ -725,16 +730,136 @@ export class DashboardPageObject extends FtrService {
 
     await this.gotoDashboardLandingPage();
 
-    await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
+    await this.searchForDashboardWithName(dashboardName);
     await this.retry.try(async () => {
       if (openInEditMode) {
-        await this.listingTable.clickActionButton('edit-action');
+        // The edit action is rendered as an `EuiButtonIcon` in each row; clicking
+        // any visible instance navigates to the dashboard in edit mode.
+        await this.testSubjects.click('content-list-table-action-edit');
       } else {
-        await this.listingTable.clickItemLink('dashboard', dashboardName);
+        const links = await this.testSubjects.findAll('content-list-table-item-link');
+        for (const link of links) {
+          if ((await link.getVisibleText()) === dashboardName) {
+            await link.click();
+            break;
+          }
+        }
       }
       await this.header.waitUntilLoadingHasFinished();
       // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
+    });
+  }
+
+  /** Type a name into the Content List toolbar search box and confirm with Enter. */
+  public async searchForDashboardWithName(name: string) {
+    const searchBox = await this.testSubjects.find('contentListToolbar-searchBox');
+    await searchBox.clearValueWithKeyboard();
+    if (name) {
+      await searchBox.type(name);
+    }
+    await searchBox.pressKeys('ENTER');
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  /** Read the current search value from the Content List toolbar. */
+  public async getListingSearchFilterValue() {
+    const searchBox = await this.testSubjects.find('contentListToolbar-searchBox');
+    return await searchBox.getAttribute('value');
+  }
+
+  /** Clear the Content List toolbar search value. */
+  public async clearListingSearchFilter() {
+    const searchBox = await this.testSubjects.find('contentListToolbar-searchBox');
+    await searchBox.clearValueWithKeyboard();
+    await searchBox.pressKeys('ENTER');
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  /** Count visible items in the listing — names match against `content-list-table-item-link`. */
+  public async expectListingItemsCount(expected: number) {
+    await this.retry.try(async () => {
+      const links = await this.testSubjects.findAll('content-list-table-item-link');
+      if (links.length !== expected) {
+        throw new Error(`Expected ${expected} listing items, found ${links.length}`);
+      }
+    });
+  }
+
+  /** Search for a name and assert the resulting visible items count. */
+  public async searchAndExpectListingItemsCount(name: string, count: number) {
+    await this.searchForDashboardWithName(name);
+    await this.expectListingItemsCount(count);
+  }
+
+  /** Select every visible listing row via the table-header checkbox. */
+  public async selectAllListingItems() {
+    await this.testSubjects.click('checkboxSelectAll');
+  }
+
+  /** Click the bulk-delete button surfaced in the selection bar. */
+  public async clickDeleteSelectedListingItems() {
+    await this.testSubjects.click('contentListSelectionBar-deleteButton');
+  }
+
+  /**
+   * Open the Content List inspect (View details) flyout for the first listed
+   * dashboard. The action is wired into `Action.Inspect` and renders as an
+   * `EuiButtonIcon` per row.
+   */
+  public async openListingInspectFlyout(index: number = 0) {
+    const inspects = await this.testSubjects.findAll('content-list-table-action-inspect');
+    if (!inspects[index]) {
+      throw new Error(`No inspect action at index ${index}`);
+    }
+    await inspects[index].click();
+    await this.testSubjects.existOrFail('flyoutTitle');
+  }
+
+  /**
+   * Set the title and description fields in the open inspect flyout and save.
+   * Mirrors `listingTable.editVisualizationDetails` for the Dashboards Content
+   * List metadata editor.
+   */
+  public async editListingItemDetails(
+    { title, description }: { title?: string; description?: string } = {},
+    shouldSave: boolean = true
+  ) {
+    if (title !== undefined) {
+      await this.testSubjects.setValue('nameInput', title);
+    }
+    if (description !== undefined) {
+      await this.testSubjects.setValue('descriptionInput', description);
+    }
+    if (shouldSave) {
+      await this.retry.try(async () => {
+        await this.testSubjects.click('saveButton');
+        await this.testSubjects.missingOrFail('flyoutTitle');
+      });
+    }
+  }
+
+  /** Close the open Content List metadata flyout. */
+  public async closeListingInspectFlyout() {
+    await this.testSubjects.click('euiFlyoutCloseButton');
+    await this.testSubjects.missingOrFail('flyoutTitle');
+  }
+
+  /**
+   * Click a listing row by its visible name (matches the
+   * `content-list-table-item-link` test subject). Useful when opening a
+   * dashboard from the listing without entering edit mode.
+   */
+  public async clickListingItemLink(name: string) {
+    await this.retry.try(async () => {
+      const links = await this.testSubjects.findAll('content-list-table-item-link');
+      for (const link of links) {
+        if ((await link.getVisibleText()) === name) {
+          await link.click();
+          return;
+        }
+      }
+      throw new Error(`Listing item not found for name: ${name}`);
     });
   }
 
@@ -867,7 +992,9 @@ export class DashboardPageObject extends FtrService {
     if (element) {
       const attribute = await element.getAttribute(attributeName);
 
-      if (!attribute) throw new Error(`no attribute found for [${attributeName}]`);
+      if (!attribute) {
+        throw new Error(`no attribute found for [${attributeName}]`);
+      }
 
       return attribute;
     }

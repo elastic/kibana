@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { coreServices } from '../services/kibana_services';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 import type { DashboardListingEmptyPromptProps } from './dashboard_listing_empty_prompt';
 import { DashboardListingEmptyPrompt } from './dashboard_listing_empty_prompt';
@@ -31,14 +32,21 @@ const renderDashboardListingEmptyPrompt = (props: Partial<DashboardListingEmptyP
     <DashboardListingEmptyPrompt
       createItem={jest.fn()}
       goToDashboard={jest.fn()}
-      setUnsavedDashboardIds={jest.fn()}
-      unsavedDashboardIds={[]}
       useSessionStorageIntegration={true}
       disableCreateDashboardButton={false}
       {...props}
     />,
     { wrapper: I18nProvider }
   );
+
+// Drives the source the self-subscribed `useUnsavedDashboardIds` hook reads.
+const setUnsavedIds = (ids: string[]) => {
+  (getDashboardBackupService().getDashboardIdsWithUnsavedChanges as jest.Mock).mockReturnValue(ids);
+};
+
+beforeEach(() => {
+  setUnsavedIds([]);
+});
 
 test.each([
   [false, false],
@@ -66,29 +74,23 @@ test('renders disabled action button when disableCreateDashboardButton is true',
 
 test('renders continue button when no dashboards exist but one is in progress', async () => {
   (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
+  setUnsavedIds(['newDashboard']);
 
-  const props = {
-    goToDashboard: jest.fn(),
-    unsavedDashboardIds: ['newDashboard'],
-    useSessionStorageIntegration: true,
-  };
+  const goToDashboard = jest.fn();
+  renderDashboardListingEmptyPrompt({ goToDashboard, useSessionStorageIntegration: true });
 
-  renderDashboardListingEmptyPrompt(props);
-
-  // EuiButton is rendered as a button with text "Continue editing"
+  // EuiButton is rendered as a button with text "Continue editing".
   const continueButton = screen.getByRole('button', { name: /continue editing/i });
   await userEvent.click(continueButton);
 
-  expect(props.goToDashboard).toHaveBeenCalled();
+  expect(goToDashboard).toHaveBeenCalled();
 });
 
 test('renders discard button when no dashboards exist but one is in progress', async () => {
   (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
+  setUnsavedIds(['coolId']);
 
-  renderDashboardListingEmptyPrompt({
-    unsavedDashboardIds: ['coolId'],
-    useSessionStorageIntegration: true,
-  });
+  renderDashboardListingEmptyPrompt({ useSessionStorageIntegration: true });
 
   const discardButton = screen.getByRole('button', { name: /reset changes/i });
   await userEvent.click(discardButton);

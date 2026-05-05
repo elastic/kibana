@@ -44,4 +44,16 @@ export interface DashboardSavedObjectUserContent extends UserContentCommonSchema
   };
   canManageAccessControl?: boolean;
   accessMode?: SavedObjectAccessControl['accessMode'];
+  /**
+   * `true` when the dashboard appears in the local-storage recently-accessed
+   * history. Matched by the `is:recent` toolbar flag (see
+   * `RecentsFilter`/`features.flags`).
+   */
+  recent?: boolean;
+  /**
+   * Numeric recency score (higher = more recently viewed, `0` = never).
+   * Enables an opt-in `accessedAt desc` sort field that mirrors the legacy
+   * `sortByRecentlyAccessed` ordering.
+   */
+  accessedAt?: number;
 }

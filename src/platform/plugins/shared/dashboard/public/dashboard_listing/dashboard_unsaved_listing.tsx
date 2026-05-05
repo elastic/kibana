@@ -29,6 +29,7 @@ import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboa
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { findService } from '../dashboard_client';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
+import { notifyUnsavedDashboardsChanged, useUnsavedDashboardIds } from './use_unsaved_dashboards';
 
 const unsavedItemStyles = {
   item: (euiThemeContext: UseEuiTheme) =>
@@ -137,16 +138,21 @@ interface UnsavedItemMap {
 }
 
 export interface DashboardUnsavedListingProps {
-  unsavedDashboardIds: string[];
-  refreshUnsavedDashboards: () => void;
   goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
 }
 
-export const DashboardUnsavedListing = ({
-  goToDashboard,
-  unsavedDashboardIds,
-  refreshUnsavedDashboards,
-}: DashboardUnsavedListingProps) => {
+/**
+ * Banner listing dashboards with unsaved local edits, with per-item edit and
+ * discard affordances.
+ *
+ * Self-subscribes to the dashboard backup service via
+ * {@link useUnsavedDashboardIds}; siblings that mutate the backup service
+ * (`useDashboardListingTable`'s delete/save handlers,
+ * `DashboardListingEmptyPrompt`'s discard path) call
+ * {@link notifyUnsavedDashboardsChanged} to keep this component in sync.
+ */
+export const DashboardUnsavedListing = ({ goToDashboard }: DashboardUnsavedListingProps) => {
+  const unsavedDashboardIds = useUnsavedDashboardIds();
   const [items, setItems] = useState<UnsavedItemMap>({});
 
   const onOpen = useCallback(
@@ -156,18 +162,15 @@ export const DashboardUnsavedListing = ({
     [goToDashboard]
   );
 
-  const onDiscard = useCallback(
-    (id?: string) => {
-      confirmDiscardUnsavedChanges(() => {
-        getDashboardBackupService().clearState(id);
-        refreshUnsavedDashboards();
-      });
-    },
-    [refreshUnsavedDashboards]
-  );
+  const onDiscard = useCallback((id?: string) => {
+    confirmDiscardUnsavedChanges(() => {
+      getDashboardBackupService().clearState(id);
+      notifyUnsavedDashboardsChanged();
+    });
+  }, []);
 
   useEffect(() => {
-    if (unsavedDashboardIds?.length === 0) {
+    if (unsavedDashboardIds.length === 0) {
       return;
     }
     let canceled = false;
@@ -184,7 +187,7 @@ export const DashboardUnsavedListing = ({
         if (result.status === 'error') {
           hasError = true;
           if (result.error && result.notFound) {
-            // Save object not found error
+            // Saved object not found error.
             getDashboardBackupService().clearState(result.id);
           }
           return map;
@@ -195,7 +198,7 @@ export const DashboardUnsavedListing = ({
         };
       }, dashboardMap);
       if (hasError) {
-        refreshUnsavedDashboards();
+        notifyUnsavedDashboardsChanged();
         return;
       }
       setItems(newItems);
@@ -204,7 +207,7 @@ export const DashboardUnsavedListing = ({
     return () => {
       canceled = true;
     };
-  }, [refreshUnsavedDashboards, unsavedDashboardIds]);
+  }, [unsavedDashboardIds]);
 
   return unsavedDashboardIds.length === 0 ? null : (
     <>
