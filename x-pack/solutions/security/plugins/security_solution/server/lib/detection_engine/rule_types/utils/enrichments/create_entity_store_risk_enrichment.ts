@@ -118,7 +118,7 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
     );
     return eventsMapById;
   } catch (error) {
-    logger.warn(`Enrichment ${name} failed: ${error}`);
+    logger.info(`Enrichment ${name} failed: ${error}`);
     return {};
   }
 };
