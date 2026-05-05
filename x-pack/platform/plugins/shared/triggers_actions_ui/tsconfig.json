@@ -69,7 +69,6 @@
     "@kbn/cloud-plugin",
     "@kbn/response-ops-alerts-apis",
     "@kbn/response-ops-alerts-table",
-    "@kbn/response-ops-form-generator",
     "@kbn/response-ops-rule-form",
     "@kbn/charts-theme",
     "@kbn/rrule",
@@ -100,7 +99,8 @@
     "@kbn/cps",
     "@kbn/security-plugin",
     "@kbn/std",
-    "@kbn/lens-common"
+    "@kbn/lens-common",
+    "@kbn/connector-specs"
   ],
   "exclude": ["target/**/*"]
 }

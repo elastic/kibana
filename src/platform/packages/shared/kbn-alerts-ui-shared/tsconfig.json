@@ -42,6 +42,7 @@
     "@kbn/es-ui-shared-plugin",
     "@kbn/licensing-plugin",
     "@kbn/licensing-types",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/zod"
   ]
 }
