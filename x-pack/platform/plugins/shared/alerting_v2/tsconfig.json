@@ -98,7 +98,15 @@
     "@kbn/deeplinks-analytics",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/core-user-profile-browser",
-    "@kbn/user-profile-components"
+    "@kbn/user-profile-components",
+    "@kbn/esql-types",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-context-layer-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-elasticsearch-server"
   ],
   "exclude": ["target/**/*"]
 }
