@@ -37,6 +37,8 @@ if (!BUMP_TYPE) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions.yml')
       );
+
+      pipeline.push('  - wait');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/bump_versions_json.yml'));
 
       // Step 3: Wait, then trigger DRA snapshot (async).
