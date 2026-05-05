@@ -237,6 +237,14 @@ describe('inlineEsqlVariables', () => {
       expect(result.query).not.toContain('"2024-01-01"');
       expect(result.unresolved).toEqual([]);
     });
+
+    it('handles reserved param names case-insensitively (?_TSTART is not flagged)', () => {
+      const result = inlineEsqlVariables(
+        'FROM logs* | WHERE @timestamp >= ?_TSTART AND @timestamp <= ?_Tend | LIMIT 10',
+        []
+      );
+      expect(result.unresolved).toEqual([]);
+    });
   });
 
   describe('shape gating (token vs control type)', () => {

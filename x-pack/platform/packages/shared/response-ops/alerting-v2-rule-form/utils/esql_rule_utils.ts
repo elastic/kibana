@@ -7,6 +7,7 @@
 
 import { esql, Walker, Parser } from '@elastic/esql';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { RESERVED_ESQL_PARAMS } from '@kbn/alerting-v2-constants';
 
 type ComposerParamValue = string | number | Array<string | number>;
 
@@ -50,16 +51,9 @@ export const esqlControlVariableIsComposerInlinable = (v: ESQLControlVariable): 
   }
 };
 
-/**
- * Names the alerting v2 rule executor substitutes itself with the rule's time
- * window at execution time (see `get_query_payload.ts`). They are valid in a
- * persisted rule and must not be flagged as unresolved.
- *
- * Side-effect: a user-created control whose key collides with one of these
- * names will be silently ignored — the placeholder stays in the query for the
- * executor to bind at run time.
- */
-const RESERVED_RULE_PARAM_NAMES: ReadonlySet<string> = new Set(['_tstart', '_tend']);
+const RESERVED_RULE_PARAM_NAMES: ReadonlySet<string> = new Set(
+  RESERVED_ESQL_PARAMS.map((n) => n.toLowerCase())
+);
 
 type PlaceholderShape = 'value' | 'identifier';
 
@@ -83,7 +77,7 @@ const findPlaceholderTokens = (query: string): string[] => {
   const result: string[] = [];
   for (const p of Walker.params(Parser.parse(query).root)) {
     const name = p.value as string;
-    if (RESERVED_RULE_PARAM_NAMES.has(name)) continue;
+    if (RESERVED_RULE_PARAM_NAMES.has(name.toLowerCase())) continue;
     const token = p.text as string;
     if (!seen.has(token)) {
       seen.add(token);
@@ -136,7 +130,10 @@ export const inlineEsqlVariables = (
   // placeholders stay unresolved and block save until proper support is added.
   const shapesByName = collectPlaceholderShapesByName(query);
   const params = esqlVariables.reduce<Record<string, ComposerParamValue>>((acc, v) => {
-    if (!esqlControlVariableIsComposerInlinable(v) || RESERVED_RULE_PARAM_NAMES.has(v.key)) {
+    if (
+      !esqlControlVariableIsComposerInlinable(v) ||
+      RESERVED_RULE_PARAM_NAMES.has(v.key.toLowerCase())
+    ) {
       return acc;
     }
     const seenShapes = shapesByName.get(v.key);
