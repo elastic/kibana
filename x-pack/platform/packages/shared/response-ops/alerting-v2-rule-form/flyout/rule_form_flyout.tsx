@@ -66,7 +66,7 @@ export const RuleFormFlyout = ({
     <EuiFlyout
       session="start"
       flyoutMenuProps={{
-        title: 'Create Alert Rule',
+        title: 'Create Rule',
         hideTitle: true,
       }}
       type={push ? 'push' : 'overlay'}
@@ -90,7 +90,7 @@ export const RuleFormFlyout = ({
             <h2>
               <FormattedMessage
                 id="xpack.alertingV2.ruleForm.flyoutTitle"
-                defaultMessage="Create Alert Rule"
+                defaultMessage="Create Rule"
               />
             </h2>
           </EuiTitle>

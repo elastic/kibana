@@ -78,14 +78,12 @@ test.describe.skip(
         // before interaction (see `euiLoadingSpinner` + `state: 'hidden'`).
         const serviceNameCombo = page.testSubj.locator('apmServiceMapEditorServiceNameComboBox');
         const environmentCombo = page.testSubj.locator('apmServiceMapEditorEnvironmentComboBox');
-        await Promise.all([
-          serviceNameCombo
-            .locator('.euiLoadingSpinner')
-            .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT }),
-          environmentCombo
-            .locator('.euiLoadingSpinner')
-            .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT }),
-        ]);
+        await serviceNameCombo
+          .locator('.euiLoadingSpinner')
+          .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+        await environmentCombo
+          .locator('.euiLoadingSpinner')
+          .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
 
         // Select service name from dropdown
         const serviceNameComboBox = new EuiComboBoxWrapper(

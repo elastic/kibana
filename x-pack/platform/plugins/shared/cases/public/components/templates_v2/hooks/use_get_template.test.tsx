@@ -23,6 +23,7 @@ const mockTemplate: ParsedTemplate = {
   name: 'My template',
   owner: 'securitySolution',
   definition: { name: 'My template', fields: [] },
+  definitionString: 'name: My template\nfields: []',
   templateVersion: 3,
   deletedAt: null,
   isLatest: true,
