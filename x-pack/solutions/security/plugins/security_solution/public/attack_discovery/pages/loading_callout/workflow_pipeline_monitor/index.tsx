@@ -23,6 +23,7 @@ import type { PipelineDataResponse } from '../../hooks/use_pipeline_data';
 import type { StepExecutionWithLink, WorkflowInspectMetadata } from '../types';
 import { useWorkflowEditorLink } from '../../use_workflow_editor_link';
 import { GroupedAlertRetrievalContent } from './grouped_alert_retrieval_content';
+import { WorkflowGroupSteps } from './workflow_group_steps';
 import { getCompositeStatus } from './helpers/get_composite_status';
 import {
   getAlertsCountBadgeLabel,
@@ -38,6 +39,7 @@ import { INSPECT_CONFIG } from './helpers/inspect_config';
 import { mapStatusToEuiStatus } from './helpers/map_status_to_eui_status';
 import {
   getCanonicalOrder,
+  groupStepsByPhase,
   groupStepsByWorkflow,
   isAlertRetrievalStep,
   isPersistenceStep,
@@ -384,42 +386,48 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
       return [];
     })();
 
-    const orderedOtherSteps = [...otherSteps].sort(
-      (a, b) => getCanonicalOrder(a) - getCanonicalOrder(b)
+    const phaseGroups = groupStepsByPhase(otherSteps);
+
+    const sortedPhaseEntries = [...phaseGroups.entries()].sort(
+      ([, groupA], [, groupB]) => getCanonicalOrder(groupA[0]) - getCanonicalOrder(groupB[0])
     );
 
-    const otherStepItems: EuiStepProps[] = orderedOtherSteps.map((step) => {
+    const otherStepItems: EuiStepProps[] = sortedPhaseEntries.map(([, phaseSteps]) => {
+      const representativeStep = phaseSteps[0];
+      const compositeStatus = getCompositeStatus(phaseSteps);
+
       // When generation has started but the workflow engine hasn't created its internal step
       // yet, the placeholder step has status PENDING. Override to RUNNING so the UI shows
       // the generation phase as active rather than not-yet-started.
       const effectiveStatus =
-        isGenerationStep(step) && isGenerationStarted && step.status === ExecutionStatus.PENDING
+        isGenerationStep(representativeStep) &&
+        isGenerationStarted &&
+        compositeStatus === ExecutionStatus.PENDING
           ? ExecutionStatus.RUNNING
-          : step.status;
+          : compositeStatus;
 
       return {
         children: (
-          <StepContent
-            alertsCountBadge={renderDiscoveryCountBadge(step)}
-            executionTimeMs={step.executionTimeMs}
-            finishedAt={step.finishedAt}
-            inspectButton={renderInspectButton(step.stepId, step.pipelinePhase, {
-              workflowId: step.workflowId,
-              workflowName: step.workflowName,
-              workflowRunId: step.workflowRunId,
-            })}
-            key={step.id}
-            startedAt={step.startedAt}
-            status={effectiveStatus}
-            step={step}
+          <WorkflowGroupSteps
+            badge={renderDiscoveryCountBadge(representativeStep)}
+            inspectButton={renderInspectButton(
+              representativeStep.stepId,
+              representativeStep.pipelinePhase,
+              {
+                workflowId: representativeStep.workflowId,
+                workflowName: representativeStep.workflowName,
+                workflowRunId: representativeStep.workflowRunId,
+              }
+            )}
+            steps={phaseSteps}
           />
         ),
         status: mapStatusToEuiStatus(effectiveStatus),
         title:
           effectiveStatus === ExecutionStatus.RUNNING ? (
-            <PulsingTitle>{formatStepName(step.stepId)}</PulsingTitle>
+            <PulsingTitle>{formatStepName(representativeStep.stepId)}</PulsingTitle>
           ) : (
-            formatStepName(step.stepId)
+            formatStepName(representativeStep.stepId)
           ),
       } as EuiStepProps;
     });
