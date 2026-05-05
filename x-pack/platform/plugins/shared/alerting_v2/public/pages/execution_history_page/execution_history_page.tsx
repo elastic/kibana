@@ -23,8 +23,10 @@ import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
@@ -42,13 +44,15 @@ type TabId = typeof POLICIES_TAB_ID | typeof RULES_TAB_ID;
 const buildColumns = (
   onPolicyClick: (policyId: string) => void,
   onRuleClick: (ruleId: string) => void,
-  getWorkflowUrl: (workflowId: string) => string
+  getWorkflowUrl: (workflowId: string) => string,
+  formatTimestamp: (value: string) => string
 ): Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> => [
   {
     field: '@timestamp',
     name: i18n.translate('xpack.alertingV2.executionHistory.columns.timestamp', {
       defaultMessage: 'Timestamp',
     }),
+    render: (value: string) => formatTimestamp(value),
   },
   {
     name: i18n.translate('xpack.alertingV2.executionHistory.columns.policy', {
@@ -153,6 +157,18 @@ const rulesPlaceholder = (
 
 const DEFAULT_PER_PAGE = 100;
 
+const bannerSlideIn = keyframes`
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
+
+const bannerStyles = css`
+  animation: ${bannerSlideIn} 200ms ease-out;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`;
+
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
 
@@ -168,12 +184,15 @@ export const ExecutionHistoryPage = () => {
     perPage,
   });
   const application = useService(CoreStart('application'));
+  const settings = useService(CoreStart('settings'));
+  const dateTimeFormat = settings.client.get<string>('dateFormat');
   const getWorkflowUrl = (workflowId: string) =>
     application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${workflowId}` });
+  const formatTimestamp = (value: string) => moment(value).format(dateTimeFormat);
 
   const items = data?.items ?? [];
   const totalEvents = data?.totalEvents ?? 0;
-  const columns = buildColumns(setPolicyToViewId, setRuleToViewId, getWorkflowUrl);
+  const columns = buildColumns(setPolicyToViewId, setRuleToViewId, getWorkflowUrl, formatTimestamp);
 
   const { data: newCountData } = useCountNewExecutionHistoryEvents({
     since: lastSeenAt,
@@ -262,6 +281,7 @@ export const ExecutionHistoryPage = () => {
       {selectedTabId === POLICIES_TAB_ID && newEventsCount > 0 && !isError && (
         <>
           <EuiCallOut
+            css={bannerStyles}
             data-test-subj="executionHistoryNewEventsBanner"
             color="primary"
             iconType="bell"

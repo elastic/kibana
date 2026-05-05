@@ -25,6 +25,9 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'application') {
       return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
     }
+    if (token === 'settings') {
+      return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
+    }
     return {};
   },
   CoreStart: (key: string) => key,
@@ -138,6 +141,22 @@ describe('ExecutionHistoryPage', () => {
     expect(
       screen.getByText(/No policy execution activity in the last 24 hours/i)
     ).toBeInTheDocument();
+  });
+
+  it('formats the timestamp using the user dateFormat setting', () => {
+    mockFetchResult({
+      data: {
+        items: [buildItem({ '@timestamp': '2026-05-05T10:00:00.000Z' })],
+        page: 1,
+        perPage: 50,
+        totalEvents: 1,
+      },
+    });
+    renderPage();
+
+    // Date format mock returns 'YYYY-MM-DD HH:mm'; raw ISO should not appear.
+    expect(screen.queryByText('2026-05-05T10:00:00.000Z')).not.toBeInTheDocument();
+    expect(screen.getByText(/2026-05-05/)).toBeInTheDocument();
   });
 
   it('renders rows with policy, rule, and workflow names', () => {
