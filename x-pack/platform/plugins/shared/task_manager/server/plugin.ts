@@ -407,7 +407,6 @@ export class TaskManagerPlugin
       });
 
       this.taskPollingLifecycle = new TaskPollingLifecycle({
-        basePathService: http.basePath,
         config: this.config!,
         definitions: this.definitions,
         logger: this.logger,

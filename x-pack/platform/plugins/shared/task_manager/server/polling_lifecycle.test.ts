@@ -23,7 +23,7 @@ import type {
 import type { Err, Ok } from './lib/result_type';
 import { asOk, isErr, isOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
-import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
 import type { TaskEventLogger } from './task';
 import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
@@ -113,7 +113,6 @@ describe('TaskPollingLifecycle', () => {
       auto_calculate_default_ech_capacity: false,
       api_key_type: ApiKeyType.ES,
     },
-    basePathService: httpServiceMock.createBasePath(),
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
     definitions: new TaskTypeDictionary(taskManagerLogger),
