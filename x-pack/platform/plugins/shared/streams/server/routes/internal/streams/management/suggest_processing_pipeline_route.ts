@@ -328,6 +328,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           success: result.pipeline !== null,
           stream_name: stream.name,
           stream_type: getStreamTypeFromDefinition(stream),
+          source: 'ui',
         });
 
         return result;

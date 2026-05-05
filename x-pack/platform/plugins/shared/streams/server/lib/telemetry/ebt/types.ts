@@ -50,6 +50,7 @@ interface StreamsProcessingPipelineSuggestedProps {
   success: boolean;
   stream_name: string;
   stream_type: StreamType;
+  source: 'ui' | 'agent';
 }
 
 interface StreamsFeaturesIdentifiedProps {

@@ -187,13 +187,14 @@ describe('EbtTelemetryClient', () => {
   });
 
   describe('trackProcessingPipelineSuggested', () => {
-    it('tracks processing pipeline suggested events on success', () => {
+    it('tracks processing pipeline suggested events on success from the UI', () => {
       client.trackProcessingPipelineSuggested({
         duration_ms: 5000,
         steps_used: 4,
         success: true,
         stream_name: 'logs-test',
         stream_type: 'wired',
+        source: 'ui',
       });
 
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
@@ -204,6 +205,7 @@ describe('EbtTelemetryClient', () => {
           success: true,
           stream_name: 'logs-test',
           stream_type: 'wired',
+          source: 'ui',
         }
       );
     });
@@ -215,6 +217,7 @@ describe('EbtTelemetryClient', () => {
         success: false,
         stream_name: 'logs-test',
         stream_type: 'classic',
+        source: 'ui',
       });
 
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
@@ -225,17 +228,19 @@ describe('EbtTelemetryClient', () => {
           success: false,
           stream_name: 'logs-test',
           stream_type: 'classic',
+          source: 'ui',
         }
       );
     });
 
-    it('tracks processing pipeline suggested events when no documents provided', () => {
+    it('tracks processing pipeline suggested events when triggered from the agent', () => {
       client.trackProcessingPipelineSuggested({
         duration_ms: 100,
         steps_used: 0,
         success: false,
         stream_name: 'logs-empty',
         stream_type: 'wired',
+        source: 'agent',
       });
 
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
@@ -246,6 +251,7 @@ describe('EbtTelemetryClient', () => {
           success: false,
           stream_name: 'logs-empty',
           stream_type: 'wired',
+          source: 'agent',
         }
       );
     });

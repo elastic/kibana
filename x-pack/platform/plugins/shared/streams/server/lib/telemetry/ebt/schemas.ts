@@ -234,6 +234,13 @@ const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipe
         description: 'The name of the Stream',
       },
     },
+    source: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Where the suggestion was triggered from: "ui" for the streams management UI, "agent" for an agent_builder tool invocation',
+      },
+    },
   };
 
 const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps> = {
