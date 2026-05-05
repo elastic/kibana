@@ -1,23 +1,27 @@
 steps:
+  - label: 'Dry run gate: ES build & promote (main)'
+    key: gate-es-build-and-promote
+    command: .buildkite/scripts/steps/version_bump/dry_run_gate.sh build-es-snapshot promote-es-snapshot
+
   - key: build-es-snapshot
     label: Build ES Snapshot
     trigger: kibana-elasticsearch-snapshot-build
     async: false
-    if: build.env("DRY_RUN") != "true"
+    depends_on: gate-es-build-and-promote
     build:
       branch: main
       env:
         PARENT_TRIGGER_JOB_ID: '${BUILDKITE_JOB_ID}'
 
-  - name: 'Upload promote step'
+  - key: promote-es-snapshot
+    label: 'Upload promote step'
     depends_on: build-es-snapshot
-    if: build.env("DRY_RUN") != "true"
     command: |
       ES_SNAPSHOT_MANIFEST="$(buildkite-agent meta-data get es_snapshot_manifest)"
 
       buildkite-agent pipeline upload << PIPELINE
       steps:
-        - name: 'Promote ES Snapshot'
+        - label: 'Promote ES Snapshot'
           trigger: kibana-elasticsearch-snapshot-promote
           async: false
           build:

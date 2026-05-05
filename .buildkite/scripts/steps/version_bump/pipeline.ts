@@ -18,6 +18,11 @@ if (!BUMP_TYPE) {
   process.exit(1);
 }
 
+// Note: DRY_RUN is honored inside each trigger pipeline YAML via a small
+// pre-trigger gate step (`dry_run_gate.sh`) that, when DRY_RUN=true, cancels
+// the downstream `trigger:` step(s). The pipeline graph below is therefore
+// identical for dry and real runs, so the orchestration (waits, ordering,
+// dependencies) is exercised in both modes.
 (async () => {
   const pipeline: string[] = [];
   try {

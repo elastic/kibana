@@ -1,8 +1,12 @@
 steps:
+  - label: 'Dry run gate: DRA staging'
+    key: gate-dra-staging
+    command: .buildkite/scripts/steps/version_bump/dry_run_gate.sh trigger-dra-staging
+
   - name: Trigger DRA Staging Build
     key: trigger-dra-staging
     trigger: kibana-artifacts-staging
     async: false
-    if: build.env("DRY_RUN") != "true"
+    depends_on: gate-dra-staging
     build:
       branch: '${BRANCH}'
