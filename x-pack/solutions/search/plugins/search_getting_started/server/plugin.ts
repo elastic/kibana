@@ -12,8 +12,12 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
-import type { SearchGettingStartedSetupDependencies } from './types';
+import type {
+  SearchGettingStartedSetupDependencies,
+  SearchGettingStartedStartDependencies,
+} from './types';
 import { registerSearchSkills } from './skills/register_search_skills';
+import { createListInferenceFeaturesTool } from './agent_builder/tools';
 
 export class SearchGettingStartedPlugin
   implements Plugin<{}, {}, SearchGettingStartedSetupDependencies>
@@ -24,8 +28,14 @@ export class SearchGettingStartedPlugin
     this.logger = initContext.logger.get();
   }
 
-  public setup(_core: CoreSetup, plugins: SearchGettingStartedSetupDependencies) {
+  public setup(
+    core: CoreSetup<SearchGettingStartedStartDependencies>,
+    plugins: SearchGettingStartedSetupDependencies
+  ) {
     registerSearchSkills({ plugins, logger: this.logger });
+
+    plugins.agentBuilder?.tools.register(createListInferenceFeaturesTool(core));
+
     return {};
   }
 

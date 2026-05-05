@@ -6,7 +6,12 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 
 export interface SearchGettingStartedSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
+}
+
+export interface SearchGettingStartedStartDependencies {
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }

@@ -37,7 +37,10 @@
     "@kbn/agent-builder-server",
     "@kbn/scout-search",
     "@kbn/search-agent",
-    "@kbn/shared-ux-ai-components"
+    "@kbn/shared-ux-ai-components",
+    "@kbn/search-inference-endpoints",
+    "@kbn/agent-builder-common",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*"
