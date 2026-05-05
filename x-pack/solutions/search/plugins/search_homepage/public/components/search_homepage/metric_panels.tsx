@@ -205,7 +205,7 @@ export const MetricPanels = () => {
   const { services } = useKibana();
   const { chrome, uiSettings } = services;
 
-  const isWorkflowsUiEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ENABLED_ID, false);
+  const isWorkflowsUiEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ENABLED_ID, true);
 
   const panels = useMemo(() => {
     const capabilityChecks: Record<MetricPanelType, boolean> = {
