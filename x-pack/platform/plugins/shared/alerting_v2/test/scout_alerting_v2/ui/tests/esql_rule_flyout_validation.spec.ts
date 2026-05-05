@@ -23,7 +23,7 @@ test.describe('ES|QL rule flyout — ?param validation', { tag: tags.stateful.cl
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsAlertingV2Editor();
     await pageObjects.discover.goto();
   });
 
@@ -43,15 +43,15 @@ test.describe('ES|QL rule flyout — ?param validation', { tag: tags.stateful.cl
 
     await test.step('open the Create ES|QL rule flyout', async () => {
       await pageObjects.ruleForm.openRulesFlyoutFromDiscover();
-      await expect(pageObjects.ruleForm.flyout()).toBeVisible();
+      await expect(pageObjects.ruleForm.flyout).toBeVisible();
     });
 
     await test.step('validation callout must not be visible', async () => {
-      await expect(pageObjects.ruleForm.flyoutValidationCallout()).toBeHidden();
+      await expect(pageObjects.ruleForm.flyoutValidationCallout).toBeHidden();
     });
 
     await test.step('save button must be enabled', async () => {
-      await expect(pageObjects.ruleForm.flyoutSaveButton()).toBeEnabled();
+      await expect(pageObjects.ruleForm.flyoutSaveButton).toBeEnabled();
     });
   });
 
@@ -67,16 +67,16 @@ test.describe('ES|QL rule flyout — ?param validation', { tag: tags.stateful.cl
 
     await test.step('open the Create ES|QL rule flyout', async () => {
       await pageObjects.ruleForm.openRulesFlyoutFromDiscover();
-      await expect(pageObjects.ruleForm.flyout()).toBeVisible();
+      await expect(pageObjects.ruleForm.flyout).toBeVisible();
     });
 
     await test.step('validation callout must be visible and mention ?limit', async () => {
-      await expect(pageObjects.ruleForm.flyoutValidationCallout()).toBeVisible();
-      await expect(pageObjects.ruleForm.flyoutValidationCallout()).toContainText('?limit');
+      await expect(pageObjects.ruleForm.flyoutValidationCallout).toBeVisible();
+      await expect(pageObjects.ruleForm.flyoutValidationCallout).toContainText('?limit');
     });
 
     await test.step('save button must be disabled', async () => {
-      await expect(pageObjects.ruleForm.flyoutSaveButton()).toBeDisabled();
+      await expect(pageObjects.ruleForm.flyoutSaveButton).toBeDisabled();
     });
   });
 });
