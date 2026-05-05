@@ -74,9 +74,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.workflow_execute_step`,
 
   // Search
-  `${internalNamespaces.search}.list_inference_features`,
-  `${internalNamespaces.search}.set_inference_feature_endpoint`,
-  `${internalNamespaces.search}.list_inference_endpoints`,
+  `${internalNamespaces.search}.manage_inference_config`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];

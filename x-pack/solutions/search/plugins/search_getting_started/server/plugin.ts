@@ -17,11 +17,7 @@ import type {
   SearchGettingStartedStartDependencies,
 } from './types';
 import { registerSearchSkills } from './skills/register_search_skills';
-import {
-  createListInferenceFeaturesTool,
-  createSetInferenceFeatureTool,
-  createListInferenceEndpointsTool,
-} from './agent_builder/tools';
+import { createManageInferenceConfigTool } from './agent_builder/tools';
 
 export class SearchGettingStartedPlugin
   implements Plugin<{}, {}, SearchGettingStartedSetupDependencies>
@@ -38,9 +34,7 @@ export class SearchGettingStartedPlugin
   ) {
     registerSearchSkills({ plugins, logger: this.logger });
 
-    plugins.agentBuilder?.tools.register(createListInferenceFeaturesTool(core));
-    plugins.agentBuilder?.tools.register(createSetInferenceFeatureTool(core));
-    plugins.agentBuilder?.tools.register(createListInferenceEndpointsTool(core));
+    plugins.agentBuilder?.tools.register(createManageInferenceConfigTool(core));
 
     return {};
   }
