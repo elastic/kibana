@@ -132,6 +132,7 @@ export const getLinksEmbeddableFactory = () => {
         ...titleManager.api,
         ...unsavedChangesApi,
         blockingError$,
+        isCustomizable: false,
         defaultTitle$,
         defaultDescription$,
         isEditingEnabled: () => Boolean(blockingError$.value === undefined),
