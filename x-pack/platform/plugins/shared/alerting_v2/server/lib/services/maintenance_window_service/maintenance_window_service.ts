@@ -11,6 +11,7 @@ import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-p
 import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
+import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import { MaintenanceWindowSavedObjectsClientToken } from './tokens';
 import type { ActiveMaintenanceWindow } from './types';
 
@@ -92,9 +93,6 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
         for (const doc of response.saved_objects) {
           if ('error' in doc && doc.error) continue;
 
-          const spaceId = doc.namespaces?.[0];
-          if (!spaceId) continue;
-
           if (!Array.isArray(doc.attributes.events)) {
             this.logger.warn({
               message: () =>
@@ -103,23 +101,15 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
             continue;
           }
 
-          try {
-            windows.push({
-              id: doc.id,
-              spaceId,
-              enabled: doc.attributes.enabled,
-              events: doc.attributes.events.map((event) => ({
-                gteMs: Date.parse(event.gte),
-                lteMs: Date.parse(event.lte),
-              })),
-              ...(doc.attributes.scope !== undefined ? { scope: doc.attributes.scope } : {}),
-            });
-          } catch (perDocError) {
-            this.logger.error({
-              error: perDocError,
-              type: 'MaintenanceWindowDocParseError',
-            });
-          }
+          windows.push({
+            id: doc.id,
+            spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
+            events: doc.attributes.events.map((event) => ({
+              gteMs: Date.parse(event.gte),
+              lteMs: Date.parse(event.lte),
+            })),
+            ...(doc.attributes.scope !== undefined ? { scope: doc.attributes.scope } : {}),
+          });
         }
       }
     } catch (error) {

@@ -19,7 +19,6 @@ import type { ActiveMaintenanceWindow } from '../../services/maintenance_window_
 const buildMw = (overrides: Partial<ActiveMaintenanceWindow> = {}): ActiveMaintenanceWindow => ({
   id: 'mw-1',
   spaceId: 'default',
-  enabled: true,
   events: [
     {
       gteMs: Date.parse('2026-01-22T07:00:00.000Z'),

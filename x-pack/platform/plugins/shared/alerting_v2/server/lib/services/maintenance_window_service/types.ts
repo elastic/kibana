@@ -13,10 +13,9 @@ interface ActiveMaintenanceWindowEvent {
 export interface ActiveMaintenanceWindow {
   id: string;
   spaceId: string;
-  enabled: boolean;
   events: ActiveMaintenanceWindowEvent[];
   scope?: {
     alerting?: unknown;
-    alertingV2?: { kql?: string } | null;
+    alertingV2?: { kql?: string };
   };
 }

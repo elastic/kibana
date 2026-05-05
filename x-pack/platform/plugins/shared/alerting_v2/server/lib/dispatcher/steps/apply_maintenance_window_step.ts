@@ -52,15 +52,15 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
 
     for (const episode of dispatchable) {
       const rule = rules.get(episode.rule_id);
-      if (!rule) {
+      const candidates = rule && windowsBySpace.get(rule.spaceId);
+      if (!rule || !candidates) {
         newDispatchable.push(episode);
         continue;
       }
 
-      const candidates = windowsBySpace.get(rule.spaceId) ?? [];
       const maintenanceWindow = findMatchingMaintenanceWindow(candidates, episode, rule);
       if (maintenanceWindow) {
-        newlySuppressed.push({ ...episode, reason: `maintenance_window:${maintenanceWindow.id}` });
+        newlySuppressed.push({ ...episode, reason: maintenanceWindowReason(maintenanceWindow.id) });
       } else {
         newDispatchable.push(episode);
       }
@@ -80,13 +80,14 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
   }
 }
 
+export const MAINTENANCE_WINDOW_REASON_PREFIX = 'maintenance_window';
+const maintenanceWindowReason = (id: string) => `${MAINTENANCE_WINDOW_REASON_PREFIX}:${id}`;
+
 function findMatchingMaintenanceWindow(
   candidates: readonly ActiveMaintenanceWindow[],
   episode: AlertEpisode,
   rule: Rule
 ): ActiveMaintenanceWindow | undefined {
-  if (candidates.length === 0) return undefined;
-
   const eventTime = Date.parse(episode.last_event_timestamp);
   if (Number.isNaN(eventTime)) return undefined;
 

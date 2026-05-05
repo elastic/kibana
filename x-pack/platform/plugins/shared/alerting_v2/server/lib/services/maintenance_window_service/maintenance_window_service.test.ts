@@ -216,7 +216,7 @@ describe('MaintenanceWindowService', () => {
     expect(logger.warn).toHaveBeenCalled();
   });
 
-  it('skips docs without a namespace', async () => {
+  it('falls back to the default space when a doc has no namespaces array', async () => {
     const noNamespace = buildSo('mw-1', 'default', {
       events: [{ gte: '2026-04-29T00:00:00.000Z', lte: '2026-04-29T23:00:00.000Z' }],
     });
@@ -231,7 +231,8 @@ describe('MaintenanceWindowService', () => {
     const service = new MaintenanceWindowService(client, buildLogger());
     const result = await service.getEnabledMaintenanceWindows();
 
-    expect(result).toEqual([]);
+    expect(result).toHaveLength(1);
+    expect(result[0].spaceId).toBe('default');
   });
 
   it('uses default cache interval', () => {
