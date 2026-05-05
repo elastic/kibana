@@ -11,6 +11,8 @@ export {
   agentBuilderServerEbtEvents,
   type AgentBuilderTelemetryEventsMap,
   type AgentBuilderEventTypes,
+  type EmbeddedFullScreenUnavailableSignal,
+  type ReportEmbeddedFullScreenUnavailableParams,
   type ReportSkillCreatedParams,
   type ReportSkillUpdatedParams,
   type ReportSkillDeletedParams,
