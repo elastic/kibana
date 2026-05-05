@@ -6,19 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ServerRoute } from '@kbn/server-route-repository-utils';
-import { fooRouteDefinition } from './foo';
-import type { FooResponse } from './foo';
+import { barRoute, type BarResponse } from './bar';
+import { fooRoute, type FooResponse } from './foo';
+import type { RouteEntry } from './types';
 
 export const routeDefinitions = {
-  foo: fooRouteDefinition,
+  foo: fooRoute,
+  bar: barRoute,
 };
 
-type RouteEntry<
-  TDef extends { ENDPOINT: string; params: any },
-  TReturn extends Record<string, any>
-> = {
-  [K in TDef['ENDPOINT']]: ServerRoute<TDef['ENDPOINT'], TDef['params'], any, TReturn, any>;
-};
-
-export type SharedAPMRouteRepository = RouteEntry<typeof fooRouteDefinition, FooResponse>;
+export type SharedAPMRouteRepository = RouteEntry<typeof fooRoute, FooResponse> &
+  RouteEntry<typeof barRoute, BarResponse>;

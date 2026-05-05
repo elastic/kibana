@@ -8,19 +8,13 @@
  */
 import * as t from 'io-ts';
 
-const query = t.partial({
-  foo: t.string,
-});
-
-const path = t.type({
-  serviceName: t.string,
-});
-
-const params = t.type({ query, path });
-const ENDPOINT = 'GET /internal/apm/foo/{serviceName}' as const;
-
 export interface FooResponse {
   msg: string;
 }
 
-export const fooRouteDefinition = { ENDPOINT, params } as const;
+export const fooRoute = {
+  endpoint: 'GET /internal/apm/foo/{serviceName}' as const,
+  params: t.type({ query: t.partial({ foo: t.string }), path: t.type({ serviceName: t.string }) }),
+} as const;
+
+export type FooRouteDefinition = typeof fooRoute & { response: FooResponse };

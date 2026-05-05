@@ -6,11 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import * as t from 'io-ts';
 
-export {
-  createCallApmApiV2,
-  type APMClientV2,
-  type AutoAbortedAPMClientV2,
-} from './src/create_call_apm_api';
-export { routeDefinitions } from './src/routes';
-export type { FooResponse } from './src/routes/foo';
+export interface BarResponse {
+  barMsg: string;
+}
+
+export const barRoute = {
+  endpoint: 'GET /internal/apm/bar' as const,
+  params: t.type({ query: t.partial({ foo: t.string }) }),
+} as const;
+
+export type BarRouteDefinition = typeof barRoute & { response: BarResponse };

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  createCallApmApiV2,
-  type APMClientV2,
-  type AutoAbortedAPMClientV2,
-} from './src/create_call_apm_api';
-export { routeDefinitions } from './src/routes';
-export type { FooResponse } from './src/routes/foo';
+import type { ServerRoute } from '@kbn/server-route-repository-utils';
+
+export type RouteEntry<
+  TDef extends { endpoint: string; params: any },
+  TReturn extends Record<string, any>
+> = {
+  [K in TDef['endpoint']]: ServerRoute<TDef['endpoint'], TDef['params'], any, TReturn, any>;
+};
