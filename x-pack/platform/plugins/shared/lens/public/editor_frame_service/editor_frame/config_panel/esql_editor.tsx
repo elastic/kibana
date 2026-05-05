@@ -98,6 +98,9 @@ export function ESQLEditor({
   const { visualizationMap, datasourceMap } = useEditorFrameService();
   const { visualization } = useLensSelector((state) => state.lens);
   const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
+  // Updated when the workspace kicks off a new search (manual refresh, auto-refresh,
+  // or when chart requests run under a new session). Used as an effect dependency to
+  // re-fetch the ES|QL results grid for the last submitted query.
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [errors, setErrors] = useState<Error[]>([]);
@@ -132,6 +135,7 @@ export function ESQLEditor({
   const lensAdaptersRef = useRef(lensAdapters);
   lensAdaptersRef.current = lensAdapters;
 
+  // Avoids duplicating the first grid load
   const isInitialRenderRef = useRef(true);
 
   const submittedQueryRef = useRef(submittedQuery);
@@ -153,7 +157,6 @@ export function ESQLEditor({
     const activeData = getActiveDataFromDatatable(layerId, lensAdaptersRef.current?.tables?.tables);
 
     const table = activeData?.[layerId];
-
     if (table) {
       // there are cases where a query can return a big amount of columns
       // at this case we don't suggest all columns in a table but the first `MAX_NUM_OF_COLUMNS`
@@ -224,6 +227,8 @@ export function ESQLEditor({
     });
   }, [query, submittedQuery, errors.length, onTextBasedQueryStateChange]);
 
+  // Refresh the ES|QL results table for the last submitted query when inputs to the preview
+  // request change without the user submitting again.
   useEffect(() => {
     // Skip the initial render, the grid is populated by useInitializeChart → runQuery
     if (isInitialRenderRef.current) {
