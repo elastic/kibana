@@ -70,39 +70,42 @@ export const exportLiveQueryResultsRoute = (
         // and CSV column headers use ECS names rather than raw osquery field names.
         // Transport-level failures are non-fatal — the export proceeds without enriched metadata.
         // A successful fetch where the actionId is not in the queries list returns 404.
+        const abortController = new AbortController();
+        const sub = request.events.aborted$.subscribe(() => abortController.abort());
         try {
-          const abortController = new AbortController();
-          const sub = request.events.aborted$.subscribe(() => abortController.abort());
-          try {
-            const search = await context.search;
+          const search = await context.search;
 
-            const { actionDetails } = await lastValueFrom(
-              search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
-                {
-                  actionId: id,
-                  factoryQueryType: OsqueryQueries.actionDetails,
-                  spaceId,
-                },
-                { abortSignal: abortController.signal, strategy: 'osquerySearchStrategy' }
-              )
-            );
+          const { actionDetails } = await lastValueFrom(
+            search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
+              {
+                actionId: id,
+                factoryQueryType: OsqueryQueries.actionDetails,
+                spaceId,
+              },
+              { abortSignal: abortController.signal, strategy: 'osquerySearchStrategy' }
+            )
+          );
 
-            const matchingQuery = actionDetails?._source?.queries?.find(
-              (q) => q.action_id === actionId
-            );
-            if (matchingQuery) {
-              query = matchingQuery.query;
-              ecsMapping = matchingQuery.ecs_mapping as ECSMapping | undefined;
-            } else if (actionDetails?._source != null) {
-              // actionDetails was fetched successfully but the requested actionId is not in
-              // its queries list — the caller provided a mismatched id/actionId pair.
-              return response.notFound({ body: { message: 'Live query action not found' } });
-            }
-          } finally {
-            sub.unsubscribe();
+          const matchingQuery = actionDetails?._source?.queries?.find(
+            (q) => q.action_id === actionId
+          );
+          if (matchingQuery) {
+            query = matchingQuery.query;
+            ecsMapping = matchingQuery.ecs_mapping as ECSMapping | undefined;
+          } else if (actionDetails?._source != null) {
+            // actionDetails was fetched successfully but the requested actionId is not in
+            // its queries list — the caller provided a mismatched id/actionId pair.
+            return response.notFound({ body: { message: 'Live query action not found' } });
           }
-        } catch {
-          // Continue without metadata enrichment
+        } catch (err) {
+          const logger = osqueryContext.logFactory.get('export_live_query_results');
+          logger.warn(
+            `Failed to fetch action details for live query export (id: ${id}, actionId: ${actionId}): ${
+              err instanceof Error ? err.message : String(err)
+            }. Proceeding without ECS-enriched metadata.`
+          );
+        } finally {
+          sub.unsubscribe();
         }
 
         return handler(context, request, response, {

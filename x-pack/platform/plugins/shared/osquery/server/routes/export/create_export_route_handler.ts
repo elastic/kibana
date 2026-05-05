@@ -58,11 +58,13 @@ export const createExportRouteHandler =
 
     // Validate the KQL filter at the route boundary so invalid kuery surfaces
     // as a 400 before any ES round-trips. Compose the full filter string the
-    // same way the factory will so validation matches execution.
-    const fullFilter = composeExportKuery({ baseFilter, kuery, agentIds });
+    // same way the factory will so validation matches execution. The composed
+    // value is used only for validation here; the factory rebuilds it from
+    // baseFilter/kuery/agentIds when issuing the search.
+    const filterForValidation = composeExportKuery({ baseFilter, kuery, agentIds });
 
     try {
-      getQueryFilter({ filter: fullFilter });
+      getQueryFilter({ filter: filterForValidation });
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       logger.warn(`Invalid kuery in export request: ${message}`);
@@ -72,8 +74,9 @@ export const createExportRouteHandler =
       });
     }
 
-    // Validate esFilters at the route boundary — an invalid pill must NOT fall
-    // through to an unfiltered export.
+    // Validate esFilters at the route boundary — an invalid filter must NOT
+    // fall through to an unfiltered export. Silently returning the full
+    // dataset when the user asked for a narrowed one is a correctness hazard.
     let validatedEsFilters: Filter[] | undefined;
     if (esFilters?.length) {
       if (!isFilters(esFilters)) {
