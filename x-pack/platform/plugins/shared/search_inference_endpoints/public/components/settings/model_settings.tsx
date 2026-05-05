@@ -153,7 +153,7 @@ export const ModelSettings: React.FC = () => {
             flush="both"
             target="_blank"
             data-test-subj="settings-api-documentation"
-            href={docLinks.createInferenceEndpoint}
+            href={docLinks.featureSettings}
           >
             {translations.API_DOCUMENTATION_LINK}
           </EuiButtonEmpty>,
