@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
+import type { Logger, SavedObject } from '@kbn/core/server';
 import type { RuleChange } from '../../../../rules_client/lib/change_tracking';
-import type { RawRule } from '../../../../types';
+import type { RawRule, RuleTypeRegistry } from '../../../../types';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
@@ -29,35 +29,35 @@ export async function logBulkRuleChanges({
     return;
   }
 
+  const changes: RuleChange[] = [];
+
+  for (const ruleSO of ruleSOs) {
+    if (ruleSO.error) {
+      continue;
+    }
+
+    const ruleType = getRuleType(ruleTypeRegistry, ruleSO.attributes.alertTypeId, logger);
+
+    if (!ruleType?.trackChanges) {
+      continue;
+    }
+
+    changes.push({
+      objectId: ruleSO.id,
+      objectType: RULE_SAVED_OBJECT_TYPE,
+      module: ruleType.solution,
+      snapshot: {
+        attributes: ruleSO.attributes,
+        references: ruleSO.references ?? [],
+      },
+    });
+  }
+
+  if (!changes.length) {
+    return;
+  }
+
   try {
-    const changes: RuleChange[] = [];
-
-    for (const ruleSO of ruleSOs) {
-      if (ruleSO.error) {
-        continue;
-      }
-
-      const ruleType = ruleTypeRegistry.get(ruleSO.attributes.alertTypeId);
-
-      if (!ruleType.trackChanges) {
-        continue;
-      }
-
-      changes.push({
-        objectId: ruleSO.id,
-        objectType: RULE_SAVED_OBJECT_TYPE,
-        module: ruleType.solution,
-        snapshot: {
-          attributes: ruleSO.attributes,
-          references: ruleSO.references ?? [],
-        },
-      });
-    }
-
-    if (!changes.length) {
-      return;
-    }
-
     await changeTrackingService.logBulk(changes, {
       action,
       spaceId,
@@ -65,5 +65,21 @@ export async function logBulkRuleChanges({
     });
   } catch (e) {
     logger.warn(`Unable to log bulk rule changes for action "${action}": ${e}`);
+  }
+}
+
+function getRuleType(
+  ruleTypeRegistry: RuleTypeRegistry,
+  alertTypeId: string,
+  logger: Logger
+): ReturnType<RuleTypeRegistry['get']> | undefined {
+  if (!alertTypeId) {
+    return;
+  }
+
+  try {
+    return ruleTypeRegistry.get(alertTypeId);
+  } catch (e) {
+    logger.debug(`Unable to fetch "${alertTypeId}" rule type from RuleTypeRegistry: ${e}`);
   }
 }

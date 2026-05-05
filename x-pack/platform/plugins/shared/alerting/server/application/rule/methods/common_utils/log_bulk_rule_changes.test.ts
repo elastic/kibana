@@ -188,7 +188,7 @@ describe('logBulkRuleChanges', () => {
     expect(changes[0].snapshot.references).toEqual([]);
   });
 
-  it('swallows registry errors and warns instead of bubbling them', async () => {
+  it('swallows registry errors', async () => {
     const ruleTypeRegistry = {
       get: jest.fn().mockImplementation(() => {
         throw new Error('rule type missing');
@@ -209,11 +209,7 @@ describe('logBulkRuleChanges', () => {
     ).resolves.toBeUndefined();
 
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
-    expect(context.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(
-        `Unable to log bulk rule changes for action "${RuleChangeTrackingAction.ruleDelete}"`
-      )
-    );
+    expect(context.logger.warn).not.toHaveBeenCalled();
   });
 
   it('swallows changeTrackingService.logBulk errors and warns instead of bubbling them', async () => {
