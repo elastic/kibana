@@ -24,12 +24,6 @@ export interface Annotation {
   type: 'annotation' | 'comment';
 }
 
-interface MlFilter {
-  filter_id: string;
-  description?: string;
-  items: string[];
-}
-
 export interface DeleteJobsOptions {
   jobIds: string[];
   deleteUserAnnotations?: boolean;
@@ -54,7 +48,7 @@ export interface MlCalendarsApi {
 }
 
 export interface MlFiltersApi {
-  getAll: () => Promise<MlFilter[]>;
+  getAll: () => Promise<estypes.MlFilter[]>;
   getById: (filterId: string) => Promise<estypes.MlFilter | null>;
   waitForFilterToExist: (filterId: string) => Promise<void>;
   waitForFilterToNotExist: (filterId: string) => Promise<void>;
