@@ -16,7 +16,7 @@ import {
   useNodesState,
 } from '@xyflow/react';
 import type { Edge, FitViewOptions, Node, ReactFlowInstance, FitView } from '@xyflow/react';
-import { useGeneratedHtmlId, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useGeneratedHtmlId } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/markers';
 import {
@@ -67,11 +67,6 @@ export interface GraphProps extends CommonProps {
    * Additional children to be rendered inside the graph component.
    */
   children?: React.ReactNode;
-  /**
-   * Optional content to be rendered in the bottom-right corner of the graph.
-   * Typically used for callouts or other contextual messages displayed next to the controls.
-   */
-  interactiveBottomRightContent?: React.ReactNode;
   /**
    * Callback invoked when the graph is updated with new nodes.
    * Receives one argument with the list of newly added nodes.
@@ -126,7 +121,6 @@ export const Graph = memo<GraphProps>(
     isLocked = false,
     showMinimap = false,
     children,
-    interactiveBottomRightContent,
     onCenterGraphAfterRefresh,
     ...rest
   }: GraphProps) => {
@@ -307,12 +301,7 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexEnd">
-                {interactiveBottomRightContent}
-                <EuiFlexItem grow={false}>
-                  <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
             </Panel>
           )}
           {children}
