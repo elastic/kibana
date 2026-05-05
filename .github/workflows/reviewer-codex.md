@@ -20,23 +20,10 @@ imports:
 timeout-minutes: 20
 engine:  
   id: codex
-  model: openai/gpt-5.5
+  model: gpt-5.5
   args:
     - -c
     - model_context_window=1050000
-    # Disable plugins and apps to remove context bloat
-    - -c
-    - features.plugins=false
-    - -c
-    - features.apps=false
-    # Codex disables settings for unrecognized model names like provider-prefixed slugs.
-    # Force reasoning on
-    - -c
-    - model_supports_reasoning_summaries=true
-    # Reasoning effort: minimal | low | medium | high.
-    - -c
-    - model_reasoning_effort=medium
-    # Reasoning summary verbosity: auto | concise | detailed | none.
     - -c
     - model_reasoning_summary=auto
   env:
