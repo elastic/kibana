@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-sets-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Data sets and data sources apis and management",
+  "plugin": {
+    "id": "data_sets",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "management"
+    ],
+    "requiredBundles": [
+    ]
+  }
+}

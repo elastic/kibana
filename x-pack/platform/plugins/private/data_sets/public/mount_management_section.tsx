@@ -1,0 +1,35 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import type { CoreStart } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { i18n } from '@kbn/i18n';
+
+import { DataSourcesPage } from './data_sources_page';
+
+export const mountManagementSection = (
+  coreStart: CoreStart,
+  { element }: ManagementAppMountParams
+) => {
+  ReactDOM.render(
+    coreStart.rendering.addContext(
+      <DataSourcesPage
+        pageTitle={i18n.translate('dataSets.pageTitle', {
+          defaultMessage: 'Data sets',
+        })}
+        httpClient={coreStart.http}
+      />
+    ),
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};

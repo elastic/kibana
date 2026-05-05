@@ -99,7 +99,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(kibanaSection?.sectionLinks).to.eql([
           'dataViews',
           'filesManagement',
-          'data_source_management',
+          'data_sets',
           'objects',
           'tags',
           'search_sessions',

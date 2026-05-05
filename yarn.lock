@@ -6446,7 +6446,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-source-management-plugin@link:x-pack/platform/plugins/private/data_source_management":
+"@kbn/data-sets-plugin@link:x-pack/platform/plugins/private/data_sets":
   version "0.0.0"
   uid ""
 

@@ -361,7 +361,7 @@ Array [
     "subFeatures": undefined,
   },
   Object {
-    "id": "data_source_management",
+    "id": "data_sets",
     "subFeatures": undefined,
   },
   Object {
@@ -1012,7 +1012,7 @@ Array [
     "subFeatures": undefined,
   },
   Object {
-    "id": "data_source_management",
+    "id": "data_sets",
     "subFeatures": undefined,
   },
   Object {
@@ -1376,7 +1376,7 @@ Array [
 ]
 `;
 
-exports[`buildOSSFeatures with a basic license returns the data_source_management feature augmented with appropriate sub feature privileges 1`] = `
+exports[`buildOSSFeatures with a basic license returns the data_sets feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
     "privilege": Object {
@@ -1385,7 +1385,7 @@ Array [
       ],
       "management": Object {
         "kibana": Array [
-          "data_source_management",
+          "data_sets",
         ],
       },
       "savedObject": Object {
@@ -1403,7 +1403,7 @@ Array [
       ],
       "management": Object {
         "kibana": Array [
-          "data_source_management",
+          "data_sets",
         ],
       },
       "savedObject": Object {
@@ -2576,7 +2576,7 @@ Array [
 ]
 `;
 
-exports[`buildOSSFeatures with a enterprise license returns the data_source_management feature augmented with appropriate sub feature privileges 1`] = `
+exports[`buildOSSFeatures with a enterprise license returns the data_sets feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
     "privilege": Object {
@@ -2585,7 +2585,7 @@ Array [
       ],
       "management": Object {
         "kibana": Array [
-          "data_source_management",
+          "data_sets",
         ],
       },
       "savedObject": Object {
@@ -2603,7 +2603,7 @@ Array [
       ],
       "management": Object {
         "kibana": Array [
-          "data_source_management",
+          "data_sets",
         ],
       },
       "savedObject": Object {
