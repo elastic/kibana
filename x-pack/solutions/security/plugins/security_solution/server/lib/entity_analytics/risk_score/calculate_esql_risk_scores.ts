@@ -656,59 +656,6 @@ export const getResolutionCompositeQuery = (
   },
 });
 
-export const getResolutionScoreESQL = (
-  entityType: EntityType,
-  bounds: { lower?: string; upper?: string },
-  sampleSize: number,
-  pageSize: number,
-  alertsIndex: string,
-  lookupIndex: string
-): string => {
-  const euidEval = euid.esql.getEuidEvaluation(entityType, { withTypeId: true });
-  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
-  const fieldEvals = euid.esql.getFieldEvaluations(entityType);
-  const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
-
-  if (!bounds.lower && !bounds.upper) {
-    throw new Error('Either lower or upper bound must be provided for resolution pagination');
-  }
-
-  const lower = bounds.lower ? `resolution_target_id > "${bounds.lower}"` : undefined;
-  const upper = bounds.upper ? `resolution_target_id <= "${bounds.upper}"` : undefined;
-  const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
-
-  const query = /* esql */ `
-  FROM ${alertsIndex} METADATA _index
-    | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
-    ${fieldEvalsClause}
-    | RENAME kibana.alert.risk_score as risk_score,
-             kibana.alert.rule.name as rule_name,
-             kibana.alert.rule.uuid as rule_id,
-             kibana.alert.uuid as alert_id,
-             event.kind as category,
-             @timestamp as time
-    | EVAL entity_id = ${euidEval},
-           rule_name_b64 = TO_BASE64(rule_name),
-           category_b64 = TO_BASE64(category)
-    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
-    | LOOKUP JOIN ${lookupIndex} ON entity_id
-    | WHERE resolution_target_id IS NOT NULL AND (${rangeClause})
-    | EVAL entity_with_rel = CONCAT(entity_id, "|", relationship_type)
-    | STATS
-        alert_count = count(risk_score),
-        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
-          sampleSize ?? 10000
-        }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
-        risk_inputs = TOP(input, 10, "desc"),
-        contributing_entities_raw = VALUES(entity_with_rel)
-        BY resolution_target_id
-    | SORT scores DESC
-    | LIMIT ${pageSize}
-  `;
-
-  return query;
-};
-
 /**
  * Resolution scoring filtered by an explicit `resolution_target_id IN (...)` list.
  *

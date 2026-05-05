@@ -13,7 +13,6 @@ import {
   getESQL,
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
-  getResolutionScoreESQL,
 } from './calculate_esql_risk_scores';
 import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
@@ -52,25 +51,6 @@ describe('Calculate risk scores with ESQL', () => {
           },
         },
       });
-    });
-
-    it('builds resolution ESQL query with lookup join and related entity aggregation', () => {
-      const query = getResolutionScoreESQL(
-        EntityType.user,
-        { lower: 'user:a', upper: 'user:z' },
-        5000,
-        1000,
-        '.alerts-security.alerts-default',
-        '.entity_analytics.risk_score.lookup-default'
-      );
-
-      expect(query).toContain(
-        'LOOKUP JOIN .entity_analytics.risk_score.lookup-default ON entity_id'
-      );
-      expect(query).toContain('BY resolution_target_id');
-      expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
-      expect(query).toContain('resolution_target_id > "user:a"');
-      expect(query).toContain('resolution_target_id <= "user:z"');
     });
 
     it('builds resolution ESQL query for explicit resolution target ids', () => {
