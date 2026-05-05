@@ -10,16 +10,19 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render } from '@testing-library/react';
 import React from 'react';
+import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
 import { LandingPage } from './landing';
 
-// It's temporary mock - will be replaced by the new sections
+// Temporary: `OnboardingFlowForm` is mocked until the V2 sections replace it.
 jest.mock('../onboarding_flow_form/onboarding_flow_form', () => ({
   OnboardingFlowForm: () => null,
 }));
 
 const renderWithFlag = (enabled: boolean) => {
   const coreStart = coreMock.createStart();
-  coreStart.featureFlags.getBooleanValue.mockReturnValue(enabled);
+  coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
+    id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
+  );
   return render(
     <I18nProvider>
       <KibanaContextProvider services={coreStart}>

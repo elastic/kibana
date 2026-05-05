@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import backgroundImageUrl from './background.svg';
+import imageUrl from './background.svg';
 
-export function LandingHeader() {
+export const LandingHeader = (): JSX.Element => {
   return (
     <EuiPageTemplate.Section paddingSize="xl" grow={false} restrictWidth>
       <EuiFlexGroup alignItems="center">
@@ -42,10 +42,10 @@ export function LandingHeader() {
         </EuiFlexItem>
         <EuiHideFor sizes={['xs', 's']}>
           <EuiFlexItem grow={false}>
-            <EuiImage src={backgroundImageUrl} alt="" size="l" />
+            <EuiImage src={imageUrl} alt="" size="l" />
           </EuiFlexItem>
         </EuiHideFor>
       </EuiFlexGroup>
     </EuiPageTemplate.Section>
   );
-}
+};

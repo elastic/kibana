@@ -9,7 +9,7 @@ import { EuiPageTemplate } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import type { ObservabilityOnboardingAppServices } from '../..';
-import { ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
+import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
 import { LandingHeader } from '../header';
 import { OnboardingFlowForm } from '../onboarding_flow_form/onboarding_flow_form';
 import { PageTemplate } from './template';
@@ -18,7 +18,7 @@ export const LandingPage = () => {
   const {
     services: { featureFlags },
   } = useKibana<ObservabilityOnboardingAppServices>();
-  const isAddDataPageV2Enabled = featureFlags.getBooleanValue(ADD_DATA_PAGE_V2_ENABLED, false);
+  const isAddDataPageV2Enabled = featureFlags.getBooleanValue(IS_ADD_DATA_PAGE_V2_ENABLED, false);
 
   if (isAddDataPageV2Enabled) {
     return (
