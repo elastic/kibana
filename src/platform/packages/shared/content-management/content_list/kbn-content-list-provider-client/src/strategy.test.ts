@@ -330,6 +330,41 @@ describe('createClientStrategy', () => {
       );
       expect(resultDesc.items[resultDesc.items.length - 1].id).toBe('2');
     });
+
+    it('sorts accessedAt desc with recents first and updatedAt desc as the fallback', async () => {
+      const mockItems: UserContentCommonSchema[] = [
+        {
+          ...createItemWithTitle('older-non-recent', 'Older non-recent'),
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+        {
+          ...createItemWithTitle('newer-non-recent', 'Newer non-recent'),
+          updatedAt: '2024-03-01T00:00:00.000Z',
+        },
+        {
+          ...createItemWithTitle('recent-second', 'Recent second'),
+          updatedAt: '2024-02-01T00:00:00.000Z',
+          accessedAt: 20,
+        },
+        {
+          ...createItemWithTitle('recent-first', 'Recent first'),
+          updatedAt: '2024-01-15T00:00:00.000Z',
+          accessedAt: 30,
+        },
+      ] as UserContentCommonSchema[];
+      const { findItems } = createClientStrategy(createMockFindItems(mockItems));
+
+      const result = await findItems(
+        createParams({ sort: { field: 'accessedAt', direction: 'desc' } })
+      );
+
+      expect(result.items.map((i) => i.id)).toEqual([
+        'recent-first',
+        'recent-second',
+        'newer-non-recent',
+        'older-non-recent',
+      ]);
+    });
   });
 
   describe('pagination', () => {

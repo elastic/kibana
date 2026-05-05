@@ -128,6 +128,30 @@ const getUserContentFieldValue = (
   return getSortableProperty(item.attributes, field);
 };
 
+const toTimestamp = (value: string | number | null): number => {
+  if (value === null) {
+    return Number.NEGATIVE_INFINITY;
+  }
+  if (typeof value === 'number') {
+    return value;
+  }
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? Number.NEGATIVE_INFINITY : parsed;
+};
+
+const compareUpdatedAtDesc = (a: UserContentCommonSchema, b: UserContentCommonSchema): number => {
+  const aUpdatedAt = toTimestamp(getUserContentFieldValue(a, 'updatedAt'));
+  const bUpdatedAt = toTimestamp(getUserContentFieldValue(b, 'updatedAt'));
+
+  if (aUpdatedAt < bUpdatedAt) {
+    return 1;
+  }
+  if (aUpdatedAt > bUpdatedAt) {
+    return -1;
+  }
+  return 0;
+};
+
 /**
  * Sorts items by a specified field.
  *
@@ -144,6 +168,18 @@ const sortItems = (
   return [...items].sort((a, b) => {
     const aValue = getUserContentFieldValue(a, field);
     const bValue = getUserContentFieldValue(b, field);
+
+    if (field === 'accessedAt') {
+      if (aValue === null && bValue === null) {
+        return compareUpdatedAtDesc(a, b);
+      }
+      if (aValue === null) {
+        return 1;
+      }
+      if (bValue === null) {
+        return -1;
+      }
+    }
 
     if (aValue === null && bValue === null) {
       return 0;
@@ -165,6 +201,9 @@ const sortItems = (
     }
     if (aValue > bValue) {
       return direction === 'asc' ? 1 : -1;
+    }
+    if (field === 'accessedAt') {
+      return compareUpdatedAtDesc(a, b);
     }
     return 0;
   });
