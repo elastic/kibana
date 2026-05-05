@@ -50,6 +50,7 @@ export interface DispatcherTaskState {
 export interface Rule {
   id: RuleId;
   spaceId: string;
+  kind: 'alert' | 'signal';
   name: string;
   description: string;
   tags: string[];
@@ -120,6 +121,7 @@ export interface LastNotifiedInfo {
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly previousStartedAt: Date;
+  readonly executionUuid: string;
 }
 
 export interface DispatcherPipelineState {
@@ -134,6 +136,7 @@ export interface DispatcherPipelineState {
   readonly groups?: ActionGroup[];
   readonly dispatch?: ActionGroup[];
   readonly throttled?: ActionGroup[];
+  readonly dispatchedExecutions?: Map<ActionGroupId, string[]>;
 }
 
 export type DispatcherHaltReason = 'no_episodes' | 'no_actions';

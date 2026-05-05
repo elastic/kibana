@@ -16,11 +16,19 @@ import {
 import styled from '@emotion/styled';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useState } from 'react';
+import type { Error } from '@kbn/apm-types';
 import { asDuration } from '../../../../../../common/utils/formatters';
-import type { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import type { ApmRoutes } from '../../../../routing/apm_route_config';
 import { ErrorDetailLink } from '../../../links/apm/error_detail_link';
 import { Legend, Shape } from '../legend';
+import type { Mark } from '.';
+
+export interface ErrorMark extends Mark {
+  type: 'errorMark';
+  error: Error;
+  serviceColor: string;
+  onClick?: () => void;
+}
 
 interface Props {
   mark: ErrorMark;
