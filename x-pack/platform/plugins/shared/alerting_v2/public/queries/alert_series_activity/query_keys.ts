@@ -12,8 +12,26 @@
  */
 export const ruleOverviewQueryKeys = {
   all: ['alerting-v2', 'rule-overview'] as const,
-  ruleEvents: (ruleId: string, gteMs: number, lteMs: number, pageSize: number) =>
-    [...ruleOverviewQueryKeys.all, 'rule-events', ruleId, gteMs, lteMs, pageSize] as const,
+  topNSeries: (ruleId: string, gteMs: number, lteMs: number) =>
+    [...ruleOverviewQueryKeys.all, 'top-n-series', ruleId, gteMs, lteMs] as const,
+  ruleEvents: (
+    ruleId: string,
+    gteMs: number,
+    lteMs: number,
+    pageSize: number,
+    groupHashes: readonly string[]
+  ) =>
+    [
+      ...ruleOverviewQueryKeys.all,
+      'rule-events',
+      ruleId,
+      gteMs,
+      lteMs,
+      pageSize,
+      [...groupHashes].sort(),
+    ] as const,
+  ganttSummary: (ruleId: string, gteMs: number, lteMs: number) =>
+    [...ruleOverviewQueryKeys.all, 'gantt-summary', ruleId, gteMs, lteMs] as const,
   seriesGroupingValues: (
     ruleId: string,
     gteMs: number,

@@ -15,11 +15,27 @@ import {
   buildRuleEventsEsqlQuery,
   type RuleEventRow,
 } from '../queries/alert_series_activity/rule_events_query';
+import {
+  buildTopNSeriesQuery,
+  type TopNSeriesRow,
+} from '../queries/alert_series_activity/top_n_series_query';
+import {
+  buildGanttSummaryQuery,
+  parseGanttSummaryRow,
+  type GanttSummaryEsqlRow,
+} from '../queries/alert_series_activity/gantt_summary_query';
 import { useFetchSeriesGroupingValues } from './use_fetch_series_grouping_values';
 import type { SeriesGroupingValuesByHash } from '../queries/alert_series_activity/series_grouping_values_query';
+import { GANTT_TOP_N_DEFAULT, type GanttSummary } from '../utils/derive_gantt_data';
 
 const EMPTY_EVENTS: RuleEventRow[] = [];
 const EMPTY_GROUPING_VALUES: SeriesGroupingValuesByHash = {};
+const EMPTY_SUMMARY: GanttSummary = {
+  episodesStarted: 0,
+  recovered: 0,
+  stillOpen: 0,
+  medianDurationMs: 0,
+};
 
 /** Hard cap on raw events pulled for the rule overview Gantt chart. */
 export const RULE_EVENTS_PAGE_SIZE = 5000;
@@ -32,37 +48,81 @@ export interface UseFetchRuleEventsOptions {
   lteMs: number;
   /** Rule's `grouping.fields`. Empty when the rule isn't grouped. */
   groupingFields?: readonly string[];
+  /** Maximum number of series (lanes) to fetch events for. */
+  topN?: number;
   pageSize?: number;
   data: DataPublicPluginStart;
 }
 
 /**
- * Fetches every alert event row for the rule inside the visible window,
- * plus per-`group_hash` grouping values for row labels. Returns the raw
- * event rows so the Gantt-data shaping step can split each episode into
- * state segments and emit a transition marker per event.
+ * Orchestrates three ES|QL queries to supply the Gantt chart:
+ *
+ * 1. **Top-N series** — lightweight STATS to rank all `group_hash` values by
+ *    most-recent activity. The caller slices to `topN` hashes and uses the
+ *    result length as `totalSeriesCount`.
+ * 2. **Filtered events** — raw alert events scoped to only the top-N series,
+ *    keeping the wire payload proportional to `topN * events_per_series`.
+ * 3. **Summary aggregation** — episode-level stats (started, recovered,
+ *    still open, median duration) across ALL series, replacing the
+ *    redundant client-side re-aggregation that previously lived inside
+ *    `deriveGanttData`.
+ *
+ * Queries 2 and 3 run in parallel once 1 completes. The grouping-values
+ * DSL query also gates on 1.
  */
 export const useFetchRuleEvents = ({
   ruleId,
   gteMs,
   lteMs,
   groupingFields = [],
+  topN = GANTT_TOP_N_DEFAULT,
   pageSize = RULE_EVENTS_PAGE_SIZE,
   data,
 }: UseFetchRuleEventsOptions) => {
   const enabled =
     Boolean(ruleId) && Number.isFinite(gteMs) && Number.isFinite(lteMs) && lteMs > gteMs;
 
-  const eventsQuery = useQuery({
-    queryKey: ruleOverviewQueryKeys.ruleEvents(ruleId ?? '', gteMs, lteMs, pageSize),
+  // --- 1. Top-N series query (runs first) ---
+  const topNSeriesQuery = useQuery({
+    queryKey: ruleOverviewQueryKeys.topNSeries(ruleId ?? '', gteMs, lteMs),
     enabled,
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
         data,
         params: {
-          query: buildRuleEventsEsqlQuery({ ruleId: ruleId!, gteMs, lteMs, pageSize }).print(
-            'basic'
-          ),
+          query: buildTopNSeriesQuery({ ruleId: ruleId!, gteMs, lteMs }).print('basic'),
+          time_zone: 'UTC',
+        },
+        abortSignal: signal,
+      }),
+    select: (raw) => esqlResponseToObjectRows<TopNSeriesRow>(raw),
+  });
+
+  const { topNHashes, totalSeriesCount } = useMemo(() => {
+    const allRows = topNSeriesQuery.data ?? [];
+    return {
+      topNHashes: allRows.slice(0, topN).map((r) => r.group_hash),
+      totalSeriesCount: allRows.length,
+    };
+  }, [topNSeriesQuery.data, topN]);
+
+  // --- 2. Filtered events query (depends on top-N hashes) ---
+  const eventsEnabled = enabled && topNSeriesQuery.isSuccess && topNHashes.length > 0;
+
+  const eventsQuery = useQuery({
+    queryKey: ruleOverviewQueryKeys.ruleEvents(ruleId ?? '', gteMs, lteMs, pageSize, topNHashes),
+    enabled: eventsEnabled,
+    queryFn: ({ signal }) =>
+      runEsqlAsyncSearch({
+        data,
+        params: {
+          query: buildRuleEventsEsqlQuery({
+            ruleId: ruleId!,
+            gteMs,
+            lteMs,
+            pageSize,
+            groupHashes: topNHashes,
+          }).print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
@@ -70,35 +130,59 @@ export const useFetchRuleEvents = ({
     select: (raw) => esqlResponseToObjectRows<RuleEventRow>(raw),
   });
 
-  const groupHashes = useMemo(() => {
-    const set = new Set<string>();
-    for (const row of eventsQuery.data ?? []) set.add(row.group_hash);
-    return [...set];
-  }, [eventsQuery.data]);
+  // --- 3. Summary aggregation query (independent of top-N) ---
+  const summaryQuery = useQuery({
+    queryKey: ruleOverviewQueryKeys.ganttSummary(ruleId ?? '', gteMs, lteMs),
+    enabled,
+    queryFn: ({ signal }) =>
+      runEsqlAsyncSearch({
+        data,
+        params: {
+          query: buildGanttSummaryQuery({ ruleId: ruleId!, gteMs, lteMs }).print('basic'),
+          time_zone: 'UTC',
+        },
+        abortSignal: signal,
+      }),
+    select: (raw) => {
+      const rows = esqlResponseToObjectRows<GanttSummaryEsqlRow>(raw);
+      return parseGanttSummaryRow(rows[0]);
+    },
+  });
 
+  // --- 4. Grouping values (depends on top-N hashes) ---
   const groupingValuesQuery = useFetchSeriesGroupingValues({
     ruleId,
-    groupHashes,
+    groupHashes: topNHashes,
     groupingFields,
     gteMs,
     lteMs,
-    enabled: enabled && eventsQuery.isSuccess,
+    enabled: enabled && topNSeriesQuery.isSuccess,
     data,
   });
 
-  // React Query v4 reports `isLoading=true` for disabled queries — guard the
-  // events piece on `enabled` so an unmounted/disabled state doesn't pin the
-  // spinner. groupingValuesQuery already gates internally.
-  const isLoading = (enabled && eventsQuery.isLoading) || groupingValuesQuery.isLoading;
-  const isError = eventsQuery.isError || groupingValuesQuery.isError;
+  const isLoading =
+    (enabled && topNSeriesQuery.isLoading) ||
+    (eventsEnabled && eventsQuery.isLoading) ||
+    (enabled && summaryQuery.isLoading) ||
+    groupingValuesQuery.isLoading;
+
+  const isError =
+    topNSeriesQuery.isError ||
+    eventsQuery.isError ||
+    summaryQuery.isError ||
+    groupingValuesQuery.isError;
 
   return {
     events: eventsQuery.data ?? EMPTY_EVENTS,
     groupingValuesByHash: groupingValuesQuery.data ?? EMPTY_GROUPING_VALUES,
+    summary: summaryQuery.data ?? EMPTY_SUMMARY,
+    totalSeriesCount,
     isLoading,
     isError,
     refetch: () => {
+      topNSeriesQuery.refetch();
       eventsQuery.refetch();
+      summaryQuery.refetch();
       groupingValuesQuery.refetch();
     },
   };

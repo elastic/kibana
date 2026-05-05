@@ -104,13 +104,15 @@ export const EpisodesGanttSection: React.FC = () => {
   }, [rule.schedule.every]);
   const fetchGteMs = gteMs - bufferMs;
 
-  const { events, groupingValuesByHash, isLoading, isError } = useFetchRuleEvents({
-    ruleId: rule.id,
-    gteMs: fetchGteMs,
-    lteMs,
-    groupingFields,
-    data,
-  });
+  const { events, groupingValuesByHash, summary, totalSeriesCount, isLoading, isError } =
+    useFetchRuleEvents({
+      ruleId: rule.id,
+      gteMs: fetchGteMs,
+      lteMs,
+      groupingFields,
+      topN: GANTT_TOP_N_DEFAULT,
+      data,
+    });
 
   const ganttData = useMemo(
     () =>
@@ -120,9 +122,10 @@ export const EpisodesGanttSection: React.FC = () => {
         'recently_active',
         gteMs,
         lteMs,
-        GANTT_TOP_N_DEFAULT
+        summary,
+        totalSeriesCount
       ),
-    [events, groupingValuesByHash, gteMs, lteMs]
+    [events, groupingValuesByHash, gteMs, lteMs, summary, totalSeriesCount]
   );
 
   const discoverHref = useMemo(

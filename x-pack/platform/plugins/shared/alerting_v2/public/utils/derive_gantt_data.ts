@@ -62,13 +62,6 @@ const EMPTY_GROUPING_VALUES: Record<string, string | null> = {};
 const isOpenStatus = (status: AlertEpisodeStatus): boolean =>
   status !== ALERT_EPISODE_STATUS.INACTIVE;
 
-const median = (values: number[]): number => {
-  if (values.length === 0) return 0;
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
-};
-
 const compareSeries = (a: GanttSeries, b: GanttSeries, sort: GanttSortPolicy): number => {
   switch (sort) {
     case 'started_asc':
@@ -90,11 +83,15 @@ interface ParsedEvent {
 }
 
 /**
- * Derive Gantt-chart-ready lanes + summary stats from raw rule event rows.
+ * Derive Gantt-chart-ready lanes from raw rule event rows in a single pass.
  * Each lane (series) splits its episodes into one segment per state span:
  * the segment between event N and event N+1 takes event N's status. An open
  * episode (last event is not INACTIVE) emits a tail segment running to
  * `lteMs`.
+ *
+ * Summary stats and the total series count are supplied externally (computed
+ * by a dedicated ES|QL aggregation) so this function no longer re-iterates
+ * every event for episode-level metrics.
  */
 export const deriveGanttData = (
   eventRows: RuleEventRow[],
@@ -102,7 +99,8 @@ export const deriveGanttData = (
   sort: GanttSortPolicy,
   gteMs: number,
   lteMs: number,
-  topN: number = GANTT_TOP_N_DEFAULT
+  summary: GanttSummary,
+  totalSeriesCount: number
 ): GanttData => {
   const eventsBySeries = new Map<string, ParsedEvent[]>();
 
@@ -185,8 +183,6 @@ export const deriveGanttData = (
             pushSegment({ episodeId, status: ev.status, x0Ms: ev.tsMs, x1Ms: next.tsMs });
           }
         } else if (isOpenStatus(ev.status)) {
-          // Tail segment for an open episode: extend to the visible window's
-          // right edge so the rect reads as "still ongoing".
           if (lteMs > ev.tsMs) {
             pushSegment({ episodeId, status: ev.status, x0Ms: ev.tsMs, x1Ms: lteMs });
           }
@@ -202,11 +198,6 @@ export const deriveGanttData = (
     // lookback buffer (so we know the episode's status at gteMs and don't
     // emit a misleading "transition" dot at the left edge), but we don't
     // want to render anything to the left of gteMs.
-    //
-    // Segments: drop ones fully before gteMs; clip ones straddling gteMs so
-    // they begin at the visible left edge. The status carries over from the
-    // pre-window run, so the bar continues seamlessly.
-    // Transitions: drop ones before gteMs — those are pre-window dots.
     const clippedSegments: GanttSegment[] = [];
     for (const s of segments) {
       if (s.x1Ms <= gteMs) continue;
@@ -227,46 +218,12 @@ export const deriveGanttData = (
     });
   }
 
-  const allRows = [...seriesByHash.values()].sort((a, b) => compareSeries(a, b, sort));
-  const totalRowCount = allRows.length;
-  const visibleRows = allRows.slice(0, topN);
-  const hiddenRowCount = Math.max(0, totalRowCount - visibleRows.length);
-
-  // Summary aggregates: episode-level stats over every event row, regardless
-  // of which series ends up visible.
-  const allEpisodes = new Map<string, ParsedEvent[]>();
-  for (const list of eventsBySeries.values()) {
-    for (const ev of list) {
-      const ep = allEpisodes.get(ev.episodeId);
-      if (ep) ep.push(ev);
-      else allEpisodes.set(ev.episodeId, [ev]);
-    }
-  }
-
-  let recovered = 0;
-  let stillOpen = 0;
-  const recoveredDurations: number[] = [];
-  for (const episodeEvents of allEpisodes.values()) {
-    episodeEvents.sort((a, b) => a.tsMs - b.tsMs);
-    const last = episodeEvents[episodeEvents.length - 1];
-    if (isOpenStatus(last.status)) {
-      stillOpen++;
-    } else {
-      recovered++;
-      const first = episodeEvents[0];
-      recoveredDurations.push(Math.max(0, last.tsMs - first.tsMs));
-    }
-  }
+  const rows = [...seriesByHash.values()].sort((a, b) => compareSeries(a, b, sort));
 
   return {
-    rows: visibleRows,
-    hiddenRowCount,
-    totalRowCount,
-    summary: {
-      episodesStarted: allEpisodes.size,
-      recovered,
-      stillOpen,
-      medianDurationMs: median(recoveredDurations),
-    },
+    rows,
+    hiddenRowCount: Math.max(0, totalSeriesCount - rows.length),
+    totalRowCount: totalSeriesCount,
+    summary,
   };
 };

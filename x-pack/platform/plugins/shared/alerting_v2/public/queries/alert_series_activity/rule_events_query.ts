@@ -30,28 +30,39 @@ export interface BuildRuleEventsEsqlQueryOptions {
   gteMs: number;
   lteMs: number;
   pageSize: number;
+  /** When provided, restricts results to these series only. */
+  groupHashes?: string[];
 }
 
 const toIsoUtc = (ms: number) => new Date(ms).toISOString();
 
 /**
  * ES|QL query returning every alert event for a rule inside the visible
- * window, oldest first. Used to derive Gantt lane segments + transition
- * markers from the underlying state-change stream rather than the episode
- * summary rows.
+ * window, oldest first. When `groupHashes` is supplied the result set is
+ * scoped to only those series, keeping the wire payload proportional to the
+ * number of visible Gantt lanes instead of all series in the rule.
  */
 export const buildRuleEventsEsqlQuery = ({
   ruleId,
   gteMs,
   lteMs,
   pageSize,
+  groupHashes,
 }: BuildRuleEventsEsqlQueryOptions) => {
   const fromIso = toIsoUtc(gteMs);
   const toIso = toIsoUtc(lteMs);
+
   // prettier-ignore
-  return esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`
+  let query = esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`
     .where`rule.id == ${ruleId}`
-    .where`@timestamp >= ${fromIso}::DATETIME AND @timestamp <= ${toIso}::DATETIME`
+    .where`@timestamp >= ${fromIso}::DATETIME AND @timestamp <= ${toIso}::DATETIME`;
+
+  if (groupHashes && groupHashes.length > 0) {
+    const hashLiterals = groupHashes.map((h) => esql.str(h));
+    query = query.where`group_hash IN (${hashLiterals})`;
+  }
+
+  return query
     .sort([TIME_FIELD, 'ASC'])
     .limit(pageSize)
     .keep(...RULE_EVENT_FIELDS);
