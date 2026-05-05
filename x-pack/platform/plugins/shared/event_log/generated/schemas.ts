@@ -253,8 +253,7 @@ export const EventSchema = schema.maybe(
               alias: ecsString(),
               type: ecsString(),
               organization: ecsString(),
-            }),
-            { maxSize: 100 }
+            })
           )
         ),
         space_ids: ecsStringMulti(),
