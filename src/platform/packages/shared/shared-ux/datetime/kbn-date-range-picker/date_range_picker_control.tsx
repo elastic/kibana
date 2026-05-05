@@ -26,6 +26,7 @@ import { DateRangePickerAutoRefreshButton } from './date_range_picker_auto_refre
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
 import { useInputHintText } from './hooks/use_input_hint_text';
+import { inputControlTexts } from './translations';
 
 /**
  * The control portion of the DateRangePicker: displays a button when idle
@@ -61,6 +62,7 @@ export function DateRangePickerControl() {
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
+  const hintTextPrefix = inputControlTexts.hintTextPrefix;
 
   const controlRef = useRef<HTMLDivElement>(null);
   const wasEditingRef = useRef(false);
@@ -78,6 +80,7 @@ export function DateRangePickerControl() {
   useSelectTextPartsWithArrowKeys({
     inputRef,
     isActive: isEditing && !wasClearedRef.current,
+    initialSelection: 'none',
     // TODO this is simply increasing/decreasing integers,
     // ideally we could make this "smart" so it knows what's being modified e.g. day of the month
     onModifyPart: ({ text: currentText, part, action }) => {
@@ -182,6 +185,7 @@ export function DateRangePickerControl() {
       data-test-subj="dateRangePickerControlWrapper"
     >
       <EuiFormControlLayout
+        icon="calendar"
         compressed={compressed}
         isInvalid={isInvalid}
         isDisabled={disabled}
@@ -217,7 +221,7 @@ export function DateRangePickerControl() {
             onChange={handleInputChange}
             onKeyDown={onInputKeyDown}
             compressed={compressed}
-            placeholder={hintText}
+            placeholder={`${hintTextPrefix} "${hintText}"`}
           />
         ) : (
           <EuiToolTip
