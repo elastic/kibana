@@ -19,9 +19,8 @@ const path = t.type({
 const params = t.type({ query, path });
 const ENDPOINT = 'GET /internal/apm/foo/{serviceName}' as const;
 
-export interface ReturnType {
+export interface FooResponse {
   msg: string;
 }
 
-// eslint-disable-next-line import/no-default-export
-export default { ENDPOINT, params } as const;
+export const fooRouteDefinition = { ENDPOINT, params } as const;

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { CoreStart } from '@kbn/core/public';
+import type { EndpointOf, ReturnOf } from '@kbn/server-route-repository-utils';
 import { formatRequest } from '@kbn/server-route-repository-utils';
 import { type RouteRepositoryClient } from '@kbn/server-route-repository';
 import type { HttpFetchOptions } from '@kbn/core/public';
@@ -34,6 +35,13 @@ export type AutoAbortedAPMClientV2 = RouteRepositoryClient<
   SharedAPMRouteRepository,
   Omit<APMClientOptions, 'signal'>
 >['fetch'];
+
+type APIEndpoint = EndpointOf<SharedAPMRouteRepository>;
+
+export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
+  SharedAPMRouteRepository,
+  TEndpoint
+>;
 
 export function createCallApmApiV2(core: CoreStart): APMClientV2 {
   return ((endpoint, options) => {

@@ -7,20 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ServerRoute } from '@kbn/server-route-repository-utils';
-import fooRouteDefinition from './foo';
-import type { ReturnType } from './foo';
+import { fooRouteDefinition } from './foo';
+import type { FooResponse } from './foo';
 
 export const routeDefinitions = {
   foo: fooRouteDefinition,
 };
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type SharedAPMRouteRepository = {
-  [fooRouteDefinition.ENDPOINT]: ServerRoute<
-    typeof fooRouteDefinition.ENDPOINT,
-    typeof fooRouteDefinition.params,
-    any, // handler resources — erased by client extractors
-    ReturnType,
-    any // route options — erased by client extractors
-  >;
+type RouteEntry<
+  TDef extends { ENDPOINT: string; params: any },
+  TReturn extends Record<string, any>
+> = {
+  [K in TDef['ENDPOINT']]: ServerRoute<TDef['ENDPOINT'], TDef['params'], any, TReturn, any>;
 };
+
+export type SharedAPMRouteRepository = RouteEntry<typeof fooRouteDefinition, FooResponse>;

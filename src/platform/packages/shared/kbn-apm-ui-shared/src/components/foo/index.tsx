@@ -10,6 +10,9 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import type { APMClientV2 } from '@kbn/apm-api-shared';
+import type { APIReturnType } from '../../../../kbn-apm-api-shared/src/create_call_apm_api';
+
+type FooReturnType = APIReturnType<'GET /internal/apm/foo/{serviceName}'>;
 
 interface FooProps {
   callApmApi: APMClientV2;
@@ -17,7 +20,7 @@ interface FooProps {
 
 export function Foo({ callApmApi }: FooProps) {
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<{ msg: string } | null>(null);
+  const [data, setData] = useState<FooReturnType | null>(null);
 
   const handleClick = async () => {
     if (data) {
@@ -30,6 +33,7 @@ export function Foo({ callApmApi }: FooProps) {
         params: { path: { serviceName: 'my-service' }, query: { foo: 'bar' } },
         signal: null,
       });
+
       setData(response);
     } finally {
       setLoading(false);
