@@ -173,28 +173,15 @@ export const assembleFlowGraphPayload = (inputs: AssembleFlowGraphInputs): FlowG
     }
   }
 
-  // ── Cloud pipeline nodes ──────────────────────────────────────────────────
-  for (const pipeline of cloudPipelines) {
-    const pipelineNodeId = `cloud-pipeline-${pipeline.id}`;
-    const pipelineThroughput = cloudPipelineMetrics.perPipeline[pipeline.id];
-    const pipelineHealth = cloudPipelineMetrics.health[pipeline.id];
+  // ── Root wired streams — used to assign fallback pipeline targets ─────────
+  // Computed after stream nodes are built (streamNodeIdByName is populated below),
+  // so we collect the raw info here and resolve the map reference after the stream loop.
+  // (Populated further down, after the stream-node loop.)
+  const rootWiredStreamNames: string[] = [];
 
-    nodes.push({
-      kind: 'cloudPipeline',
-      id: pipelineNodeId,
-      label: pipeline.name,
-      column: 'endpoints',
-      lane: 'pipelines',
-      pipelineId: pipeline.id,
-      targetStreamName: pipeline.targetStreamName,
-      throughput: pipelineThroughput
-        ? { docsPerSec: pipelineThroughput.docsPerSec, bytesPerSec: pipelineThroughput.bytesPerSec }
-        : undefined,
-      health: pipelineHealth
-        ? { status: pipelineHealth.status, message: pipelineHealth.message }
-        : undefined,
-    });
-  }
+  // ── Cloud pipeline nodes (throughput filled in after stream nodes are built) ─
+  // Stored for patching below.
+  const cloudPipelineNodeIds = new Map<string, string>(); // pipeline.id → nodeId
 
   // ── Bulk endpoint node ────────────────────────────────────────────────────
   nodes.push({
@@ -231,6 +218,7 @@ export const assembleFlowGraphPayload = (inputs: AssembleFlowGraphInputs): FlowG
 
   // ── Stream nodes ──────────────────────────────────────────────────────────
   const streamNodeIdByName = new Map<string, string>();
+  const streamDocsPerSecByName = new Map<string, number>();
 
   for (const { stream } of streams) {
     const streamNodeId = `stream-${stream.name}`;
@@ -241,9 +229,16 @@ export const assembleFlowGraphPayload = (inputs: AssembleFlowGraphInputs): FlowG
     const docsPerSec = windowSeconds > 0 ? rawDocCount / windowSeconds : 0;
     const failedDocsPerSec = windowSeconds > 0 ? rawFailedCount / windowSeconds : 0;
 
+    streamDocsPerSecByName.set(stream.name, docsPerSec);
+
     if (WiredStream.Definition.is(stream)) {
       const parentName = getParentStreamName(stream.name);
       const parentId = parentName ? `stream-${parentName}` : undefined;
+
+      // Track root wired streams for cloud pipeline fallback targeting
+      if (!parentName) {
+        rootWiredStreamNames.push(stream.name);
+      }
 
       nodes.push({
         kind: 'wiredStream',
@@ -275,6 +270,43 @@ export const assembleFlowGraphPayload = (inputs: AssembleFlowGraphInputs): FlowG
     }
   }
 
+  // ── Cloud pipeline nodes — built after streams so we can use real throughput ─
+  // Resolve target for each pipeline: use configured targetStreamName if it
+  // exists in the real stream set, otherwise fall back round-robin to root wired
+  // streams.  This makes fake metrics match actual ingest numbers.
+  const resolvedPipelineTargets = cloudPipelines.map((pipeline, idx) => {
+    const configured = pipeline.targetStreamName && streamNodeIdByName.has(pipeline.targetStreamName)
+      ? pipeline.targetStreamName
+      : undefined;
+    const fallback = rootWiredStreamNames.length > 0
+      ? rootWiredStreamNames[idx % rootWiredStreamNames.length]
+      : undefined;
+    return { pipeline, targetStreamName: configured ?? fallback };
+  });
+
+  for (const { pipeline, targetStreamName } of resolvedPipelineTargets) {
+    const pipelineNodeId = `cloud-pipeline-${pipeline.id}`;
+    cloudPipelineNodeIds.set(pipeline.id, pipelineNodeId);
+    const pipelineHealth = cloudPipelineMetrics.health[pipeline.id];
+
+    // Use the real target stream's throughput so numbers add up across the graph
+    const realDocsPerSec = targetStreamName ? streamDocsPerSecByName.get(targetStreamName) : undefined;
+
+    nodes.push({
+      kind: 'cloudPipeline',
+      id: pipelineNodeId,
+      label: pipeline.name,
+      column: 'endpoints',
+      lane: 'pipelines',
+      pipelineId: pipeline.id,
+      targetStreamName,
+      throughput: realDocsPerSec !== undefined ? { docsPerSec: realDocsPerSec } : undefined,
+      health: pipelineHealth
+        ? { status: pipelineHealth.status, message: pipelineHealth.message }
+        : undefined,
+    });
+  }
+
   // ── Wired stream → stream edges (routing rules) ───────────────────────────
   for (const { stream } of streams) {
     if (!WiredStream.Definition.is(stream)) continue;
@@ -297,21 +329,19 @@ export const assembleFlowGraphPayload = (inputs: AssembleFlowGraphInputs): FlowG
   }
 
   // ── Cloud pipeline → stream edges ────────────────────────────────────────
-  for (const pipeline of cloudPipelines) {
+  for (const { pipeline, targetStreamName } of resolvedPipelineTargets) {
     const pipelineNodeId = `cloud-pipeline-${pipeline.id}`;
-    if (pipeline.targetStreamName) {
-      const targetStreamNodeId = streamNodeIdByName.get(pipeline.targetStreamName);
+    if (targetStreamName) {
+      const targetStreamNodeId = streamNodeIdByName.get(targetStreamName);
       if (targetStreamNodeId) {
-        const edgeKey = `${pipeline.id}->${pipeline.targetStreamName}`;
-        const edgeThroughput = cloudPipelineMetrics.perEdge[edgeKey];
-
+        const realDocsPerSec = streamDocsPerSecByName.get(targetStreamName);
         edges.push({
-          id: `pipeline-stream-edge-${pipeline.id}->${pipeline.targetStreamName}`,
+          id: `pipeline-stream-edge-${pipeline.id}->${targetStreamName}`,
           source: pipelineNodeId,
           target: targetStreamNodeId,
           kind: 'pipeline->stream',
           isMock: true,
-          throughput: edgeThroughput ? { docsPerSec: edgeThroughput.docsPerSec } : undefined,
+          throughput: realDocsPerSec !== undefined ? { docsPerSec: realDocsPerSec } : undefined,
         });
       }
     }
@@ -343,7 +373,7 @@ export const assembleFlowGraphPayload = (inputs: AssembleFlowGraphInputs): FlowG
       kind: 'agent->endpoint',
     });
 
-    for (const pipeline of cloudPipelines) {
+    for (const { pipeline } of resolvedPipelineTargets) {
       const pipelineNodeId = `cloud-pipeline-${pipeline.id}`;
       edges.push({
         id: `agent-policy-edge-${policy.id}->${pipeline.id}`,
@@ -373,7 +403,10 @@ export const assembleFlowGraphPayload = (inputs: AssembleFlowGraphInputs): FlowG
   for (const scraper of prometheusScrapers) {
     const scraperNodeId = `prom-scraper-${scraper.id}`;
 
-    if (scraper.destination.kind === 'cloudPipeline') {
+    if (
+      scraper.destination.kind === 'cloudPipeline' &&
+      cloudPipelineNodeIds.has(scraper.destination.pipelineId)
+    ) {
       const pipelineNodeId = `cloud-pipeline-${scraper.destination.pipelineId}`;
       edges.push({
         id: `prom-edge-${scraper.id}->${scraper.destination.pipelineId}`,

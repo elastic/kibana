@@ -12,6 +12,8 @@ export const seedCloudPipelines = (store: CloudPipelinesStore): void => {
     return;
   }
 
-  store.create({ name: 'EU West 1 OTLP', targetStreamName: 'logs' });
-  store.create({ name: 'US East 1 OTLP', targetStreamName: 'logs.app' });
+  // No targetStreamName — the graph assembler will assign real root streams
+  // at render time via round-robin fallback, so numbers always match real data.
+  store.create({ name: 'EU West 1 OTLP' });
+  store.create({ name: 'US East 1 OTLP' });
 };
