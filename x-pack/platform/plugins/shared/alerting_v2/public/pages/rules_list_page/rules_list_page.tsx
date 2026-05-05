@@ -13,11 +13,11 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
   type Criteria,
 } from '@elastic/eui';
-import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
@@ -26,13 +26,13 @@ import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { paths } from '../../constants';
 import { RulesListTableContainer } from './rules_list_table_container';
 import type { RulesListTableSortField } from './rules_list_table';
 import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_popover';
 import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
 import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
 import { buildRulesListFilter } from './utils';
+import { CreateRulePanel } from './create_rule_panel';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -48,8 +48,6 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 ) as Partial<Record<string, FindRulesSortField>>;
 
 export const RulesListPage = () => {
-  const { basePath } = useService(CoreStart('http'));
-
   useBreadcrumbs('rules_list');
 
   const [page, setPage] = useState(1);
@@ -61,6 +59,7 @@ export const RulesListPage = () => {
   const [sortField, setSortField] = useState<FindRulesSortField>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const filter = useMemo(
     () =>
@@ -107,33 +106,44 @@ export const RulesListPage = () => {
   };
 
   const availableTagOptions = allTags ?? [];
-
   const hasActiveFilters = Boolean(filter);
+  const isInitialLoad = isLoading && data === undefined;
+  const hasRules = (data?.total ?? 0) > 0;
+  const showEmptyState = !isInitialLoad && !isError && !hasRules;
 
   return (
     <div>
       <EuiPageHeader
         pageTitle={
-          <FormattedMessage
-            id="xpack.alertingV2.rulesList.pageTitle"
-            defaultMessage="Alerting V2 Rules"
-          />
+          <FormattedMessage id="xpack.alertingV2.rulesList.pageTitle" defaultMessage="Rules" />
         }
-        rightSideItems={[
-          <EuiButton
-            key="create-rule"
-            fill
-            href={basePath.prepend(paths.ruleCreate)}
-            data-test-subj="createRuleButton"
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.rulesList.createRuleButton"
-              defaultMessage="Create rule"
-            />
-          </EuiButton>,
-        ]}
+        rightSideItems={
+          hasRules
+            ? [
+                <EuiButton
+                  key="create-rule"
+                  fill
+                  iconType="plusInCircle"
+                  onClick={() => setIsCreateModalOpen(true)}
+                  data-test-subj="createRuleButton"
+                >
+                  <FormattedMessage
+                    id="xpack.alertingV2.rulesList.createRuleButton"
+                    defaultMessage="Create rule"
+                  />
+                </EuiButton>,
+              ]
+            : []
+        }
       />
       <EuiSpacer size="m" />
+      {isInitialLoad ? (
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" data-test-subj="rulesListLoading" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
       {isError ? (
         <>
           <EuiCallOut
@@ -152,7 +162,8 @@ export const RulesListPage = () => {
           <EuiSpacer />
         </>
       ) : null}
-      {!isError ? (
+      {showEmptyState ? <CreateRulePanel onClose={() => setIsCreateModalOpen(false)} /> : null}
+      {hasRules ? (
         <>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
@@ -195,6 +206,7 @@ export const RulesListPage = () => {
           />
         </>
       ) : null}
+      {isCreateModalOpen ? <CreateRulePanel onClose={() => setIsCreateModalOpen(false)} /> : null}
     </div>
   );
 };
