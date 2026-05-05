@@ -28,7 +28,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 :::{important} - New recommended {{kib}} instance minimum size of 2 GB
 
-We now recommended that your {{kib}} instances have at least 2 GB of memory, especially when using Platinum or Enterprise {{kib}} features, and for production workloads.
+We now recommend that your {{kib}} instances have at least 2 GB of memory, especially when using Platinum or Enterprise {{kib}} features, and for production workloads.
 
 New {{ech}} deployments now default to 2 GB of RAM for each {{kib}} instance. 
 :::
