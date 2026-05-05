@@ -15,7 +15,8 @@ export const EPISODES_LIST_APP_STATE_KEY = 'episodesList' as const;
 /** Serialized in `_a` so “all statuses” survives reload (distinct from default Active) */
 export const EPISODES_LIST_STATUS_URL_ALL = 'all' as const;
 
-const DEFAULT_FILTER: EpisodesFilterState = { status: 'active' };
+/** Default list filters (Active episodes, no rule/tags/search/assignee). */
+export const DEFAULT_EPISODES_LIST_FILTER: EpisodesFilterState = { status: 'active' };
 
 /** Matches {@link useEpisodesTimeRange} fallback when timefilter has no prior state */
 export const DEFAULT_EPISODES_LIST_TIME_RANGE: TimeRange = {
@@ -75,7 +76,7 @@ function encodeFilterFields(state: EpisodesFilterState): Record<string, unknown>
   const st = state.status;
   if (st === null || st === undefined) {
     result.status = EPISODES_LIST_STATUS_URL_ALL;
-  } else if (isNonEmptyString(st) && st !== DEFAULT_FILTER.status) {
+  } else if (isNonEmptyString(st) && st !== DEFAULT_EPISODES_LIST_FILTER.status) {
     result.status = st;
   }
   if (isNonEmptyString(state.ruleId)) {
@@ -129,7 +130,7 @@ export function readEpisodesListAppStateFromUrlStorage(storage: IKbnUrlStateStor
   const raw = storage.get<AppStateRecord>('_a')?.[EPISODES_LIST_APP_STATE_KEY];
   const { filter, timeRange } = splitEpisodesListRaw(raw);
   return {
-    filterState: { ...DEFAULT_FILTER, ...filter },
+    filterState: { ...DEFAULT_EPISODES_LIST_FILTER, ...filter },
     ...(timeRange ? { timeRange } : {}),
   };
 }
