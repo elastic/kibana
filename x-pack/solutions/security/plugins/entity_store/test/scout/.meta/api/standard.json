@@ -1,5 +1,5 @@
 {
-  "sha1": "1fea52d89ca02fe101dab65a4a1b70a2a9b97a90",
+  "sha1": "ffececbd53425b5350c70aa3b582a1a408bc73b4",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -221,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 563,
+        "line": 564,
         "column": 12
       }
     },
@@ -237,7 +237,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 22,
+        "line": 28,
         "column": 10
       }
     },
@@ -253,7 +253,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 38,
+        "line": 44,
         "column": 10
       }
     },
@@ -269,7 +269,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 55,
+        "line": 61,
+        "column": 10
+      }
+    },
+    {
+      "id": "d9737789d696c32-1e7b426238d5db6",
+      "title": "Entity Store check privileges API Should return has_read_permissions: false when user has read access to only one of the two required indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
+        "line": 89,
         "column": 10
       }
     },
@@ -285,7 +301,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 83,
+        "line": 120,
         "column": 10
       }
     },
