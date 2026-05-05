@@ -1,7 +1,7 @@
 ---
 name: Codex Reviewer
 on:
-  pull_request:
+  pull_request_target:
     types: [synchronize, reopened, labeled]
   issue_comment:
     types: [created]
@@ -45,7 +45,7 @@ if: >-
       !contains(github.event.issue.labels.*.name, 'reviewer:skip-ai') &&
       (
         (
-          github.event_name == 'pull_request' &&
+          github.event_name == 'pull_request_target' &&
           (
             (
               github.event.action == 'labeled' &&
@@ -148,5 +148,5 @@ safe-outputs:
 # Codex PR Reviewer
 
 Using the imported reviewer instructions:
-- Run in review mode for `pull_request` and `workflow_dispatch` workflow events.
+- Run in review mode for `pull_request_target` and `workflow_dispatch` workflow events.
 - Run in follow-up response mode for `issue_comment` and `pull_request_review_comment` events that mention `@codex`.
