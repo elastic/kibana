@@ -12,6 +12,7 @@ import {
   type PublishesSavedObjectId,
   type PublishesRendered,
 } from '@kbn/presentation-publishing';
+import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge } from 'rxjs';
@@ -21,6 +22,8 @@ import type {
   LensRuntimeState,
   LensSerializedState,
 } from '@kbn/lens-common';
+import type { LensWireAPIConfig } from '@kbn/lens-common-2';
+import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../../common/transforms/utils';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateRefId'> &
@@ -47,6 +50,20 @@ export function initializeStateManagement(
   // savedObjectId$ exposed for PublishesSavedObjectId compatibility, sourced from ref_id in state
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState.ref_id);
 
+  const resolveAttributes = (
+    value: LensSerializedState['attributes'] | undefined,
+    state?: LensWireAPIConfig
+  ) => {
+    if (value !== undefined) return value;
+    if (state && 'attributes' in state && state.attributes) {
+      return state.attributes;
+    }
+    if (state && isFlattenedAPIConfig(state)) {
+      return unflattenAPIConfig(state).attributes;
+    }
+    return value;
+  };
+
   return {
     api: {
       updateAttributes: internalApi.updateAttributes,
@@ -60,7 +77,14 @@ export function initializeStateManagement(
     anyStateChange$: merge(internalApi.attributes$).pipe(map(() => undefined)),
     getComparators: () => {
       return {
-        attributes: initialState.ref_id === undefined ? 'deepEquality' : 'skip',
+        attributes:
+          initialState.ref_id === undefined
+            ? (lastValue, currentValue, lastState, currentState) => {
+                const lastAttributes = resolveAttributes(lastValue, lastState);
+                const currentAttributes = resolveAttributes(currentValue, currentState);
+                return deepEqual(lastAttributes, currentAttributes);
+              }
+            : 'skip',
         ref_id: 'skip',
       };
     },
