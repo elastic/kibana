@@ -24,7 +24,12 @@ export const deleteCompositeSummaryDoc = async (
   const docId = buildCompositeSloSummaryDocId(spaceId, id);
   try {
     await retryTransientEsErrors(
-      () => esClient.delete({ index: COMPOSITE_SUMMARY_INDEX_NAME, id: docId }),
+      () =>
+        esClient.delete({
+          index: COMPOSITE_SUMMARY_INDEX_NAME,
+          id: docId,
+          refresh: 'wait_for',
+        }),
       { logger }
     );
   } catch (err) {
