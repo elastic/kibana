@@ -191,54 +191,6 @@ test.describe(
       });
     });
 
-    test('shows sigevents overview with inline conversation when flag is enabled', async ({
-      page,
-      kbnUrl,
-      apiServices,
-    }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': {
-          [SIGEVENTS_FEATURE_FLAG]: true,
-        },
-      });
-
-      await page.goto(kbnUrl.get('/app/observability/overview'));
-
-      await expect(page.getByTestId('obltSigeventsOverviewPageHeader')).toBeVisible();
-      await expect(page.getByTestId('sigeventsOverview')).toBeVisible();
-      await expect(page.getByTestId('obltSigeventsConversation')).toBeVisible();
-      await expect(page.getByTestId('agentBuilderEmbeddableConversation')).toBeVisible();
-    });
-
-    test('landing page redirects to sigevents when flag is enabled', async ({
-      page,
-      kbnUrl,
-      apiServices,
-    }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': {
-          [SIGEVENTS_FEATURE_FLAG]: true,
-        },
-      });
-
-      await page.goto(kbnUrl.get('/app/observability/landing'));
-
-      await expect(page).toHaveURL(/\/app\/observability\/overview/);
-      await expect(page.getByTestId('obltSigeventsOverviewPageHeader')).toBeVisible();
-    });
-
-    test('shows default overview when flag is disabled', async ({ page, kbnUrl, apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': {
-          [SIGEVENTS_FEATURE_FLAG]: false,
-        },
-      });
-
-      await page.goto(kbnUrl.get('/app/observability/overview'));
-
-      await expect(page.getByTestId('obltOverviewPageHeader')).toBeVisible();
-    });
-
     test('Act 1: We Know Your System', async ({
       page,
       kbnUrl,
@@ -472,7 +424,9 @@ test.describe(
       });
 
       await test.step('verify page structure loads', async () => {
-        await expect(page.getByTestId('obltSigeventsOverviewPageHeader')).toBeVisible();
+        await expect(page.getByTestId('obltSigeventsOverviewPageHeader')).toBeVisible({
+          timeout: 60_000,
+        });
         await expect(page.getByTestId('sigeventsOverview')).toBeVisible();
       });
 

@@ -504,10 +504,12 @@ function EventDetailFlyout({
   ]);
 
   const recommendationSteps: RecommendationStep[] | undefined = useMemo(() => {
-    if (!event.recommendations || event.recommendations.length === 0) {
+    const raw = event.recommendations;
+    const recs = Array.isArray(raw) ? raw : typeof raw === 'string' ? [raw] : undefined;
+    if (!recs || recs.length === 0) {
       return undefined;
     }
-    return event.recommendations.map((rec, idx) => ({
+    return recs.map((rec, idx) => ({
       id: `${event.event_id}-rec-${idx}`,
       title: rec,
     }));
