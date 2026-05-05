@@ -298,7 +298,15 @@
         ],
         "label": "Evaluator",
         "description": [
-          "\nCore evaluator interface.\n\nAll evaluators — whether CODE-kind (deterministic) or LLM-kind (model-scored) — implement\nthis interface. Per the @kbn/evals vision (Section 5.2.1), evaluators should progressively\nmigrate to deriving signals from OTel traces stored in Elasticsearch rather than only\noperating on in-memory task output. Use {@link createTraceBasedEvaluator} for trace-native\nevaluators.\n"
+          "\nCore evaluator interface.\n\nAll evaluators — whether CODE-kind (deterministic) or LLM-kind (model-scored) — implement\nthis interface. Per the @kbn/evals vision (Section 5.2.1), evaluators should progressively\nmigrate to deriving signals from OTel traces stored in Elasticsearch rather than only\noperating on in-memory task output. Use ",
+          {
+            "pluginId": "@kbn/evals-extensions",
+            "scope": "common",
+            "docId": "kibKbnEvalsExtensionsPluginApi",
+            "section": "def-common.createTraceBasedEvaluator",
+            "text": "createTraceBasedEvaluator"
+          },
+          " for trace-native\nevaluators.\n"
         ],
         "signature": [
           {
@@ -387,6 +395,7 @@
                 "lineNumber": 87,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "EvaluatorParams",
                 "trackAdoption": false
               }
             ]

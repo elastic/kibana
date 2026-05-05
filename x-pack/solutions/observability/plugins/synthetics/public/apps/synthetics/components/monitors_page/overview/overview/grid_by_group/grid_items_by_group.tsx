@@ -21,7 +21,7 @@ import { useFilters } from '../../../common/monitor_filters/use_filters';
 import { GroupGridItem } from './grid_group_item';
 import { ConfigKey } from '../../../../../../../../common/runtime_types';
 import type { OverviewView } from '../../../../../state';
-import { selectOverviewState, selectServiceLocationsState } from '../../../../../state';
+import { selectOverviewGroupBy, selectServiceLocationsState } from '../../../../../state';
 import type { FlyoutParamProps } from '../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 
@@ -33,9 +33,7 @@ export const GridItemsByGroup = ({
   view: OverviewView;
 }) => {
   const [fullScreenGroup, setFullScreenGroup] = useState('');
-  const {
-    groupBy: { field: groupField, order: groupOrder },
-  } = useSelector(selectOverviewState);
+  const { field: groupField, order: groupOrder } = useSelector(selectOverviewGroupBy);
 
   const { allConfigs, loaded } = useSelector(selectOverviewStatus);
 
@@ -49,13 +47,12 @@ export const GridItemsByGroup = ({
 
   const { monitorTypes, locations, projects, tags } = data;
   let selectedGroup = {
-    key: 'location',
+    key: 'locationLabel',
     items: locations,
     values: getSyntheticsFilterDisplayValues(locations, 'locations', allLocations),
     otherValues: {
       label: 'Without any location',
-      // All monitors should have a locationId. This array tracks monitors that are missing it, which helps identify potential issues
-      items: allConfigs?.filter((monitor) => !get(monitor, 'locationId')),
+      items: allConfigs?.filter((monitor) => !monitor.locations || monitor.locations.length === 0),
     },
   };
 
@@ -85,8 +82,9 @@ export const GridItemsByGroup = ({
               defaultMessage: 'Without any location',
             }
           ),
-          // All monitors should have a locationId. This array tracks monitors that are missing it, which helps identify potential issues
-          items: allConfigs?.filter((monitor) => !get(monitor, 'locationId')),
+          items: allConfigs?.filter(
+            (monitor) => !monitor.locations || monitor.locations.length === 0
+          ),
         },
       };
       break;
@@ -133,6 +131,9 @@ export const GridItemsByGroup = ({
       {selectedValues.map((groupItem) => {
         const filteredMonitors =
           allConfigs?.filter((monitor) => {
+            if (selectedGroup.key === 'locationLabel') {
+              return monitor.locations?.some((loc) => loc.label === groupItem.label);
+            }
             const value = get(monitor, selectedGroup.key);
             if (Array.isArray(value)) {
               return value.includes(groupItem.label);
@@ -144,7 +145,7 @@ export const GridItemsByGroup = ({
             return get(monitor, selectedGroup.key) === groupItem.label;
           }) ?? [];
         return (
-          <>
+          <React.Fragment key={groupItem.label}>
             <WrappedPanel isFullScreen={fullScreenGroup === groupItem.label}>
               <GroupGridItem
                 groupLabel={groupItem.label}
@@ -157,7 +158,7 @@ export const GridItemsByGroup = ({
               />
             </WrappedPanel>
             <EuiSpacer size="m" />
-          </>
+          </React.Fragment>
         );
       })}
       {(selectedGroup.otherValues.items ?? []).length > 0 && (

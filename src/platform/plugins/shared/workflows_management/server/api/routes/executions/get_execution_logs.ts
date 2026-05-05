@@ -14,7 +14,7 @@ import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/rout
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
 import { executionIdParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerGetExecutionLogsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
@@ -68,7 +68,7 @@ export function registerGetExecutionLogsRoute({ router, api, spaces }: RouteDepe
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId } = request.params;
           const { size, page, sortField, sortOrder, stepExecutionId } = request.query;

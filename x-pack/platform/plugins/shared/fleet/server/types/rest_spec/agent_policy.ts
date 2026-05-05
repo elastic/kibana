@@ -23,13 +23,24 @@ import { CreatePackagePolicyRequestSchema } from './package_policy';
 export const GetAgentPoliciesRequestSchema = {
   query: schema.object(
     {
-      page: schema.maybe(schema.number({ defaultValue: 1 })),
-      perPage: schema.maybe(schema.number({ defaultValue: 20 })),
-      sortField: schema.maybe(schema.string()),
-      sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-      showUpgradeable: schema.maybe(schema.boolean()),
+      page: schema.maybe(schema.number({ defaultValue: 1, meta: { description: 'Page number' } })),
+      perPage: schema.maybe(
+        schema.number({ defaultValue: 20, meta: { description: 'Number of results per page' } })
+      ),
+      sortField: schema.maybe(schema.string({ meta: { description: 'Field to sort results by' } })),
+      sortOrder: schema.maybe(
+        schema.oneOf([schema.literal('desc'), schema.literal('asc')], {
+          meta: { description: 'Sort order, ascending or descending' },
+        })
+      ),
+      showUpgradeable: schema.maybe(
+        schema.boolean({
+          meta: { description: 'When true, only show policies with upgradeable agents' },
+        })
+      ),
       kuery: schema.maybe(
         schema.string({
+          meta: { description: 'A KQL query string to filter results' },
           validate: (value: string) => {
             const validationObj = validateKuery(
               value,
@@ -59,7 +70,12 @@ export const GetAgentPoliciesRequestSchema = {
         })
       ),
       format: schema.maybe(
-        schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+        schema.oneOf(
+          [schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)],
+          {
+            meta: { description: 'Format for the response: simplified or legacy' },
+          }
+        )
       ),
     },
     {
@@ -86,7 +102,9 @@ export const BulkGetAgentPoliciesRequestSchema = {
   }),
   query: schema.object({
     format: schema.maybe(
-      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)], {
+        meta: { description: 'Format for the response: simplified or legacy' },
+      })
     ),
   }),
 };
@@ -97,25 +115,31 @@ export const BulkGetAgentPoliciesResponseSchema = schema.object({
 
 export const GetOneAgentPolicyRequestSchema = {
   params: schema.object({
-    agentPolicyId: schema.string(),
+    agentPolicyId: schema.string({ meta: { description: 'The ID of the agent policy' } }),
   }),
   query: schema.object({
     format: schema.maybe(
-      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)], {
+        meta: { description: 'Format for the response: simplified or legacy' },
+      })
     ),
   }),
 };
 
 export const GetAutoUpgradeAgentsStatusRequestSchema = {
   params: schema.object({
-    agentPolicyId: schema.string(),
+    agentPolicyId: schema.string({ meta: { description: 'The ID of the agent policy' } }),
   }),
 };
 
 export const CreateAgentPolicyRequestSchema = {
   body: NewAgentPolicySchema,
   query: schema.object({
-    sys_monitoring: schema.maybe(schema.boolean()),
+    sys_monitoring: schema.maybe(
+      schema.boolean({
+        meta: { description: 'Whether to add the system integration to the new agent policy' },
+      })
+    ),
   }),
 };
 
@@ -147,7 +171,7 @@ export const CopyAgentPolicyRequestSchema = {
 
 export const DeleteAgentPolicyRequestSchema = {
   body: schema.object({
-    agentPolicyId: schema.string(),
+    agentPolicyId: schema.string({ meta: { description: 'The ID of the agent policy' } }),
     force: schema.maybe(
       schema.boolean({
         meta: { description: 'bypass validation checks that can prevent agent policy deletion' },
@@ -163,7 +187,7 @@ export const DeleteAgentPolicyResponseSchema = schema.object({
 
 export const GetFullAgentPolicyRequestSchema = {
   params: schema.object({
-    agentPolicyId: schema.string(),
+    agentPolicyId: schema.string({ meta: { description: 'The ID of the agent policy' } }),
   }),
   query: schema.object({
     download: schema.maybe(
@@ -200,9 +224,21 @@ export const DownloadFullAgentPolicyResponseSchema = schema.string();
 
 export const GetK8sManifestRequestSchema = {
   query: schema.object({
-    download: schema.maybe(schema.boolean()),
-    fleetServer: schema.maybe(schema.string()),
-    enrolToken: schema.maybe(schema.string()),
+    download: schema.maybe(
+      schema.boolean({
+        meta: { description: 'If true, returns the manifest as a downloadable file' },
+      })
+    ),
+    fleetServer: schema.maybe(
+      schema.string({
+        meta: { description: 'Fleet Server host URL to include in the manifest' },
+      })
+    ),
+    enrolToken: schema.maybe(
+      schema.string({
+        meta: { description: 'Enrollment token to include in the manifest' },
+      })
+    ),
   }),
 };
 
@@ -212,7 +248,7 @@ export const GetK8sManifestResponseScheme = schema.object({
 
 export const GetAgentPolicyOutputsRequestSchema = {
   params: schema.object({
-    agentPolicyId: schema.string(),
+    agentPolicyId: schema.string({ meta: { description: 'The ID of the agent policy' } }),
   }),
 };
 

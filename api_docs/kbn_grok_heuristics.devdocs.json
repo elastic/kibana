@@ -73,6 +73,7 @@
             "lineNumber": 46,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "AssembleGrokProcessorParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -264,6 +265,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NormalizedReviewResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -564,6 +566,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -672,6 +675,7 @@
                 "lineNumber": 17,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReviewFields",
                 "trackAdoption": false
               },
               {
@@ -985,6 +989,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ReviewFields",
             "trackAdoption": false
           },
           {

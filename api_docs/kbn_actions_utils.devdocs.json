@@ -49,6 +49,7 @@
             "lineNumber": 36,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "GetCustomAgentsOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -110,6 +111,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -151,6 +153,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SSLSettings",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -196,6 +199,7 @@
             "lineNumber": 23,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "GetProxySettingsOpts",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -9,8 +9,8 @@ import { useCallback } from 'react';
 import type { PhaseName } from '@kbn/streams-schema';
 import { get } from 'lodash';
 import type { DeepPartial, FieldErrors, FieldPath } from 'react-hook-form';
+import { PHASE_ORDER } from '@kbn/data-lifecycle-phases';
 import type { IlmPhasesFlyoutFormInternal } from './types';
-import { ILM_PHASE_ORDER } from '../constants';
 
 /**
  * Paths that `EditIlmPhasesFlyout` must watch to ensure tab error indicators refresh when
@@ -22,9 +22,7 @@ import { ILM_PHASE_ORDER } from '../constants';
 export const ILM_PHASES_FLYOUT_TAB_ERROR_INDICATOR_WATCH_PATHS: Array<
   FieldPath<IlmPhasesFlyoutFormInternal>
 > = [
-  ...ILM_PHASE_ORDER.map(
-    (p) => `_meta.${p}.enabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>
-  ),
+  ...PHASE_ORDER.map((p) => `_meta.${p}.enabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>),
   // Enable/disable toggles that gate validations (tabs need to update when these change).
   '_meta.hot.downsampleEnabled',
   '_meta.warm.downsampleEnabled',

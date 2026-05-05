@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { RiskScoreDonutChart } from '../risk_score_donut_chart';
 import { useCombinedRiskScoreKpi } from './use_combined_risk_score_kpi';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
@@ -38,6 +39,8 @@ export const CombinedRiskDonutChart = () => {
     return null;
   }
 
+  const safeSeverityCount = severityCount ?? EMPTY_SEVERITY_COUNT;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
@@ -53,10 +56,10 @@ export const CombinedRiskDonutChart = () => {
       <EuiFlexItem>
         <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
           <EuiFlexItem grow={4}>
-            <RiskLevelBreakdownTable severityCount={severityCount} loading={loading} />
+            <RiskLevelBreakdownTable severityCount={safeSeverityCount} loading={loading} />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
-            <RiskScoreDonutChart showLegend={false} severityCount={severityCount} />
+            <RiskScoreDonutChart showLegend={false} severityCount={safeSeverityCount} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

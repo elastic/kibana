@@ -59,6 +59,7 @@ describe('createExecuteConnectorSubActionTool', () => {
       },
       actions: {
         searchMessages: { isTool: true, input: {} as any, handler: jest.fn() },
+        listChannels: { isTool: true, input: {} as any, handler: jest.fn() },
         sendMessage: { isTool: true, input: {} as any, handler: jest.fn() },
       },
     });

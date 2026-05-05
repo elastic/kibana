@@ -50,6 +50,7 @@
                 "lineNumber": 15,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "UiSettingsClientParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -161,6 +162,7 @@
                 "lineNumber": 33,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "UiSettingsServiceDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }

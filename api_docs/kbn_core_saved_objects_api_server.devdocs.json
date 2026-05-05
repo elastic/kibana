@@ -154,6 +154,7 @@
                 "lineNumber": 98,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -172,6 +173,7 @@
                 "lineNumber": 99,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsCreateOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -225,6 +227,7 @@
                 "lineNumber": 113,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -243,6 +246,7 @@
                 "lineNumber": 114,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsCreateOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -312,6 +316,7 @@
                 "lineNumber": 127,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsBaseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -395,6 +400,7 @@
                 "lineNumber": 138,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsDeleteOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -460,6 +466,7 @@
                 "lineNumber": 148,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsBulkDeleteOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -524,6 +531,7 @@
                 "lineNumber": 160,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsDeleteByNamespaceOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -585,6 +593,7 @@
                 "lineNumber": 186,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsFindOptions",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -605,6 +614,7 @@
                 "lineNumber": 187,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsFindInternalOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -655,12 +665,20 @@
                 "lineNumber": 199,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsSearchOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsSearchResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsSearchResponse",
+                "text": "SavedObjectsSearchResponse"
+              }
             ]
           },
           {
@@ -701,12 +719,20 @@
                 "lineNumber": 213,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsEsqlOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsEsqlResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsEsqlResponse",
+                "text": "SavedObjectsEsqlResponse"
+              }
             ]
           },
           {
@@ -771,6 +797,7 @@
                 "lineNumber": 232,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsGetOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -841,6 +868,7 @@
                 "lineNumber": 252,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsResolveOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -927,6 +955,7 @@
                 "lineNumber": 268,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsGetOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1013,6 +1042,7 @@
                 "lineNumber": 284,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsResolveOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1101,6 +1131,7 @@
                 "lineNumber": 302,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1119,6 +1150,7 @@
                 "lineNumber": 303,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsUpdateOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1188,12 +1220,21 @@
                 "lineNumber": 316,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsCollectMultiNamespaceReferencesOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "- {@link SavedObjectsCollectMultiNamespaceReferencesResponse } { objects: [{ type, id, spaces, inboundReferences, ... }] }"
+              "- ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
+              },
+              " { objects: [{ type, id, spaces, inboundReferences, ... }] }"
             ]
           },
           {
@@ -1295,6 +1336,7 @@
                 "lineNumber": 332,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsUpdateObjectsSpacesOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1347,6 +1389,7 @@
                 "lineNumber": 345,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1367,6 +1410,7 @@
                 "lineNumber": 346,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsBulkUpdateOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1452,6 +1496,7 @@
                 "lineNumber": 372,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsRemoveReferencesToOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1540,6 +1585,7 @@
                 "lineNumber": 431,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1560,6 +1606,7 @@
                 "lineNumber": 432,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsIncrementCounterOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1578,7 +1625,15 @@
             ],
             "label": "openPointInTimeForType",
             "description": [
-              "\nOpens a Point In Time (PIT) against the indices for the specified Saved Object types.\nThe returned `id` can then be passed to `SavedObjects.find` to search against that PIT.\n\nOnly use this API if you have an advanced use case that's not solved by the\n{@link SavedObjectsRepository.createPointInTimeFinder} method.\n"
+              "\nOpens a Point In Time (PIT) against the indices for the specified Saved Object types.\nThe returned `id` can then be passed to `SavedObjects.find` to search against that PIT.\n\nOnly use this API if you have an advanced use case that's not solved by the\n",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsRepository.createPointInTimeFinder",
+                "text": "SavedObjectsRepository.createPointInTimeFinder"
+              },
+              " method.\n"
             ],
             "signature": [
               "(type: string | string[], options?: ",
@@ -1629,6 +1684,7 @@
                 "lineNumber": 474,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsOpenPointInTimeOptions",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -1649,6 +1705,7 @@
                 "lineNumber": 475,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsFindInternalOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1664,7 +1721,15 @@
             "tags": [],
             "label": "closePointInTime",
             "description": [
-              "\nCloses a Point In Time (PIT) by ID. This simply proxies the request to ES\nvia the Elasticsearch client, and is included in the Saved Objects Client\nas a convenience for consumers who are using `openPointInTimeForType`.\n\nOnly use this API if you have an advanced use case that's not solved by the\n{@link SavedObjectsRepository.createPointInTimeFinder} method.\n"
+              "\nCloses a Point In Time (PIT) by ID. This simply proxies the request to ES\nvia the Elasticsearch client, and is included in the Saved Objects Client\nas a convenience for consumers who are using `openPointInTimeForType`.\n\nOnly use this API if you have an advanced use case that's not solved by the\n",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsRepository.createPointInTimeFinder",
+                "text": "SavedObjectsRepository.createPointInTimeFinder"
+              },
+              " method.\n"
             ],
             "signature": [
               "(id: string, options?: ",
@@ -1715,6 +1780,7 @@
                 "lineNumber": 522,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClosePointInTimeOptions",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -1735,6 +1801,7 @@
                 "lineNumber": 523,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsFindInternalOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1750,7 +1817,23 @@
             "tags": [],
             "label": "createPointInTimeFinder",
             "description": [
-              "\nReturns a {@link ISavedObjectsPointInTimeFinder} to help page through\nlarge sets of saved objects. We strongly recommend using this API for\nany `find` queries that might return more than 1000 saved objects,\nhowever this API is only intended for use in server-side \"batch\"\nprocessing of objects where you are collecting all objects in memory\nor streaming them back to the client.\n\nDo NOT use this API in a route handler to facilitate paging through\nsaved objects on the client-side unless you are streaming all of the\nresults back to the client at once. Because the returned generator is\nstateful, you cannot rely on subsequent http requests retrieving new\npages from the same Kibana server in multi-instance deployments.\n\nThis generator wraps calls to {@link SavedObjectsRepository.find} and\niterates over multiple pages of results using `_pit` and `search_after`.\nThis will open a new Point-In-Time (PIT), and continue paging until a\nset of results is received that's smaller than the designated `perPage`.\n\nOnce you have retrieved all of the results you need, it is recommended\nto call `close()` to clean up the PIT and prevent Elasticsearch from\nconsuming resources unnecessarily. This is only required if you are\ndone iterating and have not yet paged through all of the results: the\nPIT will automatically be closed for you once you reach the last page\nof results, or if the underlying call to `find` fails for any reason.\n"
+              "\nReturns a ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.ISavedObjectsPointInTimeFinder",
+                "text": "ISavedObjectsPointInTimeFinder"
+              },
+              " to help page through\nlarge sets of saved objects. We strongly recommend using this API for\nany `find` queries that might return more than 1000 saved objects,\nhowever this API is only intended for use in server-side \"batch\"\nprocessing of objects where you are collecting all objects in memory\nor streaming them back to the client.\n\nDo NOT use this API in a route handler to facilitate paging through\nsaved objects on the client-side unless you are streaming all of the\nresults back to the client at once. Because the returned generator is\nstateful, you cannot rely on subsequent http requests retrieving new\npages from the same Kibana server in multi-instance deployments.\n\nThis generator wraps calls to ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsRepository.find",
+                "text": "SavedObjectsRepository.find"
+              },
+              " and\niterates over multiple pages of results using `_pit` and `search_after`.\nThis will open a new Point-In-Time (PIT), and continue paging until a\nset of results is received that's smaller than the designated `perPage`.\n\nOnce you have retrieved all of the results you need, it is recommended\nto call `close()` to clean up the PIT and prevent Elasticsearch from\nconsuming resources unnecessarily. This is only required if you are\ndone iterating and have not yet paged through all of the results: the\nPIT will automatically be closed for you once you reach the last page\nof results, or if the underlying call to `find` fails for any reason.\n"
             ],
             "signature": [
               "<T = unknown, A = unknown>(findOptions: ",
@@ -1783,6 +1866,7 @@
                 "lineNumber": 576,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsCreatePointInTimeFinderOptions",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1803,12 +1887,20 @@
                 "lineNumber": 577,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsCreatePointInTimeFinderDependencies",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "- the point-in-time finder {@link ISavedObjectsPointInTimeFinder }"
+              "- the point-in-time finder ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.ISavedObjectsPointInTimeFinder",
+                "text": "ISavedObjectsPointInTimeFinder"
+              }
             ]
           },
           {
@@ -1950,12 +2042,20 @@
                 "lineNumber": 605,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsChangeOwnershipOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsChangeAccessControlResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsChangeAccessControlResponse",
+                "text": "SavedObjectsChangeAccessControlResponse"
+              }
             ]
           },
           {
@@ -2018,6 +2118,7 @@
                 "lineNumber": 616,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsChangeAccessModeOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3275,7 +3376,15 @@
             "tags": [],
             "label": "initialNamespaces",
             "description": [
-              "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n{@link SavedObjectsCreateOptions}.\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
+              "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
+              ".\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
             ],
             "signature": [
               "string[] | undefined"
@@ -3457,7 +3566,14 @@
             "tags": [],
             "label": "statuses",
             "description": [
-              "Array of {@link SavedObjectsBulkDeleteStatus}"
+              "Array of ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkDeleteStatus",
+                "text": "SavedObjectsBulkDeleteStatus"
+              }
             ],
             "signature": [
               "SavedObjectsBulkDeleteStatus",
@@ -3712,7 +3828,14 @@
             "tags": [],
             "label": "resolved_objects",
             "description": [
-              "array of {@link SavedObjectsResolveResponse}"
+              "array of ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsResolveResponse",
+                "text": "SavedObjectsResolveResponse"
+              }
             ],
             "signature": [
               "SavedObjectsResolveResponse",
@@ -3844,7 +3967,15 @@
             "tags": [],
             "label": "namespace",
             "description": [
-              "\nOptional namespace string to use when searching for this object. If this is defined, it will supersede the namespace ID that is in\n{@link SavedObjectsBulkUpdateOptions}.\n\nNote: the default namespace's string representation is `'default'`, and its ID representation is `undefined`."
+              "\nOptional namespace string to use when searching for this object. If this is defined, it will supersede the namespace ID that is in\n",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkUpdateOptions",
+                "text": "SavedObjectsBulkUpdateOptions"
+              },
+              ".\n\nNote: the default namespace's string representation is `'default'`, and its ID representation is `undefined`."
             ],
             "signature": [
               "string | undefined"
@@ -3922,7 +4053,13 @@
             "tags": [],
             "label": "migrationVersionCompatibility",
             "description": [
-              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsRawDocParseOptions.migrationVersionCompatibility",
+                "text": "SavedObjectsRawDocParseOptions.migrationVersionCompatibility"
+              }
             ],
             "signature": [
               "\"raw\" | \"compatible\" | undefined"
@@ -3962,7 +4099,14 @@
             "tags": [],
             "label": "saved_objects",
             "description": [
-              "array of {@link SavedObjectsUpdateResponse}"
+              "array of ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              }
             ],
             "signature": [
               "SavedObjectsUpdateResponse",
@@ -4221,7 +4365,31 @@
         "tags": [],
         "label": "SavedObjectsClientContract",
         "description": [
-          "\nSaved Objects is Kibana's data persistence mechanism allowing plugins to\nuse Elasticsearch for storing plugin state.\n\n## SavedObjectsClient errors\n\nSince the SavedObjectsClient has its hands in everything we\nare a little paranoid about the way we present errors back to\nto application code. Ideally, all errors will be either:\n\n  1. Caused by bad implementation (ie. undefined is not a function) and\n     as such unpredictable\n  2. An error that has been classified and decorated appropriately\n     by the decorators in {@link SavedObjectsErrorHelpers}\n\nType 1 errors are inevitable, but since all expected/handle-able errors\nshould be Type 2 the `isXYZError()` helpers exposed at\n`SavedObjectsErrorHelpers` should be used to understand and manage error\nresponses from the `SavedObjectsClient`.\n\nType 2 errors are decorated versions of the source error, so if\nthe elasticsearch client threw an error it will be decorated based\non its type. That means that rather than looking for `error.body.error.type` or\ndoing substring checks on `error.body.error.reason`, just use the helpers to\nunderstand the meaning of the error:\n\n  ```js\n  if (SavedObjectsErrorHelpers.isNotFoundError(error)) {\n     // handle 404\n  }\n\n  if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) {\n     // 401 handling should be automatic, but in case you wanted to know\n  }\n\n  // always rethrow the error unless you handle it\n  throw error;\n  ```\n\n### 404s from missing index\n\nFrom the perspective of application code and APIs the SavedObjectsClient is\na black box that persists objects. One of the internal details that users have\nno control over is that we use an elasticsearch index for persistence and that\nindex might be missing.\n\nAt the time of writing we are in the process of transitioning away from the\noperating assumption that the SavedObjects index is always available. Part of\nthis transition is handling errors resulting from an index missing. These used\nto trigger a 500 error in most cases, and in others cause 404s with different\nerror messages.\n\nFrom my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The\nobject the request/call was targeting could not be found. This is why #14141\ntakes special care to ensure that 404 errors are generic and don't distinguish\nbetween index missing or document missing.\n\nSee {@link SavedObjectsClient}\nSee {@link SavedObjectsErrorHelpers}\n"
+          "\nSaved Objects is Kibana's data persistence mechanism allowing plugins to\nuse Elasticsearch for storing plugin state.\n\n## SavedObjectsClient errors\n\nSince the SavedObjectsClient has its hands in everything we\nare a little paranoid about the way we present errors back to\nto application code. Ideally, all errors will be either:\n\n  1. Caused by bad implementation (ie. undefined is not a function) and\n     as such unpredictable\n  2. An error that has been classified and decorated appropriately\n     by the decorators in ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsErrorHelpers",
+            "text": "SavedObjectsErrorHelpers"
+          },
+          "\n\nType 1 errors are inevitable, but since all expected/handle-able errors\nshould be Type 2 the `isXYZError()` helpers exposed at\n`SavedObjectsErrorHelpers` should be used to understand and manage error\nresponses from the `SavedObjectsClient`.\n\nType 2 errors are decorated versions of the source error, so if\nthe elasticsearch client threw an error it will be decorated based\non its type. That means that rather than looking for `error.body.error.type` or\ndoing substring checks on `error.body.error.reason`, just use the helpers to\nunderstand the meaning of the error:\n\n  ```js\n  if (SavedObjectsErrorHelpers.isNotFoundError(error)) {\n     // handle 404\n  }\n\n  if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) {\n     // 401 handling should be automatic, but in case you wanted to know\n  }\n\n  // always rethrow the error unless you handle it\n  throw error;\n  ```\n\n### 404s from missing index\n\nFrom the perspective of application code and APIs the SavedObjectsClient is\na black box that persists objects. One of the internal details that users have\nno control over is that we use an elasticsearch index for persistence and that\nindex might be missing.\n\nAt the time of writing we are in the process of transitioning away from the\noperating assumption that the SavedObjects index is always available. Part of\nthis transition is handling errors resulting from an index missing. These used\nto trigger a 500 error in most cases, and in others cause 404s with different\nerror messages.\n\nFrom my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The\nobject the request/call was targeting could not be found. This is why #14141\ntakes special care to ensure that 404 errors are generic and don't distinguish\nbetween index missing or document missing.\n\nSee ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsClient",
+            "text": "SavedObjectsClient"
+          },
+          "\nSee ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsErrorHelpers",
+            "text": "SavedObjectsErrorHelpers"
+          },
+          "\n"
         ],
         "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
         "lineNumber": 60,
@@ -4286,6 +4454,7 @@
                 "lineNumber": 133,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4306,6 +4475,7 @@
                 "lineNumber": 134,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsCreateOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4355,6 +4525,7 @@
                 "lineNumber": 145,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4375,12 +4546,20 @@
                 "lineNumber": 146,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsCreateOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsBulkResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkResponse",
+                "text": "SavedObjectsBulkResponse"
+              }
             ]
           },
           {
@@ -4444,12 +4623,20 @@
                 "lineNumber": 159,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsBaseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsCheckConflictsResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsCheckConflictsResponse",
+                "text": "SavedObjectsCheckConflictsResponse"
+              }
             ]
           },
           {
@@ -4527,6 +4714,7 @@
                 "lineNumber": 169,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsDeleteOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4594,12 +4782,20 @@
                 "lineNumber": 180,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsBulkDeleteOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsBulkDeleteResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkDeleteResponse",
+                "text": "SavedObjectsBulkDeleteResponse"
+              }
             ]
           },
           {
@@ -4640,12 +4836,20 @@
                 "lineNumber": 194,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsFindOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsFindResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsFindResponse",
+                "text": "SavedObjectsFindResponse"
+              }
             ]
           },
           {
@@ -4690,12 +4894,20 @@
                 "lineNumber": 209,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsSearchOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsSearchResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsSearchResponse",
+                "text": "SavedObjectsSearchResponse"
+              }
             ]
           },
           {
@@ -4736,12 +4948,20 @@
                 "lineNumber": 220,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsEsqlOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsEsqlResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsEsqlResponse",
+                "text": "SavedObjectsEsqlResponse"
+              }
             ]
           },
           {
@@ -4805,12 +5025,20 @@
                 "lineNumber": 237,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsGetOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsBulkResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkResponse",
+                "text": "SavedObjectsBulkResponse"
+              }
             ]
           },
           {
@@ -4890,6 +5118,7 @@
                 "lineNumber": 250,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsGetOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4959,12 +5188,20 @@
                 "lineNumber": 274,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsResolveOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsBulkResolveResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkResolveResponse",
+                "text": "SavedObjectsBulkResolveResponse"
+              }
             ]
           },
           {
@@ -5044,12 +5281,20 @@
                 "lineNumber": 296,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsResolveOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsResolveResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsResolveResponse",
+                "text": "SavedObjectsResolveResponse"
+              }
             ]
           },
           {
@@ -5128,6 +5373,7 @@
                 "lineNumber": 311,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5148,12 +5394,20 @@
                 "lineNumber": 312,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsUpdateOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsUpdateResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              }
             ]
           },
           {
@@ -5197,6 +5451,7 @@
                 "lineNumber": 330,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5217,12 +5472,20 @@
                 "lineNumber": 331,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsBulkUpdateOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsBulkUpdateResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkUpdateResponse",
+                "text": "SavedObjectsBulkUpdateResponse"
+              }
             ]
           },
           {
@@ -5302,12 +5565,20 @@
                 "lineNumber": 345,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsRemoveReferencesToOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsRemoveReferencesToResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsRemoveReferencesToResponse",
+                "text": "SavedObjectsRemoveReferencesToResponse"
+              }
             ]
           },
           {
@@ -5317,7 +5588,23 @@
             "tags": [],
             "label": "openPointInTimeForType",
             "description": [
-              "\nOpens a Point In Time (PIT) against the indices for the specified Saved Object types.\nThe returned `id` can then be passed to {@link SavedObjectsClient.find} to search\nagainst that PIT.\n\nOnly use this API if you have an advanced use case that's not solved by the\n{@link SavedObjectsClient.createPointInTimeFinder} method.\n"
+              "\nOpens a Point In Time (PIT) against the indices for the specified Saved Object types.\nThe returned `id` can then be passed to ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClient.find",
+                "text": "SavedObjectsClient.find"
+              },
+              " to search\nagainst that PIT.\n\nOnly use this API if you have an advanced use case that's not solved by the\n",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClient.createPointInTimeFinder",
+                "text": "SavedObjectsClient.createPointInTimeFinder"
+              },
+              " method.\n"
             ],
             "signature": [
               "(type: string | string[], options?: ",
@@ -5368,12 +5655,20 @@
                 "lineNumber": 362,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsOpenPointInTimeOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsOpenPointInTimeResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsOpenPointInTimeResponse",
+                "text": "SavedObjectsOpenPointInTimeResponse"
+              }
             ]
           },
           {
@@ -5383,7 +5678,23 @@
             "tags": [],
             "label": "closePointInTime",
             "description": [
-              "\nCloses a Point In Time (PIT) by ID. This simply proxies the request to ES via the\nElasticsearch client, and is included in the Saved Objects Client as a convenience\nfor consumers who are using {@link SavedObjectsClient.openPointInTimeForType}.\n\nOnly use this API if you have an advanced use case that's not solved by the\n{@link SavedObjectsClient.createPointInTimeFinder} method.\n"
+              "\nCloses a Point In Time (PIT) by ID. This simply proxies the request to ES via the\nElasticsearch client, and is included in the Saved Objects Client as a convenience\nfor consumers who are using ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClient.openPointInTimeForType",
+                "text": "SavedObjectsClient.openPointInTimeForType"
+              },
+              ".\n\nOnly use this API if you have an advanced use case that's not solved by the\n",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClient.createPointInTimeFinder",
+                "text": "SavedObjectsClient.createPointInTimeFinder"
+              },
+              " method.\n"
             ],
             "signature": [
               "(id: string, options?: ",
@@ -5434,12 +5745,20 @@
                 "lineNumber": 379,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClosePointInTimeOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsClosePointInTimeResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClosePointInTimeResponse",
+                "text": "SavedObjectsClosePointInTimeResponse"
+              }
             ]
           },
           {
@@ -5449,7 +5768,23 @@
             "tags": [],
             "label": "createPointInTimeFinder",
             "description": [
-              "\nReturns a {@link ISavedObjectsPointInTimeFinder} to help page through\nlarge sets of saved objects. We strongly recommend using this API for\nany `find` queries that might return more than 1000 saved objects,\nhowever this API is only intended for use in server-side \"batch\"\nprocessing of objects where you are collecting all objects in memory\nor streaming them back to the client.\n\nDo NOT use this API in a route handler to facilitate paging through\nsaved objects on the client-side unless you are streaming all of the\nresults back to the client at once. Because the returned generator is\nstateful, you cannot rely on subsequent http requests retrieving new\npages from the same Kibana server in multi-instance deployments.\n\nThe generator wraps calls to {@link SavedObjectsClient.find} and iterates\nover multiple pages of results using `_pit` and `search_after`. This will\nopen a new Point-In-Time (PIT), and continue paging until a set of\nresults is received that's smaller than the designated `perPage`.\n\nOnce you have retrieved all of the results you need, it is recommended\nto call `close()` to clean up the PIT and prevent Elasticsearch from\nconsuming resources unnecessarily. This is only required if you are\ndone iterating and have not yet paged through all of the results: the\nPIT will automatically be closed for you once you reach the last page\nof results, or if the underlying call to `find` fails for any reason.\n"
+              "\nReturns a ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.ISavedObjectsPointInTimeFinder",
+                "text": "ISavedObjectsPointInTimeFinder"
+              },
+              " to help page through\nlarge sets of saved objects. We strongly recommend using this API for\nany `find` queries that might return more than 1000 saved objects,\nhowever this API is only intended for use in server-side \"batch\"\nprocessing of objects where you are collecting all objects in memory\nor streaming them back to the client.\n\nDo NOT use this API in a route handler to facilitate paging through\nsaved objects on the client-side unless you are streaming all of the\nresults back to the client at once. Because the returned generator is\nstateful, you cannot rely on subsequent http requests retrieving new\npages from the same Kibana server in multi-instance deployments.\n\nThe generator wraps calls to ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClient.find",
+                "text": "SavedObjectsClient.find"
+              },
+              " and iterates\nover multiple pages of results using `_pit` and `search_after`. This will\nopen a new Point-In-Time (PIT), and continue paging until a set of\nresults is received that's smaller than the designated `perPage`.\n\nOnce you have retrieved all of the results you need, it is recommended\nto call `close()` to clean up the PIT and prevent Elasticsearch from\nconsuming resources unnecessarily. This is only required if you are\ndone iterating and have not yet paged through all of the results: the\nPIT will automatically be closed for you once you reach the last page\nof results, or if the underlying call to `find` fails for any reason.\n"
             ],
             "signature": [
               "<T = unknown, A = unknown>(findOptions: ",
@@ -5482,6 +5817,7 @@
                 "lineNumber": 432,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsCreatePointInTimeFinderOptions",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5502,6 +5838,7 @@
                 "lineNumber": 433,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsCreatePointInTimeFinderDependencies",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5571,12 +5908,20 @@
                 "lineNumber": 445,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsCollectMultiNamespaceReferencesOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsCollectMultiNamespaceReferencesResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
+              }
             ]
           },
           {
@@ -5678,12 +6023,20 @@
                 "lineNumber": 461,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsUpdateObjectsSpacesOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsUpdateObjectsSpacesResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
+                "text": "SavedObjectsUpdateObjectsSpacesResponse"
+              }
             ]
           },
           {
@@ -5807,12 +6160,20 @@
                 "lineNumber": 484,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsChangeOwnershipOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsChangeAccessControlResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsChangeAccessControlResponse",
+                "text": "SavedObjectsChangeAccessControlResponse"
+              }
             ]
           },
           {
@@ -5875,12 +6236,20 @@
                 "lineNumber": 495,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsChangeAccessModeOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "the {@link SavedObjectsChangeAccessControlResponse }"
+              "the ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsChangeAccessControlResponse",
+                "text": "SavedObjectsChangeAccessControlResponse"
+              }
             ]
           }
         ],
@@ -6046,7 +6415,14 @@
             "tags": [],
             "label": "objects",
             "description": [
-              "array of {@link SavedObjectReferenceWithContext}"
+              "array of ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectReferenceWithContext",
+                "text": "SavedObjectReferenceWithContext"
+              }
             ],
             "signature": [
               "SavedObjectReferenceWithContext",
@@ -6277,7 +6653,15 @@
             "tags": [],
             "label": "initialNamespaces",
             "description": [
-              "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n{@link SavedObjectsCreateOptions}.\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
+              "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
+              ".\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
             ],
             "signature": [
               "string[] | undefined"
@@ -6313,7 +6697,13 @@
             "tags": [],
             "label": "migrationVersionCompatibility",
             "description": [
-              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsRawDocParseOptions.migrationVersionCompatibility",
+                "text": "SavedObjectsRawDocParseOptions.migrationVersionCompatibility"
+              }
             ],
             "signature": [
               "\"raw\" | \"compatible\" | undefined"
@@ -6989,7 +7379,15 @@
             "tags": [],
             "label": "pit",
             "description": [
-              "\nSearch against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}."
+              "\nSearch against a specific Point In Time (PIT) that you've opened with ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClient.openPointInTimeForType",
+                "text": "SavedObjectsClient.openPointInTimeForType"
+              },
+              "."
             ],
             "signature": [
               "SavedObjectsPitParams",
@@ -7008,7 +7406,13 @@
             "tags": [],
             "label": "migrationVersionCompatibility",
             "description": [
-              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsRawDocParseOptions.migrationVersionCompatibility",
+                "text": "SavedObjectsRawDocParseOptions.migrationVersionCompatibility"
+              }
             ],
             "signature": [
               "\"raw\" | \"compatible\" | undefined"
@@ -7277,7 +7681,13 @@
             "tags": [],
             "label": "migrationVersionCompatibility",
             "description": [
-              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsRawDocParseOptions.migrationVersionCompatibility",
+                "text": "SavedObjectsRawDocParseOptions.migrationVersionCompatibility"
+              }
             ],
             "signature": [
               "\"raw\" | \"compatible\" | undefined"
@@ -7389,7 +7799,14 @@
             ],
             "label": "migrationVersion",
             "description": [
-              "\n{@link SavedObjectsMigrationVersion}"
+              "\n",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsMigrationVersion",
+                "text": "SavedObjectsMigrationVersion"
+              }
             ],
             "signature": [
               "SavedObjectsMigrationVersion",
@@ -7436,7 +7853,14 @@
             "tags": [],
             "label": "refresh",
             "description": [
-              "\n(default='wait_for') The Elasticsearch refresh setting for this\noperation. See {@link MutatingOperationRefreshSetting}"
+              "\n(default='wait_for') The Elasticsearch refresh setting for this\noperation. See ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.MutatingOperationRefreshSetting",
+                "text": "MutatingOperationRefreshSetting"
+              }
             ],
             "signature": [
               "MutatingOperationRefreshSetting",
@@ -7975,7 +8399,13 @@
             "tags": [],
             "label": "migrationVersionCompatibility",
             "description": [
-              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsRawDocParseOptions.migrationVersionCompatibility",
+                "text": "SavedObjectsRawDocParseOptions.migrationVersionCompatibility"
+              }
             ],
             "signature": [
               "\"raw\" | \"compatible\" | undefined"
@@ -8256,7 +8686,14 @@
             "tags": [],
             "label": "objects",
             "description": [
-              "array of {@link SavedObjectsUpdateObjectsSpacesResponseObject}"
+              "array of ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsUpdateObjectsSpacesResponseObject",
+                "text": "SavedObjectsUpdateObjectsSpacesResponseObject"
+              }
             ],
             "signature": [
               "SavedObjectsUpdateObjectsSpacesResponseObject",
@@ -8475,7 +8912,13 @@
             "tags": [],
             "label": "migrationVersionCompatibility",
             "description": [
-              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsRawDocParseOptions.migrationVersionCompatibility",
+                "text": "SavedObjectsRawDocParseOptions.migrationVersionCompatibility"
+              }
             ],
             "signature": [
               "\"raw\" | \"compatible\" | undefined"
@@ -8619,7 +9062,15 @@
         "tags": [],
         "label": "SavedObjectAttributeSingle",
         "description": [
-          "\nDon't use this type, it's simply a helper type for {@link SavedObjectAttribute}\n"
+          "\nDon't use this type, it's simply a helper type for ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectAttribute",
+            "text": "SavedObjectAttribute"
+          },
+          "\n"
         ],
         "signature": [
           "string | number | boolean | ",
@@ -8730,7 +9181,15 @@
         "tags": [],
         "label": "SavedObjectsPointInTimeFinderClient",
         "description": [
-          "\nPoint-in-time finder client.\nPartially implements {@link ISavedObjectsRepository}\n"
+          "\nPoint-in-time finder client.\nPartially implements ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.ISavedObjectsRepository",
+            "text": "ISavedObjectsRepository"
+          },
+          "\n"
         ],
         "signature": [
           "{ closePointInTime: (id: string, options?: ",
