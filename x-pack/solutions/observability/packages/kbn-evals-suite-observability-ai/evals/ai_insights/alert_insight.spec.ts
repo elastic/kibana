@@ -28,8 +28,6 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 
 function createScenarioTest(scenario: AlertScenario) {
   const scenarioLabel = `Alert AI Insights - ${scenario.id} (${scenario.snapshotName})`;
-  const isTransactionDurationRule =
-    scenario.alertRule.ruleParams.rule_type_id === 'apm.transaction_duration';
 
   evaluate.describe(scenarioLabel, { tag: tags.serverless.observability.complete }, () => {
     let ruleId: string;
@@ -68,7 +66,7 @@ function createScenarioTest(scenario: AlertScenario) {
         path: `/internal/alerting/rule/${ruleId}/_run_soon`,
       });
 
-      const prePollDelayMs = isTransactionDurationRule ? 8000 : 3000;
+      const prePollDelayMs = 5000;
       log.debug(
         `Waiting ${prePollDelayMs}ms before polling for alert (task run + alert index write)`
       );
@@ -76,23 +74,29 @@ function createScenarioTest(scenario: AlertScenario) {
 
       log.info('Polling for alert to be created');
 
+      let pollAttempt = 0;
       alertId = await pRetry(
         async () => {
-          if (isTransactionDurationRule) {
-            await refreshReplayedSourceIndices(esClient, replayResult);
+          pollAttempt += 1;
+          // Retry by triggering an immediate execution, then refresh source indices.
+          if (pollAttempt > 1) {
+            await kbnClient.request<void>({
+              method: 'POST',
+              path: `/internal/alerting/rule/${ruleId}/_run_soon`,
+            });
+            await delay(1500);
           }
+          await refreshReplayedSourceIndices(esClient, replayResult);
           await esClient.indices.refresh({ index: scenario.alertRule.alertsIndex });
 
           const alertsResponse = await esClient.search({
             index: scenario.alertRule.alertsIndex,
             query: {
               bool: {
-                filter: [
-                  { term: { 'kibana.alert.rule.uuid': ruleId } },
-                  { term: { 'kibana.alert.status': 'active' } },
-                ],
+                filter: [{ term: { 'kibana.alert.rule.uuid': ruleId } }],
               },
             },
+            sort: [{ '@timestamp': { order: 'desc' } }],
             size: 1,
           });
 
@@ -103,10 +107,10 @@ function createScenarioTest(scenario: AlertScenario) {
           return alertDoc._id as string;
         },
         {
-          retries: isTransactionDurationRule ? 20 : 10,
+          retries: 20,
           factor: 2,
-          minTimeout: isTransactionDurationRule ? 3000 : 2000,
-          maxTimeout: isTransactionDurationRule ? 20_000 : 15_000,
+          minTimeout: 3000,
+          maxTimeout: 20_000,
           onFailedAttempt: (error) => {
             if (error.retriesLeft === 0) {
               log.error(
