@@ -7,7 +7,7 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import { dismissGlobalToastsIfPresent, waitForApmSettingsHeaderLink } from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
 
 export class TransactionDetailsPage {
@@ -167,6 +167,7 @@ export class TransactionDetailsPage {
    * Open the transaction action menu by clicking the "Investigate" button
    */
   async openActionMenu() {
+    await dismissGlobalToastsIfPresent(this.page);
     const investigateButton = this.page.getByTestId('apmActionMenuButtonInvestigateButton');
     await investigateButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await investigateButton.scrollIntoViewIfNeeded();
