@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './artifacts';
-export * from './esql_params';
-export * from './labels';
+/**
+ * Lowercase parameter names that the alerting v2 rule executor binds at
+ * execution time (see `get_query_payload.ts`).
+ **/
+export const RESERVED_ESQL_PARAMS: readonly string[] = ['_tstart', '_tend'];
