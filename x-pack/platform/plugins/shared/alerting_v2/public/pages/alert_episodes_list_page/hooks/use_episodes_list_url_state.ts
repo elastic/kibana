@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction 
 import { useHistory, useLocation } from 'react-router-dom';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { TimeRange } from '@kbn/es-query';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   DEFAULT_EPISODES_LIST_TIME_RANGE,
@@ -19,9 +19,7 @@ import {
 } from '../utils/episodes_list_url_state';
 import { useEpisodesTimeRange } from './use_episodes_time_range';
 
-type Timefilter = DataPublicPluginStart['query']['timefilter']['timefilter'];
-
-export function useEpisodesListUrlState(timefilter: Timefilter) {
+export function useEpisodesListUrlState(timefilter: TimefilterContract) {
   const history = useHistory();
   const location = useLocation();
   const { timeRange, handleTimeChange: setTimeOnFilter } = useEpisodesTimeRange(timefilter);
