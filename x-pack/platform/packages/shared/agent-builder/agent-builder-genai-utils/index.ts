@@ -45,11 +45,6 @@ export {
   type TopSnippetsConfig,
 } from './tools';
 export {
-  buildVisualizationConfig,
-  getChartTypeSelectionPromptContent,
-  type VisualizationConfig,
-} from './tools/visualization';
-export {
   resolveResourceForEsqlWithSamplingStats,
   type ResolvedResourceWithSampling,
   formatResourceWithSampledValues,
