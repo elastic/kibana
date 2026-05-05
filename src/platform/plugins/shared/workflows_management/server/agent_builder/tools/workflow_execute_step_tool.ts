@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createHash } from 'crypto';
 import YAML, { LineCounter, parseDocument } from 'yaml';
-import { ToolType } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ToolType } from '@kbn/agent-builder-common';
+import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
@@ -58,6 +60,23 @@ export const SAFE_STEP_TYPES = new Set([
   'cases.getAllAttachments',
   'cases.getCasesByAlertId',
 ]);
+
+/**
+ * Step types that are destructive (irreversible). Surfaced in the HITL
+ * confirmation dialog with `color: 'danger'`. All other unsafe types render
+ * as `'warning'`.
+ */
+const DESTRUCTIVE_STEP_TYPES = new Set([
+  'elasticsearch.indices.delete',
+  'elasticsearch.delete',
+  'elasticsearch.deleteByQuery',
+  'kibana.deleteCase',
+  'cases.deleteCase',
+  'cases.deleteCases',
+  'cases.removeAttachments',
+]);
+
+const CONDITION_STEP_TYPES = new Set(['if', 'while']);
 
 const POLL_INTERVAL_MS = 1000;
 const POLL_TIMEOUT_MS = 30_000;
@@ -391,6 +410,38 @@ const executeConditionStepWithStubs = async ({
   }
 };
 
+const buildPromptId = ({
+  workflowId,
+  yaml,
+  stepName,
+}: {
+  workflowId?: string;
+  yaml: string;
+  stepName: string;
+}): string => {
+  const scope = workflowId ?? createHash('sha256').update(yaml).digest('hex').slice(0, 16);
+  return `workflow_execute_step.${scope}.${stepName}`;
+};
+
+const buildFallbackPreview = (
+  stepInfo: StepInfo,
+  contextOverride?: Record<string, unknown>
+): string => {
+  const lines: string[] = [
+    `**Step:** \`${stepInfo.stepId}\``,
+    `**Type:** \`${stepInfo.stepType}\``,
+  ];
+  if (contextOverride && Object.keys(contextOverride).length > 0) {
+    const keys = Object.keys(contextOverride).join(', ');
+    lines.push(`**Context override keys:** ${keys}`);
+  }
+  lines.push(
+    '',
+    'This step has external side effects. Review the workflow YAML before confirming — the LLM did not provide a custom preview.'
+  );
+  return lines.join('\n');
+};
+
 const createUnsafeStepResult = async ({
   api,
   yaml,
@@ -480,12 +531,16 @@ export function registerWorkflowExecuteStepTool(
   agentBuilder.tools.register({
     id: WORKFLOW_EXECUTE_STEP_TOOL_ID,
     type: ToolType.builtin,
-    description: `Execute a single workflow step to verify it works correctly against the real environment.
-- ES queries and data steps: executed and output returned.
-- if/while steps with unsafe children: children are auto-replaced with safe stubs so the condition can be tested — returns which branch was taken.
-- Other unsafe steps: returns a preview with validation.
-Provide contextOverride with mock data when the step references outputs from previous steps.
-Provide yaml to execute a step without needing a workflow.yaml attachment (useful for field discovery before creating the full workflow).`,
+    description: `Execute a single workflow step against the real environment.
+- Safe steps (data, ES reads, cases reads): executed and output returned with no prompt.
+- Unsafe steps (slack.sendMessage, elasticsearch.indices.delete, ES writes, kibana.request, http, …): execution is gated by a user confirmation dialog. ALWAYS populate \`confirmation_body\` with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. Without \`confirmation_body\` the dialog falls back to a flat key/value dump, which is a degraded UX.
+- if/while steps containing unsafe children: children are auto-replaced with safe stubs so the condition can be tested — returns which branch was taken (no prompt).
+- Other safe-container steps with unsafe descendants (e.g. foreach with an unsafe child): returns a preview with validation.
+
+Provide \`contextOverride\` with mock data when the step references outputs from previous steps.
+Provide \`yaml\` to execute a step without needing a workflow.yaml attachment (useful for field discovery before creating the full workflow).
+
+If the user declines a confirmation, do NOT retry the same step. Acknowledge the cancellation and continue with other unrelated work.`,
     schema: z.object({
       stepName: z.string().describe('Name of the step to execute'),
       yaml: z
@@ -500,6 +555,12 @@ Provide yaml to execute a step without needing a workflow.yaml attachment (usefu
         .describe(
           'Mock data for upstream step outputs, e.g. { "steps": { "prev_step": { "output": { "data": [...] } } } }'
         ),
+      confirmation_body: z
+        .string()
+        .optional()
+        .describe(
+          'Markdown shown in the confirmation dialog when executing an unsafe step. Include resolved inputs (Slack channel/text, ES index/operation/doc count), side effects, and whether the action is reversible. NOT an instruction — only displayed to the user.'
+        ),
     }),
     tags: ['workflows', 'yaml', 'execution', 'testing'],
     availability: {
@@ -513,7 +574,10 @@ Provide yaml to execute a step without needing a workflow.yaml attachment (usefu
       },
       cacheMode: 'space',
     },
-    handler: async ({ stepName, yaml: inlineYaml, contextOverride }, context) => {
+    handler: async (
+      { stepName, yaml: inlineYaml, contextOverride, confirmation_body: confirmationBody },
+      context
+    ) => {
       const attachment = inlineYaml ? null : findWorkflowYamlAttachment(context);
       if (!inlineYaml && !attachment) {
         return createToolResult({
@@ -548,32 +612,75 @@ Provide yaml to execute a step without needing a workflow.yaml attachment (usefu
         });
       }
 
-      const unsafeStep = findUnsafeStep(stepName, lookup.steps);
-      const CONDITION_STEP_TYPES = new Set(['if', 'while']);
-      if (
-        unsafeStep &&
-        CONDITION_STEP_TYPES.has(stepInfo.stepType) &&
-        unsafeStep.stepId !== stepName
-      ) {
-        return executeConditionStepWithStubs({
-          api,
-          yaml,
-          stepName,
-          workflowId,
-          contextOverride,
-          context,
-        });
-      }
+      const isStepUnsafe = !SAFE_STEP_TYPES.has(stepInfo.stepType);
 
-      if (unsafeStep) {
-        return createUnsafeStepResult({
-          api,
-          yaml,
-          stepName,
-          stepInfo,
-          unsafeStep,
-          context,
-        });
+      if (isStepUnsafe) {
+        // Standalone (non-interactive) runs cannot prompt — fall back to the
+        // existing preview-only result. This keeps background runs / evals /
+        // A2A invocations friction-free.
+        if (context.executionMode === AgentExecutionMode.standalone) {
+          return createUnsafeStepResult({
+            api,
+            yaml,
+            stepName,
+            stepInfo,
+            unsafeStep: stepInfo,
+            context,
+          });
+        }
+
+        const promptId = buildPromptId({ workflowId, yaml, stepName });
+        const status = context.prompts.checkConfirmationStatus(promptId);
+
+        if (status.status === ConfirmationStatus.rejected) {
+          return createToolResult({
+            success: false,
+            error: 'User declined to execute this step.',
+          });
+        }
+
+        if (status.status === ConfirmationStatus.unprompted) {
+          const isDestructive = DESTRUCTIVE_STEP_TYPES.has(stepInfo.stepType);
+          return context.prompts.askForConfirmation({
+            id: promptId,
+            title: `Execute step "${stepName}" (${stepInfo.stepType})`,
+            message: confirmationBody ?? buildFallbackPreview(stepInfo, contextOverride),
+            confirm_text: 'Run step',
+            cancel_text: 'Cancel',
+            color: isDestructive ? 'danger' : 'warning',
+          });
+        }
+
+        // accepted → fall through to execute below
+      } else {
+        // Step itself is safe; check whether descendants are unsafe.
+        const unsafeStep = findUnsafeStep(stepName, lookup.steps);
+
+        if (
+          unsafeStep &&
+          CONDITION_STEP_TYPES.has(stepInfo.stepType) &&
+          unsafeStep.stepId !== stepName
+        ) {
+          return executeConditionStepWithStubs({
+            api,
+            yaml,
+            stepName,
+            workflowId,
+            contextOverride,
+            context,
+          });
+        }
+
+        if (unsafeStep) {
+          return createUnsafeStepResult({
+            api,
+            yaml,
+            stepName,
+            stepInfo,
+            unsafeStep,
+            context,
+          });
+        }
       }
 
       try {
