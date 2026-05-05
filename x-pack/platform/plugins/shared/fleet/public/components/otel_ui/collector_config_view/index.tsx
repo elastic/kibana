@@ -10,22 +10,27 @@ import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { OTelCollectorConfig, ComponentHealth } from '../../../../common/types';
+import type { OTelCollectorConfig, ComponentHealth, Agent } from '../../../../common/types';
 
 import { ALL_PIPELINES } from './utils';
 import { PipelineSelector } from './pipeline_selector';
 import { YamlViewer } from './yaml_viewer';
 
 const GraphView = lazy(() => import('./graph_view').then((m) => ({ default: m.GraphView })));
+const CollectorDetail = lazy(() =>
+  import('./collector_detail').then((m) => ({ default: m.CollectorDetail }))
+);
 
 interface CollectorConfigViewProps {
   config: OTelCollectorConfig;
   health?: ComponentHealth;
+  agents?: Agent[];
 }
 
 export const CollectorConfigView: React.FunctionComponent<CollectorConfigViewProps> = ({
   config,
   health,
+  agents,
 }) => {
   const [selectedPipelineId, setSelectedPipelineId] = useState(ALL_PIPELINES);
 
@@ -73,6 +78,13 @@ export const CollectorConfigView: React.FunctionComponent<CollectorConfigViewPro
       <EuiFlexItem grow={false}>
         <YamlViewer config={config} />
       </EuiFlexItem>
+      {agents && agents.length > 0 && (
+        <EuiFlexItem>
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <CollectorDetail agents={agents} />
+          </Suspense>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
