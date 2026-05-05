@@ -220,6 +220,25 @@ agentBuilderSetup.tools.register({
 });
 ```
 
+### Marking a tool as experimental
+
+Individual built-in tools (and other static tool registrations) can be flagged as experimental by setting `experimental: true` on the registration.
+Experimental tools are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
+
+**Example:**
+
+```ts
+agentBuilder.tools.register({
+  id: 'platform.experimental.my-tool',
+  type: ToolType.builtin,
+  description: 'An experimental tool only visible when experimental features are on',
+  tags: [],
+  schema: z.object({}),
+  experimental: true,
+  handler: async () => ({ results: [] }),
+});
+```
+
 ## Registering built-in agents
 
 ### Registering the agent
