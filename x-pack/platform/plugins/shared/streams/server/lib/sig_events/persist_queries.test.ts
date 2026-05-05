@@ -66,7 +66,7 @@ describe('persistQueries', () => {
     expect(queryClient.bulk).not.toHaveBeenCalled();
   });
 
-  it('creates new queries with generated UUIDs via createRules: false', async () => {
+  it('creates low-severity queries with createRules: false', async () => {
     const { queryClient, streamsClient } = createMocks();
     const query = makeGeneratedQuery();
 
@@ -75,11 +75,7 @@ describe('persistQueries', () => {
     expect(queryClient.bulk).toHaveBeenCalledTimes(1);
     expect(queryClient.bulk).toHaveBeenCalledWith(
       definition,
-      [
-        expect.objectContaining({
-          index: expect.objectContaining({ id: 'generated-uuid' }),
-        }),
-      ],
+      [expect.objectContaining({ index: expect.objectContaining({ id: 'generated-uuid' }) })],
       { createRules: false }
     );
   });
@@ -152,7 +148,7 @@ describe('persistQueries', () => {
     );
   });
 
-  it('routes replaces for rule-backed queries to ruleBackedReplaceOps (no createRules option)', async () => {
+  it('routes replaces for rule-backed queries to ruleOps (no createRules option)', async () => {
     const existing = makeLink({ id: 'q1', ruleBacked: true });
     const { queryClient, streamsClient } = createMocks([existing]);
 
@@ -185,48 +181,6 @@ describe('persistQueries', () => {
     expect(ops[0].index.id).toBe('generated-uuid');
   });
 
-  it('issues two bulk calls when both standard and rule-backed ops exist', async () => {
-    const nonRuleBacked = makeLink({
-      id: 'q1',
-      esql: 'FROM logs | WHERE body.text:"old1"',
-      ruleBacked: false,
-    });
-    const ruleBacked = makeLink({
-      id: 'q2',
-      esql: 'FROM logs | WHERE body.text:"old2"',
-      ruleBacked: true,
-    });
-    const { queryClient, streamsClient } = createMocks([nonRuleBacked, ruleBacked]);
-
-    const newQuery = makeGeneratedQuery({
-      title: 'Brand new',
-      esql: { query: 'FROM logs | WHERE body.text:"brand-new"' },
-    });
-    const replaceNonRuleBacked = makeGeneratedQuery({
-      replaces: 'q1',
-      esql: { query: 'FROM logs | WHERE body.text:"replaced1"' },
-    });
-    const replaceRuleBacked = makeGeneratedQuery({
-      replaces: 'q2',
-      esql: { query: 'FROM logs | WHERE body.text:"replaced2"' },
-    });
-
-    await persistQueries('logs.test', [newQuery, replaceNonRuleBacked, replaceRuleBacked], {
-      queryClient,
-      streamsClient,
-    });
-
-    expect(queryClient.bulk).toHaveBeenCalledTimes(2);
-
-    const [firstCall, secondCall] = (queryClient.bulk as jest.Mock).mock.calls;
-    expect(firstCall[2]).toEqual({ createRules: false });
-    expect(firstCall[1]).toHaveLength(2);
-
-    expect(secondCall[2]).toBeUndefined();
-    expect(secondCall[1]).toHaveLength(1);
-    expect(secondCall[1][0].index.id).toBe('q2');
-  });
-
   it('skips replaces when the replacement ES|QL matches the existing query exactly', async () => {
     const existing = makeLink({
       id: 'q1',
@@ -242,5 +196,83 @@ describe('persistQueries', () => {
     await persistQueries('logs.test', [noOpReplace], { queryClient, streamsClient });
 
     expect(queryClient.bulk).not.toHaveBeenCalled();
+  });
+
+  describe('rule-eligible queries (severity >= 60, non-STATS)', () => {
+    it('routes new high-severity queries to ruleOps (creates rules)', async () => {
+      const { queryClient, streamsClient } = createMocks();
+      const query = makeGeneratedQuery({ severity_score: 75, type: 'match' });
+
+      await persistQueries('logs.test', [query], { queryClient, streamsClient });
+
+      expect(queryClient.bulk).toHaveBeenCalledTimes(1);
+      expect(queryClient.bulk).toHaveBeenCalledWith(definition, [
+        expect.objectContaining({ index: expect.objectContaining({ id: 'generated-uuid' }) }),
+      ]);
+      expect((queryClient.bulk as jest.Mock).mock.calls[0][2]).toBeUndefined();
+    });
+
+    it('routes new high-severity STATS queries to standardOps (no rules)', async () => {
+      const { queryClient, streamsClient } = createMocks();
+      const query = makeGeneratedQuery({ severity_score: 90, type: 'stats' });
+
+      await persistQueries('logs.test', [query], { queryClient, streamsClient });
+
+      expect(queryClient.bulk).toHaveBeenCalledTimes(1);
+      expect(queryClient.bulk).toHaveBeenCalledWith(
+        definition,
+        [expect.objectContaining({ index: expect.objectContaining({ id: 'generated-uuid' }) })],
+        { createRules: false }
+      );
+    });
+
+    it('creates rules at the exact threshold boundary (severity_score = 60)', async () => {
+      const { queryClient, streamsClient } = createMocks();
+      const query = makeGeneratedQuery({ severity_score: 60, type: 'match' });
+
+      await persistQueries('logs.test', [query], { queryClient, streamsClient });
+
+      expect(queryClient.bulk).toHaveBeenCalledTimes(1);
+      expect((queryClient.bulk as jest.Mock).mock.calls[0][2]).toBeUndefined();
+    });
+
+    it('issues two bulk calls when standard and rule-eligible ops coexist', async () => {
+      const ruleBacked = makeLink({
+        id: 'q1',
+        esql: 'FROM logs | WHERE body.text:"old"',
+        ruleBacked: true,
+      });
+      const { queryClient, streamsClient } = createMocks([ruleBacked]);
+
+      const lowSevNew = makeGeneratedQuery({
+        title: 'Low sev',
+        severity_score: 30,
+        esql: { query: 'FROM logs | WHERE body.text:"low"' },
+      });
+      const highSevNew = makeGeneratedQuery({
+        title: 'High sev',
+        severity_score: 80,
+        esql: { query: 'FROM logs | WHERE body.text:"high"' },
+      });
+      const replaceRuleBacked = makeGeneratedQuery({
+        replaces: 'q1',
+        esql: { query: 'FROM logs | WHERE body.text:"replaced"' },
+      });
+
+      await persistQueries('logs.test', [lowSevNew, highSevNew, replaceRuleBacked], {
+        queryClient,
+        streamsClient,
+      });
+
+      expect(queryClient.bulk).toHaveBeenCalledTimes(2);
+
+      const [firstCall, secondCall] = (queryClient.bulk as jest.Mock).mock.calls;
+
+      expect(firstCall[2]).toEqual({ createRules: false });
+      expect(firstCall[1]).toHaveLength(1);
+
+      expect(secondCall[2]).toBeUndefined();
+      expect(secondCall[1]).toHaveLength(2);
+    });
   });
 });
