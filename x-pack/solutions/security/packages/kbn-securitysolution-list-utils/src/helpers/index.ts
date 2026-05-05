@@ -1104,6 +1104,30 @@ export const hasEntryEscaping = (
   );
 };
 
+// Detect `matches` entries with escaped wildcard metacharacters (\* or \?). Uses a negative
+// lookbehind so that \\* (double-backslash path separator + wildcard) does not trigger — only
+// a lone \* or \? (escaped metacharacter) fires the warning.
+const ESCAPED_WILDCARD_REGEX = /(?<!\\)\\[*?]/;
+
+export const hasMalformedMatchesValue = (
+  items: ExceptionsBuilderReturnExceptionItem[]
+): boolean => {
+  const multipleEntries = items.flatMap((item) => item.entries);
+  const allEntries = multipleEntries.flatMap((item) => {
+    if (item.type === 'nested') {
+      return item.entries;
+    }
+    return item;
+  });
+
+  return allEntries.some((e) => {
+    if (e.type === 'wildcard' && 'value' in e && typeof e.value === 'string') {
+      return ESCAPED_WILDCARD_REGEX.test(e.value);
+    }
+    return false;
+  });
+};
+
 /**
  * Event filters helper where given an exceptions list,
  * determine if both 'subject_name' and 'trusted' are

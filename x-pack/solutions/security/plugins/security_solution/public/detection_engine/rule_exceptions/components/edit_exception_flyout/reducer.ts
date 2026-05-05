@@ -21,6 +21,7 @@ export interface State {
   expireErrorExists: boolean;
   wildcardWarningExists: boolean;
   partialCodeSignatureWarningExists: boolean;
+  malformedMatchesValueExists: boolean;
 }
 
 export type Action =
@@ -70,6 +71,10 @@ export type Action =
     }
   | {
       type: 'setPartialCodeSignature';
+      warningExists: boolean;
+    }
+  | {
+      type: 'setMalformedMatchesValue';
       warningExists: boolean;
     };
 
@@ -172,6 +177,13 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           partialCodeSignatureWarningExists: warningExists,
+        };
+      }
+      case 'setMalformedMatchesValue': {
+        const { warningExists } = action;
+        return {
+          ...state,
+          malformedMatchesValueExists: warningExists,
         };
       }
       default:

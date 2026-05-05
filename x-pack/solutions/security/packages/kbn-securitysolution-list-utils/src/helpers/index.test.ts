@@ -11,6 +11,7 @@ import {
   hasWrongOperatorWithWildcard,
   hasEscaping,
   hasPartialCodeSignatureEntry,
+  hasMalformedMatchesValue,
   getOperatorOptions,
   hasEntryEscaping,
 } from '.';
@@ -640,6 +641,203 @@ describe('Helpers', () => {
           },
         ])
       ).toBeFalsy();
+    });
+  });
+
+  describe('hasMalformedMatchesValue', () => {
+    describe('escaped wildcard characters', () => {
+      test('it returns true for a wildcard entry with escaped asterisk (\\*)', () => {
+        expect(
+          hasMalformedMatchesValue([
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [{ type: 'wildcard', value: 'app\\*.exe', field: '', operator: 'included' }],
+            },
+          ])
+        ).toBeTruthy();
+      });
+
+      test('it returns true for a wildcard entry with escaped question mark (\\?)', () => {
+        expect(
+          hasMalformedMatchesValue([
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [
+                { type: 'wildcard', value: 'file\\?.txt', field: '', operator: 'included' },
+              ],
+            },
+          ])
+        ).toBeTruthy();
+      });
+
+      test('it returns false for a wildcard entry with only escaped backslashes (\\\\) and no escaped wildcards', () => {
+        expect(
+          hasMalformedMatchesValue([
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [
+                {
+                  type: 'wildcard',
+                  value: 'C:\\\\Windows\\\\explorer.exe',
+                  field: '',
+                  operator: 'included',
+                },
+              ],
+            },
+          ])
+        ).toBeFalsy();
+      });
+    });
+
+    describe('valid wildcard entries', () => {
+      test('it returns false for a wildcard entry with a normal pattern', () => {
+        expect(
+          hasMalformedMatchesValue([
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [
+                { type: 'wildcard', value: 'chrome*.exe', field: '', operator: 'included' },
+              ],
+            },
+          ])
+        ).toBeFalsy();
+      });
+
+      test('it returns false for a wildcard entry with a question mark pattern', () => {
+        expect(
+          hasMalformedMatchesValue([
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [
+                {
+                  type: 'wildcard',
+                  value: 'file?.txt',
+                  field: '',
+                  operator: 'included',
+                },
+              ],
+            },
+          ])
+        ).toBeFalsy();
+      });
+
+      test('it returns false for a documented Windows path with double backslashes and wildcards', () => {
+        expect(
+          hasMalformedMatchesValue([
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [
+                {
+                  type: 'wildcard',
+                  value: 'C:\\\\Windows\\\\*.dll',
+                  field: '',
+                  operator: 'included',
+                },
+              ],
+            },
+          ])
+        ).toBeFalsy();
+      });
+
+      test('it returns true for a single-backslash path where backslash escapes the wildcard', () => {
+        expect(
+          hasMalformedMatchesValue([
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [
+                {
+                  type: 'wildcard',
+                  value: 'C:\\Users\\*\\Downloads\\*.exe',
+                  field: '',
+                  operator: 'included',
+                },
+              ],
+            },
+          ])
+        ).toBeTruthy();
+      });
+
+      test('it returns false for a match entry even if it contains escape sequences', () => {
+        expect(
+          hasMalformedMatchesValue([
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [{ type: 'match', value: 'app\\*.exe', field: '', operator: 'included' }],
+            },
+          ])
+        ).toBeFalsy();
+      });
+
+      test('it returns false for an empty entries list', () => {
+        expect(
+          hasMalformedMatchesValue([
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [],
+            },
+          ])
+        ).toBeFalsy();
+      });
+    });
+
+    describe('multiple entries and OR conditions', () => {
+      test('it returns true if at least one entry across OR conditions has escaped wildcards', () => {
+        expect(
+          hasMalformedMatchesValue([
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [{ type: 'wildcard', value: 'normal*', field: '', operator: 'included' }],
+            },
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [{ type: 'wildcard', value: 'app\\*.exe', field: '', operator: 'included' }],
+            },
+          ])
+        ).toBeTruthy();
+      });
+
+      test('it returns false if no entries have malformed values', () => {
+        expect(
+          hasMalformedMatchesValue([
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [{ type: 'wildcard', value: 'normal*', field: '', operator: 'included' }],
+            },
+            {
+              description: '',
+              name: '',
+              type: 'simple',
+              entries: [
+                { type: 'wildcard', value: 'also-normal?', field: '', operator: 'included' },
+              ],
+            },
+          ])
+        ).toBeFalsy();
+      });
     });
   });
 

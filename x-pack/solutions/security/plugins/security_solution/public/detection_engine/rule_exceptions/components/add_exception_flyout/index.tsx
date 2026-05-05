@@ -30,11 +30,13 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import {
+  hasMalformedMatchesValue,
   hasPartialCodeSignatureEntry,
   hasWrongOperatorWithWildcard,
 } from '@kbn/securitysolution-list-utils';
 
 import {
+  MalformedMatchesValueCallout,
   PartialCodeSignatureCallout,
   WildCardWithWrongOperatorCallout,
 } from '@kbn/securitysolution-exception-list-components';
@@ -172,6 +174,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       expireErrorExists,
       wildcardWarningExists,
       partialCodeSignatureWarningExists,
+      malformedMatchesValueExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -207,6 +210,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       dispatch({
         type: 'setPartialCodeSignature',
         warningExists: hasPartialCodeSignatureEntry(items),
+      });
+      dispatch({
+        type: 'setMalformedMatchesValue',
+        warningExists: hasMalformedMatchesValue(items),
       });
       dispatch({
         type: 'setExceptionItems',
@@ -468,12 +475,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   ]);
 
   const handleOnSubmit = useCallback(() => {
-    if (wildcardWarningExists) {
+    if (wildcardWarningExists || malformedMatchesValueExists) {
       setShowConfirmModal(true);
     } else {
       return submitException();
     }
-  }, [wildcardWarningExists, submitException]);
+  }, [wildcardWarningExists, malformedMatchesValueExists, submitException]);
 
   const isSubmitButtonDisabled = isSubmitDisabled({
     isSubmitting,
@@ -590,6 +597,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           getExtendedFields={getExtendedFields}
         />
         {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+        {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
         {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
         {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
           <>

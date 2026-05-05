@@ -27,12 +27,14 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
+  hasMalformedMatchesValue,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
 } from '@kbn/securitysolution-list-utils';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import {
+  MalformedMatchesValueCallout,
   WildCardWithWrongOperatorCallout,
   PartialCodeSignatureCallout,
 } from '@kbn/securitysolution-exception-list-components';
@@ -134,6 +136,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       expireErrorExists,
       wildcardWarningExists,
       partialCodeSignatureWarningExists,
+      malformedMatchesValueExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -149,6 +152,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     expireErrorExists: false,
     wildcardWarningExists: false,
     partialCodeSignatureWarningExists: false,
+    malformedMatchesValueExists: false,
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -192,6 +196,10 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       dispatch({
         type: 'setPartialCodeSignature',
         warningExists: hasPartialCodeSignatureEntry(items),
+      });
+      dispatch({
+        type: 'setMalformedMatchesValue',
+        warningExists: hasMalformedMatchesValue(items),
       });
       dispatch({
         type: 'setExceptionItems',
@@ -357,12 +365,12 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   ]);
 
   const handleOnSubmit = useCallback(() => {
-    if (wildcardWarningExists) {
+    if (wildcardWarningExists || malformedMatchesValueExists) {
       setShowConfirmModal(true);
     } else {
       return handleSubmitException();
     }
-  }, [wildcardWarningExists, handleSubmitException]);
+  }, [wildcardWarningExists, malformedMatchesValueExists, handleSubmitException]);
 
   const isSubmitButtonDisabled = useMemo(
     () =>
@@ -446,6 +454,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           getExtendedFields={getExtendedFields}
         />
         {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+        {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
         {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>
