@@ -9,7 +9,6 @@ import React, { Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VisualizationAttachment } from '@kbn/agent-builder-common/attachments';
-import type { ApplicationStart } from '@kbn/core/public';
 import { type AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AgentBuilderStartDependencies } from '../../../types';
 
@@ -25,7 +24,6 @@ export const createVisualizationAttachmentDefinition = ({
   startDependencies,
 }: {
   startDependencies: AgentBuilderStartDependencies;
-  application: ApplicationStart;
 }): AttachmentUIDefinition<VisualizationAttachment> => {
   return {
     getLabel: (attachment: VisualizationAttachment): string => {
