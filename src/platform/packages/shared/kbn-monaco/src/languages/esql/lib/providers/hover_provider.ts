@@ -25,6 +25,8 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
           const offset = monacoPositionToOffset(fullText, position);
           const hoveredWord = safeModel.getWordAtPosition(position);
 
+          // Monaco triggers the hover event on each char of the word,
+          // we only want to track the Hover if the word changed.
           if (
             hoveredWord &&
             hoveredWord.word !== lastHoveredWord &&

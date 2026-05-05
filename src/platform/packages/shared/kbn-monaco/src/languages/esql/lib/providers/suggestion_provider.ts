@@ -40,6 +40,7 @@ export function getSuggestionProvider(
       return createMonacoProvider({
         model,
         run: async (safeModel) => {
+          // Avoid returning suggestions for unfocused editors sharing the same model.
           const editors = monaco.editor
             .getEditors()
             .filter((editor) => editor.getModel() === model);
@@ -99,6 +100,8 @@ export function getSuggestionProvider(
       const fieldsMetadataClient = await context.getFieldsMetadata;
       if (!fieldsMetadataClient) return item;
 
+      // Fetch the full ECS field list upfront as a single lightweight check.
+      // The client caches this result, so subsequent calls are free.
       const fullEcsMetadataList = await fieldsMetadataClient.find({ attributes: ['type'] });
 
       if (item.kind !== monaco.languages.CompletionItemKind.Variable) return item;
@@ -108,6 +111,7 @@ export function getSuggestionProvider(
       const { streamNames } = context;
       const documentationParts: string[] = [];
 
+      // 1. ECS description
       if (fullEcsMetadataList && Object.hasOwn(fullEcsMetadataList.fields, strippedFieldName)) {
         const ecsMetadata = await fieldsMetadataClient.find({
           fieldNames: [strippedFieldName],
@@ -119,6 +123,7 @@ export function getSuggestionProvider(
         }
       }
 
+      // 2. Stream descriptions
       if (streamNames?.length) {
         const streamMetadata = await fieldsMetadataClient.find({
           fieldNames: [strippedFieldName],

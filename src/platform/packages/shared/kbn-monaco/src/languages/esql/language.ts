@@ -33,6 +33,8 @@ export type { ESQLDependencies, MonacoMessage };
 export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
+    // PromQL can be embedded in ES|QL querys.
+    // We need to manually trigger its language loading for it to work.
     await PromQLLang.onLanguage?.();
 
     const language = monarch.create({
