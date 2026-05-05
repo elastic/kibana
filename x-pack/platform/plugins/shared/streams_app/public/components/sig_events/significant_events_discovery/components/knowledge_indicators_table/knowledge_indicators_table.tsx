@@ -168,11 +168,15 @@ export function KnowledgeIndicatorsTable() {
     debouncedSearchTerm,
     statusFilter,
     selectedTypes,
+    selectedSubtypes,
     selectedStreams,
     hideComputedTypes,
     handleStatusFilterChange,
     handleSelectedTypesChange,
+    handleSelectedSubtypesChange,
     handleSelectedStreamsChange,
+    handleFilterByType,
+    handleFilterBySubtype,
     handleComputedToggleChange,
     handleSearchChange,
     handleTableChange,
@@ -202,6 +206,8 @@ export function KnowledgeIndicatorsTable() {
     selectedKnowledgeIndicatorId,
     toggleSelectedKnowledgeIndicator,
     setKnowledgeIndicatorsToDelete,
+    onFilterByType: handleFilterByType,
+    onFilterBySubtype: handleFilterBySubtype,
   });
 
   const generationRow = (
@@ -334,6 +340,8 @@ export function KnowledgeIndicatorsTable() {
           onSearchChange={handleSearchChange}
           onStatusFilterChange={handleStatusFilterChange}
           onSelectedTypesChange={handleSelectedTypesChange}
+          selectedSubtypes={selectedSubtypes}
+          onSelectedSubtypesChange={handleSelectedSubtypesChange}
           onSelectedStreamsChange={handleSelectedStreamsChange}
           onComputedToggleChange={handleComputedToggleChange}
           onClearSelection={() => setSelectedKnowledgeIndicators([])}
@@ -403,6 +411,8 @@ export function KnowledgeIndicatorsTable() {
             knowledgeIndicator={selectedKnowledgeIndicator}
             occurrencesByQueryId={occurrencesByQueryId}
             onClose={closeFlyout}
+            allKnowledgeIndicators={knowledgeIndicators}
+            onNavigateToKI={toggleSelectedKnowledgeIndicator}
           />
         ) : null}
         {knowledgeIndicatorsToDelete.length > 0 ? (

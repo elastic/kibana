@@ -83,7 +83,21 @@ const streamsAppRoutes = {
                 }),
               }),
               t.partial({
-                query: timeRangeQueryParams,
+                query: t.partial({
+                  rangeFrom: t.string,
+                  rangeTo: t.string,
+                  // Knowledge Indicators filter state — only present when non-default
+                  kiSearch: t.string,
+                  kiStatus: t.string,
+                  kiTypes: t.string,
+                  kiSubtypes: t.string,
+                  kiStreams: t.string,
+                  kiShowComputed: t.string,
+                  // Knowledge Indicators flyout state — present when a KI is open
+                  kiFlyoutId: t.string,
+                  // Queries flyout state — present when a query row is open
+                  queryFlyoutId: t.string,
+                }),
               }),
             ]),
           },

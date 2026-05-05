@@ -41,6 +41,7 @@ import {
 } from '../hooks/use_knowledge_indicator_actions';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
+import { StreamLink } from '../../significant_events_discovery/components/multi_step/links';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 import { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_query_details_content';
 
@@ -48,12 +49,18 @@ interface Props {
   knowledgeIndicator: KnowledgeIndicator;
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
+  /** All KIs — used to resolve dependency relationships in the Dependencies panel. */
+  allKnowledgeIndicators?: KnowledgeIndicator[];
+  /** Called when the user clicks a dependency KI to navigate to it. */
+  onNavigateToKI?: (ki: KnowledgeIndicator) => void;
 }
 
 export function KnowledgeIndicatorDetailsFlyout({
   knowledgeIndicator,
   occurrencesByQueryId,
   onClose,
+  allKnowledgeIndicators,
+  onNavigateToKI,
 }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -265,9 +272,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             )}
             <EuiFlexItem>
               <FlyoutMetadataCard title={STREAM_LABEL}>
-                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                  {streamName}
-                </EuiBadge>
+                <StreamLink name={streamName} />
               </FlyoutMetadataCard>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -275,7 +280,12 @@ export function KnowledgeIndicatorDetailsFlyout({
 
         <EuiFlyoutBody>
           {knowledgeIndicator.kind === 'feature' ? (
-            <KnowledgeIndicatorFeatureDetailsContent feature={knowledgeIndicator.feature} />
+            <KnowledgeIndicatorFeatureDetailsContent
+              feature={knowledgeIndicator.feature}
+              allKnowledgeIndicators={allKnowledgeIndicators}
+              occurrencesByQueryId={occurrencesByQueryId}
+              onNavigateTo={onNavigateToKI}
+            />
           ) : (
             <KnowledgeIndicatorQueryDetailsContent
               query={knowledgeIndicator.query}
