@@ -172,7 +172,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     }
     return (
       <EuiToolTip content={fullscreenLabels.fullScreenDisabledTooltip}>
-        <span>{fullscreenLabels.fullScreen}</span>
+        <span tabIndex={0}>{fullscreenLabels.fullScreen}</span>
       </EuiToolTip>
     );
   }, [conversationId]);
