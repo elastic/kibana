@@ -31,6 +31,8 @@ import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_a
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { RuleAuditAction } from '../../../../rules_client/common/audit_events';
 
+const BULK_CREATE_AS_DISABLED_PREFIX = 'Rule created in a disabled state: ';
+
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
@@ -286,13 +288,58 @@ describe('bulkCreateRules', () => {
     expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
   });
 
-  test('Phase 2 schedule-limit trip: enabled keys invalidated, disabled subset still created', async () => {
+  test('Phase 1 API key creation failure: enabled rule degrades to disabled, no key minted, SO still written, no scheduling', async () => {
+    rulesClientParams.createAPIKey.mockRejectedValueOnce(new Error('keys disabled'));
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+      buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }])
+    );
+
+    const result = await rulesClient.bulkCreateRules({
+      rules: [
+        { data: baseRule({ name: 'enabled-keyfail', enabled: true }) },
+        { data: baseRule({ name: 'enabled-ok', enabled: true }) },
+      ],
+    });
+
+    // Both rules persisted in a single SO bulkCreate. The first one is demoted
+    // to disabled because its key mint failed; the second is scheduled normally.
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
+    const persistedAttrsByName = new Map(
+      (
+        unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
+          attributes: { name: string; enabled: boolean; apiKey: string | null };
+        }>
+      ).map((o) => [o.attributes.name, o.attributes])
+    );
+    expect(persistedAttrsByName.get('enabled-keyfail')?.enabled).toBe(false);
+    expect(persistedAttrsByName.get('enabled-keyfail')?.apiKey).toBeNull();
+    expect(persistedAttrsByName.get('enabled-ok')?.enabled).toBe(true);
+    // Only the surviving enabled rule was scheduled / enabled.
+    expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkSchedule.mock.calls[0][0]).toHaveLength(1);
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['mock-id-2']);
+    // No key mint succeeded for the demoted rule, so nothing to invalidate.
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    expect(result.rules).toHaveLength(2);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toEqual(
+      expect.objectContaining({
+        disabledReason: 'api_key_creation_failed',
+        rule: expect.objectContaining({ name: 'enabled-keyfail' }),
+      })
+    );
+    expect(result.errors[0].message.startsWith(BULK_CREATE_AS_DISABLED_PREFIX)).toBe(true);
+    expect(result.errors[0].message).toContain('keys disabled');
+  });
+
+  test('Phase 2 schedule-limit trip: enabled rule degrades to disabled, key invalidated, SO still written for both', async () => {
     (validateScheduleLimit as jest.Mock).mockResolvedValue({
       interval: 100,
       intervalAvailable: 50,
     });
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
-      buildBulkResponse([{ id: 'mock-id-2' }])
+      buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }])
     );
 
     const result = await rulesClient.bulkCreateRules({
@@ -304,19 +351,35 @@ describe('bulkCreateRules', () => {
 
     // The enabled rule contributed an API key → must be invalidated
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalled();
-    // The disabled rule must still be persisted
+    // Both rules persisted in a single SO bulkCreate; the originally-enabled
+    // one is degraded to disabled (no scheduledTaskId, no API key fields).
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
+    expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
+    const persistedAttrsByName = new Map(
+      (
+        unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
+          attributes: { name: string; enabled: boolean; scheduledTaskId?: string | null };
+        }>
+      ).map((o) => [o.attributes.name, o.attributes])
+    );
+    expect(persistedAttrsByName.get('enabled')?.enabled).toBe(false);
+    expect(persistedAttrsByName.get('enabled')?.scheduledTaskId).toBeUndefined();
     expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+    expect(result.rules).toHaveLength(2);
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].rule.name).toBe('enabled');
-    expect(result.rules).toHaveLength(1);
+    expect(result.errors[0]).toEqual(
+      expect.objectContaining({
+        disabledReason: 'schedule_limit_exceeded',
+        rule: expect.objectContaining({ name: 'enabled' }),
+      })
+    );
+    expect(result.errors[0].message.startsWith(BULK_CREATE_AS_DISABLED_PREFIX)).toBe(true);
   });
 
-  test('Phase 3 whole TM throw: enabled subset failed, disabled subset still created', async () => {
+  test('Phase 3 whole TM throw: enabled subset degrades to disabled, disabled subset unaffected', async () => {
     taskManager.bulkSchedule.mockRejectedValueOnce(new Error('cluster unavailable'));
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
-      buildBulkResponse([{ id: 'mock-id-2' }])
+      buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }])
     );
 
     const result = await rulesClient.bulkCreateRules({
@@ -328,19 +391,25 @@ describe('bulkCreateRules', () => {
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
+    expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
+    expect(result.rules).toHaveLength(2);
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].rule.name).toBe('enabled');
-    expect(result.rules).toHaveLength(1);
+    expect(result.errors[0]).toEqual(
+      expect.objectContaining({
+        disabledReason: 'task_schedule_failed',
+        rule: expect.objectContaining({ name: 'enabled' }),
+      })
+    );
+    expect(result.errors[0].message).toContain('cluster unavailable');
+    expect(result.errors[0].message.startsWith(BULK_CREATE_AS_DISABLED_PREFIX)).toBe(true);
   });
 
-  test('Phase 3 silent per-task drop: per-rule error pushed and rule dropped before SO write', async () => {
-    // Simulate task_store dropping one of the two scheduled tasks.
+  test('Phase 3 silent per-task drop: dropped rule degrades to disabled and SO is still written', async () => {
     taskManager.bulkSchedule.mockImplementationOnce(async (tasks) => {
       return [tasks[0]] as never;
     });
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
-      buildBulkResponse([{ id: 'mock-id-1' }])
+      buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }])
     );
 
     const result = await rulesClient.bulkCreateRules({
@@ -350,13 +419,19 @@ describe('bulkCreateRules', () => {
       ],
     });
 
-    expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
+    expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
+    expect(result.rules).toHaveLength(2);
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].rule.name).toBe('dropped');
-    expect(result.rules).toHaveLength(1);
+    expect(result.errors[0]).toEqual(
+      expect.objectContaining({
+        disabledReason: 'task_validation_failed',
+        rule: expect.objectContaining({ name: 'dropped' }),
+      })
+    );
+    expect(result.errors[0].message.startsWith(BULK_CREATE_AS_DISABLED_PREFIX)).toBe(true);
   });
 
-  test('Phase 4 per-row error on Phase-3-scheduled id: per-rule key invalidated, removeIfExists called', async () => {
+  test('Phase 4 per-row error on Phase-3-scheduled id: per-rule key invalidated, bulkRemove called', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
       buildBulkResponse([{ id: 'mock-id-1', error: { message: 'conflict', statusCode: 409 } }])
     );
@@ -366,14 +441,16 @@ describe('bulkCreateRules', () => {
     });
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
-    // the only key in the call → only the failed rule's key
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith('mock-id-1');
+    // Per-row error path now batches TM cleanup into a single bulkRemove.
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['mock-id-1']);
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0].status).toBe(409);
+    expect(result.errors[0].disabledReason).toBeUndefined();
     expect(result.rules).toHaveLength(0);
   });
 
-  test('Phase 4 per-row error on caller-supplied id NOT in newlyScheduledTaskIds: NO removeIfExists', async () => {
+  test('Phase 4 per-row error on caller-supplied id NOT in newlyScheduledTaskIds: NO TM cleanup', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
       buildBulkResponse([{ id: 'caller-id', error: { message: 'conflict', statusCode: 409 } }])
     );
@@ -383,6 +460,7 @@ describe('bulkCreateRules', () => {
     });
 
     expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+    expect(taskManager.bulkRemove).not.toHaveBeenCalled();
   });
 
   test('Phase 4 whole-call throw: invalidates every newly-minted key and best-effort bulkRemove of scheduled ids, then rethrows', async () => {
@@ -416,6 +494,59 @@ describe('bulkCreateRules', () => {
 
     expect(result.taskIdsFailedToBeEnabled).toEqual(['mock-id-1']);
     expect(result.rules).toHaveLength(1);
+  });
+
+  test('every demotion path stamps a machine-readable disabledReason on the error', async () => {
+    // schedule_limit_exceeded
+    (validateScheduleLimit as jest.Mock).mockResolvedValueOnce({
+      interval: 100,
+      intervalAvailable: 50,
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(
+      buildBulkResponse([{ id: 'mock-id-1' }])
+    );
+    const phase2 = await rulesClient.bulkCreateRules({
+      rules: [{ data: baseRule({ name: 'a', enabled: true }) }],
+    });
+    expect(phase2.errors[0]).toEqual(
+      expect.objectContaining({ disabledReason: 'schedule_limit_exceeded' })
+    );
+
+    // task_schedule_failed
+    taskManager.bulkSchedule.mockRejectedValueOnce(new Error('tm boom'));
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(
+      buildBulkResponse([{ id: 'mock-id-2' }])
+    );
+    const phase3a = await rulesClient.bulkCreateRules({
+      rules: [{ data: baseRule({ name: 'b', enabled: true }) }],
+    });
+    expect(phase3a.errors[0]).toEqual(
+      expect.objectContaining({ disabledReason: 'task_schedule_failed' })
+    );
+
+    // task_validation_failed (silent drop)
+    taskManager.bulkSchedule.mockImplementationOnce(async () => [] as never);
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(
+      buildBulkResponse([{ id: 'mock-id-3' }])
+    );
+    const phase3b = await rulesClient.bulkCreateRules({
+      rules: [{ data: baseRule({ name: 'c', enabled: true }) }],
+    });
+    expect(phase3b.errors[0]).toEqual(
+      expect.objectContaining({ disabledReason: 'task_validation_failed' })
+    );
+
+    // api_key_creation_failed
+    rulesClientParams.createAPIKey.mockRejectedValueOnce(new Error('no keys'));
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(
+      buildBulkResponse([{ id: 'mock-id-4' }])
+    );
+    const phase1 = await rulesClient.bulkCreateRules({
+      rules: [{ data: baseRule({ name: 'd', enabled: true }) }],
+    });
+    expect(phase1.errors[0]).toEqual(
+      expect.objectContaining({ disabledReason: 'api_key_creation_failed' })
+    );
   });
 
   test('emits per-rule CREATE audit event for surviving rules and ENABLE for the enabled subset', async () => {

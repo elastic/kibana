@@ -21,9 +21,22 @@ export interface BulkCreateRulesParams<Params extends RuleParams = never> {
   rules: Array<BulkCreateRulesItem<Params>>;
 }
 
+/**
+ * Lets callers branch on *why* a rule was created as disabled.
+ */
+export type BulkCreateDisabledReason =
+  | 'api_key_creation_failed'
+  | 'schedule_limit_exceeded'
+  | 'task_schedule_failed'
+  | 'task_validation_failed';
+
+export interface BulkCreateOperationError extends BulkOperationError {
+  disabledReason?: BulkCreateDisabledReason;
+}
+
 export interface BulkCreateRulesResult<Params extends RuleParams = never> {
   rules: Array<SanitizedRule<Params>>;
-  errors: BulkOperationError[];
+  errors: BulkCreateOperationError[];
   total: number;
   taskIdsFailedToBeEnabled: string[];
 }

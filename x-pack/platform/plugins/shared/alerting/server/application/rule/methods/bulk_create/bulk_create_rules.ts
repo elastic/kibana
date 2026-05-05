@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import Semver from 'semver';
 import pMap from 'p-map';
+import { i18n } from '@kbn/i18n';
 import { withSpan } from '@kbn/apm-utils';
 import type {
   SavedObject,
@@ -34,14 +35,17 @@ import {
   updateMeta,
   validateActions,
 } from '../../../../rules_client/lib';
-import { apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
+import {
+  apiKeyAsAlertAttributes,
+  apiKeyAsRuleDomainProperties,
+} from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { tryToEnableTasks } from '../bulk_enable/bulk_enable_rules';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import type { RawRule, RuleTypeRegistry, SanitizedRule } from '../../../../types';
 import type { IntervalSchedule } from '../../../../../common';
-import type { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
+import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import type { RuleDomain, RuleParams } from '../../types';
 import {
   transformRuleAttributesToRuleDomain,
@@ -51,13 +55,25 @@ import {
 import { ruleDomainSchema } from '../../schemas';
 import { createRuleDataSchema } from '../create/schemas';
 import { validateScheduleLimit } from '../get_schedule_frequency';
-import type { BulkCreateRulesItem, BulkCreateRulesParams, BulkCreateRulesResult } from './types';
+import type {
+  BulkCreateOperationError,
+  BulkCreateDisabledReason,
+  BulkCreateRulesItem,
+  BulkCreateRulesParams,
+  BulkCreateRulesResult,
+} from './types';
 
 /**
  * Bound the per-rule prepare phase to avoid overwhelming downstream services
  * (security plugin API key minting, action validation).
  */
 const PREPARE_CONCURRENCY = 10;
+
+const getBulkCreateAsDisabledMessage = (message: string): string =>
+  i18n.translate('xpack.alerting.rulesClient.bulkCreate.ruleCreatedDisabledErrorMessage', {
+    defaultMessage: 'Rule created in a disabled state: {message}',
+    values: { message },
+  });
 
 interface PreparedRule {
   id: string;
@@ -114,6 +130,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
   params: BulkCreateRulesParams<Params>
 ): Promise<BulkCreateRulesResult<Params>> {
   const { rules } = params;
+  const { logger } = context;
   const total = rules.length;
 
   if (total === 0) {
@@ -123,17 +140,20 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
   const username = await context.getUserName();
   const actionsClient = await context.getActionsClient();
 
-  // Phase 0: assign ids up-front, partition by enabled flag (tracked per item id below).
   const inputsWithIds = rules.map((rule) => ({
     id: rule.options?.id ?? SavedObjectsUtils.generateId(),
     rule,
   }));
+
+  logger.debug(`Bulk creating batch of ${total} rules`);
 
   // Phase 1: per-rule prepare (per-pair authorization dedupe done first).
   const authzCache = new Map<string, Promise<void>>();
   const preparedRules = new Map<string, PreparedRule>();
   const errors: BulkOperationError[] = [];
   const apiKeysMap = new Map<string, ApiKeyEntry>();
+  // Key invalidation involves call to ES so we invalidate keys at the end to reduce round-trips.
+  const keysToInvalidate = new Set<string>();
 
   await pMap(
     inputsWithIds,
@@ -162,20 +182,22 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     const validationPayload = await validateScheduleLimit({ context, updatedInterval });
     const enabledIds = enabled.map((p) => p.id);
     if (validationPayload) {
-      const message = getRuleCircuitBreakerErrorMessage({
+      const reasonMessage = getRuleCircuitBreakerErrorMessage({
         interval: validationPayload.interval,
         intervalAvailable: validationPayload.intervalAvailable,
         action: 'bulkCreate',
         rules: enabledIds.length,
       });
-      // removes rules and invalidate keys
-      await dropEnabledSubset({
-        context,
-        enabledIds,
+      logger.warn(`Demoting ${enabledIds.length} rules -> disabled, schedule limit exceeded.`);
+      demotePreparedRules({
+        ids: enabledIds,
+        reason: 'schedule_limit_exceeded',
+        message: reasonMessage,
         preparedRules,
         apiKeysMap,
+        keysToInvalidate,
         errors,
-        message,
+        username,
       });
     }
   }
@@ -198,14 +220,19 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
       );
       scheduledIds = scheduledTasks.map((task) => task.id);
     } catch (error) {
-      // Whole-call TM throw: fail enabled subset only, continue with disabled subset.
-      await dropEnabledSubset({
-        context,
-        enabledIds: survivingEnabledIds,
+      // Whole-call TM throw: demote enabled subset to disabled, continue.
+      logger.warn(
+        `Demoting ${survivingEnabledIds.length} rules -> disabled, task scheduling failed.`
+      );
+      demotePreparedRules({
+        ids: survivingEnabledIds,
+        reason: 'task_schedule_failed',
+        message: `Failed to schedule tasks: ${error.message}`,
         preparedRules,
         apiKeysMap,
+        keysToInvalidate,
         errors,
-        message: `Failed to schedule tasks: ${error.message}`,
+        username,
       });
     }
 
@@ -214,26 +241,32 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     }
 
     // Silent per-task drops: bulkSchedule's `taskInstanceToAttributes` validation
-    // logs+skips invalid instances. Diff requested vs returned and surface them as
-    // per-rule errors so we don't write a rule SO whose scheduledTaskId is dangling.
+    // logs+skips invalid instances. Diff requested vs returned and demote the
+    // missing ones — re-enabling later will hit the same validation, but at
+    // least the rule definition isn't lost.
     if (preparedRules.size > 0 && scheduledIds.length < survivingEnabledIds.length) {
       const returned = new Set(scheduledIds);
       const dropped = survivingEnabledIds.filter((id) => !returned.has(id));
       if (dropped.length > 0) {
-        await dropEnabledSubset({
-          context,
-          enabledIds: dropped,
+        logger.warn(`Demoting ${dropped.length} rules -> disabled, task validation failed.`);
+        demotePreparedRules({
+          ids: dropped,
+          reason: 'task_validation_failed',
+          message: 'Task scheduling silently dropped this rule (validation failure in task store)',
           preparedRules,
           apiKeysMap,
+          keysToInvalidate,
           errors,
-          message: 'Task scheduling silently dropped this rule (validation failure in task store)',
+          username,
         });
       }
     }
   }
 
-  // No survivors at all: return before SO write.
+  // No survivors at all: still flush any pending key invalidations from
+  // Phase 1 demotions (no keys to flush in that case, but keep it explicit).
   if (preparedRules.size === 0) {
+    await flushKeysToInvalidate(keysToInvalidate, context);
     return { rules: [], errors, total, taskIdsFailedToBeEnabled: [] };
   }
 
@@ -269,23 +302,18 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
         })
     );
   } catch (error) {
-    // Normally, `bulkResponse` will contain per-row errors, however certain issues
-    // (auth, timeout etc) will cause a whole-response error, in this case
-    // we invalidate every newly-minted key, and perform best-effort orphan-task
-    // cleanup scoped to ids we actually scheduled in Phase 3, then rethrow.
-    const keysToInvalidate = collectNewKeysToInvalidate(apiKeysMap.values());
-    if (keysToInvalidate.length > 0) {
-      await bulkMarkApiKeysForInvalidation(
-        { apiKeys: keysToInvalidate },
-        context.logger,
-        context.unsecuredSavedObjectsClient
-      );
-    }
+    // Whole-call SO failure (auth, timeout, etc): invalidate every newly-minted
+    // key (those tracked in `apiKeysMap`, plus anything previous phases queued
+    // into `keysToInvalidate`), best-effort orphan-task cleanup scoped to ids we
+    // actually scheduled in Phase 3, then rethrow. Inline flush — control flow
+    // never reaches the end-of-function flush.
+    for (const k of collectNewKeysToInvalidate(apiKeysMap.values())) keysToInvalidate.add(k);
+    await flushKeysToInvalidate(keysToInvalidate, context);
     if (newlyScheduledTaskIds.size > 0) {
       try {
         await context.taskManager.bulkRemove([...newlyScheduledTaskIds]);
       } catch (cleanupError) {
-        context.logger.error(
+        logger.error(
           `bulkCreateRules: failed to clean up tasks ${[...newlyScheduledTaskIds].join(
             ', '
           )} after SO bulkCreate threw: ${cleanupError.message}`
@@ -298,6 +326,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
   // Phase 4 per-row outcomes.
   const successfulSos: Array<SavedObject<RawRule>> = [];
   const taskIdsToEnable: string[] = [];
+  const taskIdsToCleanUp: string[] = [];
 
   for (const so of bulkResponse.saved_objects) {
     if (so.error) {
@@ -307,30 +336,15 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
         rule: { id: so.id, name: preparedRules.get(so.id)?.name ?? 'n/a' },
       });
 
-      // Per-row API key invalidation (only the failed rule's key).
       const apiKey = apiKeysMap.get(so.id);
       if (apiKey) {
-        const keys = collectNewKeysToInvalidate([apiKey]);
-        if (keys.length > 0) {
-          await bulkMarkApiKeysForInvalidation(
-            { apiKeys: keys },
-            context.logger,
-            context.unsecuredSavedObjectsClient
-          );
-        }
+        for (const k of collectNewKeysToInvalidate([apiKey])) keysToInvalidate.add(k);
       }
 
-      // Best-effort orphan-task cleanup, but ONLY if this id was scheduled by us
-      // in Phase 3. Avoids nuking a pre-existing rule's task on a 409 caused by a
-      // caller-supplied id collision.
+      // Only ids we scheduled in Phase 3. Skipping caller-supplied id collisions
+      // avoids nuking a pre-existing rule's task on a 409.
       if (newlyScheduledTaskIds.has(so.id)) {
-        try {
-          await context.taskManager.removeIfExists(so.id);
-        } catch (cleanupError) {
-          context.logger.error(
-            `bulkCreateRules: failed to clean up task ${so.id} after SO per-row error: ${cleanupError.message}`
-          );
-        }
+        taskIdsToCleanUp.push(so.id);
       }
     } else {
       successfulSos.push(so as SavedObject<RawRule>);
@@ -352,12 +366,29 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     }
   }
 
+  // Single batched TM cleanup for per-row failures.
+  if (taskIdsToCleanUp.length > 0) {
+    try {
+      logger.warn(`Cleaning up ${taskIdsToCleanUp.length} tasks where SO creation failed.`);
+      await context.taskManager.bulkRemove(taskIdsToCleanUp);
+    } catch (cleanupError) {
+      logger.error(
+        `bulkCreateRules: failed to clean up tasks ${taskIdsToCleanUp.join(
+          ', '
+        )} after SO per-row errors: ${cleanupError.message}`
+      );
+    }
+  }
+
   // Phase 5: enable tasks for successfully persisted enabled rules.
   const taskIdsFailedToBeEnabled = await tryToEnableTasks({
     taskIdsToEnable,
-    logger: context.logger,
+    logger,
     taskManager: context.taskManager,
   });
+
+  // Single end-of-function flush for all collected key invalidations.
+  await flushKeysToInvalidate(keysToInvalidate, context);
 
   // Phase 6: domain transform + return.
   const sanitizedRules: Array<SanitizedRule<Params>> = successfulSos.map((so) =>
@@ -368,7 +399,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     rules: sanitizedRules,
     errors,
     total,
-    taskIdsFailedToBeEnabled,
+    taskIdsFailedToBeEnabled, // <-- same as bulkEnableRules().
   };
 }
 
@@ -406,7 +437,7 @@ interface PrepareRuleArgs<Params extends RuleParams> {
   id: string;
   rule: BulkCreateRulesItem<Params>;
   authzCache: Map<string, Promise<void>>;
-  errors: BulkOperationError[];
+  errors: BulkCreateOperationError[];
   apiKeysMap: Map<string, ApiKeyEntry>;
 }
 
@@ -495,26 +526,42 @@ const prepareRule = async <Params extends RuleParams>({
       );
     }
 
-    // Mint API key for enabled rules. createNewAPIKeySet returns the encoded
-    // `{ apiKey, apiKeyOwner, apiKeyCreatedByUser, uiamApiKey? }` shape suitable
-    // for direct use as rule attributes; for disabled rules we mirror createRule
-    // and use apiKeyAsRuleDomainProperties(null, ...) (all-null props).
-    const apiKeyProps = data.enabled
-      ? await createNewAPIKeySet(context, {
+    // Mint API key for enabled rules.
+    // Soft-fail: a key-mint failure does NOT reject the rule. We persist it as
+    // disabled, push a degraded error so the caller knows, and let downstream
+    // phases treat it as a never-enabled rule. Re-enabling later will re-mint.
+    let effectiveEnabled = data.enabled;
+    let apiKeyProps:
+      | ReturnType<typeof apiKeyAsRuleDomainProperties>
+      | Awaited<ReturnType<typeof createNewAPIKeySet>> = apiKeyAsRuleDomainProperties(
+      null,
+      username,
+      false
+    );
+    if (data.enabled) {
+      try {
+        apiKeyProps = await createNewAPIKeySet(context, {
           id: ruleType.id,
           ruleName: data.name,
           username,
           shouldUpdateApiKey: true,
           errorMessage: 'Error creating rule: could not create API key',
-        })
-      : apiKeyAsRuleDomainProperties(null, username, false);
-
-    if (data.enabled) {
-      apiKeysMap.set(id, {
-        apiKey: apiKeyProps.apiKey ?? null,
-        uiamApiKey: apiKeyProps.uiamApiKey ?? null,
-        apiKeyCreatedByUser: apiKeyProps.apiKeyCreatedByUser ?? null,
-      });
+        });
+        apiKeysMap.set(id, {
+          apiKey: apiKeyProps.apiKey ?? null,
+          uiamApiKey: apiKeyProps.uiamApiKey ?? null,
+          apiKeyCreatedByUser: apiKeyProps.apiKeyCreatedByUser ?? null,
+        });
+      } catch (apiKeyErr) {
+        effectiveEnabled = false;
+        apiKeyProps = apiKeyAsRuleDomainProperties(null, username, false);
+        errors.push({
+          message: getBulkCreateAsDisabledMessage(apiKeyErr.message),
+          status: apiKeyErr.output?.statusCode,
+          rule: { id, name: data.name },
+          disabledReason: 'api_key_creation_failed',
+        });
+      }
     }
 
     const allActions = [...data.actions, ...(data.systemActions ?? [])];
@@ -539,6 +586,7 @@ const prepareRule = async <Params extends RuleParams>({
       rule: {
         ...restData,
         ...apiKeyProps,
+        enabled: effectiveEnabled,
         id,
         createdBy: username,
         updatedBy: username,
@@ -557,7 +605,7 @@ const prepareRule = async <Params extends RuleParams>({
       params: { legacyId, paramsWithRefs: updatedParams },
     });
 
-    if (data.enabled) {
+    if (effectiveEnabled) {
       ruleAttributes.lastEnabledAt = new Date(createTime).toISOString();
       ruleAttributes.scheduledTaskId = id;
     }
@@ -565,7 +613,7 @@ const prepareRule = async <Params extends RuleParams>({
     const prepared = {
       id,
       name: data.name,
-      enabled: data.enabled,
+      enabled: effectiveEnabled,
       rawRule: ruleAttributes,
       references,
       schedule: data.schedule,
@@ -583,39 +631,69 @@ const prepareRule = async <Params extends RuleParams>({
   }
 };
 
-const dropEnabledSubset = async ({
-  context,
-  enabledIds,
+/**
+ * Demote in-memory (enabled -> disabled): flips a set of currently-enabled
+ * prepared rules to disabled, queues their API keys for invalidation, records a degraded
+ * error so the caller can surface "rule was created in a disabled state".
+ */
+const demotePreparedRules = ({
+  ids,
+  reason,
+  message,
   preparedRules,
   apiKeysMap,
+  keysToInvalidate,
   errors,
-  message,
+  username,
 }: {
-  context: RulesClientContext;
-  enabledIds: string[];
+  ids: string[];
+  reason: BulkCreateDisabledReason;
+  message: string;
   preparedRules: Map<string, PreparedRule>;
   apiKeysMap: Map<string, ApiKeyEntry>;
-  errors: BulkOperationError[];
-  message: string;
-}) => {
-  const keysToInvalidate: string[] = [];
-  for (const id of enabledIds) {
+  keysToInvalidate: Set<string>;
+  errors: BulkCreateOperationError[];
+  username: string | null;
+}): void => {
+  for (const id of ids) {
     const prepared = preparedRules.get(id);
-    if (prepared) {
-      errors.push({ message, rule: { id, name: prepared.name } });
-      const apiKey = apiKeysMap.get(id);
-      if (apiKey) {
-        keysToInvalidate.push(...collectNewKeysToInvalidate([apiKey]));
-        apiKeysMap.delete(id);
-      }
-      preparedRules.delete(id);
+    if (!prepared || !prepared.enabled) continue;
+
+    const apiKey = apiKeysMap.get(id);
+    if (apiKey) {
+      for (const k of collectNewKeysToInvalidate([apiKey])) keysToInvalidate.add(k);
+      apiKeysMap.delete(id);
     }
+
+    // Re-shape `rawRule` to the disabled-rule form.
+    const nullKey = apiKeyAsAlertAttributes(null, username, false);
+    prepared.rawRule = {
+      ...prepared.rawRule,
+      ...nullKey,
+      uiamApiKey: null,
+      enabled: false,
+    };
+    delete prepared.rawRule.scheduledTaskId;
+    delete prepared.rawRule.lastEnabledAt;
+    prepared.enabled = false;
+
+    errors.push({
+      message: getBulkCreateAsDisabledMessage(message),
+      rule: { id, name: prepared.name },
+      disabledReason: reason,
+    });
   }
-  if (keysToInvalidate.length > 0) {
-    await bulkMarkApiKeysForInvalidation(
-      { apiKeys: keysToInvalidate },
-      context.logger,
-      context.unsecuredSavedObjectsClient
-    );
-  }
+};
+
+const flushKeysToInvalidate = async (
+  keysToInvalidate: Set<string>,
+  context: RulesClientContext
+): Promise<void> => {
+  if (keysToInvalidate.size === 0) return;
+  await bulkMarkApiKeysForInvalidation(
+    { apiKeys: [...keysToInvalidate] },
+    context.logger,
+    context.unsecuredSavedObjectsClient
+  );
+  keysToInvalidate.clear();
 };
