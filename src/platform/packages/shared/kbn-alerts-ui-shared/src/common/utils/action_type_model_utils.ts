@@ -169,7 +169,7 @@ function createConnectorFormDeserializer() {
     const config = apiData?.config as Record<string, unknown> | undefined;
     const secrets = apiData?.secrets as Record<string, unknown> | undefined;
 
-    if (!config?.authType || (secrets?.authType && secrets.authType === config.authType)) {
+    if (!config?.authType || secrets?.authType) {
       return apiData;
     }
 

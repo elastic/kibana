@@ -168,7 +168,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
               supportedFeatureIds: [],
               isSystemActionType: false,
               isDeprecated: false,
-              source: connector.source ?? ACTION_TYPE_SOURCES.spec,
+              source: connector.source ?? ACTION_TYPE_SOURCES.stack,
             } as ActionType)
         );
       } catch (err) {
