@@ -10,6 +10,7 @@ import type { ChangePointType } from '@kbn/es-types/src';
 import type { GetSLOParams, GetSLOResponse } from '@kbn/slo-schema';
 import type { Transaction } from '@kbn/apm-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
 interface TimeseriesChangePoint {
   change_point?: number | undefined;
@@ -77,6 +78,7 @@ export interface ServicesItemsItem {
   transactionErrorRate?: number;
   throughput?: number;
   anomalyScore?: number;
+  anomalySeverity?: ML_ANOMALY_SEVERITY;
   alertsCount?: number;
 }
 

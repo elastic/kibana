@@ -1,12 +1,12 @@
 # get_services
 
-Retrieves a list of monitored services from APM, logs, and metrics sources. This includes active alert counts (for APM services), ML anomaly score (for APM services, when available), and key performance metrics: latency, transaction error rate, and throughput (for APM services).
+Retrieves a list of monitored services from APM, logs, and metrics sources. This includes active alert counts (for APM services), ML anomaly severity (for APM services, when available), and key performance metrics: latency, transaction error rate, and throughput (for APM services).
 
 ## Data Sources
 
 Services are discovered from three sources:
 
-- **APM**: Services with APM instrumentation. Includes anomaly score, alerts, and performance metrics (latency, throughput, error rate).
+- **APM**: Services with APM instrumentation. Includes anomaly severity, alerts, and performance metrics (latency, throughput, error rate).
 - **Logs**: Services identified from log data via the `service.name` field.
 - **Metrics**: Services identified from metrics data via the `service.name` field.
 

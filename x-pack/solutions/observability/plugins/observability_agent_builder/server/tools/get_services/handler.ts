@@ -187,6 +187,10 @@ export async function getToolHandler({
     })
     .map((service) => ({
       ...service,
+      anomalySeverity:
+        service.anomalyScore !== undefined
+          ? getSeverityType(service.anomalyScore)
+          : ML_ANOMALY_SEVERITY.UNKNOWN,
       latency: toMilliseconds(service.latency ?? null),
     }));
 
