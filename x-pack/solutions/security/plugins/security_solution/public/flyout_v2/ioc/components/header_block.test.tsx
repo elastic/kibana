@@ -22,7 +22,11 @@ describe('HeaderBlock', () => {
     const field = RawIndicatorFieldId.Feed;
     const { getByTestId } = render(
       <TestProviders>
-        <HeaderBlock indicator={indicator} field={field} renderCellActions={noopCellActionRenderer} />
+        <HeaderBlock
+          indicator={indicator}
+          field={field}
+          renderCellActions={noopCellActionRenderer}
+        />
       </TestProviders>
     );
 
@@ -41,7 +45,11 @@ describe('HeaderBlock', () => {
     for (const field of fields) {
       const { getByTestId } = render(
         <TestProviders>
-          <HeaderBlock indicator={indicator} field={field} renderCellActions={noopCellActionRenderer} />
+          <HeaderBlock
+            indicator={indicator}
+            field={field}
+            renderCellActions={noopCellActionRenderer}
+          />
         </TestProviders>
       );
 

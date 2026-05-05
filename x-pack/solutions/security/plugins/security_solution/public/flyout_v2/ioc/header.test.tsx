@@ -21,7 +21,11 @@ import {
 } from './test_ids';
 
 const mockIndicator = generateMockIndicator();
-const tabs = getTabsDisplayed({ indicator: mockIndicator, onViewAllFieldsInTable: jest.fn(), renderCellActions: noopCellActionRenderer });
+const tabs = getTabsDisplayed({
+  indicator: mockIndicator,
+  onViewAllFieldsInTable: jest.fn(),
+  renderCellActions: noopCellActionRenderer,
+});
 
 describe('<Header />', () => {
   it('should render title and subtitle', () => {
