@@ -113,52 +113,54 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
   context: RulesClientContext,
   params: BulkCreateRulesParams<Params>
 ): Promise<BulkCreateRulesResult<Params>> {
-  const { rules: inputs } = params;
-  const total = inputs.length;
+  const { rules } = params;
+  const total = rules.length;
 
   if (total === 0) {
     return { rules: [], errors: [], total: 0, taskIdsFailedToBeEnabled: [] };
   }
 
-  const errors: BulkOperationError[] = [];
   const username = await context.getUserName();
   const actionsClient = await context.getActionsClient();
 
   // Phase 0: assign ids up-front, partition by enabled flag (tracked per item id below).
-  const inputsWithIds = inputs.map((input) => ({
-    id: input.options?.id ?? SavedObjectsUtils.generateId(),
-    input,
+  const inputsWithIds = rules.map((rule) => ({
+    id: rule.options?.id ?? SavedObjectsUtils.generateId(),
+    rule,
   }));
 
   // Phase 1: per-rule prepare (per-pair authorization dedupe done first).
   const authzCache = new Map<string, Promise<void>>();
   const preparedRules = new Map<string, PreparedRule>();
+  const errors: BulkOperationError[] = [];
   const apiKeysMap = new Map<string, ApiKeyEntry>();
 
   await pMap(
     inputsWithIds,
-    async ({ id, input }) => {
-      const prepared = await prepareRule({
+    async ({ id, rule }) => {
+      const { prepared, error } = await prepareRule({
         context,
         actionsClient,
         username,
         id,
-        input,
+        rule,
         authzCache,
         errors,
         apiKeysMap,
       });
       if (prepared) preparedRules.set(id, prepared);
+      else if (error) errors.push(error);
     },
     { concurrency: PREPARE_CONCURRENCY }
   );
 
-  // Phase 2: schedule-limit gate, scoped to the enabled subset only.
-  const enabledIds = [...preparedRules.values()].filter((p) => p.enabled).map((p) => p.id);
+  // Phase 2: validate schedule-limits, enabled subset only.
+  const enabled = [...preparedRules.values()].filter((p) => p.enabled);
 
-  if (enabledIds.length > 0) {
-    const updatedInterval = enabledIds.map((id) => preparedRules.get(id)!.schedule.interval);
+  if (enabled.length > 0) {
+    const updatedInterval = enabled.map((r) => r.schedule.interval);
     const validationPayload = await validateScheduleLimit({ context, updatedInterval });
+    const enabledIds = enabled.map((p) => p.id);
     if (validationPayload) {
       const message = getRuleCircuitBreakerErrorMessage({
         interval: validationPayload.interval,
@@ -166,6 +168,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
         action: 'bulkCreate',
         rules: enabledIds.length,
       });
+      // removes rules and invalidate keys
       await dropEnabledSubset({
         context,
         enabledIds,
@@ -178,15 +181,16 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
   }
 
   // Phase 3: schedule tasks for the surviving enabled subset.
-  const survivingEnabledIds = [...preparedRules.values()].filter((p) => p.enabled).map((p) => p.id);
-  const scheduledTaskIdsThisCall = new Set<string>();
+  const survivingEnabled = [...preparedRules.values()].filter((p) => p.enabled);
+  const newlyScheduledTaskIds = new Set<string>();
 
-  if (survivingEnabledIds.length > 0) {
-    const tasksToSchedule = survivingEnabledIds.map((id) =>
-      buildTaskInstance(context, preparedRules.get(id)!)
+  if (survivingEnabled.length > 0) {
+    const tasksToSchedule = survivingEnabled.map((preparedRule) =>
+      buildTaskInstance(context, preparedRule)
     );
 
     let scheduledIds: string[] = [];
+    const survivingEnabledIds = survivingEnabled.map((p) => p.id);
     try {
       const scheduledTasks = await withSpan(
         { name: 'taskManager.bulkSchedule', type: 'tasks' },
@@ -206,7 +210,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     }
 
     if (scheduledIds.length > 0) {
-      scheduledIds.forEach((id) => scheduledTaskIdsThisCall.add(id));
+      scheduledIds.forEach((id) => newlyScheduledTaskIds.add(id));
     }
 
     // Silent per-task drops: bulkSchedule's `taskInstanceToAttributes` validation
@@ -228,7 +232,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     }
   }
 
-  // No survivors at all: short-circuit before SO write.
+  // No survivors at all: return before SO write.
   if (preparedRules.size === 0) {
     return { rules: [], errors, total, taskIdsFailedToBeEnabled: [] };
   }
@@ -244,7 +248,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     );
   }
 
-  // Phase 4: bulk SO create (no overwrite — id collisions surface as per-row 409).
+  // Phase 4: bulk SO create (no overwrite — id collisions surface as per-row 409)
   const bulkObjects: Array<SavedObjectsBulkCreateObject<RawRule>> = [...preparedRules.values()].map(
     (prepared) => ({
       type: RULE_SAVED_OBJECT_TYPE,
@@ -265,7 +269,9 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
         })
     );
   } catch (error) {
-    // Whole-call SO throw: invalidate every newly-minted key, best-effort orphan-task
+    // Normally, `bulkResponse` will contain per-row errors, however certain issues
+    // (auth, timeout etc) will cause a whole-response error, in this case
+    // we invalidate every newly-minted key, and perform best-effort orphan-task
     // cleanup scoped to ids we actually scheduled in Phase 3, then rethrow.
     const keysToInvalidate = collectNewKeysToInvalidate(apiKeysMap.values());
     if (keysToInvalidate.length > 0) {
@@ -275,12 +281,12 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
         context.unsecuredSavedObjectsClient
       );
     }
-    if (scheduledTaskIdsThisCall.size > 0) {
+    if (newlyScheduledTaskIds.size > 0) {
       try {
-        await context.taskManager.bulkRemove([...scheduledTaskIdsThisCall]);
+        await context.taskManager.bulkRemove([...newlyScheduledTaskIds]);
       } catch (cleanupError) {
         context.logger.error(
-          `bulkCreateRules: failed to clean up tasks ${[...scheduledTaskIdsThisCall].join(
+          `bulkCreateRules: failed to clean up tasks ${[...newlyScheduledTaskIds].join(
             ', '
           )} after SO bulkCreate threw: ${cleanupError.message}`
         );
@@ -317,7 +323,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
       // Best-effort orphan-task cleanup, but ONLY if this id was scheduled by us
       // in Phase 3. Avoids nuking a pre-existing rule's task on a 409 caused by a
       // caller-supplied id collision.
-      if (scheduledTaskIdsThisCall.has(so.id)) {
+      if (newlyScheduledTaskIds.has(so.id)) {
         try {
           await context.taskManager.removeIfExists(so.id);
         } catch (cleanupError) {
@@ -326,24 +332,23 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
           );
         }
       }
-      continue;
-    }
-
-    successfulSos.push(so as SavedObject<RawRule>);
-    if (scheduledTaskIdsThisCall.has(so.id)) {
-      taskIdsToEnable.push(so.id);
-      // Audit per-rule ENABLE for the enabled subset (mirrors single-rule semantics).
-      context.auditLogger?.log(
-        ruleAuditEvent({
-          action: RuleAuditAction.ENABLE,
-          outcome: 'unknown',
-          savedObject: {
-            type: RULE_SAVED_OBJECT_TYPE,
-            id: so.id,
-            name: preparedRules.get(so.id)?.name,
-          },
-        })
-      );
+    } else {
+      successfulSos.push(so as SavedObject<RawRule>);
+      if (newlyScheduledTaskIds.has(so.id)) {
+        taskIdsToEnable.push(so.id);
+        // Audit per-rule ENABLE for the enabled subset (mirrors single-rule semantics).
+        context.auditLogger?.log(
+          ruleAuditEvent({
+            action: RuleAuditAction.ENABLE,
+            outcome: 'unknown',
+            savedObject: {
+              type: RULE_SAVED_OBJECT_TYPE,
+              id: so.id,
+              name: preparedRules.get(so.id)?.name,
+            },
+          })
+        );
+      }
     }
   }
 
@@ -399,7 +404,7 @@ interface PrepareRuleArgs<Params extends RuleParams> {
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   username: string | null;
   id: string;
-  input: BulkCreateRulesItem<Params>;
+  rule: BulkCreateRulesItem<Params>;
   authzCache: Map<string, Promise<void>>;
   errors: BulkOperationError[];
   apiKeysMap: Map<string, ApiKeyEntry>;
@@ -410,20 +415,20 @@ const prepareRule = async <Params extends RuleParams>({
   actionsClient,
   username,
   id,
-  input,
+  rule,
   authzCache,
   errors,
   apiKeysMap,
-}: PrepareRuleArgs<Params>): Promise<PreparedRule | null> => {
-  const { allowMissingConnectorSecrets } = input;
+}: PrepareRuleArgs<Params>): Promise<{ prepared?: PreparedRule; error?: BulkOperationError }> => {
+  const { allowMissingConnectorSecrets } = rule;
 
   try {
     const { actions: genActions, systemActions: genSystemActions } = await addGeneratedActionValues(
-      input.data.actions,
-      input.data.systemActions,
+      rule.data.actions,
+      rule.data.systemActions,
       context
     );
-    const data = { ...input.data, actions: genActions, systemActions: genSystemActions };
+    const data = { ...rule.data, actions: genActions, systemActions: genSystemActions };
 
     try {
       createRuleDataSchema.validate(data);
@@ -557,7 +562,7 @@ const prepareRule = async <Params extends RuleParams>({
       ruleAttributes.scheduledTaskId = id;
     }
 
-    return {
+    const prepared = {
       id,
       name: data.name,
       enabled: data.enabled,
@@ -567,13 +572,14 @@ const prepareRule = async <Params extends RuleParams>({
       consumer: data.consumer,
       ruleTypeId: data.alertTypeId,
     };
-  } catch (error) {
-    errors.push({
-      message: error.message,
-      status: error.output?.statusCode,
-      rule: { id, name: input.data?.name ?? 'n/a' },
-    });
-    return null;
+    return { prepared };
+  } catch (err) {
+    const error = {
+      message: err.message,
+      status: err.output?.statusCode,
+      rule: { id, name: rule.data?.name ?? 'n/a' },
+    };
+    return { error };
   }
 };
 
@@ -595,14 +601,15 @@ const dropEnabledSubset = async ({
   const keysToInvalidate: string[] = [];
   for (const id of enabledIds) {
     const prepared = preparedRules.get(id);
-    if (!prepared) continue;
-    errors.push({ message, rule: { id, name: prepared.name } });
-    const apiKey = apiKeysMap.get(id);
-    if (apiKey) {
-      keysToInvalidate.push(...collectNewKeysToInvalidate([apiKey]));
-      apiKeysMap.delete(id);
+    if (prepared) {
+      errors.push({ message, rule: { id, name: prepared.name } });
+      const apiKey = apiKeysMap.get(id);
+      if (apiKey) {
+        keysToInvalidate.push(...collectNewKeysToInvalidate([apiKey]));
+        apiKeysMap.delete(id);
+      }
+      preparedRules.delete(id);
     }
-    preparedRules.delete(id);
   }
   if (keysToInvalidate.length > 0) {
     await bulkMarkApiKeysForInvalidation(

@@ -373,7 +373,7 @@ describe('bulkCreateRules', () => {
     expect(result.rules).toHaveLength(0);
   });
 
-  test('Phase 4 per-row error on caller-supplied id NOT in scheduledTaskIdsThisCall: NO removeIfExists', async () => {
+  test('Phase 4 per-row error on caller-supplied id NOT in newlyScheduledTaskIds: NO removeIfExists', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
       buildBulkResponse([{ id: 'caller-id', error: { message: 'conflict', statusCode: 409 } }])
     );
