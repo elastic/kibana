@@ -13,17 +13,8 @@ import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
-import {
-  STREAMS_API_PRIVILEGES,
-  KI_FEATURES_IDENTIFICATION_WORKFLOW_UUID,
-} from '../../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { FeatureBulkOperation } from '../../../../lib/streams/feature/feature_client';
-import {
-  WorkflowExecutionClient,
-  type WorkflowExecutionResult,
-} from '../../../../lib/workflows/workflow_execution_client';
-
-const dateFromString = z.string().transform((input) => new Date(input));
 
 export const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features',
@@ -394,147 +385,6 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
   },
 });
 
-export const featuresRunRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_run',
-  options: {
-    access: 'internal',
-    summary: 'Run features identification workflow for a stream',
-    description:
-      'Triggers the features identification workflow to identify features in a stream using an LLM.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({ name: z.string() }),
-    body: z.object({
-      from: dateFromString,
-      to: dateFromString,
-      connectorId: z.string().optional(),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    workflowsManagementApi,
-  }): Promise<WorkflowExecutionResult> => {
-    const { streamsClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    if (!workflowsManagementApi) {
-      throw new Error('Workflows management is not available');
-    }
-
-    const { name } = params.path;
-    await streamsClient.ensureStream(name);
-
-    const client = new WorkflowExecutionClient(
-      workflowsManagementApi,
-      KI_FEATURES_IDENTIFICATION_WORKFLOW_UUID
-    );
-
-    return client.run(
-      {
-        streamName: name,
-        start: params.body.from.getTime(),
-        end: params.body.to.getTime(),
-        ...(params.body.connectorId && { connectorId: params.body.connectorId }),
-      },
-      request
-    );
-  },
-});
-
-export const featuresExecutionRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{name}/features/_execution',
-  options: {
-    access: 'internal',
-    summary: 'Get the latest features identification workflow execution for a stream',
-    description:
-      'Returns the latest workflow execution status and output for features identification on the given stream.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({ name: z.string() }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    workflowsManagementApi,
-  }): Promise<WorkflowExecutionResult> => {
-    const { streamsClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    if (!workflowsManagementApi) {
-      throw new Error('Workflows management is not available');
-    }
-
-    const { name } = params.path;
-    await streamsClient.ensureStream(name);
-
-    const client = new WorkflowExecutionClient(
-      workflowsManagementApi,
-      KI_FEATURES_IDENTIFICATION_WORKFLOW_UUID
-    );
-
-    return client.getLatestExecution(name);
-  },
-});
-
-export const featuresCancelRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_cancel',
-  options: {
-    access: 'internal',
-    summary: 'Cancel running features identification workflow for a stream',
-    description:
-      'Cancels the currently running features identification workflow execution for the given stream.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({ name: z.string() }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    workflowsManagementApi,
-  }): Promise<{ acknowledged: boolean }> => {
-    const { streamsClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    if (!workflowsManagementApi) {
-      throw new Error('Workflows management is not available');
-    }
-
-    const { name } = params.path;
-    await streamsClient.ensureStream(name);
-
-    const client = new WorkflowExecutionClient(
-      workflowsManagementApi,
-      KI_FEATURES_IDENTIFICATION_WORKFLOW_UUID
-    );
-
-    await client.cancelExecution(name);
-
-    return { acknowledged: true };
-  },
-});
-
 export const featureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
@@ -542,7 +392,4 @@ export const featureRoutes = {
   ...listAllFeaturesRoute,
   ...bulkFeaturesRoute,
   ...bulkFeaturesAcrossStreamsRoute,
-  ...featuresRunRoute,
-  ...featuresExecutionRoute,
-  ...featuresCancelRoute,
 };
