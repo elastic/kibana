@@ -423,7 +423,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'src/platform/packages/shared/kbn-kbn-client/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-mcp-dev-server/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-test-saml-auth/**/*.{js,mjs,ts,tsx}',
-  'src/platform/plugins/shared/workflows_management/server/connectors/workflows/**/*.{js,mjs,ts,tsx}',
   'src/platform/test/api_integration/apis/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/examples/alerting_example/server/rule_types/**/*.{js,mjs,ts,tsx}',
   'x-pack/packages/kbn-synthetics-private-location/**/*.{js,mjs,ts,tsx}',
@@ -467,13 +466,10 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/solutions/observability/plugins/synthetics/server/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/test/api_integration/profiling/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/elastic_assistant/scripts/**/*.{js,mjs,ts,tsx,jsx}',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/data_loaders/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/utils/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/scripts/run_cypress/parallel_serverless.ts',
-  'x-pack/solutions/security/plugins/security_solution/scripts/run_cypress/project_handler/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/scripts/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/scripts/**/*.{js,mjs,ts,tsx}',
@@ -492,6 +488,11 @@ const DEPRECATED_IMPORTS = [
     name: 'enzyme',
     message:
       'Enzyme is deprecated and no longer maintained. Please use @testing-library/react instead.',
+  },
+  {
+    name: '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib',
+    message:
+      '`hook_form_lib` is deprecated and will no longer be supported. Consider using `react-hook-form` for new and existing forms.',
   },
 ];
 
@@ -1029,7 +1030,19 @@ module.exports = {
         '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
-        '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
+        '@kbn/eslint/no_deprecated_imports': [
+          'warn',
+          {
+            paths: DEPRECATED_IMPORTS,
+            patterns: [
+              {
+                group: ['@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/**'],
+                message:
+                  '`hook_form_lib` is deprecated and will no longer be supported. Consider using `react-hook-form` for new and existing forms.',
+              },
+            ],
+          },
+        ],
         'no-restricted-modules': [
           'error',
           {
@@ -2896,6 +2909,7 @@ module.exports = {
         '@kbn/eslint/scout_no_deprecated_tags': 'error',
         '@kbn/eslint/scout_no_at_in_test_titles': 'warn',
         '@kbn/eslint/scout_no_locators': ['error', { restricted: ['globalLoadingIndicator'] }],
+        '@kbn/eslint/scout_no_promise_all_with_playwright_apis': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
