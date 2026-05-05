@@ -171,6 +171,8 @@ function loadFallbackSkipSet(repoRoot) {
  * treats dot-prefixed segments as hidden and refuses to let `**` traverse
  * them, so without this e.g. `.storybook/kibana.jsonc` would silently fall out
  * of the result set.
+ * @param {string} segPath
+ * @returns string
  */
 function undot(segPath) {
   return segPath
