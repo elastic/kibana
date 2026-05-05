@@ -43,6 +43,5 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/test-saml-auth",
     "@kbn/mock-idp-utils",
-    "@kbn/entity-store"
   ]
 }
