@@ -34,8 +34,11 @@ export const useBootstrapEaseRules = () => {
   const prebuiltRulesFlowState = initState[INITIALIZATION_FLOW_INIT_PREBUILT_RULES];
   const prebuiltRulesPackageReady =
     prebuiltRulesFlowState?.result?.status === INITIALIZATION_FLOW_STATUS_READY;
-  const prebuiltRulesPackageFailed =
-    prebuiltRulesFlowState?.result?.status === INITIALIZATION_FLOW_STATUS_ERROR;
+
+  const prebuiltRulesPackageError =
+    prebuiltRulesFlowState?.result?.status === INITIALIZATION_FLOW_STATUS_ERROR
+      ? prebuiltRulesFlowState.result.error ?? 'Unknown error'
+      : null;
 
   const { mutate: bootstrapEaseRules } = useBootstrapEaseRulesMutation({
     onError: (error) => {
@@ -51,17 +54,12 @@ export const useBootstrapEaseRules = () => {
   });
 
   useEffect(() => {
-    if (prebuiltRulesPackageFailed) {
-      addError(
-        new Error(
-          prebuiltRulesFlowState?.result?.status === INITIALIZATION_FLOW_STATUS_ERROR
-            ? prebuiltRulesFlowState.result.error ?? 'Unknown error'
-            : 'Unknown error'
-        ),
-        { title: i18n.BOOTSTRAP_PREBUILT_RULES_PACKAGE_FAILURE }
-      );
+    if (prebuiltRulesPackageError !== null) {
+      addError(new Error(prebuiltRulesPackageError), {
+        title: i18n.BOOTSTRAP_PREBUILT_RULES_PACKAGE_FAILURE,
+      });
     }
-  }, [prebuiltRulesPackageFailed, prebuiltRulesFlowState, addError]);
+  }, [prebuiltRulesPackageError, addError]);
 
   useEffect(() => {
     if (prebuiltRulesPackageReady && canEditRules) {
