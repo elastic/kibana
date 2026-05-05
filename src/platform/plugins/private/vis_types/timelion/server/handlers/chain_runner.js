@@ -57,8 +57,9 @@ export default function chainRunner(tlConfig) {
   }
 
   // Invokes a modifier function, resolving arguments into series as needed
-  function invoke(fnName, args) {
+  function invoke(fnName, args, parentIsDatasource) {
     const functionDef = tlConfig.getFunction(fnName);
+    const isDatasourceContext = parentIsDatasource || functionDef.datasource;
 
     function resolveArgument(item) {
       if (Array.isArray(item)) {
@@ -69,16 +70,16 @@ export default function chainRunner(tlConfig) {
         switch (item.type) {
           case 'function': {
             const itemFunctionDef = tlConfig.getFunction(item.function);
-            if (functionDef.datasource && itemFunctionDef.datasource) {
+            if (isDatasourceContext && itemFunctionDef.datasource) {
               throw new Error(
-                `Cannot use datasource function ${item.function}() as an argument to datasource function ${fnName}(). Datasource functions cannot be nested.`
+                `Cannot use datasource function ${item.function}() as an argument to another datasource function. Datasource functions cannot be nested.`
               );
             }
             if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
               stats.queryCount++;
               return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
             }
-            return invoke(item.function, item.arguments);
+            return invoke(item.function, item.arguments, isDatasourceContext);
           }
           case 'reference': {
             resolveDepth++;
@@ -102,9 +103,9 @@ export default function chainRunner(tlConfig) {
             });
           }
           case 'chain':
-            return invokeChain(item);
+            return invokeChain(item, undefined, isDatasourceContext);
           case 'chainList':
-            return resolveChainList(item.list);
+            return resolveChainList(item.list, isDatasourceContext);
           case 'literal':
             return item.value;
           case 'requestList':
@@ -134,7 +135,7 @@ export default function chainRunner(tlConfig) {
     });
   }
 
-  function invokeChain(chainObj, result) {
+  function invokeChain(chainObj, result, parentIsDatasource) {
     if (chainObj.chain.length === 0) return result[0];
 
     const chain = _.clone(chainObj.chain);
@@ -142,9 +143,9 @@ export default function chainRunner(tlConfig) {
 
     let promise;
     if (link.type === 'chain') {
-      promise = invokeChain(link);
+      promise = invokeChain(link, undefined, parentIsDatasource);
     } else if (!result) {
-      promise = invoke('first', [link]);
+      promise = invoke('first', [link], parentIsDatasource);
     } else {
       const functionDef = tlConfig.getFunction(link.function);
       if (functionDef.datasource) {
@@ -153,15 +154,15 @@ export default function chainRunner(tlConfig) {
         );
       }
       const args = link.arguments ? result.concat(link.arguments) : result;
-      promise = invoke(link.function, args);
+      promise = invoke(link.function, args, parentIsDatasource);
     }
 
     return promise.then(function (result) {
-      return invokeChain({ type: 'chain', chain: chain }, [result]);
+      return invokeChain({ type: 'chain', chain: chain }, [result], parentIsDatasource);
     });
   }
 
-  function resolveChainList(chainList) {
+  function resolveChainList(chainList, parentIsDatasource) {
     resolveDepth++;
     if (resolveDepth > MAX_RESOLVE_DEPTH) {
       resolveDepth--;
@@ -171,7 +172,7 @@ export default function chainRunner(tlConfig) {
     }
 
     const seriesList = _.map(chainList, function (chain) {
-      const values = invoke('first', [chain]);
+      const values = invoke('first', [chain], parentIsDatasource);
       return values.then(function (args) {
         return args;
       });

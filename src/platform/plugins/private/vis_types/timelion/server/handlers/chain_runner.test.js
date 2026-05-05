@@ -66,15 +66,21 @@ describe('chain_runner', () => {
   });
 
   describe('datasource nesting prevention', () => {
-    it('rejects a datasource function nested as an argument to another datasource', async () => {
-      await expect(processExpression('.static(.static(42))')).rejects.toThrow(
-        /The value argument for static\(\) must be a number or a colon-separated string of numbers/
+    it('rejects a datasource function nested as an argument to another datasource', () => {
+      expect(() => processExpression('.static(.static(42))')).toThrow(
+        /Cannot use datasource function static\(\) as an argument to another datasource function/
       );
     });
 
-    it('rejects deeply nested datasource functions', async () => {
-      await expect(processExpression('.static(.static(.static(42)))')).rejects.toThrow(
-        /The value argument for static\(\) must be a number or a colon-separated string of numbers/
+    it('rejects deeply nested datasource functions', () => {
+      expect(() => processExpression('.static(.static(.static(42)))')).toThrow(
+        /Cannot use datasource function static\(\) as an argument to another datasource function/
+      );
+    });
+
+    it('rejects any datasource function nested inside another datasource regardless of type', () => {
+      expect(() => processExpression('.worldbank(.static(42))')).toThrow(
+        /Cannot use datasource function static\(\) as an argument to another datasource function/
       );
     });
 
