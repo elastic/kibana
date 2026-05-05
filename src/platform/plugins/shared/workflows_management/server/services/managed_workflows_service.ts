@@ -281,11 +281,11 @@ export class ManagedWorkflowsService {
     }
 
     if (suffix) {
-      return `${id}--${suffix}`;
+      return `${id}-${suffix}`;
     }
 
     if (customId) {
-      if (!customId.startsWith(`${id}--`) && customId !== id) {
+      if (!customId.startsWith(`${id}-`) && customId !== id) {
         throw new Error(
           `Managed workflow '${id}' custom workflowId must equal '${id}' or start with '${id}--'`
         );
