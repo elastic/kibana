@@ -30,9 +30,6 @@ const MAX_SERIES_PER_SHEET = 100;
 /**
  * Maximum depth for resolving references. Prevents infinite recursion
  * from circular references (e.g. @1 referencing its own sheet).
- * Each level consumes ~100KB (one cache clone), so even at depth 10
- * the total is ~1MB — safe for memory while generous for legitimate
- * multi-level reference patterns.
  */
 const MAX_RESOLVE_DEPTH = 10;
 
@@ -42,7 +39,6 @@ export default function chainRunner(tlConfig) {
   let queryCache = {};
   const stats = {};
   let sheet;
-  let resolveDepth = 0;
 
   function throwWithCell(cell, exception) {
     throw new Error(
@@ -57,7 +53,7 @@ export default function chainRunner(tlConfig) {
   }
 
   // Invokes a modifier function, resolving arguments into series as needed
-  function invoke(fnName, args, parentIsDatasource) {
+  function invoke(fnName, args, parentIsDatasource, depth = 0) {
     const functionDef = tlConfig.getFunction(fnName);
     const isDatasourceContext = parentIsDatasource || functionDef.datasource;
 
@@ -79,12 +75,10 @@ export default function chainRunner(tlConfig) {
               stats.queryCount++;
               return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
             }
-            return invoke(item.function, item.arguments, isDatasourceContext);
+            return invoke(item.function, item.arguments, isDatasourceContext, depth);
           }
           case 'reference': {
-            resolveDepth++;
-            if (resolveDepth > MAX_RESOLVE_DEPTH) {
-              resolveDepth--;
+            if (depth >= MAX_RESOLVE_DEPTH) {
               throw new Error(
                 'Maximum expression resolution depth exceeded. This is usually caused by circular references.'
               );
@@ -98,14 +92,12 @@ export default function chainRunner(tlConfig) {
                 list: sheet[item.plot - 1],
               };
             }
-            return invoke('first', [reference]).finally(function () {
-              resolveDepth--;
-            });
+            return invoke('first', [reference], false, depth + 1);
           }
           case 'chain':
-            return invokeChain(item, undefined, isDatasourceContext);
+            return invokeChain(item, undefined, isDatasourceContext, depth);
           case 'chainList':
-            return resolveChainList(item.list, isDatasourceContext);
+            return resolveChainList(item.list, isDatasourceContext, depth);
           case 'literal':
             return item.value;
           case 'requestList':
@@ -135,7 +127,7 @@ export default function chainRunner(tlConfig) {
     });
   }
 
-  function invokeChain(chainObj, result, parentIsDatasource) {
+  function invokeChain(chainObj, result, parentIsDatasource, depth = 0) {
     if (chainObj.chain.length === 0) return result[0];
 
     const chain = _.clone(chainObj.chain);
@@ -143,9 +135,9 @@ export default function chainRunner(tlConfig) {
 
     let promise;
     if (link.type === 'chain') {
-      promise = invokeChain(link, undefined, parentIsDatasource);
+      promise = invokeChain(link, undefined, parentIsDatasource, depth);
     } else if (!result) {
-      promise = invoke('first', [link], parentIsDatasource);
+      promise = invoke('first', [link], parentIsDatasource, depth);
     } else {
       const functionDef = tlConfig.getFunction(link.function);
       if (functionDef.datasource) {
@@ -154,39 +146,24 @@ export default function chainRunner(tlConfig) {
         );
       }
       const args = link.arguments ? result.concat(link.arguments) : result;
-      promise = invoke(link.function, args, parentIsDatasource);
+      promise = invoke(link.function, args, parentIsDatasource, depth);
     }
 
     return promise.then(function (result) {
-      return invokeChain({ type: 'chain', chain: chain }, [result], parentIsDatasource);
+      return invokeChain({ type: 'chain', chain: chain }, [result], parentIsDatasource, depth);
     });
   }
 
-  function resolveChainList(chainList, parentIsDatasource) {
-    resolveDepth++;
-    if (resolveDepth > MAX_RESOLVE_DEPTH) {
-      resolveDepth--;
-      throw new Error(
-        'Maximum expression resolution depth exceeded. This is usually caused by circular references.'
-      );
-    }
-
+  function resolveChainList(chainList, parentIsDatasource, depth = 0) {
     const seriesList = _.map(chainList, function (chain) {
-      const values = invoke('first', [chain], parentIsDatasource);
-      return values.then(function (args) {
-        return args;
-      });
+      return invoke('first', [chain], parentIsDatasource, depth);
     });
-    return Promise.all(seriesList)
-      .then(function (args) {
-        const list = _.chain(args).map('list').flatten().value();
-        const seriesList = _.merge.apply(this, _.flatten([{}, args]));
-        seriesList.list = list;
-        return seriesList;
-      })
-      .finally(function () {
-        resolveDepth--;
-      });
+    return Promise.all(seriesList).then(function (args) {
+      const list = _.chain(args).map('list').flatten().value();
+      const seriesList = _.merge.apply(this, _.flatten([{}, args]));
+      seriesList.list = list;
+      return seriesList;
+    });
   }
 
   function preProcessSheet(sheet) {

@@ -117,5 +117,22 @@ describe('chain_runner', () => {
       expect(results[0].list[0].data[0][1]).toBe(5);
       expect(results[0].list[1].data[0][1]).toBe(15);
     });
+
+    it('allows many parallel non-circular references', async () => {
+      const numberOfSeries = 11; // 10 series + the initial series > MAX_RESOLVE_DEPTH
+      const series = ['.static(1)'];
+      for (let i = 2; i <= numberOfSeries; i++) {
+        series.push(`.static(${i}).sum(@1:1)`);
+      }
+      const expression = series.join(', ');
+      const sheets = await processExpression(expression);
+      const results = await Promise.all(sheets);
+
+      expect(results[0].list).toHaveLength(numberOfSeries);
+      expect(results[0].list[0].data[0][1]).toBe(1);
+      for (let i = 1; i < numberOfSeries; i++) {
+        expect(results[0].list[i].data[0][1]).toBe(i + 2);
+      }
+    });
   });
 });
