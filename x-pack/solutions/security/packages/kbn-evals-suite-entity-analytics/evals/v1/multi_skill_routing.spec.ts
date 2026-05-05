@@ -6,8 +6,8 @@
  */
 
 import { tags } from '@kbn/scout-security';
-import { evaluate } from '../src/evaluate';
-import { lmdJobIds, padJobIds } from '../src/ml_helpers';
+import { evaluate } from '../../src/evaluate';
+import { lmdJobIds, padJobIds } from '../../src/ml_helpers';
 
 /**
  * Multi-skill routing prompts (P-MS1, P-MS2, and new cross-domain prompts).

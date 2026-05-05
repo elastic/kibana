@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout-security';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services/rules';
 import { DEFAULT_ANOMALY_SCORE } from '@kbn/security-solution-plugin/common/constants';
 import { deleteAllAlerts, createAlertsIndex } from '@kbn/detections-response-ftr-services/alerts';
-import { evaluate } from '../src/evaluate';
+import { evaluate } from '../../src/evaluate';
 import {
   securityAuthModule,
   securityAuthJobIds,
@@ -26,7 +26,7 @@ import {
   installIntegrationAndCreatePolicy,
   setupMlModulesWithRetry,
   waitForAllJobsToStart,
-} from '../src/ml_helpers';
+} from '../../src/ml_helpers';
 
 evaluate.describe(
   'SIEM ML Jobs Skill - Anomalous Behavior with Active ML Jobs',
