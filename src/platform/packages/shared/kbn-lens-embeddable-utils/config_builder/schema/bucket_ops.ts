@@ -109,7 +109,7 @@ const bucketTermsRankByCustomSharedSchema = schema.object({
   }),
 });
 
-const bucketTermsRankByCustomBaseSchema = bucketTermsRankByCustomSharedSchema.extends(
+const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSchema.extends(
   {
     operation: schema.oneOf([
       schema.literal('min'),
@@ -125,9 +125,9 @@ const bucketTermsRankByCustomBaseSchema = bucketTermsRankByCustomSharedSchema.ex
   },
   {
     meta: {
-      id: 'termsRankByCustomBase',
-      title: 'Terms Rank By Custom Base',
-      description: 'Terms ranked by a custom operation.',
+      id: 'termsRankByCustomOperation',
+      title: 'Terms Rank By Custom Operation',
+      description: 'Terms ranked by custom operation.',
     },
   }
 );
@@ -347,7 +347,7 @@ export const bucketTermsOperationSchema = schema.object(
             },
           }
         ),
-        bucketTermsRankByCustomBaseSchema,
+        bucketTermsRankByCustomOperationSchema,
         bucketTermsRankByPercentileOperationSchema,
         bucketTermsRankByPercentileRankOperationSchema,
       ])
@@ -504,7 +504,9 @@ export const bucketOperationDefinitionSchema = schema.oneOf(
   }
 );
 
-export type TermOperationRankByCustomBaseType = TypeOf<typeof bucketTermsRankByCustomBaseSchema>;
+export type TermOperationRankByCustomOperationType = TypeOf<
+  typeof bucketTermsRankByCustomOperationSchema
+>;
 export type TermOperationRankByCustomPercentileType = TypeOf<
   typeof bucketTermsRankByPercentileOperationSchema
 >;
