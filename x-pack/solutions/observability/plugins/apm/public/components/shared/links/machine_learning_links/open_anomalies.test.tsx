@@ -81,7 +81,7 @@ describe('OpenAnomalies', () => {
     );
 
     const wrapper = screen.getByTestId('testOpenAnomalies');
-    const link = within(wrapper).getByRole('link', { name: 'Open anomalies' });
+    const link = within(wrapper).getByRole('link', { name: 'Open Anomalies' });
     expect(link).toHaveAttribute('href', '/ml/job-id?detectorIndex=1');
   });
 });
