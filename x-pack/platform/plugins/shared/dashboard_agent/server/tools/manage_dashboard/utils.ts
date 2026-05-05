@@ -14,6 +14,7 @@ import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { z } from '@kbn/zod/v4';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import type { DashboardOperation } from './operations';
 
 /**
  * Failure record for tracking visualization errors.
@@ -30,6 +31,32 @@ export interface VisualizationFailure {
 export const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
 };
+
+const hasNonEmptyValue = (value: string | undefined): value is string =>
+  value !== undefined && value.trim().length > 0;
+
+const hasRequiredCreateMetadataOperation = (operations: DashboardOperation[]): boolean =>
+  operations.some(
+    (operation) =>
+      operation.operation === 'set_metadata' &&
+      hasNonEmptyValue(operation.title) &&
+      hasNonEmptyValue(operation.description)
+  );
+
+const hasBlankMetadataUpdate = (operations: DashboardOperation[]): boolean =>
+  operations.some((operation) => {
+    if (operation.operation !== 'set_metadata') {
+      return false;
+    }
+
+    return (
+      (operation.title !== undefined && !hasNonEmptyValue(operation.title)) ||
+      (operation.description !== undefined && !hasNonEmptyValue(operation.description))
+    );
+  });
+
+export const hasValidCreateMetadataOperations = (operations: DashboardOperation[]): boolean =>
+  hasRequiredCreateMetadataOperation(operations) && !hasBlankMetadataUpdate(operations);
 
 const visualizationAttachmentDataSchema = z.object({
   visualization: z.record(z.string(), z.unknown()),
