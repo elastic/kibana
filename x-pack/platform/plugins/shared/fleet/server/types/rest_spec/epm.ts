@@ -760,7 +760,7 @@ export const BulkNamespaceCustomizationResponseSchema = schema.object({
         schema.arrayOf(schema.string(), {
           meta: {
             description:
-              'The opt-in list on the package. Present whenever the package is installed: the new list on success, or the unchanged list when the request was rejected (e.g. by a namespace-prefix restriction).',
+              'The opt-in list on the package. Returned whenever the package is installed: the new list on success, or the unchanged list when the request is rejected (for example, because of a namespace-prefix restriction).',
           },
         })
       ),
