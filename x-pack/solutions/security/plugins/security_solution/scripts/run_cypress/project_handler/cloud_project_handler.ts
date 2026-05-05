@@ -176,8 +176,12 @@ export class CloudHandler extends ProjectHandler {
 
   // Wait until Project is initialized
   waitForProjectInitialized(projectId: string): Promise<void> {
-    const fetchProjectStatusAttempt = async (attemptNum: number) => {
-      this.log.info(`Retry number ${attemptNum} to check if project is initialized.`);
+    let lastPhase: string | undefined;
+    let attempts = 0;
+
+    const fetchProjectStatusAttempt = async () => {
+      attempts += 1;
+      this.log.info(`Retry number ${attempts} to check if project is initialized.`);
       const response = await fetch(
         `${this.baseEnvUrl}/api/v1/serverless/projects/security/${projectId}/status`,
         {
@@ -191,6 +195,7 @@ export class CloudHandler extends ProjectHandler {
       }
 
       const data = (await response.json()) as { phase: string };
+      lastPhase = typeof data.phase === 'string' ? data.phase : undefined;
       if (data.phase !== 'initialized') {
         this.log.info(data);
         throw new Error('Project is not initialized. A retry will be triggered soon...');
@@ -203,8 +208,8 @@ export class CloudHandler extends ProjectHandler {
       return Promise.reject(
         new ProjectInitTimeoutError({
           projectId,
-          lastPhase: ${data.phase},
-          attempts: ${attemptNum},
+          lastPhase: 'initializing',
+          attempts: 1,
           cause: new Error('Forced timeout for CI workflow validation'),
         })
       );
@@ -226,8 +231,8 @@ export class CloudHandler extends ProjectHandler {
     return pRetry(fetchProjectStatusAttempt, retryOptions).catch((final: unknown) => {
       throw new ProjectInitTimeoutError({
         projectId,
-        lastPhase: ${data.phase},
-        attempts: ${attemptNum},
+        lastPhase,
+        attempts,
         cause: final,
       });
     });
