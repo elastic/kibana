@@ -903,6 +903,24 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormFlyoutProps.includeYaml",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeYaml",
+            "description": [
+              "Whether to include the Form/YAML edit mode toggle (default: false)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
