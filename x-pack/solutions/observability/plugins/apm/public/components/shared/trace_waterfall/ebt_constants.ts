@@ -7,6 +7,7 @@
 
 export const TRACE_WATERFALL_EBT_CLICK_ACTIONS = {
   VIEW_FULL_TRACE: 'viewFullTrace',
+  SCROLL_TO_ORIGIN: 'scrollToOrigin',
 } as const;
 
 export const TRACE_WATERFALL_EBT_ELEMENTS = {
@@ -19,7 +20,5 @@ export const TRACE_WATERFALL_EBT_ELEMENTS = {
   SUMMARY_VIEW_FULL_TRACE: 'waterfallSummaryViewFullTrace',
   FLYOUT_OPEN_IN_DISCOVER: 'flyoutWaterfallOpenInDiscover',
   FLYOUT_OPEN_IN_APM: 'flyoutWaterfallOpenInApm',
+  FLYOUT_SCROLL_TO_ORIGIN: 'flyoutWaterfallScrollToOriginButton',
 } as const;
-
-export const EBT_SCROLL_TO_ORIGIN_ACTION = 'scrollToOrigin';
-export const EBT_FLYOUT_WATERFALL_SCROLL_TO_ORIGIN_BUTTON = 'flyoutWaterfallScrollToOriginButton';
