@@ -22,6 +22,21 @@ export const TYPE_COLUMN_LABEL = i18n.translate(
   { defaultMessage: 'Type' }
 );
 
+export const SUBTYPE_COLUMN_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicators.columns.subtypeLabel',
+  { defaultMessage: 'Subtype' }
+);
+
+export const FILTER_FOR_TYPE_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicators.columns.filterForTypeTooltip',
+  { defaultMessage: 'Filter for this type' }
+);
+
+export const FILTER_FOR_SUBTYPE_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicators.columns.filterForSubtypeTooltip',
+  { defaultMessage: 'Filter for this sub-type' }
+);
+
 export const MATCH_QUERY_TYPE_LABEL = i18n.translate(
   'xpack.streams.knowledgeIndicators.columns.matchQueryTypeLabel',
   { defaultMessage: 'Match query' }
