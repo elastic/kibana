@@ -12,11 +12,10 @@ import {
   updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
-import { CoreStart, Request } from '@kbn/core-di-server';
-import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
@@ -80,7 +79,6 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
 export class RulesClient {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
-    @inject(CoreStart('http')) private readonly http: HttpServiceStart,
     @inject(RulesSavedObjectServiceScopedToken)
     private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
@@ -88,10 +86,7 @@ export class RulesClient {
   ) {}
 
   private getSpaceContext(): { spaceId: string } {
-    const requestBasePath = this.http.basePath.get(this.request);
-    const space = getSpaceIdFromPath(requestBasePath, this.http.basePath.serverBasePath);
-    const spaceId = space?.spaceId || 'default';
-    return { spaceId };
+    return { spaceId: this.request.spaceId };
   }
 
   @withApm

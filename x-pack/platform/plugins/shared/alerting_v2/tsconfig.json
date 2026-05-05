@@ -24,7 +24,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-http-server",
     "@kbn/logging",
-    "@kbn/spaces-utils",
     "@kbn/core-di",
     "@kbn/core-di-browser",
     "@kbn/core-di-server",
