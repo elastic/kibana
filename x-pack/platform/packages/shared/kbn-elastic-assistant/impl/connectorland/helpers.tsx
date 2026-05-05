@@ -91,7 +91,9 @@ export const getConnectorTypeTitle = (
     connector.isPreconfigured || ('isEis' in connector && connector.isEis)
       ? PRECONFIGURED_CONNECTOR
       : getGenAiConfig(connector)?.apiProvider ??
-        getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
+        (actionTypeRegistry.has(connector.actionTypeId)
+          ? getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId))
+          : connector.actionTypeId);
 
   return actionType;
 };

@@ -28,6 +28,7 @@ import {
   EuiSplitPanel,
   useEuiTheme,
   EuiCallOut,
+  EuiLoadingSpinner,
   EuiSwitch,
   EuiFormPrepend,
 } from '@elastic/eui';
@@ -52,6 +53,7 @@ import {
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import type {
@@ -158,6 +160,7 @@ export const ActionTypeForm = ({
     notifications,
     unifiedSearch,
     data,
+    uiSettings,
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -259,7 +262,10 @@ export const ActionTypeForm = ({
   ]);
 
   const getDefaultParams = async () => {
-    const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
+    if (!actionTypeRegistry.has(actionItem.actionTypeId)) {
+      return undefined;
+    }
+    const connectorType = actionTypeRegistry.get(actionItem.actionTypeId);
     let defaultParams;
     if (actionItem.group === recoveryActionGroup) {
       defaultParams = connectorType.defaultRecoveredActionParams;
@@ -345,12 +351,14 @@ export const ActionTypeForm = ({
         setActionParamsErrors({ errors: {} });
         return;
       }
-      const res: { errors: IErrorObject } = await actionTypeRegistry
-        .get(actionItem.actionTypeId)
-        ?.validateParams(
-          actionItem.params,
-          actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
-        );
+      const res: { errors: IErrorObject } = actionTypeRegistry.has(actionItem.actionTypeId)
+        ? await actionTypeRegistry
+            .get(actionItem.actionTypeId)
+            .validateParams(
+              actionItem.params,
+              actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
+            )
+        : { errors: {} };
       setActionParamsErrors(res);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -412,7 +420,52 @@ export const ActionTypeForm = ({
     setActionFrequencyProperty('summary', summary, index);
   };
 
-  const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
+  const {
+    actionTypeModel: actionTypeRegistered,
+    isLoading: isLoadingActionTypeModel,
+    error: actionTypeModelError,
+  } = useActionTypeModel({
+    actionTypeRegistry,
+    actionType: actionTypesIndex[actionConnector.actionTypeId] ?? null,
+    http,
+    uiSettings,
+  });
+
+  if (isLoadingActionTypeModel) {
+    return (
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" data-test-subj="actionTypeFormLoading" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (actionTypeModelError) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        size="s"
+        color="danger"
+        iconType="error"
+        title={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionTypeForm.specLoadErrorTitle',
+          { defaultMessage: 'Failed to load connector configuration' }
+        )}
+      >
+        <p>
+          {i18n.translate(
+            'xpack.triggersActionsUI.sections.actionTypeForm.specLoadErrorDescription',
+            {
+              defaultMessage:
+                'The connector configuration could not be loaded. Try reopening the rule.',
+            }
+          )}
+        </p>
+      </EuiCallOut>
+    );
+  }
+
   if (!actionTypeRegistered) return null;
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
 

@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
@@ -129,6 +130,11 @@ const ActionsConnectorsList = ({
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
   const [showWarningText, setShowWarningText] = useState<boolean>(false);
 
+  // Delay the loading indicator so quick fetches don't flash a spinner.
+  const isAnyLoading = isLoadingActions || isLoadingActionTypes;
+  const [showLoadingIndicator, setShowLoadingIndicator] = useState(false);
+  useDebounce(() => setShowLoadingIndicator(isAnyLoading), 300, [isAnyLoading]);
+
   const disabledActConnectorCss = css`
     .actConnectorsList__tableRowDisabled {
       background-color: ${euiTheme.colors.lightestShade};
@@ -247,7 +253,6 @@ const ActionsConnectorsList = ({
       ),
       sortable: false,
       truncateText: true,
-      width: '25%',
       render: (value: string, item: ActionConnectorTableItem) => {
         const checkEnabledResult = checkActionTypeEnabled(
           actionTypesIndex && actionTypesIndex[item.actionTypeId],
@@ -331,7 +336,7 @@ const ActionsConnectorsList = ({
                     'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.earsDisabledDescription',
                     {
                       defaultMessage:
-                        'EARS authentication is disabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.',
+                        'EARS authentication is disabled. Enable it via xpack.actions.ears.enabled in kibana.yml.',
                     }
                   )}
                   position="right"
@@ -466,7 +471,6 @@ const ActionsConnectorsList = ({
     },
     {
       name: '',
-      width: '300px',
       render: (item: ActionConnectorTableItem) => {
         if (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]) {
           return null;
@@ -477,7 +481,7 @@ const ActionsConnectorsList = ({
         const isStackConnector = actionType.source === ACTION_TYPE_SOURCES.stack;
 
         return (
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false}>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
             {usesOAuthAuthorizationCode(item) && !isDisabledEarsConnector(item) && (
               <>
                 {connectorAuthStatusError ? (
@@ -544,10 +548,9 @@ const ActionsConnectorsList = ({
 
   const table = (
     <EuiInMemoryTable
-      loading={isLoadingActions || isLoadingActionTypes}
+      loading={showLoadingIndicator}
       items={actionConnectorTableItems}
       sorting={true}
-      tableLayout="fixed"
       itemId={(item: ActionConnectorTableItem) =>
         item.isPreconfigured ? `preconfigured_${item.id}` : item.id
       }
@@ -693,7 +696,7 @@ const ActionsConnectorsList = ({
         />
 
         {/* Render the view based on if there's data or if they can save */}
-        {(isLoadingActions || isLoadingActionTypes) && <CenterJustifiedSpinner />}
+        {showLoadingIndicator && <CenterJustifiedSpinner />}
         {actionConnectorTableItems.length !== 0 && table}
         {actionConnectorTableItems.length === 0 &&
           canSave &&

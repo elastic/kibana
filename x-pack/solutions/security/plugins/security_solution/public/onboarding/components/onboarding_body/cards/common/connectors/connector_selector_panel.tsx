@@ -117,7 +117,11 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
                     <EuiIcon
                       size="xxl"
                       color="text"
-                      type={actionTypeRegistry.get(selectedConnector.actionTypeId).iconClass}
+                      type={
+                        actionTypeRegistry.has(selectedConnector.actionTypeId)
+                          ? actionTypeRegistry.get(selectedConnector.actionTypeId).iconClass
+                          : 'plugs'
+                      }
                     />
                   </EuiFlexItem>
                 )}

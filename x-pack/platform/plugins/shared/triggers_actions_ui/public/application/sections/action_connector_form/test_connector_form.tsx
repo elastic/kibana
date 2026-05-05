@@ -52,13 +52,18 @@ export const TestConnectorForm = ({
 }: TestConnectorFormProps) => {
   const [actionErrors, setActionErrors] = useState<IErrorObject>({});
   const [hasErrors, setHasErrors] = useState<boolean>(false);
-  const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
-  const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
+  const actionTypeModel = actionTypeRegistry.has(connector.actionTypeId)
+    ? actionTypeRegistry.get(connector.actionTypeId)
+    : undefined;
+  const ParamsFieldsComponent = actionTypeModel?.actionParamsFields;
 
   useEffect(() => {
+    if (!actionTypeModel) {
+      return;
+    }
     (async () => {
       const res = (
-        await actionTypeModel?.validateParams(
+        await actionTypeModel.validateParams(
           actionParams,
           connector && 'config' in connector ? connector.config : undefined
         )
@@ -165,6 +170,16 @@ export const TestConnectorForm = ({
       ),
     },
   ];
+
+  if (!actionTypeModel) {
+    return (
+      <EuiFlexGroup justifyContent="center" data-test-subj="testConnectorFormLoading">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="l" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return <EuiSteps steps={steps} data-test-subj="test-connector-form" />;
 };

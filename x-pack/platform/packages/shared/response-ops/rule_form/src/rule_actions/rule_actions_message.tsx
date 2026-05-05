@@ -11,12 +11,14 @@ import {
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
-import { ActionConnectorMode } from '@kbn/alerts-ui-shared';
+import { ActionConnectorMode, useActionTypeModel } from '@kbn/alerts-ui-shared';
 import { useRuleFormState } from '../hooks';
 import type { RuleAction, RuleUiAction } from '../common';
 import { getSelectedActionGroup } from '../utils';
@@ -48,7 +50,7 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
   } = props;
 
   const {
-    plugins: { actionTypeRegistry },
+    plugins: { actionTypeRegistry, http },
     actionsParamsErrors = {},
     selectedRuleType,
     selectedRuleTypeModel,
@@ -56,15 +58,24 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
     showMustacheAutocompleteSwitch,
   } = useRuleFormState();
 
-  const actionTypeModel = actionTypeRegistry.get(action.actionTypeId);
+  const actionType = useMemo(
+    () => connectorTypes.find((ct) => ct.id === action.actionTypeId) ?? null,
+    [connectorTypes, action.actionTypeId]
+  );
 
-  const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
+  const { actionTypeModel, isLoading, error } = useActionTypeModel({
+    actionTypeRegistry,
+    actionType,
+    http,
+  });
+
+  const ParamsFieldsComponent = actionTypeModel?.actionParamsFields;
 
   const actionsParamsError = actionsParamsErrors[action.uuid!] || {};
 
   const isSystemAction = useMemo(() => {
-    return connectorTypes.some((actionType) => {
-      return actionType.id === action.actionTypeId && actionType.isSystemActionType;
+    return connectorTypes.some((ct) => {
+      return ct.id === action.actionTypeId && ct.isSystemActionType;
     });
   }, [action, connectorTypes]);
 
@@ -91,7 +102,34 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
       : selectedActionGroup?.defaultActionMessage ?? selectedRuleTypeModel.defaultActionMessage;
   }, [isSystemAction, action, selectedRuleTypeModel, selectedActionGroup]);
 
-  if (!ParamsFieldsComponent) {
+  if (isLoading) {
+    return <EuiLoadingSpinner size="m" />;
+  }
+
+  if (error) {
+    return (
+      <EuiCallOut
+        color="danger"
+        iconType="error"
+        size="s"
+        title={i18n.translate('xpack.responseOps.ruleForm.ruleActionsMessage.specLoadErrorTitle', {
+          defaultMessage: 'Failed to load action configuration',
+        })}
+      >
+        <p>
+          {i18n.translate(
+            'xpack.responseOps.ruleForm.ruleActionsMessage.specLoadErrorDescription',
+            {
+              defaultMessage:
+                'The connector configuration could not be loaded. Try reopening the rule.',
+            }
+          )}
+        </p>
+      </EuiCallOut>
+    );
+  }
+
+  if (!actionTypeModel || !ParamsFieldsComponent) {
     return null;
   }
 

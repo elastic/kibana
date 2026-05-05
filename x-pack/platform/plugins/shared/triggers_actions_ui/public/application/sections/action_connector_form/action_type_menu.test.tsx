@@ -8,6 +8,8 @@
 import * as React from 'react';
 import { screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionTypeMenu } from './action_type_menu';
 import type { GenericValidationResult } from '../../../types';
@@ -48,7 +50,10 @@ describe('connector_add_flyout', () => {
 
   afterEach(() => {
     actionTypeRegistry.get.mockReset();
+    actionTypeRegistry.has.mockImplementation(() => true);
     jest.clearAllMocks();
+    const core = coreMock.createStart();
+    useKibanaMock().services.uiSettings.get = core.uiSettings.get;
   });
 
   describe('rendering', () => {
@@ -219,6 +224,73 @@ describe('connector_add_flyout', () => {
 
       expect(screen.queryByTestId('my-action-type-1-card')).not.toBeInTheDocument();
       expect(await screen.findByTestId('my-action-type-2-card')).toBeInTheDocument();
+    });
+
+    it('shows workflows-only spec connector when workflows:ui:enabled is unset (defaults to true)', async () => {
+      const onActionTypeChange = jest.fn();
+      const coreStart = coreMock.createStart();
+      actionTypeRegistry.has.mockReturnValue(false);
+      useKibanaMock().services.uiSettings.get = jest.fn(
+        (key: string, defaultOverride?: unknown) => defaultOverride
+      ) as typeof coreStart.uiSettings.get;
+
+      loadActionTypes.mockResolvedValue([
+        {
+          id: '.workflows-spec-connector',
+          enabled: true,
+          name: 'Workflows Spec',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: [WorkflowsConnectorFeatureId],
+          isSystemActionType: false,
+          isDeprecated: false,
+          source: ACTION_TYPE_SOURCES.spec,
+        },
+      ]);
+
+      appMockRenderer.render(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      expect(await screen.findByTestId('.workflows-spec-connector-card')).toBeInTheDocument();
+    });
+
+    it('hides workflows-only spec connector when workflows:ui:enabled is false', async () => {
+      const onActionTypeChange = jest.fn();
+      const coreStart = coreMock.createStart();
+      actionTypeRegistry.has.mockReturnValue(false);
+      useKibanaMock().services.uiSettings.get = jest.fn((key: string, defaultOverride?: unknown) =>
+        key === 'workflows:ui:enabled' ? false : defaultOverride
+      ) as typeof coreStart.uiSettings.get;
+
+      loadActionTypes.mockResolvedValue([
+        {
+          id: '.workflows-spec-connector',
+          enabled: true,
+          name: 'Workflows Spec',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: [WorkflowsConnectorFeatureId],
+          isSystemActionType: false,
+          isDeprecated: false,
+          source: ACTION_TYPE_SOURCES.spec,
+        },
+      ]);
+
+      appMockRenderer.render(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      await new Promise((r) => setTimeout(r, 0));
+      expect(screen.queryByTestId('.workflows-spec-connector-card')).not.toBeInTheDocument();
     });
   });
 
