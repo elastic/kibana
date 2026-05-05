@@ -6,7 +6,7 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getPalettes, KbnPalette } from '@kbn/palettes';
+import { getPalettes } from '@kbn/palettes';
 import { chartTypeRegistry } from './chart_type_registry';
 
 /**
@@ -15,26 +15,23 @@ import { chartTypeRegistry } from './chart_type_registry';
 const CATEGORICAL_PALETTE_PREVIEW_STEPS = 5;
 
 /**
- * getAll() excludes the only light/dark palette color difference, so light palettes are enough here.
+ * Mirrors Lens palette pickers for agent prompts. Legacy palettes are excluded
+ * so the agent uses the default/current palette set unless the user asks otherwise.
  */
-const lensColorPalettes = getPalettes(false).getAll();
+const lensColorPalettes = getPalettes(false)
+  .getAll()
+  .filter(({ legacy }) => !legacy);
 
 /**
  * Mirrors the Lens dynamic color picker: gradient palettes.
  */
 const lensDynamicColorPalettes = lensColorPalettes.filter((palette) => palette.type === 'gradient');
 
-const LEGACY_CATEGORICAL_PALETTE_IDS = new Set<string>([
-  KbnPalette.Kibana7,
-  KbnPalette.Kibana4,
-  KbnPalette.ElasticClassic,
-]);
-
 /**
- * Mirrors the Lens categorical color picker, excluding legacy palettes.
+ * Mirrors the Lens categorical color picker.
  */
 const lensCategoricalColorPalettes = lensColorPalettes.filter(
-  (palette) => palette.type === 'categorical' && !LEGACY_CATEGORICAL_PALETTE_IDS.has(palette.id)
+  (palette) => palette.type === 'categorical'
 );
 
 const formatPalettePreview = ({
