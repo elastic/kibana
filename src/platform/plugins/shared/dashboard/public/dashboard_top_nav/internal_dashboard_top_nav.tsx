@@ -410,7 +410,7 @@ export function InternalDashboardTopNav({
     : undefined;
 
   return (
-    <>
+    <div css={styles.container}>
       {visibilityProps.showTopNavMenu && viewMode !== 'print' && (
         <ChromeAppHeaderRegistration
           title={dashboardTitle}
@@ -420,61 +420,50 @@ export function InternalDashboardTopNav({
           favorite={chromeNextHeaderFavoriteGlobalAction}
         />
       )}
-      <div css={styles.container}>
-        <EuiScreenReaderOnly>
-          <h1
-            id="dashboardTitle"
-            ref={dashboardTitleRef}
-          >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
-        </EuiScreenReaderOnly>
-        <AppMenu
-          setAppMenu={coreServices.chrome.setAppMenu}
-          config={
-            visibilityProps.showTopNavMenu
-              ? viewMode === 'edit'
-                ? editModeTopNavConfig
-                : viewModeTopNavConfig
-              : undefined
+      <EuiScreenReaderOnly>
+        <h1
+          id="dashboardTitle"
+          ref={dashboardTitleRef}
+        >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
+      </EuiScreenReaderOnly>
+      <AppMenu setAppMenu={coreServices.chrome.setAppMenu} config={appMenuConfig} />
+      {viewMode !== 'print' && visibilityProps.showSearchBar && (
+        <unifiedSearchService.ui.SearchBar
+          {...visibilityProps}
+          query={query as Query | undefined}
+          screenTitle={title}
+          useDefaultBehaviors={true}
+          savedQueryId={savedQueryId}
+          indexPatterns={allDataViews ?? []}
+          allowSavingQueries
+          enableDateRangePicker
+          appName={DASHBOARD_APP_ID}
+          onQuerySubmit={(_payload, isUpdate) => {
+            if (isUpdate === false) {
+              dashboardApi.forceRefresh();
+            }
+            if (hasUnpublishedFilters) dashboardApi.publishFilters();
+            if (hasUnpublishedTimeslice) dashboardApi.publishTimeslice();
+            if (hasUnpublishedVariables) dashboardInternalApi.publishVariables();
+          }}
+          onSavedQueryIdChange={setSavedQueryId}
+          hasDirtyState={
+            hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables
+          }
+          useBackgroundSearchButton={
+            dataService.search.isBackgroundSearchEnabled &&
+            getDashboardCapabilities().storeSearchSession
           }
         />
-        {viewMode !== 'print' && visibilityProps.showSearchBar && (
-          <unifiedSearchService.ui.SearchBar
-            {...visibilityProps}
-            query={query as Query | undefined}
-            screenTitle={title}
-            useDefaultBehaviors={true}
-            savedQueryId={savedQueryId}
-            indexPatterns={allDataViews ?? []}
-            allowSavingQueries
-            enableDateRangePicker
-            appName={DASHBOARD_APP_ID}
-            onQuerySubmit={(_payload, isUpdate) => {
-              if (isUpdate === false) {
-                dashboardApi.forceRefresh();
-              }
-              if (hasUnpublishedFilters) dashboardApi.publishFilters();
-              if (hasUnpublishedTimeslice) dashboardApi.publishTimeslice();
-              if (hasUnpublishedVariables) dashboardInternalApi.publishVariables();
-            }}
-            onSavedQueryIdChange={setSavedQueryId}
-            hasDirtyState={
-              hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables
-            }
-            useBackgroundSearchButton={
-              dataService.search.isBackgroundSearchEnabled &&
-              getDashboardCapabilities().storeSearchSession
-            }
-          />
-        )}
-        {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
-          <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
-        ) : null}
+      )}
+      {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
+        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+      ) : null}
 
-        {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
+      {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
 
-        {showBorderBottom && <EuiHorizontalRule margin="none" />}
-      </div>
-    </>
+      {showBorderBottom && <EuiHorizontalRule margin="none" />}
+    </div>
   );
 }
 
