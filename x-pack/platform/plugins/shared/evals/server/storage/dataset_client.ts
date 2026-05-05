@@ -273,8 +273,8 @@ export class DatasetClient {
   }
 
   async delete(datasetId: string): Promise<boolean> {
-    const dataset = await this.getDatasetById(datasetId);
-    if (!dataset) {
+    const exists = await this.datasetExists(datasetId);
+    if (!exists) {
       return false;
     }
 
@@ -389,19 +389,7 @@ export class DatasetClient {
   }
 
   async deleteExample(exampleId: string, expectedDatasetId?: string): Promise<boolean> {
-    const searchResponse = await this.examplesStorage.search({
-      track_total_hits: false,
-      size: 1,
-      _source: ['dataset_id'],
-      query: {
-        term: {
-          _id: exampleId,
-        },
-      },
-    });
-
-    const hit = searchResponse.hits.hits[0];
-    const datasetId = hit?._source?.dataset_id;
+    const datasetId = await this.getExampleDatasetId(exampleId);
     if (!datasetId) {
       return false;
     }
@@ -632,6 +620,21 @@ export class DatasetClient {
       id: hit._id,
       ...hit._source,
     };
+  }
+
+  private async getExampleDatasetId(exampleId: string): Promise<string | undefined> {
+    const response = await this.examplesStorage.search({
+      track_total_hits: false,
+      size: 1,
+      _source: ['dataset_id'],
+      query: {
+        term: {
+          _id: exampleId,
+        },
+      },
+    });
+
+    return response.hits.hits[0]?._source?.dataset_id;
   }
 
   private async getExamplesCountByDatasetId(datasetIds: string[]): Promise<Map<string, number>> {

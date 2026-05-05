@@ -21,6 +21,25 @@ import { ExampleAlreadyExistsError } from './example_already_exists_error';
 type DatasetStorageDocument = DatasetStorageProperties & { _id?: string };
 type DatasetExampleStorageDocument = DatasetExampleStorageProperties & { _id?: string };
 
+const projectSource = <TDoc extends Record<string, unknown>>(
+  source: TDoc,
+  sourceParam: unknown
+): Partial<TDoc> | undefined => {
+  if (sourceParam === false) {
+    return undefined;
+  }
+  if (Array.isArray(sourceParam)) {
+    const projected: Record<string, unknown> = {};
+    for (const field of sourceParam) {
+      if (typeof field === 'string' && field in source) {
+        projected[field] = source[field];
+      }
+    }
+    return projected as Partial<TDoc>;
+  }
+  return source;
+};
+
 const createDatasetStorageClient = () => {
   const docs = new Map<string, DatasetStorageDocument>();
 
@@ -47,7 +66,10 @@ const createDatasetStorageClient = () => {
 
     const from = (params.from as number | undefined) ?? 0;
     const size = (params.size as number | undefined) ?? rows.length;
-    const paged = rows.slice(from, from + size);
+    const paged = rows.slice(from, from + size).map((row) => ({
+      _id: row._id,
+      _source: projectSource(row._source, params._source),
+    }));
 
     return {
       hits: {
@@ -116,7 +138,10 @@ const createExamplesStorageClient = () => {
     }
 
     const size = (params.size as number | undefined) ?? rows.length;
-    const hits = rows.slice(0, size);
+    const hits = rows.slice(0, size).map((row) => ({
+      _id: row._id,
+      _source: projectSource(row._source, params._source),
+    }));
 
     if ((params.aggs as { by_dataset_id?: unknown } | undefined)?.by_dataset_id) {
       const countsByDatasetId = new Map<string, number>();
@@ -291,11 +316,14 @@ describe('DatasetClient', () => {
   });
 
   it('returns true for datasetExists when the dataset exists', async () => {
-    const { client } = createClient();
+    const { client, datasetsStorage } = createClient();
 
     const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
 
     await expect(client.datasetExists(created.id)).resolves.toBe(true);
+    expect(datasetsStorage.client.search).toHaveBeenLastCalledWith(
+      expect.objectContaining({ _source: false })
+    );
   });
 
   it('returns false for datasetExists when the dataset does not exist', async () => {
@@ -305,7 +333,7 @@ describe('DatasetClient', () => {
   });
 
   it('deletes a single example and preserves remaining examples', async () => {
-    const { client } = createClient();
+    const { client, examplesStorage } = createClient();
 
     const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
     const exampleToDelete = created.examples[0];
@@ -316,6 +344,9 @@ describe('DatasetClient', () => {
     expect(wasDeleted).toBe(true);
     expect(fetched?.examples).toHaveLength(1);
     expect(fetched?.examples[0].input).toEqual(baseExampleB.input);
+    expect(examplesStorage.client.search).toHaveBeenCalledWith(
+      expect.objectContaining({ _source: ['dataset_id'] })
+    );
   });
 
   it('returns false when deleting a non-existent example', async () => {
@@ -389,7 +420,7 @@ describe('DatasetClient', () => {
   });
 
   it('deleteExamplesByDatasetId removes all examples for a dataset', async () => {
-    const { client } = createClient();
+    const { client, examplesStorage } = createClient();
 
     const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
     const result = await client.deleteExamplesByDatasetId(created.id);
@@ -398,6 +429,12 @@ describe('DatasetClient', () => {
 
     const fetched = await client.get(created.id);
     expect(fetched?.examples).toHaveLength(0);
+    expect(examplesStorage.client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _source: false,
+        query: { term: { dataset_id: created.id } },
+      })
+    );
   });
 
   it('deleteExamplesByDatasetId returns zero when dataset has no examples', async () => {
