@@ -29,7 +29,7 @@ engine:
   env:
     CODEX_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     OPENAI_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-    OPENAI_BASE_URL: https://openrouter.ai/api/v1
+    OPENAI_BASE_URL: ${{ vars.OPENROUTER_BASE_URL }}/v1
 # Activation rules:
 # - Manual runs always activate.
 # - Reviewer label events activate, including labels added while creating a PR.
