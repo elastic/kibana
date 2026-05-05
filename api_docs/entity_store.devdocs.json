@@ -2114,6 +2114,43 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.getLatestEntityIndexPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "getLatestEntityIndexPattern",
+        "description": [],
+        "signature": [
+          "(namespace: string) => `.entities.v${number}.latest.security_${string}-*`"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-common.getLatestEntityIndexPattern.$1",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+            "lineNumber": 42,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
