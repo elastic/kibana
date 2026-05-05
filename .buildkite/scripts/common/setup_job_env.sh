@@ -10,6 +10,11 @@ fi
 
 source .buildkite/scripts/common/util.sh
 
+# Opt out of Docker ES usage from Cypress while the 9.5.0 ES Docker image is not
+# yet published (unified release must run first to publish it). Cypress suites
+# will fall back to ES snapshot tar.gz via kbn-es.
+export CYPRESS_ES_FROM=snapshot
+
 # Set up general-purpose tokens and credentials
 {
   BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
