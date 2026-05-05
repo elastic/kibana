@@ -94,7 +94,14 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
     indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
     relationshipType: 'communicates_with',
     targetEntityType: 'host',
-    requireTargetEntityIdExists: true,
+    // Step 1 / Step 2 narrowing parity: the targetEvalOverride reads only
+    // `host.target.entity.id`, so the broad `requireTargetEntityIdExists`
+    // gate (which checks for any host.* EUID source field) would surface
+    // actors in Step 1 whose docs never produce a target row in Step 2 —
+    // the same shape of bug niros1 caught for the frequency-classification
+    // path. Mirror the narrow check explicitly here so Step 1 and Step 2
+    // select the same set of docs.
+    compositeAggAdditionalFilters: [{ exists: { field: 'host.target.entity.id' } }],
     esqlWhereClause: `aws.cloudtrail.user_identity.type IN (${HUMAN_IAM_IDENTITY_TYPES.map(
       (t) => `"${t}"`
     ).join(', ')})

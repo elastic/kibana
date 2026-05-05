@@ -144,17 +144,18 @@ describe('runGenericMaintainer', () => {
       expect(esql).not.toHaveBeenCalled();
     });
 
-    it('iterates pages while after_key is present, stopping on a partial last page', async () => {
+    it('iterates pages until after_key is missing (canonical composite-agg termination)', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient } = makeCrudClient();
-      const fullPage = Array.from({ length: COMPOSITE_PAGE_SIZE }, (_, i) => ({
+      const firstPage = Array.from({ length: COMPOSITE_PAGE_SIZE }, (_, i) => ({
         key: { 'user.name': `alice${i}` },
         doc_count: 1,
       }));
-      const partialPage = [{ key: { 'user.name': 'bob' }, doc_count: 1 }];
+      // Last page omits after_key — that's the contract that terminates the loop.
+      const lastPage = [{ key: { 'user.name': 'bob' }, doc_count: 1 }];
       search
-        .mockResolvedValueOnce(successResponse(fullPage, { 'user.name': 'after' }))
-        .mockResolvedValueOnce(successResponse(partialPage));
+        .mockResolvedValueOnce(successResponse(firstPage, { 'user.name': 'after' }))
+        .mockResolvedValueOnce(successResponse(lastPage /* no after_key */));
       esql.mockResolvedValue({
         columns: [
           { name: 'actorUserId', type: 'keyword' },
@@ -172,6 +173,36 @@ describe('runGenericMaintainer', () => {
       });
       expect(search).toHaveBeenCalledTimes(2);
       expect(esql).toHaveBeenCalledTimes(2);
+    });
+
+    it('continues paginating when after_key is still present on a partial-size page', async () => {
+      // Composite agg can return a partial-size page with after_key still set
+      // (e.g. when a sub-aggregation filter drops bucket candidates). The
+      // engine must trust after_key, not infer termination from page size.
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient } = makeCrudClient();
+      const partialWithAfterKey = [
+        { key: { 'user.name': 'alice' }, doc_count: 1 },
+        { key: { 'user.name': 'bob' }, doc_count: 1 },
+      ];
+      const finalPage = [{ key: { 'user.name': 'carol' }, doc_count: 1 }];
+      search
+        .mockResolvedValueOnce(successResponse(partialWithAfterKey, { 'user.name': 'after' }))
+        .mockResolvedValueOnce(successResponse(finalPage /* no after_key */));
+      esql.mockResolvedValue({
+        columns: [{ name: 'actorUserId', type: 'keyword' }],
+        values: [],
+      });
+      await runGenericMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+      });
+      // Two search calls because after_key was still set on the partial page.
+      // (Old heuristic would have stopped after one because length < page size.)
+      expect(search).toHaveBeenCalledTimes(2);
     });
 
     it('stops at MAX_ITERATIONS even when after_key keeps coming back', async () => {
@@ -316,6 +347,74 @@ describe('runGenericMaintainer', () => {
       ).rejects.toThrow(/parsing_exception/);
       expect(bulkUpdate).not.toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalled();
+    });
+
+    // Defense in depth: ES|QL responses are typed loosely on the client. A
+    // partial-success response or future protocol change could omit the
+    // `columns` / `values` arrays. Without a guard, parseTargetsPerActorRows
+    // would crash in `.map` with a misleading TypeError.
+    describe('response shape guard', () => {
+      it('warns and skips the page when columns is not an array', async () => {
+        const { esClient, search, esql } = makeEsClient();
+        const { crudClient, bulkUpdate } = makeCrudClient();
+        search.mockResolvedValueOnce(
+          successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+        );
+        esql.mockResolvedValueOnce({ values: [['user:alice@corp']] } as unknown as EsqlResponse);
+        const logger = loggerMock.create();
+        const result = await runGenericMaintainer({
+          esClient,
+          logger,
+          namespace: 'default',
+          crudClient,
+          integrations: [baseConfig],
+        });
+        expect(result.totalRecords).toBe(0);
+        expect(bulkUpdate).not.toHaveBeenCalled();
+        const warns = logger.warn.mock.calls.map((c) => c[0] as string);
+        expect(warns.some((m) => m.includes('unexpected response shape'))).toBe(true);
+      });
+
+      it('warns and skips the page when values is not an array', async () => {
+        const { esClient, search, esql } = makeEsClient();
+        const { crudClient, bulkUpdate } = makeCrudClient();
+        search.mockResolvedValueOnce(
+          successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+        );
+        esql.mockResolvedValueOnce({
+          columns: [{ name: 'actorUserId', type: 'keyword' }],
+        } as unknown as EsqlResponse);
+        const logger = loggerMock.create();
+        const result = await runGenericMaintainer({
+          esClient,
+          logger,
+          namespace: 'default',
+          crudClient,
+          integrations: [baseConfig],
+        });
+        expect(result.totalRecords).toBe(0);
+        expect(bulkUpdate).not.toHaveBeenCalled();
+        const warns = logger.warn.mock.calls.map((c) => c[0] as string);
+        expect(warns.some((m) => m.includes('unexpected response shape'))).toBe(true);
+      });
+
+      it('does NOT throw when both columns and values are missing (the original crash mode)', async () => {
+        const { esClient, search, esql } = makeEsClient();
+        const { crudClient } = makeCrudClient();
+        search.mockResolvedValueOnce(
+          successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+        );
+        esql.mockResolvedValueOnce({} as unknown as EsqlResponse);
+        await expect(
+          runGenericMaintainer({
+            esClient,
+            logger: loggerMock.create(),
+            namespace: 'default',
+            crudClient,
+            integrations: [baseConfig],
+          })
+        ).resolves.toBeDefined();
+      });
     });
   });
 

@@ -6,7 +6,6 @@ FROM logs-aws.cloudtrail-__namespace__
 | WHERE aws.cloudtrail.user_identity.type IN (\\"IAMUser\\", \\"AssumedRole\\", \\"Root\\", \\"FederatedUser\\", \\"IdentityCenterUser\\")
     AND host.target.entity.id IS NOT NULL
     AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\"))
-    AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
  _src_entity_source1 = MV_FIRST(event.dataset),
  _src_entity_source2 = MV_FIRST(data_stream.dataset),

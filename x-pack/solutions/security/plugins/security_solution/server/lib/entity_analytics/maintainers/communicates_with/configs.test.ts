@@ -63,12 +63,42 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
       expect(hostTargeted.map((c) => c.id).sort()).toEqual(['aws_cloudtrail', 'jamf_pro']);
     });
 
+    // Each host-targeted config narrows Step 1 by target presence so it
+    // matches what Step 2's WHERE clause filters on. Two equivalent
+    // mechanisms exist:
+    //   - `requireTargetEntityIdExists: true` for configs whose target eval
+    //     reads any host.* EUID source (jamf_pro uses the engine default).
+    //   - explicit `compositeAggAdditionalFilters: [{ exists: { field } }]`
+    //     for configs whose target eval reads a single specific field
+    //     (aws_cloudtrail reads only `host.target.entity.id`, so the broad
+    //     EUID gate would surface actors that never produce target rows).
     it.each(hostTargeted)(
-      '$id: opts into requireTargetEntityIdExists so Step 1 and Step 2 narrow consistently',
+      '$id: narrows Step 1 by target presence so Step 1 and Step 2 select the same docs',
       (config) => {
-        expect(config.requireTargetEntityIdExists).toBe(true);
+        const broadGate = config.requireTargetEntityIdExists === true;
+        const narrowGate =
+          config.compositeAggAdditionalFilters?.some((f) => {
+            const filter = f as { exists?: { field?: string } };
+            return filter.exists?.field !== undefined;
+          }) ?? false;
+        expect(broadGate || narrowGate).toBe(true);
       }
     );
+
+    it('jamf_pro uses the broad target-EUID gate (no targetEvalOverride)', () => {
+      const jamf = hostTargeted.find((c) => c.id === 'jamf_pro');
+      expect(jamf?.requireTargetEntityIdExists).toBe(true);
+      expect(jamf?.targetEvalOverride).toBeUndefined();
+    });
+
+    it('aws_cloudtrail uses the narrow exists filter (because targetEvalOverride reads a single field)', () => {
+      const aws = hostTargeted.find((c) => c.id === 'aws_cloudtrail');
+      expect(aws?.requireTargetEntityIdExists).toBeUndefined();
+      expect(aws?.targetEvalOverride).toContain('host.target.entity.id');
+      expect(aws?.compositeAggAdditionalFilters).toEqual(
+        expect.arrayContaining([{ exists: { field: 'host.target.entity.id' } }])
+      );
+    });
 
     it.each(hostTargeted)(
       '$id: produces a single communicates_with STATS column (no bucket classification)',

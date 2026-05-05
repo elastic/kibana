@@ -19,7 +19,7 @@ import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_di
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import { writeEntityIds } from './update_entities';
-import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
+import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
 
 interface CompositeAggregations {
   users: {
@@ -102,7 +102,18 @@ async function fetchTargetsForActors(
       { query: buildTargetsPerActorQuery(config, namespace), filter: esqlFilter },
       transportOpts
     );
-    return result as unknown as EsqlQueryResult;
+    // Defense in depth: ES|QL responses are typed loosely on the client,
+    // and a partial-success or future protocol change could omit columns/values.
+    // Guarding here means the engine logs a warning and skips the page rather
+    // than crashing in `parseTargetsPerActorRows` with a misleading TypeError.
+    const typed = result as unknown as Partial<EsqlQueryResult>;
+    if (!Array.isArray(typed.columns) || !Array.isArray(typed.values)) {
+      logger.warn(
+        `[${config.id}] ES|QL returned unexpected response shape (columns or values not arrays); skipping page`
+      );
+      return null;
+    }
+    return { columns: typed.columns, values: typed.values };
   } catch (err) {
     if (abortController?.signal.aborted) {
       logger.info(`[${config.id}] Aborted during ES|QL query`);
@@ -169,7 +180,12 @@ async function runIntegration(
     records.push(...pageRecords);
     logger.debug(`[${config.id}] Produced ${pageRecords.length} records`);
 
-    afterKey = buckets.length < COMPOSITE_PAGE_SIZE ? undefined : newAfterKey;
+    // Composite agg's documented termination contract is "stop when after_key
+    // is absent." Trust newAfterKey directly rather than inferring termination
+    // from a partial-page heuristic — composite aggs can return a partial last
+    // page with after_key still set in some edge cases (e.g. sub-aggregation
+    // filters that drop bucket candidates).
+    afterKey = newAfterKey;
   } while (afterKey);
 
   return { buckets: totalBuckets, records };
