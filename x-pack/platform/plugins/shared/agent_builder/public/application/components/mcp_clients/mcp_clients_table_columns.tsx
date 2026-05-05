@@ -8,12 +8,14 @@
 import {
   EuiNotificationBadge,
   EuiText,
+  EuiTextColor,
   type EuiBasicTableColumn,
   type EuiTableComputedColumnType,
   type EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import type { OAuthClient } from '@kbn/agent-builder-common';
 import React, { useMemo } from 'react';
+import { isEmpty } from 'lodash';
 import { labels } from '../../utils/i18n';
 import { McpClientLogo } from './mcp_client_logo';
 import { McpClientStatusIndicator } from './mcp_client_status_indicator';
@@ -32,7 +34,11 @@ export const useMcpClientsTableColumns = (): Array<EuiBasicTableColumn<OAuthClie
       width: '60%',
       name: labels.tools.mcpClients.name,
       sortable: true,
-      render: (name: string) => <EuiText size="s">{name}</EuiText>,
+      render: (name: string) => (
+        <EuiText size="s">
+          {!isEmpty(name) ? name : <EuiTextColor color="subdued">–</EuiTextColor>}
+        </EuiText>
+      ),
     };
 
     const connectionsColumn: EuiTableFieldDataColumnType<OAuthClient> = {

@@ -259,5 +259,5 @@ export {
   type OAuthClient,
   type OAuthClientLogo,
   type OAuthClientConnectionsSummary,
-  type OAuthClientType,
+  OAuthClientType,
 } from './oauth_clients';
