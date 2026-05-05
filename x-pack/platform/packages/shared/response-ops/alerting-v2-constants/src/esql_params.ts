@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { StatusError } from './status_error';
-
-export class FeatureNotFoundError extends StatusError {
-  constructor(message: string) {
-    super(message, 404);
-    this.name = 'FeatureNotFoundError';
-  }
-}
+/**
+ * Lowercase parameter names that the alerting v2 rule executor binds at
+ * execution time (see `get_query_payload.ts`).
+ **/
+export const RESERVED_ESQL_PARAMS: readonly string[] = ['_tstart', '_tend'];
