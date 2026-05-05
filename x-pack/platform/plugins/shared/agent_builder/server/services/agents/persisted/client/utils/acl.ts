@@ -12,25 +12,6 @@ import {
   type AgentAclEntry,
 } from '@kbn/agent-builder-common';
 
-const ACL_CONFLICT_MARKER = '__agent_acl_conflict__';
-
-export class AclConflictError extends Error {
-  readonly [ACL_CONFLICT_MARKER] = true;
-  readonly statusCode = 409;
-
-  constructor(message: string) {
-    super(message);
-    this.name = 'AclConflictError';
-  }
-}
-
-export const createAclConflictError = (message: string): AclConflictError =>
-  new AclConflictError(message);
-
-export const isAclConflictError = (err: unknown): err is AclConflictError =>
-  err instanceof AclConflictError ||
-  (typeof err === 'object' && err !== null && (err as Record<string, unknown>)[ACL_CONFLICT_MARKER] === true);
-
 /**
  * Validates the entries provided in an ACL update. Returns a string describing the first
  * error encountered, or `undefined` when the input is valid.

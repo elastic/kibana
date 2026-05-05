@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { isAgentOwner } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, isAgentOwner } from '@kbn/agent-builder-common';
 import { useUiPrivileges } from '../use_ui_privileges';
 import { useCurrentUser } from './use_current_user';
 
@@ -19,6 +19,9 @@ import { useCurrentUser } from './use_current_user';
  *   - holder of the `manageAgentAcls` sub-feature privilege
  *   - the agent's owner
  *
+ * The default agent is excluded entirely — it is system-owned, always Public, and must
+ * remain reachable for everyone in the workspace, so ACLs on it are not supported.
+ *
  * Returns `false` while the current user is still loading to avoid flashing incorrect actions.
  */
 export const useCanManageAgentAccess = (
@@ -29,6 +32,7 @@ export const useCanManageAgentAccess = (
 
   const canManage = useMemo(() => {
     if (!agent || agent.readonly) return false;
+    if (agent.id === agentBuilderDefaultAgentId) return false;
     if (isLoading) return false;
     if (isAdmin) return true;
     if (manageAgentAcls) return true;

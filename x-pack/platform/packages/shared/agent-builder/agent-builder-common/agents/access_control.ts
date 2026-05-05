@@ -121,12 +121,10 @@ const meetsThreshold = (
 };
 
 export const canChangeAgentVisibility = (args: AgentAuthzArgs & { agentId?: string }): boolean => {
-  // The default agent is a very special cookie, and we can't change its visibility
   if (args.agentId === agentBuilderDefaultAgentId) {
     return false;
   }
   const role = getEffectiveAgentRole(args);
-  // Only owner / admin / Manager (via ACL) can change visibility.
   return role === 'admin' || role === 'owner' || role === AgentAclRole.Manager;
 };
 
@@ -156,8 +154,9 @@ export const canDeleteAgent = (args: AgentAuthzArgs): boolean =>
  *   - effective Manager role via ACL grant
  */
 export const canManageAgentAcl = (
-  args: AgentAuthzArgs & { manageAcls?: boolean }
+  args: AgentAuthzArgs & { manageAcls?: boolean; agentId?: string }
 ): boolean => {
+  if (args.agentId === agentBuilderDefaultAgentId) return false;
   if (args.isAdmin) return true;
   if (isAgentOwner({ owner: args.owner, currentUser: args.currentUser })) return true;
   if (args.manageAcls) return true;

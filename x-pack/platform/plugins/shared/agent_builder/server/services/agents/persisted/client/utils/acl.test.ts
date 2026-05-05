@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import {
-  AGENT_ACL_MAX_ENTRIES,
-  AgentAclRole,
-  type AgentAclEntry,
-} from '@kbn/agent-builder-common';
-import {
-  AclConflictError,
-  createAclConflictError,
-  isAclConflictError,
-  validateAclUpdate,
-} from './acl';
+import { AGENT_ACL_MAX_ENTRIES, AgentAclRole, type AgentAclEntry } from '@kbn/agent-builder-common';
+import { validateAclUpdate } from './acl';
 
 const entry = (over: Partial<AgentAclEntry> = {}): AgentAclEntry => ({
   type: 'user',
@@ -51,9 +42,9 @@ describe('validateAclUpdate', () => {
   });
 
   test('rejects unknown principal type', () => {
-    expect(
-      validateAclUpdate([{ ...entry(), type: 'group' as 'user' }])
-    ).toMatch(/type of "user" or "role"/);
+    expect(validateAclUpdate([{ ...entry(), type: 'group' as 'user' }])).toMatch(
+      /type of "user" or "role"/
+    );
   });
 
   test('rejects empty principal name', () => {
@@ -61,9 +52,9 @@ describe('validateAclUpdate', () => {
   });
 
   test('rejects unknown role', () => {
-    expect(
-      validateAclUpdate([{ ...entry(), role: 'super-admin' as AgentAclRole }])
-    ).toMatch(/Unknown ACL role/);
+    expect(validateAclUpdate([{ ...entry(), role: 'super-admin' as AgentAclRole }])).toMatch(
+      /Unknown ACL role/
+    );
   });
 
   test('rejects duplicate (type, name) pairs', () => {
@@ -82,24 +73,5 @@ describe('validateAclUpdate', () => {
         entry({ type: 'role', name: 'analyst' }),
       ])
     ).toBeUndefined();
-  });
-});
-
-describe('AclConflictError', () => {
-  test('createAclConflictError produces a 409-tagged error', () => {
-    const err = createAclConflictError('stale');
-    expect(err).toBeInstanceOf(AclConflictError);
-    expect(err.statusCode).toBe(409);
-    expect(err.message).toBe('stale');
-  });
-
-  test('isAclConflictError matches AclConflictError instances', () => {
-    expect(isAclConflictError(createAclConflictError('x'))).toBe(true);
-  });
-
-  test('isAclConflictError ignores arbitrary errors', () => {
-    expect(isAclConflictError(new Error('nope'))).toBe(false);
-    expect(isAclConflictError(null)).toBe(false);
-    expect(isAclConflictError({})).toBe(false);
   });
 });

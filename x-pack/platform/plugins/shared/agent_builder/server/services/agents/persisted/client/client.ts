@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core/server';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import {
+  agentBuilderDefaultAgentId,
   createAgentNotFoundError,
   createBadRequestError,
   isAgentNotFoundError,
@@ -63,9 +64,7 @@ import {
   validateVisibilityUpdateAccess,
 } from './utils/access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
-import { createAclConflictError, validateAclUpdate } from './utils/acl';
-
-export { createAclConflictError, isAclConflictError } from './utils/acl';
+import { validateAclUpdate } from './utils/acl';
 
 export type AgentAccess = 'read' | 'use' | 'write' | 'delete' | 'manageAcl';
 
@@ -245,10 +244,7 @@ class AgentClientImpl implements AgentClient {
     return fromEs(document);
   }
 
-  async getWithAccess(
-    agentId: string,
-    access: AgentAccess
-  ): Promise<PersistedAgentDefinition> {
+  async getWithAccess(agentId: string, access: AgentAccess): Promise<PersistedAgentDefinition> {
     const document = await this.getDocumentWithAccess({ agentId, access });
     return fromEs(document);
   }
@@ -396,30 +392,26 @@ class AgentClientImpl implements AgentClient {
       isAdmin: this.isAdmin,
       manageAcls: this.manageAcls,
     });
-    const acl: AgentAcl = source.acl ?? { entries: [], version: 0 };
+    const acl: AgentAcl = source.acl ?? { entries: [] };
     return { canManage, acl };
   }
 
   async updateAcl(agentId: string, update: AgentAclUpdateRequest): Promise<AgentAcl> {
-    const document = await this.getDocumentWithAccess({ agentId, access: 'manageAcl' });
-    const source = document._source;
-    const currentAcl: AgentAcl = source.acl ?? { entries: [], version: 0 };
-
-    if (update.version !== currentAcl.version) {
-      throw createAclConflictError(
-        `Stale ACL version (expected ${currentAcl.version}, received ${update.version}).`
+    if (agentId === agentBuilderDefaultAgentId) {
+      throw createBadRequestError(
+        `The default agent (${agentBuilderDefaultAgentId}) does not support custom access controls.`
       );
     }
+
+    const document = await this.getDocumentWithAccess({ agentId, access: 'manageAcl' });
+    const source = document._source;
 
     const validationError = validateAclUpdate(update.entries);
     if (validationError) {
       throw createBadRequestError(validationError);
     }
 
-    const nextAcl: AgentAcl = {
-      entries: update.entries,
-      version: currentAcl.version + 1,
-    };
+    const nextAcl: AgentAcl = { entries: update.entries };
 
     const next = aclUpdateToEs({
       currentProps: source,

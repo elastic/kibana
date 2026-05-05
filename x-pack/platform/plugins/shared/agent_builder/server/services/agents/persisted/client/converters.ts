@@ -133,7 +133,6 @@ const normalizeAcl = (acl: AgentAcl | undefined): AgentAcl => {
   if (!acl) return { ...EMPTY_AGENT_ACL };
   return {
     entries: acl.entries ?? [],
-    version: acl.version ?? 0,
   };
 };
 

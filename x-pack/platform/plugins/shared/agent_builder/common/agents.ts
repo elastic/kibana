@@ -27,7 +27,5 @@ export type AgentUpdateRequest = Partial<
 export type AgentDeleteRequest = Pick<AgentDefinition, 'id'>;
 
 export interface AgentAclUpdateRequest {
-  /** Must equal the current `version` on the stored ACL. Returns 409 if stale. */
-  version: number;
   entries: AgentAclEntry[];
 }

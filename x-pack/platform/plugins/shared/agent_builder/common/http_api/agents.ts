@@ -34,7 +34,6 @@ export interface GetAgentAclResponse {
 
 /** Body for `PUT /api/agent_builder/agents/{id}/acl`. */
 export interface UpdateAgentAclRequestBody {
-  version: number;
   entries: AgentAclEntry[];
 }
 

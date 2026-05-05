@@ -26,7 +26,6 @@ import type {
   UpdateAgentAclResponse,
 } from '../../common/http_api/agents';
 import { asError } from '../utils/as_error';
-import { isAclConflictError } from '../services/agents/persisted/client/utils/acl';
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object(
@@ -522,9 +521,7 @@ export function registerAgentRoutes({
 
         const body: GetAgentAclResponse = {
           canManage: result.canManage,
-          acl: result.canManage
-            ? result.acl
-            : { entries: [], version: result.acl.version },
+          acl: result.canManage ? result.acl : { entries: [] },
         };
         return response.ok<GetAgentAclResponse>({ body });
       })
@@ -538,7 +535,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: "Update an agent's access control list",
       description:
-        "Replace the per-agent access control list. Either the agent's owner or a holder of the `manageAgentAcls` privilege may call this endpoint. The body must include the current `version`; stale updates return 409.",
+        "Replace the per-agent access control list. Either the agent's owner or a holder of the `manageAgentAcls` privilege may call this endpoint. The PUT replaces the entire entries list — last write wins.",
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: { since: '9.5.0' },
@@ -555,9 +552,6 @@ export function registerAgentRoutes({
               }),
             }),
             body: schema.object({
-              version: schema.number({
-                meta: { description: 'Current ACL version. Stale values are rejected with 409.' },
-              }),
               entries: schema.arrayOf(
                 schema.object({
                   type: schema.oneOf([schema.literal('user'), schema.literal('role')]),
@@ -590,9 +584,6 @@ export function registerAgentRoutes({
             agentId: request.params.id,
             error: asError(error),
           });
-          if (isAclConflictError(error)) {
-            return response.conflict({ body: { message: error.message } });
-          }
           throw error;
         }
       })

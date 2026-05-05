@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  agentBuilderDefaultAgentId,
   canCurrentUserEditAgent,
   isAgentOwner,
   type AgentDefinition,
@@ -86,6 +87,7 @@ export const AgentsList: React.FC = () => {
   const canManageAgentAccess = React.useCallback(
     (agent: AgentDefinition) => {
       if (agent.readonly) return false;
+      if (agent.id === agentBuilderDefaultAgentId) return false;
       if (isCurrentUserLoading) return false;
       if (isAdmin) return true;
       if (manageAgentAcls) return true;

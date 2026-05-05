@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
-import { useRoles } from '../../../hooks/use_roles';
+import { EuiComboBox, type EuiComboBoxOptionOption, EuiHighlight, EuiText } from '@elastic/eui';
+import { useRoles, type KibanaRole } from '../../../hooks/use_roles';
 import { accessFlyoutAddRolesPlaceholder } from './access_i18n';
 
 interface RolePickerProps {
@@ -17,35 +17,57 @@ interface RolePickerProps {
   isDisabled?: boolean;
 }
 
-export const RolePicker: React.FC<RolePickerProps> = ({
-  excludedRoles,
-  onAdd,
-  isDisabled,
-}) => {
+interface RoleOption extends EuiComboBoxOptionOption<string> {
+  roleData: KibanaRole;
+}
+
+const roleToOption = (role: KibanaRole): RoleOption => ({
+  label: role.name,
+  value: role.name,
+  key: role.name,
+  roleData: role,
+});
+
+export const RolePicker: React.FC<RolePickerProps> = ({ excludedRoles, onAdd, isDisabled }) => {
   const { data: roles, isLoading } = useRoles();
   const excludedSet = useMemo(() => new Set(excludedRoles), [excludedRoles]);
 
-  const options: Array<EuiComboBoxOptionOption<string>> = useMemo(
-    () =>
-      (roles ?? [])
-        .filter((r) => !excludedSet.has(r.name))
-        .map((r) => ({ label: r.name, value: r.name, key: r.name })),
+  const options = useMemo(
+    () => (roles ?? []).filter((r) => !excludedSet.has(r.name)).map(roleToOption),
     [roles, excludedSet]
   );
 
   const onChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<string>>) => {
       const next = selected[0]?.value;
-      if (next) {
-        onAdd(next);
-      }
+      if (next) onAdd(next);
     },
     [onAdd]
+  );
+
+  const renderOption = useCallback(
+    (option: EuiComboBoxOptionOption<string>, searchValue: string) => {
+      const { roleData } = option as RoleOption;
+      return (
+        <div>
+          <EuiText size="s">
+            <EuiHighlight search={searchValue}>{roleData.name}</EuiHighlight>
+          </EuiText>
+          {roleData.description ? (
+            <EuiText size="xs" color="subdued">
+              <EuiHighlight search={searchValue}>{roleData.description}</EuiHighlight>
+            </EuiText>
+          ) : null}
+        </div>
+      );
+    },
+    []
   );
 
   return (
     <EuiComboBox<string>
       placeholder={accessFlyoutAddRolesPlaceholder}
+      prepend="Add"
       options={options}
       selectedOptions={[]}
       onChange={onChange}
@@ -53,6 +75,9 @@ export const RolePicker: React.FC<RolePickerProps> = ({
       isLoading={isLoading}
       isDisabled={isDisabled}
       isClearable={false}
+      compressed
+      renderOption={renderOption}
+      rowHeight={44}
       data-test-subj="agentBuilderAclRolePicker"
     />
   );

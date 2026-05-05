@@ -32,11 +32,9 @@ export interface AgentAclEntry {
 
 export interface AgentAcl {
   entries: AgentAclEntry[];
-  /** Monotonic version stamp used for optimistic concurrency on PUT /acl. */
-  version: number;
 }
 
-export const EMPTY_AGENT_ACL: AgentAcl = { entries: [], version: 0 };
+export const EMPTY_AGENT_ACL: AgentAcl = { entries: [] };
 
 export const AGENT_ACL_MAX_ENTRIES = 100;
 export const AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH = 1024;

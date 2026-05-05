@@ -626,6 +626,31 @@ describe('ACL-aware authorization', () => {
         })
       ).toBe(true);
     });
+
+    test('denies for the default agent regardless of caller, even superuser', () => {
+      expect(
+        canManageAgentAcl({
+          agentId: agentBuilderDefaultAgentId,
+          visibility: AgentVisibility.Public,
+          owner,
+          currentUser: bob,
+          isAdmin: true,
+          manageAcls: true,
+        })
+      ).toBe(false);
+    });
+
+    test('denies for the default agent even when caller is the owner', () => {
+      expect(
+        canManageAgentAcl({
+          agentId: agentBuilderDefaultAgentId,
+          visibility: AgentVisibility.Public,
+          owner,
+          currentUser: { id: 'owner-id', username: 'alice' },
+          isAdmin: false,
+        })
+      ).toBe(false);
+    });
   });
 
   describe('canChangeAgentVisibility', () => {

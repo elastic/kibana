@@ -7,17 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const accessFlyoutTitle = i18n.translate('xpack.agentBuilder.acl.flyout.title', {
-  defaultMessage: 'Manage access',
-});
+// ──────────────── Flyout ──────────────────────────────────────────────────────
 
-export const accessFlyoutContextCallout = i18n.translate(
-  'xpack.agentBuilder.acl.flyout.contextCallout',
-  {
-    defaultMessage:
-      'Visibility sets who can find and use this agent by default. Access entries grant specific people or roles additional permissions on top of that.',
-  }
-);
+export const accessFlyoutTitle = (agentName: string) =>
+  i18n.translate('xpack.agentBuilder.acl.flyout.title', {
+    defaultMessage: 'Manage access for {agentName}',
+    values: { agentName },
+  });
+
+export const accessFlyoutSubtitle = (agentName: string) =>
+  i18n.translate('xpack.agentBuilder.acl.flyout.subtitle', {
+    defaultMessage: 'For {agentName}',
+    values: { agentName },
+  });
 
 export const accessFlyoutCancel = i18n.translate('xpack.agentBuilder.acl.flyout.cancel', {
   defaultMessage: 'Cancel',
@@ -27,14 +29,56 @@ export const accessFlyoutSave = i18n.translate('xpack.agentBuilder.acl.flyout.sa
   defaultMessage: 'Save changes',
 });
 
+// Visibility context strip ────────────────────────────────────────────────────
+
+/**
+ * Per-visibility default-access blurb shown in the banner above the form.
+ *
+ * Each message stitches together the agent's current visibility (bold, lead) with the
+ * default behavior that visibility implies, plus a reminder that ACL entries grant
+ * additional access on top.
+ */
+export const visibilityContextMessage = (visibilityLabel: string) => ({
+  publicMessage: i18n.translate('xpack.agentBuilder.acl.flyout.contextPublic', {
+    defaultMessage:
+      '{visibilityLabel} by default. Anyone with access to Agent Builder can view and edit. Add entries below to grant additional permissions like delete or manage access.',
+    values: { visibilityLabel },
+  }),
+  sharedMessage: i18n.translate('xpack.agentBuilder.acl.flyout.contextShared', {
+    defaultMessage:
+      '{visibilityLabel} by default. Anyone with access to Agent Builder can view this agent; only the owner or an administrator can edit. Add entries below to grant additional permissions.',
+    values: { visibilityLabel },
+  }),
+  privateMessage: i18n.translate('xpack.agentBuilder.acl.flyout.contextPrivate', {
+    defaultMessage:
+      '{visibilityLabel} by default. Only the owner or an administrator can view and edit. Add entries below to grant access to specific people or roles.',
+    values: { visibilityLabel },
+  }),
+});
+
+// Sections ────────────────────────────────────────────────────────────────────
+
 export const accessFlyoutPeopleSection = i18n.translate(
   'xpack.agentBuilder.acl.flyout.peopleSectionTitle',
   { defaultMessage: 'People' }
 );
 
+export const accessFlyoutPeopleHelp = i18n.translate(
+  'xpack.agentBuilder.acl.flyout.peopleSectionHelp',
+  { defaultMessage: 'Grant access to a specific user.' }
+);
+
 export const accessFlyoutRolesSection = i18n.translate(
   'xpack.agentBuilder.acl.flyout.rolesSectionTitle',
   { defaultMessage: 'Roles' }
+);
+
+export const accessFlyoutRolesHelp = i18n.translate(
+  'xpack.agentBuilder.acl.flyout.rolesSectionHelp',
+  {
+    defaultMessage:
+      'Grant access to everyone with a Kibana role. Membership follows the role, not specific people.',
+  }
 );
 
 export const accessFlyoutAddPeoplePlaceholder = i18n.translate(
@@ -48,12 +92,14 @@ export const accessFlyoutAddRolesPlaceholder = i18n.translate(
 );
 
 export const accessFlyoutNoPeople = i18n.translate('xpack.agentBuilder.acl.flyout.noPeople', {
-  defaultMessage: 'No specific users have been granted access yet.',
+  defaultMessage: 'No people have been granted direct access.',
 });
 
 export const accessFlyoutNoRoles = i18n.translate('xpack.agentBuilder.acl.flyout.noRoles', {
-  defaultMessage: 'No specific roles have been granted access yet.',
+  defaultMessage: 'No roles have been granted access.',
 });
+
+// Row controls ────────────────────────────────────────────────────────────────
 
 export const accessFlyoutRoleAriaLabel = i18n.translate(
   'xpack.agentBuilder.acl.flyout.roleAriaLabel',
@@ -65,17 +111,33 @@ export const accessFlyoutRemoveAriaLabel = i18n.translate(
   { defaultMessage: 'Remove access entry' }
 );
 
-export const accessFlyoutSaveError = i18n.translate('xpack.agentBuilder.acl.flyout.saveError', {
-  defaultMessage: 'Could not save changes to access.',
+export const accessFlyoutMissingPrincipal = i18n.translate(
+  'xpack.agentBuilder.acl.flyout.missingPrincipal',
+  { defaultMessage: 'No longer exists' }
+);
+
+export const accessFlyoutSaveErrorTitle = i18n.translate(
+  'xpack.agentBuilder.acl.flyout.saveErrorTitle',
+  { defaultMessage: 'Could not save access' }
+);
+
+export const accessFlyoutLoadErrorTitle = i18n.translate(
+  'xpack.agentBuilder.acl.flyout.loadErrorTitle',
+  { defaultMessage: 'Could not load access' }
+);
+
+export const accessFlyoutLoadErrorBody = i18n.translate(
+  'xpack.agentBuilder.acl.flyout.loadErrorBody',
+  { defaultMessage: 'Try again, or close and reopen this panel.' }
+);
+
+export const accessFlyoutHiddenTitle = i18n.translate('xpack.agentBuilder.acl.flyout.hiddenTitle', {
+  defaultMessage: 'Access details are hidden',
 });
 
-export const accessFlyoutConflictError = i18n.translate(
-  'xpack.agentBuilder.acl.flyout.conflictError',
-  {
-    defaultMessage:
-      'Access was changed by someone else while you were editing. Reload to see the latest list and try again.',
-  }
-);
+export const accessFlyoutHiddenBody = i18n.translate('xpack.agentBuilder.acl.flyout.hiddenBody', {
+  defaultMessage: 'You can use this agent, but only its owner or an admin can manage who else can.',
+});
 
 export const accessSummaryCardTitle = i18n.translate('xpack.agentBuilder.acl.summary.title', {
   defaultMessage: 'Access',
@@ -89,7 +151,8 @@ export const accessSummaryManageButton = i18n.translate(
 export const accessSummaryDefaultDescription = i18n.translate(
   'xpack.agentBuilder.acl.summary.defaultDescription',
   {
-    defaultMessage: 'No custom access entries. Visibility controls who can use this agent.',
+    defaultMessage:
+      'Anyone who can see this agent gets the access set by visibility. Add entries to grant more.',
   }
 );
 
@@ -98,25 +161,27 @@ export const accessSummaryHiddenDescription = i18n.translate(
   { defaultMessage: 'This agent has custom access controls.' }
 );
 
+export const accessSummaryCount = (users: number, roles: number) =>
+  i18n.translate('xpack.agentBuilder.acl.summary.count', {
+    defaultMessage:
+      '{users, plural, =0 {} one {# user} other {# users}}{both, select, true { · } other {}}{roles, plural, =0 {} one {# role} other {# roles}} have additional access.',
+    values: { users, roles, both: users > 0 && roles > 0 ? 'true' : 'false' },
+  });
+
+export const accessSummaryLoading = i18n.translate('xpack.agentBuilder.acl.summary.loading', {
+  defaultMessage: 'Loading access…',
+});
+
+// ──────────────── List badge ─────────────────────────────────────────────────
+
 export const accessFlyoutCustomBadge = i18n.translate(
   'xpack.agentBuilder.acl.list.customAccessTooltip',
   { defaultMessage: 'Custom access' }
 );
 
-export const accessSummaryCount = (users: number, roles: number) =>
-  i18n.translate('xpack.agentBuilder.acl.summary.count', {
+export const accessFlyoutCustomBadgeWithCount = (count: number) =>
+  i18n.translate('xpack.agentBuilder.acl.list.customAccessTooltipWithCount', {
     defaultMessage:
-      '{users, plural, one {# user} other {# users}}, {roles, plural, one {# role} other {# roles}}',
-    values: { users, roles },
+      '{count, plural, one {# additional access entry} other {# additional access entries}}',
+    values: { count },
   });
-
-export const accessFlyoutVisibilityLabel = (visibility: string) =>
-  i18n.translate('xpack.agentBuilder.acl.flyout.currentVisibilityLabel', {
-    defaultMessage: 'Current visibility: {visibility}',
-    values: { visibility },
-  });
-
-export const accessFlyoutMissingPrincipal = i18n.translate(
-  'xpack.agentBuilder.acl.flyout.missingPrincipal',
-  { defaultMessage: 'No longer exists' }
-);

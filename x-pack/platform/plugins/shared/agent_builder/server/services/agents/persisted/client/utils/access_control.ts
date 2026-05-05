@@ -104,6 +104,7 @@ export const hasManageAclAccess = ({
   manageAcls: boolean;
 }): boolean =>
   canManageAgentAcl({
+    agentId: source.id,
     visibility: source.visibility,
     owner: sourceToOwner(source),
     acl: source.acl,

@@ -35,7 +35,6 @@ const storageSettings = {
       created_by_name: types.keyword({}),
       acl: types.object({
         properties: {
-          version: types.long({}),
           entries: types.nested({
             properties: {
               type: types.keyword({}),
