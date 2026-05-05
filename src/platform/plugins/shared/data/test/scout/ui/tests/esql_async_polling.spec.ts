@@ -8,25 +8,24 @@
  */
 
 import type { CDPSession } from '@kbn/scout';
-import { spaceTest, tags } from '@kbn/scout';
+import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 const DASHBOARD_FIXTURE_PATH =
   'src/platform/test/functional/fixtures/kbn_archiver/simple_slow_dash.json';
 const ESQL_ASYNC_ENDPOINT = '/internal/search/esql_async';
+const DASHBOARD_ID = '80d92ad1-ce0d-4567-81a0-a53987daf0f9';
 
-spaceTest.describe('ES|QL Async Polling - HTTP/1', { tag: tags.deploymentAgnostic }, () => {
+test.describe('ES|QL Async Polling - HTTP/1', { tag: tags.deploymentAgnostic }, () => {
   let cdp: CDPSession;
   let esqlAsyncRequestCount: number;
-  let dashboardId: string;
 
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.cleanStandardList();
-    const imported = await scoutSpace.savedObjects.load(DASHBOARD_FIXTURE_PATH);
-    dashboardId = imported[0].id;
+  test.beforeAll(async ({ kbnClient, isSnapshotBuild }) => {
+    test.skip(!isSnapshotBuild, 'Requires ES|QL DELAY function (SNAPSHOT builds only)');
+    await kbnClient.importExport.load(DASHBOARD_FIXTURE_PATH);
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, page, context }) => {
+  test.beforeEach(async ({ browserAuth, page, context }) => {
     esqlAsyncRequestCount = 0;
     cdp = await context.newCDPSession(page);
     await cdp.send('Network.enable');
@@ -40,21 +39,20 @@ spaceTest.describe('ES|QL Async Polling - HTTP/1', { tag: tags.deploymentAgnosti
     await browserAuth.loginAsViewer();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.cleanStandardList();
+  test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.cleanStandardList();
   });
 
-  spaceTest(
-    'loads dashboard with 5s async ES|QL query and polls multiple times',
-    async ({ pageObjects }) => {
-      // Open the dashboard (waitForRenderComplete is called internally)
-      await pageObjects.dashboard.openDashboardWithId(dashboardId);
+  test('loads dashboard with 5s async ES|QL query and polls multiple times', async ({
+    pageObjects,
+  }) => {
+    // Open the dashboard (waitForRenderComplete is called internally)
+    await pageObjects.dashboard.openDashboardWithId(DASHBOARD_ID);
 
-      // HTTP/1 should make multiple sequential polling requests
-      expect(
-        esqlAsyncRequestCount,
-        `HTTP/1 should make more than 2 requests (got ${esqlAsyncRequestCount})`
-      ).toBeGreaterThan(2);
-    }
-  );
+    // HTTP/1 should make multiple sequential polling requests
+    expect(
+      esqlAsyncRequestCount,
+      `HTTP/1 should make more than 2 requests (got ${esqlAsyncRequestCount})`
+    ).toBeGreaterThan(2);
+  });
 });
