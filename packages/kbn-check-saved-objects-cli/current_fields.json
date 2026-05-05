@@ -832,6 +832,7 @@
     "is_default",
     "name",
     "proxy_id",
+    "security_artifacts_proxy_id",
     "source_id"
   ],
   "ingest-outputs": [

@@ -1476,10 +1476,6 @@
       }
     }
   },
-  "entity-store-ccs-state": {
-    "dynamic": false,
-    "properties": {}
-  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
@@ -1626,6 +1622,10 @@
         "type": "keyword"
       }
     }
+  },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
   },
   "entity-store-global-state": {
     "dynamic": false,
@@ -2763,6 +2763,9 @@
         "type": "keyword"
       },
       "proxy_id": {
+        "type": "keyword"
+      },
+      "security_artifacts_proxy_id": {
         "type": "keyword"
       },
       "source_id": {
