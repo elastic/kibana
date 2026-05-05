@@ -176,30 +176,13 @@ export class CloudHandler extends ProjectHandler {
 
   // Wait until Project is initialized
   waitForProjectInitialized(projectId: string): Promise<void> {
-    let lastPhase: string | undefined;
-    let attempts = 0;
-
-    if (process.env.MKI_FORCE_PROJECT_INIT_TIMEOUT === '1') {
-      return Promise.reject(
-        new ProjectInitTimeoutError({
-          projectId,
-          lastPhase: 'initializing',
-          attempts: 1,
-          cause: new Error('Forced timeout for CI workflow validation'),
-        })
-      );
-    }
-
     const fetchProjectStatusAttempt = async (attemptNum: number) => {
       this.log.info(`Retry number ${attemptNum} to check if project is initialized.`);
-      const response = await fetch(
-        `${this.baseEnvUrl}/api/v1/serverless/projects/security/${projectId}/status`,
-        {
-          headers: {
-            Authorization: `ApiKey ${this.apiKey}`,
-          },
-        }
-      );
+      const response = await fetch(`${this.baseEnvUrl}/projects/${projectId}/status`, {
+        headers: {
+          Authorization: `Basic ${this.proxyAuth}`,
+        },
+      });
       if (!response.ok) {
         throw new Error(`${response.status}:${await response.text()}`);
       }
@@ -212,6 +195,18 @@ export class CloudHandler extends ProjectHandler {
         this.log.info('Project is initialized');
       }
     };
+
+    if (process.env.MKI_FORCE_PROJECT_INIT_TIMEOUT === '1') {
+      return Promise.reject(
+        new ProjectInitTimeoutError({
+          projectId,
+          lastPhase: ${data.phase},
+          attempts: ${attemptNum},
+          cause: new Error('Forced timeout for CI workflow validation'),
+        })
+      );
+    }
+
     const retryOptions = {
       onFailedAttempt: (error: Error) => {
         if ((error as { cause?: { code?: string } }).cause?.code === 'ENOTFOUND') {
@@ -228,8 +223,8 @@ export class CloudHandler extends ProjectHandler {
     return pRetry(fetchProjectStatusAttempt, retryOptions).catch((final: unknown) => {
       throw new ProjectInitTimeoutError({
         projectId,
-        lastPhase,
-        attempts,
+        lastPhase: ${data.phase},
+        attempts: ${attemptNum},
         cause: final,
       });
     });

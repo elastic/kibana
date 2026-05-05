@@ -180,20 +180,6 @@ export class ProxyHandler extends ProjectHandler {
 
   // Wait until Project is initialized
   waitForProjectInitialized(projectId: string): Promise<void> {
-    let lastPhase: string | undefined;
-    let attempts = 0;
-
-    if (process.env.MKI_FORCE_PROJECT_INIT_TIMEOUT === '1') {
-      return Promise.reject(
-        new ProjectInitTimeoutError({
-          projectId,
-          lastPhase: 'initializing',
-          attempts: 1,
-          cause: new Error('Forced timeout for CI workflow validation'),
-        })
-      );
-    }
-
     const fetchProjectStatusAttempt = async (attemptNum: number) => {
       this.log.info(`Retry number ${attemptNum} to check if project is initialized.`);
       const response = await fetch(`${this.baseEnvUrl}/projects/${projectId}/status`, {
@@ -213,6 +199,18 @@ export class ProxyHandler extends ProjectHandler {
         this.log.info('Project is initialized');
       }
     };
+
+    if (process.env.MKI_FORCE_PROJECT_INIT_TIMEOUT === '1') {
+      return Promise.reject(
+        new ProjectInitTimeoutError({
+          projectId,
+          lastPhase: ${data.phase},
+          attempts: ${attemptNum},
+          cause: new Error('Forced timeout for CI workflow validation'),
+        })
+      );
+    }
+
     const retryOptions = {
       onFailedAttempt: (error: Error) => {
         if ((error as { cause?: { code?: string } }).cause?.code === 'ENOTFOUND') {
@@ -229,8 +227,8 @@ export class ProxyHandler extends ProjectHandler {
     return pRetry(fetchProjectStatusAttempt, retryOptions).catch((final: unknown) => {
       throw new ProjectInitTimeoutError({
         projectId,
-        lastPhase,
-        attempts,
+        lastPhase: ${data.phase},
+        attempts: ${attemptNum},
         cause: final,
       });
     });
