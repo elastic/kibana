@@ -20,7 +20,7 @@ interface BaseAction {
   dataTestSubj?: string;
   label?: string;
   id?: string;
-  ebt?: EbtClickAttrs;
+  ebt: EbtClickAttrs;
 }
 
 export type Action =
@@ -40,7 +40,7 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
       {actions.map((action, idx) => {
         const { icon, ariaLabel, dataTestSubj, label, onClick, href, ebt } = action;
         const buttonProps = getLinkActionProps({ href, onClick });
-        const ebtProps = ebt ? getEbtProps(ebt) : {};
+        const ebtProps = getEbtProps(ebt);
 
         return (
           <EuiFlexItem grow={false} key={action.id ?? idx} id={action.id}>
