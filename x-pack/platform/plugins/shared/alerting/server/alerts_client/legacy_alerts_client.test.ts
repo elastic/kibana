@@ -210,6 +210,72 @@ describe('Legacy Alerts Client', () => {
     });
   });
 
+  test('initializeExecution() should set snooze config on active alerts with a matching snoozed instance', async () => {
+    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    const snoozeConfig = { instanceId: '1', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' };
+    await alertsClient.initializeExecution({
+      ...defaultExecutionOpts,
+      snoozedInstances: [snoozeConfig],
+    });
+
+    expect(setSnoozeConfigSpy).toHaveBeenCalledTimes(1);
+    expect(setSnoozeConfigSpy).toHaveBeenCalledWith(snoozeConfig);
+    setSnoozeConfigSpy.mockRestore();
+  });
+
+  test('initializeExecution() should set snooze config on recovered alerts with a matching snoozed instance', async () => {
+    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    const snoozeConfig = { instanceId: 'r1', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' };
+    await alertsClient.initializeExecution({
+      ...defaultExecutionOpts,
+      activeAlertsFromState: {},
+      recoveredAlertsFromState: { r1: testAlert1 },
+      snoozedInstances: [snoozeConfig],
+    });
+
+    expect(setSnoozeConfigSpy).toHaveBeenCalledTimes(1);
+    expect(setSnoozeConfigSpy).toHaveBeenCalledWith(snoozeConfig);
+    setSnoozeConfigSpy.mockRestore();
+  });
+
+  test('initializeExecution() should not set snooze config on alerts without a matching snoozed instance', async () => {
+    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    await alertsClient.initializeExecution({
+      ...defaultExecutionOpts,
+      snoozedInstances: [{ instanceId: 'no-match', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' }],
+    });
+
+    expect(setSnoozeConfigSpy).not.toHaveBeenCalled();
+    setSnoozeConfigSpy.mockRestore();
+  });
+
   test('factory() should call getPublicAlertFactory on alert factory', async () => {
     const alertsClient = new LegacyAlertsClient({
       alertingEventLogger,

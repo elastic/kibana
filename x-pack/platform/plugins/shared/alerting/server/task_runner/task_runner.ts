@@ -699,7 +699,7 @@ export class TaskRunner<
       }
 
       const expiredSnoozedInstances = isOk(runRuleResult)
-        ? (runRuleResult.value.expiredSnoozedInstances ?? [])
+        ? runRuleResult.value.expiredSnoozedInstances ?? []
         : [];
       const prunedSnoozedInstances =
         expiredSnoozedInstances.length > 0
@@ -729,7 +729,9 @@ export class TaskRunner<
           nextRun,
           lastRun: lastRunToRaw(lastRun),
           monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-          ...(prunedSnoozedInstances !== undefined ? { snoozedInstances: prunedSnoozedInstances } : {}),
+          ...(prunedSnoozedInstances !== undefined
+            ? { snoozedInstances: prunedSnoozedInstances }
+            : {}),
         });
       }
 
