@@ -70,11 +70,10 @@ export interface InferenceUsageResponse {
 
 export enum GroupByOptions {
   None = 'none',
-  Model = 'model_id',
   Service = 'service',
 }
 
-export type GroupByViewOptions = GroupByOptions.Model | GroupByOptions.Service;
+export type GroupByViewOptions = GroupByOptions.Service;
 
 export interface FilterOptions {
   provider: ServiceProviderKeys[];
