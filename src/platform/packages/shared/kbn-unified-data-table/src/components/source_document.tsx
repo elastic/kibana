@@ -90,7 +90,7 @@ export function SourceDocument({
     );
   }
 
-  if (renderedPairs.length === 0) {
+  if (isPlainRecord && renderedPairs.length === 0) {
     return <span className={classnames(CELL_CLASS, className)}>—</span>;
   }
 
