@@ -136,7 +136,7 @@ test.describe(
           },
           { timeout: 90_000, intervals: [5000] }
         )
-        .toEqual({ good: '50', degraded: '52', poor: '60' });
+        .toStrictEqual({ good: '50', degraded: '52', poor: '60' });
     });
 
     test('should display correct data quality badge', async ({ pageObjects, page }) => {
@@ -161,7 +161,7 @@ test.describe(
           },
           { timeout: 90_000, intervals: [5000] }
         )
-        .toEqual({ good: 'Good', degraded: 'Degraded', poor: 'Poor' });
+        .toStrictEqual({ good: 'Good', degraded: 'Degraded', poor: 'Poor' });
     });
 
     test('should display correct retention in the table', async ({ pageObjects, config }) => {
