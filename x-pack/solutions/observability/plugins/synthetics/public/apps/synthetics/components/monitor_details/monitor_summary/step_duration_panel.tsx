@@ -31,7 +31,7 @@ export const StepDurationPanel = ({
 
   const { monitor } = useSelectedMonitor();
 
-  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const { queryIdFilter, locationFilter, dataTypesIndexPatterns } = useMonitorQueryFilters();
 
   const isBrowser = monitor?.type === 'browser';
 
@@ -67,6 +67,7 @@ export const StepDurationPanel = ({
         reportType={ReportTypes.KPI}
         legendPosition={legendPosition}
         legendIsVisible={doBreakdown}
+        dataTypesIndexPatterns={dataTypesIndexPatterns}
         attributes={[
           {
             time,

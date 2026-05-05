@@ -13,13 +13,19 @@ import { MonitorDetailsPanel } from '../../common/components/monitor_details_pan
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
+import { RemoteMonitorDetailsPanel } from './remote_monitor_details_panel';
 
 export const MonitorDetailsPanelContainer = (props: Partial<MonitorDetailsPanelProps>) => {
   const { latestPing } = useMonitorLatestPing();
 
   const { monitorId: configId } = useParams<{ monitorId: string }>();
 
-  const { monitor, loading } = useSelectedMonitor();
+  const { monitor, loading, isRemote } = useSelectedMonitor();
+
+  // For remote monitors, show a simplified panel built from ping data
+  if (isRemote) {
+    return <RemoteMonitorDetailsPanel />;
+  }
 
   const isPingRelevant =
     latestPing?.config_id === monitor?.[ConfigKey.CONFIG_ID] ||

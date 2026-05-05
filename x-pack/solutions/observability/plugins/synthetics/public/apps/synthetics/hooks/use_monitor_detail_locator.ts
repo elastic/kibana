@@ -21,6 +21,8 @@ export interface MonitorDetailLocatorParams {
   spaces?: string[];
   tabId?: string;
   useAbsoluteDate?: boolean;
+  remoteName?: string;
+  remoteKibanaUrl?: string;
 }
 
 export function useMonitorDetailLocator({
@@ -30,6 +32,8 @@ export function useMonitorDetailLocator({
   timeRange,
   tabId,
   useAbsoluteDate = false,
+  remoteName,
+  remoteKibanaUrl,
 }: MonitorDetailLocatorParams) {
   const { space } = useKibanaSpace();
   const [monitorUrl, setMonitorUrl] = useState<string | undefined>(undefined);
@@ -44,10 +48,12 @@ export function useMonitorDetailLocator({
       locationId,
       timeRange: useAbsoluteDate ? convertToAbsoluteTimeRange(timeRange) : timeRange,
       tabId,
+      remoteName,
+      remoteKibanaUrl,
       ...getMonitorSpaceToAppend(space, spaces),
     });
     setMonitorUrl(url);
-  }, [locator, configId, locationId, spaces, space, timeRange, tabId, useAbsoluteDate]);
+  }, [locator, configId, locationId, spaces, space, timeRange, tabId, useAbsoluteDate, remoteName, remoteKibanaUrl]);
 
   return monitorUrl;
 }

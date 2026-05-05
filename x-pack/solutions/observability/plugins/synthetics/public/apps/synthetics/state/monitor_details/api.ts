@@ -26,6 +26,7 @@ export interface MostRecentPingsRequest {
   size?: number;
   pageIndex?: number;
   statusFilter?: 'up' | 'down';
+  remoteName?: string;
 }
 
 export const fetchMonitorRecentPings = async ({
@@ -36,6 +37,7 @@ export const fetchMonitorRecentPings = async ({
   size = 10,
   pageIndex = 0,
   statusFilter,
+  remoteName,
 }: MostRecentPingsRequest): Promise<PingsResponse> => {
   const locations = JSON.stringify([locationId]);
   const sort = 'desc';
@@ -51,6 +53,7 @@ export const fetchMonitorRecentPings = async ({
       size,
       pageIndex,
       status: statusFilter,
+      ...(remoteName ? { remoteName } : {}),
     },
     PingsResponseType
   );
@@ -59,13 +62,19 @@ export const fetchMonitorRecentPings = async ({
 export const fetchLatestTestRun = async ({
   monitorId,
   locationLabel,
+  locationId,
+  remoteName,
 }: {
   monitorId: string;
   locationLabel?: string;
+  locationId?: string;
+  remoteName?: string;
 }): Promise<{ ping?: Ping }> => {
   return apiService.get<{ ping?: Ping }>(SYNTHETICS_API_URLS.LATEST_TEST_RUN, {
     monitorId,
-    locationLabel,
+    ...(locationLabel ? { locationLabel } : {}),
+    ...(locationId ? { locationId } : {}),
+    ...(remoteName ? { remoteName } : {}),
     version: INITIAL_REST_VERSION,
   });
 };

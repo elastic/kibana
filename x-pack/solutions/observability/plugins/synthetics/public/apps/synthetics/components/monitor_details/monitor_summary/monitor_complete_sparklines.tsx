@@ -21,7 +21,7 @@ export const MonitorCompleteSparklines = (props: Props) => {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const { queryIdFilter, locationFilter, dataTypesIndexPatterns } = useMonitorQueryFilters();
 
   const { euiTheme } = useEuiTheme();
 
@@ -36,6 +36,7 @@ export const MonitorCompleteSparklines = (props: Props) => {
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           seriesType: 'area',

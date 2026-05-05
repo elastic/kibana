@@ -24,7 +24,7 @@ export const MonitorErrorsCount = ({ from, to, id }: MonitorErrorsCountProps) =>
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
   const { euiTheme } = useEuiTheme();
-  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const { queryIdFilter, locationFilter, dataTypesIndexPatterns } = useMonitorQueryFilters();
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 
@@ -38,6 +38,7 @@ export const MonitorErrorsCount = ({ from, to, id }: MonitorErrorsCountProps) =>
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           time,

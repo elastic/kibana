@@ -118,14 +118,17 @@ export function ActionsPopover({
   const isRemote = Boolean(monitor.remote);
   const { space } = useKibanaSpace();
 
-  const { http } = useKibana().services;
+  const { http, application } = useKibana().services;
   const locationLabel = monitor.locations[0]?.label ?? '';
+
+  const effectiveLocationId = locationId || monitor.locations[0]?.id || '';
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: locationId || monitor.locations[0]?.id || '',
+    locationId: effectiveLocationId,
     spaces: monitor.spaces,
   });
+
   const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });
 
   const canEditSynthetics = useCanEditSynthetics();
@@ -226,7 +229,32 @@ export function ActionsPopover({
   let popoverItems: EuiContextMenuPanelItemDescriptor[];
 
   if (isRemote) {
+    const navigateToRemoteDetail = () => {
+      const remoteName = monitor.remote?.remoteName;
+      if (!remoteName) return;
+      const params = new URLSearchParams();
+      if (effectiveLocationId) params.set('locationId', effectiveLocationId);
+      params.set('remoteName', remoteName);
+      if (monitor.remote?.kibanaUrl) {
+        params.set('remoteKibanaUrl', monitor.remote.kibanaUrl);
+      }
+      if (monitor.monitorQueryId && monitor.monitorQueryId !== monitor.configId) {
+        params.set('monitorQueryId', monitor.monitorQueryId);
+      }
+      const query = params.toString();
+      application?.navigateToApp('synthetics', {
+        path: `/monitor/${monitor.configId}${query ? `?${query}` : ''}`,
+      });
+      setIsPopoverOpen(false);
+    };
+
     popoverItems = [
+      {
+        name: actionsMenuGoToMonitorName,
+        icon: 'sortRight' as const,
+        onClick: navigateToRemoteDetail,
+        'data-test-subj': 'actionsPopoverGoToMonitor',
+      },
       quickInspectPopoverItem,
       ...(remoteMonitorUrl
         ? [

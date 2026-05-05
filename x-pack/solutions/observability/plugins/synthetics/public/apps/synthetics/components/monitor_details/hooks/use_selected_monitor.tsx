@@ -28,7 +28,10 @@ export const useSelectedMonitor = ({
 }: UseSelectedMonitorOptions = {}) => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const { space } = useKibanaSpace();
-  const { spaceId } = useGetUrlParams();
+  const { spaceId, remoteName } = useGetUrlParams();
+
+  // Remote monitors have no local saved object — skip all saved object fetching
+  const isRemote = Boolean(remoteName);
 
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
@@ -55,11 +58,18 @@ export const useSelectedMonitor = ({
     : null;
 
   const isMonitorMissing =
+    !isRemote &&
     error?.body?.statusCode === 404 &&
     (error.getPayload as { monitorId: string })?.monitorId === monitorId;
 
   useEffect(() => {
-    if (monitorId && !availableMonitor && !syntheticsMonitorLoading && !isMonitorMissing) {
+    if (
+      monitorId &&
+      !isRemote &&
+      !availableMonitor &&
+      !syntheticsMonitorLoading &&
+      !isMonitorMissing
+    ) {
       dispatch(
         getMonitorAction.get({
           monitorId,
@@ -70,6 +80,7 @@ export const useSelectedMonitor = ({
   }, [
     dispatch,
     monitorId,
+    isRemote,
     availableMonitor,
     syntheticsMonitorLoading,
     isMonitorMissing,
@@ -81,6 +92,7 @@ export const useSelectedMonitor = ({
     // Only perform periodic refresh if the last dispatch was earlier enough
     if (
       monitorId &&
+      !isRemote &&
       !syntheticsMonitorLoading &&
       !monitorListLoading &&
       syntheticsMonitorDispatchedAt > 0 &&
@@ -99,6 +111,7 @@ export const useSelectedMonitor = ({
     lastRefresh,
     refreshInterval,
     monitorId,
+    isRemote,
     monitorListLoading,
     syntheticsMonitorLoading,
     syntheticsMonitorDispatchedAt,
@@ -109,8 +122,9 @@ export const useSelectedMonitor = ({
 
   return {
     monitor: availableMonitor,
-    loading: syntheticsMonitorLoading || monitorListLoading,
+    loading: isRemote ? false : syntheticsMonitorLoading || monitorListLoading,
     error,
     isMonitorMissing,
+    isRemote,
   };
 };

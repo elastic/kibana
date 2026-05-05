@@ -29,8 +29,15 @@ export const useLatestError = ({ monitor, configIdByLocation }: UseMonitorLatest
 
   useEffect(() => {
     const locationLabel = monitor?.locations?.[0]?.label;
+    const remoteName = monitor?.remote?.remoteName;
     if (locationLabel && isPopoverOpen === configIdByLocation) {
-      dispatch(getMonitorLastErrorRunAction.get({ monitorId: monitor.configId, locationLabel }));
+      dispatch(
+        getMonitorLastErrorRunAction.get({
+          monitorId: monitor.configId,
+          locationLabel,
+          ...(remoteName ? { remoteName } : {}),
+        })
+      );
     }
   }, [
     dispatch,
@@ -39,6 +46,7 @@ export const useLatestError = ({ monitor, configIdByLocation }: UseMonitorLatest
     configIdByLocation,
     monitor?.locations,
     monitor.configId,
+    monitor?.remote?.remoteName,
   ]);
 
   return { loading, latestPing };

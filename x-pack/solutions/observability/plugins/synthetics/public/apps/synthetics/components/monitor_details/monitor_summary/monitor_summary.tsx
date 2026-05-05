@@ -33,6 +33,7 @@ import { LastTestRun } from './last_test_run';
 import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_config';
+import { RemoteMonitorCallout } from '../remote_monitor_callout';
 
 export const MonitorSummary = () => {
   const { monitorId: configId } = useParams<{ monitorId: string }>();
@@ -51,6 +52,7 @@ export const MonitorSummary = () => {
 
   return (
     <>
+      <RemoteMonitorCallout />
       <MissingIntegrationCallout configId={configId} />
       <MonitorPendingWrapper>
         <MonitorMWsCallout />

@@ -36,5 +36,10 @@ export function useLocalDataView(
     }
   }, [setDataViewTitle, updatedDataViewTitle]);
 
-  return { dataViewTitle: dataViewTitle || initDatViewTitle };
+  // Prefer the title explicitly provided via `dataTypesIndexPatterns` over
+  // the cached value from local storage. Otherwise consumers that switch the
+  // index pattern between renders (e.g. CCS embeddables that point at a
+  // remote cluster) get the previously-cached pattern on first paint and
+  // produce empty results until the cache catches up on a later refresh.
+  return { dataViewTitle: initDatViewTitle || dataViewTitle };
 }

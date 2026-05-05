@@ -21,7 +21,7 @@ export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const { queryIdFilter, locationFilter, dataTypesIndexPatterns } = useMonitorQueryFilters();
 
   if (!queryIdFilter) {
     return null;
@@ -32,6 +32,7 @@ export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
       id="monitorDurationTrend"
       customHeight="240px"
       reportType="kpi-over-time"
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={Object.keys(metricsToShow).map((metric) => ({
         dataType: 'synthetics',
         time: props,

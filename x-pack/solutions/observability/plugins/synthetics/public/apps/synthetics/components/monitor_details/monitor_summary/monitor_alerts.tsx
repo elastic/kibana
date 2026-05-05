@@ -42,7 +42,7 @@ export const MonitorAlerts = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const { queryIdFilter, locationFilter, dataTypesIndexPatterns } = useMonitorQueryFilters();
   const selectedLocation = useSelectedLocation();
 
   if (!selectedLocation || !queryIdFilter) {
@@ -64,6 +64,7 @@ export const MonitorAlerts = ({
                   withActions={false}
                   customHeight={'27px'}
                   reportType="single-metric"
+                  dataTypesIndexPatterns={dataTypesIndexPatterns}
                   attributes={[
                     {
                       dataType: 'alerts',
@@ -101,6 +102,7 @@ export const MonitorAlerts = ({
             dataTestSubj="monitorActiveAlertsCount"
             customHeight={'120px'}
             reportType="single-metric"
+            dataTypesIndexPatterns={dataTypesIndexPatterns}
             attributes={[
               {
                 dataType: 'alerts',
@@ -127,6 +129,7 @@ export const MonitorAlerts = ({
             sparklineMode
             customHeight="100px"
             reportType="kpi-over-time"
+            dataTypesIndexPatterns={dataTypesIndexPatterns}
             attributes={[
               {
                 seriesType: 'area',
@@ -154,6 +157,7 @@ export const MonitorAlerts = ({
           <ExploratoryViewEmbeddable
             customHeight={'120px'}
             reportType="single-metric"
+            dataTypesIndexPatterns={dataTypesIndexPatterns}
             attributes={[
               {
                 dataType: 'alerts',
@@ -180,6 +184,7 @@ export const MonitorAlerts = ({
             sparklineMode
             customHeight="100px"
             reportType="kpi-over-time"
+            dataTypesIndexPatterns={dataTypesIndexPatterns}
             attributes={[
               {
                 seriesType: 'area',

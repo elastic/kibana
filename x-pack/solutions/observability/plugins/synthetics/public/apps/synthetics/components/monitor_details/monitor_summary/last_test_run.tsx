@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { getTestRunDetailLink } from '../../common/links/test_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
+import { useGetUrlParams } from '../../../hooks';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 import type {
   EncryptedSyntheticsSavedMonitor,
@@ -79,11 +80,17 @@ export const LastTestRunComponent = ({
   stepsData?: SyntheticsJourneyApiResponse;
   isErrorDetails?: boolean;
 }) => {
-  const { monitor } = useSelectedMonitor();
+  const { monitor, isRemote } = useSelectedMonitor();
   const { euiTheme } = useEuiTheme();
 
   const selectedLocation = useSelectedLocation();
+  const { locationId: urlLocationId } = useGetUrlParams();
   const { basePath } = useSyntheticsSettingsContext();
+
+  // For remote monitors, selectedLocation may be null (location not in local list).
+  // Fall back to urlLocationId from the URL params.
+  const effectiveLocationId = selectedLocation?.id ?? urlLocationId;
+  const effectiveConfigId = monitor?.[ConfigKey.CONFIG_ID] ?? latestPing?.[ConfigKey.CONFIG_ID];
 
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 356 }}>
@@ -103,14 +110,14 @@ export const LastTestRunComponent = ({
           color="danger"
           iconType="warning"
         >
-          {isErrorDetails ? null : (
+          {isErrorDetails || !effectiveConfigId || !effectiveLocationId ? null : (
             <EuiButton
               data-test-subj="monitorTestRunViewErrorDetails"
               color="danger"
               href={getErrorDetailsUrl({
                 basePath,
-                configId: monitor?.[ConfigKey.CONFIG_ID]!,
-                locationId: selectedLocation!.id,
+                configId: effectiveConfigId,
+                locationId: effectiveLocationId,
                 stateId: latestPing.state?.id!,
               })}
             >
@@ -124,7 +131,8 @@ export const LastTestRunComponent = ({
 
       <EuiSpacer size="m" />
 
-      {monitor?.type === MonitorTypeEnum.BROWSER ? (
+      {(monitor?.type === MonitorTypeEnum.BROWSER ||
+        latestPing?.monitor?.type === MonitorTypeEnum.BROWSER) ? (
         <BrowserStepsList
           steps={stepsData?.steps ?? []}
           loading={stepsLoading}
@@ -158,7 +166,9 @@ const PanelHeader = ({
   const formatter = useDateFormat();
   const lastRunTimestamp = formatter(latestPing?.['@timestamp']);
 
-  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
+  const isBrowserMonitor =
+    monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER ||
+    latestPing?.monitor?.type === MonitorTypeEnum.BROWSER;
 
   const TitleNode = (
     <EuiTitle size="xs">

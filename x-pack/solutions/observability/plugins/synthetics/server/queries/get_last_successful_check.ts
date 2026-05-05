@@ -40,8 +40,12 @@ export const getLastSuccessfulStepParams = ({
             },
           },
           {
-            term: {
-              'monitor.id': monitorId,
+            bool: {
+              should: [
+                { term: { 'monitor.id': monitorId } },
+                { term: { config_id: monitorId } },
+              ],
+              minimum_should_match: 1,
             },
           },
           {

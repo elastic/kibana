@@ -6,6 +6,8 @@
  */
 import React, { useCallback } from 'react';
 
+import { EuiDescriptionList } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useParams, useRouteMatch } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
@@ -20,10 +22,17 @@ import { PLUGIN } from '../../../../../common/constants/plugin';
 import { useSelectedLocation } from './hooks/use_selected_location';
 import { MonitorLocationSelect } from '../common/components/monitor_location_select';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
+import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
+
+const LOCATION_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetailsLocation.locationLabel',
+  { defaultMessage: 'Location' }
+);
 
 export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean }) => {
-  const { monitor } = useSelectedMonitor();
+  const { monitor, isRemote } = useSelectedMonitor();
   const { monitorId } = useParams<{ monitorId: string }>();
+  const { latestPing } = useMonitorLatestPing();
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
@@ -42,6 +51,18 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
 
   if (spaceId && spaceId !== space?.id) {
     params += `&spaceId=${spaceId}`;
+  }
+
+  // For remote monitors, there is no local saved object with a locations array
+  // and the location is not in the local locations list. Display the location
+  // label from the latest ping's observer.geo.name as a static label.
+  if (isRemote && !monitor?.locations) {
+    const locationLabel = latestPing?.observer?.geo?.name;
+    return (
+      <EuiDescriptionList
+        listItems={[{ title: LOCATION_LABEL, description: locationLabel ?? '' }]}
+      />
+    );
   }
 
   return (

@@ -33,6 +33,7 @@ import {
   MONITORS_ROUTE,
 } from '../../../../../common/constants';
 import type { RouteProps } from '../../routes';
+import { useGetUrlParams } from '../../hooks';
 
 export const getMonitorDetailsRoute = (
   history: ReturnType<typeof useHistory>,
@@ -117,6 +118,7 @@ const getMonitorSummaryHeader = (
 ): EuiPageHeaderProps => {
   // Not a component, but it doesn't matter. Hooks are just functions
   const match = useRouteMatch<{ monitorId: string }>(MONITOR_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
+  const { remoteName } = useGetUrlParams(); // eslint-disable-line react-hooks/rules-of-hooks
 
   if (!match) {
     return {};
@@ -124,13 +126,17 @@ const getMonitorSummaryHeader = (
 
   const search = history.location.search;
   const monitorId = match.params.monitorId;
+  const isRemote = Boolean(remoteName);
 
-  const rightSideItems = [
-    <Actions />,
-    <MonitorDetailsLastRun />,
-    <MonitorDetailsStatus />,
-    <MonitorDetailsLocation />,
-  ];
+  // Remote monitors have no local saved object — hide edit/run actions
+  const rightSideItems = isRemote
+    ? [<MonitorDetailsLastRun />, <MonitorDetailsStatus />, <MonitorDetailsLocation />]
+    : [
+        <Actions />,
+        <MonitorDetailsLastRun />,
+        <MonitorDetailsStatus />,
+        <MonitorDetailsLocation />,
+      ];
 
   return {
     pageTitle: <MonitorDetailsPageTitle />,

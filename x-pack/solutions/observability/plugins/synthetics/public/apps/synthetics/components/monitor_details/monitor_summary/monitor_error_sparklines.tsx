@@ -23,7 +23,7 @@ export const MonitorErrorSparklines = ({ from, to, id }: Props) => {
   } = useKibana<ClientPluginsStart>().services;
 
   const { euiTheme } = useEuiTheme();
-  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const { queryIdFilter, locationFilter, dataTypesIndexPatterns } = useMonitorQueryFilters();
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 
@@ -38,6 +38,7 @@ export const MonitorErrorSparklines = ({ from, to, id }: Props) => {
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           time,

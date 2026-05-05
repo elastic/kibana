@@ -40,6 +40,9 @@ export interface SyntheticsUrlParams {
   spaceId?: string;
   useLogicalAndFor?: UseLogicalAndField[];
   view?: Exclude<OverviewView, typeof DEFAULT_OVERVIEW_VIEW>;
+  remoteName?: string;
+  remoteKibanaUrl?: string;
+  monitorQueryId?: string;
 }
 
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
@@ -99,6 +102,9 @@ export const getSupportedUrlParams = (params: {
     spaceId,
     useLogicalAndFor,
     view,
+    remoteName,
+    remoteKibanaUrl,
+    monitorQueryId,
   } = filteredParams;
 
   return {
@@ -134,6 +140,9 @@ export const getSupportedUrlParams = (params: {
     spaceId: spaceId || undefined,
     useLogicalAndFor: parseFilters(useLogicalAndFor),
     view: view && isOverviewView(view) && view !== DEFAULT_OVERVIEW_VIEW ? view : undefined,
+    remoteName: remoteName || undefined,
+    remoteKibanaUrl: remoteKibanaUrl || undefined,
+    monitorQueryId: monitorQueryId || undefined,
   };
 };
 

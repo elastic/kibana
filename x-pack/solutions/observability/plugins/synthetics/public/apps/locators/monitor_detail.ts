@@ -14,12 +14,16 @@ async function navigate({
   spaceId,
   timeRange,
   tabId,
+  remoteName,
+  remoteKibanaUrl,
 }: {
   configId: string;
   locationId?: string;
   spaceId?: string;
   timeRange?: TimeRange;
   tabId?: string;
+  remoteName?: string;
+  remoteKibanaUrl?: string;
 }) {
   let queryParam = locationId ? `?locationId=${locationId}` : '';
   const tab = `${tabId ? `/${tabId}` : ''}`;
@@ -32,6 +36,18 @@ async function navigate({
     queryParam += queryParam
       ? `&dateRangeStart=${timeRange.from}&dateRangeEnd=${timeRange.to}`
       : `?dateRangeStart=${timeRange.from}&dateRangeEnd=${timeRange.to}`;
+  }
+
+  if (remoteName) {
+    queryParam += queryParam
+      ? `&remoteName=${encodeURIComponent(remoteName)}`
+      : `?remoteName=${encodeURIComponent(remoteName)}`;
+  }
+
+  if (remoteKibanaUrl) {
+    queryParam += queryParam
+      ? `&remoteKibanaUrl=${encodeURIComponent(remoteKibanaUrl)}`
+      : `?remoteKibanaUrl=${encodeURIComponent(remoteKibanaUrl)}`;
   }
 
   return {

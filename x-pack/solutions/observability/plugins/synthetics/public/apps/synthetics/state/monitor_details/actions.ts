@@ -24,12 +24,12 @@ export const getMonitorAction = createAsyncAction<
 >('[MONITOR DETAILS] GET MONITOR');
 
 export const getMonitorLastRunAction = createAsyncAction<
-  { monitorId: string; locationLabel: string },
+  { monitorId: string; locationLabel?: string; locationId?: string; remoteName?: string },
   { ping?: Ping }
 >('[MONITOR DETAILS] GET LAST RUN');
 
 export const getMonitorLastErrorRunAction = createAsyncAction<
-  { monitorId: string; locationLabel: string },
+  { monitorId: string; locationLabel?: string; locationId?: string; remoteName?: string },
   { ping?: Ping }
 >('[MONITOR DETAILS] GET LAST ERROR RUN');
 

@@ -274,6 +274,30 @@ export function MonitorDetailFlyout(props: Props) {
     spaces,
   });
 
+  const { application } = useKibana<ClientPluginsStart>().services;
+
+  // For remote monitors, navigate programmatically so we can include
+  // remoteName / remoteKibanaUrl / monitorQueryId query params that must survive in-app routing.
+  const navigateToRemoteDetail = useCallback(() => {
+    const remoteName = monitor?.remote?.remoteName;
+    if (!remoteName) return;
+    const params = new URLSearchParams();
+    if (locationId) params.set('locationId', locationId);
+    params.set('remoteName', remoteName);
+    if (monitor?.remote?.kibanaUrl) {
+      params.set('remoteKibanaUrl', monitor.remote.kibanaUrl);
+    }
+    // monitorQueryId is the `monitor.id` field in ping documents, which may differ
+    // from configId for project monitors. Pass it so the detail page can query correctly.
+    if (monitor?.monitorQueryId && monitor.monitorQueryId !== configId) {
+      params.set('monitorQueryId', monitor.monitorQueryId);
+    }
+    const query = params.toString();
+    application?.navigateToApp('synthetics', {
+      path: `/monitor/${configId}${query ? `?${query}` : ''}`,
+    });
+  }, [application, configId, locationId, monitor?.remote?.remoteName, monitor?.remote?.kibanaUrl, monitor?.monitorQueryId]);
+
   const editLink = useEditMonitorLocator({ configId, spaces });
 
   const { space } = useKibanaSpace();
@@ -516,19 +540,33 @@ export function MonitorDetailFlyout(props: Props) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {isRemote ? (
-                <EuiToolTip content={!remoteMonitorUrl ? REMOTE_URL_UNAVAILABLE_TEXT : undefined}>
-                  <EuiButton
-                    data-test-subj="syntheticsMonitorDetailFlyoutViewRemoteButton"
-                    isDisabled={!remoteMonitorUrl}
-                    href={remoteMonitorUrl}
-                    target="_blank"
-                    iconType="popout"
-                    iconSide="right"
-                    fill
-                  >
-                    {VIEW_ON_REMOTE_CLUSTER_TEXT}
-                  </EuiButton>
-                </EuiToolTip>
+                <EuiFlexGroup gutterSize="s">
+                  {remoteMonitorUrl && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="syntheticsMonitorDetailFlyoutViewRemoteButton"
+                        href={remoteMonitorUrl}
+                        target="_blank"
+                        iconType="popout"
+                        iconSide="right"
+                      >
+                        {VIEW_ON_REMOTE_CLUSTER_TEXT}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                      isDisabled={!monitor?.remote?.remoteName}
+                      onClick={navigateToRemoteDetail}
+                      iconType="sortRight"
+                      iconSide="right"
+                      fill
+                    >
+                      {GO_TO_MONITOR_LINK_TEXT}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               ) : (
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>

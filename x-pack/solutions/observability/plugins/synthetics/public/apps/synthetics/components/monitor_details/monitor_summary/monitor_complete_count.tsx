@@ -22,7 +22,7 @@ export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const { queryIdFilter, locationFilter, dataTypesIndexPatterns } = useMonitorQueryFilters();
 
   if (!queryIdFilter) {
     return null;
@@ -33,6 +33,7 @@ export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
       id="monitorSuccessfulCount"
       align="left"
       reportType={ReportTypes.SINGLE_METRIC}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           time: props,

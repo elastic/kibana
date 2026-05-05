@@ -25,7 +25,7 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
       exploratoryView: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
-  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const { queryIdFilter, locationFilter, dataTypesIndexPatterns } = useMonitorQueryFilters();
   const { euiTheme } = useEuiTheme();
 
   if (!queryIdFilter) {
@@ -40,6 +40,7 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
         axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
         legendIsVisible={false}
         hideTicks={true}
+        dataTypesIndexPatterns={dataTypesIndexPatterns}
         attributes={[
           {
             seriesType: 'area',

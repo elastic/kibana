@@ -19,6 +19,7 @@ import type {
 import type { SyntheticsEsClient } from '../lib';
 import { getRemoteMonitorInfo } from '../lib/remote_result_utils';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
+import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 
 const DEFAULT_PAGE_SIZE = 25;
 
@@ -53,6 +54,7 @@ export async function queryPings<F>(
     pageIndex,
     locations,
     excludedLocations,
+    remoteName,
   } = params;
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
@@ -60,12 +62,28 @@ export async function queryPings<F>(
     size,
     from: pageIndex !== undefined ? pageIndex * size : 0,
     ...(index ? { from: index * size } : {}),
+    // For remote monitors, target the remote cluster's synthetics indices via
+    // CCS syntax. SyntheticsEsClient.search uses local `synthetics-*` by
+    // default, so we override it per-request when remoteName is provided.
+    ...(remoteName ? { index: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` } : {}),
     query: {
       bool: {
         filter: [
           SUMMARY_FILTER,
           { range: { '@timestamp': { gte: from, lte: to } } },
-          ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
+          ...(monitorId
+            ? [
+                {
+                  bool: {
+                    should: [
+                      { term: { 'monitor.id': monitorId } },
+                      { term: { config_id: monitorId } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ]
+            : []),
           ...(status ? [{ term: { 'monitor.status': status } }] : []),
         ] as QueryDslQueryContainer[],
       },

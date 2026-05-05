@@ -14,13 +14,14 @@ import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumb
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
 export const useMonitorDetailsPage = () => {
-  const { monitor, isMonitorMissing } = useSelectedMonitor();
+  const { monitor, isMonitorMissing, isRemote } = useSelectedMonitor();
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
   useMonitorListBreadcrumbs(monitor ? [{ text: monitor?.name ?? '' }] : []);
 
-  if (isMonitorMissing && monitor?.[ConfigKey.CONFIG_ID] !== monitorId) {
+  // Remote monitors have no local saved object — don't redirect to "Not Found"
+  if (!isRemote && isMonitorMissing && monitor?.[ConfigKey.CONFIG_ID] !== monitorId) {
     return <Redirect to={MONITOR_NOT_FOUND_ROUTE.replace(':monitorId', monitorId)} />;
   }
   return null;

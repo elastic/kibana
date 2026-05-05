@@ -25,7 +25,7 @@ export const DurationPanel = (props: DurationPanelProps) => {
     },
   } = useKibana<ClientPluginsStart>();
 
-  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const { queryIdFilter, locationFilter, dataTypesIndexPatterns } = useMonitorQueryFilters();
 
   if (!queryIdFilter) {
     return null;
@@ -37,6 +37,7 @@ export const DurationPanel = (props: DurationPanelProps) => {
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           time: props,
