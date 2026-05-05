@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { PointVisibilityOptions } from '@kbn/expression-xy-plugin/public';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
 import { ToolbarDivider } from '../../../../shared_components/toolbar_divider';
 import { MissingValuesOptions } from './missing_values_option';
@@ -47,10 +48,11 @@ export function getValueLabelDisableReason({
   });
 }
 
-export const XyAppearanceSettings: React.FC<{
-  state: XYVisualizationState;
-  setState: (newState: XYVisualizationState) => void;
-}> = ({ state, setState }) => {
+export const XyAppearanceSettings: React.FC<VisualizationToolbarProps<XYVisualizationState>> = ({
+  state,
+  setState,
+  frame,
+}) => {
   const dataLayers = getDataLayers(state.layers);
   const isAreaPercentage = dataLayers.some(
     ({ seriesType }) => seriesType === 'area_percentage_stacked'
@@ -58,7 +60,10 @@ export const XyAppearanceSettings: React.FC<{
 
   const isHasNonBarSeries = hasNonBarSeries(dataLayers);
 
-  const isFittingEnabled = isHasNonBarSeries && !isAreaPercentage;
+  const hasTextBasedDatasource = dataLayers.some(
+    (layer) => frame.datasourceLayers[layer.layerId]?.isTextBasedLanguage() === true
+  );
+  const isFittingEnabled = isHasNonBarSeries && !isAreaPercentage && !hasTextBasedDatasource;
   const isCurveTypeEnabled = isHasNonBarSeries || isAreaPercentage;
 
   const isHorizontal = isHorizontalChart(state.layers);

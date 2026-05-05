@@ -120,23 +120,23 @@ describe('useAssetInventoryStatus', () => {
     });
   });
 
-  it('returns inactive_feature when the entity-store v2 UI setting is disabled', async () => {
+  it('returns entity_store_v2_disabled when the entity-store v2 UI setting is disabled', async () => {
     setUiSettings({ assetInventory: true, entityStoreV2: false });
 
     const { result } = renderStatusHook();
 
     await waitFor(() => {
-      expect(result.current.data).toEqual({ status: 'inactive_feature' });
+      expect(result.current.data).toEqual({ status: 'entity_store_v2_disabled' });
     });
   });
 
-  it('returns inactive_feature when the entity-store v2 experimental flag is disabled', async () => {
+  it('returns entity_store_v2_disabled when the entity-store v2 experimental flag is disabled', async () => {
     mockIsExperimentalFeatureEnabled.mockReturnValue(false);
 
     const { result } = renderStatusHook();
 
     await waitFor(() => {
-      expect(result.current.data).toEqual({ status: 'inactive_feature' });
+      expect(result.current.data).toEqual({ status: 'entity_store_v2_disabled' });
     });
   });
 
@@ -200,16 +200,14 @@ describe('useAssetInventoryStatus', () => {
     });
   });
 
-  it('returns empty when the generic engine transform has triggered with no docs', async () => {
+  it('returns empty when the generic engine task has executed with no docs', async () => {
     setHasDocs(false);
     setEntityStoreStatus({
       status: 'running',
       engines: [
         {
           type: 'generic',
-          components: [
-            { resource: 'transform', metadata: { documents_processed: 0, trigger_count: 1 } },
-          ],
+          components: [{ resource: 'task', runs: 1, status: 'success', remainingLogsToExtract: 0 }],
         },
       ],
     });
@@ -221,16 +219,14 @@ describe('useAssetInventoryStatus', () => {
     });
   });
 
-  it('returns initializing when the generic engine transform has not yet triggered', async () => {
+  it('returns initializing when the generic engine task has not yet executed', async () => {
     setHasDocs(false);
     setEntityStoreStatus({
       status: 'running',
       engines: [
         {
           type: 'generic',
-          components: [
-            { resource: 'transform', metadata: { documents_processed: 0, trigger_count: 0 } },
-          ],
+          components: [{ resource: 'task', runs: 0, status: 'idle', remainingLogsToExtract: null }],
         },
       ],
     });

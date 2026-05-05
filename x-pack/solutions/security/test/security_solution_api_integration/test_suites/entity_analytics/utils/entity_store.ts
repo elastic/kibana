@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
+import type { EntityType } from '@kbn/entity-store/common';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { waitFor } from '@kbn/detections-response-ftr-services';
@@ -13,6 +13,7 @@ import expect from '@kbn/expect';
 import { ENTITY_LATEST, ENTITY_STORE_ROUTES, getEntitiesAlias } from '@kbn/entity-store/common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from './data_view';
+import { entityMaintainerRouteHelpersFactory } from './entity_maintainers';
 
 export const EntityStoreUtils = (
   getService: FtrProviderContext['getService'],
@@ -40,11 +41,14 @@ export const EntityStoreUtils = (
   };
 
   const cleanEngines = async () => {
+    // Temporarily enable V2 so the uninstall API isn't blocked by the
+    // feature flag middleware (which returns 403 when V2 is disabled).
+    // A previous test's cleanup may have already disabled V2.
     await supertest
       .post(namespacedPath('/internal/kibana/settings'))
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
-      .send({ changes: { 'securitySolution:entityStoreEnableV2': null } })
+      .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
       .expect(200);
 
     // Use the supported uninstall API so maintainers are removed via
@@ -128,7 +132,8 @@ export const EntityStoreUtils = (
       dataViewPattern = 'logs-*',
       waitForEntities = true,
       entityTypes = ['user', 'host'],
-      maintainerAutoStart = false,
+      stopMaintainerAfterInstall = true,
+      maintainerAutoStart: _ignoredAutoStart,
       ...installBody
     } = body;
     const installRequestBody = { ...installBody, entityTypes };
@@ -171,14 +176,57 @@ export const EntityStoreUtils = (
       await waitForEntityStoreEntities({ es: getService('es'), log, count: 1, namespace });
     }
 
-    const maintainersRes = await supertest
-      .post(namespacedPath('/internal/security/entity_store/entity_maintainers/init'))
-      .set('kbn-xsrf', 'true')
-      .set('x-elastic-internal-origin', 'Kibana')
-      .set('elastic-api-version', '2')
-      .send({ autoStart: maintainerAutoStart });
+    // Install schedules the risk-score maintainer with enabled: true.
+    // Wait for any TM auto-run to complete, then stop the task so tests
+    // can set up preconditions before triggering scoring via the sync
+    // run_now route. The run_now route calls ensureRiskScoreSetup before
+    // scoring, so resources are created on first use even if we stop the
+    // maintainer before its first TM execution. Tests that need the
+    // maintainer running (e.g. async lifecycle tests) pass
+    // stopMaintainerAfterInstall: false to skip this block.
+    if (stopMaintainerAfterInstall) {
+      const maintainerRoutes = entityMaintainerRouteHelpersFactory(
+        supertest,
+        namespace !== 'default' ? namespace : undefined
+      );
 
-    expect([200, 201]).to.contain(maintainersRes.status);
+      // Wait for any TM auto-run to finish BEFORE stopping. Install
+      // schedules the task with enabled=true so TM may auto-run it
+      // immediately. Calling stopMaintainer (bulkUpdateState) while TM
+      // is mid-execution causes a version_conflict_engine_exception on
+      // TM's write-back, permanently wedging the task in "running" state.
+      let lastSeenRuns = -1;
+      await retry.waitForWithTimeout(
+        'risk-score maintainer to be idle before stop after install',
+        60_000,
+        async () => {
+          const response = await maintainerRoutes.getMaintainers(200, ['risk-score']);
+          const maintainer = response.body.maintainers.find(
+            (m: { id: string; runs: number; nextRunAt?: string | null }) => m.id === 'risk-score'
+          );
+          if (!maintainer) return false;
+
+          const nextRunAt = (maintainer as { nextRunAt?: string | null }).nextRunAt;
+          const isNextRunInFuture = nextRunAt != null && new Date(nextRunAt).getTime() > Date.now();
+          if (!isNextRunInFuture) {
+            lastSeenRuns = -1;
+            return false;
+          }
+
+          const runs = maintainer.runs;
+          if (runs === lastSeenRuns) return true;
+          lastSeenRuns = runs;
+          return false;
+        }
+      );
+
+      try {
+        await maintainerRoutes.stopMaintainer('risk-score');
+      } catch (e) {
+        log.debug(`stopMaintainer after install failed (may not be registered yet): ${e.message}`);
+      }
+    }
+
     return res;
   };
 

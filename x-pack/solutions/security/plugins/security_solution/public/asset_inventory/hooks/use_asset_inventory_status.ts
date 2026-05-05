@@ -23,6 +23,7 @@ import { useAssetInventoryRoutes } from './use_asset_inventory_routes';
 
 export type AssetInventoryStatus =
   | 'inactive_feature'
+  | 'entity_store_v2_disabled'
   | 'disabled'
   | 'initializing'
   | 'empty'
@@ -44,30 +45,24 @@ interface GenericEntityEngineStatus extends Omit<EntityStoreEngineStatus, 'type'
   type: 'generic';
 }
 
-interface TransformMetadata {
-  documents_processed: number;
-  trigger_count: number;
+interface TaskComponent {
+  runs: number;
 }
 
 const isGenericEntityEngine = (
   engine: EntityStoreEngineStatus
 ): engine is GenericEntityEngineStatus => engine.type === 'generic';
 
-const isTransformMetadata = (metadata: unknown): metadata is TransformMetadata =>
-  typeof metadata === 'object' &&
-  metadata !== null &&
-  'documents_processed' in metadata &&
-  'trigger_count' in metadata &&
-  typeof (metadata as TransformMetadata).documents_processed === 'number' &&
-  typeof (metadata as TransformMetadata).trigger_count === 'number';
+const isTaskComponent = (component: unknown): component is TaskComponent =>
+  typeof component === 'object' &&
+  component !== null &&
+  'runs' in component &&
+  typeof (component as TaskComponent).runs === 'number';
 
-const hasTransformTriggered = (engine: GenericEntityEngineStatus): boolean =>
-  !!engine.components?.some((component) => {
-    if (component.resource === 'transform' && isTransformMetadata(component.metadata)) {
-      return component.metadata.trigger_count > 0;
-    }
-    return false;
-  });
+const hasGenericEngineExecuted = (engine: GenericEntityEngineStatus): boolean =>
+  !!engine.components?.some(
+    (component) => component.resource === 'task' && isTaskComponent(component) && component.runs > 0
+  );
 
 /**
  * Composed Asset Inventory status resolver.
@@ -144,8 +139,11 @@ export const useAssetInventoryStatus = () => {
   });
 
   const data = useMemo<AssetInventoryStatusResponse | undefined>(() => {
-    if (!isAssetInventoryEnabled || !v2FlagsEnabled) {
+    if (!isAssetInventoryEnabled) {
       return { status: 'inactive_feature' };
+    }
+    if (!v2FlagsEnabled) {
+      return { status: 'entity_store_v2_disabled' };
     }
 
     if (entityStoreStatusQuery.isLoading || privilegesQuery.isLoading || hasDocsQuery.isLoading) {
@@ -183,7 +181,7 @@ export const useAssetInventoryStatus = () => {
       return { status: 'disabled' };
     }
 
-    if (hasTransformTriggered(genericEngine)) {
+    if (hasGenericEngineExecuted(genericEngine)) {
       return { status: 'empty' };
     }
 
