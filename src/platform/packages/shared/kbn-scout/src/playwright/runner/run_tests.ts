@@ -24,7 +24,7 @@ import {
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import type { ScoutPlaywrightProjects } from '../types';
-import { execPromise, getPlaywrightGrepTag } from '../utils';
+import { execPromise, getPlaywrightGrepTag, withKibanaBabelRegister } from '../utils';
 import type { RunTestsOptions } from './flags';
 
 export const getPlaywrightProject = (
@@ -66,10 +66,10 @@ async function runPlaywrightTest(
     cmd,
     args,
     cwd: resolve(REPO_ROOT),
-    env: {
+    env: withKibanaBabelRegister({
       ...process.env,
       ...env,
-    },
+    }),
     wait: true,
   });
 }
@@ -82,10 +82,14 @@ export async function hasTestsInPlaywrightConfig(
 ): Promise<number> {
   log.info(`scout: Validate Playwright config has tests`);
   try {
-    const validationCmd = ['SCOUT_REPORTER_ENABLED=false', cmd, ...cmdArgs, '--list'].join(' ');
-    log.debug(`scout: running '${validationCmd}'`);
+    const validationCmd = [cmd, ...cmdArgs, '--list'].join(' ');
 
-    const result = await execPromise(validationCmd);
+    const result = await execPromise(validationCmd, {
+      env: withKibanaBabelRegister({
+        ...process.env,
+        SCOUT_REPORTER_ENABLED: 'false',
+      }) as NodeJS.ProcessEnv,
+    });
     const lastLine = result.stdout.trim().split('\n').pop() || '';
 
     log.info(`scout: ${lastLine}`);
