@@ -151,7 +151,10 @@ export const useTopNavLinks = ({
       items.push(inspectAppMenuItem);
     }
 
-    if (services.triggersActionsUi && discoverParams.authorizedRuleTypeIds.length) {
+    const hasV1AlertsAccess = discoverParams.authorizedRuleTypeIds.length > 0;
+    const shouldShowAlertsMenu = hasV1AlertsAccess || showCreateRuleV2;
+
+    if (services.triggersActionsUi && shouldShowAlertsMenu) {
       const alertsAppMenuItem = getAlertsAppMenuItem({
         discoverParams,
         services,
