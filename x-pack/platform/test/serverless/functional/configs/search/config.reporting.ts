@@ -9,15 +9,22 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseTestConfig = await readConfigFile(require.resolve('../../config.search.base.ts'));
+  const kbnTestServer = baseTestConfig.get('kbnTestServer');
 
   return {
     ...baseTestConfig.getAll(),
-    testFiles: [
-      require.resolve('../../test_suites/discover/x_pack_visualize_field'),
-      require.resolve('../../test_suites/discover_ml_uptime/discover'),
-    ],
+    kbnTestServer: {
+      ...kbnTestServer,
+      serverArgs: [
+        ...kbnTestServer.serverArgs,
+        '--xpack.reporting.csv.scroll.duration=10m',
+        '--xpack.reporting.queue.timeout=600000',
+        '--elasticsearch.requestTimeout=600000',
+      ],
+    },
+    testFiles: [require.resolve('../../test_suites/discover/x_pack_reporting')],
     junit: {
-      reportName: 'Serverless Search Functional Tests - Common Group 6',
+      reportName: 'Serverless Search Functional Tests - Reporting',
     },
   };
 }
