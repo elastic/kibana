@@ -111,6 +111,24 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-public.CreateRuleFormFlyoutProps.includeYaml",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeYaml",
+            "description": [
+              "Whether to include the Form/YAML edit mode toggle (default: true)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -130,7 +148,7 @@
           "ContainerModule"
         ],
         "path": "x-pack/platform/plugins/shared/alerting_v2/public/index.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -150,7 +168,7 @@
         "label": "AlertingServerStart",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
-        "lineNumber": 32,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -176,7 +194,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
-            "lineNumber": 33,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -193,7 +211,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
-                "lineNumber": 33,
+                "lineNumber": 35,
                 "columnNumber": 29,
                 "deprecated": false,
                 "docsReferencedTypeName": "KibanaRequest",
@@ -247,7 +265,7 @@
           ") => Promise<{ items: { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }[]; total: number; page: number; perPage: number; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
-        "lineNumber": 28,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
