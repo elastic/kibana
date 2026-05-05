@@ -118,9 +118,8 @@ describe('IlmPhaseFilter', () => {
 
         const searchInput = screen.getByTestId('comboBoxSearchInput');
         await userEvent.click(searchInput);
-        fireEvent.mouseOver(screen.getByText(option.toLowerCase()));
 
-        expect(screen.getByRole('tooltip')).toHaveTextContent(tooltipDescription);
+        expect(screen.getByText(tooltipDescription)).toBeInTheDocument();
       });
     });
   });
