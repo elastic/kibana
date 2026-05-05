@@ -255,26 +255,9 @@ export const useSendMessageMutation = ({
     abortControllerRef.current?.abort();
   }, []);
 
-  const cleanConversation = useCallback(
-    ({ conversationId, hasError }: { conversationId?: string; hasError: boolean }) => {
-      // Cleaning the conversation is only invoked when the user wants to back out of a
-      // pending or errored state. If a stream is in flight, abort it; otherwise just clear
-      // any leftover error/pending state.
-      if (isLoading) {
-        abortControllerRef.current?.abort();
-        return;
-      }
-      if (hasError && conversationId) {
-        clearPendingMessage(conversationId);
-      }
-    },
-    [isLoading, clearPendingMessage]
-  );
-
   return {
     mutate,
     isLoading,
     cancel,
-    cleanConversation,
   };
 };

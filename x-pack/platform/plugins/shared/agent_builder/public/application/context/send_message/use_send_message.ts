@@ -33,7 +33,6 @@ export const useSendMessage = () => {
     mutateSendMessage,
     mutateResumeRound,
     cancelActiveStream,
-    cleanConversation: cleanConversationCtx,
     removeError: removeErrorCtx,
   } = useSendMessageContext();
 
@@ -147,10 +146,6 @@ export const useSendMessage = () => {
     cancelActiveStream();
   }, [cancelActiveStream]);
 
-  const cleanConversation = useCallback(() => {
-    cleanConversationCtx({ conversationId, hasError: Boolean(record.error) });
-  }, [cleanConversationCtx, conversationId, record.error]);
-
   const removeError = useCallback(() => {
     if (conversationId) {
       removeErrorCtx(conversationId);
@@ -164,7 +159,6 @@ export const useSendMessage = () => {
       resumeRound,
       retry,
       cancel,
-      cleanConversation,
       removeError,
       isResponseLoading,
       isResuming,
@@ -181,7 +175,6 @@ export const useSendMessage = () => {
       resumeRound,
       retry,
       cancel,
-      cleanConversation,
       removeError,
       isResponseLoading,
       isResuming,

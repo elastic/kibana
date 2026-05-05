@@ -35,7 +35,6 @@ export interface SendMessageContextValue {
   mutateSendMessage: (vars: SendMessageVars) => void;
   mutateResumeRound: (vars: ResumeRoundVars) => void;
   cancelActiveStream: () => void;
-  cleanConversation: (params: { conversationId?: string; hasError: boolean }) => void;
   removeError: (conversationId: string) => void;
   removeAllErrors: () => void;
 }
@@ -131,7 +130,6 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
   // whole object would re-evaluate every render. The individual fields below are stable.
   const sendMutate = sendMutation.mutate;
   const sendCancel = sendMutation.cancel;
-  const sendCleanConversation = sendMutation.cleanConversation;
   const resumeMutate = resumeMutation.mutate;
   const resumeCancel = resumeMutation.cancel;
 
@@ -176,7 +174,6 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
       mutateSendMessage,
       mutateResumeRound,
       cancelActiveStream,
-      cleanConversation: sendCleanConversation,
       removeError,
       removeAllErrors,
     }),
@@ -186,7 +183,6 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
       mutateSendMessage,
       mutateResumeRound,
       cancelActiveStream,
-      sendCleanConversation,
       removeError,
       removeAllErrors,
     ]
