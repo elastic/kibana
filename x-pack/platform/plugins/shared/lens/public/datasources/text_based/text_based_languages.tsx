@@ -39,6 +39,7 @@ import type {
 } from '@kbn/lens-common';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
+import { LayerSettingsPanel } from './layer_settings';
 import { toExpression } from './to_expression';
 import { generateId } from '../../id_generator';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
@@ -520,6 +521,8 @@ export function getTextBasedDatasource({
     LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {
       return null;
     },
+
+    LayerSettingsComponent: LayerSettingsPanel,
 
     uniqueLabels(state: TextBasedPrivateState) {
       const layers = state.layers;

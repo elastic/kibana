@@ -8,7 +8,11 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { ESDocumentWithOperation, InfraDocument } from '@kbn/synthtrace-client';
+import type {
+  ESDocumentWithOperation,
+  InfraDocument,
+  SynthtraceGenerator,
+} from '@kbn/synthtrace-client';
 import type { Readable } from 'stream';
 import { pipeline, Transform } from 'stream';
 import type { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
@@ -48,7 +52,75 @@ export class InfraSynthtraceEsClientImpl
       'metrics-kubernetes*',
       'metrics-docker*',
       'metrics-aws*',
+      'metrics-hostmetricsreceiver.otel*',
     ];
+  }
+
+  private otelTemplateCreated = false;
+
+  override async index(
+    streamOrGenerator:
+      | (Readable | SynthtraceGenerator<InfraDocument>)
+      | Array<Readable | SynthtraceGenerator<InfraDocument>>,
+    pipelineCallback?: (base: Readable) => NodeJS.WritableStream
+  ): Promise<void> {
+    if (!this.otelTemplateCreated) {
+      await this.ensureOtelDataStreamTemplate();
+      this.otelTemplateCreated = true;
+    }
+    return super.index(streamOrGenerator, pipelineCallback);
+  }
+
+  private async ensureOtelDataStreamTemplate() {
+    const templateName = 'metrics-hostmetricsreceiver.otel';
+    try {
+      await this.client.indices.putIndexTemplate({
+        name: templateName,
+        index_patterns: ['metrics-hostmetricsreceiver.otel-*'],
+        data_stream: {},
+        priority: 500,
+        template: {
+          mappings: {
+            dynamic: true,
+            dynamic_templates: [
+              {
+                strings_as_keyword: {
+                  match_mapping_type: 'string',
+                  mapping: { type: 'keyword', ignore_above: 1024 },
+                },
+              },
+            ],
+            properties: {
+              '@timestamp': { type: 'date' },
+              host: {
+                properties: {
+                  name: { type: 'keyword' },
+                  hostname: { type: 'keyword' },
+                  ip: { type: 'ip' },
+                  os: { properties: { name: { type: 'keyword' } } },
+                },
+              },
+              cloud: {
+                properties: {
+                  provider: { type: 'keyword' },
+                  region: { type: 'keyword' },
+                },
+              },
+              data_stream: {
+                properties: {
+                  dataset: { type: 'keyword' },
+                  type: { type: 'keyword' },
+                  namespace: { type: 'keyword' },
+                },
+              },
+            },
+          },
+        },
+      });
+      this.logger.info(`Created index template "${templateName}"`);
+    } catch (error) {
+      this.logger.warning(`Failed to create index template "${templateName}": ${error}`);
+    }
   }
 
   async initializePackage(opts?: { version?: string; skipInstallation?: boolean }) {
@@ -104,6 +176,13 @@ function getRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<InfraDocument>, encoding, callback) {
+      const dataset = document['data_stream.dataset'];
+      if (typeof dataset === 'string' && dataset.includes('otel')) {
+        document._index = `metrics-${dataset}-default`;
+        callback(null, document);
+        return;
+      }
+
       const metricset = document['metricset.name'];
 
       if (metricset === 'cpu') {
