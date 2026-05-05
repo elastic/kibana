@@ -11,24 +11,23 @@ import type { List } from 'react-virtualized';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 
 export function useScrollToOrigin({
-  contextSpanIds,
+  contextSpanId,
   visibleList,
   listRef,
   scrollToOriginRef,
   setIsContextSpanVisible,
 }: {
-  contextSpanIds?: string[];
+  contextSpanId?: string;
   visibleList: TraceWaterfallItem[];
   listRef: React.RefObject<List>;
   scrollToOriginRef: React.MutableRefObject<() => void>;
   setIsContextSpanVisible: (visible: boolean) => void;
 }) {
   const contextSpanIndex = useMemo(() => {
-    const target = contextSpanIds?.[0];
-    if (!target) return undefined;
-    const idx = visibleList.findIndex((item) => item.id === target);
+    if (!contextSpanId) return undefined;
+    const idx = visibleList.findIndex((item) => item.id === contextSpanId);
     return idx >= 0 ? idx : undefined;
-  }, [contextSpanIds, visibleList]);
+  }, [contextSpanId, visibleList]);
 
   scrollToOriginRef.current = () => {
     if (contextSpanIndex !== undefined) {

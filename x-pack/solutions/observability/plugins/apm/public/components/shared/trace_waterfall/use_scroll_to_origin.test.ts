@@ -43,7 +43,7 @@ describe('useScrollToOrigin', () => {
       const setIsContextSpanVisible = jest.fn();
       const { result } = renderHook(() =>
         useScrollToOrigin({
-          contextSpanIds: ['b'],
+          contextSpanId: 'b',
           visibleList,
           listRef: makeListRef(),
           scrollToOriginRef: makeScrollToOriginRef(),
@@ -60,7 +60,7 @@ describe('useScrollToOrigin', () => {
       const setIsContextSpanVisible = jest.fn();
       const { result } = renderHook(() =>
         useScrollToOrigin({
-          contextSpanIds: ['c'],
+          contextSpanId: 'c',
           visibleList,
           listRef: makeListRef(),
           scrollToOriginRef: makeScrollToOriginRef(),
@@ -74,11 +74,11 @@ describe('useScrollToOrigin', () => {
       expect(setIsContextSpanVisible).toHaveBeenCalledWith(false);
     });
 
-    it('does not call setIsContextSpanVisible when contextSpanIds is not set', () => {
+    it('does not call setIsContextSpanVisible when contextSpanId is not set', () => {
       const setIsContextSpanVisible = jest.fn();
       const { result } = renderHook(() =>
         useScrollToOrigin({
-          contextSpanIds: undefined,
+          contextSpanId: undefined,
           visibleList,
           listRef: makeListRef(),
           scrollToOriginRef: makeScrollToOriginRef(),
@@ -95,7 +95,7 @@ describe('useScrollToOrigin', () => {
       const setIsContextSpanVisible = jest.fn();
       const { result } = renderHook(() =>
         useScrollToOrigin({
-          contextSpanIds: ['nonexistent'],
+          contextSpanId: 'nonexistent',
           visibleList,
           listRef: makeListRef(),
           scrollToOriginRef: makeScrollToOriginRef(),
@@ -116,7 +116,7 @@ describe('useScrollToOrigin', () => {
 
       renderHook(() =>
         useScrollToOrigin({
-          contextSpanIds: ['b'],
+          contextSpanId: 'b',
           visibleList,
           listRef: makeListRef(scrollToRow),
           scrollToOriginRef,
@@ -136,7 +136,7 @@ describe('useScrollToOrigin', () => {
 
       renderHook(() =>
         useScrollToOrigin({
-          contextSpanIds: ['nonexistent'],
+          contextSpanId: 'nonexistent',
           visibleList,
           listRef: makeListRef(scrollToRow),
           scrollToOriginRef,
@@ -157,7 +157,7 @@ describe('useScrollToOrigin', () => {
       const { rerender } = renderHook(
         ({ list }: { list: TraceWaterfallItem[] }) =>
           useScrollToOrigin({
-            contextSpanIds: ['b'],
+            contextSpanId: 'b',
             visibleList: list,
             listRef: makeListRef(scrollToRow),
             scrollToOriginRef,

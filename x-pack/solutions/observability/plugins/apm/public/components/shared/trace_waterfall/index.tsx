@@ -344,7 +344,7 @@ function TraceTree({
   }, [scrollToContextOnMount, scrollStrategy, scrollComplete, contextSpanIds, visibleList]);
 
   const { onScrolled } = useScrollToOrigin({
-    contextSpanIds,
+    contextSpanId: contextSpanIds?.[0],
     visibleList,
     listRef,
     scrollToOriginRef,
