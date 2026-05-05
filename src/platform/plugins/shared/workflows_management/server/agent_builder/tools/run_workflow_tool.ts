@@ -31,26 +31,22 @@ export function registerRunWorkflowTool(
 **When NOT to use:** To save / persist a workflow — use \`deploy_workflow\` for that.
 
 After execution starts, use the \`${platformCoreTools.getWorkflowExecutionStatus}\` tool with the returned \`workflowExecutionId\` to poll for status and final output.`,
-    schema: z
-      .object({
-        workflowId: z
-          .string()
-          .optional()
-          .describe('ID of a deployed workflow to execute. Mutually exclusive with `yaml`.'),
-        yaml: z
-          .string()
-          .optional()
-          .describe(
-            'Inline workflow YAML to execute as an unsaved draft. Mutually exclusive with `workflowId`.'
-          ),
-        inputs: z
-          .record(z.string(), z.any())
-          .optional()
-          .describe('Optional key-value inputs for the workflow execution.'),
-      })
-      .refine((value) => Boolean(value.workflowId) !== Boolean(value.yaml), {
-        message: 'Provide exactly one of `workflowId` or `yaml`.',
-      }),
+    schema: z.object({
+      workflowId: z
+        .string()
+        .optional()
+        .describe('ID of a deployed workflow to execute. Mutually exclusive with `yaml`.'),
+      yaml: z
+        .string()
+        .optional()
+        .describe(
+          'Inline workflow YAML to execute as an unsaved draft. Mutually exclusive with `workflowId`.'
+        ),
+      inputs: z
+        .record(z.string(), z.any())
+        .optional()
+        .describe('Optional key-value inputs for the workflow execution.'),
+    }),
     tags: ['workflows', 'lifecycle', 'execution'],
     availability: {
       handler: async ({ uiSettings }) => {
@@ -64,6 +60,21 @@ After execution starts, use the \`${platformCoreTools.getWorkflowExecutionStatus
       cacheMode: 'space',
     },
     handler: async ({ workflowId, yaml, inputs }, { spaceId, request }) => {
+      if (Boolean(workflowId) === Boolean(yaml)) {
+        return {
+          results: [
+            {
+              type: 'other' as const,
+              data: {
+                executed: false,
+                reason: 'invalid_arguments',
+                message: 'Provide exactly one of `workflowId` or `yaml`.',
+              },
+            },
+          ],
+        };
+      }
+
       const resolvedInputs = inputs ?? {};
 
       if (yaml) {
