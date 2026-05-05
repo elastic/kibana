@@ -160,6 +160,10 @@ class DownloadSourceService {
       await this.throwIfProxyNotFound(soClient, data.proxy_id);
     }
 
+    if (data.security_artifacts_proxy_id) {
+      await this.throwIfProxyNotFound(soClient, data.security_artifacts_proxy_id);
+    }
+
     // default should be only one
     if (data.is_default) {
       const defaultDownloadSourceId = await this.getDefaultDownloadSourceId();
@@ -262,6 +266,10 @@ class DownloadSourceService {
 
     if (updateData.proxy_id) {
       await this.throwIfProxyNotFound(soClient, updateData.proxy_id);
+    }
+
+    if (updateData.security_artifacts_proxy_id) {
+      await this.throwIfProxyNotFound(soClient, updateData.security_artifacts_proxy_id);
     }
 
     if (updateData.name) {
@@ -513,7 +521,7 @@ class DownloadSourceService {
     const downloadSources = await this.soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       searchFields: ['proxy_id', 'security_artifacts_proxy_id'],
-      search: proxyId,
+      search: escapeSearchQueryPhrase(proxyId),
       perPage: SO_SEARCH_LIMIT,
     });
 

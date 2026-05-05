@@ -313,6 +313,8 @@ export interface DownloadSourceSOAttributes {
   proxy_id?: string | null;
   ssl?: string | null; // encrypted ssl field
   auth?: string | null; // encrypted auth field
+  security_artifacts_proxy_id?: string | null;
+  security_artifacts_url?: string | null;
   secrets?: {
     ssl?: {
       key?: { id: string };
