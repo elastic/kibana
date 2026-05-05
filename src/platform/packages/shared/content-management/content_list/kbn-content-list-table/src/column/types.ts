@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import type {
   ContentListItem,
   ContentListItemConfig,
@@ -40,6 +41,12 @@ export interface BuilderContext {
   supports?: ContentListSupports;
   /** Callbacks for action orchestration. */
   actions?: BuilderContextActions;
+  /**
+   * Active EUI theme. Threaded through context so that builder functions
+   * (which are plain functions, not React hooks or components) can derive
+   * values from the theme.
+   */
+  euiTheme?: UseEuiTheme['euiTheme'];
 }
 
 /**

@@ -14,6 +14,8 @@ import { WrappedHelper } from '../../../utils/testing';
 import type { SyntheticsAppState } from '../../../state/root_reducer';
 import type { MonitorFilterState } from '../../../state';
 import {
+  fetchMonitorListAction,
+  quietFetchMonitorListAction,
   selectEncryptedSyntheticsSavedMonitors,
   updateManagementPageStateAction,
 } from '../../../state';
@@ -54,10 +56,6 @@ describe('useMonitorList', () => {
     filterStateWithQuery = { ...filterState, query: 'xyz' };
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   it('returns expected initial state', () => {
     const {
       result: { current: hookResult },
@@ -68,11 +66,10 @@ describe('useMonitorList', () => {
     expect(hookResult).toMatchObject({ ...initialState, handleFilterChange: expect.any(Function) });
   });
 
-  it('dispatches correct action for query url param', async () => {
+  it('dispatches correct action for query url param', () => {
     const query = 'xyz';
     const url = `/monitor/1?query=${query}`;
 
-    jest.useFakeTimers().setSystemTime(Date.now());
     const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper url={url} path={MONITOR_ROUTE}>
@@ -88,7 +85,7 @@ describe('useMonitorList', () => {
     );
   });
 
-  it('dispatches correct action for filter url param', async () => {
+  it('dispatches correct action for filter url param', () => {
     const exp = {
       ...filterStateWithQuery,
       tags: ['abc', 'xyz'],
@@ -105,7 +102,6 @@ describe('useMonitorList', () => {
       exp.schedules
     )}&projects=${JSON.stringify(exp.projects)}`;
 
-    jest.useFakeTimers().setSystemTime(Date.now());
     const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper url={url} path={MONITOR_ROUTE}>
@@ -117,5 +113,51 @@ describe('useMonitorList', () => {
     renderHook(() => useMonitorList(), { wrapper: WrapperWithState });
 
     expect(dispatchMockFn).toHaveBeenCalledWith(updateManagementPageStateAction(exp));
+  });
+
+  describe('initial mount fetch', () => {
+    it('dispatches `fetchMonitorListAction.get` on initial mount when not yet loaded', () => {
+      renderHook(() => useMonitorList(), {
+        wrapper: ({ children }) => React.createElement(WrappedHelper, null, children),
+      });
+
+      expect(dispatchMockFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: fetchMonitorListAction.get.type,
+          payload: state.monitorList.pageState,
+        })
+      );
+    });
+
+    it('dispatches `quietFetchMonitorListAction` on initial mount when already loaded', () => {
+      renderHook(() => useMonitorList(), {
+        wrapper: ({ children }) =>
+          React.createElement(
+            WrappedHelper,
+            { state: { monitorList: { ...state.monitorList, loaded: true } } },
+            children
+          ),
+      });
+
+      expect(dispatchMockFn).toHaveBeenCalledWith(
+        quietFetchMonitorListAction(state.monitorList.pageState)
+      );
+      expect(dispatchMockFn).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: fetchMonitorListAction.get.type })
+      );
+    });
+
+    it('dispatches the initial fetch exactly once on mount', () => {
+      renderHook(() => useMonitorList(), {
+        wrapper: ({ children }) => React.createElement(WrappedHelper, null, children),
+      });
+
+      const initialFetchCalls = dispatchMockFn.mock.calls.filter(
+        ([action]) =>
+          action?.type === fetchMonitorListAction.get.type ||
+          action?.type === quietFetchMonitorListAction.type
+      );
+      expect(initialFetchCalls).toHaveLength(1);
+    });
   });
 });

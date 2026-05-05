@@ -414,7 +414,7 @@
           "section": "def-common.FieldFormatsRegistry",
           "text": "FieldFormatsRegistry"
         },
-        ", \"register\" | \"init\"> & { deserialize: ",
+        ", \"init\" | \"register\"> & { deserialize: ",
         {
           "pluginId": "fieldFormats",
           "scope": "common",
@@ -6590,22 +6590,6 @@
             "path": "src/platform/plugins/shared/data/common/search/aggs/utils/get_aggs_formats.tsx"
           },
           {
-            "plugin": "expressionLegacyMetricVis",
-            "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/public/utils/format.ts"
-          },
-          {
-            "plugin": "expressionLegacyMetricVis",
-            "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/public/utils/format.ts"
-          },
-          {
-            "plugin": "visTypeTimeseries",
-            "path": "src/platform/plugins/shared/vis_types/timeseries/public/application/components/lib/create_field_formatter.ts"
-          },
-          {
-            "plugin": "visTypeTimeseries",
-            "path": "src/platform/plugins/shared/vis_types/timeseries/public/application/components/lib/create_field_formatter.ts"
-          },
-          {
             "plugin": "@kbn/discover-utils",
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts"
           },
@@ -7163,15 +7147,7 @@
         "label": "IFieldFormatsRegistry",
         "description": [],
         "signature": [
-          "{ register: (fieldFormats: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatInstanceType",
-            "text": "FieldFormatInstanceType"
-          },
-          "[]) => void; init: (getConfig: ",
+          "{ init: (getConfig: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -7196,6 +7172,14 @@
             "text": "FieldFormatMetaParams"
           },
           ", defaultFieldConverters?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormatInstanceType",
+            "text": "FieldFormatInstanceType"
+          },
+          "[]) => void; register: (fieldFormats: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",

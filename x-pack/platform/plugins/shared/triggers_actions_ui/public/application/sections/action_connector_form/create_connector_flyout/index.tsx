@@ -422,7 +422,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               </>
             )}
 
-            {!isLoadingActionTypeModel && !actionTypeModelError && (
+            {!isLoadingActionTypeModel && !showLoadingSpinner && !actionTypeModelError && (
               <>
                 <ConnectorForm
                   actionTypeModel={actionTypeModel}
