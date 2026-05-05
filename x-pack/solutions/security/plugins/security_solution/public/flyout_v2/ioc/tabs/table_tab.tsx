@@ -6,9 +6,9 @@
  */
 
 import React, { memo } from 'react';
+import { FlyoutError } from '../../shared/components/flyout_error';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
-import { FlyoutError } from '../../../flyout/shared/components/flyout_error';
 import { IndicatorFieldsTable } from '../components/fields_table';
 
 export const FLYOUT_TABLE_TEST_ID = 'tiFlyoutTable';

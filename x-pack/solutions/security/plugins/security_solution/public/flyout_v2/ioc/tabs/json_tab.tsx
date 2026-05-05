@@ -6,8 +6,8 @@
  */
 
 import React, { memo } from 'react';
+import { FlyoutError } from '../../shared/components/flyout_error';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
-import { FlyoutError } from '../../../flyout/shared/components/flyout_error';
 import { JsonTab as SharedJsonTab } from '../../../flyout/shared/components/json_tab';
 
 export const FLYOUT_JSON_TEST_ID = 'indicators-flyout';

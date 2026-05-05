@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FlyoutError } from '../../../flyout/shared/components/flyout_error';
+import { FlyoutError } from '../../shared/components/flyout_error';
 import { unwrapValue } from '../../../threat_intelligence/modules/indicators/utils/unwrap_value';
 import { RawIndicatorFieldId } from '../../../../common/threat_intelligence/types/indicator';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
