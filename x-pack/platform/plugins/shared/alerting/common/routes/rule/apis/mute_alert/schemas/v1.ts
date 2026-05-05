@@ -26,7 +26,7 @@ export const muteAlertQuerySchema = schema.maybe(
       schema.boolean({
         defaultValue: true,
         meta: {
-          description: 'Whether to validate the existence of the alert before muting.',
+          description: 'Whether to validate the existence of the alert.',
         },
       })
     ),

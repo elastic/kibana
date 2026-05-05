@@ -11,7 +11,7 @@ export {
   muteAlertQuerySchema as muteAlertQuerySchemaV1,
 } from './schemas/v1';
 
-export type { MuteAlertRequestParams, MuteAlertRequestQuery } from './types/latest';
+export type { MuteAlertRequestParams } from './types/latest';
 export type {
   MuteAlertRequestParams as MuteAlertRequestParamsV1,
   MuteAlertRequestQuery as MuteAlertRequestQueryV1,
