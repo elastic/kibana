@@ -237,25 +237,33 @@ export function ESQLEditor({
     }
 
     const lastSubmittedQuery = submittedQueryRef.current;
-    if (isOfAggregateQueryType(lastSubmittedQuery)) {
-      getSuggestions(
-        lastSubmittedQuery,
-        data,
-        http,
-        uiSettings,
-        datasourceMap,
-        visualizationMap,
-        adHocDataViews,
-        undefined,
-        undefined,
-        setDataGridAttrs,
-        esqlVariables,
-        false,
-        currentAttributesRef.current
-      ).catch(() => {
-        // The chart itself will surface query errors via its own error handling path
-      });
+    if (!isOfAggregateQueryType(lastSubmittedQuery)) {
+      return;
     }
+
+    const abortController = new AbortController();
+
+    getSuggestions(
+      lastSubmittedQuery,
+      data,
+      http,
+      uiSettings,
+      datasourceMap,
+      visualizationMap,
+      adHocDataViews,
+      undefined,
+      abortController,
+      setDataGridAttrs,
+      esqlVariables,
+      false,
+      currentAttributesRef.current
+    ).catch(() => {
+      // The chart itself will surface query errors via its own error handling path
+    });
+
+    return () => {
+      abortController.abort();
+    };
   }, [
     searchSessionId,
     esqlVariables,
