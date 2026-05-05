@@ -11,6 +11,7 @@ export {
   createCallApmApiV2,
   type APMClientV2,
   type AutoAbortedAPMClientV2,
+  type APIReturnType,
 } from './src/create_call_apm_api';
 export { routeDefinitions } from './src/routes';
 export type { FooResponse } from './src/routes/foo';

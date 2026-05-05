@@ -16,5 +16,3 @@ export const barRoute = {
   endpoint: 'GET /internal/apm/bar' as const,
   params: t.type({ query: t.partial({ foo: t.string }) }),
 } as const;
-
-export type BarRouteDefinition = typeof barRoute & { response: BarResponse };

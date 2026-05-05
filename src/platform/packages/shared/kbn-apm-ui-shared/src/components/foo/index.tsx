@@ -9,8 +9,7 @@
 
 import React, { useState } from 'react';
 import { EuiButton, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import type { APMClientV2 } from '@kbn/apm-api-shared';
-import type { APIReturnType } from '../../../../kbn-apm-api-shared/src/create_call_apm_api';
+import type { APMClientV2, APIReturnType } from '@kbn/apm-api-shared';
 
 type FooReturnType = APIReturnType<'GET /internal/apm/foo/{serviceName}'>;
 

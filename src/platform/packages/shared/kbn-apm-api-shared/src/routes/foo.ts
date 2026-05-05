@@ -16,5 +16,3 @@ export const fooRoute = {
   endpoint: 'GET /internal/apm/foo/{serviceName}' as const,
   params: t.type({ query: t.partial({ foo: t.string }), path: t.type({ serviceName: t.string }) }),
 } as const;
-
-export type FooRouteDefinition = typeof fooRoute & { response: FooResponse };
