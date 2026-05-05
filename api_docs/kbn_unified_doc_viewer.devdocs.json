@@ -331,6 +331,61 @@
       },
       {
         "parentPluginId": "@kbn/unified-doc-viewer",
+        "id": "def-public.FieldActionsProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldActionsProvider",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<React.PropsWithChildren<",
+          "UseFieldActionsDeps",
+          ">>"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/hooks/use_field_actions.tsx",
+        "lineNumber": 69,
+        "columnNumber": 15,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-doc-viewer",
+            "id": "def-public.FieldActionsProvider.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
+            "deprecated": false,
+            "docsReferencedTypeName": "P",
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-doc-viewer",
+            "id": "def-public.FieldActionsProvider.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-doc-viewer",
         "id": "def-public.FieldName",
         "type": "Function",
         "tags": [],
@@ -562,6 +617,46 @@
             "columnNumber": 41,
             "deprecated": false,
             "docsReferencedTypeName": "UseDocViewerViewedEventParams",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-doc-viewer",
+        "id": "def-public.useUIFieldActions",
+        "type": "Function",
+        "tags": [],
+        "label": "useUIFieldActions",
+        "description": [],
+        "signature": [
+          "({ field, value, mapping, formattedValue, }: FieldActionParams) => ",
+          "TFieldAction",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/hooks/use_field_actions.tsx",
+        "lineNumber": 71,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-doc-viewer",
+            "id": "def-public.useUIFieldActions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  field,\n  value,\n  mapping,\n  formattedValue,\n}",
+            "description": [],
+            "signature": [
+              "FieldActionParams"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/hooks/use_field_actions.tsx",
+            "lineNumber": 71,
+            "columnNumber": 35,
+            "deprecated": false,
+            "docsReferencedTypeName": "FieldActionParams",
             "trackAdoption": false,
             "isRequired": true
           }
