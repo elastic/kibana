@@ -29,6 +29,7 @@ const ACCESSES_BUCKETING = {
 
 export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
+    kind: 'bucketed',
     id: 'elastic_defend',
     name: 'Elastic Defend',
     indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
@@ -45,6 +46,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     ],
   },
   {
+    kind: 'bucketed',
     id: 'aws_cloudtrail',
     name: 'AWS CloudTrail',
     indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
@@ -61,6 +63,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     ],
   },
   {
+    kind: 'bucketed',
     id: 'system_auth',
     name: 'System Auth',
     indexPattern: (ns) => `logs-system.auth-${ns}`,
@@ -77,6 +80,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     ],
   },
   {
+    kind: 'bucketed',
     id: 'system_security',
     name: 'System Security',
     indexPattern: (ns) => `logs-system.security-${ns}`,

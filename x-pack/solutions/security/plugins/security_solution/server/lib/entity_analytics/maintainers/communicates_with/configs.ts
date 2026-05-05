@@ -67,6 +67,7 @@ FROM logs-azure.auditlogs-${namespace}
 
 export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
+    kind: 'standard',
     id: 'okta',
     name: 'Okta',
     indexPattern: (ns) => `logs-okta.system-${ns}`,
@@ -80,6 +81,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
     additionalTargetFilter: `AND targetEntityId != "user:@okta"`,
   },
   {
+    kind: 'standard',
     id: 'jamf_pro',
     name: 'Jamf Pro',
     indexPattern: (ns) => `logs-jamf_pro.events-${ns}`,
@@ -89,6 +91,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
     esqlWhereClause: `user.name IS NOT NULL`,
   },
   {
+    kind: 'standard',
     id: 'aws_cloudtrail',
     name: 'AWS CloudTrail',
     indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
@@ -109,12 +112,12 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
     targetEvalOverride: `CONCAT("host:", host.target.entity.id)`,
   },
   {
+    kind: 'override',
     id: 'azure_auditlogs',
     name: 'Azure Audit Logs',
     indexPattern: (ns) => `logs-azure.auditlogs-${ns}`,
     relationshipType: 'communicates_with',
     targetEntityType: 'user',
-    esqlWhereClause: '',
     actorFields: [AZURE_AUDITLOGS_ACTOR_UPN_FIELD],
     esqlQueryOverride: buildAzureEsqlQuery,
   },

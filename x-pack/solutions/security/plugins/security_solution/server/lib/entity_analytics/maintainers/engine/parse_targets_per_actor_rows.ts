@@ -7,7 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 
-import type { RelationshipIntegrationConfig, ProcessedEngineRecord } from './types';
+import type {
+  ProcessedEngineRecord,
+  RelationshipType,
+  BucketTargetByThresholdConfig,
+} from './types';
 
 interface EsqlColumn {
   name: string;
@@ -22,36 +26,45 @@ function toStringArray(value: unknown): string[] {
 }
 
 /**
- * Safety net for developer-provided `esqlQueryOverride` configs.
+ * Minimal projection of `RelationshipIntegrationConfig` that the parser reads.
+ * Mirrors the engine's three variants on `kind` so consumers (and tests) can
+ * supply tightly-typed fixtures without filling in the engine fields the
+ * parser doesn't touch (`name`, `indexPattern`, `targetEntityType`, etc.).
+ *
+ * `Pick` over a discriminated union does not preserve the discriminator
+ * narrowing for fields that are absent on some variants (`bucketTargetByThreshold`
+ * collapses to `unknown`), so the projection is written out explicitly here.
+ */
+interface ParseConfigBase {
+  id: string;
+  relationshipType: RelationshipType;
+}
+type ParseConfig =
+  | (ParseConfigBase & { kind: 'standard' })
+  | (ParseConfigBase & { kind: 'bucketed'; bucketTargetByThreshold: BucketTargetByThresholdConfig })
+  | (ParseConfigBase & { kind: 'override' });
+
+/**
+ * Safety net for developer-provided `kind: 'override'` configs.
  *
  * Overrides are required to emit a fixed set of column names (see the column
- * contract documented on `RelationshipIntegrationConfig.esqlQueryOverride`).
- * If they don't, every row below silently parses as null/empty and the engine
- * produces zero records — a slow, silent failure that's painful to debug.
+ * contract documented on `OverrideRelationshipIntegrationConfig`). If they
+ * don't, every row below silently parses as null/empty and the engine produces
+ * zero records — a slow, silent failure that's painful to debug.
  *
  * This emits a single actionable warning naming the missing columns. It only
  * runs on the override path because the default builder generates the columns
  * itself and cannot drift.
  */
-type ParseConfig = Pick<
-  RelationshipIntegrationConfig,
-  'id' | 'relationshipType' | 'bucketTargetByThreshold' | 'esqlQueryOverride'
->;
 
 function warnIfOverrideColumnsMissing(
   columns: EsqlColumn[],
   config: ParseConfig,
   logger: Logger
 ): void {
-  if (!config.esqlQueryOverride) return;
+  if (config.kind !== 'override') return;
   const colNames = new Set(columns.map((c) => c.name));
-  const expected = config.bucketTargetByThreshold
-    ? [
-        'actorUserId',
-        config.bucketTargetByThreshold.aboveThresholdRelationship,
-        config.bucketTargetByThreshold.belowThresholdRelationship,
-      ]
-    : ['actorUserId', config.relationshipType];
+  const expected = ['actorUserId', config.relationshipType];
   const missing = expected.filter((n) => !colNames.has(n));
   if (missing.length > 0) {
     logger.warn(
@@ -79,7 +92,7 @@ export const parseTargetsPerActorRows = (
     const actorUserId = record.actorUserId != null ? String(record.actorUserId) : null;
 
     // TODO(follow-up): entityType hardcoded to 'user' — use actorEntityType from config.
-    if (config.bucketTargetByThreshold) {
+    if (config.kind === 'bucketed') {
       const { aboveThresholdRelationship: above, belowThresholdRelationship: below } =
         config.bucketTargetByThreshold;
       return {

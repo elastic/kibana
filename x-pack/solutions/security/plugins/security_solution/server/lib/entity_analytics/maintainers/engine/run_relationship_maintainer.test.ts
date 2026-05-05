@@ -50,6 +50,7 @@ const makeCrudClient = (
 };
 
 const baseConfig: RelationshipIntegrationConfig = {
+  kind: 'bucketed',
   id: 'elastic_defend',
   name: 'Elastic Defend',
   indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
@@ -65,6 +66,7 @@ const baseConfig: RelationshipIntegrationConfig = {
 };
 
 const oktaConfig: RelationshipIntegrationConfig = {
+  kind: 'standard',
   id: 'okta',
   name: 'Okta',
   indexPattern: (ns) => `logs-okta.system-${ns}`,

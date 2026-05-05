@@ -8,10 +8,17 @@
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { getFieldEvaluationsEsql } from '@kbn/entity-store/common/domain/euid';
 
-import type { RelationshipIntegrationConfig } from './types';
+import type {
+  RelationshipIntegrationConfig,
+  StandardRelationshipIntegrationConfig,
+  BucketedRelationshipIntegrationConfig,
+} from './types';
 import { COMPOSITE_PAGE_SIZE } from './constants';
 
-function buildRelationshipEsql(config: RelationshipIntegrationConfig, namespace: string): string {
+function buildRelationshipEsql(
+  config: StandardRelationshipIntegrationConfig | BucketedRelationshipIntegrationConfig,
+  namespace: string
+): string {
   const indexPattern = config.indexPattern(namespace);
   // TODO(follow-up): 'user' hardcoded for actor — thread actorEntityType through config.
   const userFieldEvals = !config.actorEvalOverride ? getFieldEvaluationsEsql('user') : undefined;
@@ -30,14 +37,15 @@ function buildRelationshipEsql(config: RelationshipIntegrationConfig, namespace:
     ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter(config.targetEntityType)})\n`
     : '';
 
-  const statsClause = config.bucketTargetByThreshold
-    ? (() => {
-        const {
-          threshold,
-          aboveThresholdRelationship: above,
-          belowThresholdRelationship: below,
-        } = config.bucketTargetByThreshold;
-        return `| STATS access_count = COUNT(*) BY actorUserId, targetEntityId
+  const statsClause =
+    config.kind === 'bucketed'
+      ? (() => {
+          const {
+            threshold,
+            aboveThresholdRelationship: above,
+            belowThresholdRelationship: below,
+          } = config.bucketTargetByThreshold;
+          return `| STATS access_count = COUNT(*) BY actorUserId, targetEntityId
 | EVAL access_type = CASE(
     access_count >= ${threshold}, "${above}",
     "${below}"
@@ -47,8 +55,8 @@ function buildRelationshipEsql(config: RelationshipIntegrationConfig, namespace:
     ${above} = VALUES(targets) WHERE access_type == "${above}",
     ${below} = VALUES(targets) WHERE access_type == "${below}"
   BY actorUserId`;
-      })()
-    : `| STATS ${config.relationshipType} = VALUES(targetEntityId) BY actorUserId`;
+        })()
+      : `| STATS ${config.relationshipType} = VALUES(targetEntityId) BY actorUserId`;
 
   // NOTE: We use `COALESCE(col, "") != ""` rather than the more natural
   // `col IS NOT NULL AND col != ""` because ES|QL has a quirk where
@@ -73,17 +81,17 @@ ${statsClause}
 /**
  * Builds the ES|QL query for the given integration config.
  *
- * If esqlQueryOverride is provided, delegates to it directly.
- * NOTE: overrides must emit columns named `actorUserId` plus either
- * `<aboveThresholdRelationship>` + `<belowThresholdRelationship>` (when
- * bucketTargetByThreshold is set) or `<relationshipType>` (e.g. `communicates_with`)
- * otherwise. Mismatched column names produce silent empty results.
+ * - `kind: 'override'` → delegates to `config.esqlQueryOverride(namespace)`.
+ *   The override must emit columns `actorUserId` and `<relationshipType>`
+ *   (e.g. `communicates_with`); mismatched column names produce silent empty
+ *   results (see `parseTargetsPerActorRows` for the warning safety net).
+ * - `kind: 'standard' | 'bucketed'` → uses the default ES|QL builder.
  */
 export const buildTargetsPerActorQuery = (
   config: RelationshipIntegrationConfig,
   namespace: string
 ): string => {
-  if (config.esqlQueryOverride) {
+  if (config.kind === 'override') {
     return config.esqlQueryOverride(namespace);
   }
 

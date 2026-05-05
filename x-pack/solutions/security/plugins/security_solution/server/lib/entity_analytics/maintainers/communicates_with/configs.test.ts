@@ -9,6 +9,17 @@ import { COMMUNICATES_WITH_ENGINE_CONFIGS } from './configs';
 import { buildActorDiscoveryQuery } from '../engine/build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from '../engine/build_targets_per_actor_query';
 import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
+import type {
+  StandardRelationshipIntegrationConfig,
+  OverrideRelationshipIntegrationConfig,
+} from '../engine/types';
+
+const standardConfigs = COMMUNICATES_WITH_ENGINE_CONFIGS.filter(
+  (c): c is StandardRelationshipIntegrationConfig => c.kind === 'standard'
+);
+const overrideConfigs = COMMUNICATES_WITH_ENGINE_CONFIGS.filter(
+  (c): c is OverrideRelationshipIntegrationConfig => c.kind === 'override'
+);
 
 describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
   it('ships exactly the four expected integrations', () => {
@@ -26,10 +37,14 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
     }
   });
 
-  it('does NOT enable bucketTargetByThreshold on any communicates_with config (flat targets list)', () => {
+  it('uses only kind: "standard" or "override" (no bucketing — communicates_with is a flat targets list)', () => {
     for (const config of COMMUNICATES_WITH_ENGINE_CONFIGS) {
-      expect(config.bucketTargetByThreshold).toBeUndefined();
+      expect(['standard', 'override']).toContain(config.kind);
     }
+    // Sanity-check that filtered partitions cover every config.
+    expect(standardConfigs.length + overrideConfigs.length).toBe(
+      COMMUNICATES_WITH_ENGINE_CONFIGS.length
+    );
   });
 
   it.each(COMMUNICATES_WITH_ENGINE_CONFIGS)(
@@ -86,13 +101,15 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
     );
 
     it('jamf_pro uses the broad target-EUID gate (no targetEvalOverride)', () => {
-      const jamf = hostTargeted.find((c) => c.id === 'jamf_pro');
+      const jamf = standardConfigs.find((c) => c.id === 'jamf_pro');
+      expect(jamf).toBeDefined();
       expect(jamf?.requireTargetEntityIdExists).toBe(true);
       expect(jamf?.targetEvalOverride).toBeUndefined();
     });
 
     it('aws_cloudtrail uses the narrow exists filter (because targetEvalOverride reads a single field)', () => {
-      const aws = hostTargeted.find((c) => c.id === 'aws_cloudtrail');
+      const aws = standardConfigs.find((c) => c.id === 'aws_cloudtrail');
+      expect(aws).toBeDefined();
       expect(aws?.requireTargetEntityIdExists).toBeUndefined();
       expect(aws?.targetEvalOverride).toContain('host.target.entity.id');
       expect(aws?.compositeAggAdditionalFilters).toEqual(
@@ -114,21 +131,20 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
 
   describe('user-targeted configs', () => {
     it('okta is the only standard-builder user-targeted config (azure uses an override)', () => {
-      const userStandard = COMMUNICATES_WITH_ENGINE_CONFIGS.filter(
-        (c) => c.targetEntityType === 'user' && !c.esqlQueryOverride
-      );
+      const userStandard = standardConfigs.filter((c) => c.targetEntityType === 'user');
       expect(userStandard.map((c) => c.id)).toEqual(['okta']);
     });
 
     it('okta uses targetEvalOverride + additionalTargetFilter to handle the @okta suffix and empty guard', () => {
-      const okta = COMMUNICATES_WITH_ENGINE_CONFIGS.find((c) => c.id === 'okta');
+      const okta = standardConfigs.find((c) => c.id === 'okta');
+      expect(okta).toBeDefined();
       expect(okta?.targetEvalOverride).toContain('@okta');
       expect(okta?.additionalTargetFilter).toContain('user:@okta');
     });
   });
 
   describe('azure_auditlogs override path', () => {
-    const azure = COMMUNICATES_WITH_ENGINE_CONFIGS.find((c) => c.id === 'azure_auditlogs');
+    const azure = overrideConfigs.find((c) => c.id === 'azure_auditlogs');
 
     it('declares an esqlQueryOverride and an explicit actorFields list', () => {
       expect(azure).toBeDefined();
@@ -169,8 +185,6 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
   });
 
   describe('non-override configs share the COALESCE empty-guard form', () => {
-    const standardConfigs = COMMUNICATES_WITH_ENGINE_CONFIGS.filter((c) => !c.esqlQueryOverride);
-
     it.each(standardConfigs)('$id: uses COALESCE for the actorUserId guard', (config) => {
       expect(buildTargetsPerActorQuery(config, 'default')).toContain(
         '| WHERE COALESCE(actorUserId, "") != ""'

@@ -9,6 +9,11 @@ import { ACCESSES_ENGINE_CONFIGS } from './configs';
 import { buildActorDiscoveryQuery } from '../engine/build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from '../engine/build_targets_per_actor_query';
 import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
+import type { BucketedRelationshipIntegrationConfig } from '../engine/types';
+
+const bucketedConfigs = ACCESSES_ENGINE_CONFIGS.filter(
+  (c): c is BucketedRelationshipIntegrationConfig => c.kind === 'bucketed'
+);
 
 describe('ACCESSES_ENGINE_CONFIGS', () => {
   it('ships exactly the four expected integrations', () => {
@@ -18,6 +23,14 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
       'system_auth',
       'system_security',
     ]);
+  });
+
+  it('declares kind: "bucketed" on every accesses config (access-count classification is the contract)', () => {
+    for (const config of ACCESSES_ENGINE_CONFIGS) {
+      expect(config.kind).toBe('bucketed');
+    }
+    // Sanity-check that the typed filter lined up with the runtime assertion.
+    expect(bucketedConfigs).toHaveLength(ACCESSES_ENGINE_CONFIGS.length);
   });
 
   it('declares relationshipType "accesses" on every config', () => {
@@ -33,7 +46,7 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
   });
 
   it('opts every accesses config into bucket classification (accesses_frequently / accesses_infrequently)', () => {
-    for (const config of ACCESSES_ENGINE_CONFIGS) {
+    for (const config of bucketedConfigs) {
       expect(config.bucketTargetByThreshold).toEqual({
         threshold: expect.any(Number),
         aboveThresholdRelationship: 'accesses_frequently',
@@ -108,7 +121,7 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
   );
 
   it('declares a single shared threshold across all four accesses configs (declarative, not magical)', () => {
-    const thresholds = ACCESSES_ENGINE_CONFIGS.map((c) => c.bucketTargetByThreshold?.threshold);
+    const thresholds = bucketedConfigs.map((c) => c.bucketTargetByThreshold.threshold);
     expect(new Set(thresholds).size).toBe(1);
   });
 

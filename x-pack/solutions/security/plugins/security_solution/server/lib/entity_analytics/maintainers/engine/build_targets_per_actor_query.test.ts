@@ -14,6 +14,7 @@ const HOST_ESQL_EXISTS = euid.esql.getEuidDocumentsContainsIdFilter('host');
 const USER_ESQL_EXISTS = euid.esql.getEuidDocumentsContainsIdFilter('user');
 
 const accessesConfig: RelationshipIntegrationConfig = {
+  kind: 'bucketed',
   id: 'elastic_defend',
   name: 'Elastic Defend',
   indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
@@ -30,6 +31,7 @@ const accessesConfig: RelationshipIntegrationConfig = {
 };
 
 const commWithHostConfig: RelationshipIntegrationConfig = {
+  kind: 'standard',
   id: 'jamf_pro',
   name: 'Jamf Pro',
   indexPattern: (ns) => `logs-jamf_pro.events-${ns}`,
@@ -40,6 +42,7 @@ const commWithHostConfig: RelationshipIntegrationConfig = {
 };
 
 const commWithUserConfig: RelationshipIntegrationConfig = {
+  kind: 'standard',
   id: 'okta',
   name: 'Okta',
   indexPattern: (ns) => `logs-okta.system-${ns}`,
@@ -51,9 +54,18 @@ const commWithUserConfig: RelationshipIntegrationConfig = {
 };
 
 describe('buildTargetsPerActorQuery (targets per actor)', () => {
-  it('uses esqlQueryOverride when provided', () => {
+  it('delegates entirely to esqlQueryOverride for kind: "override" configs', () => {
     const override = jest.fn().mockReturnValue('FROM test | LIMIT 1');
-    buildTargetsPerActorQuery({ ...accessesConfig, esqlQueryOverride: override }, 'default');
+    const overrideConfig: RelationshipIntegrationConfig = {
+      kind: 'override',
+      id: 'test_override',
+      name: 'Test Override',
+      indexPattern: (ns) => `logs-test-${ns}`,
+      relationshipType: 'communicates_with',
+      targetEntityType: 'user',
+      esqlQueryOverride: override,
+    };
+    expect(buildTargetsPerActorQuery(overrideConfig, 'default')).toBe('FROM test | LIMIT 1');
     expect(override).toHaveBeenCalledWith('default');
   });
 

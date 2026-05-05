@@ -14,6 +14,7 @@ const HOST_EUID_FILTER = euid.dsl.getEuidDocumentsContainsIdFilter('host');
 const USER_EUID_FILTER = euid.dsl.getEuidDocumentsContainsIdFilter('user');
 
 const accessesConfig: RelationshipIntegrationConfig = {
+  kind: 'bucketed',
   id: 'test_accesses',
   name: 'Test Accesses',
   indexPattern: (ns) => `logs-test-${ns}`,
@@ -29,6 +30,7 @@ const accessesConfig: RelationshipIntegrationConfig = {
 };
 
 const communicatesConfig: RelationshipIntegrationConfig = {
+  kind: 'standard',
   id: 'test_comm',
   name: 'Test Comm',
   indexPattern: (ns) => `logs-okta-${ns}`,

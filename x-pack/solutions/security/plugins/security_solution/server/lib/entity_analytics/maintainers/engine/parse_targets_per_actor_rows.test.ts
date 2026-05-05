@@ -21,6 +21,7 @@ const COMM_COLUMNS = [
 ];
 
 const ACCESSES_CONFIG = {
+  kind: 'bucketed' as const,
   id: 'elastic_defend',
   relationshipType: 'accesses' as const,
   bucketTargetByThreshold: {
@@ -30,6 +31,18 @@ const ACCESSES_CONFIG = {
   },
 } as const;
 const COMM_CONFIG = {
+  kind: 'standard' as const,
+  id: 'okta',
+  relationshipType: 'communicates_with' as const,
+};
+
+const ACCESSES_OVERRIDE_CONFIG = {
+  kind: 'override' as const,
+  id: 'elastic_defend',
+  relationshipType: 'accesses' as const,
+};
+const COMM_OVERRIDE_CONFIG = {
+  kind: 'override' as const,
   id: 'okta',
   relationshipType: 'communicates_with' as const,
 };
@@ -101,6 +114,7 @@ describe('parseTargetsPerActorRows — accesses', () => {
     // Same shape as accesses but with a different schema-valid pair to prove
     // the parser reads keys from config, not from a baked-in literal.
     const ownsConfig = {
+      kind: 'bucketed' as const,
       id: 'hypothetical_owns_bucketed',
       relationshipType: 'accesses' as const,
       bucketTargetByThreshold: {
@@ -148,77 +162,63 @@ describe('parseTargetsPerActorRows — communicates_with', () => {
   });
 });
 
-describe('parseTargetsPerActorRows — esqlQueryOverride safety net', () => {
-  const overrideFn = (ns: string) => `FROM index-${ns} | LIMIT 1`;
-
-  it('does not warn when override is not set, even with mismatched columns', () => {
+describe('parseTargetsPerActorRows — kind: "override" safety net', () => {
+  it('does not warn for kind: "standard" / "bucketed" configs even with mismatched columns', () => {
     const logger = createLogger();
     parseTargetsPerActorRows([{ name: 'wrong', type: 'keyword' }], [], ACCESSES_CONFIG, logger);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('does not warn when override is set and frequency columns are present', () => {
+  it('does not warn when override columns match the relationshipType contract', () => {
     const logger = createLogger();
-    parseTargetsPerActorRows(
-      ACCESSES_COLUMNS,
-      [],
-      { ...ACCESSES_CONFIG, esqlQueryOverride: overrideFn },
-      logger
-    );
+    parseTargetsPerActorRows(COMM_COLUMNS, [], COMM_OVERRIDE_CONFIG, logger);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('does not warn when override is set and the relationshipType column is present', () => {
-    const logger = createLogger();
-    parseTargetsPerActorRows(
-      COMM_COLUMNS,
-      [],
-      { ...COMM_CONFIG, esqlQueryOverride: overrideFn },
-      logger
-    );
-    expect(logger.warn).not.toHaveBeenCalled();
-  });
-
-  it('warns naming each missing frequency column when override is set', () => {
+  it('warns naming the relationshipType column when override is missing it', () => {
     const logger = createLogger();
     parseTargetsPerActorRows(
       [{ name: 'actorUserId', type: 'keyword' }],
       [],
-      { ...ACCESSES_CONFIG, esqlQueryOverride: overrideFn },
-      logger
-    );
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    const message = (logger.warn as jest.Mock).mock.calls[0][0] as string;
-    expect(message).toContain('[elastic_defend]');
-    expect(message).toContain('accesses_frequently');
-    expect(message).toContain('accesses_infrequently');
-    expect(message).toContain('results will be empty');
-  });
-
-  it('warns naming the relationshipType column when override is set and it is missing', () => {
-    const logger = createLogger();
-    parseTargetsPerActorRows(
-      [{ name: 'actorUserId', type: 'keyword' }],
-      [],
-      { ...COMM_CONFIG, esqlQueryOverride: overrideFn },
+      COMM_OVERRIDE_CONFIG,
       logger
     );
     expect(logger.warn).toHaveBeenCalledTimes(1);
     const message = (logger.warn as jest.Mock).mock.calls[0][0] as string;
     expect(message).toContain('[okta]');
     expect(message).toContain('communicates_with');
+    expect(message).toContain('results will be empty');
   });
 
-  it('warns when actorUserId is missing', () => {
+  it('warns when override is missing actorUserId', () => {
     const logger = createLogger();
     parseTargetsPerActorRows(
       [{ name: 'communicates_with', type: 'keyword' }],
       [],
-      { ...COMM_CONFIG, esqlQueryOverride: overrideFn },
+      COMM_OVERRIDE_CONFIG,
       logger
     );
     expect(logger.warn).toHaveBeenCalledTimes(1);
     const message = (logger.warn as jest.Mock).mock.calls[0][0] as string;
     expect(message).toContain('actorUserId');
+  });
+
+  it('warns naming the relationshipType column for an accesses-flavored override', () => {
+    // Override configs are flat-only by design (the type system disallows
+    // override + bucketing). For a relationshipType: 'accesses' override the
+    // expected column is literally `accesses`, not the bucket pair.
+    const logger = createLogger();
+    parseTargetsPerActorRows(
+      [{ name: 'actorUserId', type: 'keyword' }],
+      [],
+      ACCESSES_OVERRIDE_CONFIG,
+      logger
+    );
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    const message = (logger.warn as jest.Mock).mock.calls[0][0] as string;
+    expect(message).toContain('[elastic_defend]');
+    expect(message).toContain('accesses');
+    expect(message).not.toContain('accesses_frequently');
+    expect(message).not.toContain('accesses_infrequently');
   });
 });
