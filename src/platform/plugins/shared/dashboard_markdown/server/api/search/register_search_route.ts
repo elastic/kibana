@@ -9,7 +9,7 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
+import { commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
 import { searchRequestQuerySchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
@@ -25,7 +25,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
 
   searchRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: PUBLIC_API_VERSION,
       validate: {
         request: {
           query: searchRequestQuerySchema,

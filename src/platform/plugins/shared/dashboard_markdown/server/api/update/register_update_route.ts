@@ -11,7 +11,7 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
-import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
+import { PUBLIC_API_VERSION, commonRouteConfig } from '../constants';
 import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
@@ -25,7 +25,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
 
   updateRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: PUBLIC_API_VERSION,
       validate: {
         request: {
           params: schema.object({

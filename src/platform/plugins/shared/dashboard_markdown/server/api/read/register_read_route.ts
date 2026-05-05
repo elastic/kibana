@@ -10,7 +10,7 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
+import { commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
 import { readResponseBodySchema } from './schemas';
 import { read } from './read';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
@@ -24,7 +24,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
 
   readRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: PUBLIC_API_VERSION,
       validate: {
         request: {
           params: schema.object({

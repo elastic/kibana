@@ -12,11 +12,11 @@
  * public API is fully implemented and stable. When the public API is ready, this
  * const will be removed and a PUBLIC_API_VERSION (ex. 2023-10-31) will be introduced.
  */
-export const INTERNAL_API_VERSION = '1';
+export const PUBLIC_API_VERSION = '2023-10-31';
 
 export const commonRouteConfig = {
   // This route is in development and not yet intended for public use.
-  access: 'internal',
+  access: 'public',
   /**
    * `enableQueryVersion` is a temporary solution for testing internal endpoints.
    * Requests to these internal endpoints from Kibana Dev Tools or external clients
@@ -30,6 +30,7 @@ export const commonRouteConfig = {
     tags: ['oas-tag:markdown'],
     availability: {
       stability: 'experimental',
+      since: '9.5.0',
     },
   },
   security: {
