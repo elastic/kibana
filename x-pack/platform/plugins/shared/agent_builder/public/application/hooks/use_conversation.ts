@@ -33,18 +33,23 @@ export const useConversation = () => {
   const { conversationsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? '');
-  const { activeStream } = useSendMessageContext();
+  const { activeStream, byConversationId } = useSendMessageContext();
 
   // Disable the query when this conversation is being written to by a stream, OR when
-  // its cached state shows a HITL pause. The cache is authoritative in both states; a
-  // refetch would race with optimistic chunks (streaming) or with the resume mutation
-  // about to fire (HITL). Reading the round status from the cache rather than relying
-  // on mutation timing makes the handoff between send and resume safe.
+  // its cached state shows a HITL pause, OR when there's an unpersisted error in the
+  // per-conversation error map. The cache is authoritative in all three cases; a
+  // refetch would race with optimistic chunks (streaming), or with the resume mutation
+  // about to fire (HITL), or 404 a fresh conversation that errored before the backend
+  // persisted it (overriding the in-round error UI with "Conversation not found").
   const isAwaitingPrompt =
     queryClient.getQueryData<Conversation>(queryKey)?.rounds?.at(-1)?.status ===
     ConversationRoundStatus.awaitingPrompt;
 
   const isThisConversationStreaming = activeStream?.conversationId === conversationId;
+
+  const hasUnpersistedError = conversationId
+    ? Boolean(byConversationId[conversationId]?.error)
+    : false;
 
   const {
     data: conversation,
@@ -55,7 +60,11 @@ export const useConversation = () => {
     error,
   } = useQuery({
     queryKey,
-    enabled: Boolean(conversationId) && !isThisConversationStreaming && !isAwaitingPrompt,
+    enabled:
+      Boolean(conversationId) &&
+      !isThisConversationStreaming &&
+      !isAwaitingPrompt &&
+      !hasUnpersistedError,
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));

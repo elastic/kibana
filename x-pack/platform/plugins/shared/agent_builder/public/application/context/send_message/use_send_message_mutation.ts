@@ -53,6 +53,7 @@ export interface SendMessageMutationBindings {
   setPendingMessage: (conversationId: string, message: string) => void;
   clearPendingMessage: (conversationId: string) => void;
   setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
+  clearError: (conversationId: string) => void;
   clearActiveStream: () => void;
 }
 
@@ -128,6 +129,7 @@ export const useSendMessageMutation = ({
   setPendingMessage,
   clearPendingMessage,
   setError,
+  clearError,
   clearActiveStream,
 }: UseSendMessageMutationProps) => {
   const { chatService, conversationsService } = useAgentBuilderServices();
@@ -143,6 +145,12 @@ export const useSendMessageMutation = ({
     mutationKey: mutationKeys.sendMessage,
     mutationFn: async (vars: SendMessageVars) => {
       const isRegenerate = vars.action === 'regenerate';
+
+      // Clear any previous error for this conversation before starting the new mutation.
+      // Covers retry, fresh-send-after-error, and regenerate-after-error uniformly —
+      // otherwise `useConversationRounds` would render the stale error round alongside
+      // the new optimistic round.
+      clearError(vars.conversationId);
 
       // Each conversation owns its streaming lifecycle. The streamActions instance built
       // here is closure-bound to vars.conversationId for the duration of this mutation —
@@ -171,6 +179,7 @@ export const useSendMessageMutation = ({
         });
       }
 
+      let succeeded = false;
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
 
@@ -211,6 +220,7 @@ export const useSendMessageMutation = ({
           clearPendingMessage(vars.conversationId);
           vars.resetAttachments?.();
         }
+        succeeded = true;
       } catch (err) {
         setError(vars.conversationId, err, vars.lastRoundSteps ?? []);
         if (!isRegenerate) {
@@ -220,16 +230,17 @@ export const useSendMessageMutation = ({
         }
         throw err;
       } finally {
-        // Skip invalidation when the round paused on a HITL prompt. The cache is the
-        // canonical source of truth in that state (server has the same pending prompt),
-        // and a stale-marked cache would race with the resume mutation's optimistic
-        // updates if anything reopened the `useConversation` gate.
+        // Only invalidate on success. On error: refetching a fresh conversation that
+        // never persisted server-side would 404 and replace the in-round error UI with
+        // the "Conversation not found" page. The cache already holds the right state
+        // for `useConversationRounds` to render the synthetic error round.
+        // Also skip when paused on a HITL prompt (cache is canonical there too).
         const cached = queryClient.getQueryData<Conversation>(
           queryKeys.conversations.byId(vars.conversationId)
         );
         const endedInAwaitingPrompt =
           cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
-        if (!endedInAwaitingPrompt) {
+        if (succeeded && !endedInAwaitingPrompt) {
           streamActions.invalidateConversation();
         }
         clearActiveStream();

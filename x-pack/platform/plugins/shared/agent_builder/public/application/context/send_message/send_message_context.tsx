@@ -116,6 +116,7 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     setPendingMessage,
     clearPendingMessage,
     setError,
+    clearError: removeError,
     clearActiveStream,
   });
 

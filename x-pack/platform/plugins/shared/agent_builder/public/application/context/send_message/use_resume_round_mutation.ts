@@ -67,6 +67,7 @@ export const useResumeRoundMutation = ({
       // Drop pending prompts from the round — the user has answered, the round is back in progress.
       streamActions.clearPendingPrompts();
 
+      let succeeded = false;
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
 
@@ -87,11 +88,15 @@ export const useResumeRoundMutation = ({
           isAborted: () => controller.signal.aborted,
           setAgentReasoning: updateActiveReasoning,
         });
+        succeeded = true;
       } catch (err) {
         setError(vars.conversationId, err, vars.lastRoundSteps ?? []);
         throw err;
       } finally {
-        streamActions.invalidateConversation();
+        // Only invalidate on success — see use_send_message_mutation.ts for rationale.
+        if (succeeded) {
+          streamActions.invalidateConversation();
+        }
         clearActiveStream();
         if (abortControllerRef.current === controller) {
           abortControllerRef.current = null;
