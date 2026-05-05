@@ -24,13 +24,11 @@ export interface EvaluationTestOptions extends ScoutTestOptions {
  */
 export function createPlaywrightEvalsConfig({
   testDir,
-  testIgnore,
   repetitions,
   timeout,
   runGlobalSetup,
 }: {
   testDir: string;
-  testIgnore?: PlaywrightTestConfig['testIgnore'];
   repetitions?: number;
   timeout?: number;
   runGlobalSetup?: boolean;
@@ -108,6 +106,5 @@ export function createPlaywrightEvalsConfig({
     globalSetup: require.resolve('./setup.js'),
     globalTeardown: require.resolve('./teardown.js'),
     timeout: timeout ?? 5 * 60_000,
-    ...(testIgnore !== undefined ? { testIgnore } : {}),
   });
 }
