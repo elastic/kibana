@@ -25,7 +25,7 @@ import {
   type ArchiveEntry,
 } from '../../../../../../common/types/models/epm';
 import type { EsAssetReference } from '../../../../../types';
-import { updateEsAssetReferences } from '../../es_assets_reference';
+import { optimisticallyAddEsAssetReferences } from '../../es_assets_reference';
 import type { KnowledgeBaseItem } from '../../../../../../common/types/models/epm';
 import { licenseService } from '../../../../license';
 import { getIntegrationKnowledgeSetting } from '../../get_integration_knowledge_setting';
@@ -162,14 +162,13 @@ export async function indexKnowledgeBase(
         type: ElasticsearchAssetType.knowledgeBase,
       }));
 
-      // Update ES asset references to include knowledge base assets
-      esReferences = await updateEsAssetReferences(
+      // Use optimistic concurrency control to safely merge KB refs with
+      // any refs that may have been added concurrently (e.g. by policy creation
+      // for input packages), since this step runs asynchronously.
+      esReferences = await optimisticallyAddEsAssetReferences(
         savedObjectsClient,
         packageInfo.name,
-        esReferences,
-        {
-          assetsToAdd: knowledgeBaseAssetRefs,
-        }
+        knowledgeBaseAssetRefs
       );
     } catch (error) {
       throw new FleetError(`Error saving knowledge base content: ${error}`);

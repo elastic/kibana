@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import type { z } from '@kbn/zod/v4';
 import React, { useMemo } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   FormProvider,
@@ -33,6 +34,8 @@ export const FieldsRenderer: FC<{
   parsedTemplate: ParsedTemplateDefinition;
   form: FormHook<{}>;
 }> = ({ parsedTemplate, form }) => {
+  const { euiTheme } = useEuiTheme();
+
   const fieldTypeMap = useMemo(
     () => Object.fromEntries(parsedTemplate.fields.map((f) => [f.name, f.type])),
     [parsedTemplate.fields]
@@ -103,7 +106,11 @@ export const FieldsRenderer: FC<{
         };
 
         return (
-          <div key={field.name} data-test-subj={`template-field-${field.name}`}>
+          <div
+            key={field.name}
+            data-test-subj={`template-field-${field.name}`}
+            css={{ marginBottom: euiTheme.size.m }}
+          >
             <Control {...controlProps} />
           </div>
         );
@@ -159,7 +166,7 @@ export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
   useYamlFormSync(form, stableFields, onFieldDefaultChange);
 
   return (
-    <FormProvider key={parsedTemplate.name} form={form}>
+    <FormProvider form={form}>
       <FieldsRenderer parsedTemplate={parsedTemplate} form={form} />
     </FormProvider>
   );
