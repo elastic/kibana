@@ -6,14 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { barRoute, type BarResponse } from './bar';
-import { fooRoute, type FooResponse } from './foo';
-import type { RouteEntry } from './types';
+import { fooRoute } from './foo';
+import { barRoute } from './bar';
+import type { BuildRepository } from './types';
 
 export const routeDefinitions = {
   foo: fooRoute,
   bar: barRoute,
 };
 
-export type SharedAPMRouteRepository = RouteEntry<typeof fooRoute, FooResponse> &
-  RouteEntry<typeof barRoute, BarResponse>;
+export type SharedAPMRouteRepository = BuildRepository<typeof routeDefinitions>;

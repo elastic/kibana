@@ -7,11 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServerRoute } from '@kbn/server-route-repository-utils';
+import type { RouteParamsRT, ServerRoute } from '@kbn/server-route-repository-utils';
 
-export type RouteEntry<
-  TDef extends { endpoint: string; params: any },
-  TReturn extends Record<string, any>
-> = {
-  [K in TDef['endpoint']]: ServerRoute<TDef['endpoint'], TDef['params'], any, TReturn, any>;
+declare const __response: unique symbol;
+
+export interface WithResponse<T> {
+  readonly [__response]: T;
+}
+
+export type ExtractResponse<T> = T extends WithResponse<infer R extends Record<string, any>>
+  ? R
+  : Record<string, never>;
+
+export function defineRoute<TResponse extends Record<string, any>>() {
+  return <TEndpoint extends string, TParams extends RouteParamsRT>(config: {
+    endpoint: TEndpoint;
+    params: TParams;
+  }) => config as typeof config & WithResponse<TResponse>;
+}
+
+export type BuildRepository<T extends Record<string, { endpoint: string; params: any }>> = {
+  [K in keyof T as T[K]['endpoint']]: ServerRoute<
+    T[K]['endpoint'],
+    T[K]['params'],
+    any,
+    ExtractResponse<T[K]>,
+    any
+  >;
 };

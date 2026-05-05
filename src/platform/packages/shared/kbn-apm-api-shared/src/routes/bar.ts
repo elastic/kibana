@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import * as t from 'io-ts';
+import { defineRoute } from './types';
 
 export interface BarResponse {
   barMsg: string;
 }
 
-export const barRoute = {
+export const barRoute = defineRoute<BarResponse>()({
   endpoint: 'GET /internal/apm/bar' as const,
   params: t.type({ query: t.partial({ foo: t.string }) }),
-} as const;
+});
