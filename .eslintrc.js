@@ -470,8 +470,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/utils/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/scripts/run_cypress/parallel_serverless.ts',
-  'x-pack/solutions/security/plugins/security_solution/scripts/run_cypress/project_handler/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/scripts/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/scripts/**/*.{js,mjs,ts,tsx}',
