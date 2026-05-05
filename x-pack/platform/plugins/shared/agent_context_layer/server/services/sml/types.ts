@@ -175,6 +175,29 @@ export interface SmlCrawler {
 }
 
 /**
+ * Input fields for upserting an SML document.
+ *
+ * `created_at` / `updated_at` are managed server-side; `id` is the URL path id.
+ */
+export interface SmlDocumentInput {
+  type: string;
+  title: string;
+  origin_id: string;
+  content: string;
+  spaces: string[];
+  permissions?: string[];
+}
+
+/**
+ * Result of an upsert operation.
+ */
+export interface SmlUpsertResult {
+  document: SmlDocument;
+  /** Whether the document was newly created (vs. updated in place). */
+  created: boolean;
+}
+
+/**
  * SML service interface — exposed on the plugin start contract.
  */
 export interface SmlService {
@@ -219,6 +242,44 @@ export interface SmlService {
     spaceId: string;
     esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
+
+  /** Fetch a single SML document by id, scoped to a space. Returns undefined if not found. */
+  getDocument: (params: {
+    id: string;
+    spaceId: string;
+    esClient: IScopedClusterClient;
+  }) => Promise<SmlDocument | undefined>;
+
+  /** List SML documents in a space with optional filters and pagination. */
+  listDocuments: (params: {
+    spaceId: string;
+    esClient: IScopedClusterClient;
+    page?: number;
+    perPage?: number;
+    type?: string;
+    originId?: string;
+  }) => Promise<{ total: number; results: SmlDocument[] }>;
+
+  /**
+   * Upsert an SML document by id. Creates a new document if it does not
+   * exist, otherwise replaces the existing one (preserving `created_at`).
+   */
+  upsertDocument: (params: {
+    id: string;
+    document: SmlDocumentInput;
+    esClient: IScopedClusterClient;
+  }) => Promise<SmlUpsertResult>;
+
+  /**
+   * Delete an SML document by id, scoped to a space.
+   * Resolves to `true` when a document was deleted, `false` when no
+   * matching document was found.
+   */
+  deleteDocument: (params: {
+    id: string;
+    spaceId: string;
+    esClient: IScopedClusterClient;
+  }) => Promise<boolean>;
 
   /** Get a type definition by ID */
   getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;

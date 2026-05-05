@@ -10,12 +10,19 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
-import type { SmlService, SmlSearchResult, SmlDocument, SmlTypeDefinition } from './types';
+import type {
+  SmlService,
+  SmlSearchResult,
+  SmlDocument,
+  SmlDocumentInput,
+  SmlTypeDefinition,
+  SmlUpsertResult,
+} from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
 import { SmlCrawlerImpl } from './sml_crawler';
 import type { SmlCrawler } from './types';
-import { smlIndexName } from './sml_storage';
+import { smlIndexName, createSmlStorage } from './sml_storage';
 
 export interface SmlServiceSetup {
   /**
@@ -106,6 +113,26 @@ class SmlServiceImpl implements SmlServiceInstance {
       },
       getDocuments: async ({ ids, spaceId, esClient }) => {
         return getDocumentsByIds({ ids, spaceId, esClient, logger });
+      },
+      getDocument: async ({ id, spaceId, esClient }) => {
+        return getDocumentById({ id, spaceId, esClient, logger });
+      },
+      listDocuments: async ({ spaceId, esClient, page, perPage, type, originId }) => {
+        return listDocuments({
+          spaceId,
+          esClient,
+          logger,
+          page,
+          perPage,
+          type,
+          originId,
+        });
+      },
+      upsertDocument: async ({ id, document, esClient }) => {
+        return upsertDocument({ id, document, esClient, logger });
+      },
+      deleteDocument: async ({ id, spaceId, esClient }) => {
+        return deleteDocument({ id, spaceId, esClient, logger });
       },
       getTypeDefinition: (typeId: string) => {
         return this.registry.get(typeId);
@@ -479,4 +506,243 @@ const getDocumentsByIds = async ({
   }
 
   return docMap;
+};
+
+/**
+ * Fetch a single SML document by id, scoped to a space.
+ * Returns `undefined` when the document does not exist or is not in the space.
+ */
+const getDocumentById = async ({
+  id,
+  spaceId,
+  esClient,
+  logger,
+}: {
+  id: string;
+  spaceId: string;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+}): Promise<SmlDocument | undefined> => {
+  try {
+    const response = await esClient.asInternalUser.search<SmlDocument>({
+      index: smlIndexName,
+      size: 1,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [
+            { term: { id } },
+            {
+              bool: {
+                should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const hit = response.hits.hits[0];
+    if (!hit?._source) return undefined;
+
+    const source = hit._source;
+    return {
+      id: source.id ?? '',
+      type: source.type ?? '',
+      title: source.title ?? '',
+      origin_id: source.origin_id ?? '',
+      content: source.content ?? '',
+      created_at: source.created_at ?? '',
+      updated_at: source.updated_at ?? '',
+      spaces: source.spaces ?? [],
+      permissions: source.permissions ?? [],
+    };
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return undefined;
+    }
+    logger.warn(`SML getDocument failed: ${(error as Error).message}`);
+    throw error;
+  }
+};
+
+/**
+ * List SML documents in a space with optional filters and pagination.
+ *
+ * Pagination follows the standard Kibana convention (`page` is 1-based,
+ * `per_page` bounds the page size).
+ */
+const listDocuments = async ({
+  spaceId,
+  esClient,
+  logger,
+  page = 1,
+  perPage = 20,
+  type,
+  originId,
+}: {
+  spaceId: string;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  page?: number;
+  perPage?: number;
+  type?: string;
+  originId?: string;
+}): Promise<{ total: number; results: SmlDocument[] }> => {
+  const filters: Array<Record<string, unknown>> = [
+    {
+      bool: {
+        should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+  if (type) {
+    filters.push({ term: { type } });
+  }
+  if (originId) {
+    filters.push({ term: { origin_id: originId } });
+  }
+
+  try {
+    const response = await esClient.asInternalUser.search<SmlDocument>({
+      index: smlIndexName,
+      from: (page - 1) * perPage,
+      size: perPage,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: filters,
+        },
+      },
+      sort: [{ updated_at: { order: 'desc' } }],
+    });
+
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+
+    const results: SmlDocument[] = response.hits.hits
+      .filter((hit) => hit._source != null)
+      .map((hit) => {
+        const source = hit._source!;
+        return {
+          id: source.id ?? '',
+          type: source.type ?? '',
+          title: source.title ?? '',
+          origin_id: source.origin_id ?? '',
+          content: source.content ?? '',
+          created_at: source.created_at ?? '',
+          updated_at: source.updated_at ?? '',
+          spaces: source.spaces ?? [],
+          permissions: source.permissions ?? [],
+        };
+      });
+
+    return { total, results };
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return { total: 0, results: [] };
+    }
+    logger.warn(`SML listDocuments failed: ${(error as Error).message}`);
+    throw error;
+  }
+};
+
+/**
+ * Upsert an SML document by id.
+ *
+ * If an existing document is found, its `created_at` is preserved and
+ * `updated_at` is refreshed; otherwise a new document is created with both
+ * timestamps set to now.
+ */
+const upsertDocument = async ({
+  id,
+  document,
+  esClient,
+  logger,
+}: {
+  id: string;
+  document: SmlDocumentInput;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+}): Promise<SmlUpsertResult> => {
+  const internalEsClient = esClient.asInternalUser;
+  const storage = createSmlStorage({ logger, esClient: internalEsClient });
+  const smlClient = storage.getClient();
+
+  let existing: SmlDocument | undefined;
+  try {
+    const existingResponse = await smlClient.get({ id });
+    if (existingResponse?.found && existingResponse._source) {
+      existing = existingResponse._source;
+    }
+  } catch (error) {
+    if (!isNotFoundError(error)) {
+      logger.warn(`SML upsertDocument lookup failed: ${(error as Error).message}`);
+      throw error;
+    }
+  }
+
+  const now = new Date().toISOString();
+  const created = !existing;
+  const fullDocument: SmlDocument = {
+    id,
+    type: document.type,
+    title: document.title,
+    origin_id: document.origin_id,
+    content: document.content,
+    created_at: existing?.created_at ?? now,
+    updated_at: now,
+    spaces: document.spaces,
+    permissions: document.permissions ?? [],
+  };
+
+  await smlClient.index({ id, document: fullDocument });
+
+  return { document: fullDocument, created };
+};
+
+/**
+ * Delete an SML document by id, scoped to a space.
+ *
+ * The space scope is enforced via a lookup before the delete: documents
+ * that exist but are not visible in `spaceId` are reported as not found.
+ * Returns `true` when a document was deleted, `false` otherwise.
+ */
+const deleteDocument = async ({
+  id,
+  spaceId,
+  esClient,
+  logger,
+}: {
+  id: string;
+  spaceId: string;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+}): Promise<boolean> => {
+  const existing = await getDocumentById({ id, spaceId, esClient, logger });
+  if (!existing) {
+    return false;
+  }
+
+  const internalEsClient = esClient.asInternalUser;
+  const storage = createSmlStorage({ logger, esClient: internalEsClient });
+  const smlClient = storage.getClient();
+
+  try {
+    const response = await smlClient.delete({ id });
+    return response.result === 'deleted';
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return false;
+    }
+    logger.warn(`SML deleteDocument failed: ${(error as Error).message}`);
+    throw error;
+  }
 };
