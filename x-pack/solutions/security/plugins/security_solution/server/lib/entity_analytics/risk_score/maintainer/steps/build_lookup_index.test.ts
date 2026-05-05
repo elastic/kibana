@@ -32,6 +32,7 @@ describe('build_lookup_index', () => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     (esClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
     (esClient.indices.refresh as jest.Mock).mockResolvedValue({});
+    (esClient.search as jest.Mock).mockResolvedValue({ hits: { hits: [] } });
     logger = buildLogger();
     crudClient = {
       listEntities: jest.fn(),
@@ -52,10 +53,12 @@ describe('build_lookup_index', () => {
       entityTypes: [EntityType.host],
       calculationRunId: RUN_ID,
       now: NOW,
+      propagationEnabled: false,
     });
 
     expect(result).toEqual({
       lookupRowsWritten: 1,
+      propagationRowsWritten: 0,
       entitiesIterated: 1,
       pagesProcessed: 1,
       bulkBatches: 1,
@@ -105,6 +108,7 @@ describe('build_lookup_index', () => {
       entityTypes: [EntityType.user],
       calculationRunId: RUN_ID,
       now: NOW,
+      propagationEnabled: false,
     });
 
     expect(esClient.bulk).toHaveBeenCalledWith({
@@ -140,11 +144,13 @@ describe('build_lookup_index', () => {
       entityTypes: [EntityType.host],
       calculationRunId: RUN_ID,
       now: NOW,
+      propagationEnabled: false,
       abortSignal: abortController.signal,
     });
 
     expect(result).toEqual({
       lookupRowsWritten: 1,
+      propagationRowsWritten: 0,
       entitiesIterated: 1,
       pagesProcessed: 1,
       bulkBatches: 1,
@@ -167,6 +173,7 @@ describe('build_lookup_index', () => {
       entityTypes: [EntityType.host],
       calculationRunId: RUN_ID,
       now: NOW,
+      propagationEnabled: false,
     });
 
     expect(esClient.bulk).not.toHaveBeenCalled();
@@ -208,6 +215,7 @@ describe('build_lookup_index', () => {
         entityTypes: [EntityType.host],
         calculationRunId: RUN_ID,
         now: NOW,
+        propagationEnabled: false,
       })
     ).rejects.toThrow(
       'Phase 0 lookup build had 2 failed item(s) across 4 iterated entities; reasons: 1x failed reason A; 1x failed reason B'
@@ -215,9 +223,6 @@ describe('build_lookup_index', () => {
     expect(esClient.indices.refresh).not.toHaveBeenCalled();
   });
 
-  // Covers the bulk-summary path where ES reports `errors: true` but echoes
-  // no `items`. We must charge the entire batch as failed under the catch-all
-  // reason instead of silently treating the page as a no-op.
   it('charges all items as failed when bulk reports errors with no item details', async () => {
     (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
       entities: [{ entity: { id: 'host:1' } }, { entity: { id: 'host:2' } }],
@@ -234,9 +239,140 @@ describe('build_lookup_index', () => {
         entityTypes: [EntityType.host],
         calculationRunId: RUN_ID,
         now: NOW,
+        propagationEnabled: false,
       })
     ).rejects.toThrow(
       'Phase 0 lookup build had 2 failed item(s) across 2 iterated entities; reasons: 2x unknown_bulk_error'
     );
+  });
+
+  it('populates propagation_target_id from ownership relationships when enabled', async () => {
+    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
+      entities: [
+        {
+          entity: {
+            id: 'user:alice',
+            EngineMetadata: { Type: EntityType.user },
+            relationships: {
+              owns: {
+                ids: ['host:owned-1', 'host:owned-1'],
+              },
+            },
+          },
+        },
+      ],
+      nextSearchAfter: undefined,
+    });
+
+    const result = await buildLookupIndex({
+      esClient,
+      crudClient,
+      logger,
+      lookupIndex: '.lookup-default',
+      entityTypes: [EntityType.user, EntityType.host],
+      calculationRunId: RUN_ID,
+      now: NOW,
+      propagationEnabled: true,
+    });
+
+    expect(result.propagationRowsWritten).toBe(1);
+    expect(esClient.bulk).toHaveBeenCalledWith({
+      operations: [
+        { index: { _index: '.lookup-default', _id: 'user:alice' } },
+        {
+          entity_id: 'user:alice',
+          resolution_target_id: 'user:alice',
+          propagation_target_id: null,
+          relationship_type: 'self',
+          calculation_run_id: RUN_ID,
+          '@timestamp': NOW,
+        },
+        { index: { _index: '.lookup-default', _id: 'host:owned-1' } },
+        {
+          entity_id: 'host:owned-1',
+          resolution_target_id: 'host:owned-1',
+          propagation_target_id: ['user:alice'],
+          relationship_type: 'self',
+          calculation_run_id: RUN_ID,
+          '@timestamp': NOW,
+        },
+      ],
+    });
+  });
+
+  it('accumulates propagation targets across pages in the same run', async () => {
+    (crudClient.listEntities as jest.Mock)
+      .mockResolvedValueOnce({
+        entities: [
+          {
+            entity: {
+              id: 'user:alice',
+              EngineMetadata: { Type: EntityType.user },
+              relationships: {
+                owns: {
+                  ids: ['host:shared-1'],
+                },
+              },
+            },
+          },
+        ],
+        nextSearchAfter: ['cursor-1'],
+      })
+      .mockResolvedValueOnce({
+        entities: [
+          {
+            entity: {
+              id: 'user:bob',
+              EngineMetadata: { Type: EntityType.user },
+              relationships: {
+                owns: {
+                  ids: ['host:shared-1'],
+                },
+              },
+            },
+          },
+        ],
+        nextSearchAfter: undefined,
+      });
+
+    (esClient.search as jest.Mock)
+      .mockResolvedValueOnce({ hits: { hits: [] } })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                entity_id: 'host:shared-1',
+                resolution_target_id: 'host:shared-1',
+                propagation_target_id: ['user:alice'],
+                relationship_type: 'self',
+                calculation_run_id: RUN_ID,
+                '@timestamp': NOW,
+              },
+            },
+          ],
+        },
+      });
+
+    await buildLookupIndex({
+      esClient,
+      crudClient,
+      logger,
+      lookupIndex: '.lookup-default',
+      entityTypes: [EntityType.user, EntityType.host],
+      calculationRunId: RUN_ID,
+      now: NOW,
+      propagationEnabled: true,
+    });
+
+    const secondBatchOperations = (esClient.bulk as jest.Mock).mock.calls[1][0].operations;
+    expect(secondBatchOperations).toContainEqual({
+      entity_id: 'host:shared-1',
+      resolution_target_id: 'host:shared-1',
+      propagation_target_id: ['user:alice', 'user:bob'],
+      relationship_type: 'self',
+      calculation_run_id: RUN_ID,
+      '@timestamp': NOW,
+    });
   });
 });

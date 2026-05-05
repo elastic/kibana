@@ -3298,10 +3298,9 @@ components:
                 type: string
           type: array
         score_type:
-          description: Distinguishes base, propagated, and resolution scores.
+          description: Distinguishes base and resolution scores.
           enum:
             - base
-            - propagated
             - resolution
           type: string
       required:

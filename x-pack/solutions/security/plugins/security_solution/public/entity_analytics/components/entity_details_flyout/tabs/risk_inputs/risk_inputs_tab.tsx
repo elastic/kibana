@@ -73,6 +73,13 @@ const FIRST_RECORD_PAGINATION = {
 
 export const EXPAND_ALERT_TEST_ID = 'risk-input-alert-preview-button';
 export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
+const RESOLUTION_RELATIONSHIP_TYPE = 'entity.relationships.resolution.resolved_to';
+
+const formatRelationshipTypeLabel = (relationshipType: string): string =>
+  relationshipType
+    .replace(/^entity\.relationships\./, '')
+    .replace(/\./g, ' ')
+    .replace(/_/g, ' ');
 
 interface RiskScorePanelProps extends FlyoutPanelProps {
   params: {
@@ -341,17 +348,44 @@ const RiskInputsTabContent = <T extends EntityType>({
   }, [resolutionGroup]);
 
   const alertEntityById = useMemo(() => {
-    const map = new Map<string, string>();
-    if (!isResolutionView || !euidApi || !alerts.data) return map;
-    alerts.data.forEach((alert) => {
-      const sourceEntityId =
-        alert.input.entity_id ?? euidApi.euid.getEuidFromObject(entityType, alert.rawSource);
-      if (sourceEntityId) {
-        map.set(alert._id, entityNameByEuid.get(sourceEntityId) ?? sourceEntityId);
+    const relationshipTypeBySourceEntityId = new Map<string, string>();
+    const relatedEntities = activeRiskScore?.[entityType].risk.related_entities ?? [];
+    relatedEntities.forEach((entity) => {
+      if (entity.entity_id && entity.relationship_type) {
+        relationshipTypeBySourceEntityId.set(entity.entity_id, entity.relationship_type);
       }
     });
+
+    const map = new Map<string, string>();
+    if (!alerts.data) {
+      return map;
+    }
+
+    alerts.data.forEach((alert) => {
+      const sourceEntityId =
+        alert.input.entity_id ??
+        (isResolutionView && euidApi
+          ? euidApi.euid.getEuidFromObject(entityType, alert.rawSource)
+          : undefined);
+      const relationshipType = sourceEntityId
+        ? relationshipTypeBySourceEntityId.get(sourceEntityId)
+        : undefined;
+
+      if (!sourceEntityId || (!isResolutionView && !relationshipType)) {
+        return;
+      }
+
+      const sourceEntityLabel = entityNameByEuid.get(sourceEntityId) ?? sourceEntityId;
+      const relationshipSuffix =
+        relationshipType && relationshipType !== RESOLUTION_RELATIONSHIP_TYPE
+          ? ` (${formatRelationshipTypeLabel(relationshipType)})`
+          : '';
+
+      map.set(alert._id, `${sourceEntityLabel}${relationshipSuffix}`);
+    });
+
     return map;
-  }, [alerts.data, entityNameByEuid, entityType, euidApi, isResolutionView]);
+  }, [activeRiskScore, alerts.data, entityNameByEuid, entityType, euidApi, isResolutionView]);
 
   const euiTableSelectionProps = useMemo(
     () => ({
@@ -436,7 +470,7 @@ const RiskInputsTabContent = <T extends EntityType>({
       },
     ];
 
-    if (isResolutionView) {
+    if (isResolutionView || alertEntityById.size > 0) {
       columns.splice(4, 0, {
         name: (
           <FormattedMessage

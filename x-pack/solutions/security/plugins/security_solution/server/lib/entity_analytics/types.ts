@@ -53,6 +53,7 @@ export interface SearchHitRiskInput {
   time?: string;
   score?: number;
   contribution?: number;
+  entity_id?: string;
 }
 
 export interface RiskScoreBucket {

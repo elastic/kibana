@@ -36,6 +36,7 @@ const buildScore = (entityId: string, overrides?: Partial<ParsedRiskScore>): Par
   alert_count: 1,
   score: 85,
   normalized_score: 75,
+  related_entities: [],
   risk_inputs: [
     {
       id: 'alert-1',
@@ -317,7 +318,7 @@ describe('applyScoreModifiersFromEntities', () => {
 
   it.each([
     { scoreType: undefined, expected: 'base' },
-    { scoreType: 'propagated' as const, expected: 'propagated' },
+    { scoreType: 'resolution' as const, expected: 'resolution' },
   ])('sets score_type to $expected', ({ scoreType, expected }) => {
     const entities = new Map([['host:h1', buildTestEntity({ id: 'host:h1' })]]);
 

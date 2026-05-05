@@ -224,6 +224,7 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
         success: (input: {
           entitiesIterated: number;
           lookupRowsWritten: number;
+          propagationRowsWritten?: number;
           pagesProcessed?: number;
           bulkBatches?: number;
           lookupRowsFailed?: number;
@@ -234,6 +235,7 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
             durationMs: Date.now() - stageStartedAtMs,
             entitiesIterated: input.entitiesIterated,
             lookupRowsWritten: input.lookupRowsWritten,
+            propagationRowsWritten: input.propagationRowsWritten,
             pagesProcessed: input.pagesProcessed,
             bulkBatches: input.bulkBatches,
             lookupRowsFailed: input.lookupRowsFailed,

@@ -9,9 +9,8 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import { calculateBaseEntityScores, scoreBaseEntities } from './score_base_entities';
+import { calculateBaseEntityScores } from './score_base_entities';
 import type { ScopedLogger } from '../utils/with_log_context';
-import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
 
 const buildLogger = (): ScopedLogger =>
   ({
@@ -33,6 +32,8 @@ const baseParams = {
   entityType: EntityType.user,
   alertFilters: [],
   alertsIndex: '.alerts-security.alerts-default',
+  lookupIndex: '.entity_analytics.risk_score.lookup-default',
+  propagationEnabled: false,
   pageSize: 100,
   sampleSize: 1000,
   now: '2026-01-01T00:00:00.000Z',
@@ -49,20 +50,11 @@ const esqlRow = (entityId: string) => [
   entityId,
 ];
 
-// Composite agg page: pass entityIds as bucket keys, optional after_key for
-// the next page (omitted means terminal page).
-const mockCompositeAggPage = (
-  esClient: ElasticsearchClient,
-  entityIds: string[],
-  afterKey?: Record<string, string>
-) => {
+const lookupHit = (entityId: string) => ({ _source: { entity_id: entityId } });
+
+const mockLookupPage = (esClient: ElasticsearchClient, entityIds: string[]) => {
   (esClient.search as jest.Mock).mockImplementationOnce(async () => ({
-    aggregations: {
-      by_entity_id: {
-        buckets: entityIds.map((entity_id) => ({ key: { entity_id } })),
-        ...(afterKey ? { after_key: afterKey } : {}),
-      },
-    },
+    hits: { hits: entityIds.map(lookupHit) },
   }));
 };
 
@@ -81,8 +73,8 @@ describe('score_base_entities', () => {
     });
   });
 
-  it('terminates after a single page when the composite agg has no after_key', async () => {
-    mockCompositeAggPage(esClient, ['user:a@okta']);
+  it('terminates after a single page when the lookup page is not full', async () => {
+    mockLookupPage(esClient, ['user:a@okta']);
     (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
       values: [esqlRow('user:a@okta')],
     });
@@ -92,48 +84,63 @@ describe('score_base_entities', () => {
     expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1);
     expect(esClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
 
-    const compositeCall = (esClient.search as jest.Mock).mock.calls[0][0];
-    expect(compositeCall.index).toBe(baseParams.alertsIndex);
-    expect(compositeCall.aggs.by_entity_id.composite.size).toBe(baseParams.pageSize);
+    const lookupCall = (esClient.search as jest.Mock).mock.calls[0][0];
+    expect(lookupCall.index).toBe(baseParams.lookupIndex);
+    expect(lookupCall.search_after).toBeUndefined();
+    expect(lookupCall.query).toEqual({ prefix: { entity_id: 'user:' } });
 
     const esqlQuery = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
-    expect(esqlQuery).toContain('entity_id <= "user:a@okta"');
-    expect(esqlQuery).not.toContain('entity_id >');
+    expect(esqlQuery).toContain('WHERE entity_id IN ("user:a@okta")');
   });
 
-  it('paginates by composite after_key and applies a half-open EUID range to scoring', async () => {
-    mockCompositeAggPage(esClient, ['user:001@okta', 'user:002@okta'], {
-      entity_id: 'user:002@okta',
+  it('uses the propagation-aware base query when propagation is enabled', async () => {
+    mockLookupPage(esClient, ['user:a@okta']);
+    (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+      values: [esqlRow('user:a@okta')],
     });
-    mockCompositeAggPage(esClient, ['user:003@okta']);
+
+    await collectPages(
+      calculateBaseEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        ...baseParams,
+        propagationEnabled: true,
+      })
+    );
+
+    const esqlQuery = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+    expect(esqlQuery).toContain('LOOKUP JOIN');
+    expect(esqlQuery).toContain('MV_EXPAND all_targets');
+  });
+
+  it('paginates the lookup index by entity_id cursor when pages are full', async () => {
+    const fullPage = Array.from(
+      { length: baseParams.pageSize },
+      (_, i) => `user:${i.toString().padStart(3, '0')}@okta`
+    );
+    mockLookupPage(esClient, fullPage);
+    mockLookupPage(esClient, ['user:zzz@okta']);
 
     (esClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce({
-        values: [esqlRow('user:001@okta'), esqlRow('user:002@okta')],
-      })
-      .mockResolvedValueOnce({ values: [esqlRow('user:003@okta')] });
+      .mockResolvedValueOnce({ values: fullPage.map(esqlRow) })
+      .mockResolvedValueOnce({ values: [esqlRow('user:zzz@okta')] });
 
     await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
 
     expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(2);
-    const secondCompositeCall = (esClient.search as jest.Mock).mock.calls[1][0];
-    expect(secondCompositeCall.aggs.by_entity_id.composite.after).toEqual({
-      entity_id: 'user:002@okta',
-    });
-
-    const secondEsqlQuery = (esClient.esql.query as jest.Mock).mock.calls[1][0].query as string;
-    // Half-open range: previous upper becomes the new exclusive lower.
-    expect(secondEsqlQuery).toContain('entity_id > "user:002@okta"');
-    expect(secondEsqlQuery).toContain('entity_id <= "user:003@okta"');
+    const secondLookupCall = (esClient.search as jest.Mock).mock.calls[1][0];
+    expect(secondLookupCall.search_after).toEqual([fullPage[fullPage.length - 1]]);
   });
 
   it('does not produce another ES|QL call when the abort signal fires between pages', async () => {
     const controller = new AbortController();
-    mockCompositeAggPage(esClient, ['user:a@okta'], { entity_id: 'user:a@okta' });
+    const fullPage = Array.from({ length: baseParams.pageSize }, (_, i) => `user:${i}@okta`);
+    mockLookupPage(esClient, fullPage);
 
     (esClient.esql.query as jest.Mock).mockImplementationOnce(async () => {
       controller.abort();
-      return { values: [esqlRow('user:a@okta')] };
+      return { values: fullPage.map(esqlRow) };
     });
 
     await collectPages(
@@ -150,8 +157,8 @@ describe('score_base_entities', () => {
   });
 
   it('fetches modifier entities only for IDs that produced scores', async () => {
-    // Composite agg returns three IDs but only two get scored.
-    mockCompositeAggPage(esClient, ['user:a@okta', 'user:b@okta', 'user:c@okta']);
+    // Lookup returns three IDs but only two get scored.
+    mockLookupPage(esClient, ['user:a@okta', 'user:b@okta', 'user:c@okta']);
     (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
       values: [esqlRow('user:a@okta'), esqlRow('user:b@okta')],
     });
@@ -162,97 +169,6 @@ describe('score_base_entities', () => {
     const fetchArgs = (crudClient.listEntities as jest.Mock).mock.calls[0][0];
     expect(fetchArgs.filter).toEqual({
       terms: { 'entity.id': ['user:a@okta', 'user:b@okta'] },
-    });
-  });
-
-  it('terminates without scoring when the composite agg returns zero buckets', async () => {
-    mockCompositeAggPage(esClient, []);
-
-    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
-
-    expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1);
-    expect(esClient.esql.query as jest.Mock).not.toHaveBeenCalled();
-  });
-
-  describe('scoreBaseEntities not_in_store filter', () => {
-    const buildWriter = (): RiskEngineDataWriter =>
-      ({
-        bulk: jest
-          .fn<Promise<{ errors: never[]; docs_written: number; took: number }>, [unknown]>()
-          .mockImplementation(async (params) => {
-            const [scoresArr] = Object.values(params as Record<string, unknown[]>);
-            return { errors: [], docs_written: scoresArr.length, took: 1 };
-          }),
-      } as unknown as RiskEngineDataWriter);
-
-    const makeStoreEntity = (entityId: string) => ({
-      entity: {
-        id: entityId,
-        attributes: { watchlists: [] },
-        relationships: { resolution: { resolved_to: undefined } },
-      },
-      asset: { criticality: undefined },
-    });
-
-    it('drops scores whose entity_id is not in the entity store before persistence', async () => {
-      // Composite agg + ES|QL produce two scored entities; one is in store, one is not.
-      mockCompositeAggPage(esClient, ['user:in-store@okta', 'user:phantom@okta']);
-      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
-        values: [esqlRow('user:in-store@okta'), esqlRow('user:phantom@okta')],
-      });
-
-      // Entity store knows only `user:in-store@okta`. The phantom is alert-only.
-      (crudClient.listEntities as jest.Mock).mockResolvedValue({
-        entities: [makeStoreEntity('user:in-store@okta')],
-        nextSearchAfter: undefined,
-      });
-
-      const writer = buildWriter();
-
-      const summary = await scoreBaseEntities({
-        esClient,
-        crudClient,
-        logger,
-        writer,
-        idBasedRiskScoringEnabled: false,
-        ...baseParams,
-      });
-
-      // Only the in-store entity reached the writer.
-      expect(writer.bulk).toHaveBeenCalledTimes(1);
-      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
-      expect(writtenScores).toHaveLength(1);
-      expect(writtenScores[0].id_value).toBe('user:in-store@okta');
-
-      expect(summary.scoresWritten).toBe(1);
-    });
-
-    it('writes no scores when no entity on the page is in the entity store', async () => {
-      mockCompositeAggPage(esClient, ['user:phantom-a@okta', 'user:phantom-b@okta']);
-      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
-        values: [esqlRow('user:phantom-a@okta'), esqlRow('user:phantom-b@okta')],
-      });
-
-      // Entity store has nothing for this page.
-      (crudClient.listEntities as jest.Mock).mockResolvedValue({
-        entities: [],
-        nextSearchAfter: undefined,
-      });
-
-      const writer = buildWriter();
-
-      const summary = await scoreBaseEntities({
-        esClient,
-        crudClient,
-        logger,
-        writer,
-        idBasedRiskScoringEnabled: false,
-        ...baseParams,
-      });
-
-      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
-      expect(writtenScores).toHaveLength(0);
-      expect(summary.scoresWritten).toBe(0);
     });
   });
 });

@@ -20,6 +20,9 @@ jest.mock('../maintainer/utils/fetch_watchlist_configs');
 describe('calculateScoresWithESQLV2', () => {
   const esClient = {
     search: jest.fn(),
+    indices: {
+      exists: jest.fn(),
+    },
     esql: {
       query: jest.fn(),
     },
@@ -32,6 +35,7 @@ describe('calculateScoresWithESQLV2', () => {
     jest.resetAllMocks();
 
     (fetchWatchlistConfigs as jest.Mock).mockResolvedValue(new Map());
+    (esClient.indices.exists as jest.Mock).mockResolvedValue(true);
     (esClient.search as jest.Mock).mockResolvedValue({
       aggregations: {
         by_entity_id: {
@@ -109,6 +113,7 @@ describe('calculateScoresWithESQLV2', () => {
       crudClient,
       soClient,
       namespace: 'default',
+      propagationEnabled: false,
     });
 
     expect(applyScoreModifiersFromEntities).toHaveBeenCalledWith(
