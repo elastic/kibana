@@ -22,17 +22,19 @@ spaceTest.describe(
   () => {
     let timelineId: string;
 
-    spaceTest.beforeAll(async ({ apiServices }) => {
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
       // Clean up any leftover rules from a previous failed run
       await apiServices.detectionRule.deleteAll();
+      await apiServices.timeline.deleteAll();
       // Create a timeline to import its query in the Define step
       timelineId = await apiServices.timeline.createTimeline();
     });
 
-    spaceTest.afterAll(async ({ apiServices }) => {
+    spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
       // Clean up everything created by this test
       await apiServices.detectionRule.deleteAll();
       await apiServices.timeline.deleteAll();
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest(
