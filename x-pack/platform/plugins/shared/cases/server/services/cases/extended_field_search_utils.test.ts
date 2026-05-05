@@ -15,6 +15,8 @@ import {
   resolveFieldLabelSearch,
   buildFieldLabelRuntimeMappings,
   buildFieldLabelExistsClauses,
+  buildAllExtendedFieldValuesRuntimeMapping,
+  EF_ALL_VALUES_FIELD,
 } from './extended_field_search_utils';
 
 describe('resolveExtendedFieldFilters', () => {
@@ -1648,5 +1650,51 @@ describe('buildFieldLabelExistsClauses', () => {
 
   it('returns empty array for empty input', () => {
     expect(buildFieldLabelExistsClauses([])).toEqual([]);
+  });
+});
+
+describe('buildAllExtendedFieldValuesRuntimeMapping', () => {
+  it('returns a mapping with the ef_all_values field', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+
+    expect(mappings).toHaveProperty([EF_ALL_VALUES_FIELD]);
+    expect(mappings[EF_ALL_VALUES_FIELD].type).toBe('keyword');
+  });
+
+  it('generates a Painless script that reads from _source', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('params._source');
+  });
+
+  it('generates a Painless script that iterates extended_fields entries', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('ef.entrySet()');
+    expect(src).toContain('extended_fields');
+  });
+
+  it('generates a Painless script that lowercases and splits on whitespace', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('toLowerCase(Locale.ROOT)');
+    expect(src).toContain('emit(t)');
+  });
+
+  it('generates a Painless script that strips JSON punctuation', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('replaceAll');
+  });
+
+  it('does not use optional chaining (?.) in the Painless script', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).not.toContain('?.');
   });
 });

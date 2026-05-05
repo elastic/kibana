@@ -404,6 +404,47 @@ export const buildFieldLabelRuntimeMappings = (
   return runtimeMappings;
 };
 
+export const EF_ALL_VALUES_FIELD = `${CASE_SAVED_OBJECT}.ef_all_values`;
+
+/**
+ * Builds a runtime field mapping that tokenizes ALL extended field values
+ * on whitespace, enabling word-level partial matching across every extended field.
+ */
+export const buildAllExtendedFieldValuesRuntimeMapping = (): Record<
+  string,
+  estypes.MappingRuntimeField
+> => ({
+  [EF_ALL_VALUES_FIELD]: {
+    type: 'keyword',
+    script: {
+      source: buildAllValuesTokenizingScript(),
+    },
+  },
+});
+
+const buildAllValuesTokenizingScript = (): string => {
+  const soType = `'${CASE_SAVED_OBJECT}'`;
+  const efKey = `'${CASE_EXTENDED_FIELDS}'`;
+
+  return (
+    `if (params._source == null) { return; }` +
+    `def so = params._source.get(${soType});` +
+    `if (so == null) { return; }` +
+    `def ef = so.get(${efKey});` +
+    `if (ef == null) { return; }` +
+    `for (def entry : ef.entrySet()) {` +
+    `if (entry.getValue() != null) {` +
+    `def raw = entry.getValue().toString();` +
+    `def cleaned = /[\\[\\]"{}]/.matcher(raw).replaceAll('').trim();` +
+    `for (def word : /[\\s,]+/.split(cleaned)) {` +
+    `def t = word.trim().toLowerCase(Locale.ROOT);` +
+    `if (!t.isEmpty()) { emit(t); }` +
+    `}` +
+    `}` +
+    `}`
+  );
+};
+
 /**
  * Builds ES query clauses that check for the existence of extended fields
  * (field has any value), scoped to the correct template versions.

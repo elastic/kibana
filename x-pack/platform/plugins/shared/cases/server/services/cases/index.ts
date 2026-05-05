@@ -64,6 +64,8 @@ import type {
 import {
   buildExtendedFieldRuntimeMappings,
   buildFieldLabelRuntimeMappings,
+  buildAllExtendedFieldValuesRuntimeMapping,
+  EF_ALL_VALUES_FIELD,
 } from './extended_field_search_utils';
 import type {
   CasePersistedAttributes,
@@ -325,9 +327,15 @@ export class CasesService {
         ? buildFieldLabelRuntimeMappings(fieldLabelFilters)
         : {};
 
+    const allValuesRuntimeMappings =
+      caseOptions.search && caseOptions.searchFields?.includes(EF_ALL_VALUES_FIELD)
+        ? buildAllExtendedFieldValuesRuntimeMapping()
+        : {};
+
     const runtimeMappings = {
       ...extendedFieldRuntimeMappings,
       ...fieldLabelRuntimeMappings,
+      ...allValuesRuntimeMappings,
     };
 
     const hasRuntimeMappings = Object.keys(runtimeMappings).length > 0;

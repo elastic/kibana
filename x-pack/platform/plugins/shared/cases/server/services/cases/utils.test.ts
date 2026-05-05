@@ -7,10 +7,12 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { EF_ALL_VALUES_FIELD } from './extended_field_search_utils';
 import {
   constructSearchQuery,
   convertFindQueryParams,
   DEFAULT_CASE_NESTED_FIELDS,
+  DEFAULT_CASE_RUNTIME_FIELDS,
   DEFAULT_CASE_SEARCH_FIELDS,
   mergeSearchQuery,
 } from './utils';
@@ -666,6 +668,95 @@ describe('constructSearchQuery with fieldLabelFilters', () => {
     const result = constructSearchQuery({
       caseIds: [],
     });
+    expect(result).toBeUndefined();
+  });
+});
+
+describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () => {
+  it('adds a term clause for EF_ALL_VALUES_FIELD when included in searchFields', () => {
+    const result = constructSearchQuery({
+      search: 'reason',
+      searchFields: [...DEFAULT_CASE_SEARCH_FIELDS, ...DEFAULT_CASE_RUNTIME_FIELDS],
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const runtimeClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) => c?.term?.[EF_ALL_VALUES_FIELD] != null
+    );
+    expect(runtimeClause).toEqual({
+      term: { [EF_ALL_VALUES_FIELD]: { value: 'reason', case_insensitive: true } },
+    });
+  });
+
+  it('lowercases the search term for runtime field matching', () => {
+    const result = constructSearchQuery({
+      search: 'EMEA',
+      searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const runtimeClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) => c?.term?.[EF_ALL_VALUES_FIELD] != null
+    );
+    expect(runtimeClause).toEqual({
+      term: { [EF_ALL_VALUES_FIELD]: { value: 'emea', case_insensitive: true } },
+    });
+  });
+
+  it('does not add runtime field clause when EF_ALL_VALUES_FIELD is not in searchFields', () => {
+    const result = constructSearchQuery({
+      search: 'reason',
+      searchFields: DEFAULT_CASE_SEARCH_FIELDS,
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const runtimeClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) => c?.term?.[EF_ALL_VALUES_FIELD] != null
+    );
+    expect(runtimeClause).toBeUndefined();
+  });
+
+  it('combines runtime field clause with other search clauses', () => {
+    const result = constructSearchQuery({
+      search: 'test',
+      searchFields: [
+        ...DEFAULT_CASE_SEARCH_FIELDS,
+        ...DEFAULT_CASE_NESTED_FIELDS,
+        ...DEFAULT_CASE_RUNTIME_FIELDS,
+      ],
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const hasIdClause = shouldClauses!.some((c) => c?.term?._id != null);
+    const hasMultiMatch = shouldClauses!.some((c) => c?.multi_match != null);
+    const hasNested = shouldClauses!.some((c) => c?.nested != null);
+    const hasRuntime = shouldClauses!.some((c) => c?.term?.[EF_ALL_VALUES_FIELD] != null);
+
+    expect(hasIdClause).toBe(true);
+    expect(hasMultiMatch).toBe(true);
+    expect(hasNested).toBe(true);
+    expect(hasRuntime).toBe(true);
+  });
+
+  it('does not add runtime field clause when search is empty', () => {
+    const result = constructSearchQuery({
+      search: '',
+      searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
+      caseIds: [],
+    });
+
     expect(result).toBeUndefined();
   });
 });
