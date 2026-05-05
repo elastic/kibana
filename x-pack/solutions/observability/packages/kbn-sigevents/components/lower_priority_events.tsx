@@ -593,7 +593,6 @@ function EventDetailFlyout({
                   onRemediate
                     ? () => {
                         onRemediate(event.title);
-                        onClose();
                       }
                     : undefined
                 }

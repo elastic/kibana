@@ -150,7 +150,7 @@ describe('LowerPriorityEvents', () => {
     expect(screen.getByTestId('eventRuleLink-Rule Y')).toBeInTheDocument();
   });
 
-  it('calls onRemediate and closes flyout when remediate is triggered', () => {
+  it('calls onRemediate and keeps flyout open when remediate is triggered', () => {
     const onRemediate = jest.fn();
     const events = [
       makeEvent({
@@ -172,6 +172,8 @@ describe('LowerPriorityEvents', () => {
     fireEvent.click(remediateButton);
 
     expect(onRemediate).toHaveBeenCalledWith('Remediation Event');
+    // Flyout should remain open
+    expect(screen.getByTestId('eventDetailFlyout')).toBeInTheDocument();
   });
 
   it('formats the detected-at date', () => {
