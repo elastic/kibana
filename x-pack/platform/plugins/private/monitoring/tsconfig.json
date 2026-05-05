@@ -60,8 +60,7 @@
     "@kbn/react-query",
     "@kbn/response-ops-rule-params",
     "@kbn/kql",
-    "@kbn/cloud-connect-plugin",
-    "@kbn/management-settings-ids"
+    "@kbn/cloud-connect-plugin"
   ],
   "exclude": ["target/**/*"]
 }

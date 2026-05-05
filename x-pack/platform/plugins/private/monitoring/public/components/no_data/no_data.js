@@ -56,6 +56,12 @@ export function NoData(props) {
   const { services } = useKibana();
 
   const cloudConnectStatus = Legacy.shims.useCloudConnectStatus();
+  const hideAnnouncements = !services.notifications.tours.isEnabled();
+  const shouldShowAutoOpsPromotion =
+    !Legacy.shims.isAirGapped &&
+    !cloudConnectStatus.isLoading &&
+    !cloudConnectStatus.isCloudConnectAutoopsEnabled &&
+    !hideAnnouncements;
   const cloudConnectUrl = services.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e) => {
     e.preventDefault();
@@ -132,9 +138,7 @@ export function NoData(props) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
-          {!Legacy.shims.isAirGapped &&
-            !cloudConnectStatus.isLoading &&
-            !cloudConnectStatus.isCloudConnectAutoopsEnabled && (
+          {shouldShowAutoOpsPromotion && (
               <>
                 <AutoOpsPromotionCallout
                   cloudConnectUrl={cloudConnectUrl}
@@ -188,9 +192,7 @@ export function NoData(props) {
         </h1>
       </EuiScreenReaderOnly>
       <EuiPageBody restrictWidth={600}>
-        {!Legacy.shims.isAirGapped &&
-          !cloudConnectStatus.isLoading &&
-          !cloudConnectStatus.isCloudConnectAutoopsEnabled && (
+        {shouldShowAutoOpsPromotion && (
             <>
               <AutoOpsPromotionCallout
                 cloudConnectUrl={cloudConnectUrl}
