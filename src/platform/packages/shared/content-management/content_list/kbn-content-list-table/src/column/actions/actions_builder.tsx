@@ -29,11 +29,23 @@ const DEFAULT_ACTIONS_COLUMN_TITLE = i18n.translate(
  * EUI renders row actions as `EuiButtonIcon` `size="s"`, which `euiButtonSizeMap`
  * sets to `euiTheme.size.xl` (32px) with an `euiTheme.size.xs` (4px) gap between
  * icons. The cell content adds `euiTheme.size.s` (8px) of padding on each side.
- * The cell also has `flex-wrap: wrap` applied (see EUI's `_table_cell_content.styles`),
- * so any width shortfall causes icons to stack vertically. The formula below
- * sizes the column to fit `N` icons inline plus padding:
+ * The formula below sizes the column to fit `N` icons inline plus padding:
  * `xl * N + xs * (N - 1) + s * 2`, which works out to `36N + 12` at the default
  * theme scale.
+ *
+ * `N` is the number of action parts the consumer declared (e.g. Inspect + Edit
+ * + Delete = 3). When EUI's auto-collapse kicks in (>2 actions, see
+ * `renderItemActionsCell` in `@elastic/eui`) the visible footprint is "primary
+ * icons (max 2) + the 3-dot overflow trigger" — which still fits inside `36N`
+ * because the 3-dot trigger replaces one of the inline icons rather than
+ * adding a fourth.
+ *
+ * EUI's action cells ship `flex-wrap: wrap` on desktop, which without
+ * intervention would let the icons stack vertically when the column squeezes.
+ * `cssActionsCellNoWrap` (in `content_list_table.tsx`) pins the cell's flex
+ * container to `flex-wrap: nowrap` so the column's `min-width: 'max-content'`
+ * floor resolves to the full icon-row width and the auto table-layout
+ * algorithm can't shrink the column past that point.
  *
  * Falls back to the static formula when the theme is not threaded through
  * context (e.g. unit tests that construct contexts inline).

@@ -252,6 +252,38 @@ const cssWideViewportNameWidth = css`
 `;
 
 /**
+ * Keep `Column.Actions` row icons (including the EUI-provided "All actions"
+ * 3-dot overflow trigger) on a single line at every viewport width.
+ *
+ * EUI's `euiTableCellContent` ships `flex-wrap: wrap` for action cells on
+ * desktop (see `_table_cell_content.styles.js` in `@elastic/eui`). With the
+ * wrap enabled, the cell's `max-content` intrinsic width collapses to the
+ * widest single icon (~28px) instead of the full inline row, so the auto
+ * table-layout algorithm happily shrinks the actions column whenever the
+ * container squeezes — which lands the overflow trigger on a second line
+ * underneath the primary icons.
+ *
+ * Pinning the cell's flex container to `flex-wrap: nowrap` restores the
+ * unwrapped intrinsic width (`36N + 12` at the default theme), so the
+ * column's `min-width: 'max-content'` floor (set in
+ * {@link buildActionsColumn}) actually holds at the icon-row width and the
+ * browser stops shrinking the column past that point. When the rest of the
+ * row genuinely cannot fit, `scrollableInline` takes over and the icons
+ * stay inline inside the horizontal scroll instead of wrapping vertically.
+ *
+ * Scoped via the column's `data-test-subj` rather than EUI's
+ * `.euiTableCellContent--hasActions` class so the rule is anchored to our
+ * column identity (stable across EUI internal CSS refactors) and limited
+ * to the Content List actions column — leaving any other action columns
+ * inside Kibana untouched.
+ */
+const cssActionsCellNoWrap = css`
+  td[data-test-subj='content-list-table-column-actions'] .euiTableCellContent {
+    flex-wrap: nowrap;
+  }
+`;
+
+/**
  * ContentListTable - Table renderer for content listings.
  *
  * Integrates with EUI's EuiBasicTable and ContentListProvider for state management.
@@ -324,6 +356,10 @@ const ContentListTableComponent = ({
       // 64em cap so users with wide displays see more of the title. The
       // pseudo-cell still absorbs the rest of the slack.
       cssWideViewportNameWidth,
+      // Keep the actions row icons + 3-dot overflow trigger inline at every
+      // viewport width. Without this, EUI's default `flex-wrap: wrap` on
+      // action cells lets the column collapse when the table squeezes.
+      cssActionsCellNoWrap,
       ...(supports.starred ? [cssFavoriteHoverWithinEuiTableRow(euiTheme)] : []),
     ],
     [euiTheme, supports.starred]
