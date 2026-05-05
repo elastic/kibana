@@ -3,5 +3,6 @@ steps:
     key: trigger-dra-snapshot
     trigger: kibana-artifacts-snapshot
     async: false
+    if: build.env("DRY_RUN") != "true"
     build:
       branch: 'main'

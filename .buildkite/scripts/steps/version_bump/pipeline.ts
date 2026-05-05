@@ -10,7 +10,6 @@
 import { emitPipeline, getPipeline } from '#pipeline-utils';
 
 const BUMP_TYPE = process.env.WORKFLOW;
-const DRY_RUN = process.env.DRY_RUN;
 
 if (!BUMP_TYPE) {
   console.error(
@@ -24,11 +23,9 @@ if (!BUMP_TYPE) {
   try {
     if (BUMP_TYPE === 'patch') {
       // Step 1: Trigger ES build and promote (synchronous)
-      if (!DRY_RUN) {
-        pipeline.push(
-          getPipeline('.buildkite/pipelines/version_bump/trigger_es_build_and_promote.yml', false)
-        );
-      }
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/version_bump/trigger_es_build_and_promote.yml', false)
+      );
 
       // Step 2: Wait for ES build to complete, then bump package.json and other files on the release branch
       pipeline.push(
@@ -36,16 +33,12 @@ if (!BUMP_TYPE) {
       );
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/bump_versions_json.yml'));
 
-      // Step 3: Wait, then trigger DRA builds for both snapshot and staging (async).
-      // If branch is main, we only run DRA snapshot, otherwise we run them both.
-      if (!DRY_RUN) {
-        pipeline.push('  - wait');
-        pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
-      }
+      // Step 3: Wait, then trigger DRA snapshot (async).
+      pipeline.push('  - wait');
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
 
       // Step 4: Update the labels for PRs and the color of the label itself
       pipeline.push('  - wait');
-
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_label_color.yml'));
     }
 
