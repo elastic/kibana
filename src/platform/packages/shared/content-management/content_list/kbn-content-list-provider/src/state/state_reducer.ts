@@ -35,6 +35,7 @@ export const reducer = (
       return {
         ...state,
         queryText: action.payload.queryText,
+        queryChangeSource: action.payload.source,
         page: { ...state.page, index: 0 },
         selection: { ...DEFAULT_SELECTION },
       };
@@ -43,6 +44,7 @@ export const reducer = (
       return {
         ...state,
         queryText: '',
+        queryChangeSource: undefined,
         page: { ...state.page, index: 0 },
         selection: { ...DEFAULT_SELECTION },
       };

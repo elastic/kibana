@@ -15,6 +15,21 @@ import { CONTENT_LIST_ACTIONS } from '../../state/types';
 import { useFieldDefinitions } from '../../query_model';
 
 /**
+ * Source of a public query update.
+ *
+ * - `'typing'` — search-box keystrokes; `ContentListUrlSync` uses
+ *   `history.replace` so the back stack does not grow one entry per keystroke.
+ * - `'filter'` — committed filter actions (toggles, clears, custom-component
+ *   filter `onChange`); `ContentListUrlSync` uses `history.push` so back/forward
+ *   navigates between committed filter states.
+ *
+ * The internal `'url'` source — used when `ContentListUrlSync` rehydrates
+ * state from `history.listen` events — is intentionally not surfaced here.
+ * Callers that need URL-driven dispatch should dispatch `SET_QUERY` directly.
+ */
+export type QuerySetterSource = 'typing' | 'filter';
+
+/**
  * Return type for the {@link useContentListSearch} hook.
  */
 export interface UseContentListSearchReturn {
@@ -22,11 +37,14 @@ export interface UseContentListSearchReturn {
   queryText: string;
   /**
    * Update query from an already-parsed EUI Query object (search bar typing).
-   * Stores `query.text` as the new queryText.
+   * Stores `query.text` as the new `queryText`. Defaults to `source: 'typing'`.
    */
-  setQueryFromEuiQuery: (euiQuery: Query) => void;
-  /** Update query from raw text (programmatic input, URL params). */
-  setQueryFromText: (text: string) => void;
+  setQueryFromEuiQuery: (euiQuery: Query, source?: QuerySetterSource) => void;
+  /**
+   * Update query from raw text (programmatic input). Defaults to
+   * `source: 'typing'`.
+   */
+  setQueryFromText: (text: string, source?: QuerySetterSource) => void;
   /** Whether search is supported (enabled via features). */
   isSupported: boolean;
   /**
@@ -51,26 +69,26 @@ export const useContentListSearch = (): UseContentListSearchReturn => {
   const queryText = state.queryText;
 
   const setQueryFromEuiQuery = useCallback(
-    (euiQuery: Query) => {
+    (euiQuery: Query, source: QuerySetterSource = 'typing') => {
       if (!supports.search) {
         return;
       }
       dispatch({
         type: CONTENT_LIST_ACTIONS.SET_QUERY,
-        payload: { queryText: euiQuery.text },
+        payload: { queryText: euiQuery.text, source },
       });
     },
     [dispatch, supports.search]
   );
 
   const setQueryFromText = useCallback(
-    (text: string) => {
+    (text: string, source: QuerySetterSource = 'typing') => {
       if (!supports.search) {
         return;
       }
       dispatch({
         type: CONTENT_LIST_ACTIONS.SET_QUERY,
-        payload: { queryText: text },
+        payload: { queryText: text, source },
       });
     },
     [dispatch, supports.search]

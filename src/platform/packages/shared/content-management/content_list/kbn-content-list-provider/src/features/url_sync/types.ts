@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { SearchConfig } from './types';
-export { useContentListSearch } from './use_content_list_search';
-export type { QuerySetterSource, UseContentListSearchReturn } from './use_content_list_search';
+/** Parsed URL params after `query-string` parsing. */
+export type ParsedQuery = Record<string, string | string[] | null | undefined>;
+
+export interface UrlStateSlices {
+  queryText?: string;
+  sort?: { field: string; direction: 'asc' | 'desc' };
+}
+
+export interface HydratedUrlState {
+  kind: 'new' | 'legacy' | 'empty';
+  state: UrlStateSlices;
+  consumed?: ReadonlyArray<string>;
+}

@@ -89,7 +89,7 @@ export const useFilterToggle = (fieldName: string) => {
 
       dispatch({
         type: CONTENT_LIST_ACTIONS.SET_QUERY,
-        payload: { queryText: newQueryText },
+        payload: { queryText: newQueryText, source: 'filter' },
       });
     },
     [fieldName, field, schema, dispatch]

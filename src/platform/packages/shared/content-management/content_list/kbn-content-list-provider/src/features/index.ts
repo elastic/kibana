@@ -26,7 +26,7 @@ export type { PaginationConfig, UseContentListPaginationReturn } from './paginat
 export { useContentListPagination } from './pagination';
 
 // Search feature.
-export type { SearchConfig, UseContentListSearchReturn } from './search';
+export type { QuerySetterSource, SearchConfig, UseContentListSearchReturn } from './search';
 export { useContentListSearch } from './search';
 
 // Selection feature.

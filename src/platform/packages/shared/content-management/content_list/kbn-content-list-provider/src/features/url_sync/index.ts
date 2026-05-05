@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { SearchConfig } from './types';
-export { useContentListSearch } from './use_content_list_search';
-export type { QuerySetterSource, UseContentListSearchReturn } from './use_content_list_search';
+export { ContentListUrlSync } from './url_sync';

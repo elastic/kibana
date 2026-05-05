@@ -42,8 +42,12 @@ const defaultPlaceholder = i18n.translate(
  * `ContentListToolbar` component.
  *
  * `queryText` from state flows directly to `EuiSearchBar`'s `query` prop.
- * When the user types, `onChange` stores `query.text` back to state.
- * No displayText, no typingRef, no sync hacks — one source of truth.
+ * When the user types, `onChange` stores `query.text` back to state with the
+ * default `'typing'` source. Custom filter components are wrapped in
+ * `useFilters` so their `onChange` dispatches `SET_QUERY` directly with
+ * `source: 'filter'`, and the URL-sync effect uses that to decide between
+ * `history.push` and `history.replace`. No displayText, no typingRef, no
+ * sync hacks — one source of truth.
  */
 const ContentListToolbarComponent = ({
   children,
@@ -76,6 +80,14 @@ const ContentListToolbarComponent = ({
         // input will snap to the new external query value.
         return;
       }
+      // `custom_component` filter changes never reach this handler:
+      // `useFilters` wraps each one so it dispatches directly with
+      // `'filter'` and bypasses `EuiSearchBar.notifyControllingParent`.
+      // All built-in `ContentList` filters use `custom_component`, so in
+      // practice this branch only fires for search-box typing. If a
+      // third-party filter resolver returns a different `SearchFilterConfig`
+      // type, its onChange will fall through here and be tagged as `'typing'`
+      // — `wrapCustomFilters` emits a dev-mode warning when that happens.
       setQueryFromEuiQuery(query);
     },
     [setQueryFromEuiQuery]

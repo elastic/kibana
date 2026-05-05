@@ -83,6 +83,7 @@ export type {
   UseContentListSortReturn,
   PaginationConfig,
   UseContentListPaginationReturn,
+  QuerySetterSource,
   SearchConfig,
   UseContentListSearchReturn,
   SelectionConfig,
