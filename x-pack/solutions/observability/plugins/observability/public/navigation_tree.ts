@@ -108,6 +108,10 @@ function createNavTree({
           ]
         : []),
       {
+        link: 'dataFabric' as const,
+        icon: 'indexOpen',
+      },
+      {
         id: 'applications',
         title: i18n.translate('xpack.observability.obltNav.applications', {
           defaultMessage: 'Applications',
