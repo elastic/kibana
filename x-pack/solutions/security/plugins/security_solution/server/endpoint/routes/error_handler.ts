@@ -28,9 +28,9 @@ export const errorHandler = <E extends Error>(
   };
 
   if (shouldLogToDebug()) {
-    logger.debug(stringify(error, 20));
+    logger.debug(() => stringify(error, 20), { error });
   } else {
-    logger.error(stringify(error, 20));
+    logger.error(stringify(error, 20), { error });
   }
 
   if (error instanceof CustomHttpRequestError || error instanceof EndpointHttpError) {
