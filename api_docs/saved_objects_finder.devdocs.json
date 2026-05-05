@@ -504,7 +504,7 @@
           "SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize"
         ],
         "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-        "lineNumber": 105,
+        "lineNumber": 106,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
