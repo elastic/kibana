@@ -522,6 +522,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         config,
         kibanaEnvironment,
         observabilityRuleTypeRegistry,
+        telemetry,
       });
     });
 
