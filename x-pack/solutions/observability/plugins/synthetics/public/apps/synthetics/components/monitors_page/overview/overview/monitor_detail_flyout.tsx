@@ -9,6 +9,9 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -16,6 +19,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHealth,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPageSection,
   EuiPanel,
@@ -48,10 +52,17 @@ import {
   selectSyntheticsMonitorLoading,
   setFlyoutConfig,
 } from '../../../../state';
-import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
+import {
+  MonitorDetailsPanel,
+  frequencyStr,
+} from '../../../common/components/monitor_details_panel';
+import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
+import { useDateFormat } from '../../../../../../hooks/use_date_format';
 import { ErrorCallout } from '../../../common/components/error_callout';
 import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../../common/constants';
+import type { Ping } from '../../../../../../../common/runtime_types';
 import type { OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
@@ -93,10 +104,12 @@ function DetailFlyoutDurationChart({
   id,
   location,
   allLocations,
+  remoteName,
 }: {
   id: string;
   location: string;
   allLocations: Array<{ id: string; label: string }>;
+  remoteName?: string;
 }) {
   const { euiTheme } = useEuiTheme();
   const [showAllLocations, setShowAllLocations] = useState(false);
@@ -163,6 +176,14 @@ function DetailFlyoutDurationChart({
     ];
   }, [showAllLocations, allLocations, id, location, euiTheme.colors.vis]);
 
+  const dataTypesIndexPatterns = useMemo(
+    () =>
+      remoteName
+        ? { synthetics: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` }
+        : undefined,
+    [remoteName]
+  );
+
   return (
     <EuiPageSection bottomBorder="extended">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -190,6 +211,7 @@ function DetailFlyoutDurationChart({
         legendIsVisible={true}
         legendPosition="bottom"
         attributes={attributes}
+        dataTypesIndexPatterns={dataTypesIndexPatterns}
       />
     </EuiPageSection>
   );
@@ -221,6 +243,87 @@ function DetailFlyoutStatusHistory({ configId, location }: { configId: string; l
         locationLabel={location}
       />
     </EuiPageSection>
+  );
+}
+
+function RemoteMonitorDetailsPanel({
+  monitor,
+  latestPing,
+}: {
+  monitor: OverviewStatusMetaData;
+  latestPing?: Ping;
+}) {
+  const formatter = useDateFormat();
+  const url = latestPing?.url?.full ?? monitor.urls;
+  const lastRunTimestamp = latestPing?.['@timestamp'];
+
+  return (
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+      <EuiTitle size="xs">
+        <h3>{MONITOR_DETAILS_LABEL}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiDescriptionList
+        type="responsiveColumn"
+        columnWidths={[2, 3]}
+        compressed
+        align="left"
+        css={{ maxWidth: 550 }}
+      >
+        <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription style={{ wordBreak: 'break-all' }}>
+          {url ? (
+            <EuiLink href={url} external>
+              {url}
+            </EuiLink>
+          ) : (
+            <EuiText color="subdued" size="s">
+              {'--'}
+            </EuiText>
+          )}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>{LAST_RUN_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          {lastRunTimestamp ? (
+            <time dateTime={lastRunTimestamp}>{formatter(lastRunTimestamp)}</time>
+          ) : (
+            <EuiText color="subdued" size="s">
+              {'--'}
+            </EuiText>
+          )}
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>{MONITOR_ID_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>{monitor.configId}</EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <MonitorTypeBadge monitorType={monitor.type} />
+        </EuiDescriptionListDescription>
+
+        <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          {monitor.schedule
+            ? frequencyStr({ number: monitor.schedule, unit: 'm' })
+            : '--'}
+        </EuiDescriptionListDescription>
+
+        {monitor.tags.length > 0 && (
+          <>
+            <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {monitor.tags.join(', ')}
+            </EuiDescriptionListDescription>
+          </>
+        )}
+
+        <EuiDescriptionListTitle>{REMOTE_CLUSTER_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          {monitor.remote?.remoteName}
+        </EuiDescriptionListDescription>
+      </EuiDescriptionList>
+    </EuiPanel>
   );
 }
 
@@ -293,7 +396,7 @@ export function MonitorDetailFlyout(props: Props) {
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
-  const monitorDetail = useMonitorDetail(configId, props.location);
+  const monitorDetail = useMonitorDetail(configId, props.location, monitor?.remote?.remoteName);
 
   const getColor = useMonitorHealthColor();
 
@@ -446,10 +549,16 @@ export function MonitorDetailFlyout(props: Props) {
             id={id}
             location={props.location}
             allLocations={monitor?.locations ?? []}
+            remoteName={monitor?.remote?.remoteName}
           />
         )}
         {selectedTab === 'details' &&
-          (monitorObject ? (
+          (isRemote && monitor ? (
+            <RemoteMonitorDetailsPanel
+              monitor={monitor}
+              latestPing={monitorDetail.data}
+            />
+          ) : monitorObject ? (
             <MonitorDetailsPanel
               hasBorder={false}
               latestPing={monitorDetail.data}
@@ -658,3 +767,38 @@ const REMOTE_URL_UNAVAILABLE_TEXT = i18n.translate(
       'The remote Kibana URL is not available. Ensure the remote cluster has server.publicBaseUrl configured.',
   }
 );
+
+const MONITOR_DETAILS_LABEL = i18n.translate(
+  'xpack.synthetics.flyout.remoteMonitorDetails',
+  {
+    defaultMessage: 'Monitor details',
+  }
+);
+
+const URL_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.url', {
+  defaultMessage: 'URL',
+});
+
+const LAST_RUN_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.lastRun', {
+  defaultMessage: 'Last run',
+});
+
+const MONITOR_ID_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.monitorId', {
+  defaultMessage: 'Monitor ID',
+});
+
+const MONITOR_TYPE_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.monitorType', {
+  defaultMessage: 'Monitor type',
+});
+
+const FREQUENCY_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.frequency', {
+  defaultMessage: 'Frequency',
+});
+
+const TAGS_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.tags', {
+  defaultMessage: 'Tags',
+});
+
+const REMOTE_CLUSTER_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.remoteCluster', {
+  defaultMessage: 'Remote cluster',
+});
