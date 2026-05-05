@@ -1604,6 +1604,19 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                source_id: schema.string(),
+                name: schema.string(),
+                is_default: schema.boolean(),
+                host: schema.string(),
+                proxy_id: schema.maybe(schema.string()),
+                security_artifacts_proxy_id: schema.maybe(schema.string()),
+              },
+              { unknowns: 'ignore' }
+            ),
+          },
         },
       },
     },
