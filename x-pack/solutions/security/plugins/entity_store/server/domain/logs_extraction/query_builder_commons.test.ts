@@ -60,23 +60,21 @@ describe('buildExtractionSourceClause', () => {
     toDateISO: '2024-01-02T00:00:00.000Z',
   };
 
-  it('should build FROM, METADATA, and time range with strict lower bound when recoveryId is absent and pagesCursorStart is set', () => {
-    const clause = buildExtractionSourceClause({
+  it('should always use inclusive >= lower bound on @timestamp regardless of cursor', () => {
+    const withCursor = buildExtractionSourceClause({
       ...baseParams,
       logsPageCursorStart: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: '1' },
     });
-    expect(clause).toContain('FROM logs-*, metrics-*');
-    expect(clause).toContain('METADATA _index, _id');
-    expect(clause).toContain(`${TIMESTAMP_FIELD} > TO_DATETIME("2024-01-01T00:00:00.000Z")`);
-    expect(clause).not.toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
-    expect(clause).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
-    expect(clause).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
-  });
+    expect(withCursor).toContain('FROM logs-*, metrics-*');
+    expect(withCursor).toContain('METADATA _index, _id');
+    expect(withCursor).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
+    expect(withCursor).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
+    expect(withCursor).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
 
-  it('should use inclusive lower bound on @timestamp when recoveryId is set', () => {
-    const clause = buildExtractionSourceClause({ ...baseParams, recoveryId: 'recover-1' });
-    expect(clause).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
-    expect(clause).not.toContain(`${TIMESTAMP_FIELD} > TO_DATETIME("2024-01-01T00:00:00.000Z")`);
+    const withoutCursor = buildExtractionSourceClause({ ...baseParams });
+    expect(withoutCursor).toContain(
+      `${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`
+    );
   });
 });
 
@@ -365,7 +363,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: true }
     );
     expect(fragment).toBe(
-      '| EVAL recent.entity.name = CASE((`recent.entity.namespace` == "local"), TO_STRING(recent.user.name), recent.entity.name)'
+      '| EVAL recent.entity.name = CASE((COALESCE(`recent.entity.namespace` == "local", FALSE)), TO_STRING(recent.user.name), recent.entity.name)'
     );
   });
 
@@ -378,7 +376,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: false }
     );
     expect(fragment).toBe(
-      '| EVAL entity.name = CASE((`entity.namespace` == "local"), TO_STRING(user.name), entity.name)'
+      '| EVAL entity.name = CASE((COALESCE(`entity.namespace` == "local", FALSE)), TO_STRING(user.name), entity.name)'
     );
   });
 
@@ -396,7 +394,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: true }
     );
     expect(fragment).toBe(
-      '| EVAL recent.entity.name = CASE((`recent.entity.namespace` == "local" AND NOT(`recent.user.name` IS NULL)), TO_STRING(recent.user.name), recent.entity.name)'
+      '| EVAL recent.entity.name = CASE((COALESCE(`recent.entity.namespace` == "local", FALSE) AND NOT(`recent.user.name` IS NULL)), TO_STRING(recent.user.name), recent.entity.name)'
     );
   });
 });

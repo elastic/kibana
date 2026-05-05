@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type {
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+} from '@kbn/agent-context-layer-plugin/server';
+import type {
   CoreSetup,
   CoreStart,
   Logger,
@@ -14,8 +18,9 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
+import { createWorkflowSmlType } from './agent_builder/sml_types/workflow';
 import { defineRoutes } from './api/routes';
-import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './api/workflows_management_api';
+import { WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
 import { AvailabilityUpdater } from './availability';
 import { createWorkflowsClientProvider } from './client/workflows_client';
@@ -27,7 +32,7 @@ import {
 import { WorkflowsManagementFeatureConfig } from './features';
 import { WorkflowsAiTelemetryClient } from './telemetry/workflows_ai_telemetry_client';
 import type {
-  AgentBuilderPluginSetupContract,
+  AgentBuilderPluginSetup,
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
   WorkflowsServerPluginSetupDeps,
@@ -129,7 +134,7 @@ export class WorkflowsPlugin
     aiTelemetryClient: WorkflowsAiTelemetryClient
   ): void {
     void core.plugins
-      .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
+      .onSetup<{ agentBuilder: AgentBuilderPluginSetup }>('agentBuilder')
       .then(({ agentBuilder }) => {
         if (agentBuilder.found) {
           this.logger.debug(
@@ -151,11 +156,32 @@ export class WorkflowsPlugin
       });
 
     void core.plugins
-      .onStart<{ agentBuilder: { sml: { indexAttachment: SmlIndexAttachmentFn } } }>('agentBuilder')
-      .then(({ agentBuilder }) => {
-        if (agentBuilder.found) {
+      .onSetup<{
+        agentContextLayer: AgentContextLayerPluginSetup;
+      }>('agentContextLayer')
+      .then(({ agentContextLayer }) => {
+        if (agentContextLayer.found) {
+          agentContextLayer.contract.registerType(createWorkflowSmlType(api));
+          this.logger.debug(
+            'Workflows Management: Workflow SML type registered with Agent Context Layer'
+          );
+        } else {
+          this.logger.warn(
+            'Workflows Management: agentContextLayer not available — workflow SML type not registered'
+          );
+        }
+      })
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : String(err);
+        this.logger.warn(`Workflows Management: Failed to register workflow SML type: ${message}`);
+      });
+
+    void core.plugins
+      .onStart<{ agentContextLayer: AgentContextLayerPluginStart }>('agentContextLayer')
+      .then(({ agentContextLayer }) => {
+        if (agentContextLayer.found) {
           api.setSmlIndexAttachment(
-            agentBuilder.contract.sml.indexAttachment,
+            agentContextLayer.contract.indexAttachment,
             this.logger.get('sml')
           );
           this.logger.debug(
@@ -166,7 +192,7 @@ export class WorkflowsPlugin
       .catch((err) => {
         const message = err instanceof Error ? err.message : String(err);
         this.logger.warn(
-          `Workflows Management: Failed to wire SML indexing with Agent Builder: ${message}`
+          `Workflows Management: Failed to wire SML indexing with Agent Context Layer: ${message}`
         );
       });
   }
