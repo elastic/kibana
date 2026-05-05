@@ -21,6 +21,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
 
+  // Fleet
+  `${internalNamespaces.fleet}.list_installed_integrations`,
+
   // Observability
   `${internalNamespaces.observability}.get_anomaly_detection_jobs`,
   `${internalNamespaces.observability}.run_log_rate_analysis`,
@@ -47,6 +50,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.alerts`,
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.search_entities`,
+  `${internalNamespaces.security}.find_prebuilt_rules`,
+  `${internalNamespaces.security}.install_prebuilt_rules`,
+  `${internalNamespaces.security}.bulk_actions`,
 
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
@@ -130,6 +136,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
   'detection-rule-edit',
   'threat-hunting',
+  'threat-coverage-initialization',
+  'detection-coverage-onboarding',
 
   // O11Y
   'observability.rca',

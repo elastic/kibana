@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { initializeRoute } from './initialize_route';
-export { setupCompleteRoute } from './setup_complete_route';
+export { createDetectionCoverageOnboardingSkill } from './detection_coverage_onboarding_skill';

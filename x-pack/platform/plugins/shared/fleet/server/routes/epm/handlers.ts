@@ -117,6 +117,7 @@ import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integ
 import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
 import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
 import { getPackageKnowledgeBase } from '../../services/epm/packages';
+import { emitIntegrationInstalledEvent } from '../../services/epm/packages/emit_integration_installed_event';
 
 import { getPackagePolicyIdsForCurrentUser } from './bulk_handler';
 
@@ -397,6 +398,18 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
         name: pkgName,
       },
     };
+
+    // Fire-and-forget: notify subscribed workflows about the new integration
+    emitIntegrationInstalledEvent({
+      context,
+      payload: {
+        package_name: pkgName,
+        package_version: pkgVersion ?? 'latest',
+        install_source: res.installSource ?? installSource,
+      },
+      logger: appContextService.getLogger(),
+    });
+
     return response.ok({ body });
   } else {
     throw res.error;
@@ -560,6 +573,18 @@ export const installPackageByUploadHandler: FleetRequestHandler<
         name: res.pkgName,
       },
     };
+
+    // Fire-and-forget: notify subscribed workflows about the new integration
+    emitIntegrationInstalledEvent({
+      context,
+      payload: {
+        package_name: res.pkgName,
+        package_version: 'uploaded',
+        install_source: res.installSource ?? installSource,
+      },
+      logger: appContextService.getLogger(),
+    });
+
     return response.ok({ body });
   } else {
     if (res.error instanceof FleetTooManyRequestsError) {

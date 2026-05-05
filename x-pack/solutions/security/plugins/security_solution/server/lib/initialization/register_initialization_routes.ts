@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../types';
-import { initializeRoute } from './routes';
+import { initializeRoute, setupCompleteRoute } from './routes';
 
 export interface InitializationRoutesDeps {
   router: SecuritySolutionPluginRouter;
@@ -19,4 +19,5 @@ export const registerInitializationRoutes = ({
   logger,
 }: InitializationRoutesDeps): void => {
   initializeRoute(router, logger);
+  setupCompleteRoute(router, logger);
 };

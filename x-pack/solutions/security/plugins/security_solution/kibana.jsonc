@@ -88,7 +88,9 @@
       "llmTasks",
       "workflowsExtensions",
       "cps",
-      "searchInferenceEndpoints"
+      "searchInferenceEndpoints",
+      "workflowsExtensions",
+      "workflowsManagement"
     ],
     "requiredBundles": [
       "esUiShared",

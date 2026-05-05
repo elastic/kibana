@@ -82,6 +82,7 @@ import {
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { registerTriggerDefinitions } from './triggers';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -129,6 +130,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const { home, usageCollection, management, cases, share, workflowsExtensions } = plugins;
     const { productFeatureKeys$ } = this.contract;
+
+    if (workflowsExtensions) {
+      registerTriggerDefinitions(workflowsExtensions);
+    }
 
     if (share) {
       share.url.locators.create(new AIValueReportLocatorDefinition());

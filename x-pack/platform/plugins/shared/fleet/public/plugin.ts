@@ -58,6 +58,7 @@ import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/pu
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
 import type { FleetAuthz } from '../common';
 import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
@@ -79,6 +80,7 @@ import { API_VERSIONS } from '../common/constants';
 import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import type { RequestError } from './hooks';
 import { licenseService, sendGetBulkAssets } from './hooks';
+import { registerTriggerDefinitions } from './triggers';
 import { setHttpClient } from './hooks/use_request';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import { ExperimentalFeaturesService } from './services/experimental_features';
@@ -124,6 +126,7 @@ export interface FleetSetupDeps {
   globalSearch?: GlobalSearchPluginSetup;
   customIntegrations: CustomIntegrationsSetup;
   usageCollection?: UsageCollectionSetup;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface FleetStartDeps {
@@ -317,6 +320,10 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
         .catch(() => {
           this.logger.error('Failed to load search providers.');
         });
+    }
+
+    if (deps.workflowsExtensions) {
+      registerTriggerDefinitions(deps.workflowsExtensions);
     }
 
     return {};

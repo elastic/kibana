@@ -28,6 +28,14 @@
  */
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
+    id: 'fleet.integrationInstalled',
+    schemaHash: 'a4dfd7950378128d350b42493bce26ad8ece5e8ce133165938dbdbfd7d6686f5',
+  },
+  {
+    id: 'security.setupComplete',
+    schemaHash: 'cebc79d9d38f29f51328eae1a81251545c6b9f1fda4758be49ae20165efbeeaf',
+  },
+  {
     id: 'workflows.failed',
     schemaHash: '2ac7a279823d7ca59c4d47de93ea7bd7103b1953ea484cef7f489d12d0c81980',
   },

@@ -1,0 +1,58 @@
+version: '1'
+name: Detection Coverage Onboarding
+description: >
+  When a new Fleet integration is installed, automatically analyzes matching
+  prebuilt detection rules, installs critical and high severity rules, creates
+  a case documenting the changes, and monitors rule health.
+enabled: true
+
+triggers:
+  - type: fleet.integrationInstalled
+  - type: manual
+
+steps:
+  - name: log_trigger
+    type: console
+    with:
+      message: >
+        Detection coverage onboarding triggered.
+        Package: {{ event.package_name | default: "manual trigger" }}
+        Version: {{ event.package_version | default: "N/A" }}
+        Source: {{ event.install_source | default: "N/A" }}
+
+  - name: onboard_coverage
+    type: ai.agent
+    agent-id: detection-coverage-agent
+    with:
+      message: |
+        A new Fleet integration was just installed: {{ event.package_name | default: "unknown" }} (version {{ event.package_version | default: "unknown" }}).
+
+        Please run the full detection coverage onboarding workflow:
+        1. Check the current prebuilt rules status
+        2. List all installed integrations
+        3. Find prebuilt rules matching the installed integrations
+        4. Install all critical severity matching rules automatically — do NOT ask for confirmation, just install them
+        5. Check the health of the newly installed rules
+        6. Provide a summary of what was installed and the health status
+
+        Be concise in your response. Focus on the data: what was found, what was installed, and any issues.
+    timeout: 600s
+
+  - name: create_case
+    type: cases.createCase
+    with:
+      title: "Detection Coverage: rules installed for {{ event.package_name | default: 'new integrations' }}"
+      description: |
+        ## Automated Detection Coverage Onboarding
+
+        **Trigger:** New integration installed — {{ event.package_name | default: "manual trigger" }} ({{ event.package_version | default: "N/A" }})
+
+        **Agent Summary:**
+        {{ steps.onboard_coverage.output.message | default: "Agent did not return a summary." }}
+
+        ---
+        *This case was created automatically by the Detection Coverage Onboarding workflow.*
+      tags:
+        - detection-coverage
+        - automated
+        - "{{ event.package_name | default: 'manual' }}"
