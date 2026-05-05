@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -24,8 +24,15 @@ import {
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LatestSignificantEventData } from '../hooks/use_fetch_latest_significant_event';
+import { useFlyoutFocusManagement } from '../hooks/use_flyout_focus_management';
 import { SignificantEventDetailBody } from './significant_event_detail_body';
 import { SignificantEventDetailHeader } from './significant_event_detail_header';
+import {
+  capitalize,
+  getRecommendedActionBadgeColor,
+  getRecommendedActionIcon,
+  getSeverityBadgeColor,
+} from './event_utils';
 
 type RecommendedAction = LatestSignificantEventData['raw']['recommended_action'];
 
@@ -33,54 +40,6 @@ export interface OtherPromotedEventsProps {
   events: LatestSignificantEventData[];
   onRemediate?: (eventTitle: string) => void;
 }
-
-const capitalize = (value: string) => (value ? value.charAt(0).toUpperCase() + value.slice(1) : '');
-
-const getSeverityBadgeColor = (
-  color: LatestSignificantEventData['severityColor']
-): 'warning' | 'primary' | 'default' | 'danger' => {
-  switch (color) {
-    case 'danger':
-      return 'danger';
-    case 'warning':
-      return 'warning';
-    case 'primary':
-      return 'primary';
-    case 'subdued':
-    default:
-      return 'default';
-  }
-};
-
-const getRecommendedActionBadgeColor = (
-  action: RecommendedAction | undefined
-): 'warning' | 'success' | 'neutral' => {
-  switch (action) {
-    case 'escalate':
-      return 'warning';
-    case 'resolve':
-      return 'success';
-    case 'investigate':
-    case 'monitor':
-    default:
-      return 'neutral';
-  }
-};
-
-const getRecommendedActionIcon = (action: RecommendedAction | undefined): string => {
-  switch (action) {
-    case 'escalate':
-      return 'warning';
-    case 'monitor':
-      return 'eye';
-    case 'resolve':
-      return 'checkInCircleFilled';
-    case 'investigate':
-      return 'search';
-    default:
-      return 'questionInCircle';
-  }
-};
 
 interface OtherPromotedEventRow {
   id: string;
@@ -107,53 +66,28 @@ export function OtherPromotedEvents({ events, onRemediate }: OtherPromotedEvents
   const [sortField, setSortField] = useState<SortableField>('severity');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'otherPromotedEventFlyout' });
-  const returnFocusRef = useRef<Element | null>(null);
 
   const closeFlyout = useCallback(() => {
     setSelectedEvent(null);
-    requestAnimationFrame(() => {
-      (returnFocusRef.current as HTMLElement | null)?.focus();
-    });
   }, []);
+
+  const { open: openFlyout } = useFlyoutFocusManagement({
+    isOpen: !!selectedEvent,
+    onClose: closeFlyout,
+    flyoutTestSubj: 'otherPromotedEventDetailFlyout',
+  });
 
   const toggleEvent = useCallback(
     (item: LatestSignificantEventData) => {
       if (selectedEvent?.raw.event_id === item.raw.event_id) {
         closeFlyout();
       } else {
-        returnFocusRef.current = document.activeElement;
+        openFlyout();
         setSelectedEvent(item);
       }
     },
-    [selectedEvent, closeFlyout]
+    [selectedEvent, closeFlyout, openFlyout]
   );
-
-  useEffect(() => {
-    if (!selectedEvent) return;
-
-    // Focus the close button inside the flyout once it renders
-    const timerId = setTimeout(() => {
-      const flyout = document.querySelector<HTMLElement>(
-        '[data-test-subj="otherPromotedEventDetailFlyout"]'
-      );
-      const closeBtn = flyout?.querySelector<HTMLElement>(
-        '[data-test-subj="euiFlyoutCloseButton"]'
-      );
-      closeBtn?.focus();
-    }, 50);
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeFlyout();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      clearTimeout(timerId);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [selectedEvent, closeFlyout]);
 
   const onTableChange = useCallback(({ sort }: Criteria<OtherPromotedEventRow>) => {
     if (sort) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiEmptyPrompt,
@@ -24,6 +24,7 @@ import { FormattedRelativeTime } from '@kbn/i18n-react';
 import {
   useFetchLatestSignificantEvent,
   useFetchSystemOverview,
+  useFlyoutFocusManagement,
   SigeventsOverview,
   SignificantEventDetailBody,
   SignificantEventDetailHeader,
@@ -96,48 +97,21 @@ export function SigeventsOverviewPage() {
   const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
   const [conversationKey, setConversationKey] = useState(0);
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigeventsDetailFlyout' });
-  const returnFocusRef = useRef<Element | null>(null);
 
-  const openDetailFlyout = useCallback(() => {
-    returnFocusRef.current = document.activeElement;
-    setIsDetailFlyoutOpen(true);
-  }, []);
   const closeDetailFlyout = useCallback(() => {
     setIsDetailFlyoutOpen(false);
-    requestAnimationFrame(() => {
-      (returnFocusRef.current as HTMLElement | null)?.focus();
-    });
   }, []);
 
-  useEffect(() => {
-    if (!isDetailFlyoutOpen) {
-      return;
-    }
+  const { open: openFlyoutFocus } = useFlyoutFocusManagement({
+    isOpen: isDetailFlyoutOpen,
+    onClose: closeDetailFlyout,
+    flyoutTestSubj: 'obltSigeventsDetailFlyout',
+  });
 
-    // Focus the close button inside the flyout once it renders
-    const timerId = setTimeout(() => {
-      const flyout = document.querySelector<HTMLElement>(
-        '[data-test-subj="obltSigeventsDetailFlyout"]'
-      );
-      const closeBtn = flyout?.querySelector<HTMLElement>(
-        '[data-test-subj="euiFlyoutCloseButton"]'
-      );
-      closeBtn?.focus();
-    }, 50);
-
-    // Handle Escape key to close the flyout
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeDetailFlyout();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      clearTimeout(timerId);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isDetailFlyoutOpen, closeDetailFlyout]);
+  const openDetailFlyout = useCallback(() => {
+    openFlyoutFocus();
+    setIsDetailFlyoutOpen(true);
+  }, [openFlyoutFocus]);
 
   const handleRemediate = useCallback(() => {
     const eventTitle = eventData?.mainEventTitle ?? 'the significant event';

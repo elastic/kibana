@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiHealth,
-  EuiHorizontalRule,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -27,44 +24,20 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn, Criteria, EuiHealthProps } from '@elastic/eui';
+import type { EuiBasicTableColumn, Criteria } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EventDocument } from '../hooks/use_fetch_system_overview';
-import { InfoPanel } from './info_panel';
-import { RootCausePanel } from './root_cause_panel';
-import { RecommendationsPlanPanel } from './recommendations_plan_panel';
-import type { RecommendationStep } from './recommendations_plan_panel';
-
-const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
-
-const getRecommendedActionBadgeColor = (
-  action: EventDocument['recommended_action']
-): 'warning' | 'success' | 'neutral' => {
-  switch (action) {
-    case 'escalate':
-      return 'warning';
-    case 'resolve':
-      return 'success';
-    case 'monitor':
-    default:
-      return 'neutral';
-  }
-};
-
-const getCriticalityHealthColor = (impact: EventDocument['impact']): EuiHealthProps['color'] => {
-  switch (impact) {
-    case 'critical':
-      return 'danger';
-    case 'high':
-      return 'warning';
-    case 'medium':
-      return 'primary';
-    case 'low':
-    default:
-      return 'subdued';
-  }
-};
+import { useFlyoutFocusManagement } from '../hooks/use_flyout_focus_management';
+import { SignificantEventDetailBody } from './significant_event_detail_body';
+import { SignificantEventDetailHeader } from './significant_event_detail_header';
+import {
+  capitalize,
+  getRecommendedActionBadgeColor,
+  getRecommendedActionIcon,
+  getImpactBadgeColor,
+  adaptEventDocumentToDetailFields,
+} from './event_utils';
 
 const formatDetectedAt = (timestamp: string): string => {
   const date = new Date(timestamp);
@@ -90,35 +63,6 @@ export interface LowerPriorityEventsProps {
   onRemediate?: (eventTitle: string) => void;
 }
 
-const getImpactBadgeColor = (
-  impact: EventDocument['impact']
-): 'warning' | 'primary' | 'default' | 'danger' => {
-  switch (impact) {
-    case 'critical':
-      return 'danger';
-    case 'high':
-      return 'warning';
-    case 'medium':
-      return 'primary';
-    case 'low':
-    default:
-      return 'default';
-  }
-};
-
-const getRecommendedActionIcon = (action: EventDocument['recommended_action']): string => {
-  switch (action) {
-    case 'escalate':
-      return 'arrowUp';
-    case 'monitor':
-      return 'eye';
-    case 'resolve':
-      return 'check';
-    default:
-      return 'questionInCircle';
-  }
-};
-
 export function LowerPriorityEvents({ events, onRemediate }: LowerPriorityEventsProps) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -130,25 +74,27 @@ export function LowerPriorityEvents({ events, onRemediate }: LowerPriorityEvents
   const [sortField, setSortField] = useState<keyof EventDocument>('criticality');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'eventDetailFlyout' });
-  const returnFocusRef = useRef<Element | null>(null);
 
   const closeFlyout = useCallback(() => {
     setSelectedEvent(null);
-    requestAnimationFrame(() => {
-      (returnFocusRef.current as HTMLElement | null)?.focus();
-    });
   }, []);
+
+  const { open: openFlyout } = useFlyoutFocusManagement({
+    isOpen: !!selectedEvent,
+    onClose: closeFlyout,
+    flyoutTestSubj: 'eventDetailFlyout',
+  });
 
   const toggleEvent = useCallback(
     (item: EventDocument) => {
       if (selectedEvent?.event_id === item.event_id) {
         closeFlyout();
       } else {
-        returnFocusRef.current = document.activeElement;
+        openFlyout();
         setSelectedEvent(item);
       }
     },
-    [selectedEvent, closeFlyout]
+    [selectedEvent, closeFlyout, openFlyout]
   );
 
   const onTableChange = useCallback(({ sort }: Criteria<EventDocument>) => {
@@ -169,31 +115,6 @@ export function LowerPriorityEvents({ events, onRemediate }: LowerPriorityEvents
       return String(aVal).localeCompare(String(bVal)) * direction;
     })
     .slice(0, 5);
-
-  useEffect(() => {
-    if (!selectedEvent) return;
-
-    // Focus the close button inside the flyout once it renders
-    const timerId = setTimeout(() => {
-      const flyout = document.querySelector<HTMLElement>('[data-test-subj="eventDetailFlyout"]');
-      const closeBtn = flyout?.querySelector<HTMLElement>(
-        '[data-test-subj="euiFlyoutCloseButton"]'
-      );
-      closeBtn?.focus();
-    }, 50);
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeFlyout();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      clearTimeout(timerId);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [selectedEvent, closeFlyout]);
 
   const columns: Array<EuiBasicTableColumn<EventDocument>> = [
     {
@@ -392,128 +313,14 @@ function EventDetailFlyout({
   onClose,
   onRemediate,
 }: EventDetailFlyoutProps) {
-  const {
-    http: {
-      basePath: { prepend },
-    },
-  } = useKibana().services;
-  const severityLabel = capitalize(event.impact);
-  const severityColor = getImpactBadgeColor(event.impact);
-  const recommendedActionLabel = capitalize(event.recommended_action);
-  const recommendedActionIconType = getRecommendedActionIcon(event.recommended_action);
-  const criticalityLabel = String(event.criticality);
-  const criticalityColor = getCriticalityHealthColor(event.impact);
+  const detailFields = adaptEventDocumentToDetailFields(event);
   const detectedAtLabel = formatDetectedAt(event['@timestamp']);
-  const rulesTabHref = prepend('/app/streams/_discovery/queries');
 
-  const generalInfoItems = useMemo(() => {
-    const items: Array<{
-      title: NonNullable<React.ReactNode>;
-      description: NonNullable<React.ReactNode>;
-    }> = [
-      {
-        title: i18n.translate('xpack.observability.lowerPriorityEvents.generalSeverity', {
-          defaultMessage: 'Severity',
-        }),
-        description: <EuiBadge color={severityColor}>{severityLabel}</EuiBadge>,
-      },
-      {
-        title: i18n.translate('xpack.observability.lowerPriorityEvents.generalCriticality', {
-          defaultMessage: 'Criticality score',
-        }),
-        description: <EuiHealth color={criticalityColor}>{criticalityLabel}</EuiHealth>,
-      },
-      {
-        title: i18n.translate('xpack.observability.lowerPriorityEvents.generalRecommendedAction', {
-          defaultMessage: 'Recommended action',
-        }),
-        description: (
-          <EuiBadge
-            color={getRecommendedActionBadgeColor(event.recommended_action)}
-            iconType={recommendedActionIconType}
-          >
-            {recommendedActionLabel}
-          </EuiBadge>
-        ),
-      },
-    ];
-
-    if (event.stream_names && event.stream_names.length > 0) {
-      items.push({
-        title: i18n.translate('xpack.observability.lowerPriorityEvents.generalStreams', {
-          defaultMessage: 'Streams',
-        }),
-        description: (
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {event.stream_names.map((stream, idx) => (
-              <EuiFlexItem key={`${stream}-${idx}`} grow={false}>
-                <EuiBadge
-                  color="hollow"
-                  iconType="popout"
-                  iconSide="right"
-                  href={prepend(`/app/streams/${encodeURIComponent(stream)}`)}
-                  data-test-subj={`eventStreamLink-${stream}`}
-                >
-                  {stream}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        ),
-      });
+  const handleRemediate = useCallback(() => {
+    if (onRemediate) {
+      onRemediate(event.title);
     }
-
-    if (event.rule_names && event.rule_names.length > 0) {
-      items.push({
-        title: i18n.translate('xpack.observability.lowerPriorityEvents.generalRules', {
-          defaultMessage: 'Related rules',
-        }),
-        description: (
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {event.rule_names.map((rule, idx) => (
-              <EuiFlexItem key={`${rule}-${idx}`} grow={false}>
-                <EuiBadge
-                  color="hollow"
-                  iconType="popout"
-                  iconSide="right"
-                  href={rulesTabHref}
-                  data-test-subj={`eventRuleLink-${rule}`}
-                >
-                  {rule}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        ),
-      });
-    }
-
-    return items;
-  }, [
-    criticalityColor,
-    criticalityLabel,
-    prepend,
-    recommendedActionIconType,
-    recommendedActionLabel,
-    rulesTabHref,
-    severityColor,
-    severityLabel,
-    event.recommended_action,
-    event.rule_names,
-    event.stream_names,
-  ]);
-
-  const recommendationSteps: RecommendationStep[] | undefined = useMemo(() => {
-    const raw = event.recommendations;
-    const recs = Array.isArray(raw) ? raw : typeof raw === 'string' ? [raw] : undefined;
-    if (!recs || recs.length === 0) {
-      return undefined;
-    }
-    return recs.map((rec, idx) => ({
-      id: `${event.event_id}-rec-${idx}`,
-      title: rec,
-    }));
-  }, [event.recommendations, event.event_id]);
+  }, [onRemediate, event.title]);
 
   return (
     <EuiFlyout
@@ -528,78 +335,21 @@ function EventDetailFlyout({
       data-test-subj="eventDetailFlyout"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="xs">
-          <h2 id={flyoutHeadingId}>{event.title}</h2>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p>{detectedAtLabel}</p>
-        </EuiText>
+        <div id={flyoutHeadingId}>
+          <SignificantEventDetailHeader
+            title={event.title}
+            detectedAtLabel={detectedAtLabel}
+            severityLabel={detailFields.severityLabel}
+            severityColor={detailFields.severityColor}
+          />
+        </div>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <InfoPanel
-              title={i18n.translate('xpack.observability.lowerPriorityEvents.generalInfoTitle', {
-                defaultMessage: 'General information',
-              })}
-              collapsible
-              initialCollapsed
-            >
-              {generalInfoItems.map((listItem, index) => (
-                <React.Fragment key={index}>
-                  <EuiDescriptionList
-                    type="column"
-                    columnWidths={[1, 2]}
-                    compressed
-                    listItems={[listItem]}
-                  />
-                  {index < generalInfoItems.length - 1 ? <EuiHorizontalRule margin="m" /> : null}
-                </React.Fragment>
-              ))}
-            </InfoPanel>
-          </EuiFlexItem>
-
-          {event.summary ? (
-            <EuiFlexItem grow={false}>
-              <InfoPanel
-                title={i18n.translate('xpack.observability.lowerPriorityEvents.summaryPanelTitle', {
-                  defaultMessage: 'Summary',
-                })}
-              >
-                <EuiText size="s">
-                  <p>{event.summary}</p>
-                </EuiText>
-              </InfoPanel>
-            </EuiFlexItem>
-          ) : null}
-
-          {event.root_cause ? (
-            <EuiFlexItem grow={false}>
-              <RootCausePanel>
-                <p>{event.root_cause}</p>
-              </RootCausePanel>
-            </EuiFlexItem>
-          ) : null}
-
-          {recommendationSteps ? (
-            <EuiFlexItem grow={false}>
-              <RecommendationsPlanPanel
-                steps={recommendationSteps}
-                escalateBadgeLabel={recommendedActionLabel}
-                escalateBadgeColor={getRecommendedActionBadgeColor(event.recommended_action)}
-                escalateBadgeIconType={recommendedActionIconType}
-                onRemediate={
-                  onRemediate
-                    ? () => {
-                        onRemediate(event.title);
-                      }
-                    : undefined
-                }
-              />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
+        <SignificantEventDetailBody
+          event={detailFields}
+          hideHeader
+          onRemediate={onRemediate ? handleRemediate : undefined}
+        />
       </EuiFlyoutBody>
     </EuiFlyout>
   );

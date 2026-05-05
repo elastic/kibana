@@ -16,3 +16,5 @@ export type {
   SigEventPriority,
   PriorityCounts,
 } from './hooks/use_fetch_system_overview';
+
+export { useFlyoutFocusManagement } from './hooks/use_flyout_focus_management';

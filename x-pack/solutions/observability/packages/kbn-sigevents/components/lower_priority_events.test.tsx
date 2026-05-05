@@ -124,7 +124,7 @@ describe('LowerPriorityEvents', () => {
     expect(screen.getByText('The actual root cause')).toBeInTheDocument();
   });
 
-  it('renders stream links in the flyout', () => {
+  it('renders stream names in the flyout general info', () => {
     const events = [makeEvent({ event_id: 'e-1', stream_names: ['logs.otel', 'metrics.k8s'] })];
     renderWithIntl(<LowerPriorityEvents events={events} />);
 
@@ -133,11 +133,10 @@ describe('LowerPriorityEvents', () => {
     // Expand the collapsed "General information" panel
     fireEvent.click(screen.getByTestId('sigeventsOverviewInfoPanelToggle'));
 
-    expect(screen.getByTestId('eventStreamLink-logs.otel')).toBeInTheDocument();
-    expect(screen.getByTestId('eventStreamLink-metrics.k8s')).toBeInTheDocument();
+    expect(screen.getByText('logs.otel, metrics.k8s')).toBeInTheDocument();
   });
 
-  it('renders rule links in the flyout general info panel', () => {
+  it('renders rule names in the flyout general info panel', () => {
     const events = [makeEvent({ event_id: 'e-1', rule_names: ['Rule X', 'Rule Y'] })];
     renderWithIntl(<LowerPriorityEvents events={events} />);
 
@@ -146,8 +145,7 @@ describe('LowerPriorityEvents', () => {
     // Expand the collapsed "General information" panel
     fireEvent.click(screen.getByTestId('sigeventsOverviewInfoPanelToggle'));
 
-    expect(screen.getByTestId('eventRuleLink-Rule X')).toBeInTheDocument();
-    expect(screen.getByTestId('eventRuleLink-Rule Y')).toBeInTheDocument();
+    expect(screen.getByText('Rule X, Rule Y')).toBeInTheDocument();
   });
 
   it('calls onRemediate and keeps flyout open when remediate is triggered', () => {
@@ -258,10 +256,8 @@ describe('LowerPriorityEvents', () => {
 
     fireEvent.click(screen.getByTestId('eventExpandRow-e-1'));
 
-    // RecommendationsPlanPanel should not be rendered
-    expect(
-      screen.queryByTestId('sigeventsOverviewRecommendationsPlanRemediate')
-    ).not.toBeInTheDocument();
+    // RecommendationsPlanPanel is still rendered but without individual steps
+    expect(screen.getByTestId('eventDetailFlyout')).toBeInTheDocument();
   });
 
   it('closes the flyout when Escape is pressed', () => {
