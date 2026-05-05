@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBadge, EuiButtonEmpty } from '@elastic/eui';
+import { EuiAccordion, EuiBadge, EuiButtonEmpty } from '@elastic/eui';
 
 import { CurlRequest } from '../../components/curl_request/curl_request';
 
@@ -66,6 +66,7 @@ describe('DefaultPipelineItem', () => {
 
     const title = wrapper.find('h4').text();
     const settingsButton = wrapper.find(EuiButtonEmpty);
+    const accordion = wrapper.find(EuiAccordion);
     const curlRequest = wrapper.find(CurlRequest);
     const badge = wrapper.find(EuiBadge);
 
@@ -75,6 +76,8 @@ describe('DefaultPipelineItem', () => {
     );
     settingsButton.simulate('click');
     expect(mockOpenModal).toHaveBeenCalledTimes(1);
+    expect(accordion.prop('onClick')).toBeUndefined();
+    expect(typeof accordion.prop('onToggle')).toBe('function');
     expect(curlRequest.prop('document')).toBeDefined();
     expect(curlRequest.prop('indexName')).toEqual(index.name);
     expect(curlRequest.prop('pipeline')).toEqual({
