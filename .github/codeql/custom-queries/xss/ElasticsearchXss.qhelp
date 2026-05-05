@@ -19,14 +19,6 @@ The query tracks data from the following <code>@kbn/discover-utils</code> functi
 <li><code>getLogFieldWithFallback</code> — extracts log field values with fallback logic</li>
 </ul>
 <p>
-The following <code>@kbn/discover-utils</code> functions are intentionally excluded because they
-return <code>ReactNode</code>, not HTML strings:
-</p>
-<ul>
-<li><code>formatHitReact</code> — returns <code>ReactNode</code>, safe for direct React rendering</li>
-<li><code>formatFieldValueReact</code> — returns <code>ReactNode</code> via <code>reactConvert</code></li>
-</ul>
-<p>
 The query catches both direct usage of <code>dangerouslySetInnerHTML</code> as a JSX attribute
 and indirect usage via object literals that are later spread into JSX elements. The latter
 pattern is particularly dangerous because it bypasses the ESLint <code>react/no-danger</code>
