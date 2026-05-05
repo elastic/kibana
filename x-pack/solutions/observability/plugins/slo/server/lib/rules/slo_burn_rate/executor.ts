@@ -23,7 +23,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { upperCase } from 'lodash';
 import {

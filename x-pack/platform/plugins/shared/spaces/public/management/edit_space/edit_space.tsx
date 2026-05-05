@@ -21,11 +21,11 @@ import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import type { FC } from 'react';
 
 import type { ScopedHistory } from '@kbn/core/public';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { Role } from '@kbn/security-plugin-types-common';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
 
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
 import { handleApiError } from './handle_api_error';

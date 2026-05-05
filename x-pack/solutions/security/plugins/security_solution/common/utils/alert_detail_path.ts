@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { ALERT_DETAILS_REDIRECT_PATH, APP_PATH } from '../constants';
 
 export const buildAlertDetailPath = ({

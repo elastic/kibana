@@ -138,7 +138,8 @@
     "@kbn/controls-constants",
     "@kbn/cps-utils",
     "@kbn/es-query-constants",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/core-spaces-common"
   ],
   "exclude": ["target/**/*"]
 }

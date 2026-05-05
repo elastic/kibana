@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/test-suites-xpack-platform'
   - '@kbn/es-query'
   - '@kbn/core-chrome-layout-constants'
+  - '@kbn/core-spaces-common'
 tags:
   - test-helper
   - package

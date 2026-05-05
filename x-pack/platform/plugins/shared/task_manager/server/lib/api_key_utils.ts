@@ -8,7 +8,7 @@
 import type { AuthenticatedUser, SecurityServiceStart, IBasePath } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { truncate } from 'lodash';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
+import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import type { TaskInstance, TaskUserScope } from '../task';
 
 export interface APIKeyResult {

@@ -31,5 +31,6 @@
     "@kbn/dev-utils",
     "@kbn/spaces-plugin",
     "@kbn/config-schema",
+    "@kbn/core-spaces-common",
   ]
 }

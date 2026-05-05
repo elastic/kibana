@@ -10,8 +10,8 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { getSolutionViewSwitchCalloutComponent } from './solution_view_switch_callout';

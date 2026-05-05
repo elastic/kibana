@@ -15,9 +15,6 @@ const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
 /**
  * Extracts the space id from the given path.
  *
- * This is Core's internal copy of the logic from `@kbn/spaces-utils`.
- * `@kbn/spaces-utils` will be removed once all consumers migrate to
- * `request.spaceId` (Phase 2).
  *
  * @param requestBasePath The base path of the current request.
  * @param serverBasePath The server's base path.

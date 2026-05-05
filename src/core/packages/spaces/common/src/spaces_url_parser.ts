@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_SPACE_ID } from './constants';
+import { DEFAULT_SPACE_ID } from './space_id';
 
 const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
 

@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
 
 import { ENTER_SPACE_PATH } from '../../../common';
 import type { PluginsStart } from '../../plugin';

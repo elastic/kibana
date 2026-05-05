@@ -8,8 +8,7 @@
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-utils';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 
 export function getKibanaUrl(
   coreSetup: CoreSetup,

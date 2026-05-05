@@ -131,6 +131,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/scout-oblt'
   - '@kbn/core-saved-objects-utils-server'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

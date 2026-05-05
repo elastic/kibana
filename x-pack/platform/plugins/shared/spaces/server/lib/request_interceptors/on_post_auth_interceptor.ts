@@ -6,8 +6,8 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
 
 import type { Space } from '../../../common';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';

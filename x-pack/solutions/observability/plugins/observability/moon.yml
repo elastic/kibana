@@ -158,6 +158,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

@@ -6139,6 +6139,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-spaces-common@link:src/core/packages/spaces/common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-status-common@link:src/core/packages/status/common":
   version "0.0.0"
   uid ""
@@ -9200,10 +9204,6 @@
   uid ""
 
 "@kbn/spaces-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin":
-  version "0.0.0"
-  uid ""
-
-"@kbn/spaces-utils@link:src/platform/packages/shared/kbn-spaces-utils":
   version "0.0.0"
   uid ""
 

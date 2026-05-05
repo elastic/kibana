@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { REVIEW_RULE_INSTALLATION_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/urls';
 import { RULES_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';

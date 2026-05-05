@@ -19,9 +19,9 @@ import { capitalize } from 'lodash';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
 
 import { handleApiError } from './handle_api_error';
 import { useEditSpaceServices } from './provider';

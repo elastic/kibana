@@ -25,10 +25,10 @@ import { css } from '@emotion/react';
 import React, { Component, Fragment, lazy, Suspense } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
 
 import { ManageSpacesButton } from './manage_spaces_button';
 import type { Space } from '../../../common';

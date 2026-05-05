@@ -24,7 +24,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/es-query'
   - '@kbn/i18n-react'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/cps-common'
 tags:
   - plugin

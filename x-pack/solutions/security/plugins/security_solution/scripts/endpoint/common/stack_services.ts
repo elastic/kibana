@@ -15,8 +15,7 @@ import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { omit } from 'lodash';
-import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-utils';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import { enableFleetSpaceAwareness } from './fleet_services';
 import {
   fetchKibanaStatus,
