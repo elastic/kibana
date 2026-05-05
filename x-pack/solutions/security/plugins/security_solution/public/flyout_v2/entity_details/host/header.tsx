@@ -27,11 +27,17 @@ import { EntitySourceBadge } from '../../../flyout/entity_details/shared/compone
 import { RiskLevelBadge } from '../../../flyout/entity_details/shared/components/risk_level_badge';
 
 export interface HeaderProps {
+  /** Host name displayed as the flyout title. */
   hostName: string;
+  /** First/last seen timestamps for the host. */
   lastSeen: FirstLastSeenData;
+  /** Entity store entity ID, used for the entity source badge. */
   entityId?: string;
+  /** Key-value map of identity fields used to resolve the host. */
   identityFields?: IdentityFields;
+  /** Whether the host exists in the entity store. */
   isEntityInStore?: boolean;
+  /** Risk severity level for the host. */
   riskLevel?: RiskSeverity;
 }
 

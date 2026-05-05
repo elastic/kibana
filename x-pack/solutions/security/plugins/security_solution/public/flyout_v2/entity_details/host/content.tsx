@@ -27,19 +27,29 @@ import { ResolutionSection } from '../../../entity_analytics/components/entity_r
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
 export interface ContentProps {
+  /** Observed host data (anomalies excluded). */
   observedHost: ObservedHostData;
+  /** Current risk score state for the host. */
   riskScoreState: RiskScoreState<EntityType.host>;
+  /** Unique context ID passed to child queries. */
   contextID: string;
+  /** Scope ID for the timeline or table that opened this flyout. */
   scopeId: string;
+  /** Callback to navigate to a detail panel (e.g. risk inputs, asset criticality). */
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  /** Key-value map of identity fields used to resolve the host. */
   identityFields: IdentityFields;
+  /** Callback invoked after asset criticality is updated. */
   onAssetCriticalityChange: () => void;
+  /** Whether the risk score is currently being recalculated. */
   recalculatingScore: boolean;
+  /** Whether the flyout is rendered in preview mode. */
   isPreviewMode: boolean;
   /** When using Entity Store v2: entity record for asset criticality upsert. */
   entityRecord?: Entity;
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
+  /** Entity store entity ID for the host. */
   entityStoreEntityId?: string;
 }
 
