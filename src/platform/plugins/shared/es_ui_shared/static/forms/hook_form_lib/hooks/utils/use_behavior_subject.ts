@@ -69,6 +69,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
     );
   }
  */
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export const useBehaviorSubject = <T = any>(initialState: T) => {
   const subjectRef = useRef<BehaviorSubject<T>>();
 
