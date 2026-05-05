@@ -62,6 +62,29 @@ describe('StarredFilterRenderer', () => {
     expect(screen.getByText('Starred')).toBeInTheDocument();
   });
 
+  it('renders as an unpressed toggle when the filter is inactive', () => {
+    render(<StarredFilterRenderer query={Query.parse('')} />, {
+      wrapper: createWrapper({ favoritesService: mockFavoritesService }),
+    });
+
+    // EUI's single-filter pattern (`isToggle` + `isSelected={active}`) is what
+    // gives the button its `aria-pressed` semantics — assert it directly so a
+    // future regression surfaces here rather than as a screen-reader-only bug.
+    expect(screen.getByRole('button', { name: 'Starred' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+  });
+
+  it('renders as a pressed toggle when the filter is active', () => {
+    const activeQuery = Query.parse('').addMustIsClause('starred');
+    render(<StarredFilterRenderer query={activeQuery} />, {
+      wrapper: createWrapper({ favoritesService: mockFavoritesService }),
+    });
+
+    expect(screen.getByRole('button', { name: 'Starred' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
   it('renders nothing when the favorites service is not available', () => {
     const { container } = render(<StarredFilterRenderer query={Query.parse('')} />, {
       wrapper: createWrapper(),
