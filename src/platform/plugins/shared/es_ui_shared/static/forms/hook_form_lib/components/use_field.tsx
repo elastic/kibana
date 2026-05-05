@@ -13,6 +13,10 @@ import React from 'react';
 import type { FieldHook, FieldConfig, FormData } from '../types';
 import { useFieldFromProps } from '../hooks';
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface Props<T, FormType = FormData, I = T> {
   path: string;
   // @ts-expect-error upgrade typescript v4.9.5

@@ -28,6 +28,10 @@ const DEFAULT_OPTIONS = {
   stripUnsetFields: false,
 };
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface UseFormReturn<T extends FormData, I extends FormData> {
   form: FormHook<T, I>;
 }
