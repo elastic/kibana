@@ -173,7 +173,8 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
       expect(query).toContain(
         'owns_inferred = VALUES(targets) WHERE access_type == "owns_inferred"'
       );
-      // The previously-hardcoded names must not leak in for a non-accesses config.
+      // The accesses bucket-pair literals must not leak into a non-accesses
+      // bucketed config — proves the column names are 100% data-driven.
       expect(query).not.toContain('accesses_frequently');
       expect(query).not.toContain('accesses_infrequently');
     });
@@ -281,7 +282,7 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
       expect(query).not.toMatch(/WHERE\s+targetEntityId\s+IS\s+NOT\s+NULL/);
     });
 
-    it('applies the COALESCE form for non-frequency-classification configs as well', () => {
+    it('applies the COALESCE form on the non-bucketed (kind: "standard") path as well', () => {
       const query = buildTargetsPerActorQuery(commWithHostConfig, 'default');
       expect(query).toContain('| WHERE COALESCE(actorUserId, "") != ""');
       expect(query).toContain('| WHERE COALESCE(targetEntityId, "") != ""');

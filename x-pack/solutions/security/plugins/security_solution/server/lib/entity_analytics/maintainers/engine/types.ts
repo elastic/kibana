@@ -70,8 +70,7 @@ export interface BucketTargetByThresholdConfig {
  * actor EUID expression (`evalOverride`) without also declaring the Step 1
  * composite-agg sources (`fields`). Without that pairing, Step 1 would
  * bucket-discover on ECS `user.*` while Step 2 computed the EUID from custom
- * fields — Step 1 and Step 2 would silently desync (the same shape of bug
- * niros1 caught for the EUID-exists gate).
+ * fields, and Step 1 and Step 2 would silently surface different actor sets.
  */
 export interface CustomActorBinding {
   /** Composite-agg sources + bucket filter keys (Step 1, all variants). */
