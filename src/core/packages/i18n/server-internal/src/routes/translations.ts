@@ -87,8 +87,13 @@ export const registerTranslationsRoute = ({
             if (files.length === 1) {
               // Single pre-merged file (standard case): inject locale field via string
               // splice and serve without parsing or caching the content.
+              // Strip the outer braces and only add the comma when inner content exists,
+              // so an empty file ({}) doesn't produce the invalid {"locale":"xx",}.
               const raw = await readFile(files[0], 'utf8');
-              body = `{"locale":${JSON.stringify(canonicalLocale)},${raw.slice(1)}`;
+              const inner = raw.trim().slice(1, -1);
+              body = inner
+                ? `{"locale":${JSON.stringify(canonicalLocale)},${inner}}`
+                : `{"locale":${JSON.stringify(canonicalLocale)}}`;
             } else {
               // Multiple files (external plugin contributed translations): merge via
               // the loader and serve without caching.
