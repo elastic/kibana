@@ -709,6 +709,16 @@ export const getResolutionScoreESQL = (
   return query;
 };
 
+/**
+ * Resolution scoring filtered by an explicit `resolution_target_id IN (...)` list.
+ *
+ * `COALESCE(resolution_target_id, entity_id)` after the LOOKUP JOIN routes
+ * alerts on resolution targets that aren't themselves iterated by the entity
+ * store (so they have no lookup row) to their own EUID — keeping their alerts
+ * attributed to the requested target. `relationship_type` defaults to "self"
+ * on the same path; `parseEsqlResolutionScoreRow` drops "self" entries from
+ * `related_entities`.
+ */
 export const getResolutionScoreESQLByIds = (
   entityType: EntityType,
   resolutionTargetIds: string[],
@@ -745,6 +755,8 @@ export const getResolutionScoreESQLByIds = (
           category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
     | LOOKUP JOIN ${lookupIndex} ON entity_id
+    | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
+           relationship_type = COALESCE(relationship_type, "self")
     | WHERE resolution_target_id IN (${idsClause})
     | EVAL entity_with_rel = CONCAT(entity_id, "|", relationship_type)
     | STATS

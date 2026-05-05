@@ -48,12 +48,13 @@ interface BulkSummary {
 }
 
 /**
- * Lookup rows for one entity:
- * - alias (has resolved_to): alias row + eager target self-row.
- * - plain: self-row only.
+ * One row per iterated entity, keyed by its own EUID:
+ * - alias (has resolved_to): alias row pointing at the target.
+ * - plain: self-row.
  *
- * Eager target self-rows let resolution scoring attribute a target's own
- * alerts to its group via LOOKUP JOIN (elastic/kibana#263542).
+ * Resolution targets that are not themselves in the entity store have no row;
+ * Phase 2 ES|QL recovers their `resolution_target_id` via
+ * `COALESCE(resolution_target_id, entity_id)` after the LOOKUP JOIN.
  */
 const buildLookupRowsForEntity = (
   source: EntityStoreLookupSource,
@@ -75,14 +76,6 @@ const buildLookupRowsForEntity = (
         calculation_run_id: calculationRunId,
         '@timestamp': now,
       },
-      {
-        entity_id: resolvedTo,
-        resolution_target_id: resolvedTo,
-        propagation_target_id: null,
-        relationship_type: SELF_RELATIONSHIP_TYPE,
-        calculation_run_id: calculationRunId,
-        '@timestamp': now,
-      },
     ];
   }
 
@@ -98,31 +91,13 @@ const buildLookupRowsForEntity = (
   ];
 };
 
-/**
- * De-dupes rows for the page (an entity may appear as alias source and another
- * alias's target) and emits ES bulk action/document pairs.
- */
+/** Emits ES bulk action/document pairs keyed by `entity_id`. */
 const toBulkIndexOperations = (
   docs: LookupDocument[],
   index: string
 ): Array<BulkOperationContainer | LookupDocument> => {
-  const byEntityId = new Map<string, LookupDocument>();
-  for (const doc of docs) {
-    // Alias rows beat self-rows for the same entity_id. Decide by
-    // relationship_type, not insertion order — chains (A→B, B→C) can place
-    // B's eager self-row before B's own alias row.
-    const existing = byEntityId.get(doc.entity_id);
-    if (
-      existing === undefined ||
-      (existing.relationship_type === SELF_RELATIONSHIP_TYPE &&
-        doc.relationship_type !== SELF_RELATIONSHIP_TYPE)
-    ) {
-      byEntityId.set(doc.entity_id, doc);
-    }
-  }
-
   const operations: Array<BulkOperationContainer | LookupDocument> = [];
-  for (const doc of byEntityId.values()) {
+  for (const doc of docs) {
     operations.push({ index: { _index: index, _id: doc.entity_id } });
     operations.push(doc);
   }

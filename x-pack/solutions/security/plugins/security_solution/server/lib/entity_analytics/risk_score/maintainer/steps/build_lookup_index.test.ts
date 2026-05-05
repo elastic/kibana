@@ -81,7 +81,10 @@ describe('build_lookup_index', () => {
     });
   });
 
-  it('writes alias and target self rows for alias entities', async () => {
+  it('writes only the alias row for alias entities', async () => {
+    // Targets that aren't themselves iterated have no lookup row; Phase 2
+    // ES|QL recovers their target_id via COALESCE(resolution_target_id,
+    // entity_id) after the LOOKUP JOIN.
     (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
       entities: [
         {
@@ -115,66 +118,8 @@ describe('build_lookup_index', () => {
           calculation_run_id: RUN_ID,
           '@timestamp': NOW,
         },
-        { index: { _index: '.lookup-default', _id: 'user:target' } },
-        {
-          entity_id: 'user:target',
-          resolution_target_id: 'user:target',
-          propagation_target_id: null,
-          relationship_type: 'self',
-          calculation_run_id: RUN_ID,
-          '@timestamp': NOW,
-        },
       ],
     });
-  });
-
-  it("keeps an alias row over an earlier alias-target's eager self-row in a resolution chain", async () => {
-    // Chain A→B, B→C. Phase 0 emits B's eager self-row while processing A
-    // (because B is A's resolution target), then later emits B's own alias
-    // row while processing B. The alias row must win — otherwise B is
-    // persisted as a self-row and its resolution to C is lost.
-    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
-      entities: [
-        {
-          entity: {
-            id: 'user:a',
-            relationships: { resolution: { resolved_to: 'user:b' } },
-          },
-        },
-        {
-          entity: {
-            id: 'user:b',
-            relationships: { resolution: { resolved_to: 'user:c' } },
-          },
-        },
-      ],
-      nextSearchAfter: undefined,
-    });
-
-    await buildLookupIndex({
-      esClient,
-      crudClient,
-      logger,
-      lookupIndex: '.lookup-default',
-      entityTypes: [EntityType.user],
-      calculationRunId: RUN_ID,
-      now: NOW,
-    });
-
-    const operations = (esClient.bulk as jest.Mock).mock.calls[0][0].operations;
-    const docByEntityId = new Map<string, Record<string, unknown>>();
-    for (let i = 0; i < operations.length; i += 2) {
-      const action = operations[i] as { index: { _id: string } };
-      docByEntityId.set(action.index._id, operations[i + 1]);
-    }
-
-    expect(docByEntityId.get('user:b')).toEqual(
-      expect.objectContaining({
-        entity_id: 'user:b',
-        resolution_target_id: 'user:c',
-        relationship_type: 'entity.relationships.resolution.resolved_to',
-      })
-    );
   });
 
   it('returns early when aborted between pages', async () => {
