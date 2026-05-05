@@ -41,6 +41,8 @@ describe('DefaultAlertService', () => {
         defaultEmail: undefined,
         defaultStatusRuleEnabled: true,
         defaultTLSRuleEnabled: true,
+        useAllRemoteClusters: false,
+        selectedRemoteClusters: [],
       });
       expect(soClient.get).toHaveBeenCalledTimes(1);
     });

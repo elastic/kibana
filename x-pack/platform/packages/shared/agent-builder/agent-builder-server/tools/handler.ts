@@ -12,6 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import type { AgentExecutionMode } from '@kbn/agent-builder-common';
 import type {
   ToolEventEmitter,
   ModelProvider,
@@ -150,4 +151,9 @@ export interface ToolHandlerContext {
    * The current execution context, including the agent/tool call stack.
    */
   runContext: RunContext;
+  /**
+   * The execution mode for the current agent run.
+   * When 'standalone', the execution is non-interactive (HITL disabled).
+   */
+  executionMode?: AgentExecutionMode;
 }

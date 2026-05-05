@@ -154,7 +154,7 @@ export function registerAnalyticsRoutes({
       },
       validate: {
         body: schema.object({
-          name: schema.string(),
+          name: schema.string({ maxLength: 1024 }),
         }),
       },
     },

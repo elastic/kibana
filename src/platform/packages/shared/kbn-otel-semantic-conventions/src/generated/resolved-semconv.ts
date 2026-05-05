@@ -13,13 +13,13 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 143
- * Metric groups: 508
+ * Metric groups: 525
  * Hardcoded fields: 34
- * Total fields: 1224
+ * Total fields: 1252
  *
  * @internal
  *
- * WARNING: This object contains 1224+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1252+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -1987,6 +1987,11 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'forest,lived',
   },
+  'gen_ai.request.stream': {
+    name: 'gen_ai.request.stream',
+    description: 'Indicates whether the GenAI request was made in streaming mode.',
+    type: 'boolean',
+  },
   'gen_ai.request.temperature': {
     name: 'gen_ai.request.temperature',
     description: 'The temperature setting for the GenAI request.',
@@ -2023,6 +2028,13 @@ export const semconvFlat = {
     description: 'The name of the model that generated the response.',
     type: 'keyword',
     example: 'gpt-4-0613',
+  },
+  'gen_ai.response.time_to_first_chunk': {
+    name: 'gen_ai.response.time_to_first_chunk',
+    description:
+      'Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.',
+    type: 'double',
+    example: '0.5',
   },
   'gen_ai.retrieval.documents': {
     name: 'gen_ai.retrieval.documents',
@@ -2071,8 +2083,7 @@ export const semconvFlat = {
   },
   'gen_ai.tool.definitions': {
     name: 'gen_ai.tool.definitions',
-    description:
-      'The list of source system tool definitions available to the GenAI agent or model.',
+    description: 'The list of tool definitions available to the GenAI agent or model.',
     type: 'keyword',
     example:
       '[{"type":"function","name":"get_current_weather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location","unit"]}}]',
@@ -2859,11 +2870,87 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'node-1',
   },
+  'k8s.node.system_container.name': {
+    name: 'k8s.node.system_container.name',
+    description: 'The name of the system container running on the K8s Node.',
+    type: 'keyword',
+    example: 'kubelet',
+  },
   'k8s.node.uid': {
     name: 'k8s.node.uid',
     description: 'The UID of the Node.',
     type: 'keyword',
     example: '1eb3a0c6-0477-4080-a9cb-0cb7db65c6a2',
+  },
+  'k8s.persistentvolume.annotation': {
+    name: 'k8s.persistentvolume.annotation',
+    description:
+      'The annotation placed on the PersistentVolume, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: 'kubernetes.io/aws-ebs',
+  },
+  'k8s.persistentvolume.label': {
+    name: 'k8s.persistentvolume.label',
+    description:
+      'The label placed on the PersistentVolume, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'ssd',
+  },
+  'k8s.persistentvolume.name': {
+    name: 'k8s.persistentvolume.name',
+    description: 'The name of the PersistentVolume.',
+    type: 'keyword',
+    example: 'pv-data-01',
+  },
+  'k8s.persistentvolume.reclaim_policy': {
+    name: 'k8s.persistentvolume.reclaim_policy',
+    description: 'The reclaim policy of the PersistentVolume.',
+    type: 'keyword',
+    example: 'Delete',
+  },
+  'k8s.persistentvolume.status.phase': {
+    name: 'k8s.persistentvolume.status.phase',
+    description: 'The phase of the PersistentVolume.',
+    type: 'keyword',
+    example: 'Pending',
+  },
+  'k8s.persistentvolume.uid': {
+    name: 'k8s.persistentvolume.uid',
+    description: 'The UID of the PersistentVolume.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.persistentvolumeclaim.annotation': {
+    name: 'k8s.persistentvolumeclaim.annotation',
+    description:
+      'The annotation placed on the PersistentVolumeClaim, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: 'kubernetes.io/aws-ebs',
+  },
+  'k8s.persistentvolumeclaim.label': {
+    name: 'k8s.persistentvolumeclaim.label',
+    description:
+      'The label placed on the PersistentVolumeClaim, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'my-app',
+  },
+  'k8s.persistentvolumeclaim.name': {
+    name: 'k8s.persistentvolumeclaim.name',
+    description: 'The name of the PersistentVolumeClaim.',
+    type: 'keyword',
+    example: 'pvc-data-01',
+  },
+  'k8s.persistentvolumeclaim.status.phase': {
+    name: 'k8s.persistentvolumeclaim.status.phase',
+    description: 'The phase of the PersistentVolumeClaim.',
+    type: 'keyword',
+    example: 'Pending',
+  },
+  'k8s.persistentvolumeclaim.uid': {
+    name: 'k8s.persistentvolumeclaim.uid',
+    description: 'The UID of the PersistentVolumeClaim.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
   },
   'k8s.pod.annotation': {
     name: 'k8s.pod.annotation',
@@ -3966,6 +4053,12 @@ export const semconvFlat = {
     description: 'Heap size target for the end of the GC cycle.',
     type: 'double',
   },
+  'metrics.go.memory.gc.pause.duration': {
+    name: 'metrics.go.memory.gc.pause.duration',
+    description:
+      'Distribution of individual GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again.',
+    type: 'double',
+  },
   'metrics.go.memory.limit': {
     name: 'metrics.go.memory.limit',
     description: 'Go runtime memory limit configured by the user, if a limit exists.',
@@ -4352,24 +4445,34 @@ export const semconvFlat = {
     description: 'Number of executing platform threads.',
     type: 'double',
   },
-  'metrics.k8s.container.cpu.limit': {
-    name: 'metrics.k8s.container.cpu.limit',
-    description: 'Maximum CPU resource limit set for the container.',
+  'metrics.k8s.container.cpu.limit.current': {
+    name: 'metrics.k8s.container.cpu.limit.current',
+    description: 'Maximum CPU resource limit currently configured for a running container.',
     type: 'double',
   },
-  'metrics.k8s.container.cpu.limit_utilization': {
-    name: 'metrics.k8s.container.cpu.limit_utilization',
-    description: 'The ratio of container CPU usage to its CPU limit.',
+  'metrics.k8s.container.cpu.limit.desired': {
+    name: 'metrics.k8s.container.cpu.limit.desired',
+    description: 'Maximum CPU resource limit as defined by the container spec.',
     type: 'double',
   },
-  'metrics.k8s.container.cpu.request': {
-    name: 'metrics.k8s.container.cpu.request',
-    description: 'CPU resource requested for the container.',
+  'metrics.k8s.container.cpu.limit.utilization': {
+    name: 'metrics.k8s.container.cpu.limit.utilization',
+    description: 'The ratio of container CPU usage to its current CPU limit.',
     type: 'double',
   },
-  'metrics.k8s.container.cpu.request_utilization': {
-    name: 'metrics.k8s.container.cpu.request_utilization',
-    description: 'The ratio of container CPU usage to its CPU request.',
+  'metrics.k8s.container.cpu.request.current': {
+    name: 'metrics.k8s.container.cpu.request.current',
+    description: 'CPU resource requested currently configured for a running container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.cpu.request.desired': {
+    name: 'metrics.k8s.container.cpu.request.desired',
+    description: 'CPU resource requested as defined by the container spec.',
+    type: 'double',
+  },
+  'metrics.k8s.container.cpu.request.utilization': {
+    name: 'metrics.k8s.container.cpu.request.utilization',
+    description: 'The ratio of container CPU usage to its current CPU request.',
     type: 'double',
   },
   'metrics.k8s.container.ephemeral_storage.limit': {
@@ -4620,9 +4723,54 @@ export const semconvFlat = {
     description: 'Amount of pods allocatable on the node.',
     type: 'double',
   },
+  'metrics.k8s.node.system_container.cpu.time': {
+    name: 'metrics.k8s.node.system_container.cpu.time',
+    description: "Node's system container CPU time.",
+    type: 'double',
+  },
+  'metrics.k8s.node.system_container.cpu.usage': {
+    name: 'metrics.k8s.node.system_container.cpu.usage',
+    description: "Node's system container CPU usage, measured in cpus.",
+    type: 'double',
+  },
+  'metrics.k8s.node.system_container.memory.usage': {
+    name: 'metrics.k8s.node.system_container.memory.usage',
+    description: "Node's system container memory usage.",
+    type: 'double',
+  },
+  'metrics.k8s.node.system_container.memory.working_set': {
+    name: 'metrics.k8s.node.system_container.memory.working_set',
+    description: 'The amount of working set memory.',
+    type: 'double',
+  },
   'metrics.k8s.node.uptime': {
     name: 'metrics.k8s.node.uptime',
     description: 'The time the Node has been running.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolume.status.phase': {
+    name: 'metrics.k8s.persistentvolume.status.phase',
+    description: 'Number of PersistentVolumes in a given phase.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolume.storage.capacity': {
+    name: 'metrics.k8s.persistentvolume.storage.capacity',
+    description: 'The storage capacity of the PersistentVolume.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolumeclaim.status.phase': {
+    name: 'metrics.k8s.persistentvolumeclaim.status.phase',
+    description: 'Number of PersistentVolumeClaims in a given phase.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolumeclaim.storage.capacity': {
+    name: 'metrics.k8s.persistentvolumeclaim.storage.capacity',
+    description: 'The actual storage capacity provisioned for the PersistentVolumeClaim.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolumeclaim.storage.request': {
+    name: 'metrics.k8s.persistentvolumeclaim.storage.request',
+    description: 'The storage requested by the PersistentVolumeClaim.',
     type: 'double',
   },
   'metrics.k8s.pod.cpu.time': {
@@ -5625,6 +5773,11 @@ export const semconvFlat = {
     description: 'Heap Memory size allocated.',
     type: 'double',
   },
+  'metrics.v8js.resource.active': {
+    name: 'metrics.v8js.resource.active',
+    description: 'Gauge of the active resources that are currently keeping the event loop alive.',
+    type: 'double',
+  },
   'metrics.vcs.change.count': {
     name: 'metrics.vcs.change.count',
     description:
@@ -6147,8 +6300,7 @@ export const semconvFlat = {
   },
   'process.executable.build_id.htlhash': {
     name: 'process.executable.build_id.htlhash',
-    description:
-      'Profiling specific build ID for executables. See the OTel specification for Profiles for more information.',
+    description: 'Deterministic build ID for executables.',
     type: 'keyword',
     example: '600DCAFE4A110000F2BF38C493F5FB92',
   },
@@ -7058,6 +7210,11 @@ export const semconvFlat = {
   'v8js.heap.space.name': {
     name: 'v8js.heap.space.name',
     description: 'The name of the space type of heap memory.',
+    type: 'keyword',
+  },
+  'v8js.resource.type': {
+    name: 'v8js.resource.type',
+    description: 'The type of resource keeping the event loop active.',
     type: 'keyword',
   },
   'vcs.change.id': {

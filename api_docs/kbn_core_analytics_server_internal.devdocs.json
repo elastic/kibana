@@ -53,6 +53,7 @@
                 "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreContext",
                 "trackAdoption": false,
                 "isRequired": true
               }

@@ -8,7 +8,7 @@
  */
 
 import { useState, useLayoutEffect } from 'react';
-import { EXPANDED_WIDTH } from '@kbn/core-chrome-navigation';
+import { EXPANDED_WIDTH } from '@kbn/ui-side-navigation';
 
 // Thresholds for how wide the main app column is (px). Layout: nav | app | sidebar.
 // `window.innerWidth` does not change when the nav collapses, so measuring it does not

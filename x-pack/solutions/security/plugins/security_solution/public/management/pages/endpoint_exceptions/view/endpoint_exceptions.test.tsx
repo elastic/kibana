@@ -16,15 +16,20 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import { exceptionsListAllHttpMocks } from '../../../mocks';
 import { endpointExceptionsPerPolicyOptInAllHttpMocks } from '../../../mocks/endpoint_per_policy_opt_in_http_mocks';
 import userEvent from '@testing-library/user-event';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 
 jest.mock('../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
+
+jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
+const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
 
 describe('When on the endpoint exceptions page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
+  let mockCanCreateEndpointExceptions: boolean;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
@@ -36,10 +41,19 @@ describe('When on the endpoint exceptions page', () => {
     act(() => {
       history.push(ENDPOINT_EXCEPTIONS_PATH);
     });
+
+    mockCanCreateEndpointExceptions = true;
+    mockUseEndpointExceptionsCapability.mockImplementation((capability: string) => {
+      if (capability === 'crudEndpointExceptions') {
+        return mockCanCreateEndpointExceptions;
+      }
+
+      return true;
+    });
   });
 
   afterEach(() => {
-    mockUserPrivileges.mockReset();
+    jest.clearAllMocks();
   });
 
   describe('And no data exists', () => {
@@ -58,10 +72,11 @@ describe('When on the endpoint exceptions page', () => {
       beforeEach(() => {
         mockUserPrivileges.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({
-            canWriteEndpointExceptions: true,
             canWriteAdminData: false,
+            canWriteEndpointExceptions: true,
           }),
         });
+        mockCanCreateEndpointExceptions = true;
       });
 
       it('should enable adding entries', async () => {
@@ -75,14 +90,16 @@ describe('When on the endpoint exceptions page', () => {
       });
     });
 
-    describe('READ privilege', () => {
+    describe('READ privilege - or ALL privilege without global write before per-policy opt-in', () => {
       beforeEach(() => {
         mockUserPrivileges.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({
-            canWriteEndpointExceptions: false,
             canWriteAdminData: false,
+            canWriteEndpointExceptions: true,
           }),
         });
+
+        mockCanCreateEndpointExceptions = false;
       });
 
       it('should disable adding entries', async () => {
@@ -129,10 +146,10 @@ describe('When on the endpoint exceptions page', () => {
 
       mockUserPrivileges.mockReturnValue({
         endpointPrivileges: getEndpointAuthzInitialStateMock({
-          canWriteEndpointExceptions: true,
           canWriteAdminData: true,
         }),
       });
+      mockCanCreateEndpointExceptions = true;
     });
 
     describe('when there are no exceptions', () => {
@@ -327,10 +344,10 @@ describe('When on the endpoint exceptions page', () => {
           beforeEach(() => {
             mockUserPrivileges.mockReturnValue({
               endpointPrivileges: getEndpointAuthzInitialStateMock({
-                canWriteEndpointExceptions: true,
                 canWriteAdminData: true,
               }),
             });
+            mockCanCreateEndpointExceptions = true;
           });
 
           it('should show the update details button', async () => {
@@ -359,10 +376,10 @@ describe('When on the endpoint exceptions page', () => {
           beforeEach(() => {
             mockUserPrivileges.mockReturnValue({
               endpointPrivileges: getEndpointAuthzInitialStateMock({
-                canWriteEndpointExceptions: true,
                 canWriteAdminData: false,
               }),
             });
+            mockCanCreateEndpointExceptions = true;
           });
 
           it('should show "Contact your admin" instead of the update details button', async () => {

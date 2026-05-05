@@ -25,7 +25,11 @@ import type {
   XYByReferenceAnnotationLayerConfig,
 } from '@kbn/lens-common';
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
-import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import type {
+  LensByValueSerializedAPIConfig,
+  LensSerializedAPIConfig,
+  LensWireAPIConfig,
+} from '@kbn/lens-common-2';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
@@ -38,7 +42,7 @@ import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
-import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils';
 
 import type { StrippedLensState } from '../../common/transforms/helpers';
 import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../common/transforms/utils';
@@ -84,8 +88,9 @@ export async function deserializeState(
     attributeService,
     ...services
   }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
-  state: LensSerializedAPIConfig
+  rawState: LensWireAPIConfig
 ): Promise<LensRuntimeState> {
+  const state = isFlattenedAPIConfig(rawState) ? unflattenAPIConfig(rawState) : rawState;
   const fallbackAttributes = createEmptyLensState().attributes;
   const refId = 'ref_id' in state ? state.ref_id : undefined;
 
@@ -106,7 +111,7 @@ export async function deserializeState(
     }
   }
 
-  const newState = transformFromApiConfig(state as LensSerializedAPIConfig) as LensRuntimeState;
+  const newState = transformFromApiConfig(state) as LensRuntimeState;
 
   if (newState.isNewPanel) {
     try {
@@ -180,14 +185,12 @@ export function getStructuredDatasourceStates(
 }
 
 export function transformFromApiConfig(
-  rawState: LensSerializedAPIConfig | FlattenedLensByValuePanelSchema
+  rawState: LensWireAPIConfig | FlattenedLensByValuePanelSchema
 ): LensSerializedState {
   // The dashboard may provide state in the flat API format (from server-side transforms)
   // where chart props sit at the top level without an `attributes` wrapper.
   // Normalize to the nested format before proceeding.
-  const state: LensSerializedAPIConfig = isFlattenedAPIConfig(rawState)
-    ? unflattenAPIConfig(rawState)
-    : rawState;
+  const state = isFlattenedAPIConfig(rawState) ? unflattenAPIConfig(rawState) : rawState;
 
   const builder = getLensBuilder();
 

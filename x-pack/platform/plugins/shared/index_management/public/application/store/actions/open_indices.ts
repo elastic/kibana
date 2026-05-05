@@ -9,15 +9,19 @@ import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
 import { openIndices as request } from '../../services';
 import { clearRowStatus, reloadIndices } from '.';
-import { notificationService } from '../../services/notification';
 import type { AppDispatch } from '../types';
 import { getHttpErrorToastMessage } from '../http_error';
+import type { AppDependencies } from '../../app_context';
 
 export const openIndicesStart = createAction('INDEX_MANAGEMENT_OPEN_INDICES_START');
 
 export const openIndices =
   ({ indexNames }: { indexNames: string[] }) =>
-  async (dispatch: AppDispatch) => {
+  async (
+    dispatch: AppDispatch,
+    _getState: () => unknown,
+    { notificationService }: AppDependencies['services']
+  ) => {
     dispatch(openIndicesStart({ indexNames }));
     try {
       await request(indexNames);

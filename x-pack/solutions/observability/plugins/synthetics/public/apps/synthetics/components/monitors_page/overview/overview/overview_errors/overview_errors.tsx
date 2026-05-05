@@ -9,11 +9,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elast
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { OverviewErrorsSparklines } from './overview_errors_sparklines';
-import { useRefreshedRange } from '../../../../../hooks';
+import { useRefreshedRangeFromUrl } from '../../../../../hooks';
 import { OverviewErrorsCount } from './overview_errors_count';
 
 export function OverviewErrors() {
-  const { from, to } = useRefreshedRange(6, 'hours');
+  // Range now follows the page-level date picker (URL params). When the user
+  // hasn't touched the picker, this falls back to "now-24h → now" via the
+  // `now-24h` default in `getSupportedUrlParams`.
+  const { from, to } = useRefreshedRangeFromUrl();
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
@@ -34,5 +37,5 @@ export function OverviewErrors() {
 }
 
 const headingText = i18n.translate('xpack.synthetics.overview.errors.headingText', {
-  defaultMessage: 'Last 6 hours',
+  defaultMessage: 'Errors',
 });

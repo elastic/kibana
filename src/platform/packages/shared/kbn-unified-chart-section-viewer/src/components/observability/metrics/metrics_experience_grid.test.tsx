@@ -34,7 +34,12 @@ jest.mock('@kbn/ebt-tools', () => ({
     onPageReady: jest.fn(),
   }),
 }));
-jest.mock('./hooks');
+jest.mock('./hooks', () => ({
+  ...jest.requireActual('./hooks'),
+  useMetricsGridFullScreen: jest.fn(),
+  useMetricFieldsFilter: jest.fn(),
+  useDiscoverFieldForBreakdown: jest.fn(),
+}));
 jest.mock('./hooks/use_fetch_metrics_data', () => ({
   useFetchMetricsData: jest.fn(),
 }));
@@ -137,6 +142,7 @@ describe('MetricsExperienceGrid', () => {
       } as unknown as UnifiedHistogramServices,
       fetch$,
       isComponentVisible: true,
+      profileId: 'test-profile-id',
     };
 
     useMetricsExperienceStateMock.mockReturnValue({
@@ -148,19 +154,19 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     useFetchMetricsDataMock.mockReturnValue({
       metricItems,
       allDimensions: dimensions,
+      activeDimensions: [],
       loading: false,
       error: null,
     });
 
     useMetricsGridFullScreenMock.mockReturnValue({
       metricsGridId: 'test-metrics-grid-id',
-      metricsGridWrapper: null,
-      setMetricsGridWrapper: jest.fn(),
       styles: {
         'metricsGrid--fullScreen': 'mock-fullscreen-class',
         'metricsGrid--restrictBody': 'mock-restrict-body-class',
@@ -191,6 +197,7 @@ describe('MetricsExperienceGrid', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
+      activeDimensions: [],
       loading: false,
       error: new Error('METRICS_INFO failed'),
     });
@@ -215,6 +222,7 @@ describe('MetricsExperienceGrid', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
+      activeDimensions: [],
       loading: false,
       error: abortError,
     });
@@ -232,6 +240,7 @@ describe('MetricsExperienceGrid', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
+      activeDimensions: [],
       loading: true,
       error: new Error('stale error while refetching'),
     });
@@ -259,6 +268,7 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange,
       onToggleFullscreen: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -301,6 +311,7 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen,
+      profileId: 'test-profile-id',
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -316,5 +327,89 @@ describe('MetricsExperienceGrid', () => {
     });
 
     expect(onToggleFullscreen).toHaveBeenCalled();
+  });
+
+  describe('wipe orphan dimensions on stream switch (#264957)', () => {
+    // Smoke tests only: these assert the grid wires `useDimensionsWipe`
+    // correctly (selection + breakdown callbacks reach Discover). The full
+    // matrix of wipe scenarios lives in `use_dimensions_wipe.test.ts`.
+    const hostName: Dimension = { name: 'host.name' };
+    const environment: Dimension = { name: 'environment' };
+
+    it('prunes selectedDimensions and proposes a default breakdown via onBreakdownFieldChange', () => {
+      const onDimensionsChange = jest.fn();
+      const onBreakdownFieldChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [hostName, environment],
+        onDimensionsChange,
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        profileId: 'test-profile-id',
+      });
+
+      // Stream's universe only has `host.name`; `environment` is mapped but
+      // not emitted by this stream, so it must be wiped.
+      useFetchMetricsDataMock.mockReturnValue({
+        metricItems,
+        allDimensions: [hostName],
+        activeDimensions: [hostName],
+        loading: false,
+        error: null,
+      });
+
+      render(
+        <MetricsExperienceGrid {...defaultProps} onBreakdownFieldChange={onBreakdownFieldChange} />,
+        { wrapper: IntlProvider }
+      );
+
+      expect(onDimensionsChange).toHaveBeenCalledWith([hostName]);
+      // Discover had no breakdown yet, so the wipe proposes the first
+      // surviving dimension.
+      expect(onBreakdownFieldChange).toHaveBeenCalledWith('host.name');
+    });
+
+    it('does not touch the breakdown when the current breakdownField survives the prune', () => {
+      const onDimensionsChange = jest.fn();
+      const onBreakdownFieldChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [hostName, environment],
+        onDimensionsChange,
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        profileId: 'test-profile-id',
+      });
+
+      useFetchMetricsDataMock.mockReturnValue({
+        metricItems,
+        allDimensions: [hostName],
+        activeDimensions: [hostName],
+        loading: false,
+        error: null,
+      });
+
+      // Discover already breaks down by `host.name`, which survives the
+      // prune; the wipe must leave it untouched.
+      render(
+        <MetricsExperienceGrid
+          {...defaultProps}
+          breakdownField="host.name"
+          onBreakdownFieldChange={onBreakdownFieldChange}
+        />,
+        { wrapper: IntlProvider }
+      );
+
+      expect(onDimensionsChange).toHaveBeenCalledWith([hostName]);
+      expect(onBreakdownFieldChange).not.toHaveBeenCalled();
+    });
   });
 });

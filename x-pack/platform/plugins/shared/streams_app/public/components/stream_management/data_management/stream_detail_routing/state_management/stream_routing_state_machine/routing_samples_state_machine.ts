@@ -21,6 +21,7 @@ import type { Condition } from '@kbn/streamlang';
 import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
 import { processCondition } from '../../utils';
 import type { StreamsTelemetryClient } from '../../../../../../telemetry/client';
+import type { PartitionableDefinition } from './types';
 
 export interface RoutingSamplesMachineDeps {
   data: DataPublicPluginStart;
@@ -35,13 +36,13 @@ export type DocumentMatchFilterOptions = 'matched' | 'unmatched';
 
 export interface RoutingSamplesInput {
   condition?: Condition;
-  definition: Streams.ingest.all.GetResponse;
+  definition: PartitionableDefinition;
   documentMatchFilter: DocumentMatchFilterOptions;
 }
 
 export interface RoutingSamplesContext {
   condition?: Condition;
-  definition: Streams.ingest.all.GetResponse;
+  definition: PartitionableDefinition;
   documents: SampleDocument[];
   documentsError?: Error;
   approximateMatchRatio?: number | null;
@@ -487,7 +488,7 @@ const getAbsoluteTimestamps = (data: DataPublicPluginStart) => {
  * ingest in the painless condition checks.
  */
 function getRuntimeMappings(
-  definition: Streams.ingest.all.GetResponse,
+  definition: PartitionableDefinition,
   condition?: Condition
 ): MappingRuntimeFields {
   if (!condition) return {};

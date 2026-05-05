@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import React from 'react';
 import type { Theme } from '@elastic/charts';
 import type { BoolQuery } from '@kbn/es-query';
 import type { RecursivePartial } from '@elastic/eui';
 import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CHART_SETTINGS } from './constants';
-
+import type { TopAlert } from '@kbn/observability-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
+import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
@@ -20,13 +24,16 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 import { TransactionTypeSelect } from './transaction_type_select';
-import { ViewInAPMButton } from './view_in_apm_button';
+import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
+import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 
 const INITIAL_STATE = {
   currentPeriod: [],
   previousPeriod: [],
 };
-function ThroughputChart({
+
+export function ThroughputChart({
+  alert,
   transactionType,
   transactionTypes,
   setTransactionType,
@@ -41,8 +48,12 @@ function ThroughputChart({
   timeZone,
   kuery = '',
   filters,
+  customAlertEvaluationThreshold,
+  threshold,
+  ruleTypeId,
 }: {
-  transactionType: string;
+  alert: TopAlert;
+  transactionType?: string;
   transactionTypes?: string[];
   setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
@@ -56,7 +67,16 @@ function ThroughputChart({
   timeZone: string;
   kuery?: string;
   filters?: BoolQuery;
+  customAlertEvaluationThreshold?: number;
+  threshold?: ReactElement;
+  ruleTypeId?: ApmRuleType;
 }) {
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
+
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
@@ -69,7 +89,7 @@ function ThroughputChart({
 
   const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } = useFetcher(
     (callApmApi) => {
-      if (serviceName && transactionType && start && end && preferred) {
+      if (serviceName && start && end && preferred) {
         return callApmApi('GET /internal/apm/services/{serviceName}/throughput', {
           params: {
             path: {
@@ -103,7 +123,17 @@ function ThroughputChart({
       filters,
     ]
   );
-  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
+
+  const dateFormat = (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT;
+
+  const alertAnnotations = useGetChartAlertAnnotations({
+    alert,
+    dateFormat,
+    showAnnotations: !!threshold,
+    customAlertEvaluationThreshold,
+    normalizeThreshold: (value) => value / 100,
+  });
+
   const timeseriesThroughput = [
     {
       data: dataThroughput.currentPeriod,
@@ -125,7 +155,7 @@ function ThroughputChart({
       : []),
   ];
 
-  const showTransactionTypeSelect = setTransactionType && transactionTypes;
+  const showTransactionTypeSelect = transactionType && transactionTypes && setTransactionType;
 
   return (
     <EuiFlexItem>
@@ -161,36 +191,45 @@ function ThroughputChart({
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <ViewInAPMButton
-                  serviceName={serviceName}
-                  environment={environment}
-                  from={start}
-                  to={end}
-                  kuery={kuery}
-                  transactionName={transactionName}
-                  transactionType={transactionType}
+                <RedMetricsChartActions
+                  queryParams={{
+                    serviceName,
+                    environment,
+                    transactionName,
+                    transactionType,
+                    kuery,
+                  }}
+                  timeRange={{ from: start, to: end }}
+                  ruleTypeId={ruleTypeId}
+                  element={RED_METRICS_CHART_ELEMENT.THROUGHPUT}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-
-        <TimeseriesChart
-          id="throughput"
-          height={200}
-          comparisonEnabled={comparisonEnabled}
-          offset={offset}
-          fetchStatus={statusThroughput}
-          customTheme={comparisonChartTheme}
-          timeseries={timeseriesThroughput}
-          yLabelFormat={asExactTransactionRate}
-          timeZone={timeZone}
-          settings={CHART_SETTINGS}
-        />
+        <EuiFlexGroup direction="row" gutterSize="m">
+          {!!threshold && (
+            <EuiFlexItem style={{ minWidth: THRESHOLD_SIDEBAR_MIN_WIDTH }} grow={1}>
+              {threshold}
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={!!threshold ? 5 : undefined}>
+            <TimeseriesChart
+              id="throughput"
+              height={200}
+              annotations={alertAnnotations}
+              comparisonEnabled={comparisonEnabled}
+              offset={offset}
+              fetchStatus={statusThroughput}
+              customTheme={comparisonChartTheme}
+              timeseries={timeseriesThroughput}
+              yLabelFormat={asExactTransactionRate}
+              timeZone={timeZone}
+              settings={CHART_SETTINGS}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexItem>
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export default ThroughputChart;

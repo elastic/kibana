@@ -49,6 +49,7 @@
             "lineNumber": 29,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "ReporterOptions",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -47,6 +47,11 @@ const TracingProjectDetailPage = React.lazy(async () => {
   return { default: mod.TracingProjectDetailPage };
 });
 
+const CompareRunsPage = React.lazy(async () => {
+  const mod = await import('./pages/compare_runs');
+  return { default: mod.CompareRunsPage };
+});
+
 const appTitleLabel = i18n.translate('xpack.evals.app.title', {
   defaultMessage: 'Evaluations',
 });
@@ -68,11 +73,16 @@ const tracingTabLabel = i18n.translate('xpack.evals.navigation.tracing', {
 });
 
 const ROOT_PATH = '/' as const;
+const COMPARE_PATH = '/compare' as const;
 const DATASETS_PATH = '/datasets' as const;
 const TRACING_PATH = '/tracing' as const;
 const REMOTES_PATH = '/remotes' as const;
 const runDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runDetail', {
   defaultMessage: 'Run details',
+});
+
+const compareRunsBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.compareRuns', {
+  defaultMessage: 'Compare runs',
 });
 
 const datasetDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.datasetDetail', {
@@ -136,6 +146,10 @@ const getBreadcrumbs = ({
 
   if (pathname.startsWith('/runs/')) {
     return [{ text: runsTabLabel, href: runsHref }, { text: runDetailBreadcrumbLabel }];
+  }
+
+  if (pathname.startsWith(COMPARE_PATH)) {
+    return [{ text: runsTabLabel, href: runsHref }, { text: compareRunsBreadcrumbLabel }];
   }
 
   return [{ text: runsTabLabel }];
@@ -203,6 +217,7 @@ export const EvalsApp: React.FC<{
           <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
             <Routes>
               <Route exact path={ROOT_PATH} component={RunsListPage} />
+              <Route exact path={COMPARE_PATH} component={CompareRunsPage} />
               <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
               <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
               <Route exact path={REMOTES_PATH} component={RemotesListPage} />

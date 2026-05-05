@@ -8,52 +8,52 @@ components:
     CopySavedQueryResponse:
       description: 'The response for copying a saved query.'
       type: object
+      required:
+        - data
       properties:
         data:
-          description: 'The copied saved query.'
           type: object
+          required:
+            - saved_object_id
+            - id
           properties:
             saved_object_id:
-              description: 'The saved object ID of the copied saved query.'
               type: string
             id:
-              description: 'The saved query ID.'
-              type: string
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
             description:
-              description: 'The saved query description.'
-              type: string
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryDescriptionOrUndefined'
             query:
-              description: 'The SQL query.'
-              type: string
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Query'
             interval:
-              description: 'The query interval in seconds.'
-              type: string
+              oneOf:
+                - type: integer
+                - type: string
             timeout:
-              description: 'The query timeout in seconds.'
               type: integer
             snapshot:
-              description: 'Whether the query is a snapshot query.'
-              type: boolean
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SnapshotOrUndefined'
             removed:
-              description: 'Whether to include results for removed processes.'
-              type: boolean
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RemovedOrUndefined'
             platform:
-              description: 'The target platform(s).'
-              type: string
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PlatformOrUndefined'
             ecs_mapping:
-              description: 'The ECS mapping configuration.'
-              type: object
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingOrUndefined'
             created_at:
-              description: 'The creation timestamp.'
               type: string
+              format: date-time
             created_by:
-              description: 'The user who created the copy.'
+              type: string
+              nullable: true
+            created_by_profile_uid:
               type: string
             updated_at:
-              description: 'The last update timestamp.'
               type: string
+              format: date-time
             updated_by:
-              description: 'The user who last updated the saved query.'
+              type: string
+              nullable: true
+            updated_by_profile_uid:
               type: string
       example:
         data:

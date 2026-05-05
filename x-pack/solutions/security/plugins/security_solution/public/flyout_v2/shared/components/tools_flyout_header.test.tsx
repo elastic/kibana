@@ -23,7 +23,9 @@ jest.mock('../../document/components/severity', () => ({
 }));
 
 jest.mock('../../document/components/timestamp', () => ({
-  Timestamp: () => <div data-test-subj="mockTimestamp" />,
+  Timestamp: ({ size }: { size?: string }) => (
+    <div data-test-subj="mockTimestamp" data-size={size} />
+  ),
 }));
 
 const createMockHit = (flattened: DataTableRecord['flattened'] = {}): DataTableRecord =>
@@ -67,5 +69,10 @@ describe('<ToolsFlyoutHeader />', () => {
   it('should render the document timestamp', () => {
     const { getByTestId } = renderHeader();
     expect(getByTestId('mockTimestamp')).toBeInTheDocument();
+  });
+
+  it('should pass size="xs" to Timestamp', () => {
+    const { getByTestId } = renderHeader();
+    expect(getByTestId('mockTimestamp')).toHaveAttribute('data-size', 'xs');
   });
 });

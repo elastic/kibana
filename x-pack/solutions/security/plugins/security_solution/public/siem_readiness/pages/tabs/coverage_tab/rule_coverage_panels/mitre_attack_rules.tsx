@@ -379,6 +379,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                   disabledPackagesSet
                 )}
                 showOnlySelectable
+                telemetrySource="mitre_attack"
               />
             </EuiPopover>
           ))}

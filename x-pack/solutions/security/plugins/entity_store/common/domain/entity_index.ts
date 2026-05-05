@@ -32,7 +32,9 @@ export const getEntityIndexPattern = <TDataset extends Dataset>({
 }: IndexPatternOptions<TDataset>) =>
   `.${ENTITY_BASE_PREFIX}.${schemaVersion}.${dataset}.security_${namespace}` as const;
 
-// Returns the alias name for an entity dataset. All reads/writes should use this.
+// Returns the alias name for an entity dataset. Used for alias creation, privilege
+// checks, and external consumers. Internal read/write operations should use
+// getLatestEntitiesIndexName to target the concrete index directly.
 export const getEntitiesAlias = (dataset: Dataset, namespace: string) =>
   `${ENTITY_BASE_PREFIX}-${dataset}-${namespace}` as const;
 

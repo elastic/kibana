@@ -38,11 +38,11 @@ jest.mock('../notes', () => ({
   NotesDetails: () => <div data-test-subj="mock-notes-details" />,
 }));
 
-const createAlertHit = (): DataTableRecord =>
+const createAlertHit = (extra: DataTableRecord['flattened'] = {}): DataTableRecord =>
   ({
     id: '1',
     raw: {},
-    flattened: { 'event.kind': 'signal' },
+    flattened: { 'event.kind': 'signal', ...extra },
     isAnchor: false,
   } as DataTableRecord);
 
@@ -149,5 +149,74 @@ describe('<DocumentFlyout />', () => {
     );
 
     expect(getByTestId('mock-header')).toHaveAttribute('data-has-on-assignees-updated', 'true');
+  });
+
+  describe('remote document callout', () => {
+    it('shows the callout for remote alerts', () => {
+      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+
+      const { getByText } = render(
+        <TestProviders>
+          <DocumentFlyout
+            hit={createAlertHit({ _index: 'remote-cluster:.alerts-security.alerts-default' })}
+            renderCellActions={jest.fn()}
+            onAlertUpdated={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(
+        getByText(
+          'This alert originates from a remote cluster. Some features may not be available.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('shows the callout for remote non-alert documents', () => {
+      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+
+      const remoteEventHit: DataTableRecord = {
+        id: '1',
+        raw: {},
+        flattened: { 'event.kind': 'event', _index: 'remote-cluster:logs-system-default' },
+        isAnchor: false,
+      } as DataTableRecord;
+
+      const { getByText } = render(
+        <TestProviders>
+          <DocumentFlyout
+            hit={remoteEventHit}
+            renderCellActions={jest.fn()}
+            onAlertUpdated={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(
+        getByText(
+          'This event originates from a remote cluster. Some features may not be available.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('does not show the callout for local documents', () => {
+      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+
+      const { queryByText } = render(
+        <TestProviders>
+          <DocumentFlyout
+            hit={createAlertHit({ _index: '.alerts-security.alerts-default' })}
+            renderCellActions={jest.fn()}
+            onAlertUpdated={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(
+        queryByText(
+          'This alert originates from a remote cluster. Some features may not be available.'
+        )
+      ).not.toBeInTheDocument();
+    });
   });
 });

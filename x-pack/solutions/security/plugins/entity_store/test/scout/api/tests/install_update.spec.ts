@@ -7,17 +7,27 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import {
+  PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
+  ENTITY_STORE_ROUTES,
+  ENTITY_STORE_TAGS,
+} from '../fixtures/constants';
+import { FF_ENABLE_ENTITY_STORE_V2, type GetEntityMaintainersResponse } from '../../../../common';
 
 apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
       ...PUBLIC_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
     };
   });
 
@@ -34,6 +44,18 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
         body: {},
       });
       expect(install.statusCode).toBe(201);
+
+      const maintainersResponse = await apiClient.get(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET,
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+        }
+      );
+      expect(maintainersResponse.statusCode).toBe(200);
+      const { maintainers } = maintainersResponse.body as GetEntityMaintainersResponse;
+      expect(maintainers.length).toBeGreaterThan(0);
+      expect(maintainers.every((m) => m.taskStatus === 'started')).toBe(true);
 
       const uninstall = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,

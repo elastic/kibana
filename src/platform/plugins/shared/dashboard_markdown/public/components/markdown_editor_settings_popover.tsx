@@ -10,7 +10,7 @@
 import { EuiButtonIcon, EuiPopover, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
-import type { MarkdownSettingsState } from '../../server/schemas';
+import type { MarkdownSettingsState } from '../../server/embeddable/schemas';
 
 interface Props {
   settings: MarkdownSettingsState;

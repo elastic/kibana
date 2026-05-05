@@ -14,8 +14,10 @@ import {
   EVENT_RENDERER_TEST_ID,
   MITRE_ATTACK_TITLE_TEST_ID,
   REASON_TITLE_TEST_ID,
+  RULE_SUMMARY_BUTTON_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { AboutSection } from './about_section';
@@ -31,10 +33,12 @@ jest.mock('../../../../common/components/link_to');
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
+jest.mock('../../../../common/components/user_privileges');
 
 const renderAboutSection = (searchHit = mockSearchHit) => {
   const contextValue = {
     ...mockContextValue,
+    indexName: searchHit._index,
     searchHit,
   };
   return render(
@@ -111,6 +115,47 @@ describe('<AboutSection />', () => {
 
     await act(async () => {
       expect(getByText('Event renderer')).toBeInTheDocument();
+    });
+  });
+
+  describe('rule summary button', () => {
+    beforeEach(() => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        rulesPrivileges: { rules: { read: true } },
+      });
+    });
+
+    it('should disable the rule summary button for a remote alert', async () => {
+      const remoteAlertSearchHit = {
+        ...mockSearchHit,
+        _index: 'remote-cluster:.alerts-security.alerts-default',
+        fields: {
+          ...mockSearchHit.fields,
+          'event.kind': [EventKind.signal],
+        },
+      };
+
+      const { getByTestId } = renderAboutSection(remoteAlertSearchHit);
+
+      await act(async () => {
+        expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toHaveAttribute('disabled');
+      });
+    });
+
+    it('should enable the rule summary button for a local alert', async () => {
+      const localAlertSearchHit = {
+        ...mockSearchHit,
+        fields: {
+          ...mockSearchHit.fields,
+          'event.kind': [EventKind.signal],
+        },
+      };
+
+      const { getByTestId } = renderAboutSection(localAlertSearchHit);
+
+      await act(async () => {
+        expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).not.toHaveAttribute('disabled');
+      });
     });
   });
 });

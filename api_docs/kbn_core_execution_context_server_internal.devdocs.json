@@ -28,7 +28,7 @@
           ">"
         ],
         "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
-        "lineNumber": 64,
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +44,7 @@
               "any"
             ],
             "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
-            "lineNumber": 73,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -60,9 +60,10 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
-                "lineNumber": 73,
+                "lineNumber": 75,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -81,7 +82,7 @@
               "IExecutionContext"
             ],
             "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
-            "lineNumber": 79,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -100,7 +101,7 @@
               "IExecutionContext"
             ],
             "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
-            "lineNumber": 97,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -118,7 +119,7 @@
               "() => void"
             ],
             "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
-            "lineNumber": 109,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

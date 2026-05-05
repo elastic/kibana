@@ -21,8 +21,8 @@ import { getEsqlQuery } from '../utils/get_esql_query';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
- * When selectedDimensionNames has more than one item, refetches with a WHERE filter so only
- * metrics that have at least one of those dimensions are returned.
+ * When selectedDimensionNames is non-empty, refetches with a WHERE filter so only
+ * metrics that have all of the selected dimensions are returned.
  * Returns loading state, error, and parsed metrics info for the grid.
  */
 export function useFetchMetricsData({
@@ -42,18 +42,34 @@ export function useFetchMetricsData({
 
   const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
 
-  const selectedDimensions = useMemo(
-    () => selectedDimensionNames?.map((dimension) => dimension.name),
-    [selectedDimensionNames]
+  // Pre-fetch defense against dimensions the active stream does not map.
+  // Pushing a field name that is not in the dataView into the
+  // `WHERE TO_STRING(field) IS NOT NULL` clause breaks the query and surfaces
+  // "Unable to load visualization". The post-fetch state wipe (against
+  // `allDimensions`) lives in `MetricsExperienceGrid` via `useDimensionsWipe`.
+  const appliedDimensions = useMemo(() => {
+    if (!selectedDimensionNames?.length || !fetchParams.dataView) {
+      return selectedDimensionNames;
+    }
+    return selectedDimensionNames.filter(
+      (dimension) => fetchParams.dataView!.getFieldByName(dimension.name) != null
+    );
+  }, [selectedDimensionNames, fetchParams.dataView]);
+
+  const appliedDimensionNames = useMemo(
+    () => appliedDimensions?.map((dimension) => dimension.name),
+    [appliedDimensions]
   );
 
   const metricsInfoQuery = useMemo(
-    () => buildMetricsInfoQuery(esql, selectedDimensions),
-    [esql, selectedDimensions]
+    () => buildMetricsInfoQuery(esql, appliedDimensionNames),
+    [esql, appliedDimensionNames]
   );
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
-    async (signal: AbortSignal): Promise<ParsedMetrics | null> => {
+    async (
+      signal: AbortSignal
+    ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
       const documents = await trackRequest(
         'Grid of metrics',
         'This request queries Elasticsearch to fetch metrics info for the grid.',
@@ -99,7 +115,10 @@ export function useFetchMetricsData({
         trackMetricsInfo(parsed.telemetry);
       }
 
-      return sortedMetrics;
+      return {
+        ...sortedMetrics,
+        activeDimensions: appliedDimensions ?? [],
+      };
     },
     [
       metricsInfoQuery,
@@ -111,6 +130,7 @@ export function useFetchMetricsData({
       services.data.search.search,
       services.uiSettings,
       trackMetricsInfo,
+      appliedDimensions,
     ]
   );
 
@@ -125,7 +145,6 @@ export function useFetchMetricsData({
     };
   }, [
     shouldFetch,
-    selectedDimensionNames,
     fetchParams.dataView,
     fetchParams.timeRange,
     fetchParams.abortController,
@@ -139,5 +158,6 @@ export function useFetchMetricsData({
     error: error ?? null,
     metricItems: value?.metricItems ?? [],
     allDimensions: value?.allDimensions ?? [],
+    activeDimensions: value?.activeDimensions ?? [],
   };
 }

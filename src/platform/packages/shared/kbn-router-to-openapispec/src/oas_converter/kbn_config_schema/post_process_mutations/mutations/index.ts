@@ -70,9 +70,15 @@ export const processAllTypes = (ctx: IContext, schema: OpenAPIV3.SchemaObject): 
 };
 
 export const processAnyType = (schema: OpenAPIV3.SchemaObject): void => {
-  // Map schema to an empty object: `{}`
+  const { description, nullable } = schema;
   for (const key of Object.keys(schema)) {
     deleteField(schema as unknown as Record<any, unknown>, key);
+  }
+  if (description) {
+    schema.description = description;
+  }
+  if (nullable) {
+    (schema as Record<string, unknown>).nullable = nullable;
   }
 };
 

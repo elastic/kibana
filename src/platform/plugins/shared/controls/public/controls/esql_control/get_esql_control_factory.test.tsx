@@ -10,11 +10,14 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import {
+  optionsListESQLControlSchema,
+  type OptionsListESQLControlState,
+} from '@kbn/controls-schemas';
 import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 
 const mockGetESQLSingleColumnValues = jest.fn(() => ({ options: ['option1', 'option2'] }));
 const mockIsSuccess = jest.fn(() => true);
@@ -200,6 +203,56 @@ describe('ESQLControlApi', () => {
           },
         });
       });
+    });
+  });
+
+  describe('unsaved changes', () => {
+    test('should have unsaved changes when there are changes', async () => {
+      const lastSavedState = optionsListESQLControlSchema.validate({
+        control_type: 'VALUES_FROM_QUERY',
+        selected_options: ['osx'],
+        variable_name: 'old name',
+        variable_type: 'values',
+        esql_query: 'from kibana_sample_data_logs | KEEP machine.os.keyword',
+      });
+      const initialState = {
+        ...lastSavedState,
+        variable_name: 'new name',
+      };
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: {
+          lastSavedStateForChild$: () => of(lastSavedState),
+          getLastSavedStateForChild: lastSavedState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(true);
+    });
+
+    test('should not have unsaved changes when there are no changes', async () => {
+      const initialState = optionsListESQLControlSchema.validate({
+        control_type: 'VALUES_FROM_QUERY',
+        selected_options: ['osx'],
+        variable_name: 'machineOs',
+        variable_type: 'values',
+        esql_query: 'from kibana_sample_data_logs | KEEP machine.os.keyword',
+      });
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: {
+          lastSavedStateForChild$: () => of(initialState),
+          getLastSavedStateForChild: initialState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(false);
     });
   });
 });

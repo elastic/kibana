@@ -17,10 +17,14 @@ export const usePluginsMutation = ({ agent }: { agent: AgentDefinition | null })
   const { agentService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const { addSuccessToast, addErrorToast } = useToasts();
-  const { id: agentId, configuration } = agent ?? {};
-  const { plugin_ids: agentPluginIds } = configuration ?? {};
+  const agentId = agent?.id;
 
   const agentQueryKey = queryKeys.agentProfiles.byId(agentId);
+
+  const getCurrentPluginIds = useCallback((): string[] => {
+    const currentAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
+    return currentAgent?.configuration?.plugin_ids ?? [];
+  }, [queryClient, agentQueryKey]);
 
   const updatePluginsMutation = useMutation({
     mutationFn: (newPluginIds: string[]) => {
@@ -61,7 +65,7 @@ export const usePluginsMutation = ({ agent }: { agent: AgentDefinition | null })
 
   const handleAddPlugin = useCallback(
     (plugin: PluginDefinition, { onSuccess }: { onSuccess?: (pluginId: string) => void } = {}) => {
-      const currentIds = agentPluginIds ?? [];
+      const currentIds = getCurrentPluginIds();
       if (currentIds.includes(plugin.id)) return;
       const newIds = [...currentIds, plugin.id];
 
@@ -72,12 +76,12 @@ export const usePluginsMutation = ({ agent }: { agent: AgentDefinition | null })
         },
       });
     },
-    [agentPluginIds, updatePluginsMutation, addSuccessToast]
+    [getCurrentPluginIds, updatePluginsMutation, addSuccessToast]
   );
 
   const handleRemovePlugin = useCallback(
     (plugin: PluginDefinition) => {
-      const currentIds = agentPluginIds ?? [];
+      const currentIds = getCurrentPluginIds();
       const newIds = currentIds.filter((id) => id !== plugin.id);
       updatePluginsMutation.mutate(newIds, {
         onSuccess: () => {
@@ -85,7 +89,7 @@ export const usePluginsMutation = ({ agent }: { agent: AgentDefinition | null })
         },
       });
     },
-    [agentPluginIds, updatePluginsMutation, addSuccessToast]
+    [getCurrentPluginIds, updatePluginsMutation, addSuccessToast]
   );
 
   const handlers = useMemo(

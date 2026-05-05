@@ -7,13 +7,11 @@
 
 import { screen } from '@testing-library/react';
 import { within } from '@testing-library/react';
-import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
 import { MAX_DATA_RETENTION } from '../../../common/constants';
 import { setupEnvironment } from '../helpers/setup_environment';
 import { renderHome } from '../helpers/render_home';
-import { notificationService } from '../../../public/application/services/notification';
 
 import {
   createDataStreamTabActions,
@@ -42,8 +40,6 @@ describe('Data Streams - Project level max retention', () => {
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
-  const notificationsServiceMock = notificationServiceMock.createStartContract();
-
   beforeEach(() => {
     jest.clearAllMocks();
     const env = setupEnvironment();
@@ -67,8 +63,6 @@ describe('Data Streams - Project level max retention', () => {
     httpRequestsMockHelpers.setLoadDataStreamsResponse([ds1]);
     httpRequestsMockHelpers.setLoadDataStreamResponse(ds1.name, ds1);
     httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
-
-    notificationService.setup(notificationsServiceMock);
 
     await renderHome(httpSetup, {
       initialEntries: ['/data_streams'],

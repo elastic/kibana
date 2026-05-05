@@ -8,7 +8,13 @@
 export { Streams, streamDefinitionSchema } from './src/models/streams';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
-export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
+export {
+  WiredIngest,
+  WiredStream,
+  WiredIngestUpsertRequest,
+  isDraftStream,
+  type DraftStreamDefinition,
+} from './src/models/ingest/wired';
 export {
   ClassicIngest,
   ClassicStream,
@@ -74,6 +80,8 @@ export {
   hasStatsCommand,
   MS_PER_UNIT,
   normalizeEsqlQuery,
+  normalizeEsqlSafe,
+  hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
 } from './src/helpers/esql_helpers';
@@ -131,6 +139,7 @@ export {
   type QueryType,
   QUERY_TYPE_MATCH,
   QUERY_TYPE_STATS,
+  HIGH_SEVERITY_THRESHOLD,
   queryTypeSchema,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
@@ -198,6 +207,7 @@ export type {
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
 } from './src/api/significant_events';
+export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
 
 export { emptyAssets } from './src/helpers/empty_assets';
 export {
@@ -220,6 +230,7 @@ export {
   LOG_PATTERNS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
+  INFERRED_FEATURE_TYPES,
   isFeature,
   isFeatureWithFilter,
   isComputedFeature,
@@ -233,6 +244,8 @@ export {
   ignoredFeatureSchema,
   featureStatusSchema,
 } from './src/feature';
+
+export { FeatureAccumulator } from './src/feature_accumulator';
 
 export {
   type BaseSimulationError,
@@ -252,6 +265,7 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
+export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type GenerateInsightsResult,

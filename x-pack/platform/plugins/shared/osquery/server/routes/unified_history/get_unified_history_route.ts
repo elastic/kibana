@@ -36,6 +36,8 @@ import {
 } from './process_scheduled_history';
 import type { LiveActionHit } from './map_live_hit_to_row';
 
+import { unifiedHistoryResponseSchema } from './response_schemas';
+
 const VALID_SOURCE_FILTERS = new Set(['live', 'rule', 'scheduled']);
 
 export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -80,6 +82,11 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 defaultValue: 'desc',
               }),
             }),
+          },
+          response: {
+            200: {
+              body: () => unifiedHistoryResponseSchema,
+            },
           },
         },
       },

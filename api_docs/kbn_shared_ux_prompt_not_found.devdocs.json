@@ -51,6 +51,7 @@
             "lineNumber": 38,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "NotFoundProps",
             "trackAdoption": false,
             "isRequired": true
           }

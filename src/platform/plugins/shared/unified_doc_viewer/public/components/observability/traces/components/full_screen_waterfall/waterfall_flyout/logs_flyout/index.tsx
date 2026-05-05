@@ -24,7 +24,7 @@ export interface LogFlyoutContentProps {
 }
 
 export function LogFlyoutContent({ hit, logDataView }: LogFlyoutContentProps) {
-  const { indexes } = useDataSourcesContext();
+  const { indexes, profileId } = useDataSourcesContext();
   const actions = useDocViewerExtensionActionsContext();
 
   return (
@@ -34,6 +34,7 @@ export function LogFlyoutContent({ hit, logDataView }: LogFlyoutContentProps) {
       indexes={indexes}
       showTraceWaterfall={false}
       docViewActions={actions}
+      profileId={profileId}
     />
   );
 }

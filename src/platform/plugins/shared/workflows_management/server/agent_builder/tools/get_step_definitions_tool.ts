@@ -8,7 +8,6 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   BaseStepDefinition,
   ConnectorContractUnion,
@@ -31,9 +30,10 @@ import {
   addDynamicConnectorsToCache,
   getAllConnectors,
   getCachedAllConnectorsMap,
+  getDeprecatedStepMetadata,
 } from '../../../common/schema';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
-import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { AgentBuilderPluginSetup } from '../../types';
 
 interface StepDefinitionForAgent {
   id: string;
@@ -117,7 +117,8 @@ export function formatConnectorStep(connector: ConnectorContractUnion): StepDefi
     ? buildStepParamsSummary(connector.configSchema)
     : undefined;
   const outputSummary = buildOutputSummary(connector.outputSchema);
-  const deprecationMetadata = formatDeprecationMetadata(connector.type, connector.deprecation);
+  const deprecation = connector.deprecation ?? getDeprecatedStepMetadata(connector.type);
+  const deprecationMetadata = formatDeprecationMetadata(connector.type, deprecation);
 
   return {
     id: connector.type,
@@ -162,7 +163,7 @@ function formatDeprecationMetadata(
 }
 
 export function registerGetStepDefinitionsTool(
-  agentBuilder: AgentBuilderPluginSetupContract,
+  agentBuilder: AgentBuilderPluginSetup,
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
@@ -214,17 +215,7 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
         ),
     }),
     tags: ['workflows', 'yaml', 'steps'],
-    availability: {
-      handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        return isEnabled
-          ? { status: 'available' }
-          : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };
-      },
-      cacheMode: 'space',
-    },
+    experimental: true,
     handler: async (
       { stepType, search, category, includeDeprecated, includeOutputSummary, includeFullSchema },
       { spaceId, request }

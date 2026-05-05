@@ -66,17 +66,17 @@ describe('useBulkSelect', () => {
     expect(result.current.selectedCount).toBe(logical);
   });
 
-  it('returns match-all filter when select-all with no exclusions', () => {
+  it('returns match_all params when select-all with no filter or search', () => {
     const { result } = renderHook(() => useBulkSelect({ totalItemCount: 10, items: pageItems }));
 
     act(() => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.getBulkParams()).toEqual({ filter: '' });
+    expect(result.current.getBulkParams()).toEqual({ match_all: true });
   });
 
-  it('scopes select-all bulk filter to filter', () => {
+  it('scopes select-all bulk params to filter', () => {
     const { result } = renderHook(() =>
       useBulkSelect({
         totalItemCount: 10,
@@ -89,10 +89,10 @@ describe('useBulkSelect', () => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.getBulkParams()).toEqual({ filter: 'enabled: true' });
+    expect(result.current.getBulkParams()).toEqual({ filter: '(enabled: true)' });
   });
 
-  it('scopes select-all bulk filter to search', () => {
+  it('passes search as a separate field in bulk params', () => {
     const { result } = renderHook(() =>
       useBulkSelect({
         totalItemCount: 10,
@@ -105,13 +105,10 @@ describe('useBulkSelect', () => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.getBulkParams()).toEqual({
-      filter:
-        '(metadata.name: prod* OR metadata.description: prod* OR metadata.tags: prod* OR grouping.fields: prod*)',
-    });
+    expect(result.current.getBulkParams()).toEqual({ search: 'prod' });
   });
 
-  it('combines list scope with NOT exclusions when select-all with deselected rows', () => {
+  it('passes filter and search as separate fields with exclusions', () => {
     const { result } = renderHook(() =>
       useBulkSelect({
         totalItemCount: 10,
@@ -129,8 +126,30 @@ describe('useBulkSelect', () => {
     });
 
     expect(result.current.getBulkParams()).toEqual({
-      filter:
-        '((enabled: true) AND ((metadata.name: x* OR metadata.description: x* OR metadata.tags: x* OR grouping.fields: x*))) AND NOT (id: "rule-1")',
+      filter: '(enabled: true) AND NOT (id: "rule-1")',
+      search: 'x',
+    });
+  });
+
+  it('includes only exclusion clauses in filter when no structural filter is set', () => {
+    const { result } = renderHook(() =>
+      useBulkSelect({
+        totalItemCount: 10,
+        items: pageItems,
+        search: 'prod',
+      })
+    );
+
+    act(() => {
+      result.current.onSelectAll();
+    });
+    act(() => {
+      result.current.onSelectRow('rule-1');
+    });
+
+    expect(result.current.getBulkParams()).toEqual({
+      filter: 'NOT (id: "rule-1")',
+      search: 'prod',
     });
   });
 

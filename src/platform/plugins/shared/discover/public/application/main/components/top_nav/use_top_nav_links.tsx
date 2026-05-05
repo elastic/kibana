@@ -111,9 +111,18 @@ export const useTopNavLinks = ({
     });
 
     services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
-      state: byValueState,
+      state: {
+        byValueState,
+        controlGroupState: currentTab.attributes.controlGroupState,
+      },
     });
-  }, [getState, currentTab.id, runtimeStateManager, services]);
+  }, [
+    currentTab.id,
+    currentTab.attributes.controlGroupState,
+    getState,
+    runtimeStateManager,
+    services,
+  ]);
 
   const discoverParams: AppMenuDiscoverParams = useMemo(
     () => ({
@@ -142,7 +151,10 @@ export const useTopNavLinks = ({
       items.push(inspectAppMenuItem);
     }
 
-    if (services.triggersActionsUi && discoverParams.authorizedRuleTypeIds.length) {
+    const hasV1AlertsAccess = discoverParams.authorizedRuleTypeIds.length > 0;
+    const shouldShowAlertsMenu = hasV1AlertsAccess || showCreateRuleV2;
+
+    if (services.triggersActionsUi && shouldShowAlertsMenu) {
       const alertsAppMenuItem = getAlertsAppMenuItem({
         discoverParams,
         services,
@@ -310,7 +322,6 @@ export const useTopNavLinks = ({
         popoverWidth: 150,
         popoverTestId: 'discoverSaveButtonPopover',
         splitButtonProps: {
-          secondaryButtonIcon: 'chevronSingleDown',
           secondaryButtonAriaLabel: i18n.translate('discover.localMenu.saveOptionsAriaLabel', {
             defaultMessage: 'Save options',
           }),
@@ -334,7 +345,7 @@ export const useTopNavLinks = ({
               }
             : {
                 showNotificationIndicator: hasUnsavedChanges,
-                notifcationIndicatorTooltipContent: hasUnsavedChanges
+                notificationIndicatorTooltipContent: hasUnsavedChanges
                   ? i18n.translate('discover.localMenu.unsavedChangesTooltip', {
                       defaultMessage: 'You have unsaved changes',
                     })
