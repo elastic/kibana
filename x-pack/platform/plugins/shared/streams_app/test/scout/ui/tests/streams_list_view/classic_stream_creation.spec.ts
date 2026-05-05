@@ -91,7 +91,7 @@ async function cleanupClassicStreamCreation({
 
 test.describe(
   'Streams list view - classic stream creation',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.all] },
   () => {
     test('creates a classic stream via the creation flyout', async ({
       apiServices,
