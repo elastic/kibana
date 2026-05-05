@@ -50,21 +50,28 @@ describe('createDuplicateTitleValidator', () => {
   it('returns the formatted warning when `checkForDuplicate` throws (alternative idiom)', async () => {
     const findCurrentTitle = jest.fn().mockResolvedValue('Existing');
     const checkForDuplicate = jest.fn().mockRejectedValue(new Error('boom'));
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
-    const validator = createDuplicateTitleValidator({
-      findCurrentTitle,
-      checkForDuplicate,
-      getDuplicateTitleWarning: (value) => `BAD: ${value}`,
-    });
+    try {
+      const validator = createDuplicateTitleValidator({
+        findCurrentTitle,
+        checkForDuplicate,
+        getDuplicateTitleWarning: (value) => `BAD: ${value}`,
+      });
 
-    await expect(validator.fn('Duplicate', 'id-1')).resolves.toBe('boom');
-    // Without an error message on the throw, falls back to the formatter.
-    const validator2 = createDuplicateTitleValidator({
-      findCurrentTitle,
-      checkForDuplicate: jest.fn().mockRejectedValue({}),
-      getDuplicateTitleWarning: (value) => `BAD: ${value}`,
-    });
-    await expect(validator2.fn('Duplicate', 'id-1')).resolves.toBe('BAD: Duplicate');
+      await expect(validator.fn('Duplicate', 'id-1')).resolves.toBe('BAD: Duplicate');
+
+      // Without an error message on the throw, still falls back to the formatter.
+      const validator2 = createDuplicateTitleValidator({
+        findCurrentTitle,
+        checkForDuplicate: jest.fn().mockRejectedValue({}),
+        getDuplicateTitleWarning: (value) => `BAD: ${value}`,
+      });
+      await expect(validator2.fn('Duplicate', 'id-1')).resolves.toBe('BAD: Duplicate');
+      expect(warnSpy).toHaveBeenCalledTimes(2);
+    } finally {
+      warnSpy.mockRestore();
+    }
   });
 
   it('returns undefined when the title is unique (`checkForDuplicate` resolves true or void)', async () => {

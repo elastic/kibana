@@ -114,9 +114,9 @@ export const createDuplicateTitleValidator = ({
     } catch (e) {
       // Some upstream check functions throw on duplicate rather than returning
       // `false`. Always return the formatted warning so non-duplicate errors
-      // don't leak raw technical messages into the UI. Log unexpected errors
-      // in development so they don't silently disappear.
-      if (process.env.NODE_ENV !== 'production' && e?.message) {
+      // don't leak raw technical messages into the UI. Log any thrown value in
+      // development so failures are visible regardless of `message` shape.
+      if (process.env.NODE_ENV !== 'production') {
         // eslint-disable-next-line no-console
         console.warn('[createDuplicateTitleValidator] unexpected error during title check:', e);
       }

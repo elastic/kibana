@@ -18,7 +18,7 @@ import {
 /**
  * Options for {@link createFavoritesService}.
  */
-export interface FavoritesServiceOptions<Metadata extends object | void = void> {
+export interface FavoritesServiceOptions {
   /**
    * Application identifier reported to the favorites usage collector
    * (e.g. `'dashboards'`, `'visualize'`).
@@ -59,7 +59,7 @@ export const createFavoritesService = <Metadata extends object | void = void>({
   http,
   userProfile,
   usageCollection,
-}: FavoritesServiceOptions<Metadata>): FavoritesClientPublic<Metadata> =>
+}: FavoritesServiceOptions): FavoritesClientPublic<Metadata> =>
   new FavoritesClient<Metadata>(appId, savedObjectType, {
     http,
     userProfile,

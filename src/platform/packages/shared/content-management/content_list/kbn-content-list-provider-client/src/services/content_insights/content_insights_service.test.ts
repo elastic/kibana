@@ -12,33 +12,40 @@ import type { Logger } from '@kbn/logging';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { createContentInsightsService } from './content_insights_service';
 
-jest.mock('@kbn/content-management-content-insights-public', () => {
-  const actual = jest.requireActual('@kbn/content-management-content-insights-public');
-  return {
-    ...actual,
-    ContentInsightsClient: jest.fn().mockImplementation(function MockClient(this: unknown) {
-      Object.assign(this as object, { __isMock: true });
-    }),
-  };
-});
-
 describe('createContentInsightsService', () => {
-  const http = {} as HttpStart;
-  const logger = { get: jest.fn().mockReturnValue({ warn: jest.fn() }) } as unknown as Logger;
+  const http = {
+    get: jest.fn(),
+    post: jest.fn(),
+  } as unknown as jest.Mocked<HttpStart>;
+  const childLogger = { warn: jest.fn() };
+  const logger = {
+    get: jest.fn().mockReturnValue(childLogger),
+  } as unknown as jest.Mocked<Logger>;
 
   beforeEach(() => {
-    (ContentInsightsClient as unknown as jest.Mock).mockClear();
+    jest.clearAllMocks();
   });
 
-  it('instantiates `ContentInsightsClient` with the supplied core services and domain id', () => {
+  it('returns a real `ContentInsightsClient` configured for the supplied domain id', async () => {
+    http.post.mockResolvedValue(undefined);
+    http.get.mockResolvedValue({ result: { count: 7 } });
+
     const service = createContentInsightsService({
       http,
       logger,
       domainId: 'dashboard',
     });
 
-    expect(ContentInsightsClient).toHaveBeenCalledTimes(1);
-    expect(ContentInsightsClient).toHaveBeenCalledWith({ http, logger }, { domainId: 'dashboard' });
-    expect(service).toMatchObject({ __isMock: true });
+    service.track('dash-1', 'viewed');
+    await expect(service.getStats('dash-1', 'viewed')).resolves.toEqual({ count: 7 });
+
+    expect(service).toBeInstanceOf(ContentInsightsClient);
+    expect(logger.get).toHaveBeenCalledWith('content_insights_client');
+    expect(http.post).toHaveBeenCalledWith(
+      '/internal/content_management/insights/dashboard/dash-1/viewed'
+    );
+    expect(http.get).toHaveBeenCalledWith(
+      '/internal/content_management/insights/dashboard/dash-1/viewed/stats'
+    );
   });
 });

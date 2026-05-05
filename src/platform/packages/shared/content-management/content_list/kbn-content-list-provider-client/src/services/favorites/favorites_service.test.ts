@@ -10,29 +10,30 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { of } from 'rxjs';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { createFavoritesService } from './favorites_service';
 
-jest.mock('@kbn/content-management-favorites-public', () => {
-  const actual = jest.requireActual('@kbn/content-management-favorites-public');
-  return {
-    ...actual,
-    FavoritesClient: jest.fn().mockImplementation(function MockFavoritesClient(this: unknown) {
-      Object.assign(this as object, { __isMock: true });
-    }),
-  };
-});
-
 describe('createFavoritesService', () => {
-  const http = {} as HttpStart;
-  const userProfile = {} as UserProfileServiceStart;
-  const usageCollection = {} as UsageCollectionStart;
+  const http = {
+    get: jest.fn(),
+    post: jest.fn(),
+  } as unknown as jest.Mocked<HttpStart>;
+  const userProfile = {
+    getEnabled$: jest.fn(),
+  } as unknown as jest.Mocked<UserProfileServiceStart>;
+  const usageCollection = {
+    reportUiCounter: jest.fn(),
+  } as unknown as jest.Mocked<UsageCollectionStart>;
 
   beforeEach(() => {
-    (FavoritesClient as unknown as jest.Mock).mockClear();
+    jest.clearAllMocks();
+    userProfile.getEnabled$.mockReturnValue(of(true));
   });
 
-  it('constructs a `FavoritesClient` with the supplied app id, saved object type, and core deps', () => {
+  it('returns a real `FavoritesClient` configured for the supplied favorite type', async () => {
+    http.get.mockResolvedValue({ favoriteIds: ['dash-1'], favoriteMetadata: {} });
+
     const service = createFavoritesService({
       appId: 'dashboards',
       savedObjectType: 'dashboard',
@@ -41,27 +42,73 @@ describe('createFavoritesService', () => {
       usageCollection,
     });
 
-    expect(FavoritesClient).toHaveBeenCalledTimes(1);
-    expect(FavoritesClient).toHaveBeenCalledWith('dashboards', 'dashboard', {
-      http,
-      userProfile,
-      usageCollection,
+    await expect(service.getFavorites()).resolves.toEqual({
+      favoriteIds: ['dash-1'],
+      favoriteMetadata: {},
     });
-    expect(service).toMatchObject({ __isMock: true });
+
+    expect(service).toBeInstanceOf(FavoritesClient);
+    expect(service.getFavoriteType()).toBe('dashboard');
+    expect(http.get).toHaveBeenCalledWith('/internal/content_management/favorites/dashboard');
   });
 
-  it('omits `usageCollection` when not supplied', () => {
-    createFavoritesService({
+  it('passes metadata through `addFavorite` and reports usage events', async () => {
+    http.post.mockResolvedValue({ favoriteIds: ['map-1'] });
+
+    const service = createFavoritesService<{ title: string }>({
       appId: 'maps',
       savedObjectType: 'map',
       http,
       userProfile,
+      usageCollection,
     });
 
-    expect(FavoritesClient).toHaveBeenCalledWith('maps', 'map', {
+    await expect(
+      service.addFavorite({ id: 'map-1', metadata: { title: 'Road trip' } })
+    ).resolves.toEqual({
+      favoriteIds: ['map-1'],
+    });
+    service.reportAddFavoriteClick();
+    service.reportRemoveFavoriteClick();
+
+    expect(http.post).toHaveBeenCalledWith(
+      '/internal/content_management/favorites/map/map-1/favorite',
+      { body: JSON.stringify({ metadata: { title: 'Road trip' } }) }
+    );
+    expect(usageCollection.reportUiCounter).toHaveBeenNthCalledWith(
+      1,
+      'maps',
+      'click',
+      'add_favorite'
+    );
+    expect(usageCollection.reportUiCounter).toHaveBeenNthCalledWith(
+      2,
+      'maps',
+      'click',
+      'remove_favorite'
+    );
+  });
+
+  it('does not report usage clicks when `usageCollection` is omitted', async () => {
+    http.get.mockResolvedValue({ favoriteIds: [], favoriteMetadata: {} });
+
+    const service = createFavoritesService({
+      appId: 'dashboards',
+      savedObjectType: 'dashboard',
       http,
       userProfile,
-      usageCollection: undefined,
     });
+
+    expect(() => {
+      service.reportAddFavoriteClick();
+      service.reportRemoveFavoriteClick();
+    }).not.toThrow();
+
+    await expect(service.getFavorites()).resolves.toEqual({
+      favoriteIds: [],
+      favoriteMetadata: {},
+    });
+
+    expect(usageCollection.reportUiCounter).not.toHaveBeenCalled();
   });
 });
