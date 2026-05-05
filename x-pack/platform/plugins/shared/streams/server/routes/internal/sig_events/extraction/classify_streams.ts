@@ -7,7 +7,7 @@
 
 import { Streams } from '@kbn/streams-schema';
 import { minimatch } from 'minimatch';
-import type { FeaturesRecencyResult } from '../../../../lib/sig_events/features/are_features_recent';
+import type { ShouldIdentifyFeaturesResult } from '../../../../lib/sig_events/features/should_identify_features';
 
 export interface StreamCandidate {
   streamName: string;
@@ -41,7 +41,7 @@ export const classifyStreams = ({
   excludedStreamPatterns,
 }: {
   allStreams: Streams.all.Definition[];
-  recencyByStream: Map<string, FeaturesRecencyResult>;
+  recencyByStream: Map<string, ShouldIdentifyFeaturesResult>;
   excludedStreamPatterns: string;
 }): StreamClassificationResult => {
   const excludePatterns = parseExcludePatterns(excludedStreamPatterns);
@@ -66,7 +66,7 @@ export const classifyStreams = ({
 
     const recency = recencyByStream.get(stream.name);
 
-    if (!recency || !recency.isRecent) {
+    if (!recency || recency.shouldIdentify) {
       candidates.push({
         streamName: stream.name,
         lastCompletedAt: recency?.newestLastSeen ?? null,

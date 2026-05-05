@@ -26,7 +26,7 @@ describe('createKiIdentificationStatusTool', () => {
         .mockResolvedValueOnce({ results: [completedExecution] }),
       getWorkflowExecution: jest.fn().mockResolvedValue({
         ...completedExecution,
-        context: { outputs: { result: 'ok' } },
+        context: { inputs: { streamName: 'logs.nginx' }, outputs: { result: 'ok' } },
       }),
     };
 

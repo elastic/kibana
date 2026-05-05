@@ -62,8 +62,7 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete, onError }: 
         setExecutionState({ status: 'not_found' });
         previousStatusRef.current = 'not_found';
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [streamName, getOnboardingExecution]);
 
   const scheduleKnowledgeIndicatorsTask = useCallback(() => {
     setExecutionState({ status: 'pending' });
@@ -113,6 +112,7 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete, onError }: 
 
   return {
     isPending,
+    isCanceling: cancelMutation.isLoading,
     knowledgeIndicatorsTaskState: executionState,
     scheduleKnowledgeIndicatorsTask,
     cancelKnowledgeIndicatorsTask,

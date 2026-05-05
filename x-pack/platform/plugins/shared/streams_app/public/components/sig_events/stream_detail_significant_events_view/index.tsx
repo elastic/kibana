@@ -133,6 +133,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   const {
     isPending: isKnowledgeIndicatorsGenerationPending,
+    isCanceling: isKnowledgeIndicatorsGenerationCanceling,
     knowledgeIndicatorsTaskState,
     scheduleKnowledgeIndicatorsTask,
     cancelKnowledgeIndicatorsTask,
@@ -183,8 +184,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     () => typeFilterOptions.some((option) => option.key === 'rule' && option.checked === 'on'),
     [typeFilterOptions]
   );
-  const isKnowledgeIndicatorsGenerationCanceling =
-    knowledgeIndicatorsTaskState?.status === 'cancelled';
   const isGenerateButtonDisabled =
     knowledgeIndicatorsTaskState === null ||
     isKnowledgeIndicatorsGenerationPending ||

@@ -11,6 +11,7 @@ import type { FeatureClient } from '../../streams/feature/feature_client';
 
 export interface ShouldIdentifyFeaturesResult {
   shouldIdentify: boolean;
+  newestLastSeen?: string | null;
 }
 
 export async function shouldIdentifyFeatures({
@@ -32,7 +33,8 @@ export async function shouldIdentifyFeatures({
     return { shouldIdentify: true };
   }
 
-  const newestTimestamp = new Date(hits[0].last_seen).getTime();
+  const newestLastSeen = hits[0].last_seen;
+  const newestTimestamp = new Date(newestLastSeen).getTime();
 
   if (Number.isNaN(newestTimestamp)) {
     return { shouldIdentify: true };
@@ -42,6 +44,7 @@ export async function shouldIdentifyFeatures({
 
   return {
     shouldIdentify: Date.now() - newestTimestamp >= thresholdMs,
+    newestLastSeen,
   };
 }
 
@@ -51,7 +54,7 @@ const RECENCY_BATCH_CONCURRENCY = 10;
  * Checks feature recency for multiple streams with bounded concurrency
  * to avoid overwhelming ES with unbounded parallel queries.
  */
-export async function areFeaturesRecentBatch({
+export async function shouldIdentifyFeaturesBatch({
   featureClient,
   streamNames,
   thresholdHours,
@@ -59,15 +62,19 @@ export async function areFeaturesRecentBatch({
   featureClient: FeatureClient;
   streamNames: string[];
   thresholdHours: number;
-}): Promise<Map<string, FeaturesRecencyResult>> {
-  const result = new Map<string, FeaturesRecencyResult>();
+}): Promise<Map<string, ShouldIdentifyFeaturesResult>> {
+  const result = new Map<string, ShouldIdentifyFeaturesResult>();
   const pending = [...streamNames];
 
   while (pending.length > 0) {
     const batch = pending.splice(0, RECENCY_BATCH_CONCURRENCY);
     const results = await Promise.all(
       batch.map(async (streamName) => {
-        const recency = await areFeaturesRecent({ featureClient, streamName, thresholdHours });
+        const recency = await shouldIdentifyFeatures({
+          featureClient,
+          streamName,
+          thresholdHours,
+        });
         return [streamName, recency] as const;
       })
     );

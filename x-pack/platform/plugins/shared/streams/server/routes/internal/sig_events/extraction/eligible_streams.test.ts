@@ -6,7 +6,7 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import type { FeaturesRecencyResult } from '../../../../lib/sig_events/features/are_features_recent';
+import type { ShouldIdentifyFeaturesResult } from '../../../../lib/sig_events/features/should_identify_features';
 import { classifyStreams, parseExcludePatterns } from './classify_streams';
 
 const STUB_STREAM_FIELDS = {
@@ -59,7 +59,7 @@ describe('parseExcludePatterns', () => {
 describe('classifyStreams', () => {
   const defaultArgs = {
     allStreams: [] as ReturnType<typeof makeStream>[],
-    recencyByStream: new Map<string, FeaturesRecencyResult>(),
+    recencyByStream: new Map<string, ShouldIdentifyFeaturesResult>(),
     excludedStreamPatterns: '',
   };
 
@@ -95,8 +95,8 @@ describe('classifyStreams', () => {
 
   it('marks streams with recent features as up-to-date', () => {
     const recentLastSeen = new Date().toISOString();
-    const recencyByStream = new Map<string, FeaturesRecencyResult>([
-      ['fresh-stream', { isRecent: true, newestLastSeen: recentLastSeen }],
+    const recencyByStream = new Map<string, ShouldIdentifyFeaturesResult>([
+      ['fresh-stream', { shouldIdentify: false, newestLastSeen: recentLastSeen }],
     ]);
 
     const result = classifyStreams({
@@ -113,8 +113,8 @@ describe('classifyStreams', () => {
 
   it('marks streams with stale features as candidates', () => {
     const oldLastSeen = '2024-01-01T00:00:00Z';
-    const recencyByStream = new Map<string, FeaturesRecencyResult>([
-      ['old-stream', { isRecent: false, newestLastSeen: oldLastSeen }],
+    const recencyByStream = new Map<string, ShouldIdentifyFeaturesResult>([
+      ['old-stream', { shouldIdentify: true, newestLastSeen: oldLastSeen }],
     ]);
 
     const result = classifyStreams({
@@ -127,8 +127,8 @@ describe('classifyStreams', () => {
   });
 
   it('marks streams with no features as candidates with null lastCompletedAt', () => {
-    const recencyByStream = new Map<string, FeaturesRecencyResult>([
-      ['empty-stream', { isRecent: false }],
+    const recencyByStream = new Map<string, ShouldIdentifyFeaturesResult>([
+      ['empty-stream', { shouldIdentify: true }],
     ]);
 
     const result = classifyStreams({
