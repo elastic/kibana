@@ -130,7 +130,11 @@ export const createWatchlistEntitiesService = ({
           if (isIndexSync) {
             const correlationValue = get(record, idp.field);
             if (correlationValue) {
-              correlationMap.set(String(correlationValue), { euid, entityType });
+              const exists = correlationMap.get(String(correlationValue));
+              correlationMap.set(String(correlationValue), {
+                euids: exists ? [...exists.euids, euid] : [euid],
+                entityType,
+              });
             }
           }
         }
