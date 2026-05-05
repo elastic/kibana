@@ -363,7 +363,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: true }
     );
     expect(fragment).toBe(
-      '| EVAL recent.entity.name = CASE((`recent.entity.namespace` == "local"), TO_STRING(recent.user.name), recent.entity.name)'
+      '| EVAL recent.entity.name = CASE((COALESCE(`recent.entity.namespace` == "local", FALSE)), TO_STRING(recent.user.name), recent.entity.name)'
     );
   });
 
@@ -376,7 +376,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: false }
     );
     expect(fragment).toBe(
-      '| EVAL entity.name = CASE((`entity.namespace` == "local"), TO_STRING(user.name), entity.name)'
+      '| EVAL entity.name = CASE((COALESCE(`entity.namespace` == "local", FALSE)), TO_STRING(user.name), entity.name)'
     );
   });
 
@@ -394,7 +394,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: true }
     );
     expect(fragment).toBe(
-      '| EVAL recent.entity.name = CASE((`recent.entity.namespace` == "local" AND NOT(`recent.user.name` IS NULL)), TO_STRING(recent.user.name), recent.entity.name)'
+      '| EVAL recent.entity.name = CASE((COALESCE(`recent.entity.namespace` == "local", FALSE) AND NOT(`recent.user.name` IS NULL)), TO_STRING(recent.user.name), recent.entity.name)'
     );
   });
 });

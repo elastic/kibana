@@ -7,6 +7,11 @@
 
 export * from './data_tiers';
 
-export * from './use_phase_colors';
+export {
+  PHASE_NAMES,
+  PHASE_TITLES,
+  PHASE_DESCRIPTIONS,
+  PHASE_ORDER,
+} from '@kbn/data-lifecycle-phases';
 
 export * from './rollover';
