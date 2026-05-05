@@ -20,12 +20,11 @@ The query tracks data from the following <code>@kbn/discover-utils</code> functi
 </ul>
 <p>
 The following <code>@kbn/discover-utils</code> functions are intentionally excluded because they
-return <code>ReactNode</code> or plain text, not HTML strings:
+return <code>ReactNode</code>, not HTML strings:
 </p>
 <ul>
 <li><code>formatHitReact</code> — returns <code>ReactNode</code>, safe for direct React rendering</li>
 <li><code>formatFieldValueReact</code> — returns <code>ReactNode</code> via <code>reactConvert</code></li>
-<li><code>formatFieldValueText</code> — returns a plain text string</li>
 </ul>
 <p>
 The query catches both direct usage of <code>dangerouslySetInnerHTML</code> as a JSX attribute
