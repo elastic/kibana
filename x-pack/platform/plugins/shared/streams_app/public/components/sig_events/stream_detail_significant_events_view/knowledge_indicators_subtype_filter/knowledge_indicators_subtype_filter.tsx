@@ -92,7 +92,14 @@ export function KnowledgeIndicatorsSubtypeFilter({
     });
 
     return counts;
-  }, [knowledgeIndicators, searchTerm, statusFilter, selectedTypes, hideComputedTypes, selectedStreams]);
+  }, [
+    knowledgeIndicators,
+    searchTerm,
+    statusFilter,
+    selectedTypes,
+    hideComputedTypes,
+    selectedStreams,
+  ]);
 
   const options = useMemo<EuiSelectableOption[]>(
     () => [

@@ -123,7 +123,7 @@ export function QueriesTable() {
   const selectedQuery = useMemo(
     () =>
       routeQuery?.queryFlyoutId
-        ? (queriesData?.queries.find((q) => q.query.id === routeQuery.queryFlyoutId) ?? null)
+        ? queriesData?.queries.find((q) => q.query.id === routeQuery.queryFlyoutId) ?? null
         : null,
     [queriesData?.queries, routeQuery?.queryFlyoutId]
   );

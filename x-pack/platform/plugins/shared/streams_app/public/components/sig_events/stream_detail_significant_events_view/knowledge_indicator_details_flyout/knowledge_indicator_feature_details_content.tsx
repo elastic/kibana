@@ -237,8 +237,8 @@ export function KnowledgeIndicatorFeatureDetailsContent({
           const ki = relation.ki;
           const label =
             ki.kind === 'feature'
-              ? (ki.feature.title ?? ki.feature.id)
-              : (ki.query.title ?? ki.query.id);
+              ? ki.feature.title ?? ki.feature.id
+              : ki.query.title ?? ki.query.id;
           return onNavigateTo ? (
             <EuiLink onClick={() => onNavigateTo(ki)}>{label}</EuiLink>
           ) : (
@@ -429,10 +429,9 @@ const EMPTY_VALUE = i18n.translate('xpack.streams.featureDetailsFlyout.emptyValu
   defaultMessage: '-',
 });
 
-const DEPENDENCIES_LABEL = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.dependenciesLabel',
-  { defaultMessage: 'Dependencies' }
-);
+const DEPENDENCIES_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.dependenciesLabel', {
+  defaultMessage: 'Dependencies',
+});
 
 const DEPENDS_ON_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.dependsOnLabel', {
   defaultMessage: 'Depends on',
@@ -472,10 +471,9 @@ const EVENTS_QUERY_TITLE_LABEL = i18n.translate(
   { defaultMessage: 'Query' }
 );
 
-const EVENTS_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.eventsColumnLabel',
-  { defaultMessage: 'Events' }
-);
+const EVENTS_COLUMN_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.eventsColumnLabel', {
+  defaultMessage: 'Events',
+});
 
 const OCCURRENCES_TOOLTIP_NAME = i18n.translate(
   'xpack.streams.featureDetailsFlyout.occurrencesTooltipName',

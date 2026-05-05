@@ -96,11 +96,10 @@ export function useKnowledgeIndicatorsTable() {
   const selectedKnowledgeIndicator = useMemo(
     () =>
       query?.kiFlyoutId
-        ? (knowledgeIndicators.find(
-            (ki) => getKnowledgeIndicatorItemId(ki) === query.kiFlyoutId
-          ) ?? null)
+        ? knowledgeIndicators.find((ki) => getKnowledgeIndicatorItemId(ki) === query.kiFlyoutId) ??
+          null
         : null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [knowledgeIndicators, query?.kiFlyoutId]
   );
 
@@ -216,7 +215,14 @@ export function useKnowledgeIndicatorsTable() {
       const pruned = current.filter((s) => availableStreams.has(s));
       return pruned.length === current.length ? current : pruned;
     });
-  }, [isLoading, knowledgeIndicators, statusFilter, selectedTypes, selectedStreams, hideComputedTypes]);
+  }, [
+    isLoading,
+    knowledgeIndicators,
+    statusFilter,
+    selectedTypes,
+    selectedStreams,
+    hideComputedTypes,
+  ]);
 
   // Sync all filter state to URL so the page can be deep-linked and shared.
   // Only non-default values are written to keep URLs clean.
@@ -241,7 +247,14 @@ export function useKnowledgeIndicatorsTable() {
       },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearchTerm, statusFilter, selectedTypes, selectedSubtypes, selectedStreams, hideComputedTypes]);
+  }, [
+    debouncedSearchTerm,
+    statusFilter,
+    selectedTypes,
+    selectedSubtypes,
+    selectedStreams,
+    hideComputedTypes,
+  ]);
 
   const filteredKnowledgeIndicators = useMemo(() => {
     const filtered = knowledgeIndicators.filter((ki) =>

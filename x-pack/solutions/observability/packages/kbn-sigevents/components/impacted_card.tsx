@@ -17,12 +17,7 @@ export interface ImpactedCardProps {
   onClick?: () => void;
 }
 
-export const ImpactedCard = ({
-  label,
-  value,
-  iconType = 'layers',
-  onClick,
-}: ImpactedCardProps) => {
+export const ImpactedCard = ({ label, value, iconType = 'layers', onClick }: ImpactedCardProps) => {
   const { euiTheme } = useEuiTheme();
 
   const cardCss = css`

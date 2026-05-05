@@ -91,9 +91,7 @@ export function getKIDependencies(
   const matchesCurrent = (v: unknown): boolean => {
     if (v === currentId || (currentTitle !== '' && v === currentTitle)) return true;
     const vNorm = normalizeServiceName(v);
-    return (
-      vNorm === currentIdNorm || (currentTitleNorm !== '' && vNorm === currentTitleNorm)
-    );
+    return vNorm === currentIdNorm || (currentTitleNorm !== '' && vNorm === currentTitleNorm);
   };
 
   const findKI = (identifier: unknown): KnowledgeIndicator | undefined =>

@@ -49,9 +49,12 @@ export function StreamLink({ name }: { name: string }) {
   const href = router.link('/{key}', { path: { key: name } });
   return (
     <EuiToolTip
-      content={i18n.translate('xpack.streams.sigEventsDiscovery.multiStep.links.viewStreamTooltip', {
-        defaultMessage: 'View stream',
-      })}
+      content={i18n.translate(
+        'xpack.streams.sigEventsDiscovery.multiStep.links.viewStreamTooltip',
+        {
+          defaultMessage: 'View stream',
+        }
+      )}
     >
       <EuiLink href={href} data-test-subj="streamsDiscoveryStreamLink" color="text">
         <EuiBadge color="hollow">{name}</EuiBadge>
