@@ -6395,6 +6395,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-lifecycle-phases@link:x-pack/platform/packages/shared/kbn-data-lifecycle-phases":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-plugin@link:src/platform/plugins/shared/data":
   version "0.0.0"
   uid ""
@@ -7276,6 +7280,10 @@
   uid ""
 
 "@kbn/home-sample-data-types@link:src/platform/packages/shared/home/sample_data_types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/human-readable-id@link:src/platform/packages/shared/kbn-human-readable-id":
   version "0.0.0"
   uid ""
 
