@@ -59,14 +59,7 @@ export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
 export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
-/**
- * Per-page heap for `STATS ... BY entity_id` is ~`pageSize × alertSampleSizePerShard × 8 bytes`.
- * With the default `alertSampleSizePerShard = 10_000`, 5,000 keeps the worst case at ~400 MB —
- * safe on small/serverless heaps. Total alert work is roughly invariant to `pageSize` thanks to
- * Lucene's terms-filter pushdown. Operators with heap to spare can raise via saved object up to
- * {@link MAX_RISK_SCORE_PAGE_SIZE}.
- */
-export const DEFAULT_RISK_SCORE_PAGE_SIZE = 5_000 as const;
+export const DEFAULT_RISK_SCORE_PAGE_SIZE = 10_000 as const;
 export const MAX_RISK_SCORE_PAGE_SIZE = 10_000 as const;
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/platform/plugins/shared/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
