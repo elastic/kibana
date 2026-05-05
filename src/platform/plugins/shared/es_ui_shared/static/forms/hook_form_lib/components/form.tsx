@@ -22,6 +22,10 @@ export interface Props {
   [key: string]: any;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => {
   const { getFormData, __getFormData$ } = form;
 

@@ -695,6 +695,66 @@
                             }
                         }
                     }
+                },
+                "alerting_v2": {
+                    "properties": {
+                        "dispatcher": {
+                            "properties": {
+                                "episode_count": {
+                                    "type": "long"
+                                },
+                                "episode_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "rule_count": {
+                                    "type": "long"
+                                },
+                                "rule_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "action_group_count": {
+                                    "type": "long"
+                                },
+                                "action_group_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "workflow_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "workflow_execution_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "execution": {
+                                    "properties": {
+                                        "uuid": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
