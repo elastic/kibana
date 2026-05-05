@@ -177,10 +177,7 @@ function DetailFlyoutDurationChart({
   }, [showAllLocations, allLocations, id, location, euiTheme.colors.vis]);
 
   const dataTypesIndexPatterns = useMemo(
-    () =>
-      remoteName
-        ? { synthetics: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` }
-        : undefined,
+    () => (remoteName ? { synthetics: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` } : undefined),
     [remoteName]
   );
 
@@ -273,7 +270,7 @@ function RemoteMonitorDetailsPanel({
         <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription style={{ wordBreak: 'break-all' }}>
           {url ? (
-            <EuiLink href={url} external>
+            <EuiLink data-test-subj="syntheticsRemoteMonitorDetailsPanelLink" href={url} external>
               {url}
             </EuiLink>
           ) : (
@@ -304,24 +301,18 @@ function RemoteMonitorDetailsPanel({
 
         <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          {monitor.schedule
-            ? frequencyStr({ number: monitor.schedule, unit: 'm' })
-            : '--'}
+          {monitor.schedule ? frequencyStr({ number: monitor.schedule, unit: 'm' }) : '--'}
         </EuiDescriptionListDescription>
 
         {monitor.tags.length > 0 && (
           <>
             <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              {monitor.tags.join(', ')}
-            </EuiDescriptionListDescription>
+            <EuiDescriptionListDescription>{monitor.tags.join(', ')}</EuiDescriptionListDescription>
           </>
         )}
 
         <EuiDescriptionListTitle>{REMOTE_CLUSTER_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          {monitor.remote?.remoteName}
-        </EuiDescriptionListDescription>
+        <EuiDescriptionListDescription>{monitor.remote?.remoteName}</EuiDescriptionListDescription>
       </EuiDescriptionList>
     </EuiPanel>
   );
@@ -554,10 +545,7 @@ export function MonitorDetailFlyout(props: Props) {
         )}
         {selectedTab === 'details' &&
           (isRemote && monitor ? (
-            <RemoteMonitorDetailsPanel
-              monitor={monitor}
-              latestPing={monitorDetail.data}
-            />
+            <RemoteMonitorDetailsPanel monitor={monitor} latestPing={monitorDetail.data} />
           ) : monitorObject ? (
             <MonitorDetailsPanel
               hasBorder={false}
@@ -768,12 +756,9 @@ const REMOTE_URL_UNAVAILABLE_TEXT = i18n.translate(
   }
 );
 
-const MONITOR_DETAILS_LABEL = i18n.translate(
-  'xpack.synthetics.flyout.remoteMonitorDetails',
-  {
-    defaultMessage: 'Monitor details',
-  }
-);
+const MONITOR_DETAILS_LABEL = i18n.translate('xpack.synthetics.flyout.remoteMonitorDetails', {
+  defaultMessage: 'Monitor details',
+});
 
 const URL_LABEL = i18n.translate('xpack.synthetics.flyout.remoteDetails.url', {
   defaultMessage: 'URL',

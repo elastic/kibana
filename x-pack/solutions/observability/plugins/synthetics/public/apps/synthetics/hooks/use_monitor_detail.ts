@@ -15,9 +15,7 @@ export const useMonitorDetail = (
   location: string,
   remoteName?: string
 ): { data?: Ping; loading?: boolean } => {
-  const index = remoteName
-    ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}`
-    : SYNTHETICS_INDEX_PATTERN;
+  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
 
   const params = {
     index,

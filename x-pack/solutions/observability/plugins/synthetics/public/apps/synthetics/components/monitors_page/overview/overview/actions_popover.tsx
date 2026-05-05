@@ -209,7 +209,9 @@ export function ActionsPopover({
   const remoteMonitorUrl = useMemo(() => {
     if (!monitor.remote?.kibanaUrl) return undefined;
     const baseUrl = monitor.remote.kibanaUrl.replace(/\/+$/, '');
-    return `${baseUrl}/app/synthetics/monitor/${monitor.configId}?locationId=${locationId || monitor.locations[0]?.id || ''}`;
+    return `${baseUrl}/app/synthetics/monitor/${monitor.configId}?locationId=${
+      locationId || monitor.locations[0]?.id || ''
+    }`;
   }, [monitor.remote?.kibanaUrl, monitor.configId, monitor.locations, locationId]);
 
   const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;

@@ -224,9 +224,7 @@ describe('Monitor Detail Flyout', () => {
                       remoteName: 'remote-cluster-1',
                       kibanaUrl: 'https://remote-kibana.example.com',
                     },
-                    locations: [
-                      { id: 'europe-west3-a', label: 'europe-west3-a', status: 'up' },
-                    ],
+                    locations: [{ id: 'europe-west3-a', label: 'europe-west3-a', status: 'up' }],
                   },
                 },
                 downConfigs: {},
@@ -281,9 +279,7 @@ describe('Monitor Detail Flyout', () => {
                       remoteName: 'remote-cluster-1',
                       kibanaUrl: 'https://remote-kibana.example.com',
                     },
-                    locations: [
-                      { id: 'europe-west3-a', label: 'europe-west3-a', status: 'up' },
-                    ],
+                    locations: [{ id: 'europe-west3-a', label: 'europe-west3-a', status: 'up' }],
                   },
                 },
                 downConfigs: {},
