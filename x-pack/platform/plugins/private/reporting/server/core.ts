@@ -12,7 +12,6 @@ import type {
   AnalyticsServiceStart,
   CoreSetup,
   DocLinksServiceSetup,
-  IBasePath,
   IClusterClient,
   KibanaRequest,
   Logger,
@@ -66,7 +65,6 @@ import { API_PRIVILEGES } from './features';
 
 export interface ReportingInternalSetup {
   actions: ActionsPluginSetupContract;
-  basePath: Pick<IBasePath, 'set'>;
   docLinks: DocLinksServiceSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;

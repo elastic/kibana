@@ -16,7 +16,6 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import {
   savedObjectsClientMock,
   loggingSystemMock,
-  httpServiceMock,
   savedObjectsRepositoryMock,
   analyticsServiceMock,
   securityServiceMock,
@@ -109,7 +108,6 @@ const taskRunnerFactoryInitializerParams = {
   actionTypeRegistry,
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
-  basePathService: httpServiceMock.createBasePath(),
   savedObjectsRepository: savedObjectsRepositoryMock.create(),
 };
 
@@ -201,11 +199,6 @@ describe('Task Runner Factory', () => {
         attempts: 0,
       },
     });
-
-    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
-      executeParams.request,
-      '/s/test'
-    );
   });
 
   test('executes the task by calling the executor with proper parameters, using stored actionId when actionRef is in references', async () => {
@@ -261,11 +254,6 @@ describe('Task Runner Factory', () => {
         attempts: 0,
       },
     });
-
-    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
-      executeParams.request,
-      '/s/test'
-    );
   });
 
   test('executes the task by calling the executor with proper parameters when consumer is provided', async () => {
@@ -317,11 +305,6 @@ describe('Task Runner Factory', () => {
         attempts: 0,
       },
     });
-
-    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
-      executeParams.request,
-      '/s/test'
-    );
   });
 
   test('executes the task by calling the executor with proper parameters when saved_object source is provided', async () => {
@@ -378,11 +361,6 @@ describe('Task Runner Factory', () => {
         attempts: 0,
       },
     });
-
-    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
-      executeParams.request,
-      '/s/test'
-    );
   });
 
   test('executes the task by calling the executor with proper parameters when notification source is provided', async () => {
@@ -439,11 +417,6 @@ describe('Task Runner Factory', () => {
         attempts: 0,
       },
     });
-
-    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
-      executeParams.request,
-      '/s/test'
-    );
   });
 
   test('should pass abort signal to the action executor', async () => {
@@ -628,11 +601,6 @@ describe('Task Runner Factory', () => {
         attempts: 0,
       },
     });
-
-    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
-      executeParams.request,
-      '/s/test'
-    );
   });
 
   test('uses relatedSavedObjects merged with references when provided', async () => {
@@ -843,11 +811,6 @@ describe('Task Runner Factory', () => {
         attempts: 0,
       },
     });
-
-    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
-      executeParams.request,
-      '/s/test'
-    );
   });
 
   test(`throws an error when license doesn't support the action type`, async () => {

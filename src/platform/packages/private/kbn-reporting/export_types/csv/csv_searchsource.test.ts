@@ -75,9 +75,7 @@ beforeAll(async () => {
     context
   );
 
-  mockCsvSearchSourceExportType.setup({
-    basePath: { set: jest.fn() },
-  });
+  mockCsvSearchSourceExportType.setup({});
 
   mockCsvSearchSourceExportType.start({
     esClient: elasticsearchServiceMock.createClusterClient(),

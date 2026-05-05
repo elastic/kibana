@@ -2316,14 +2316,40 @@ describe('space extraction in onRequest', () => {
       }
     );
 
-    const { registerRouter, server: innerServer, basePath } = await server.setup({ config$ });
+    const { registerRouter, server: innerServer } = await server.setup({ config$ });
     registerRouter(router);
     await server.start();
 
     const response = await supertest(innerServer.listener).get('/s/custom/foo').expect(200);
 
     expect(response.body).toEqual({ spaceId: 'custom', url: '/foo' });
-    expect(basePath.get).toBeDefined();
+  });
+
+  test('basePath.get(request) returns space prefix derived from request.spaceId', async () => {
+    const router = new Router('/', logger, enhanceWithContext, routerOptions);
+
+    router.get(
+      {
+        path: '/api/test',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => {
+        return res.ok({ body: { basePath: basePath.get(req), spaceId: req.spaceId } });
+      }
+    );
+
+    const { registerRouter, server: innerServer, basePath } = await server.setup({ config$ });
+    registerRouter(router);
+    await server.start();
+
+    const response = await supertest(innerServer.listener).get('/s/myspace/api/test').expect(200);
+
+    expect(response.body).toEqual({ basePath: '/s/myspace', spaceId: 'myspace' });
   });
 
   test('extracts spaceId and rewrites URL when rewriteBasePath is true', async () => {

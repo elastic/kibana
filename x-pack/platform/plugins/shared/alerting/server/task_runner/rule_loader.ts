@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
@@ -178,16 +178,11 @@ export function getFakeKibanaRequest(
     requestHeaders.authorization = `ApiKey ${apiKey}`;
   }
 
-  const path = addSpaceIdToPath('/', spaceId);
-
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    path,
-    url: new URL(`https://fake-request${path}`),
+    path: '/',
+    app: { spaceId: asSpaceId(spaceId) },
   };
 
-  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-  context.basePathService.set(fakeRequest, path);
-
-  return fakeRequest;
+  return kibanaRequestFactory(fakeRawRequest);
 }

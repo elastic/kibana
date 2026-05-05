@@ -719,7 +719,6 @@ export class AlertingPlugin {
       actionsPlugin: plugins.actions,
       alertsService: this.alertsService,
       backfillClient: this.backfillClient!,
-      basePathService: core.http.basePath,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       data: plugins.data,

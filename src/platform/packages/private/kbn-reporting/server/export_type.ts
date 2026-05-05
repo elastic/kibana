@@ -12,7 +12,6 @@ import type {
   FakeRawRequest,
   Headers,
   HttpServiceSetup,
-  IBasePath,
   KibanaRequest,
 } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
@@ -38,7 +37,6 @@ import type { CreateJobFn, RunTaskFn } from './types';
 import type { ReportingConfigType } from '.';
 
 export interface BaseExportTypeSetupDeps {
-  basePath: Pick<IBasePath, 'set'>;
   spaces?: SpacesPluginSetup;
 }
 

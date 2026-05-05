@@ -63,9 +63,7 @@ beforeEach(async () => {
   encryptedHeaders = await encryptHeaders({});
 
   mockPngExportType = new PngExportType(mockCoreSetup, configType, mockLogger, context);
-  mockPngExportType.setup({
-    basePath: { set: jest.fn() },
-  });
+  mockPngExportType.setup({});
   mockPngExportType.start({
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: mockCoreStart.savedObjects,

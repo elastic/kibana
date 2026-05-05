@@ -57,9 +57,7 @@ beforeEach(async () => {
 
   mockPdfExportType = new PdfV1ExportType(mockCoreSetup, configType, mockLogger, context);
 
-  mockPdfExportType.setup({
-    basePath: { set: jest.fn() },
-  });
+  mockPdfExportType.setup({});
   mockPdfExportType.start({
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: mockCoreStart.savedObjects,

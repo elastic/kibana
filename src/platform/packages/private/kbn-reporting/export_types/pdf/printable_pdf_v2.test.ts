@@ -65,9 +65,7 @@ beforeEach(async () => {
   encryptedHeaders = await encryptHeaders({});
 
   mockPdfExportType = new PdfExportType(mockCoreSetup, configType, mockLogger, context);
-  mockPdfExportType.setup({
-    basePath: { set: jest.fn() },
-  });
+  mockPdfExportType.setup({});
   mockPdfExportType.start({
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: mockCoreStart.savedObjects,

@@ -41,9 +41,7 @@ const createMockCoreStart = (
         }),
         getScopedClient: jest.fn().mockReturnValue(sc),
       },
-      http: {
-        basePath: { set: jest.fn() },
-      },
+      http: {},
       elasticsearch: {
         client: { asInternalUser: {} },
       },

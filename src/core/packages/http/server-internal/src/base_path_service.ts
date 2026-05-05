@@ -8,9 +8,8 @@
  */
 
 import { modifyUrl } from '@kbn/std';
-import type { Request } from '@hapi/hapi';
 import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
-import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 /**
  * Core internal implementation of {@link IBasePath}
@@ -18,8 +17,6 @@ import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
  * @internal
  */
 export class BasePath implements IBasePath {
-  private readonly basePathCache = new WeakMap<Request, string>();
-
   public readonly serverBasePath: string;
   public readonly publicBaseUrl?: string;
 
@@ -29,31 +26,8 @@ export class BasePath implements IBasePath {
   }
 
   public get = (request: KibanaRequest) => {
-    const requestScopePath = this.basePathCache.get(ensureRawRequest(request)) || '';
-    return `${this.serverBasePath}${requestScopePath}`;
-  };
-
-  /**
-   * @deprecated Use {@link FakeRequest.spaceId} (server) or read `request.spaceId`
-   * directly. Will be removed in Phase 2 once all consumers have migrated off
-   * `basePath.set` for space-scoping background tasks.
-   */
-  public set = (request: KibanaRequest, requestSpecificBasePath: string) => {
-    this.setForRawRequest(ensureRawRequest(request), requestSpecificBasePath);
-  };
-
-  /**
-   * Internal variant of {@link set} that accepts a raw Hapi Request directly.
-   * Used by Core's onRequest handler which runs before KibanaRequest is created.
-   * @internal
-   */
-  public setForRawRequest = (rawRequest: Request, requestSpecificBasePath: string) => {
-    if (this.basePathCache.has(rawRequest)) {
-      throw new Error(
-        'Request basePath was previously set. Setting multiple times is not supported.'
-      );
-    }
-    this.basePathCache.set(rawRequest, requestSpecificBasePath);
+    const spacePath = request.spaceId === DEFAULT_SPACE_ID ? '' : `/s/${request.spaceId}`;
+    return `${this.serverBasePath}${spacePath}`;
   };
 
   public prepend = (path: string): string => {
