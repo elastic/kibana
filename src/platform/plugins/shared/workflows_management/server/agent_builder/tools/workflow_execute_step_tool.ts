@@ -13,7 +13,6 @@ import { AgentExecutionMode, ToolType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import {
   buildWorkflowLookup,
@@ -606,17 +605,7 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
         ),
     }),
     tags: ['workflows', 'yaml', 'execution', 'testing'],
-    availability: {
-      handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        return isEnabled
-          ? { status: 'available' }
-          : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };
-      },
-      cacheMode: 'space',
-    },
+    experimental: true,
     handler: async (
       { stepName, yaml: inlineYaml, contextOverride, confirmation_body: confirmationBody },
       context
