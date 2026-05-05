@@ -12,7 +12,7 @@ import type { OverviewView } from '../../../../../../state';
 import {
   DEFAULT_OVERVIEW_VIEW,
   isOverviewView,
-  selectOverviewState,
+  selectOverviewView,
   setOverviewViewAction,
 } from '../../../../../../state';
 import { useUrlParams } from '../../../../../../hooks';
@@ -20,7 +20,7 @@ import { useUrlParams } from '../../../../../../hooks';
 export const useViewButtons = () => {
   const isInitialMount = useRef(true);
 
-  const { view } = useSelector(selectOverviewState);
+  const view = useSelector(selectOverviewView);
   const [urlParams, updateUrlParams] = useUrlParams();
 
   const { view: urlView } = urlParams();

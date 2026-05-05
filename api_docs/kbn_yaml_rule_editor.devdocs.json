@@ -13,7 +13,7 @@
           "\nYAML Rule Editor component with ES|QL support\n\nThis component provides a Monaco-based code editor for editing rule definitions\nin YAML format with embedded ES|QL query support, including:\n- Syntax highlighting for both YAML and ES|QL\n- Auto-completion for YAML keys based on the rule schema\n- ES|QL auto-completion within the query field\n- Real-time validation against the rule schema"
         ],
         "signature": [
-          "({ value, onChange, esqlCallbacks, esqlPropertyNames, isReadOnly, height, dataTestSubj, }: ",
+          "({ value, onChange, onBlur, esqlCallbacks, esqlPropertyNames, isReadOnly, height, dataTestSubj, }: ",
           {
             "pluginId": "@kbn/yaml-rule-editor",
             "scope": "public",
@@ -34,7 +34,7 @@
             "id": "def-public.YamlRuleEditor.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  value,\n  onChange,\n  esqlCallbacks,\n  esqlPropertyNames = DEFAULT_ESQL_PROPERTY_NAMES,\n  isReadOnly = false,\n  height = 'clamp(320px, calc(100vh - 500px), 750px)',\n  dataTestSubj = 'alertingV2YamlRuleEditor',\n}",
+            "label": "{\n  value,\n  onChange,\n  onBlur,\n  esqlCallbacks,\n  esqlPropertyNames = DEFAULT_ESQL_PROPERTY_NAMES,\n  isReadOnly = false,\n  height = 'clamp(320px, calc(100vh - 500px), 750px)',\n  dataTestSubj = 'alertingV2YamlRuleEditor',\n}",
             "description": [],
             "signature": [
               {
@@ -281,6 +281,26 @@
           },
           {
             "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.YamlRuleEditorProps.onBlur",
+            "type": "Function",
+            "tags": [],
+            "label": "onBlur",
+            "description": [
+              "\nCalled when the editor text loses focus. Useful for \"user paused editing\"\ntriggers like syncing parsed YAML back into a parent form's state."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
             "id": "def-public.YamlRuleEditorProps.esqlCallbacks",
             "type": "Object",
             "tags": [],
@@ -296,7 +316,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -316,7 +336,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
-            "lineNumber": 76,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -332,7 +352,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -348,7 +368,7 @@
               "string | number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -364,7 +384,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

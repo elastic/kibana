@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/navigation-plugin'
   - '@kbn/config-schema'
   - '@kbn/workflows'
+  - '@kbn/human-readable-id'
   - '@kbn/workflows-ui'
   - '@kbn/workflows-yaml'
   - '@kbn/zod'
@@ -91,14 +92,15 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/logging'
-  - '@kbn/core-saved-objects-api-server'
   - '@kbn/management-settings-ids'
+  - '@kbn/agent-context-layer-plugin'
   - '@kbn/std'
   - '@kbn/use-observable'
   - '@kbn/cloud-plugin'
   - '@kbn/kbn-client'
   - '@kbn/rule-data-utils'
   - '@kbn/std'
+  - '@kbn/core-saved-objects-common'
 tags:
   - plugin
   - prod
