@@ -547,22 +547,25 @@ export const getBaseScoreESQL = (
   const upper = bounds.upper ? `entity_id <= "${bounds.upper}"` : undefined;
   const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
 
+  // Filter on entity_id (computed from cheap field evals) BEFORE the
+  // CONCAT/base64 builders run, so non-matching alerts skip the per-row
+  // string-allocation work.
   const query = /* esql */ `
   SET unmapped_fields="nullify";
   FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
+    | EVAL entity_id = ${euidEval}
+    | WHERE ${rangeClause}
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    | EVAL entity_id = ${euidEval},
-           rule_name_b64 = TO_BASE64(rule_name),
+    | EVAL rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
-    | WHERE ${rangeClause}
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
@@ -606,22 +609,25 @@ export const getBaseScoreESQLByIds = (
 
   const idsClause = entityIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
 
+  // Filter on entity_id BEFORE the CONCAT/base64 builders run, so the
+  // per-row string-allocation work only happens for alerts that survive
+  // the IN-clause. RENAME/EVAL ordering is otherwise unchanged.
   const query = /* esql */ `
   SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
+    | EVAL entity_id = ${euidEval}
+    | WHERE entity_id IN (${idsClause})
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    | EVAL entity_id = ${euidEval},
-           rule_name_b64 = TO_BASE64(rule_name),
+    | EVAL rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
-    | WHERE entity_id IN (${idsClause})
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
@@ -690,25 +696,29 @@ export const getResolutionScoreESQLByIds = (
 
   const idsClause = resolutionTargetIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
 
+  // Compute entity_id (cheap), then LOOKUP JOIN to recover
+  // resolution_target_id, then filter on resolution_target_id BEFORE the
+  // CONCAT/base64 builders run so per-row string-allocation work only
+  // happens for alerts that survive the IN-clause.
   const query = /* esql */ `
   SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
+    | EVAL entity_id = ${euidEval}
+    | LOOKUP JOIN ${lookupIndex} ON entity_id
+    | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
+           relationship_type = COALESCE(relationship_type, "self")
+    | WHERE resolution_target_id IN (${idsClause})
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    | EVAL entity_id = ${euidEval},
-          rule_name_b64 = TO_BASE64(rule_name),
-          category_b64 = TO_BASE64(category)
+    | EVAL rule_name_b64 = TO_BASE64(rule_name),
+           category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
-    | LOOKUP JOIN ${lookupIndex} ON entity_id
-    | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
-           relationship_type = COALESCE(relationship_type, "self")
-    | WHERE resolution_target_id IN (${idsClause})
     | EVAL entity_with_rel = CONCAT(entity_id, "|", relationship_type)
     | STATS
         alert_count = count(risk_score),
