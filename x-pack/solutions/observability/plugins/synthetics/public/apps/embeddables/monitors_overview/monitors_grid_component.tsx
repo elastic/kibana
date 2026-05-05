@@ -128,6 +128,9 @@ const MonitorsOverviewList = ({
   view: OverviewView;
 }) => {
   const dispatch = useDispatch();
+
+  useOverviewStatus({ scopeStatusByLocation: true });
+
   useEffect(() => {
     if (!filters) return;
     dispatch(

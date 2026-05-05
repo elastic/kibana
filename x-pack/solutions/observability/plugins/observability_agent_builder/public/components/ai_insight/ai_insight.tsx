@@ -20,6 +20,7 @@ import {
   EuiMarkdownFormat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -159,6 +160,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
                 color={euiTheme.colors.primary}
                 style={{ marginTop: 6 }}
                 size="l"
+                aria-hidden={true}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -227,16 +229,17 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
               <EuiSpacer size="s" />
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
+                  <AiButton
                     data-test-subj="observabilityAgentBuilderRegenerateButton"
                     size="s"
                     iconType="sparkles"
+                    variant="empty"
                     onClick={regenerate}
                   >
                     {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.regenerateButton', {
                       defaultMessage: 'Regenerate',
                     })}
-                  </EuiButtonEmpty>
+                  </AiButton>
                 </EuiFlexItem>
                 {Boolean(summary && summary.trim()) && (
                   <EuiFlexItem grow={false}>

@@ -7,8 +7,17 @@
 
 import React, { memo } from 'react';
 import { Handle, Position, type NodeProps, type Node } from '@xyflow/react';
-import { useEuiTheme, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiText,
+  EuiToolTip,
+  EuiHealth,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+
+import { HEALTH_STATUS_COLORS } from '../utils';
 
 import type { OTelGraphNodeData } from './constants';
 import { COMPONENT_TYPE_VIS_COLORS, COMPONENT_TYPE_LABELS } from './constants';
@@ -63,9 +72,18 @@ export const ComponentNode = memo(
         <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
         <div css={typeStyles}>{COMPONENT_TYPE_LABELS[data.componentType]}</div>
         <EuiToolTip content={data.label}>
-          <EuiText size="xs" css={labelStyles} tabIndex={0}>
-            {data.label}
-          </EuiText>
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+            {data.healthStatus && (
+              <EuiFlexItem grow={false}>
+                <EuiHealth color={HEALTH_STATUS_COLORS[data.healthStatus]} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              <EuiText size="xs" css={labelStyles} tabIndex={0}>
+                {data.label}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiToolTip>
         <Handle type="source" position={sourcePosition ?? Position.Right} css={handleStyles} />
       </div>

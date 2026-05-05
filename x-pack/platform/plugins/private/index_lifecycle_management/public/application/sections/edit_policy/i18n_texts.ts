@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { PHASE_TITLES, PHASE_LONG_DESCRIPTIONS } from '@kbn/data-lifecycle-phases';
 
 export const i18nTexts = {
   editPolicy: {
@@ -320,49 +321,7 @@ export const i18nTexts = {
         }
       ),
     },
-    titles: {
-      hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseTitle', {
-        defaultMessage: 'Hot phase',
-      }),
-      warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseTitle', {
-        defaultMessage: 'Warm phase',
-      }),
-      cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseTitle', {
-        defaultMessage: 'Cold phase',
-      }),
-      frozen: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseTitle', {
-        defaultMessage: 'Frozen phase',
-      }),
-      delete: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseTitle', {
-        defaultMessage: 'Delete phase',
-      }),
-    },
-    descriptions: {
-      hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescription', {
-        defaultMessage:
-          'Store your most recent, most frequently-searched data in the hot tier. The hot tier provides the best indexing and search performance by using the most powerful, expensive hardware.',
-      }),
-      warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescription', {
-        defaultMessage:
-          'Move data to the warm tier when you are still likely to search it, but infrequently need to update it. The warm tier is optimized for search performance over indexing performance.',
-      }),
-      cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescription', {
-        defaultMessage:
-          'Move data to the cold tier when you are searching it less often and don’t need to update it. The cold tier is optimized for cost savings over search performance.',
-      }),
-      frozen: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseDescription',
-        {
-          defaultMessage:
-            'Move data to the frozen tier for long term retention. The frozen tier provides the most cost-effective way store your data and still be able to search it.',
-        }
-      ),
-      delete: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescription',
-        {
-          defaultMessage: 'Delete data you no longer need.',
-        }
-      ),
-    },
+    titles: PHASE_TITLES,
+    descriptions: PHASE_LONG_DESCRIPTIONS,
   },
 };

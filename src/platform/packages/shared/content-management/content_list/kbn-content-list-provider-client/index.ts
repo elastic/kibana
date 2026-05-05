@@ -26,3 +26,32 @@ export type {
   TableListViewFindItemsResult,
   SavedObjectReference,
 } from './src/types';
+
+// Saved-object listing services — small, single-purpose helpers that build
+// args for `ContentListClientProvider`. See `services/<area>/` and the
+// README for how each helper maps to a `ContentListClientProviderProps`
+// field.
+export {
+  createTagsService,
+  type TagsApi,
+  createFavoritesService,
+  type FavoritesServiceOptions,
+  createUserProfilesService,
+  createContentInsightsService,
+  type ContentInsightsServiceOptions,
+  SavedObjectActivityRow,
+  type SavedObjectActivityRowProps,
+  createDuplicateTitleValidator,
+  type DuplicateTitleValidatorOptions,
+  type TitleValidator,
+  useRecentlyAccessedDecoration,
+  type RecentlyAccessedDecoration,
+  type RecentDecoration,
+  type DecorableFindItemsResult,
+  RecentsFilterRenderer,
+  type RecentsFilterRendererProps,
+  type RecentlyAccessedEntry,
+  type RecentlyAccessedHistorySource,
+  withPerformanceMetrics,
+  type PerformanceMetricsOptions,
+} from './src/services';
