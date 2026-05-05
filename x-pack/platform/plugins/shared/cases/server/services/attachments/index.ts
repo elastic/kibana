@@ -100,6 +100,11 @@ function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): 
  * decoding and may otherwise leak into `_source` (mapping is `dynamic: false`,
  * so they would be stored but not indexed). Stripping here guarantees
  * byte-for-byte equivalence with pre-migration legacy writes.
+ *
+ * Applied via {@link stripUnifiedOnlyFields} on every legacy-SO write path:
+ * `create`, `bulkCreate`, `update`, `bulkUpdate`. Regression tests for all
+ * four paths live in the "byte-for-byte legacy storage equivalence" describe
+ * block in `index.test.ts`.
  */
 const UNIFIED_ONLY_ATTRIBUTE_KEYS = ['attachmentId', 'metadata', 'data'] as const;
 
