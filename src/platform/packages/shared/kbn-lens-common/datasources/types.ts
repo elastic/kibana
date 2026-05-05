@@ -74,6 +74,7 @@ export type ColumnBuildHints = Partial<
       params?: { format?: ValueFormatConfig; [key: string]: unknown };
     }
 >;
+
 /**
  * Base options passed to `buildColumn` in operation definitions.
  *
