@@ -77,7 +77,9 @@ spaceTest.describe(
           // Go back to about step and verify rule name is still there
           await createRulePage.ruleNameInput.waitFor();
           await expect(createRulePage.ruleNameInput).toHaveValue(RULE_NAME);
+          await createRulePage.aboutContinueButton.scrollIntoViewIfNeeded();
           await createRulePage.aboutContinueButton.click();
+          await createRulePage.scheduleContinueButton.waitFor({ state: 'visible' });
           await createRulePage.scheduleContinueButton.click();
         });
 
