@@ -47,7 +47,7 @@ evaluate.describe(
             {
               input: {
                 question:
-                  'Some of our services seem to be running slowly. Can you investigate why?',
+                  'Fraud-detection service seems to be running slowly. Can you investigate why?',
                 attachments: [
                   {
                     type: 'screen_context',
