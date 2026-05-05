@@ -52,9 +52,13 @@ export const createCreatePartitionTool = ({
   id: STREAMS_CREATE_PARTITION_TOOL_ID,
   type: ToolType.builtin,
   description: dedent(`
-    Creates a child stream (partition) under a parent wired stream with a routing condition. This tool MUTATES state — only call when the user explicitly asks to create a partition, route, or child stream.
+    Creates a child stream (partition) under a parent wired stream with a routing condition. This tool MUTATES state, but the platform automatically renders a confirmation dialog (Create stream / Cancel) using \`confirmation_body\` — so the user always reviews and approves before the partition is created. Always populate \`confirmation_body\` with a clear Markdown preview (parent, new child name, routing condition, expected impact).
 
-    **Cancellation:** If this tool returns "The user chose not to proceed with this action", stop immediately, acknowledge, and ask how to proceed. Do NOT retry.
+    **When to call:** When the user has given a direct instruction to create or apply a partition — e.g. "create a partition for errors", "split this stream by service", "route nginx logs out", or after the user accepts a suggestion produced by the partition-suggestion read tool. Do NOT ask in chat for confirmation first when intent is clear; the platform dialog is the user's confirmation step. When applying multiple suggested partitions at once, call this tool once per partition — each renders its own dialog so the user can accept some and reject others.
+
+    **When NOT to call:** When the user's message is exploratory ("how should I split this?", "what splits make sense?") or when partition suggestions came back with a \`reason\` (\`no_clusters\`, \`no_samples\`, \`all_data_partitioned\`) — present those in chat instead. See the confidence check rules in the streams skill prompt.
+
+    **Cancellation:** If this tool returns "The user chose not to proceed with this action", acknowledge that partition is skipped. Continue with any other partitions the user requested. Do NOT retry the same partition with different parameters.
 
     Child names MUST follow the parent.childname convention: for parent "logs.ecs", use "logs.ecs.nginx"; for parent "logs.otel", use "logs.otel.nginx".
 
