@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SeverityBadge } from '../../../common/components/severity_badge';
 import { PreviewLink } from '../../../flyout/shared/components/preview_link';
+import { ChildLink } from '../../shared/components/child_link';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -24,12 +25,12 @@ export const getColumns = ({
   scopeId,
   dataTestSubj,
   onShowAlert,
-  hidePreviewLink,
+  useLegacyExpandableFlyout,
 }: {
   scopeId: string;
   dataTestSubj?: string;
   onShowAlert: (id: string, indexName: string) => void;
-  hidePreviewLink: boolean;
+  useLegacyExpandableFlyout?: boolean;
 }): Array<EuiBasicTableColumn<Record<string, unknown>>> => [
   {
     render: (row: Record<string, unknown>) => (
@@ -80,9 +81,7 @@ export const getColumns = ({
       const ruleId = row['kibana.alert.rule.uuid'] as string;
       return (
         <EuiToolTip content={ruleName}>
-          {hidePreviewLink ? (
-            <span>{ruleName}</span>
-          ) : (
+          {useLegacyExpandableFlyout ? (
             <PreviewLink
               field={ALERT_RULE_NAME}
               value={ruleName}
@@ -92,6 +91,14 @@ export const getColumns = ({
             >
               <span>{ruleName}</span>
             </PreviewLink>
+          ) : (
+            <ChildLink
+              field={ALERT_RULE_NAME}
+              value={ruleId}
+              data-test-subj={`${dataTestSubj}RuleLink`}
+            >
+              <span>{ruleName}</span>
+            </ChildLink>
           )}
         </EuiToolTip>
       );
