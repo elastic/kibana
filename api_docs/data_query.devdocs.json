@@ -71,6 +71,7 @@
                 "lineNumber": 47,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "IUiSettingsClient",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -515,6 +516,7 @@
                 "lineNumber": 207,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "Filter",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -615,6 +617,7 @@
                 "lineNumber": 225,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FilterStateStore",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -968,6 +971,7 @@
                 "lineNumber": 30,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               },
               {
@@ -984,6 +988,7 @@
                 "lineNumber": 30,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]
@@ -1074,6 +1079,7 @@
                 "lineNumber": 39,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "PersistedLogOptions",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1098,6 +1104,7 @@
                 "lineNumber": 39,
                 "columnNumber": 67,
                 "deprecated": false,
+                "docsReferencedTypeName": "IStorageWrapper",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1231,6 +1238,7 @@
                 "lineNumber": 19,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "IStorageWrapper",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1281,6 +1289,7 @@
                 "lineNumber": 31,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimeRange",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1434,6 +1443,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1460,6 +1470,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "BaseStateContainer",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1634,6 +1645,7 @@
             "lineNumber": 17,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpStart",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1713,6 +1725,7 @@
             "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterManager",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1802,6 +1815,7 @@
             "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewBase",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1841,6 +1855,7 @@
             "lineNumber": 12,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "QueryLanguage",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1900,6 +1915,7 @@
             "lineNumber": 60,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1991,6 +2007,7 @@
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2074,6 +2091,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Filter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2165,7 +2183,15 @@
         "tags": [],
         "label": "syncGlobalQueryStateWithUrl",
         "description": [
-          "\nHelper to sync global query state {@link GlobalQueryStateFromUrl} with the URL (`_g` query param that is preserved between apps)"
+          "\nHelper to sync global query state ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.GlobalQueryStateFromUrl",
+            "text": "GlobalQueryStateFromUrl"
+          },
+          " with the URL (`_g` query param that is preserved between apps)"
         ],
         "signature": [
           "(query: Pick<",
@@ -2230,6 +2256,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2255,6 +2282,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IKbnUrlStateStorage",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2361,6 +2389,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false
           },
           {
@@ -2383,6 +2412,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IKbnUrlStateStorage",
             "trackAdoption": false
           }
         ],
@@ -2397,7 +2427,15 @@
         "tags": [],
         "label": "GlobalQueryStateFromUrl",
         "description": [
-          "\nPart of {@link QueryState} serialized in the `_g` portion of Url"
+          "\nPart of ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.QueryState",
+            "text": "QueryState"
+          },
+          " serialized in the `_g` portion of Url"
         ],
         "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
         "lineNumber": 24,
@@ -2994,7 +3032,7 @@
                 "id": "def-public.QueryStart.addToQueryLog.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "__1",
+                "label": "{ language, query }",
                 "description": [],
                 "signature": [
                   "{ query: string | { [key: string]: any; }; language: string; }"
@@ -3003,6 +3041,7 @@
                 "lineNumber": 30,
                 "columnNumber": 50,
                 "deprecated": false,
+                "docsReferencedTypeName": "Query",
                 "trackAdoption": false
               }
             ]
@@ -3131,6 +3170,7 @@
                 "lineNumber": 72,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataView",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3155,6 +3195,7 @@
                 "lineNumber": 72,
                 "columnNumber": 38,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimeRange",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3340,6 +3381,7 @@
                 "lineNumber": 22,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedQueryAttributes",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3415,6 +3457,7 @@
                 "lineNumber": 23,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedQueryAttributes",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4359,6 +4402,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRange",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4376,6 +4420,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CalculateBoundsOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4434,6 +4479,7 @@
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRange",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4566,6 +4612,7 @@
             "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRange",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4714,6 +4761,7 @@
             "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRange",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4896,6 +4944,7 @@
             "lineNumber": 32,
             "columnNumber": 62,
             "deprecated": false,
+            "docsReferencedTypeName": "Args",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4942,6 +4991,7 @@
             "lineNumber": 33,
             "columnNumber": 52,
             "deprecated": false,
+            "docsReferencedTypeName": "Args",
             "trackAdoption": false,
             "isRequired": true
           }

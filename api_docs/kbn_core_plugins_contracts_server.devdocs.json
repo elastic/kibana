@@ -158,6 +158,7 @@
                 "lineNumber": 184,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false
               }
             ]
@@ -201,6 +202,7 @@
                 "lineNumber": 184,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false
               }
             ]
@@ -262,6 +264,7 @@
                 "lineNumber": 184,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false
               }
             ]
@@ -300,7 +303,23 @@
         "tags": [],
         "label": "PluginContractResolver",
         "description": [
-          "\nA plugin contract resolver, allowing to retrieve plugin contracts at runtime.\n\nPlease refer to {@link PluginsServiceSetup} and {@link PluginsServiceStart} for more documentation and examples.\n"
+          "\nA plugin contract resolver, allowing to retrieve plugin contracts at runtime.\n\nPlease refer to ",
+          {
+            "pluginId": "@kbn/core-plugins-contracts-server",
+            "scope": "server",
+            "docId": "kibKbnCorePluginsContractsServerPluginApi",
+            "section": "def-server.PluginsServiceSetup",
+            "text": "PluginsServiceSetup"
+          },
+          " and ",
+          {
+            "pluginId": "@kbn/core-plugins-contracts-server",
+            "scope": "server",
+            "docId": "kibKbnCorePluginsContractsServerPluginApi",
+            "section": "def-server.PluginsServiceStart",
+            "text": "PluginsServiceStart"
+          },
+          " for more documentation and examples.\n"
         ],
         "signature": [
           "<T extends ",
@@ -330,6 +349,7 @@
             "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false
           }
         ],

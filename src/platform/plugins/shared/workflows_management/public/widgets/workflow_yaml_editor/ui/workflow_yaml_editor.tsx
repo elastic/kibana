@@ -28,6 +28,7 @@ import {
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
+  useWorkflowEventsOnDecorations,
   useWorkflowIdDecorations,
 } from './decorations';
 import { DocumentationLink } from './documentation_link';
@@ -52,6 +53,7 @@ import {
 import {
   selectEditorWorkflowLookup,
   selectEditorYaml,
+  selectEditorYamlLineCounter,
   selectExecution,
   selectHasChanges,
   selectHighlightedStepId,
@@ -127,6 +129,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   fontSize: 14,
   lineHeight: 23, // default ~21px + 2px
   renderWhitespace: 'none',
+  roundedSelection: false,
   wordWrap: 'on',
   wordWrapColumn: 80,
   wrappingIndent: 'indent',
@@ -225,6 +228,7 @@ export const WorkflowYAMLEditor = ({
   const workflowDefinition = useSelector(selectWorkflowDefinition);
   // The current yaml document in the editor (could be unsaved)
   const yamlDocument = useSelector(selectEditorYamlDocument);
+  const yamlLineCounter = useSelector(selectEditorYamlLineCounter);
   const yamlDocumentRef = useRef<YAML.Document | null>(yamlDocument ?? null);
   yamlDocumentRef.current = yamlDocument || null;
 
@@ -503,6 +507,14 @@ export const WorkflowYAMLEditor = ({
   useAlertTriggerDecorations({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,
+    isEditorMounted,
+    readOnly: isExecutionYaml,
+  });
+
+  useWorkflowEventsOnDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    yamlLineCounter,
     isEditorMounted,
     readOnly: isExecutionYaml,
   });

@@ -75,6 +75,7 @@
                 "lineNumber": 113,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "UsageCollectionSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -113,6 +114,7 @@
                 "lineNumber": 130,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UiCounterMetricType",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -130,6 +132,7 @@
                 "lineNumber": 131,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CloudSecurityUiCounters",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -349,6 +352,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CspBenchmarkRulesStates",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -590,6 +594,7 @@
             "lineNumber": 40,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "CspBenchmarkRuleMetadata",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -666,6 +671,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CspBenchmarkRuleMetadata",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -751,6 +757,7 @@
             "lineNumber": 170,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "EntityStoreEuid",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -836,6 +843,7 @@
             "lineNumber": 188,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "EntityStoreEuid",
             "trackAdoption": false,
             "isRequired": true
           }

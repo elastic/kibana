@@ -63,6 +63,7 @@
             "lineNumber": 145,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "CardsNavigationComponentProps",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -11,6 +11,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { builtInStepDefinitions } from '@kbn/workflows';
+import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import type { StepDefinitionForAgent } from './get_step_definitions_tool';
 import {
@@ -19,7 +20,6 @@ import {
   resolveConnectors,
 } from './get_step_definitions_tool';
 import { workflowTools } from '../../../common/agent_builder/constants';
-import { parseYamlToJSONWithoutValidation } from '../../../common/lib/yaml';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 

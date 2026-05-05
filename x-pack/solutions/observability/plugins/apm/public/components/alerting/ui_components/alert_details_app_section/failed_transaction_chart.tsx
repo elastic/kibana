@@ -65,7 +65,7 @@ export function FailedTransactionChart({
   ruleTypeId,
 }: {
   alert: TopAlert;
-  transactionType: string;
+  transactionType?: string;
   transactionTypes?: string[];
   setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
@@ -162,7 +162,7 @@ export function FailedTransactionChart({
     },
   ];
 
-  const showTransactionTypeSelect = setTransactionType && transactionTypes;
+  const showTransactionTypeSelect = transactionType && transactionTypes && setTransactionType;
 
   return (
     <EuiFlexItem>

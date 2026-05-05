@@ -26,7 +26,15 @@
         "tags": [],
         "label": "createModelVersionTestBed",
         "description": [
-          "\nCreate a {@link ModelVersionTestBed} that can be used for model version integration testing.\n"
+          "\nCreate a ",
+          {
+            "pluginId": "@kbn/core-test-helpers-model-versions",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+            "section": "def-common.ModelVersionTestBed",
+            "text": "ModelVersionTestBed"
+          },
+          " that can be used for model version integration testing.\n"
         ],
         "signature": [
           "() => ",
@@ -48,7 +56,15 @@
         "tags": [],
         "label": "createModelVersionTestMigrator",
         "description": [
-          "\nCreate a {@link ModelVersionTestMigrator | test migrator} that can be used\nto test model version changes between versions.\n"
+          "\nCreate a ",
+          {
+            "pluginId": "@kbn/core-test-helpers-model-versions",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+            "section": "def-common.ModelVersionTestMigrator",
+            "text": "test migrator"
+          },
+          " that can be used\nto test model version changes between versions.\n"
         ],
         "signature": [
           "({ type, }: { type: ",
@@ -194,6 +210,7 @@
                 "lineNumber": 39,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ModelVersionTestkitOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -302,7 +319,17 @@
         "tags": [],
         "label": "ModelVersionTestkitOptions",
         "description": [
-          "\nOptions used to create a {@link ModelVersionTestKit} via {@link ModelVersionTestBed#prepareTestKit}\n"
+          "\nOptions used to create a ",
+          {
+            "pluginId": "@kbn/core-test-helpers-model-versions",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+            "section": "def-common.ModelVersionTestKit",
+            "text": "ModelVersionTestKit"
+          },
+          " via ",
+          "ModelVersionTestBed#prepareTestKit",
+          "\n"
         ],
         "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
         "lineNumber": 42,
@@ -317,7 +344,15 @@
             "tags": [],
             "label": "savedObjectDefinitions",
             "description": [
-              "\nThe {@link SavedObjectTestkitDefinition | definitions} for the SO type(s) to test"
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-test-helpers-model-versions",
+                "scope": "common",
+                "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+                "section": "def-common.SavedObjectTestkitDefinition",
+                "text": "definitions"
+              },
+              " for the SO type(s) to test"
             ],
             "signature": [
               "SavedObjectTestkitDefinition",
@@ -489,6 +524,7 @@
                 "lineNumber": 53,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ModelVersionTestMigrateOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }

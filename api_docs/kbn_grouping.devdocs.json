@@ -54,12 +54,20 @@
             "lineNumber": 44,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "GroupingQueryArgs",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "query dsl {@link GroupingQuery }"
+          "query dsl ",
+          {
+            "pluginId": "@kbn/grouping",
+            "scope": "common",
+            "docId": "kibKbnGroupingPluginApi",
+            "section": "def-common.GroupingQuery",
+            "text": "GroupingQuery"
+          }
         ],
         "initialIsOpen": false
       },
@@ -143,6 +151,7 @@
             "lineNumber": 114,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "GroupingArgs",
             "trackAdoption": false,
             "isRequired": true
           }

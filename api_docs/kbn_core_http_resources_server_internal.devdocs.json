@@ -61,6 +61,7 @@
                 "lineNumber": 56,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -105,6 +106,7 @@
                 "lineNumber": 60,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "PrebootDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -149,6 +151,7 @@
                 "lineNumber": 67,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetupDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }

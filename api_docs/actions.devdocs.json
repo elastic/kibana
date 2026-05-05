@@ -68,6 +68,7 @@
                 "lineNumber": 47,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -209,6 +210,7 @@
               "lineNumber": 15,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "ValidateEmailAddressesOptions",
               "trackAdoption": false,
               "isRequired": false
             }
@@ -337,6 +339,7 @@
                 "lineNumber": 51,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ServiceParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -358,6 +361,7 @@
                 "lineNumber": 52,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -437,6 +441,7 @@
                 "lineNumber": 87,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConnectorUsageCollector",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -477,6 +482,7 @@
                 "lineNumber": 91,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Incident",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -494,6 +500,7 @@
                 "lineNumber": 92,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConnectorUsageCollector",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -578,6 +585,7 @@
                 "lineNumber": 102,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConnectorUsageCollector",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -644,6 +652,7 @@
                 "lineNumber": 106,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConnectorUsageCollector",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -731,6 +740,7 @@
                 "lineNumber": 114,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConnectorUsageCollector",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1923,6 +1933,7 @@
                 "lineNumber": 55,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ServiceParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1961,6 +1972,7 @@
                 "lineNumber": 116,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "SubAction",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2056,6 +2068,7 @@
                 "lineNumber": 132,
                 "columnNumber": 46,
                 "deprecated": false,
+                "docsReferencedTypeName": "AxiosError",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2099,6 +2112,7 @@
                 "lineNumber": 135,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SubActionRequestParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2116,6 +2130,7 @@
                 "lineNumber": 144,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConnectorUsageCollector",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2168,6 +2183,7 @@
                 "lineNumber": 64,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnsecuredActionsClientOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2212,6 +2228,7 @@
                 "lineNumber": 66,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnsecuredExecuteOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2359,6 +2376,7 @@
             "lineNumber": 35,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2399,6 +2417,7 @@
             "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NotificationSource",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2441,6 +2460,7 @@
             "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2478,6 +2498,7 @@
             "lineNumber": 19,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "GetBasicAuthHeaderArgs",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3217,6 +3238,7 @@
                 "lineNumber": 210,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConnectorLifecyclePostCreateParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3267,6 +3289,7 @@
                 "lineNumber": 212,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConnectorLifecyclePostDeleteParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3701,6 +3724,7 @@
                 "lineNumber": 56,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnsecuredExecuteOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4292,6 +4316,7 @@
               "lineNumber": 130,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "ActionType",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -4339,6 +4364,7 @@
               "lineNumber": 137,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "SubActionConnectorType",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -4379,6 +4405,7 @@
               "lineNumber": 140,
               "columnNumber": 28,
               "deprecated": false,
+              "docsReferencedTypeName": "GetAxiosInstanceWithAuthFnOpts",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -4528,6 +4555,7 @@
               "lineNumber": 153,
               "columnNumber": 30,
               "deprecated": false,
+              "docsReferencedTypeName": "EnabledConnectorTypes",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -4642,6 +4670,7 @@
               "lineNumber": 157,
               "columnNumber": 38,
               "deprecated": false,
+              "docsReferencedTypeName": "ConnectorLifecycleListener",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -4921,6 +4950,7 @@
               "lineNumber": 173,
               "columnNumber": 31,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -4978,6 +5008,7 @@
               "lineNumber": 183,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -5050,6 +5081,7 @@
               "lineNumber": 187,
               "columnNumber": 38,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -5176,6 +5208,7 @@
               "lineNumber": 196,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "Params",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -5193,6 +5226,7 @@
               "lineNumber": 197,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "Record",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -5292,6 +5326,7 @@
               "lineNumber": 207,
               "columnNumber": 30,
               "deprecated": false,
+              "docsReferencedTypeName": "InMemoryConnector",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -5417,6 +5452,7 @@
             "lineNumber": 14,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -5712,6 +5748,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ValidateEmailAddressesOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -7337,6 +7374,7 @@
             "lineNumber": 22,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "AsApiContract",
             "trackAdoption": false
           }
         ],
@@ -7389,6 +7427,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],

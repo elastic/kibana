@@ -14,8 +14,8 @@ import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { OverviewStatusQuery } from '../common';
 import { getMonitorFilters } from '../common';
+import { ConfigKey, MONITOR_STATUS_ENUM } from '../../../common/constants/monitor_management';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
-import { ConfigKey } from '../../../common/constants/monitor_management';
 import type { RouteContext } from '../types';
 import type {
   EncryptedSyntheticsMonitorAttributes,
@@ -28,12 +28,22 @@ import {
   getTimespanFilter,
 } from '../../../common/constants/client_defaults';
 
-type LocationStatus = Array<{
+interface LocationStatusEntry {
   status: string;
   locationId: string;
   timestamp: string;
   monitorUrl?: string;
-}>;
+  // The latest error reason for the most recent final summary on this
+  // (monitor, location). Only populated for down checks where the heartbeat
+  // doc has an `error` object — `error.message` is `text` so we collect it
+  // via `top_hits` rather than `top_metrics`.
+  error?: { message?: string; type?: string };
+  // Start of the current state segment (down streak) for this location, taken
+  // from `state.started_at` on the latest final summary. Used to render
+  // "Down · 12m" without having to compute durations on the client.
+  downSince?: string;
+}
+type LocationStatus = LocationStatusEntry[];
 
 export const SUMMARIES_PAGE_SIZE = 5000;
 
@@ -198,6 +208,37 @@ export class OverviewStatusService {
                       },
                     },
                   },
+                  // `error.message` is mapped as `text` so it can't be pulled
+                  // via `top_metrics`; fetch the latest final summary doc and
+                  // grab `error` + `state` from its source.
+                  //
+                  // We only need this for currently-down locations — for up
+                  // locations the data is dropped at propagation time anyway.
+                  // Wrapping the (expensive) `top_hits` in a `filter` agg
+                  // keyed on `monitor.status: down` keeps `_source` loading
+                  // off the hot up-bucket path, which dominates real
+                  // deployments.
+                  errorAndState: {
+                    filter: {
+                      term: { 'monitor.status': 'down' },
+                    },
+                    aggs: {
+                      latest: {
+                        top_hits: {
+                          size: 1,
+                          _source: {
+                            includes: [
+                              'error.message',
+                              'error.type',
+                              'state.started_at',
+                              'state.duration_ms',
+                            ],
+                          },
+                          sort: [{ '@timestamp': 'desc' as const }],
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -210,13 +251,45 @@ export class OverviewStatusService {
         hasMoreData = (data?.buckets ?? []).length >= SUMMARIES_PAGE_SIZE;
         afterKey = data?.after_key;
 
-        data?.buckets.forEach(({ status: statusAgg, key: bKey }) => {
+        data?.buckets.forEach((bucket) => {
+          const { status: statusAgg, key: bKey } = bucket;
           const monitorId = String(bKey.monitorId);
           const locationId = String(bKey.locationId);
           const status = String(statusAgg.top?.[0].metrics?.['monitor.status']);
-          const monitorUrl = statusAgg.top?.[0].metrics?.['url.full.keyword'];
+          const rawMonitorUrl = statusAgg.top?.[0].metrics?.['url.full.keyword'];
 
           const timestamp = String(statusAgg.top[0].sort[0]);
+
+          // Pull error + state from the latest *down* doc in the bucket. The
+          // `filter > top_hits` shape means up buckets short-circuit with
+          // `doc_count: 0` and no `latest.hits.hits[0]`.
+          const latestSource =
+            (
+              bucket as unknown as {
+                errorAndState?: {
+                  doc_count?: number;
+                  latest?: {
+                    hits?: {
+                      hits?: Array<{
+                        _source?: {
+                          error?: { message?: unknown; type?: unknown };
+                          state?: { started_at?: unknown };
+                        };
+                      }>;
+                    };
+                  };
+                };
+              }
+            ).errorAndState?.latest?.hits?.hits?.[0]?._source ?? undefined;
+          const errorMessage =
+            latestSource?.error?.message != null ? String(latestSource.error.message) : undefined;
+          const errorType =
+            latestSource?.error?.type != null ? String(latestSource.error.type) : undefined;
+          const downSince =
+            latestSource?.state?.started_at != null
+              ? String(latestSource.state.started_at)
+              : undefined;
+
           if (!monitorByIds.has(String(monitorId))) {
             monitorByIds.set(monitorId, []);
           }
@@ -224,7 +297,10 @@ export class OverviewStatusService {
             status,
             locationId,
             timestamp,
-            monitorUrl: monitorUrl ? String(monitorUrl) : undefined,
+            monitorUrl: rawMonitorUrl != null ? String(rawMonitorUrl) : undefined,
+            error:
+              errorMessage || errorType ? { message: errorMessage, type: errorType } : undefined,
+            downSince,
           });
         });
       } while (hasMoreData && afterKey);
@@ -254,13 +330,26 @@ export class OverviewStatusService {
       const monitorQueryId = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];
       const meta = this.getMonitorMeta(monitor);
       monitor.attributes[ConfigKey.LOCATIONS]?.forEach((location) => {
-        disabledConfigs[`${meta.configId}-${location.id}`] = {
-          monitorQueryId,
-          status: 'disabled',
-          locationId: location.id,
-          locationLabel: location.label,
-          ...meta,
-        };
+        if (disabledConfigs[meta.configId]) {
+          disabledConfigs[meta.configId].locations.push({
+            id: location.id,
+            label: location.label,
+            status: MONITOR_STATUS_ENUM.DISABLED,
+          });
+        } else {
+          disabledConfigs[meta.configId] = {
+            monitorQueryId,
+            overallStatus: MONITOR_STATUS_ENUM.DISABLED,
+            locations: [
+              {
+                id: location.id,
+                label: location.label,
+                status: MONITOR_STATUS_ENUM.DISABLED,
+              },
+            ],
+            ...meta,
+          };
+        }
       });
     });
 
@@ -278,37 +367,100 @@ export class OverviewStatusService {
         }
         const locData = monitorStatus?.find((loc) => loc.locationId === monLocation.id);
         const metaInfo = this.getMonitorMeta(monitor);
+        const status = locData?.status || MONITOR_STATUS_ENUM.PENDING;
+        // Only attach `error` / `downSince` when this location is currently
+        // down — otherwise we'd carry stale error text from the previous
+        // failure which is misleading on the overview row.
+        const isDown = status === MONITOR_STATUS_ENUM.DOWN;
+        const location = {
+          status,
+          id: monLocation.id,
+          label: monLocation.label,
+          ...(isDown && locData?.error ? { error: locData.error } : {}),
+          ...(isDown && locData?.downSince ? { downSince: locData.downSince } : {}),
+        };
         const meta = {
           ...metaInfo,
           monitorQueryId: monitorId,
-          locationId: monLocation.id,
           timestamp: locData?.timestamp,
-          locationLabel: monLocation.label,
           urls: monitor.attributes[ConfigKey.URLS] || locData?.monitorUrl,
+          locations: [location],
+          overallStatus: status,
         };
-        const monLocId = `${meta.configId}-${monLocation.id}`;
-        if (locData) {
-          if (locData.status === 'down') {
+        switch (status) {
+          case MONITOR_STATUS_ENUM.DOWN:
             down += 1;
-            downConfigs[monLocId] = {
-              ...meta,
-              status: 'down',
-            };
-          } else if (locData.status === 'up') {
+            break;
+          case MONITOR_STATUS_ENUM.UP:
             up += 1;
-            upConfigs[monLocId] = {
-              ...meta,
-              status: 'up',
-            };
+            break;
+          default:
+            break;
+        }
+
+        if (
+          downConfigs[meta.configId] ||
+          upConfigs[meta.configId] ||
+          pendingConfigs[meta.configId]
+        ) {
+          const existingMeta =
+            downConfigs[meta.configId] || upConfigs[meta.configId] || pendingConfigs[meta.configId];
+          existingMeta.locations.push(location);
+          // check if urls is missing from existing meta and update it
+          if (!existingMeta.urls && meta.urls) {
+            existingMeta.urls = meta.urls;
+          }
+          // also update timestamp if it is missing or older
+          if (
+            !existingMeta.timestamp ||
+            (meta.timestamp && moment(meta.timestamp).isAfter(existingMeta.timestamp))
+          ) {
+            existingMeta.timestamp = meta.timestamp;
+          }
+          if (status === MONITOR_STATUS_ENUM.DOWN) {
+            existingMeta.overallStatus = MONITOR_STATUS_ENUM.DOWN;
           }
         } else {
-          pendingConfigs[monLocId] = {
-            status: 'unknown',
-            ...meta,
-          };
+          switch (status) {
+            case MONITOR_STATUS_ENUM.DOWN:
+              downConfigs[meta.configId] = meta;
+              break;
+            case MONITOR_STATUS_ENUM.UP:
+              upConfigs[meta.configId] = meta;
+              break;
+            default:
+              pendingConfigs[meta.configId] = meta;
+              break;
+          }
         }
       });
     });
+    // Reconcile bucket placement: processing order from ES is not
+    // deterministic, so a monitor may land in upConfigs or pendingConfigs
+    // even though a later location flipped overallStatus to DOWN. Walk
+    // every non-down bucket and relocate entries whose overallStatus
+    // disagrees with the bucket they currently sit in.
+    for (const [id, meta] of Object.entries(upConfigs)) {
+      if (meta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.DOWN)) {
+        meta.overallStatus = MONITOR_STATUS_ENUM.DOWN;
+        meta.locations = movePendingToEnd(meta.locations);
+        downConfigs[id] = meta;
+        delete upConfigs[id];
+      }
+    }
+    for (const [id, meta] of Object.entries(pendingConfigs)) {
+      if (meta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.DOWN)) {
+        meta.overallStatus = MONITOR_STATUS_ENUM.DOWN;
+        meta.locations = movePendingToEnd(meta.locations);
+        downConfigs[id] = meta;
+        delete pendingConfigs[id];
+      } else if (meta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.UP)) {
+        meta.overallStatus = MONITOR_STATUS_ENUM.UP;
+        meta.locations = movePendingToEnd(meta.locations);
+        upConfigs[id] = meta;
+        delete pendingConfigs[id];
+      }
+    }
 
     return {
       up,
@@ -377,4 +529,16 @@ export class OverviewStatusService {
       maintenanceWindows: monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS]?.map((mw) => mw),
     };
   }
+}
+
+function movePendingToEnd(locations: Array<{ id: string; label: string; status: string }>) {
+  return locations.sort((a, b) => {
+    if (a.status === MONITOR_STATUS_ENUM.PENDING && b.status !== MONITOR_STATUS_ENUM.PENDING) {
+      return 1;
+    }
+    if (b.status === MONITOR_STATUS_ENUM.PENDING && a.status !== MONITOR_STATUS_ENUM.PENDING) {
+      return -1;
+    }
+    return 0;
+  });
 }

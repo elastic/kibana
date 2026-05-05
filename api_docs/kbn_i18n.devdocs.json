@@ -389,7 +389,7 @@
                 "id": "def-common.i18n.translate.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "__1",
+                "label": "{ values = {}, description, defaultMessage, ignoreTag, formatters }",
                 "description": [],
                 "signature": [
                   {
@@ -404,6 +404,7 @@
                 "lineNumber": 147,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TranslateArguments",
                 "trackAdoption": false
               }
             ]
@@ -505,6 +506,7 @@
                 "lineNumber": 191,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "TranslationInput",
                 "trackAdoption": false
               }
             ]

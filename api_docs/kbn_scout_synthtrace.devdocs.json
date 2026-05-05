@@ -65,6 +65,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -88,6 +89,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SynthtraceClientOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -203,6 +205,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -220,6 +223,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -236,6 +240,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -308,6 +313,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -325,6 +331,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -341,6 +348,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
