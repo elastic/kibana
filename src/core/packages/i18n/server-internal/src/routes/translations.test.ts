@@ -18,6 +18,7 @@ describe('registerTranslationsRoute', () => {
       locale: 'en',
       isDist: true,
       translationHashes: { en: 'XXXX' },
+      localeFileMap: {},
     });
     expect(router.get).toHaveBeenCalledTimes(2);
     expect(router.get).toHaveBeenNthCalledWith(
