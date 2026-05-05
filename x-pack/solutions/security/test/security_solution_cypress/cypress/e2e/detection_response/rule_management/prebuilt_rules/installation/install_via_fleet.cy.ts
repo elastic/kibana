@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { times } from 'lodash';
 import {
   INITIALIZE_SECURITY_SOLUTION_URL,
   INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
@@ -63,24 +62,17 @@ describe(
             .should('eql', 'security_detection_engine');
 
           // Install the first 3 visible prebuilt rules one at a time.
-          const installedRuleNames: string[] = [];
+          cy.get<JQuery<HTMLElement>>(RULE_NAME).then(($rules) => {
+            const ruleNames = $rules
+              .toArray()
+              .slice(0, 3)
+              .map((el) => el.innerText);
 
-          const installFirstVisibleRule = () => {
-            cy.get<HTMLElement>(RULE_NAME)
-              .first()
-              .invoke('text')
-              .then((name) => {
-                installedRuleNames.push(name);
-                installSinglePrebuiltRule(name);
-              });
-          };
+            ruleNames.forEach((name) => installSinglePrebuiltRule(name));
 
-          times(3, installFirstVisibleRule);
+            visitRulesManagementTable();
 
-          visitRulesManagementTable();
-
-          cy.then(() => {
-            expectManagementTableRules(installedRuleNames);
+            expectManagementTableRules(ruleNames);
           });
         });
       });

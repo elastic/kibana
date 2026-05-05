@@ -8,11 +8,11 @@
 import { visit } from './navigation';
 import { installIntegration } from './integrations';
 import { INTEGRATION_CARD } from '../screens/integrations';
+import { BASIC_RULES_TAB } from '../screens/promotion_rules';
 import {
   CONFIGURATIONS_INTEGRATIONS_URL,
   CONFIGURATIONS_BASIC_RULES_URL_FRAGMENT,
-  BASIC_RULES_TAB,
-} from '../screens/promotion_rules';
+} from '../urls/navigation';
 import { MODAL_CONFIRMATION_CANCEL_BTN } from '../screens/alerts_detection_rules';
 
 export const installIntegrationFromBrowsePage = (integrationName: string) => {
