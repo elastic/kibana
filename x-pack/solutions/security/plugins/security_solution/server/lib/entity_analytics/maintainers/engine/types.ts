@@ -20,6 +20,33 @@ export interface CompositeBucket {
 export type TargetEntityType = 'host' | 'user' | 'service';
 
 /**
+ * ES|QL identifier-quoting convention for config authors.
+ *
+ * The engine substitutes user-supplied ES|QL fragments (`esqlWhereClause`,
+ * `targetEvalOverride`, `customActor.evalOverride`, `additionalTargetFilter`,
+ * and the bodies of `esqlQueryOverride` functions) directly into the
+ * generated query. ES|QL's identifier rules apply:
+ *
+ * - **Bare identifiers** (no quoting) work for ECS-style dotted names whose
+ *   every segment starts with a letter and contains only alnum + underscore:
+ *   `event.action`, `user.target.email`, `host.target.entity.id`. This is
+ *   the common case — the four shipped accesses configs and three of the
+ *   four communicates_with configs use bare identifiers throughout.
+ *
+ * - **Backtick-quoted identifiers** (`` `field.name` ``) are REQUIRED when
+ *   the dotted name contains a segment that is not a valid bare identifier,
+ *   for example a numeric segment or a reserved word:
+ *   `` `azure.auditlogs.properties.target_resources.0.type` `` — note the
+ *   numeric `.0.` segment. The Azure override uses backticks for every
+ *   such field; un-quoted these would be ES|QL parse errors.
+ *
+ * Forgetting backticks on a dotted-numeric field surfaces as an ES|QL
+ * `Unknown column` or `expecting identifier` error at run time, not at
+ * compile time. When in doubt, run the produced query against a populated
+ * cluster and the parse error will point at the offending identifier.
+ */
+
+/**
  * Bucket-classification config: actor→target pairs with `COUNT(*) >= threshold`
  * are classified into `aboveThresholdRelationship`, the rest into
  * `belowThresholdRelationship`. Every field is required so the engine carries
@@ -55,6 +82,10 @@ export interface CustomActorBinding {
    * configs compute the actor EUID inside their override fn — set `fields`
    * here for Step 1 narrowing parity, but `evalOverride` is unused for them.
    * Defaults to `euid.esql.getEuidEvaluation('user', { withTypeId: true })`.
+   *
+   * Identifiers must follow the quoting convention described at the top of
+   * this file (backticks required for dotted-numeric or reserved-word
+   * segments, bare identifiers otherwise).
    */
   evalOverride?: string;
 }
@@ -118,6 +149,10 @@ interface StandardBuilderFields {
    * query logic. The engine adds only timestamp + actor-identity + (optional)
    * target-EUID existence filters; everything else (event.action, event.outcome,
    * etc.) belongs here.
+   *
+   * Identifiers must follow the quoting convention described at the top of
+   * this file (backticks required for dotted-numeric or reserved-word
+   * segments, bare identifiers otherwise).
    */
   esqlWhereClause: string;
   /**
@@ -125,12 +160,19 @@ interface StandardBuilderFields {
    * Defaults to euid.esql.getEuidEvaluation(targetEntityType, { withTypeId: true }).
    * Required for integrations with non-standard target fields (e.g. okta,
    * aws_cloudtrail communicates_with).
+   *
+   * Identifiers must follow the quoting convention described at the top of
+   * this file (backticks required for dotted-numeric or reserved-word
+   * segments, bare identifiers otherwise).
    */
   targetEvalOverride?: string;
   /**
    * Optional additional filter appended after the standard empty-guard post-EVAL.
    * Use when the target eval can produce non-empty but semantically empty EUIDs.
    * Example: 'AND targetEntityId != "user:@okta"' for okta.
+   *
+   * Identifiers must follow the quoting convention described at the top of
+   * this file.
    */
   additionalTargetFilter?: string;
 }
@@ -176,6 +218,10 @@ export interface BucketedRelationshipIntegrationConfig
  * - `actorUserId` (string) — the actor's full EUID, e.g. "user:alice@okta"
  * - a column named after `relationshipKey` (e.g. `communicates_with`)
  *   (string | string[])
+ *
+ * Identifiers inside the override body must follow the quoting convention
+ * described at the top of this file (backticks for dotted-numeric or
+ * reserved-word segments — see the Azure override for an example).
  */
 export interface OverrideRelationshipIntegrationConfig extends BaseRelationshipIntegrationFields {
   kind: 'override';

@@ -96,6 +96,41 @@ const aborted = () => {
 };
 
 describe('runGenericMaintainer', () => {
+  describe('namespace boundary validation (defense-in-depth)', () => {
+    it('throws InvalidNamespaceError before issuing any ES request when namespace is malformed', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, bulkUpdate } = makeCrudClient();
+      await expect(
+        runGenericMaintainer({
+          esClient,
+          logger: loggerMock.create(),
+          namespace: 'bad/value',
+          crudClient,
+          integrations: [baseConfig],
+        })
+      ).rejects.toThrow(/Invalid namespace/);
+      // Engine never reached Step 1 / Step 2 / write — precondition guard ran first.
+      expect(search).not.toHaveBeenCalled();
+      expect(esql).not.toHaveBeenCalled();
+      expect(bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('accepts the conventional "default" namespace', async () => {
+      const { esClient, search } = makeEsClient();
+      search.mockResolvedValue(successResponse([]));
+      const { crudClient } = makeCrudClient();
+      await expect(
+        runGenericMaintainer({
+          esClient,
+          logger: loggerMock.create(),
+          namespace: 'default',
+          crudClient,
+          integrations: [baseConfig],
+        })
+      ).resolves.toBeDefined();
+    });
+  });
+
   it('returns zeros when no integrations are provided', async () => {
     const { esClient } = makeEsClient();
     const { crudClient, bulkUpdate } = makeCrudClient();

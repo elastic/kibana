@@ -53,7 +53,7 @@ const commWithUserConfig: RelationshipIntegrationConfig = {
 };
 
 describe('buildTargetsPerActorQuery (targets per actor)', () => {
-  it('delegates entirely to esqlQueryOverride for kind: "override" configs', () => {
+  it('delegates body to esqlQueryOverride and prepends the engine preamble for kind: "override" configs', () => {
     const override = jest.fn().mockReturnValue('FROM test | LIMIT 1');
     const overrideConfig: RelationshipIntegrationConfig = {
       kind: 'override',
@@ -64,8 +64,34 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
       targetEntityType: 'user',
       esqlQueryOverride: override,
     };
-    expect(buildTargetsPerActorQuery(overrideConfig, 'default')).toBe('FROM test | LIMIT 1');
+    // The engine owns the preamble — overrides only return the body. This
+    // means a future override that forgets `SET unmapped_fields="nullify"`
+    // still gets the right semantics.
+    expect(buildTargetsPerActorQuery(overrideConfig, 'default')).toBe(
+      'SET unmapped_fields="nullify";\nFROM test | LIMIT 1'
+    );
     expect(override).toHaveBeenCalledWith('default');
+  });
+
+  it('prepends the engine preamble exactly once on the override path (overrides must not include their own SET)', () => {
+    const overrideConfig: RelationshipIntegrationConfig = {
+      kind: 'override',
+      id: 'test_override',
+      name: 'Test Override',
+      indexPattern: (ns) => `logs-test-${ns}`,
+      relationshipKey: 'communicates_with',
+      targetEntityType: 'user',
+      esqlQueryOverride: () => 'FROM test | LIMIT 1',
+    };
+    const query = buildTargetsPerActorQuery(overrideConfig, 'default');
+    const matches = query.match(/SET unmapped_fields="nullify";/g) ?? [];
+    expect(matches).toHaveLength(1);
+  });
+
+  it('prepends the engine preamble exactly once on the default-builder path', () => {
+    const query = buildTargetsPerActorQuery(accessesConfig, 'default');
+    const matches = query.match(/SET unmapped_fields="nullify";/g) ?? [];
+    expect(matches).toHaveLength(1);
   });
 
   describe('engine no longer injects integration data semantics', () => {

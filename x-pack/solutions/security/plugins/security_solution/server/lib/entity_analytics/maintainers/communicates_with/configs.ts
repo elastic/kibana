@@ -40,13 +40,16 @@ const AZURE_AUDITLOGS_TARGET_TYPE_FIELD = 'azure.auditlogs.properties.target_res
 const AZURE_AUDITLOGS_TARGET_DISPLAY_NAME_FIELD =
   'azure.auditlogs.properties.target_resources.0.display_name';
 
+// Azure override body — the engine prepends `ESQL_ENGINE_PREAMBLE` (i.e.
+// `SET unmapped_fields="nullify";`) when running the query, so override
+// functions MUST NOT include it themselves (it would be redundant and
+// could mislead future readers about which value is in effect).
 function buildAzureEsqlQuery(namespace: string): string {
   const tType = `\`${AZURE_AUDITLOGS_TARGET_TYPE_FIELD}\``;
   const tUpn = `\`${AZURE_AUDITLOGS_TARGET_UPN_FIELD}\``;
   const tDisplayName = `\`${AZURE_AUDITLOGS_TARGET_DISPLAY_NAME_FIELD}\``;
 
-  return `SET unmapped_fields="nullify";
-FROM logs-azure.auditlogs-${namespace}
+  return `FROM logs-azure.auditlogs-${namespace}
 | WHERE ${AZURE_AUDITLOGS_ACTOR_UPN_FIELD} IS NOT NULL
     AND (
       (${tType} == "User" AND ${tUpn} IS NOT NULL)

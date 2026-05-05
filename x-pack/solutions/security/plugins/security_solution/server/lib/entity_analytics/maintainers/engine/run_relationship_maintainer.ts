@@ -20,6 +20,7 @@ import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import { writeEntityIds } from './update_entities';
 import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
+import { assertValidNamespace } from './validate_namespace';
 
 interface CompositeAggregations {
   users: {
@@ -218,6 +219,11 @@ export const runGenericMaintainer = async ({
   totalWritten: number;
   lastRunTimestamp: string;
 }> => {
+  // Defense-in-depth: namespace flows raw into eight `indexPattern(namespace)`
+  // callbacks plus the Azure override fn. One guard at the engine boundary
+  // is cheaper and stronger than trusting all callers.
+  assertValidNamespace(namespace);
+
   let totalBuckets = 0;
   let totalRecords = 0;
   let totalWritten = 0;

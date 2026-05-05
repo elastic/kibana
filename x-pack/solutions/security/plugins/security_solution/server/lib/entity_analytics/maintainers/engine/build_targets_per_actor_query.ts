@@ -13,7 +13,7 @@ import type {
   StandardRelationshipIntegrationConfig,
   BucketedRelationshipIntegrationConfig,
 } from './types';
-import { COMPOSITE_PAGE_SIZE } from './constants';
+import { COMPOSITE_PAGE_SIZE, ESQL_ENGINE_PREAMBLE } from './constants';
 import { ENGINE_COLUMNS } from './columns';
 
 function buildRelationshipEsql(
@@ -72,8 +72,7 @@ function buildRelationshipEsql(
   // (as our user EUID actorEval does). That would silently drop every row
   // from the pipeline. COALESCE is semantically equivalent to the original
   // intent (treat NULL as empty, then check non-empty) and sidesteps the bug.
-  return `SET unmapped_fields="nullify";
-FROM ${indexPattern}
+  return `FROM ${indexPattern}
 | WHERE ${config.esqlWhereClause}
     AND (${userIdFilter})
 ${targetIdFilterLine}${userFieldEvalsLine}| EVAL ${ENGINE_COLUMNS.actor} = ${actorEval}
@@ -88,19 +87,25 @@ ${statsClause}
 /**
  * Builds the ES|QL query for the given integration config.
  *
- * - `kind: 'override'` → delegates to `config.esqlQueryOverride(namespace)`.
+ * The engine always prepends `ESQL_ENGINE_PREAMBLE` to the result so that
+ * `IS NOT NULL` / `COALESCE` semantics are consistent across queries —
+ * override authors cannot accidentally omit it.
+ *
+ * - `kind: 'override'` → delegates the body to `config.esqlQueryOverride(namespace)`.
  *   The override must emit columns `actorUserId` and `<relationshipKey>`
  *   (e.g. `communicates_with`); mismatched column names produce silent empty
  *   results (see `parseTargetsPerActorRows` for the warning safety net).
+ *   Override functions MUST NOT include `SET unmapped_fields="nullify"`
+ *   themselves — the engine prepends it.
  * - `kind: 'standard' | 'bucketed'` → uses the default ES|QL builder.
  */
 export const buildTargetsPerActorQuery = (
   config: RelationshipIntegrationConfig,
   namespace: string
 ): string => {
-  if (config.kind === 'override') {
-    return config.esqlQueryOverride(namespace);
-  }
-
-  return buildRelationshipEsql(config, namespace);
+  const body =
+    config.kind === 'override'
+      ? config.esqlQueryOverride(namespace)
+      : buildRelationshipEsql(config, namespace);
+  return `${ESQL_ENGINE_PREAMBLE}\n${body}`;
 };
