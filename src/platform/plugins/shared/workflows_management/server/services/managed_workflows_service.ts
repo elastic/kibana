@@ -271,7 +271,29 @@ export class ManagedWorkflowsService {
     id: ManagedWorkflowId,
     options?: ManagedWorkflowOperationOptions
   ): string {
-    return options?.workflowId ?? id;
+    const customId = options?.workflowId?.trim();
+    const suffix = options?.workflowIdSuffix?.trim();
+
+    if (customId && suffix) {
+      throw new Error(
+        `Managed workflow '${id}' cannot be installed with both workflowId and workflowIdSuffix`
+      );
+    }
+
+    if (suffix) {
+      return `${id}--${suffix}`;
+    }
+
+    if (customId) {
+      if (!customId.startsWith(`${id}--`) && customId !== id) {
+        throw new Error(
+          `Managed workflow '${id}' custom workflowId must equal '${id}' or start with '${id}--'`
+        );
+      }
+      return customId;
+    }
+
+    return id;
   }
 
   private async cleanupOrphanManagedWorkflows(options?: { spaceId?: string }): Promise<void> {
