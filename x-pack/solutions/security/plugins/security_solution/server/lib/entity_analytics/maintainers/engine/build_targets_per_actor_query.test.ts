@@ -18,7 +18,6 @@ const accessesConfig: RelationshipIntegrationConfig = {
   id: 'elastic_defend',
   name: 'Elastic Defend',
   indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
-  relationshipType: 'accesses',
   targetEntityType: 'host',
   bucketTargetByThreshold: {
     threshold: 4,
@@ -35,7 +34,7 @@ const commWithHostConfig: RelationshipIntegrationConfig = {
   id: 'jamf_pro',
   name: 'Jamf Pro',
   indexPattern: (ns) => `logs-jamf_pro.events-${ns}`,
-  relationshipType: 'communicates_with',
+  relationshipKey: 'communicates_with',
   targetEntityType: 'host',
   requireTargetEntityIdExists: true,
   esqlWhereClause: 'user.name IS NOT NULL',
@@ -46,7 +45,7 @@ const commWithUserConfig: RelationshipIntegrationConfig = {
   id: 'okta',
   name: 'Okta',
   indexPattern: (ns) => `logs-okta.system-${ns}`,
-  relationshipType: 'communicates_with',
+  relationshipKey: 'communicates_with',
   targetEntityType: 'user',
   esqlWhereClause: 'event.action IN ("user.lifecycle.create") AND user.target.email IS NOT NULL',
   targetEvalOverride: 'CONCAT("user:", user.target.email, "@okta")',
@@ -61,7 +60,7 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
       id: 'test_override',
       name: 'Test Override',
       indexPattern: (ns) => `logs-test-${ns}`,
-      relationshipType: 'communicates_with',
+      relationshipKey: 'communicates_with',
       targetEntityType: 'user',
       esqlQueryOverride: override,
     };
@@ -153,28 +152,42 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
       expect(query).not.toContain('accesses_infrequently');
     });
 
-    it('uses actorEvalOverride when provided', () => {
-      const override = 'CONCAT("user:", user.name, "@", host.id, "@local")';
+    it('uses customActor.evalOverride when provided', () => {
+      const evalOverride = 'CONCAT("user:", user.name, "@", host.id, "@local")';
       const query = buildTargetsPerActorQuery(
-        { ...accessesConfig, actorEvalOverride: override },
+        { ...accessesConfig, customActor: { fields: ['user.name'], evalOverride } },
         'default'
       );
-      expect(query).toContain(override);
+      expect(query).toContain(evalOverride);
     });
 
-    it('skips entity.namespace field evals when actorEvalOverride is set', () => {
-      const override = 'CONCAT("user:", user.name, "@", host.id, "@local")';
+    it('skips entity.namespace field evals when customActor.evalOverride is set', () => {
+      const evalOverride = 'CONCAT("user:", user.name, "@", host.id, "@local")';
       const query = buildTargetsPerActorQuery(
-        { ...accessesConfig, actorEvalOverride: override },
+        { ...accessesConfig, customActor: { fields: ['user.name'], evalOverride } },
         'default'
       );
       expect(query).not.toContain('entity.namespace');
       expect(query).not.toContain('_src_entity_namespace');
     });
 
-    it('includes entity.namespace field evals when actorEvalOverride is not set', () => {
+    it('includes entity.namespace field evals when customActor.evalOverride is not set', () => {
       const query = buildTargetsPerActorQuery(accessesConfig, 'default');
       expect(query).toContain('entity.namespace');
+    });
+
+    // Type-level co-requirement: setting `customActor` requires `fields`.
+    // Setting `evalOverride` without `fields` is a compile error because the
+    // two live in the same nested object — Step 1 (composite-agg sources)
+    // and Step 2 (actor EUID expression) cannot drift apart silently.
+    it('co-requires customActor.fields when customActor is set (compile-time invariant)', () => {
+      const config: RelationshipIntegrationConfig = {
+        ...accessesConfig,
+        customActor: { fields: ['user.name'], evalOverride: 'CONCAT("user:", user.name)' },
+      };
+      // Smoke check: both fields present in the build path.
+      const query = buildTargetsPerActorQuery(config, 'default');
+      expect(query).toContain('CONCAT("user:", user.name)');
     });
   });
 

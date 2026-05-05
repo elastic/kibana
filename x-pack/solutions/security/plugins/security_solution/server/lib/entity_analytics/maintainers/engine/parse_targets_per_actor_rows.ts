@@ -6,12 +6,10 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { EntityRelationshipKey } from '@kbn/entity-store/common/domain/definitions/common_fields';
 
-import type {
-  ProcessedEngineRecord,
-  RelationshipType,
-  BucketTargetByThresholdConfig,
-} from './types';
+import type { ProcessedEngineRecord, BucketTargetByThresholdConfig } from './types';
+import { ENGINE_COLUMNS } from './columns';
 
 interface EsqlColumn {
   name: string;
@@ -34,15 +32,17 @@ function toStringArray(value: unknown): string[] {
  * `Pick` over a discriminated union does not preserve the discriminator
  * narrowing for fields that are absent on some variants (`bucketTargetByThreshold`
  * collapses to `unknown`), so the projection is written out explicitly here.
+ *
+ * Bucketed configs do not carry `relationshipKey` — the bucket pair declares
+ * both schema keys this maintainer writes to.
  */
 interface ParseConfigBase {
   id: string;
-  relationshipType: RelationshipType;
 }
 type ParseConfig =
-  | (ParseConfigBase & { kind: 'standard' })
+  | (ParseConfigBase & { kind: 'standard'; relationshipKey: EntityRelationshipKey })
   | (ParseConfigBase & { kind: 'bucketed'; bucketTargetByThreshold: BucketTargetByThresholdConfig })
-  | (ParseConfigBase & { kind: 'override' });
+  | (ParseConfigBase & { kind: 'override'; relationshipKey: EntityRelationshipKey });
 
 /**
  * Safety net for developer-provided `kind: 'override'` configs.
@@ -56,7 +56,6 @@ type ParseConfig =
  * runs on the override path because the default builder generates the columns
  * itself and cannot drift.
  */
-
 function warnIfOverrideColumnsMissing(
   columns: EsqlColumn[],
   config: ParseConfig,
@@ -64,7 +63,7 @@ function warnIfOverrideColumnsMissing(
 ): void {
   if (config.kind !== 'override') return;
   const colNames = new Set(columns.map((c) => c.name));
-  const expected = ['actorUserId', config.relationshipType];
+  const expected = [ENGINE_COLUMNS.actor, ENGINE_COLUMNS.flat(config.relationshipKey)];
   const missing = expected.filter((n) => !colNames.has(n));
   if (missing.length > 0) {
     logger.warn(
@@ -89,27 +88,31 @@ export const parseTargetsPerActorRows = (
       record[col.name] = row[idx];
     });
 
-    const actorUserId = record.actorUserId != null ? String(record.actorUserId) : null;
+    const actorRaw = record[ENGINE_COLUMNS.actor];
+    const actorUserId = actorRaw != null ? String(actorRaw) : null;
 
     // TODO(follow-up): entityType hardcoded to 'user' — use actorEntityType from config.
     if (config.kind === 'bucketed') {
       const { aboveThresholdRelationship: above, belowThresholdRelationship: below } =
         config.bucketTargetByThreshold;
+      const aboveCol = ENGINE_COLUMNS.bucketAbove(above);
+      const belowCol = ENGINE_COLUMNS.bucketBelow(below);
       return {
         entityId: actorUserId,
         entityType: 'user' as const,
         relationships: {
-          [above]: toStringArray(record[above]),
-          [below]: toStringArray(record[below]),
+          [above]: toStringArray(record[aboveCol]),
+          [below]: toStringArray(record[belowCol]),
         },
       };
     }
 
+    const flatCol = ENGINE_COLUMNS.flat(config.relationshipKey);
     return {
       entityId: actorUserId,
       entityType: 'user' as const,
       relationships: {
-        [config.relationshipType]: toStringArray(record[config.relationshipType]),
+        [config.relationshipKey]: toStringArray(record[flatCol]),
       },
     };
   });

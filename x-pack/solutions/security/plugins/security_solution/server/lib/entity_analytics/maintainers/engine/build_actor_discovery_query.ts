@@ -20,7 +20,7 @@ export const buildActorDiscoveryQuery = (
   config: RelationshipIntegrationConfig,
   afterKey: CompositeAfterKey | undefined
 ): Record<string, unknown> => {
-  const actorFields = config.actorFields ?? USER_IDENTITY_FIELDS;
+  const actorFields = config.customActor?.fields ?? USER_IDENTITY_FIELDS;
 
   const baseFilters: QueryDslQueryContainer[] = [
     { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
@@ -56,7 +56,7 @@ export const buildActorPageFilter = (
   config: RelationshipIntegrationConfig,
   buckets: CompositeBucket[]
 ): QueryDslQueryContainer => {
-  const actorFields = config.actorFields ?? USER_IDENTITY_FIELDS;
+  const actorFields = config.customActor?.fields ?? USER_IDENTITY_FIELDS;
 
   if (buckets.length === 0) {
     return { bool: { must_not: { match_all: {} } } };

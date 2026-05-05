@@ -54,7 +54,6 @@ const baseConfig: RelationshipIntegrationConfig = {
   id: 'elastic_defend',
   name: 'Elastic Defend',
   indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
-  relationshipType: 'accesses',
   targetEntityType: 'host',
   bucketTargetByThreshold: {
     threshold: 4,
@@ -70,7 +69,7 @@ const oktaConfig: RelationshipIntegrationConfig = {
   id: 'okta',
   name: 'Okta',
   indexPattern: (ns) => `logs-okta.system-${ns}`,
-  relationshipType: 'communicates_with',
+  relationshipKey: 'communicates_with',
   targetEntityType: 'user',
   esqlWhereClause: 'user.target.email IS NOT NULL',
   targetEvalOverride: 'CONCAT("user:", user.target.email, "@okta")',

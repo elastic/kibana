@@ -33,12 +33,6 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
     expect(bucketedConfigs).toHaveLength(ACCESSES_ENGINE_CONFIGS.length);
   });
 
-  it('declares relationshipType "accesses" on every config', () => {
-    for (const config of ACCESSES_ENGINE_CONFIGS) {
-      expect(config.relationshipType).toBe('accesses');
-    }
-  });
-
   it('declares targetEntityType "host" on every config (accesses is host-targeted)', () => {
     for (const config of ACCESSES_ENGINE_CONFIGS) {
       expect(config.targetEntityType).toBe('host');

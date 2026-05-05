@@ -17,7 +17,6 @@ export interface CompositeBucket {
   doc_count: number;
 }
 
-export type RelationshipType = 'accesses' | 'communicates_with';
 export type TargetEntityType = 'host' | 'user' | 'service';
 
 /**
@@ -36,6 +35,31 @@ export interface BucketTargetByThresholdConfig {
 }
 
 /**
+ * Custom actor binding — used by integrations whose actor is not in standard
+ * ECS user.* fields (e.g. azure_auditlogs reads
+ * `azure.auditlogs.properties.initiated_by.user.userPrincipalName`).
+ *
+ * `fields` and `evalOverride` are co-located so a config cannot set the Step 2
+ * actor EUID expression (`evalOverride`) without also declaring the Step 1
+ * composite-agg sources (`fields`). Without that pairing, Step 1 would
+ * bucket-discover on ECS `user.*` while Step 2 computed the EUID from custom
+ * fields — Step 1 and Step 2 would silently desync (the same shape of bug
+ * niros1 caught for the EUID-exists gate).
+ */
+export interface CustomActorBinding {
+  /** Composite-agg sources + bucket filter keys (Step 1, all variants). */
+  fields: string[];
+  /**
+   * ESQL expression for the actor EUID (Step 2 default builder only).
+   * Used by `kind: 'standard'` and `kind: 'bucketed'` configs. Override
+   * configs compute the actor EUID inside their override fn — set `fields`
+   * here for Step 1 narrowing parity, but `evalOverride` is unused for them.
+   * Defaults to `euid.esql.getEuidEvaluation('user', { withTypeId: true })`.
+   */
+  evalOverride?: string;
+}
+
+/**
  * Fields shared by every variant — the engine reads these regardless of
  * whether the config uses the default ES|QL builder or supplies its own
  * override (Step 1 composite-agg discovery always uses these).
@@ -47,8 +71,6 @@ interface BaseRelationshipIntegrationFields {
   name: string;
   /** Returns the Elasticsearch index pattern for this integration in the given namespace. */
   indexPattern: (namespace: string) => string;
-  /** Which relationship type this config populates. */
-  relationshipType: RelationshipType;
   /** Entity type of the relationship target (controls the default target EVAL). */
   targetEntityType: TargetEntityType;
   /**
@@ -77,11 +99,12 @@ interface BaseRelationshipIntegrationFields {
    */
   requireTargetEntityIdExists?: boolean;
   /**
-   * Actor field names used as composite aggregation sources and bucket filter keys.
-   * Defaults to ECS user identity fields. Set this for integrations whose actor is
-   * not in standard ECS user.* fields (e.g. azure_auditlogs).
+   * Optional override of the actor identity. Set this for integrations whose
+   * actor is not in standard ECS `user.*` fields. Combining `fields` and
+   * (optional) `evalOverride` in a single object guarantees Step 1 sources
+   * and Step 2 EUID expression describe the same actor — they cannot drift.
    */
-  actorFields?: string[];
+  customActor?: CustomActorBinding;
 }
 
 /**
@@ -97,12 +120,6 @@ interface StandardBuilderFields {
    * etc.) belongs here.
    */
   esqlWhereClause: string;
-  /**
-   * Optional ESQL expression for the actor EUID.
-   * Defaults to euid.esql.getEuidEvaluation('user', { withTypeId: true }).
-   * Required only for integrations with non-ECS actor fields.
-   */
-  actorEvalOverride?: string;
   /**
    * Optional ESQL expression for the target entity ID.
    * Defaults to euid.esql.getEuidEvaluation(targetEntityType, { withTypeId: true }).
@@ -120,17 +137,21 @@ interface StandardBuilderFields {
 
 /**
  * Standard config: default ES|QL builder, single relationship column named
- * after `relationshipType` (e.g. `communicates_with`).
+ * after `relationshipKey` (e.g. `communicates_with`). The `relationshipKey`
+ * is also the entity.relationships key the parser writes to.
  */
 export interface StandardRelationshipIntegrationConfig
   extends BaseRelationshipIntegrationFields,
     StandardBuilderFields {
   kind: 'standard';
+  relationshipKey: EntityRelationshipKey;
 }
 
 /**
  * Bucketed config: default ES|QL builder, two relationship columns based on
- * access-count classification. The `bucketTargetByThreshold` field is required.
+ * access-count classification. The bucket pair declares both
+ * `entity.relationships.<key>` keys this maintainer writes to, so no separate
+ * `relationshipKey` is required.
  */
 export interface BucketedRelationshipIntegrationConfig
   extends BaseRelationshipIntegrationFields,
@@ -153,11 +174,12 @@ export interface BucketedRelationshipIntegrationConfig
  * Column contract — the query MUST emit these exact column names or results
  * will be silently empty:
  * - `actorUserId` (string) — the actor's full EUID, e.g. "user:alice@okta"
- * - a column named after `relationshipType` (e.g. `communicates_with`)
+ * - a column named after `relationshipKey` (e.g. `communicates_with`)
  *   (string | string[])
  */
 export interface OverrideRelationshipIntegrationConfig extends BaseRelationshipIntegrationFields {
   kind: 'override';
+  relationshipKey: EntityRelationshipKey;
   esqlQueryOverride: (namespace: string) => string;
 }
 

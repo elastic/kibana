@@ -23,7 +23,6 @@ const COMM_COLUMNS = [
 const ACCESSES_CONFIG = {
   kind: 'bucketed' as const,
   id: 'elastic_defend',
-  relationshipType: 'accesses' as const,
   bucketTargetByThreshold: {
     threshold: 4,
     aboveThresholdRelationship: 'accesses_frequently',
@@ -33,18 +32,18 @@ const ACCESSES_CONFIG = {
 const COMM_CONFIG = {
   kind: 'standard' as const,
   id: 'okta',
-  relationshipType: 'communicates_with' as const,
+  relationshipKey: 'communicates_with' as const,
 };
 
-const ACCESSES_OVERRIDE_CONFIG = {
-  kind: 'override' as const,
-  id: 'elastic_defend',
-  relationshipType: 'accesses' as const,
-};
 const COMM_OVERRIDE_CONFIG = {
   kind: 'override' as const,
   id: 'okta',
-  relationshipType: 'communicates_with' as const,
+  relationshipKey: 'communicates_with' as const,
+};
+const OWNS_OVERRIDE_CONFIG = {
+  kind: 'override' as const,
+  id: 'hypothetical_owns_override',
+  relationshipKey: 'owns' as const,
 };
 
 const createLogger = () => loggingSystemMock.createLogger();
@@ -116,7 +115,6 @@ describe('parseTargetsPerActorRows — accesses', () => {
     const ownsConfig = {
       kind: 'bucketed' as const,
       id: 'hypothetical_owns_bucketed',
-      relationshipType: 'accesses' as const,
       bucketTargetByThreshold: {
         threshold: 4,
         aboveThresholdRelationship: 'owns',
@@ -203,22 +201,23 @@ describe('parseTargetsPerActorRows — kind: "override" safety net', () => {
     expect(message).toContain('actorUserId');
   });
 
-  it('warns naming the relationshipType column for an accesses-flavored override', () => {
+  it('warns naming the literal relationshipKey for non-bucketed overrides (no bucket-pair fallback)', () => {
     // Override configs are flat-only by design (the type system disallows
-    // override + bucketing). For a relationshipType: 'accesses' override the
-    // expected column is literally `accesses`, not the bucket pair.
+    // override + bucketing). For a `relationshipKey: 'owns'` override the
+    // expected column is literally `owns`, not any bucket pair like
+    // `owns` + `owns_inferred`. Proves the parser names the literal
+    // schema key the override is configured to write to.
     const logger = createLogger();
     parseTargetsPerActorRows(
       [{ name: 'actorUserId', type: 'keyword' }],
       [],
-      ACCESSES_OVERRIDE_CONFIG,
+      OWNS_OVERRIDE_CONFIG,
       logger
     );
     expect(logger.warn).toHaveBeenCalledTimes(1);
     const message = (logger.warn as jest.Mock).mock.calls[0][0] as string;
-    expect(message).toContain('[elastic_defend]');
-    expect(message).toContain('accesses');
-    expect(message).not.toContain('accesses_frequently');
-    expect(message).not.toContain('accesses_infrequently');
+    expect(message).toContain('[hypothetical_owns_override]');
+    expect(message).toContain('owns');
+    expect(message).not.toContain('owns_inferred');
   });
 });

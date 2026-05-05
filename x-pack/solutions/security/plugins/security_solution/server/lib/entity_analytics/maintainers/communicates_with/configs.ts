@@ -71,7 +71,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
     id: 'okta',
     name: 'Okta',
     indexPattern: (ns) => `logs-okta.system-${ns}`,
-    relationshipType: 'communicates_with',
+    relationshipKey: 'communicates_with',
     targetEntityType: 'user',
     esqlWhereClause: `event.action IN (${OKTA_USER_ADMIN_EVENT_ACTIONS.map((a) => `"${a}"`).join(
       ', '
@@ -85,7 +85,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
     id: 'jamf_pro',
     name: 'Jamf Pro',
     indexPattern: (ns) => `logs-jamf_pro.events-${ns}`,
-    relationshipType: 'communicates_with',
+    relationshipKey: 'communicates_with',
     targetEntityType: 'host',
     requireTargetEntityIdExists: true,
     esqlWhereClause: `user.name IS NOT NULL`,
@@ -95,7 +95,7 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
     id: 'aws_cloudtrail',
     name: 'AWS CloudTrail',
     indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
-    relationshipType: 'communicates_with',
+    relationshipKey: 'communicates_with',
     targetEntityType: 'host',
     // Step 1 / Step 2 narrowing parity: the targetEvalOverride reads only
     // `host.target.entity.id`, so the broad `requireTargetEntityIdExists`
@@ -116,9 +116,9 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
     id: 'azure_auditlogs',
     name: 'Azure Audit Logs',
     indexPattern: (ns) => `logs-azure.auditlogs-${ns}`,
-    relationshipType: 'communicates_with',
+    relationshipKey: 'communicates_with',
     targetEntityType: 'user',
-    actorFields: [AZURE_AUDITLOGS_ACTOR_UPN_FIELD],
+    customActor: { fields: [AZURE_AUDITLOGS_ACTOR_UPN_FIELD] },
     esqlQueryOverride: buildAzureEsqlQuery,
   },
 ];

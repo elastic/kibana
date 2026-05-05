@@ -14,6 +14,7 @@ import type {
   BucketedRelationshipIntegrationConfig,
 } from './types';
 import { COMPOSITE_PAGE_SIZE } from './constants';
+import { ENGINE_COLUMNS } from './columns';
 
 function buildRelationshipEsql(
   config: StandardRelationshipIntegrationConfig | BucketedRelationshipIntegrationConfig,
@@ -21,11 +22,13 @@ function buildRelationshipEsql(
 ): string {
   const indexPattern = config.indexPattern(namespace);
   // TODO(follow-up): 'user' hardcoded for actor — thread actorEntityType through config.
-  const userFieldEvals = !config.actorEvalOverride ? getFieldEvaluationsEsql('user') : undefined;
+  const userFieldEvals = !config.customActor?.evalOverride
+    ? getFieldEvaluationsEsql('user')
+    : undefined;
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
   const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
   const actorEval =
-    config.actorEvalOverride ?? euid.esql.getEuidEvaluation('user', { withTypeId: true });
+    config.customActor?.evalOverride ?? euid.esql.getEuidEvaluation('user', { withTypeId: true });
   const targetEval =
     config.targetEvalOverride ??
     euid.esql.getEuidEvaluation(config.targetEntityType, { withTypeId: true });
@@ -45,18 +48,22 @@ function buildRelationshipEsql(
             aboveThresholdRelationship: above,
             belowThresholdRelationship: below,
           } = config.bucketTargetByThreshold;
-          return `| STATS access_count = COUNT(*) BY actorUserId, targetEntityId
+          const aboveCol = ENGINE_COLUMNS.bucketAbove(above);
+          const belowCol = ENGINE_COLUMNS.bucketBelow(below);
+          return `| STATS access_count = COUNT(*) BY ${ENGINE_COLUMNS.actor}, targetEntityId
 | EVAL access_type = CASE(
     access_count >= ${threshold}, "${above}",
     "${below}"
   )
-| STATS targets = VALUES(targetEntityId) BY access_type, actorUserId
+| STATS targets = VALUES(targetEntityId) BY access_type, ${ENGINE_COLUMNS.actor}
 | STATS
-    ${above} = VALUES(targets) WHERE access_type == "${above}",
-    ${below} = VALUES(targets) WHERE access_type == "${below}"
-  BY actorUserId`;
+    ${aboveCol} = VALUES(targets) WHERE access_type == "${above}",
+    ${belowCol} = VALUES(targets) WHERE access_type == "${below}"
+  BY ${ENGINE_COLUMNS.actor}`;
         })()
-      : `| STATS ${config.relationshipType} = VALUES(targetEntityId) BY actorUserId`;
+      : `| STATS ${ENGINE_COLUMNS.flat(config.relationshipKey)} = VALUES(targetEntityId) BY ${
+          ENGINE_COLUMNS.actor
+        }`;
 
   // NOTE: We use `COALESCE(col, "") != ""` rather than the more natural
   // `col IS NOT NULL AND col != ""` because ES|QL has a quirk where
@@ -69,8 +76,8 @@ function buildRelationshipEsql(
 FROM ${indexPattern}
 | WHERE ${config.esqlWhereClause}
     AND (${userIdFilter})
-${targetIdFilterLine}${userFieldEvalsLine}| EVAL actorUserId = ${actorEval}
-| WHERE COALESCE(actorUserId, "") != ""
+${targetIdFilterLine}${userFieldEvalsLine}| EVAL ${ENGINE_COLUMNS.actor} = ${actorEval}
+| WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""
 | EVAL targetEntityId = ${targetEval}
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, "") != ""${additionalTargetFilter}
@@ -82,7 +89,7 @@ ${statsClause}
  * Builds the ES|QL query for the given integration config.
  *
  * - `kind: 'override'` → delegates to `config.esqlQueryOverride(namespace)`.
- *   The override must emit columns `actorUserId` and `<relationshipType>`
+ *   The override must emit columns `actorUserId` and `<relationshipKey>`
  *   (e.g. `communicates_with`); mismatched column names produce silent empty
  *   results (see `parseTargetsPerActorRows` for the warning safety net).
  * - `kind: 'standard' | 'bucketed'` → uses the default ES|QL builder.

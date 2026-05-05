@@ -31,9 +31,9 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
     ]);
   });
 
-  it('declares relationshipType "communicates_with" on every config', () => {
-    for (const config of COMMUNICATES_WITH_ENGINE_CONFIGS) {
-      expect(config.relationshipType).toBe('communicates_with');
+  it('declares relationshipKey "communicates_with" on every standard/override config (bucketed has no relationshipKey)', () => {
+    for (const config of [...standardConfigs, ...overrideConfigs]) {
+      expect(config.relationshipKey).toBe('communicates_with');
     }
   });
 
@@ -146,10 +146,10 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
   describe('azure_auditlogs override path', () => {
     const azure = overrideConfigs.find((c) => c.id === 'azure_auditlogs');
 
-    it('declares an esqlQueryOverride and an explicit actorFields list', () => {
+    it('declares an esqlQueryOverride and an explicit customActor.fields list', () => {
       expect(azure).toBeDefined();
       expect(azure?.esqlQueryOverride).toBeInstanceOf(Function);
-      expect(azure?.actorFields).toEqual([
+      expect(azure?.customActor?.fields).toEqual([
         'azure.auditlogs.properties.initiated_by.user.userPrincipalName',
       ]);
     });

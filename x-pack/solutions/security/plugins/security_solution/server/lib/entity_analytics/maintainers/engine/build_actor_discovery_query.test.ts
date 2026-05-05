@@ -18,7 +18,6 @@ const accessesConfig: RelationshipIntegrationConfig = {
   id: 'test_accesses',
   name: 'Test Accesses',
   indexPattern: (ns) => `logs-test-${ns}`,
-  relationshipType: 'accesses',
   targetEntityType: 'host',
   bucketTargetByThreshold: {
     threshold: 4,
@@ -34,7 +33,7 @@ const communicatesConfig: RelationshipIntegrationConfig = {
   id: 'test_comm',
   name: 'Test Comm',
   indexPattern: (ns) => `logs-okta-${ns}`,
-  relationshipType: 'communicates_with',
+  relationshipKey: 'communicates_with',
   targetEntityType: 'user',
   esqlWhereClause: 'event.action == "user.lifecycle.create"',
 };
@@ -126,10 +125,10 @@ describe('buildActorDiscoveryQuery (actor discovery)', () => {
     });
   });
 
-  it('uses actorFields as composite sources when provided (structural, not substring)', () => {
+  it('uses customActor.fields as composite sources when provided (structural, not substring)', () => {
     const config: RelationshipIntegrationConfig = {
       ...accessesConfig,
-      actorFields: ['custom.actor.field'],
+      customActor: { fields: ['custom.actor.field'] },
     };
     const result = buildActorDiscoveryQuery(config, undefined) as {
       aggs: {
@@ -145,10 +144,10 @@ describe('buildActorDiscoveryQuery (actor discovery)', () => {
     });
   });
 
-  it('uses actorFields in bucket filter when provided', () => {
+  it('uses customActor.fields in bucket filter when provided', () => {
     const config: RelationshipIntegrationConfig = {
       ...accessesConfig,
-      actorFields: ['custom.actor.field'],
+      customActor: { fields: ['custom.actor.field'] },
     };
     const buckets: CompositeBucket[] = [{ key: { 'custom.actor.field': 'alice' }, doc_count: 1 }];
     const result = buildActorPageFilter(config, buckets);
