@@ -12,8 +12,7 @@ import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule
 import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
 import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
 import { PerFieldRuleDiffTab } from '../components/rule_details/per_field_rule_diff_tab';
-import { useSecuritySolutionInitialization } from '../../../common/components/initialization/use_security_solution_initialization';
-import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../common/api/initialization';
+import { useIsInitializingPrebuiltRulesPackage } from '../logic/prebuilt_rules/use_is_initializing_prebuilt_rules_package';
 import { usePrebuiltRulesCustomizationStatus } from '../logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { usePerformUpgradeRules } from '../logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
@@ -72,8 +71,7 @@ export function usePrebuiltRulesUpgrade({
   onUpgrade,
 }: UsePrebuiltRulesUpgradeParams) {
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
-  const initState = useSecuritySolutionInitialization([INITIALIZATION_FLOW_INIT_PREBUILT_RULES]);
-  const isUpgradingSecurityPackages = initState[INITIALIZATION_FLOW_INIT_PREBUILT_RULES].loading;
+  const isInitializingPrebuiltRulesPackage = useIsInitializingPrebuiltRulesPackage();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const { telemetry } = useKibana().services;
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
@@ -261,7 +259,7 @@ export function usePrebuiltRulesUpgrade({
             !canEditRules ||
             loadingRules.includes(rule.rule_id) ||
             isRefetching ||
-            isUpgradingSecurityPackages ||
+            isInitializingPrebuiltRulesPackage ||
             (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
             isEditingRule
           }
@@ -286,7 +284,7 @@ export function usePrebuiltRulesUpgrade({
       canEditRules,
       loadingRules,
       isRefetching,
-      isUpgradingSecurityPackages,
+      isInitializingPrebuiltRulesPackage,
       isRulesCustomizationEnabled,
       upgradeRulesToTarget,
       upgradeRulesToResolved,
@@ -420,7 +418,7 @@ export function usePrebuiltRulesUpgrade({
     isLoading: isLoading || areMlJobsLoading,
     isFetching,
     isRefetching,
-    isUpgradingSecurityPackages,
+    isInitializingPrebuiltRulesPackage,
     loadingRules,
     lastUpdated: dataUpdatedAt,
     rulePreviewFlyout,

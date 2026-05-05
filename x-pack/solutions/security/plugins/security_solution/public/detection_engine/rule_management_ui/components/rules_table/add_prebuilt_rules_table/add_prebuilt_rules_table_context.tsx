@@ -20,8 +20,7 @@ import {
   usePerformInstallSpecificRules,
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
-import { useSecuritySolutionInitialization } from '../../../../../common/components/initialization/use_security_solution_initialization';
-import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../../../common/api/initialization';
+import { useIsInitializingPrebuiltRulesPackage } from '../../../../rule_management/logic/prebuilt_rules/use_is_initializing_prebuilt_rules_package';
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
 import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
 import * as i18n from './translations';
@@ -60,10 +59,10 @@ export interface AddPrebuiltRulesTableState {
    */
   isRefetching: boolean;
   /**
-   * Is true when installing security_detection_rules
-   * package in background
+   * Is true while the `security_detection_engine` Fleet package is being
+   * initialized (installed or upgraded) in the background.
    */
-  isUpgradingSecurityPackages: boolean;
+  isInitializingPrebuiltRulesPackage: boolean;
   /**
    * Is true when performing Install All Rules mutation
    */
@@ -163,8 +162,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
   useInvalidatePrebuiltRulesStatusOnInit();
   const { data: prebuiltRulesStatus } = useFetchPrebuiltRulesStatusQuery();
 
-  const initState = useSecuritySolutionInitialization([INITIALIZATION_FLOW_INIT_PREBUILT_RULES]);
-  const isUpgradingSecurityPackages = initState[INITIALIZATION_FLOW_INIT_PREBUILT_RULES].loading;
+  const isInitializingPrebuiltRulesPackage = useIsInitializingPrebuiltRulesPackage();
   const isInstallingAllRules =
     useIsMutating({
       mutationKey: PERFORM_ALL_RULES_INSTALLATION_KEY,
@@ -172,7 +170,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const isUpgradeReviewEnabled = isUpgradeReviewRequestEnabled({
     canEditRules,
-    isUpgradingSecurityPackages,
+    isInitializingPrebuiltRulesPackage,
     prebuiltRulesStatus: prebuiltRulesStatus?.stats,
   });
   const {
@@ -268,7 +266,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
     (rule: RuleResponse, closeRulePreview: () => void) => {
       const isPreviewRuleLoading = loadingRules.includes(rule.rule_id);
       const canPreviewedRuleBeInstalled =
-        canEditRules && !(isPreviewRuleLoading || isRefetching || isUpgradingSecurityPackages);
+        canEditRules &&
+        !(isPreviewRuleLoading || isRefetching || isInitializingPrebuiltRulesPackage);
 
       return (
         <EuiFlexGroup>
@@ -300,7 +299,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         </EuiFlexGroup>
       );
     },
-    [loadingRules, canEditRules, isRefetching, isUpgradingSecurityPackages, installOneRule]
+    [loadingRules, canEditRules, isRefetching, isInitializingPrebuiltRulesPackage, installOneRule]
   );
 
   const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
@@ -348,7 +347,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         isFetching,
         loadingRules,
         isRefetching,
-        isUpgradingSecurityPackages,
+        isInitializingPrebuiltRulesPackage,
         isInstallingAllRules,
         isAnyRuleInstalling,
         selectedRules,
@@ -372,7 +371,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isLoading,
     loadingRules,
     isRefetching,
-    isUpgradingSecurityPackages,
+    isInitializingPrebuiltRulesPackage,
     isInstallingAllRules,
     isAnyRuleInstalling,
     selectedRules,

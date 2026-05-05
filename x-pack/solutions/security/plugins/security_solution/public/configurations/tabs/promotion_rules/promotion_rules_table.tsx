@@ -47,7 +47,7 @@ export enum PromotionRuleTabs {
 }
 
 export const PromotionRulesTable = () => {
-  const isUpgradingSecurityPackages = useIsBootstrappingEaseRules();
+  const isBootstrappingEaseRules = useIsBootstrappingEaseRules();
   const rulesTableContext = useRulesTableContext();
   const { data: ruleManagementFilters } = useRuleManagementFilters();
   const [currentTab, setCurrentTab] = useState(PromotionRuleTabs.management);
@@ -127,7 +127,7 @@ export const PromotionRulesTable = () => {
     [currentTab, handleTabClick, installedTotal]
   );
 
-  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
+  const shouldShowLinearProgress = (isFetched && isRefetching) || isBootstrappingEaseRules;
   const shouldShowLoadingOverlay = !isFetched && isRefetching;
 
   return (
