@@ -8,6 +8,7 @@
 import {
   evaluate as base,
   createQuantitativeCorrectnessEvaluators,
+  createSkillInvocationEvaluator,
   createSpanLatencyEvaluator,
   createToolCallsEvaluator,
   createTrajectoryEvaluator,
@@ -19,7 +20,7 @@ import { AgentBuilderClient } from '../../src/clients/chat/agent_builder_client'
 import type { ConverseAttachment } from '../../src/clients/chat/types';
 import { createCriteriaEvaluator } from '../../src/criteria_evaluator';
 
-interface ObservabilityAgentExample extends Example {
+interface ElasticAgentBuilderEvalExample extends Example {
   input: {
     question: string;
     attachments?: ConverseAttachment[];
@@ -29,13 +30,16 @@ interface ObservabilityAgentExample extends Example {
     expected?: string;
     expectedTools?: string[];
   };
+  metadata?: {
+    expectedSkill?: string;
+  };
 }
 
-export type EvaluateObservabilityAgentDataset = (params: {
+export type EvaluateElasticAgentBuilderDataset = (params: {
   dataset: {
     name: string;
     description: string;
-    examples: ObservabilityAgentExample[];
+    examples: ElasticAgentBuilderEvalExample[];
   };
 }) => Promise<void>;
 
@@ -43,7 +47,7 @@ export const evaluate = base.extend<
   {},
   {
     chatClient: AgentBuilderClient;
-    evaluateDataset: EvaluateObservabilityAgentDataset;
+    evaluateDataset: EvaluateElasticAgentBuilderDataset;
   }
 >({
   chatClient: [
@@ -63,6 +67,16 @@ export const evaluate = base.extend<
         const includeToolCoverage = examples.some((example) =>
           Boolean(example.output.expectedTools?.length)
         );
+
+        const includeCriteria = examples.some((example) =>
+          Boolean(example.output.criteria?.length)
+        );
+
+        const expectedSkills = [
+          ...new Set(
+            examples.map((example) => example.metadata?.expectedSkill).filter(Boolean) as string[]
+          ),
+        ];
 
         await executorClient.runExperiment(
           {
@@ -98,7 +112,7 @@ export const evaluate = base.extend<
             },
           },
           [
-            createCriteriaEvaluator({ evaluators }),
+            ...(includeCriteria ? [createCriteriaEvaluator({ evaluators })] : []),
             ...(includeQuantitativeCorrectness ? createQuantitativeCorrectnessEvaluators() : []),
             ...(includeToolCoverage
               ? [
@@ -118,6 +132,9 @@ export const evaluate = base.extend<
                 ]
               : []),
             createToolCallsEvaluator({ traceEsClient, log }),
+            ...expectedSkills.map((skillName) =>
+              createSkillInvocationEvaluator({ traceEsClient, log, skillName })
+            ),
             evaluators.traceBasedEvaluators.inputTokens,
             evaluators.traceBasedEvaluators.outputTokens,
             evaluators.traceBasedEvaluators.cachedTokens,

@@ -27,13 +27,18 @@ import {
   NO_CREATOR_USER_LABEL,
   SENTINEL_KEYS,
 } from '@kbn/content-list-provider';
-import { SAVED_OBJECTS_PER_PAGE_ID } from '@kbn/management-settings-ids';
+import {
+  SAVED_OBJECTS_PER_PAGE_ID,
+  SAVED_OBJECTS_LISTING_LIMIT_ID,
+} from '@kbn/management-settings-ids';
 import { useFavorites } from '@kbn/content-management-favorites-public';
 import type { Tag } from '@kbn/content-management-tags';
 import type { TableListViewFindItemsFn, ContentListClientServices } from './types';
 import { createClientStrategy, filterItems, getCreatorKey } from './strategy';
 import type { ItemDecorator } from './strategy';
 import { ProfilePrimeEffect } from './profile_prime_effect';
+import type { ContentEditorConfig } from './content_editor';
+import { useContentEditorInspect } from './content_editor';
 
 /**
  * Compute per-key item counts from the full item set.
@@ -120,6 +125,15 @@ export type ContentListClientProviderProps = ContentListCoreConfig & {
   services: ContentListClientServices;
   /** Called after each successful item fetch. */
   onFetchSuccess?: DataSourceConfig['onFetchSuccess'];
+  /**
+   * Content editor (metadata editing flyout) configuration.
+   *
+   * When provided, creates an `onInspect` callback on the item config that opens
+   * the Kibana content editor flyout. The consumer must wrap their component tree
+   * with `ContentEditorKibanaProvider` (from `@kbn/content-management-content-editor`)
+   * above this provider.
+   */
+  contentEditor?: ContentEditorConfig;
 };
 
 /**
@@ -150,6 +164,20 @@ export type ContentListClientProviderProps = ContentListCoreConfig & {
  *   <MyContentList />
  * </ContentListClientProvider>
  * ```
+ *
+ * @example With content editor
+ * ```tsx
+ * const openContentEditor = useOpenContentEditor();
+ *
+ * <ContentListClientProvider
+ *   id="my-dashboards"
+ *   labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+ *   findItems={myExistingFindItems}
+ *   contentEditor={{ openContentEditor, onSave: handleSave }}
+ * >
+ *   <MyContentList />
+ * </ContentListClientProvider>
+ * ```
  */
 export const ContentListClientProvider = ({
   children,
@@ -157,6 +185,8 @@ export const ContentListClientProvider = ({
   features: featuresProp = {},
   services,
   onFetchSuccess,
+  contentEditor,
+  item: itemConfigProp,
   ...rest
 }: ContentListClientProviderProps): JSX.Element => {
   const favoritesClient = services?.favorites;
@@ -180,9 +210,20 @@ export const ContentListClientProvider = ({
     []
   );
 
+  // Read listing limit once at mount. Not reactive — changes during a session
+  // are not expected to take effect until reload (same pattern as page size).
+  const [listingLimit] = useState(() =>
+    services.uiSettings.get<number>(SAVED_OBJECTS_LISTING_LIMIT_ID)
+  );
+
   const { findItems, onInvalidate, onRefresh, getItems } = useMemo(
-    () => createClientStrategy(tableListViewFindItems, starredEnabled ? decorate : undefined),
-    [tableListViewFindItems, starredEnabled, decorate]
+    () =>
+      createClientStrategy(
+        tableListViewFindItems,
+        starredEnabled ? decorate : undefined,
+        listingLimit
+      ),
+    [tableListViewFindItems, starredEnabled, decorate, listingLimit]
   );
 
   const dataSource: DataSourceConfig = useMemo(
@@ -331,12 +372,52 @@ export const ContentListClientProvider = ({
     };
   }, [features, uiSettingsPageSize]);
 
+  // Derive queryKeyScope the same way the base provider does.
+  const queryKeyScope = rest.queryKeyScope ?? `${rest.id}-listing`;
+
+  // Wrap the consumer's `contentEditor.onSave` so the client strategy cache is
+  // cleared before {@link useContentEditorInspect} invalidates the React Query
+  // cache. Without this, the strategy's internal `searchQuery`-keyed cache
+  // returns stale items on the post-save refetch and the row appears
+  // unchanged in the table — see `createClientStrategy.findItemsFn`.
+  const contentEditorWithInvalidation = useMemo<ContentEditorConfig | undefined>(() => {
+    if (!contentEditor?.onSave) {
+      return contentEditor;
+    }
+    const consumerOnSave = contentEditor.onSave;
+    return {
+      ...contentEditor,
+      onSave: async (args) => {
+        await consumerOnSave(args);
+        onInvalidate();
+      },
+    };
+  }, [contentEditor, onInvalidate]);
+
+  // Create the onInspect callback from the content editor config.
+  const onInspect = useContentEditorInspect({
+    contentEditor: contentEditorWithInvalidation,
+    entityName: rest.labels.entity,
+    isReadOnly: rest.isReadOnly,
+    queryKeyScope,
+  });
+
+  // Merge onInspect into the item config.
+  const itemConfig = useMemo(
+    () => ({
+      ...itemConfigProp,
+      ...(onInspect && { onInspect }),
+    }),
+    [itemConfigProp, onInspect]
+  );
+
   return (
     <ContentListProvider
       dataSource={dataSource}
       features={resolvedFeatures}
       services={services}
       profileCache={profileCache}
+      item={itemConfig}
       {...rest}
     >
       {starredEnabled && <FavoritesSyncEffect favoriteIdsRef={favoriteIdsRef} />}

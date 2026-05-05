@@ -68,6 +68,7 @@ import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
+import type { ApiKeyStrategy } from '../api_key_strategy';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
@@ -137,6 +138,7 @@ type Opts = {
   allowReadingInvalidState: boolean;
   strategy: string;
   getPollInterval: () => number;
+  apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
@@ -192,6 +194,7 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
   private getPollInterval: () => number;
+  private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
 
@@ -221,6 +224,7 @@ export class TaskManagerRunner implements TaskRunner {
     allowReadingInvalidState,
     strategy,
     getPollInterval,
+    apiKeyStrategy,
     eventLogger,
   }: Opts) {
     this.basePathService = basePathService;
@@ -243,6 +247,7 @@ export class TaskManagerRunner implements TaskRunner {
     });
     this.claimStrategy = strategy;
     this.getPollInterval = getPollInterval;
+    this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
   }
 
@@ -427,9 +432,16 @@ export class TaskManagerRunner implements TaskRunner {
         const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
 
         try {
-          const sanitizedTaskInstance = omit(modifiedContext.taskInstance, ['apiKey', 'userScope']);
+          const sanitizedTaskInstance = omit(modifiedContext.taskInstance, [
+            'apiKey',
+            'uiamApiKey',
+            'userScope',
+          ]);
+          const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
+            modifiedContext.taskInstance
+          );
           const fakeRequest = this.getFakeKibanaRequest(
-            modifiedContext.taskInstance.apiKey,
+            apiKeyForRequest,
             modifiedContext.taskInstance.userScope?.spaceId
           );
 

@@ -67,6 +67,7 @@
                 "lineNumber": 30,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Reporter",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -103,6 +104,7 @@
                 "lineNumber": 38,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApplicationKey",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -390,6 +392,7 @@
                 "lineNumber": 39,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReporterConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -569,6 +572,7 @@
                 "lineNumber": 93,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApplicationUsageMetric",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -681,6 +685,7 @@
                 "lineNumber": 56,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Report",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -831,6 +836,7 @@
                 "lineNumber": 80,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "Metric",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -989,6 +995,7 @@
                 "lineNumber": 27,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "Report",
                 "trackAdoption": false
               }
             ]
@@ -1187,6 +1194,7 @@
                 "lineNumber": 14,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1378,6 +1386,7 @@
             "lineNumber": 27,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "Report",
             "trackAdoption": false
           }
         ],

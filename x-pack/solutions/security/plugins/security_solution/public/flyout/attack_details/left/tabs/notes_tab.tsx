@@ -7,6 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { EuiSpacer } from '@elastic/eui';
+import { NotesRemoteCallout } from '../../../../flyout_v2/notes/components/notes_remote_callout';
 import { NotesDetailsContent } from '../../../../flyout_v2/notes/components/notes_details_content';
 import { useTimelineConfig } from '../../../../flyout_v2/notes/hooks/use_timeline_config';
 import { useAttackDetailsContext } from '../../context';
@@ -22,7 +24,14 @@ export const NotesTab = memo(() => {
   const isTimelineFlyout = useWhichFlyout() === Flyouts.timeline;
   const timelineConfig = useTimelineConfig(attackId, isTimelineFlyout);
 
-  return <NotesDetailsContent hit={hit} timelineConfig={timelineConfig} hideTimelineIcon={false} />;
+  return (
+    <>
+      <NotesRemoteCallout hit={hit}>
+        <EuiSpacer size="m" />
+      </NotesRemoteCallout>
+      <NotesDetailsContent hit={hit} timelineConfig={timelineConfig} hideTimelineIcon={false} />
+    </>
+  );
 });
 
 NotesTab.displayName = 'NotesTab';

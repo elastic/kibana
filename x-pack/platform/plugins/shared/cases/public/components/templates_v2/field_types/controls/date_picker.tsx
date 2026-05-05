@@ -16,11 +16,13 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import React from 'react';
 import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import {
   type DatePickerFieldSchema,
   type ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
+import { OptionalFieldLabel } from '../../../optional_field_label';
 
 type DatePickerProps = z.infer<typeof DatePickerFieldSchema> & ConditionRenderProps;
 
@@ -55,14 +57,21 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   return (
     <UseField
       key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
       serializer={serializer}
       config={{ validations }}
     >
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
         return (
-          <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
+          <EuiFormRow
+            label={label}
+            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+            error={errorMessage}
+            isInvalid={isInvalid}
+            fullWidth
+          >
             <EuiDatePicker
               selected={toMoment(field.value, isLocal)}
               onChange={(date) => field.setValue(date)}

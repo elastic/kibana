@@ -9,6 +9,7 @@
     "server/**/*",
     "types/**/*",
     "test_helpers/**/*",
+    "test/scout/**/*",
     "utils/**/*",
     "index.ts"
   ],
@@ -176,6 +177,7 @@
     "@kbn/migrator-test-kit",
     "@kbn/core-user-activity-server-mocks",
     "@kbn/core-user-activity-server-internal",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",

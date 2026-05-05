@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import { z } from '@kbn/zod/v4';
 
 // Mock the imports
 jest.mock('../../../../common/lib/parse_variable_path');
-jest.mock('../../../../common/lib/zod');
+jest.mock('@kbn/workflows/common/utils/zod/get_schema_at_path');
 jest.mock('../../workflow_context/lib/get_foreach_state_schema');
 
 import { validateVariable } from './validate_variable';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
-import { getSchemaAtPath } from '../../../../common/lib/zod';
 import {
   InvalidForeachParameterError,
   InvalidForeachParameterErrorCodes,

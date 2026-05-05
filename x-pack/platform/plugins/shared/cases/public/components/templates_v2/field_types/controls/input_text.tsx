@@ -11,6 +11,7 @@ import React from 'react';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
   InputTextFieldSchema,
   ConditionRenderProps,
@@ -22,6 +23,7 @@ import {
   FIELD_PATTERN_MISMATCH,
   FIELD_PATTERN_INVALID,
 } from '../../translations';
+import { OptionalFieldLabel } from '../../../optional_field_label';
 
 const { emptyField } = fieldValidators;
 
@@ -81,11 +83,12 @@ export const InputText = ({
   return (
     <UseField
       key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
       component={TextField}
       config={{ validations }}
       componentProps={{
         label,
+        labelAppend: !isRequired ? OptionalFieldLabel : undefined,
       }}
     />
   );

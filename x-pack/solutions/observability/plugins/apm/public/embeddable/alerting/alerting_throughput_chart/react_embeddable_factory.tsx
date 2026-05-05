@@ -13,9 +13,9 @@ import {
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
+import { APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE } from '@kbn/apm-embeddable-common';
 import { ApmEmbeddableContext } from '../../embeddable_context';
 import type { EmbeddableDeps } from '../../types';
-import { APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE } from '../constants';
 import type { EmbeddableApmAlertingVizProps } from '../types';
 import { APMAlertingThroughputChart } from './chart';
 

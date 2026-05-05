@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 import moment from 'moment-timezone';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import { getYamlDefaultAsString } from '../../utils';
 
 export interface FieldInfo {
@@ -35,7 +36,7 @@ export const useYamlToFormSync = (
     for (const field of parsedFields) {
       const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
       const lastSynced = lastSyncedYamlDefaultRef.current[field.name];
-      const fieldPath = `${CASE_EXTENDED_FIELDS}.${field.name}_as_${field.type}`;
+      const fieldPath = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(field.name, field.type)}`;
 
       if (lastSynced === undefined || lastSynced !== yamlDefault) {
         fieldsToSync.push({ path: fieldPath, name: field.name, yamlDefault });
@@ -85,7 +86,7 @@ export const useFormToYamlSync = (
       if (!extendedFields) return;
 
       for (const field of parsedFields) {
-        const fieldKey = `${field.name}_as_${field.type}`;
+        const fieldKey = getFieldSnakeKey(field.name, field.type);
         const rawValue = extendedFields[fieldKey];
         const currentFormValue = serializeFormValue(rawValue);
         const currentYamlValue = yamlDefaultsRef.current[field.name] ?? '';

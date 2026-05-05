@@ -90,6 +90,7 @@
                 "lineNumber": 41,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "PersistedStatePath",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -126,6 +127,7 @@
                 "lineNumber": 58,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "PersistedStateKey",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -303,6 +305,7 @@
                 "lineNumber": 89,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "PersistedStatePath",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -598,6 +601,7 @@
             "lineNumber": 16,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "IUiSettingsClient",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -707,6 +711,7 @@
             "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Datatable",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -795,6 +800,7 @@
             "lineNumber": 52,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "VisualizationContainerProps",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -18,7 +18,8 @@ import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import { EsqlControlType } from '@kbn/esql-types';
 
 export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
-  embeddable.registerTransforms(ESQL_CONTROL, {
+  embeddable.registerEmbeddableServerDefinition(ESQL_CONTROL, {
+    title: 'ES|QL variable control',
     getSchema: () => optionsListESQLControlSchema,
     getTransforms: () => ({
       transformOut: <

@@ -28,8 +28,10 @@ jest.mock('../../../../common', () => ({
 }));
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
 
+const mockUsePackageNames = jest.fn((): Set<string> | undefined => undefined);
 jest.mock('../../forms/integration_form', () => ({
   useIntegrationForm: jest.fn(),
+  usePackageNames: () => mockUsePackageNames(),
 }));
 const mockUseIntegrationForm = useIntegrationForm as jest.Mock;
 
@@ -189,27 +191,7 @@ describe('DataStreams', () => {
       fireEvent.click(getByTestId('addDataStreamButton'));
 
       expect(mockReportDataStreamFlyoutOpened).toHaveBeenCalledWith(
-        expect.objectContaining({ isFirstDataStream: true })
-      );
-    });
-
-    it('should report isFirstDataStream as false when integration already has data streams', () => {
-      mockUseGetIntegrationById.mockReturnValue({
-        integration: {
-          title: 'My Integration',
-          dataStreams: [{ dataStreamId: 'ds-1', title: 'Existing' }],
-        },
-        isLoading: false,
-      });
-
-      const { getByTestId } = renderDataStreams('test-id');
-
-      fireEvent.click(getByTestId('addDataStreamButton'));
-
-      expect(mockReportDataStreamFlyoutOpened).toHaveBeenCalledWith(
-        expect.objectContaining({
-          isFirstDataStream: false,
-        })
+        expect.objectContaining({ integrationId: 'test-id' })
       );
     });
   });
@@ -284,6 +266,20 @@ describe('DataStreams', () => {
 
       const { getByTestId } = renderDataStreams();
       expect(getByTestId('addDataStreamButton')).not.toBeDisabled();
+    });
+
+    it('disables add data stream when integration name already exists', () => {
+      mockUseIntegrationForm.mockReturnValue({
+        formData: { title: 'Existing Integration', description: 'A description' },
+      });
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: undefined,
+        isLoading: false,
+      });
+      mockUsePackageNames.mockReturnValue(new Set(['existing_integration']));
+
+      const { getByTestId } = renderDataStreams();
+      expect(getByTestId('addDataStreamButton')).toBeDisabled();
     });
 
     it('does not open flyout when add button is disabled on create page', () => {

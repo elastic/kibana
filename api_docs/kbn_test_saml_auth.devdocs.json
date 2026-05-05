@@ -69,6 +69,7 @@
                 "lineNumber": 71,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "SamlSessionManagerOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -173,6 +174,7 @@
                 "lineNumber": 236,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetCookieOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -241,6 +243,7 @@
                 "lineNumber": 245,
                 "columnNumber": 68,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetCookieOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }

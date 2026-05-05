@@ -347,6 +347,7 @@
                 "lineNumber": 21,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Function",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1142,6 +1143,7 @@
             "lineNumber": 16,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Args",
             "trackAdoption": false,
             "isRequired": true
           }

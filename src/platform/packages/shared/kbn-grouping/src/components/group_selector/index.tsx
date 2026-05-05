@@ -13,6 +13,7 @@ import type {
 } from '@elastic/eui';
 import { useEuiTheme, EuiButtonEmpty } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
+import { i18n as i18nCore } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { UiCounterMetricType } from '@kbn/analytics';
@@ -238,6 +239,7 @@ const GroupSelectorComponent = ({
   return (
     <EuiPopover
       data-test-subj={dataTestSubj ?? 'groupByPopover'}
+      aria-label={i18nCore.translate('grouping.selector.groupBy', { defaultMessage: 'Group by' })}
       button={button}
       closePopover={closePopover}
       isOpen={isPopoverOpen}

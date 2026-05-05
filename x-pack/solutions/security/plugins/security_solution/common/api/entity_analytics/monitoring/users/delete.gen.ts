@@ -14,22 +14,29 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const DeletePrivMonUserRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The document ID of the monitored user to delete
+     */
+    id: z.string(),
+  })
+);
 export type DeletePrivMonUserRequestParams = z.infer<typeof DeletePrivMonUserRequestParams>;
-export const DeletePrivMonUserRequestParams = z.object({
-  id: z.string(),
-});
 export type DeletePrivMonUserRequestParamsInput = z.input<typeof DeletePrivMonUserRequestParams>;
 
+export const DeletePrivMonUserResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Indicates if the deletion was successful
+     */
+    acknowledged: z.boolean().optional(),
+    /**
+     * A message providing additional information about the deletion status
+     */
+    message: z.string().optional(),
+  })
+);
 export type DeletePrivMonUserResponse = z.infer<typeof DeletePrivMonUserResponse>;
-export const DeletePrivMonUserResponse = z.object({
-  /**
-   * Indicates if the deletion was successful
-   */
-  acknowledged: z.boolean().optional(),
-  /**
-   * A message providing additional information about the deletion status
-   */
-  message: z.string().optional(),
-});

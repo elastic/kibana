@@ -73,7 +73,7 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <Timestamp hit={hit} />
+              <Timestamp hit={hit} size="xs" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

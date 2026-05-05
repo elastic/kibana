@@ -14,18 +14,28 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const RiskEngineScheduleNowResponse = lazySchema(() =>
+  z.object({
+    success: z.boolean().optional(),
+  })
+);
 export type RiskEngineScheduleNowResponse = z.infer<typeof RiskEngineScheduleNowResponse>;
-export const RiskEngineScheduleNowResponse = z.object({
-  success: z.boolean().optional(),
-});
 
+export const RiskEngineScheduleNowErrorResponse = lazySchema(() =>
+  z.object({
+    message: z.string(),
+    full_error: z.string(),
+  })
+);
 export type RiskEngineScheduleNowErrorResponse = z.infer<typeof RiskEngineScheduleNowErrorResponse>;
-export const RiskEngineScheduleNowErrorResponse = z.object({
-  message: z.string(),
-  full_error: z.string(),
-});
 
+export const ScheduleRiskEngineNowRequestBody = lazySchema(() => z.object({}));
+export type ScheduleRiskEngineNowRequestBody = z.infer<typeof ScheduleRiskEngineNowRequestBody>;
+export type ScheduleRiskEngineNowRequestBodyInput = z.input<
+  typeof ScheduleRiskEngineNowRequestBody
+>;
+
+export const ScheduleRiskEngineNowResponse = lazySchema(() => RiskEngineScheduleNowResponse);
 export type ScheduleRiskEngineNowResponse = z.infer<typeof ScheduleRiskEngineNowResponse>;
-export const ScheduleRiskEngineNowResponse = RiskEngineScheduleNowResponse;

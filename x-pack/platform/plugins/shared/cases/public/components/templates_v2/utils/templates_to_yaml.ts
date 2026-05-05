@@ -122,6 +122,29 @@ const serializeCheckboxGroupMetadata = (
   }
 };
 
+const serializeUserPickerMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'USER_PICKER' }>
+) => {
+  const meta = field.metadata;
+  if (!meta) return;
+  const hasMultiple = meta.multiple !== undefined;
+  const defaults = meta.default;
+  const hasDefaults = Array.isArray(defaults) && defaults.length > 0;
+  if (!hasMultiple && !hasDefaults) return;
+  out.push(`      metadata:`);
+  if (hasMultiple) {
+    out.push(`        multiple: ${meta.multiple}`);
+  }
+  if (hasDefaults) {
+    out.push(`        default:`);
+    for (const user of defaults) {
+      out.push(`          - uid: ${yamlString(user.uid)}`);
+      out.push(`            name: ${yamlString(user.name)}`);
+    }
+  }
+};
+
 const serializeFieldMetadata = (out: string[], field: Field) => {
   if (field.control === FieldType.SELECT_BASIC) {
     serializeSelectMetadata(out, field);
@@ -145,6 +168,10 @@ const serializeFieldMetadata = (out: string[], field: Field) => {
     if (defaultValue !== undefined && typeof defaultValue === 'string') {
       out.push(`        default: ${yamlString(defaultValue)}`);
     }
+    return;
+  }
+  if (field.control === FieldType.USER_PICKER) {
+    serializeUserPickerMetadata(out, field);
     return;
   }
   // INPUT_TEXT, INPUT_NUMBER, TEXTAREA

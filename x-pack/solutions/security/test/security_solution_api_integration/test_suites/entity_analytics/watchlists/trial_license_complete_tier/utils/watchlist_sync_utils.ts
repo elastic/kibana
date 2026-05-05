@@ -21,6 +21,9 @@ export const WatchlistSyncUtils = (
       index: sourceIndexName,
       mappings: {
         properties: {
+          '@timestamp': {
+            type: 'date',
+          },
           user: {
             properties: {
               name: {
@@ -32,8 +35,11 @@ export const WatchlistSyncUtils = (
       },
     });
 
-  const addUsersToSourceIndex = async (users: string[]) => {
-    const ops = users.flatMap((name) => [{ index: {} }, { user: { name } }]);
+  const addUsersToSourceIndex = async (users: string[], timestamp?: string) => {
+    const ops = users.flatMap((name) => [
+      { index: {} },
+      { '@timestamp': timestamp ?? new Date().toISOString(), user: { name } },
+    ]);
     await es.bulk({
       index: sourceIndexName,
       body: ops,
@@ -47,7 +53,10 @@ export const WatchlistSyncUtils = (
     });
   };
 
-  const createWatchlistAndEntitySource = async (watchlistName: string) => {
+  const createWatchlistAndEntitySource = async (
+    watchlistName: string,
+    range?: { start: string; end: string }
+  ) => {
     const { body: watchlist } = await entityAnalyticsApi.createWatchlist({
       body: {
         name: watchlistName,
@@ -65,6 +74,7 @@ export const WatchlistSyncUtils = (
         name: `Source for ${sourceIndexName}`,
         indexPattern: sourceIndexName,
         enabled: true,
+        range: range ?? { start: 'now-10d', end: 'now' },
       },
     });
 

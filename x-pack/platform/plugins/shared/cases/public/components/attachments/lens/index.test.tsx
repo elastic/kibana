@@ -56,6 +56,7 @@ describe('getVisualizationAttachmentType', () => {
       displayName: 'Visualizations',
       getAttachmentViewObject: expect.any(Function),
       getAttachmentRemovalObject: expect.any(Function),
+      schemaValidator: expect.any(Function),
     });
   });
 

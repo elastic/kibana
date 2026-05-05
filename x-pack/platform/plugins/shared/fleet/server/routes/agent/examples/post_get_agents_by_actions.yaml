@@ -1,0 +1,36 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postGetAgentsByActionsRequestExample:
+          description: 'Retrieve agents associated with specific action IDs'
+          value:
+            actionIds:
+              - 'action-id-1'
+              - 'action-id-2'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postGetAgentsByActionsExample:
+            description: 'Agents associated with the given actions'
+            value:
+              items:
+                - id: 'agent-id-1'
+                  active: true
+                  status: 'online'
+                  policy_id: 'agent-policy-id-1'
+              total: 1
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

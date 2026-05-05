@@ -93,8 +93,10 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
   const groups = new Map<string, GroupedModel>();
 
   for (const ep of endpoints) {
-    const modelName = getModelName(ep);
-    const key = `${ep.service}::${modelName}`;
+    const { model_id: modelId } = ep.service_settings;
+    // Group by model_id so that user-created endpoints with the same underlying model
+    // are merged with pre-configured endpoints, even when metadata display names differ.
+    const key = `${ep.service}::${modelId.length > 0 ? modelId : ep.inference_id}`;
 
     const existing = groups.get(key);
     if (existing) {
@@ -106,11 +108,19 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
         }
       }
       existing.endpoints.push(ep);
+      // Prefer metadata-based display values when available, so that a pre-configured
+      // endpoint's friendly name/creator wins over the raw model_id fallback.
+      if (isInferenceEndpointWithDisplayNameMetadata(ep)) {
+        existing.modelName = ep.metadata.display.name;
+      }
+      if (isInferenceEndpointWithDisplayCreatorMetadata(ep)) {
+        existing.modelCreator = ep.metadata.display.model_creator;
+      }
     } else {
       const cat = TASK_TYPE_CATEGORY[ep.task_type];
       groups.set(key, {
         service: ep.service,
-        modelName,
+        modelName: getModelName(ep),
         modelCreator: getModelCreator(ep),
         taskTypes: [ep.task_type],
         categories: cat ? [cat] : [],

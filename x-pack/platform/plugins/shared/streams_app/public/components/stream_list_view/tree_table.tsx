@@ -97,12 +97,10 @@ const TechnicalPreviewBadge = () => (
 export function StreamsTreeTable({
   loading,
   streams = [],
-  canReadFailureStore = false,
   wiredStreamsStatus,
   openFlyout,
 }: {
   streams?: ListStreamDetail[];
-  canReadFailureStore?: boolean;
   loading?: boolean;
   wiredStreamsStatus?: WiredStreamsStatus;
   openFlyout?: () => void;
@@ -126,9 +124,21 @@ export function StreamsTreeTable({
     pageSize: 25,
   });
 
+  const { privilegeMap, hasFailureStoreAccess } = React.useMemo(() => {
+    return streams.reduce(
+      (acc, streamDetail) => {
+        acc.privilegeMap.set(streamDetail.stream.name, streamDetail.privileges.read_failure_store);
+        acc.hasFailureStoreAccess ||= streamDetail.privileges.read_failure_store;
+        return acc;
+      },
+      { privilegeMap: new Map<string, boolean>(), hasFailureStoreAccess: false }
+    );
+  }, [streams]);
+
   const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
-    canReadFailureStore,
+    getCanReadFailureStore: (streamName: string | undefined) =>
+      streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });
 
@@ -501,7 +511,7 @@ export function StreamsTreeTable({
                 />
               )}
               {DOCUMENTS_COLUMN_HEADER}
-              {!canReadFailureStore && (
+              {!hasFailureStoreAccess && (
                 <EuiIconTip
                   content={FAILURE_STORE_PERMISSIONS_ERROR}
                   type="warning"
@@ -530,7 +540,7 @@ export function StreamsTreeTable({
           name: (
             <EuiFlexGroup alignItems="center" gutterSize="s">
               {DATA_QUALITY_COLUMN_HEADER}
-              {!canReadFailureStore && (
+              {!hasFailureStoreAccess && (
                 <EuiIconTip
                   content={FAILURE_STORE_PERMISSIONS_ERROR}
                   type="warning"
@@ -627,7 +637,7 @@ export function StreamsTreeTable({
           </div>
         ),
         filters:
-          qualityLoaded && canReadFailureStore
+          qualityLoaded && hasFailureStoreAccess
             ? [
                 {
                   type: 'field_value_selection',

@@ -65,7 +65,7 @@ export const ObservableActionsPopoverButton: React.FC<{
     if (permissions.update) {
       mainPanelItems.push({
         name: <EuiTextColor color={'danger'}>{i18n.DELETE_OBSERVABLE}</EuiTextColor>,
-        icon: <EuiIcon type="trash" size="m" color={'danger'} />,
+        icon: <EuiIcon type="trash" size="m" color={'danger'} aria-hidden={true} />,
         onClick: () => {
           closePopover();
           onDeletionModalOpen();
@@ -76,7 +76,7 @@ export const ObservableActionsPopoverButton: React.FC<{
 
       mainPanelItems.push({
         name: <EuiTextColor>{i18n.EDIT_OBSERVABLE}</EuiTextColor>,
-        icon: <EuiIcon type="pencil" size="m" />,
+        icon: <EuiIcon type="pencil" size="m" aria-hidden={true} />,
         onClick: () => {
           setShowEditModal(true);
           closePopover();

@@ -17,8 +17,6 @@ import type { WiredStream } from '../models/ingest/wired';
 import { getEsqlViewName } from '../models/query/view_name';
 import { getParentId } from '../shared/hierarchy';
 
-const UNMAPPED_FIELDS_DIRECTIVE = 'SET unmapped_fields="LOAD"';
-
 export interface DefinitionToESQLQueryOptions {
   definition: WiredStream.Definition;
   routingCondition: Condition;
@@ -30,6 +28,10 @@ export interface DefinitionToESQLQueryOptions {
  * Draft streams use read-time ES|QL views instead of ingest pipelines.
  * The generated query reads from the parent stream's view, filters by
  * the routing condition, and applies processing steps.
+ *
+ * The query does NOT include session-level directives like
+ * `SET unmapped_fields="LOAD"` because they are not supported in
+ * ES|QL view definitions — consumers should apply those at query time.
  *
  * OTel mapping aliases (e.g. message, trace.id) and passthrough
  * namespace resolution (e.g. attributes.host.name → host.name) are
@@ -75,5 +77,5 @@ export async function definitionToESQLQuery(
     }
   }
 
-  return `${UNMAPPED_FIELDS_DIRECTIVE};\n${query}`;
+  return query;
 }

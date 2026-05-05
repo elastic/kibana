@@ -20,12 +20,10 @@ import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import { TraceDataState, type TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
-import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
-import {
-  getAgentMarks,
-  type AgentMark,
-} from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { getCriticalPath, type CriticalPathSegment } from './critical_path';
+import type { ErrorMark } from '../charts/timeline/marker/error_marker';
+import { getAgentMarks } from '../charts/timeline/marker/get_agent_marks';
+import type { AgentMark } from '../charts/timeline/marker/agent_marker';
 
 export type TraceWaterfallScrollStrategy = 'parent' | 'window';
 
@@ -47,8 +45,9 @@ export interface TraceWaterfallContextProps {
   showCriticalPathControl?: boolean;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
-  highlightedSpanId?: string;
-  scrollToHighlightedOnMount?: boolean;
+  contextSpanIds?: string[];
+  selectedSpanId?: string;
+  scrollToContextOnMount?: boolean;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
   isEmbeddable: boolean;
@@ -109,7 +108,7 @@ interface Props {
   children: React.ReactNode;
   traceItems: TraceItem[];
   showAccordion: boolean;
-  highlightedSpanId?: string;
+  contextSpanIds?: string[];
   scrollStrategy?: TraceWaterfallScrollStrategy;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
@@ -126,7 +125,7 @@ interface Props {
   defaultShowCriticalPath?: boolean;
   onShowCriticalPathChange?: (value: boolean) => void;
   entryTransactionId?: string;
-  scrollToHighlightedOnMount?: boolean;
+  scrollToContextOnMount?: boolean;
   scrollElement?: Element;
 }
 
@@ -136,7 +135,7 @@ export function TraceWaterfallContextProvider({
   children,
   traceItems,
   showAccordion,
-  highlightedSpanId,
+  contextSpanIds,
   scrollStrategy = 'window',
   onClick,
   onErrorClick,
@@ -154,7 +153,7 @@ export function TraceWaterfallContextProvider({
   defaultShowCriticalPath = false,
   onShowCriticalPathChange,
   entryTransactionId,
-  scrollToHighlightedOnMount,
+  scrollToContextOnMount,
 }: Props) {
   const { duration, traceWaterfall, rootItem, legends, colorBy, traceState, message, errorMarks } =
     useTraceWaterfall({
@@ -164,6 +163,16 @@ export function TraceWaterfallContextProvider({
       onErrorClick,
       entryTransactionId,
     });
+
+  const [selectedSpanId, setSelectedSpanId] = useState<string | undefined>();
+
+  const handleNodeClick = useCallback<OnNodeClick>(
+    (id, options) => {
+      setSelectedSpanId(id);
+      onClick?.(id, options);
+    },
+    [onClick]
+  );
 
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultShowCriticalPath);
   const isCriticalPathControlled = controlledValue !== undefined;
@@ -183,7 +192,9 @@ export function TraceWaterfallContextProvider({
   const [accordionStatesMap, setAccordionStateMap] = useState<
     Record<string, EuiAccordionProps['forceState']>
   >(() => {
-    const ancestorIds = getAncestorIds(traceWaterfall, highlightedSpanId);
+    const ancestorIds = new Set(
+      contextSpanIds?.flatMap((id) => [...getAncestorIds(traceWaterfall, id)]) ?? []
+    );
 
     return traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
       acc[item.id] = item.depth < maxLevelOpen || ancestorIds.has(item.id) ? 'open' : 'closed';
@@ -262,11 +273,12 @@ export function TraceWaterfallContextProvider({
         showCriticalPath,
         setShowCriticalPath,
         showCriticalPathControl,
-        onClick,
+        onClick: onClick ? handleNodeClick : undefined,
         onErrorClick,
         getServiceBadgeHref,
-        highlightedSpanId,
-        scrollToHighlightedOnMount,
+        contextSpanIds,
+        selectedSpanId,
+        scrollToContextOnMount,
         getRelatedErrorsHref,
         isEmbeddable,
         legends,

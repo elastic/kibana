@@ -1,0 +1,7 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          getMaintenanceWindowResponse:
+            $ref: './get_maintenance_window_response.yaml'

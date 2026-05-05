@@ -27,9 +27,11 @@
       "charts",
       "management",
       "kibanaUtils",
-      "share"
+      "share",
+      "eventLog",
+      "unifiedDocViewer"
     ],
-    "optionalPlugins": ["usageCollection"],
+    "optionalPlugins": ["usageCollection", "agentBuilder", "agentContextLayer"],
     "requiredBundles": ["alerting", "kibanaReact"],
     "extraPublicDirs": []
   }

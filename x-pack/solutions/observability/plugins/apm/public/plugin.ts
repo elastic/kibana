@@ -76,7 +76,7 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type {
@@ -522,6 +522,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         config,
         kibanaEnvironment,
         observabilityRuleTypeRegistry,
+        telemetry,
       });
     });
 
@@ -548,7 +549,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     } else {
       setApmInternalServices({});
     }
-
+    if (plugins.agentBuilder) {
+      import('./agent_builder/attachment_types').then(({ registerServiceMapAttachment }) => {
+        registerServiceMapAttachment(plugins.agentBuilder!.attachments);
+      });
+    }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
 

@@ -20,6 +20,7 @@ import {
   SERVICE_KEY,
   SERVICE_PATH,
   INITIAL_REST_VERSION,
+  GET_DATA_VIEWS_SUMMARY,
   GET_DATA_VIEWS_DESCRIPTION,
 } from '../../constants';
 import type { DataViewListItemRestResponse } from '../route_types';
@@ -40,7 +41,7 @@ export const getDataViews = async ({
 };
 
 const getDataViewsRouteFactory =
-  (path: string, serviceKey: string, description?: string) =>
+  (path: string, serviceKey: string, summary?: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -52,14 +53,56 @@ const getDataViewsRouteFactory =
     const responseValidation = () => {
       const dataViewListSchema = schema.arrayOf(
         schema.object({
-          id: schema.string(),
-          namespaces: schema.maybe(schema.arrayOf(schema.string())),
-          title: schema.string(),
-          type: schema.maybe(schema.string()),
-          typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-          name: schema.maybe(schema.string()),
-          timeFieldName: schema.maybe(schema.string()),
-          managed: schema.maybe(schema.boolean()),
+          id: schema.string({
+            meta: { description: 'The unique identifier for the data view.' },
+          }),
+          namespaces: schema.maybe(
+            schema.arrayOf(schema.string(), {
+              meta: {
+                description: 'The Kibana namespaces (spaces) where this data view is available.',
+              },
+            })
+          ),
+          title: schema.string({
+            meta: {
+              description:
+                'The comma-separated list of data streams, indices, and aliases that the data view matches.',
+            },
+          }),
+          type: schema.maybe(
+            schema.string({
+              meta: {
+                description: 'The type of data view. Set to `rollup` for rollup data views.',
+              },
+            })
+          ),
+          typeMeta: schema.maybe(
+            schema.object(
+              {},
+              {
+                unknowns: 'allow',
+                meta: {
+                  description:
+                    'Type-specific metadata. For rollup data views, contains information about rollup jobs and their capabilities.',
+                },
+              }
+            )
+          ),
+          name: schema.maybe(
+            schema.string({
+              meta: { description: 'The human-readable display name for the data view.' },
+            })
+          ),
+          timeFieldName: schema.maybe(
+            schema.string({
+              meta: { description: 'The timestamp field name used for time-based data views.' },
+            })
+          ),
+          managed: schema.maybe(
+            schema.boolean({
+              meta: { description: 'Indicates whether this data view is managed by Kibana.' },
+            })
+          ),
         })
       );
       return schema.object({ [serviceKey]: dataViewListSchema });
@@ -69,6 +112,7 @@ const getDataViewsRouteFactory =
       .get({
         path,
         access: 'public',
+        summary,
         description,
         security: {
           authz: {
@@ -121,5 +165,6 @@ const getDataViewsRouteFactory =
 export const registerGetDataViewsRoute = getDataViewsRouteFactory(
   SERVICE_PATH,
   SERVICE_KEY,
+  GET_DATA_VIEWS_SUMMARY,
   GET_DATA_VIEWS_DESCRIPTION
 );

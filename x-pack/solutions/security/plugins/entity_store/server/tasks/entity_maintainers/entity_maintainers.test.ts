@@ -8,6 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import {
+  DEFAULT_ENTITY_MAINTAINER_TIMEOUT,
   DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
   registerEntityMaintainerTask,
   scheduleEntityMaintainerTask,
@@ -236,6 +237,42 @@ describe('entity_maintainer task', () => {
           minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
         })
       );
+    });
+
+    it('should pass the configured timeout to task definition', async () => {
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
+      const config = createMockConfig({ timeout: '60m' });
+
+      registerEntityMaintainerTask({
+        taskManager: taskManagerSetup as any,
+        logger,
+        config,
+        core: core as any,
+        analytics,
+      });
+      await core.getStartServices();
+
+      const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
+      const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
+      expect(defs[taskType].timeout).toBe('60m');
+    });
+
+    it('should use the default timeout when timeout is not configured', async () => {
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
+      const config = createMockConfig();
+
+      registerEntityMaintainerTask({
+        taskManager: taskManagerSetup as any,
+        logger,
+        config,
+        core: core as any,
+        analytics,
+      });
+      await core.getStartServices();
+
+      const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
+      const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
+      expect(defs[taskType].timeout).toBe(DEFAULT_ENTITY_MAINTAINER_TIMEOUT);
     });
 
     it('should trigger the correct run method upon registration and scheduling', async () => {

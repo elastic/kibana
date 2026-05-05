@@ -13,6 +13,7 @@ import type { ContentListItem } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
+import { getColumnLayoutProps, type ColumnLayoutProps } from '../layout';
 import { CreatedByCell } from './created_by_cell';
 
 const DEFAULT_COLUMN_TITLE = i18n.translate(
@@ -23,9 +24,7 @@ const DEFAULT_COLUMN_TITLE = i18n.translate(
 /**
  * Props for the `Column.CreatedBy` preset component.
  */
-export interface CreatedByColumnProps {
-  /** Column width (CSS value). */
-  width?: string;
+export interface CreatedByColumnProps extends ColumnLayoutProps {
   /** Override column header text. Defaults to "Created by". */
   columnTitle?: string;
 }
@@ -44,13 +43,17 @@ export const buildCreatedByColumn = (
     return undefined;
   }
 
-  const { width, columnTitle } = attributes;
+  const { columnTitle, ...layoutProps } = attributes;
 
   return {
+    ...getColumnLayoutProps(layoutProps),
     field: 'createdBy',
     name: columnTitle ?? DEFAULT_COLUMN_TITLE,
     sortable: false,
-    ...(width && { width }),
+    // The cell renders a small fixed-size `EuiAvatar` (or a `—` placeholder),
+    // never free-form text — center it horizontally in the column so it
+    // doesn't visually float to the left of the header.
+    align: 'center',
     'data-test-subj': 'content-list-table-column-createdBy',
     render: (value: string | undefined, record: ContentListItem) => {
       return <CreatedByCell createdBy={value} managed={!!record.managed} />;
@@ -78,7 +81,14 @@ export const buildCreatedByColumn = (
  * </ContentListTable>
  * ```
  */
+/** EUI user-profile avatar default diameter. */
+const CREATED_BY_AVATAR_SIZE = 24;
+
 export const CreatedByColumn = column.createPreset({
   name: 'createdBy',
   resolve: buildCreatedByColumn,
+  skeleton: () => ({
+    shape: 'circle',
+    size: CREATED_BY_AVATAR_SIZE,
+  }),
 });
