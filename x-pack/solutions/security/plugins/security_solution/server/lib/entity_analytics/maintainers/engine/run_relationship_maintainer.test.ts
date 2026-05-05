@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { runGenericMaintainer } from './run_maintainer';
+import { runGenericMaintainer } from './run_relationship_maintainer';
 import { COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
 import type { RelationshipIntegrationConfig } from './types';
 
