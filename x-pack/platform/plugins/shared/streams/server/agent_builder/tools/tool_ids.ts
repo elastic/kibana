@@ -12,6 +12,7 @@ export const STREAMS_INSPECT_STREAMS_TOOL_ID = `${internalNamespaces.streams}.in
 export const STREAMS_DIAGNOSE_STREAM_TOOL_ID = `${internalNamespaces.streams}.diagnose_stream`;
 export const STREAMS_QUERY_DOCUMENTS_TOOL_ID = `${internalNamespaces.streams}.query_documents`;
 export const STREAMS_DESIGN_PIPELINE_TOOL_ID = `${internalNamespaces.streams}.design_pipeline`;
+export const STREAMS_SUGGEST_PARTITIONS_TOOL_ID = `${internalNamespaces.streams}.suggest_partitions`;
 export const STREAMS_LIST_ILM_POLICIES_TOOL_ID = `${internalNamespaces.streams}.list_ilm_policies`;
 
 export const STREAMS_READ_TOOL_IDS = [
@@ -20,6 +21,7 @@ export const STREAMS_READ_TOOL_IDS = [
   STREAMS_QUERY_DOCUMENTS_TOOL_ID,
   STREAMS_DESIGN_PIPELINE_TOOL_ID,
   STREAMS_LIST_ILM_POLICIES_TOOL_ID,
+  STREAMS_SUGGEST_PARTITIONS_TOOL_ID,
 ] as const;
 
 // Write tools
