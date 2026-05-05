@@ -17,10 +17,13 @@ tags:
 triggers:
   - type: security.setupComplete
   - type: fleet.integrationInstalled
+    on:
+      condition: 'not event.package_name: "system"'
 
 steps:
   - name: initialize_threat_coverage
     type: ai.agent
+    connector-id: gpt-5-1
     with:
       message: >-
         {%- if event.trigger_id == "fleet.integrationInstalled" -%}

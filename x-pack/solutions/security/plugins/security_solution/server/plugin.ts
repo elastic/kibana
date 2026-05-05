@@ -1136,6 +1136,34 @@ export class Plugin implements ISecuritySolutionPlugin {
           return packagePolicy;
         }
       );
+
+      const workflowsExtensionsStart = plugins.workflowsExtensions;
+      if (workflowsExtensionsStart) {
+        const logger = this.logger;
+        registerIngestCallback(
+          'packagePolicyPostCreate',
+          async (packagePolicy, _soClient, _esClient, _context, request) => {
+            const pkg = packagePolicy.package;
+            if (pkg && request) {
+              try {
+                const client = await workflowsExtensionsStart.getClient(request);
+                await client.emitEvent('fleet.integrationInstalled', {
+                  package_name: pkg.name,
+                  package_version: pkg.version,
+                  install_source: 'registry',
+                });
+              } catch (error) {
+                logger.warn(
+                  `Failed to emit fleet.integrationInstalled for "${pkg.name}@${pkg.version}": ${
+                    error instanceof Error ? error.message : String(error)
+                  }`
+                );
+              }
+            }
+            return packagePolicy;
+          }
+        );
+      }
     }
 
     if (plugins.taskManager) {

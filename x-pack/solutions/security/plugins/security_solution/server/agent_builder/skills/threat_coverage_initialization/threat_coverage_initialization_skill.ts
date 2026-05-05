@@ -41,8 +41,6 @@ This is a closed-loop process: assess data → map to MITRE ATT&CK → identify 
 
 ### Step 1: Assess Available Security Data
 
-First, determine what security telemetry is available in the environment.
-
 #### 1a. Discover Log Indices
 - Use 'platform.core.list_indices' with pattern \`logs-*\` to discover available security log indices
 - Look for key security data sources:
@@ -95,43 +93,39 @@ For each MITRE ATT&CK tactic that the available data can support, search for pre
 
 - Use '${SECURITY_FIND_PREBUILT_RULES_TOOL_ID}' with the \`mitre_tactic\` parameter to find rules for each covered tactic
 - Cross-reference rule \`related_integrations\` with the installed integrations from Step 1b
-- Prioritize rules that:
-  1. Match installed integrations (the data source exists)
-  2. Cover high-impact tactics (Initial Access, Execution, Persistence, Credential Access)
-  3. Have higher severity (critical and high first)
+- **Hard requirements (do not deviate):**
+  1. Only consider rules with severity \`critical\`, \`high\`, or \`medium\`. **Never** include rules with \`low\` severity.
+  2. Each rule's \`related_integrations\` must intersect the installed integrations from Step 1b.
+  3. The final selection installed in Step 5 must be **at most 15 rules total**, across all tactics combined.
+- **Selection priority** within the 15-rule budget:
+  1. Critical severity first, then high, then medium
+  2. Within the same severity, prefer high-impact tactics (Initial Access, Execution, Persistence, Credential Access)
+  3. Within the same severity and tactic, prefer broader integration coverage
 - Use \`mitre_technique_id\` for more targeted searches when specific technique coverage is needed
 - Use \`tags\` to filter by OS platform (e.g., "Windows", "Linux", "macOS") matching the environment
-- Request up to 50 rules per query using the \`limit\` parameter to get comprehensive results
+- Request up to 50 rules per query using the \`limit\` parameter so you can rank and pick the best 15
 
-### Step 4: Present Coverage Plan
-
-Before installing rules, present the user with a coverage plan:
-- Group recommended rules by MITRE ATT&CK tactic
-- Show rule name, severity, and the data source it requires
-- Highlight any coverage gaps where data exists but no rules were found
-- Highlight tactics where no data sources are available (true blind spots)
-- Let the user review and approve the selection before proceeding
-
-### Step 5: Install Selected Rules
+### Step 4: Install Selected Rules
 
 - Use '${SECURITY_INSTALL_PREBUILT_RULES_TOOL_ID}' to install the approved rules
-- Install in batches grouped by tactic or severity (max 50 rules per call)
+- Install **at most 15 rules** in a single call (the budget cap from Step 3)
+- Never install rules with \`low\` severity
 - Report results: successfully installed, already installed (skipped), and any failures
 - After installation, summarize the new coverage:
   - Total rules installed by tactic
   - Remaining coverage gaps
   - Recommendations for additional data sources to close blind spots
 
-### Step 6: Add "auto-installed" tag
+### Step 5: Add "auto-installed" tag
 
 - Use '${SECURITY_BULK_ACTIONS_TOOL_ID}' to add tags to rules
 - Add 'auto-installed' tag to the rules installed at the Step 5
 - Add tags to rules in batches (max 1000 rules per call)
 
-### Step 7: Enable installed rules
+### Step 6: Enable installed rules
 
 - Use '${SECURITY_BULK_ACTIONS_TOOL_ID}' to enable rules
-- Enable the prebuilt rules previously installed at the Step 5
+- Enable the prebuilt rules previously installed at the Step 4
 - Enable rules in batches (max 1000 rules per call)
 - Report results: N rules were enabled
 
@@ -153,7 +147,8 @@ When presenting results, use this structure:
 ## Best Practices
 - Always assess data sources before searching for rules — rules without matching data generate false negatives or fail to run
 - Prioritize breadth of tactic coverage over depth within a single tactic during initial setup
-- Start with high and critical severity rules, then expand to medium and low
+- Install only critical, high, and medium severity rules; never install low severity
+- Stay within the 15-rule total budget — quality over quantity
 - Cross-reference rule \`related_integrations\` with installed integrations to ensure rules will have data
 - Present the coverage plan to the user before installing — let them make informed decisions
 - After installation, recommend a review cycle to tune rules and reduce false positives

@@ -788,7 +788,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       'packagePolicyPostCreate',
       createdPackagePolicy,
       soClient,
-      esClient
+      esClient,
+      context,
+      request
     );
   }
 

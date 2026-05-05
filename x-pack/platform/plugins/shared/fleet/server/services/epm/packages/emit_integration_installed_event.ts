@@ -28,20 +28,23 @@ export const emitIntegrationInstalledEvent = async ({
   logger: Logger;
 }): Promise<void> => {
   try {
-    const workflows = await (context as RequestHandlerContext & { workflows?: Promise<unknown> })
-      .workflows;
-    if (!workflows || typeof workflows !== 'object') {
+    const workflows = await (
+      context as RequestHandlerContext & {
+        workflows?: Promise<{
+          isWorkflowsAvailable: boolean;
+          emitEvent: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
+        }>;
+      }
+    ).workflows;
+    if (!workflows || typeof workflows.emitEvent !== 'function') {
       return;
     }
-    const client = (
-      workflows as { getWorkflowsClient: () => { emitEvent: Function } }
-    ).getWorkflowsClient();
-    await client.emitEvent(FLEET_INTEGRATION_INSTALLED_TRIGGER_ID, payload);
+    await workflows.emitEvent(FLEET_INTEGRATION_INSTALLED_TRIGGER_ID, payload);
     logger.debug(
       `Emitted ${FLEET_INTEGRATION_INSTALLED_TRIGGER_ID} event for package "${payload.package_name}@${payload.package_version}"`
     );
   } catch (error) {
-    logger.debug(
+    logger.warn(
       `Could not emit ${FLEET_INTEGRATION_INSTALLED_TRIGGER_ID} event for package "${payload.package_name}@${payload.package_version}": ${error.message}`
     );
   }
