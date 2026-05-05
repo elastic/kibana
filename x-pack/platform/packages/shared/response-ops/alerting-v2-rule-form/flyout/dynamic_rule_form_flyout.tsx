@@ -27,6 +27,8 @@ export interface DynamicRuleFormFlyoutProps {
   query: string;
   /** Required services */
   services: RuleFormServices;
+  /** Whether to include the Form/YAML edit mode toggle (default: false) */
+  includeYaml?: boolean;
   /**
    * ES|QL control variables from Discover. When provided (including `[]`),
    * the flyout inlines resolvable `?param` / `??param` tokens via Composer
@@ -58,6 +60,7 @@ const DynamicRuleFormFlyoutInner = ({
   onClose,
   query,
   services,
+  includeYaml = false,
   esqlVariables,
   validationErrors,
 }: DynamicRuleFormFlyoutProps) => {
@@ -117,6 +120,7 @@ const DynamicRuleFormFlyoutInner = ({
         query={inlineResult.query}
         services={services}
         layout="flyout"
+        includeYaml={includeYaml}
       />
     </RuleFormFlyout>
   );

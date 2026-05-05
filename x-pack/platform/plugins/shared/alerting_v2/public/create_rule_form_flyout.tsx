@@ -17,9 +17,14 @@ export interface CreateRuleFormFlyoutProps {
   push?: boolean;
   esqlVariables?: ESQLControlVariable[];
   validationErrors?: string[];
+  /** Whether to include the Form/YAML edit mode toggle (default: true) */
+  includeYaml?: boolean;
 }
 
-export const DynamicRuleFormFlyout = (props: CreateRuleFormFlyoutProps) => {
+export const DynamicRuleFormFlyout = ({
+  includeYaml = true,
+  ...props
+}: CreateRuleFormFlyoutProps) => {
   const { loading, value } = useAsync(() => {
     const servicesPromise = untilPluginStartServicesReady();
     const modulePromise = import('@kbn/alerting-v2-rule-form');
@@ -31,5 +36,5 @@ export const DynamicRuleFormFlyout = (props: CreateRuleFormFlyoutProps) => {
 
   if (loading || !services || !Flyout) return <EuiLoadingSpinner size="l" />;
 
-  return <Flyout {...props} services={services} />;
+  return <Flyout {...props} services={services} includeYaml={includeYaml} />;
 };
