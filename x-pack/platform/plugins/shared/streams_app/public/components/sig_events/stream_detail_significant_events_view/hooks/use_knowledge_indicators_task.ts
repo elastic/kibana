@@ -70,7 +70,6 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete, onError }: 
   }, [runMutation, streamName]);
 
   const cancelKnowledgeIndicatorsTask = useCallback(() => {
-    setExecutionState({ status: 'cancelled' });
     cancelMutation.mutate(streamName);
   }, [cancelMutation, streamName]);
 

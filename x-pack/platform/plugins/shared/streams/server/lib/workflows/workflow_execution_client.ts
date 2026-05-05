@@ -56,8 +56,8 @@ const getStreamNameFromContext = (
   context: Record<string, unknown> | undefined
 ): string | undefined => {
   const inputs = context?.inputs;
-  if (inputs && typeof inputs === 'object' && 'streamName' in inputs) {
-    return String((inputs as Record<string, unknown>).streamName);
+  if (inputs && typeof inputs === 'object' && !Array.isArray(inputs) && 'streamName' in inputs) {
+    return String(inputs.streamName);
   }
   return undefined;
 };

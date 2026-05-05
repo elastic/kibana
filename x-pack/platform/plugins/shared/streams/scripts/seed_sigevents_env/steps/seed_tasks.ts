@@ -11,11 +11,11 @@ import type { LogsManifest } from '@kbn/synthtrace/src/lib/service_graph_logs/ty
 import type { SeedContext, SeedScenario, SeededQuery } from '../types';
 import { deterministicId } from '../types';
 import { buildFeaturePayloads, buildInsightPayloads } from '../lib/builders';
+import { KI_ONBOARDING_WORKFLOW_UUID } from '../../../common/constants';
 
 const INSIGHTS_TASK_TYPE = 'streams_insights_discovery';
 
 const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
-const KI_ONBOARDING_WORKFLOW_UUID = 'workflow-68c0af3c-dbfa-536b-bdda-dc598f389ab3';
 
 const TEMP_SEED_USER = 'seed_sigevents_tasks_tmp';
 const TEMP_SEED_PASSWORD = 'seed_sigevents_tasks_tmp_pass!';
