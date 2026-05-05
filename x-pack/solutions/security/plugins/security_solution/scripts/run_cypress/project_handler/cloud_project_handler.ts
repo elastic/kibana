@@ -178,11 +178,14 @@ export class CloudHandler extends ProjectHandler {
   waitForProjectInitialized(projectId: string): Promise<void> {
     const fetchProjectStatusAttempt = async (attemptNum: number) => {
       this.log.info(`Retry number ${attemptNum} to check if project is initialized.`);
-      const response = await fetch(`${this.baseEnvUrl}/projects/${projectId}/status`, {
-        headers: {
-          Authorization: `Basic ${this.proxyAuth}`,
-        },
-      });
+      const response = await fetch(
+        `${this.baseEnvUrl}/api/v1/serverless/projects/security/${projectId}/status`,
+        {
+          headers: {
+            Authorization: `ApiKey ${this.apiKey}`,
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error(`${response.status}:${await response.text()}`);
       }
