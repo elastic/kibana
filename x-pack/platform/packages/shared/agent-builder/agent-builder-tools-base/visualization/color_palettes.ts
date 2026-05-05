@@ -92,21 +92,20 @@ const getChartSpecificRules = (chartType: SupportedChartType): string[] => {
 };
 
 /**
- * Returns the color-rules section appended to the visualization config
- * generation prompt. Gated by `supportsDynamicColoring` and
- * `supportsCategoricalColoring` on the chart registry entry; returns an empty
- * string for chart types with neither (they inherit Lens defaults).
+ * Returns chart-specific coloring guidance for the visualization config prompt.
  */
 export const getColorPalettesPromptContent = (chartType: SupportedChartType): string => {
   const entry = chartTypeRegistry[chartType];
-  const supportsDynamic = entry.supportsDynamicColoring ?? false;
-  const supportsCategorical = entry.supportsCategoricalColoring ?? false;
+  const coloringOptions = entry.prompt.config?.options?.coloring;
+  const dynamicColoringOptions = coloringOptions?.dynamic;
+  const supportsDynamic = dynamicColoringOptions !== undefined;
+  const supportsCategorical = coloringOptions?.categorical ?? false;
 
   if (!supportsDynamic && !supportsCategorical) {
     return '';
   }
 
-  const stepsCount = entry.paletteStepsCount ?? 5;
+  const stepsCount = dynamicColoringOptions?.recommendedStepCount ?? 5;
   const lines: string[] = ['COLOR PALETTE RULES:', ''];
   let sectionNumber = 1;
   const nextSection = () => sectionNumber++;
