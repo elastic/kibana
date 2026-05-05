@@ -17,7 +17,7 @@ export interface LangModuleType {
   languageConfiguration?: monaco.languages.LanguageConfiguration;
   foldingRangeProvider?: monaco.languages.FoldingRangeProvider;
   getSuggestionProvider?: Function;
-  onLanguage?: () => void;
+  onLanguage?: () => void | Promise<void>;
   languageThemeResolver?: (args: UseEuiTheme) => monaco.editor.IStandaloneThemeData;
 }
 

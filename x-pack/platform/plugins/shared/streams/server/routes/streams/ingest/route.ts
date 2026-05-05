@@ -27,6 +27,7 @@ const readIngestRoute = createServerRoute({
     oasOperationObject: () => ({
       responses: {
         200: {
+          description: 'Ingest settings for the stream.',
           content: {
             'application/json': {
               examples: {
@@ -44,7 +45,7 @@ const readIngestRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the stream.') }),
   }),
   handler: async ({
     params,
@@ -87,6 +88,11 @@ const upsertIngestRoute = createServerRoute({
           },
         },
       },
+      responses: {
+        200: {
+          description: 'The ingest settings were updated successfully.',
+        },
+      },
     }),
   },
   security: {
@@ -96,7 +102,7 @@ const upsertIngestRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
     body: z.object({
       ingest: IngestUpsertRequest.right,
