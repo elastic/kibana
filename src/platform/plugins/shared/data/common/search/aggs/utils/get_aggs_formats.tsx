@@ -15,7 +15,7 @@ import type {
   FieldFormatInstanceType,
   FieldFormatsContentType,
   IFieldFormat,
-  ReactContextTypeSingleConvert,
+  RenderConvertFunction,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -173,7 +173,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
       getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
 
-      reactConvertSingle: ReactContextTypeSingleConvert = (val, options) => {
+      renderConvert: RenderConvertFunction = (val, options) => {
         return this.getSpecialBucketLabel(val) ?? this.getNestedFormat().reactConvert(val, options);
       };
     },
@@ -214,7 +214,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
       getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
 
-      reactConvertSingle: ReactContextTypeSingleConvert = (val, options) => {
+      renderConvert: RenderConvertFunction = (val, options) => {
         const otherLabel = this.getSpecialBucketLabel(val);
         if (otherLabel) return otherLabel;
 

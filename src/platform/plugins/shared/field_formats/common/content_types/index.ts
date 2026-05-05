@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { setup as textContentTypeSetup, TEXT_CONTEXT_TYPE } from './text_content_type';
+export { TEXT_CONTEXT_TYPE } from './text_content_type';

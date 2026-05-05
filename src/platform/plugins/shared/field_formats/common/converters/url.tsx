@@ -14,7 +14,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getHighlightReact } from '../utils';
 import { FieldFormat } from '../field_format';
 import type {
-  ReactContextTypeSingleConvert,
+  RenderConvertFunction,
   TextContextTypeConvert,
   FieldFormatMetaParams,
   FieldFormatParams,
@@ -135,7 +135,7 @@ export class UrlFormat extends FieldFormat {
     return this.formatLabel(value);
   };
 
-  reactConvertSingle: ReactContextTypeSingleConvert = (rawValue, options = {}) => {
+  renderConvert: RenderConvertFunction = (rawValue, options = {}) => {
     const missing = this.checkForMissingValueReact(rawValue);
     if (missing) return missing;
 

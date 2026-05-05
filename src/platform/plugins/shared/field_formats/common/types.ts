@@ -35,14 +35,19 @@ export type ReactContextTypeConvert = (value: any, options?: ReactContextTypeOpt
 
 /**
  * Single-value React node converter. Like {@link ReactContextTypeConvert} but explicitly
- * excludes arrays — use this for `reactConvertSingle` overrides so that callers cannot
+ * excludes arrays — use this for `renderConvert` overrides so that callers cannot
  * accidentally pass an array where only scalar values are expected.
  * @public
  */
-export type ReactContextTypeSingleConvert = (
+export type RenderConvertFunction = (
   value: string | number | boolean | null | undefined | Record<string, unknown>,
   options?: ReactContextTypeOptions
 ) => ReactNode;
+
+/**
+ * @deprecated Use {@link RenderConvertFunction} instead.
+ */
+export type ReactContextTypeSingleConvert = RenderConvertFunction;
 
 /**
  * Plain text converter options

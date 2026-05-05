@@ -7,24 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunction } from 'lodash';
-import type { IFieldFormat, TextContextTypeConvert, FieldFormatsContentType } from '../types';
-import { asPrettyString } from '../utils';
+import type { FieldFormatsContentType } from '../types';
 
 export const TEXT_CONTEXT_TYPE: FieldFormatsContentType = 'text';
-
-export const setup = (
-  format: IFieldFormat,
-  convert: TextContextTypeConvert = asPrettyString
-): TextContextTypeConvert => {
-  const recurse: TextContextTypeConvert = (value, options) => {
-    if (!value || !isFunction(value.map)) {
-      return convert.call(format, value, options);
-    }
-
-    // format a list of values. In text contexts we just use JSON encoding
-    return JSON.stringify(value.map(recurse));
-  };
-
-  return recurse;
-};
