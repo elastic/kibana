@@ -90,10 +90,9 @@ export function AddAttachmentFlyout({
     [streamsRepositoryClient, entityId, filters.debouncedQuery, filters.types, filters.tags]
   );
 
-  const flyoutTitleLabel = i18n.translate(
-    'xpack.streams.addAttachmentFlyout.flyoutHeaderLabel',
-    { defaultMessage: 'Add attachments' }
-  );
+  const flyoutTitleLabel = i18n.translate('xpack.streams.addAttachmentFlyout.flyoutHeaderLabel', {
+    defaultMessage: 'Add attachments',
+  });
 
   const allAttachments = useMemo(() => {
     return attachmentSuggestionsFetch.value?.attachments || [];
