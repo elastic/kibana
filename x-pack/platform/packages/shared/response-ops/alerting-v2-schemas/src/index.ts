@@ -6,7 +6,9 @@
  */
 
 export * from './rule_data_schema';
+export * from './rule_attachment_schema';
 export * from './constants';
+export { durationSchema } from './common';
 export {
   validateDuration,
   validateMaxDuration,
@@ -18,5 +20,6 @@ export * from './action_policy_data_schema';
 export * from './action_policy_response_schema';
 export * from './alert_action_schema';
 export * from './bulk_operation_schema';
+export * from './rule_doctor_insights_schema';
 export type { MatcherContext, MatcherContextFieldDescriptor } from './matcher_context';
 export { MATCHER_CONTEXT_FIELDS } from './matcher_context';

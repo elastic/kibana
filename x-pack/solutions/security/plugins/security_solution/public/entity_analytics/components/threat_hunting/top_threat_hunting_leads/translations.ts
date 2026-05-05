@@ -212,6 +212,11 @@ export const SCHEDULE_UPDATE_ERROR = i18n.translate(
   { defaultMessage: 'Failed to update schedule' }
 );
 
+export const GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateDisabledNoWritePermissionTooltip',
+  { defaultMessage: "You don't have write access to the leads index" }
+);
+
 export const getStalenessLabel = (staleness: string): string => {
   switch (staleness) {
     case 'fresh':
