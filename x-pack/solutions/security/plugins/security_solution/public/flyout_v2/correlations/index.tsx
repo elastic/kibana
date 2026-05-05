@@ -40,11 +40,6 @@ export interface CorrelationsDetailsProps {
    * // TODO make required once we have an attack flyout in the new flyout system
    */
   onShowAttack?: (id: string, indexName: string) => void;
-  /**
-   * Whether to hide the rule preview link in the correlations table.
-   * Defaults to true (hidden) for the new tools flyout which has no expandable flyout context.
-   */
-  hidePreviewLink?: boolean;
 }
 
 /**
@@ -52,14 +47,7 @@ export interface CorrelationsDetailsProps {
  * This component is meant to be used in a tools flyout, with the new EUI flyout system.
  */
 export const CorrelationsDetails = memo(
-  ({
-    hit,
-    scopeId,
-    isRulePreview,
-    onShowAlert,
-    onShowAttack,
-    hidePreviewLink = true,
-  }: CorrelationsDetailsProps) => {
+  ({ hit, scopeId, isRulePreview, onShowAlert, onShowAttack }: CorrelationsDetailsProps) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -79,7 +67,7 @@ export const CorrelationsDetails = memo(
             isRulePreview={isRulePreview}
             onShowAlert={onShowAlert}
             onShowAttack={onShowAttack}
-            hidePreviewLink={hidePreviewLink}
+            useLegacyExpandableFlyout={false}
           />
         </EuiFlyoutBody>
       </>

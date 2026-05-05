@@ -15,79 +15,80 @@ import {
   EuiBadge,
   EuiLink,
 } from '@elastic/eui';
-import { DELETED_RULE } from '../../../detection_engine/rule_details_ui/pages/rule_details/translations';
-import { CreatedBy, UpdatedBy } from '../../../detections/components/rules/rule_info';
+import { DELETED_RULE } from '../../detection_engine/rule_details_ui/pages/rule_details/translations';
+import { CreatedBy, UpdatedBy } from '../../detections/components/rules/rule_info';
+import type { RuleResponse } from '../../../common/api/detection_engine';
+import { useRuleDetailsLink } from './hooks/use_rule_details_link';
+import { FlyoutTitle } from '../shared/components/flyout_title';
 import {
-  RULE_TITLE_TEST_ID,
-  RULE_CREATED_BY_TEST_ID,
-  RULE_UPDATED_BY_TEST_ID,
-  RULE_TITLE_SUPPRESSED_TEST_ID,
-  NAVIGATE_TO_RULE_DETAILS_PAGE_TEST_ID,
+  RULE_DETAILS_TITLE_TEST_ID,
+  RULE_DETAILS_TITLE_LINK_TEST_ID,
+  RULE_DETAILS_SUPPRESSED_TEST_ID,
+  RULE_DETAILS_CREATED_BY_TEST_ID,
+  RULE_DETAILS_UPDATED_BY_TEST_ID,
 } from './test_ids';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
-import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
-import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export interface PanelHeaderProps {
+export interface HeaderProps {
   /**
    * Rule object that represents relevant information about a rule
    */
   rule: RuleResponse;
   /**
-   * Flag to indicate if rule is suppressed
-   */
+   * Whether the rule has been deleted. When true, a "Deleted rule" badge is shown.
+   * */
   isSuppressed: boolean;
 }
 
-/**
- * Title component that shows basic information of a rule. This is displayed above rule overview body
- */
-export const PanelHeader: React.FC<PanelHeaderProps> = memo(({ rule, isSuppressed }) => {
+export const Header: React.FC<HeaderProps> = memo(({ rule, isSuppressed }) => {
   const href = useRuleDetailsLink({ ruleId: rule.id }, urlParamOverride);
 
   return (
-    <FlyoutHeader data-test-subj={RULE_TITLE_TEST_ID}>
+    <>
       {href ? (
         <EuiLink
           href={href}
-          target={'_blank'}
+          target="_blank"
           external={false}
-          data-test-subj={NAVIGATE_TO_RULE_DETAILS_PAGE_TEST_ID}
+          data-test-subj={RULE_DETAILS_TITLE_LINK_TEST_ID}
         >
-          <FlyoutTitle title={rule.name} iconType={'warning'} isLink />
+          <FlyoutTitle
+            title={rule.name}
+            iconType="warning"
+            isLink
+            data-test-subj={RULE_DETAILS_TITLE_TEST_ID}
+          />
         </EuiLink>
       ) : (
         <EuiTitle>
-          <h6>{rule.name}</h6>
+          <h6 data-test-subj={RULE_DETAILS_TITLE_TEST_ID}>{rule.name}</h6>
         </EuiTitle>
       )}
 
       {isSuppressed && (
         <>
           <EuiSpacer size="s" />
-          <EuiBadge data-test-subj={RULE_TITLE_SUPPRESSED_TEST_ID} title="">
+          <EuiBadge data-test-subj={RULE_DETAILS_SUPPRESSED_TEST_ID} title="">
             {DELETED_RULE}
           </EuiBadge>
         </>
       )}
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xs" direction="column">
-        <EuiFlexItem data-test-subj={RULE_CREATED_BY_TEST_ID}>
+        <EuiFlexItem data-test-subj={RULE_DETAILS_CREATED_BY_TEST_ID}>
           <EuiText size="xs">
             <CreatedBy createdBy={rule?.created_by} createdAt={rule?.created_at} />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem data-test-subj={RULE_UPDATED_BY_TEST_ID}>
+        <EuiFlexItem data-test-subj={RULE_DETAILS_UPDATED_BY_TEST_ID}>
           <EuiText size="xs">
             <UpdatedBy updatedBy={rule?.updated_by} updatedAt={rule?.updated_at} />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </FlyoutHeader>
+    </>
   );
 });
 
-PanelHeader.displayName = 'PanelHeader';
+Header.displayName = 'Header';
