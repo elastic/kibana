@@ -48,14 +48,16 @@ export function getColorSeriesAccessorFn(
     if (configuredSplitAccessors.length > 1) {
       // if we have more then 1 split accessor we are in an ESQL multi-term context
       // we need to reconstruct back the MultiFieldKey from the original set of raw values to get the right color
-      const rawValues = configuredSplitAccessors.map((fieldId) => {
-        const splitValue = splitAccessors.get(fieldId);
-        if (splitValue === undefined) return null;
-        return getRawSplitValue(fieldId, splitValue, invertedRawValueMap);
-      });
+      const rawValues = configuredSplitAccessors
+        .map((fieldId) => {
+          const splitValue = splitAccessors.get(fieldId);
+          if (splitValue === undefined) return null;
+          return getRawSplitValue(fieldId, splitValue, invertedRawValueMap);
+        })
+        .map((raw) => getValueKey(raw));
       return getColor(
         new MultiFieldKey({
-          key: rawValues.map((raw) => getValueKey(raw)),
+          key: rawValues,
         })
       );
     }
