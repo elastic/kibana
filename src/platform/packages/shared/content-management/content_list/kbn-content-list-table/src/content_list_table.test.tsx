@@ -497,6 +497,45 @@ describe('ContentListTable', () => {
       expect(screen.queryByTestId('content-list-table-column-spacer')).not.toBeInTheDocument();
     });
 
+    /**
+     * `Column.Actions` ships `min-width: 'max-content'` to keep its row icons
+     * (including EUI's auto-collapsed 3-dot overflow trigger) on a single
+     * line. That floor only resolves to the unwrapped icon-row width if the
+     * cell's flex container is forbidden from wrapping; otherwise EUI's
+     * default `flex-wrap: wrap` lets `max-content` collapse to the widest
+     * single icon and the column shrinks underneath the trigger.
+     *
+     * jsdom doesn't lay out tables, so we can't observe the visual outcome
+     * directly. We instead assert the CSS rule reaches the document — same
+     * approach as the wide-viewport `Column.Name` test above.
+     */
+    it('emits the actions-cell nowrap override as a CSS rule', async () => {
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <ContentListTable title="Dashboards" />
+        </Wrapper>
+      );
+
+      expect(await screen.findByText('Dashboard One')).toBeInTheDocument();
+
+      const styleSheets = Array.from(document.styleSheets);
+      const allRulesText = styleSheets
+        .flatMap((sheet) => {
+          try {
+            return Array.from(sheet.cssRules);
+          } catch {
+            return [];
+          }
+        })
+        .map((rule) => rule.cssText)
+        .join('\n');
+
+      expect(allRulesText).toMatch(
+        /td\[data-test-subj=['"]content-list-table-column-actions['"]\][^{]*\.euiTableCellContent[^{]*\{[^}]*flex-wrap:\s*nowrap/
+      );
+    });
+
     it('keeps cell counts in lockstep when consumers add their own columns', async () => {
       const { Column } = ContentListTable;
       const Wrapper = createWrapper();
