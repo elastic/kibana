@@ -6,29 +6,33 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 import type { Space } from '../../../common';
 import { addSpaceIdToPath } from '../../../common';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
 import type { SpacesServiceStart } from '../../spaces_service';
+import type { SpacesPluginStartDeps } from '../../types';
 import { wrapError } from '../errors';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
 import { withSpaceSolutionDisabledFeatures } from '../utils/space_solution_disabled_features';
 
 export interface OnPostAuthInterceptorDeps {
   http: CoreSetup['http'];
-  getFeatures: () => Promise<FeaturesPluginStart>;
+  getCoreStartServices: CoreSetup<SpacesPluginStartDeps>['getStartServices'];
   getSpacesService: () => SpacesServiceStart;
   log: Logger;
 }
 
 export function initSpacesOnPostAuthRequestInterceptor({
-  getFeatures,
+  getCoreStartServices,
   getSpacesService,
   log,
   http,
 }: OnPostAuthInterceptorDeps) {
+  // create pointer to the core start services promise, so we get the resolved value later
+  const coreStartServicesPromise = getCoreStartServices();
+  const getFeatures = async () => (await coreStartServicesPromise)[1].features;
+
   http.registerOnPostAuth(async (request, response, toolkit) => {
     const serverBasePath = http.basePath.serverBasePath;
 
