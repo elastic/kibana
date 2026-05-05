@@ -5,50 +5,70 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { IBasePath } from '@kbn/core-http-browser';
+import { paths } from '../../../../constants';
+import { formatSeriesLabel } from '../../../../utils/format_series_label';
 
 const MAX_LABEL_WIDTH_PX = 220;
-
-const shortGroupHash = (groupHash: string): string =>
-  groupHash.length <= 14 ? groupHash : `${groupHash.slice(0, 12)}…`;
-
-/**
- * Format `groupingValues` into a compact `field=value` summary; fall back to
- * the truncated group_hash when no values are present. Dotted field names are
- * shortened to the last segment (`host.name` → `name`) to fit narrow rows.
- */
-const formatSeriesLabel = (
-  groupHash: string,
-  groupingValues: Record<string, string | null>
-): string => {
-  const entries = Object.entries(groupingValues).filter(([, v]) => v != null && v !== '');
-  if (entries.length === 0) return shortGroupHash(groupHash);
-  return entries
-    .map(([field, value]) => {
-      const lastSegment = field.split('.').pop() ?? field;
-      return `${lastSegment}=${value as string}`;
-    })
-    .join(' · ');
-};
 
 export interface GanttSeriesLabelProps {
   groupHash: string;
   groupingValues: Record<string, string | null>;
+  episodeCount: number;
+  ruleId: string;
+  /** Visible window the Gantt is rendering. */
+  gteMs: number;
+  lteMs: number;
+  basePath: IBasePath;
 }
 
 /**
- * Two-line meta for a Gantt row: the formatted series label on top and the
- * short hash underneath in a subdued monospace tone (skipped when the label
- * already IS the hash, i.e. ungrouped rules).
+ * Two-line meta for a Gantt row: the formatted series label (clickable, deep-
+ * links into the episodes list pre-filtered to this `groupHash`) on top, with
+ * the episode count for the visible window below in a subdued tone.
  */
 export const GanttSeriesLabel: React.FC<GanttSeriesLabelProps> = ({
   groupHash,
   groupingValues,
+  episodeCount,
+  ruleId,
+  gteMs,
+  lteMs,
+  basePath,
 }) => {
   const label = formatSeriesLabel(groupHash, groupingValues);
-  const hash = shortGroupHash(groupHash);
-  const showHash = label !== hash;
+
+  const href = useMemo(
+    () =>
+      basePath.prepend(
+        paths.alertEpisodesList({
+          filters: {
+            ruleId,
+            groupHash,
+            // Carry the resolved grouping values through the URL so the
+            // destination chip renders `host=web-01` without re-running the
+            // DSL lookup.
+            groupingValues,
+          },
+          timeRange: {
+            from: new Date(gteMs).toISOString(),
+            to: new Date(lteMs).toISOString(),
+          },
+        })
+      ),
+    [basePath, ruleId, groupHash, groupingValues, gteMs, lteMs]
+  );
+
+  const episodeCountLabel = i18n.translate(
+    'xpack.alertingV2.ruleDetails.gantt.seriesLabel.episodeCount',
+    {
+      defaultMessage: '{count, plural, one {# episode} other {# episodes}}',
+      values: { count: episodeCount },
+    }
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -59,16 +79,16 @@ export const GanttSeriesLabel: React.FC<GanttSeriesLabelProps> = ({
           style={{ maxWidth: MAX_LABEL_WIDTH_PX }}
           data-test-subj="ganttSeriesLabel"
         >
-          <strong>{label}</strong>
+          <EuiLink href={href} target="_blank" rel="noopener" data-test-subj="ganttSeriesLabelLink">
+            <strong>{label}</strong>
+          </EuiLink>
         </EuiText>
       </EuiFlexItem>
-      {showHash && (
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <code>{hash}</code>
-          </EuiText>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued" data-test-subj="ganttSeriesEpisodeCount">
+          {episodeCountLabel}
+        </EuiText>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

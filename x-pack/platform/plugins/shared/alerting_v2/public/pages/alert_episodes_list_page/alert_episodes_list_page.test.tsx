@@ -34,6 +34,24 @@ jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
 
 jest.mock('../../hooks/use_breadcrumbs', () => ({ useBreadcrumbs: jest.fn() }));
 
+// useEpisodesUrlState wires react-router's useHistory and the data plugin's
+// syncQueryStateWithUrl. The page test exercises page behavior, not URL sync,
+// so we stub it with a plain useState pair. URL-state behavior is exercised
+// in `use_episodes_url_state.test.ts`.
+jest.mock('./hooks/use_episodes_url_state', () => {
+  const ReactActual = jest.requireActual('react');
+  return {
+    useEpisodesUrlState: () => {
+      const [filterState, setFilterState] = ReactActual.useState({});
+      const [sortState, setSortState] = ReactActual.useState({
+        sortField: '@timestamp',
+        sortDirection: 'desc',
+      });
+      return { filterState, setFilterState, sortState, setSortState };
+    },
+  };
+});
+
 jest.mock('react-use/lib/useObservable', () =>
   jest.fn().mockReturnValue({ from: 'now-24h', to: 'now' })
 );

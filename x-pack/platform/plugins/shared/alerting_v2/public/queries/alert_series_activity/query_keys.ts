@@ -12,8 +12,8 @@
  */
 export const ruleOverviewQueryKeys = {
   all: ['alerting-v2', 'rule-overview'] as const,
-  ruleEpisodes: (ruleId: string, gteMs: number, lteMs: number, pageSize: number) =>
-    [...ruleOverviewQueryKeys.all, 'rule-episodes', ruleId, gteMs, lteMs, pageSize] as const,
+  ruleEvents: (ruleId: string, gteMs: number, lteMs: number, pageSize: number) =>
+    [...ruleOverviewQueryKeys.all, 'rule-events', ruleId, gteMs, lteMs, pageSize] as const,
   seriesGroupingValues: (
     ruleId: string,
     gteMs: number,

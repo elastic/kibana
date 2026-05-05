@@ -8,8 +8,9 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { GanttEpisode, GanttSeries } from '../../../../utils/derive_gantt_data';
-import { GanttBar } from './gantt_bar';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { GanttSeries } from '../../../../utils/derive_gantt_data';
+import { GanttLane } from './gantt_bar';
 import { GanttSeriesLabel } from './gantt_series_label';
 import { GanttTimeAxis } from './gantt_time_axis';
 
@@ -20,10 +21,21 @@ export interface GanttChartProps {
   rows: GanttSeries[];
   gteMs: number;
   lteMs: number;
-  onEpisodeClick?: (episode: GanttEpisode) => void;
+  ruleId: string;
+  basePath: IBasePath;
+  onEpisodeClick?: (episodeId: string) => void;
+  getEpisodeHref?: (episodeId: string) => string;
 }
 
-export const GanttChart: React.FC<GanttChartProps> = ({ rows, gteMs, lteMs, onEpisodeClick }) => {
+export const GanttChart: React.FC<GanttChartProps> = ({
+  rows,
+  gteMs,
+  lteMs,
+  ruleId,
+  basePath,
+  onEpisodeClick,
+  getEpisodeHref,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -53,7 +65,15 @@ export const GanttChart: React.FC<GanttChartProps> = ({ rows, gteMs, lteMs, onEp
                   align-items: center;
                 `}
               >
-                <GanttSeriesLabel groupHash={row.groupHash} groupingValues={row.groupingValues} />
+                <GanttSeriesLabel
+                  groupHash={row.groupHash}
+                  groupingValues={row.groupingValues}
+                  episodeCount={row.episodeCount}
+                  ruleId={ruleId}
+                  gteMs={gteMs}
+                  lteMs={lteMs}
+                  basePath={basePath}
+                />
               </div>
             </EuiFlexItem>
           ))}
@@ -66,21 +86,18 @@ export const GanttChart: React.FC<GanttChartProps> = ({ rows, gteMs, lteMs, onEp
           <div
             key={row.groupHash}
             css={css`
-              position: relative;
-              height: ${ROW_HEIGHT_PX}px;
               border-top: 1px solid ${euiTheme.colors.lightestShade};
             `}
             data-test-subj="ganttRow"
           >
-            {row.episodes.map((ep) => (
-              <GanttBar
-                key={ep.episodeId}
-                episode={ep}
-                gteMs={gteMs}
-                lteMs={lteMs}
-                onClick={onEpisodeClick}
-              />
-            ))}
+            <GanttLane
+              lane={row}
+              gteMs={gteMs}
+              lteMs={lteMs}
+              height={ROW_HEIGHT_PX}
+              onSegmentClick={onEpisodeClick}
+              getEpisodeHref={getEpisodeHref}
+            />
           </div>
         ))}
       </EuiFlexItem>

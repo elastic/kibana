@@ -6,9 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
+import {
+  GANTT_STATUS_LEGEND_ORDER,
+  ganttStatusColor,
+  ganttStatusLabel,
+} from './gantt_status_palette';
 
 const SWATCH_WIDTH_PX = 20;
 const SWATCH_HEIGHT_PX = 8;
@@ -17,10 +21,6 @@ interface SwatchProps {
   background: string;
 }
 
-/**
- * Pill-shaped color sample used to preview the chart's bar styling in the
- * legend; sized to read at the same height as the surrounding `EuiText size="xs"`.
- */
 const PillSwatch: React.FC<SwatchProps> = ({ background }) => (
   <span
     css={css`
@@ -36,54 +36,11 @@ const PillSwatch: React.FC<SwatchProps> = ({ background }) => (
 export const GanttLegend: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
-  const items = [
-    {
-      key: 'recovered',
-      sample: <PillSwatch background={euiTheme.colors.success} />,
-      label: i18n.translate('xpack.alertingV2.ruleDetails.gantt.legendRecovered', {
-        defaultMessage: 'Recovered episode',
-      }),
-    },
-    {
-      key: 'open',
-      sample: (
-        <PillSwatch
-          background={`linear-gradient(to right, ${euiTheme.colors.danger} 60%, transparent)`}
-        />
-      ),
-      label: i18n.translate('xpack.alertingV2.ruleDetails.gantt.legendOpen', {
-        defaultMessage: 'Open episode (ongoing)',
-      }),
-    },
-    {
-      key: 'recovery-dot',
-      sample: <EuiIcon type="dot" color={euiTheme.colors.textParagraph} size="s" />,
-      label: i18n.translate('xpack.alertingV2.ruleDetails.gantt.legendRecoveryDot', {
-        defaultMessage: 'Recovery',
-      }),
-    },
-    {
-      key: 'live-dot',
-      sample: (
-        <span
-          css={css`
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: ${euiTheme.size.base};
-            height: ${euiTheme.size.base};
-            border-radius: 9999px;
-            box-shadow: inset 0 0 0 1px ${euiTheme.colors.danger};
-          `}
-        >
-          <EuiIcon type="dot" color={euiTheme.colors.danger} size="s" />
-        </span>
-      ),
-      label: i18n.translate('xpack.alertingV2.ruleDetails.gantt.legendLiveDot', {
-        defaultMessage: 'Live',
-      }),
-    },
-  ];
+  const items = GANTT_STATUS_LEGEND_ORDER.map((status) => ({
+    key: status,
+    sample: <PillSwatch background={ganttStatusColor(euiTheme, status)} />,
+    label: ganttStatusLabel(status),
+  }));
 
   return (
     <EuiFlexGroup

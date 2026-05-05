@@ -22,14 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { useRule } from '../../rule_context';
-import { useFetchRuleEpisodes } from '../../../../hooks/use_fetch_rule_episodes';
+import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
 import {
   deriveGanttData,
   GANTT_TOP_N_DEFAULT,
-  type GanttEpisode,
   type GanttSortPolicy,
 } from '../../../../utils/derive_gantt_data';
 import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for_episode';
@@ -45,7 +43,6 @@ const VISIBLE_WINDOW_MS = 7 * DAY_MS;
 
 export const EpisodesGanttSection: React.FC = () => {
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
-  const expressions = useService(PluginStart('expressions')) as ExpressionsStart;
   const share = useService(PluginStart('share')) as SharePluginStart;
   const application = useService(CoreStart('application'));
   const uiSettings = useService(CoreStart('uiSettings'));
@@ -60,18 +57,17 @@ export const EpisodesGanttSection: React.FC = () => {
     return { gteMs: now - VISIBLE_WINDOW_MS, lteMs: now };
   }, []);
 
-  const { episodes, groupingValuesByHash, isLoading, isError } = useFetchRuleEpisodes({
+  const { events, groupingValuesByHash, isLoading, isError } = useFetchRuleEvents({
     ruleId: rule.id,
     gteMs,
     lteMs,
     groupingFields,
     data,
-    expressions,
   });
 
   const ganttData = useMemo(
-    () => deriveGanttData(episodes, groupingValuesByHash, sort, GANTT_TOP_N_DEFAULT),
-    [episodes, groupingValuesByHash, sort]
+    () => deriveGanttData(events, groupingValuesByHash, sort, lteMs, GANTT_TOP_N_DEFAULT),
+    [events, groupingValuesByHash, sort, lteMs]
   );
 
   const discoverHref = useMemo(
@@ -89,53 +85,51 @@ export const EpisodesGanttSection: React.FC = () => {
     [share, application.capabilities, uiSettings, gteMs, lteMs, rule.evaluation?.query?.base]
   );
 
-  // TODO: pass `ruleId` via URL params once the episodes list page syncs filter
-  // state to the URL (`paths.alertEpisodesList` helper). For now this links to
-  // the bare list and the user re-applies the rule filter manually.
-  const viewAllHref = useMemo(() => http.basePath.prepend(paths.alertEpisodesList), [http]);
-
-  const onEpisodeClick = useCallback(
-    (episode: GanttEpisode) => {
-      const href = http.basePath.prepend(paths.alertEpisodeDetails(episode.episodeId));
-      application.navigateToUrl(href);
-    },
-    [http, application]
+  const viewAllHref = useMemo(
+    () =>
+      http.basePath.prepend(
+        paths.alertEpisodesList({
+          filters: { ruleId: rule.id },
+          timeRange: {
+            from: new Date(gteMs).toISOString(),
+            to: new Date(lteMs).toISOString(),
+          },
+        })
+      ),
+    [http, rule.id, gteMs, lteMs]
   );
 
-  const ruleName = rule.metadata?.name ?? rule.id;
-  const subtitle = i18n.translate('xpack.alertingV2.ruleDetails.gantt.subtitle', {
-    defaultMessage: 'Rule: {ruleName} · {count, plural, one {# episode} other {# episodes}}',
-    values: { ruleName, count: ganttData.summary.episodesStarted },
-  });
+  const getEpisodeHref = useCallback(
+    (episodeId: string) => http.basePath.prepend(paths.alertEpisodeDetails(episodeId)),
+    [http]
+  );
+
+  const onEpisodeClick = useCallback(
+    (episodeId: string) => {
+      application.navigateToUrl(getEpisodeHref(episodeId));
+    },
+    [application, getEpisodeHref]
+  );
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="ruleEpisodesGanttSection">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+          <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3>
-                      {i18n.translate('xpack.alertingV2.ruleDetails.gantt.title', {
-                        defaultMessage: 'Alert episodes',
-                      })}
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {i18n.translate('xpack.alertingV2.ruleDetails.gantt.windowCaption', {
-                      defaultMessage: '— last 7 days',
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate('xpack.alertingV2.ruleDetails.gantt.title', {
+                    defaultMessage: 'Alert activity',
+                  })}
+                </h3>
+              </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" data-test-subj="ganttSubtitle">
-                {subtitle}
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.alertingV2.ruleDetails.gantt.windowCaption', {
+                  defaultMessage: '— last 7 days',
+                })}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -226,7 +220,10 @@ export const EpisodesGanttSection: React.FC = () => {
             rows={ganttData.rows}
             gteMs={gteMs}
             lteMs={lteMs}
+            ruleId={rule.id}
+            basePath={http.basePath}
             onEpisodeClick={onEpisodeClick}
+            getEpisodeHref={getEpisodeHref}
           />
           <EuiSpacer size="m" />
           <GanttFooter

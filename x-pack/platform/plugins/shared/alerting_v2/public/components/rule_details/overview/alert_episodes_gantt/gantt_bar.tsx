@@ -5,155 +5,369 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import {
+  Axis,
+  Chart,
+  LineSeries,
+  Position,
+  RectAnnotation,
+  ScaleType,
+  Settings,
+  Tooltip,
+} from '@elastic/charts';
+import type {
+  ElementClickListener,
+  RectAnnotationDatum,
+  XYChartElementEvent,
+} from '@elastic/charts';
+import { EuiText, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { GanttEpisode } from '../../../../utils/derive_gantt_data';
+import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { PluginStart } from '@kbn/core-di';
+import { useService } from '@kbn/core-di-browser';
+import type {
+  GanttSegment,
+  GanttSeries,
+  GanttTransition,
+} from '../../../../utils/derive_gantt_data';
+import { ganttStatusColor, ganttStatusLabel } from './gantt_status_palette';
+import { formatDuration, formatTimestamp } from './gantt_format';
 
-const BAR_HEIGHT_PX = 8;
-const END_DOT_OFFSET_PX = 2;
+// Render order = paint order. Sibling series declared later paint on top,
+// so list lower-priority statuses first and higher-priority ones last —
+// when dots collide at the same x, ACTIVE wins over RECOVERING wins over
+// PENDING wins over INACTIVE.
+const STATUS_ORDER: readonly AlertEpisodeStatus[] = [
+  ALERT_EPISODE_STATUS.INACTIVE,
+  ALERT_EPISODE_STATUS.PENDING,
+  ALERT_EPISODE_STATUS.RECOVERING,
+  ALERT_EPISODE_STATUS.ACTIVE,
+];
 
-const pct = (n: number) => `${n}%`;
+// Rect annotations span a centered horizontal band, not the full lane height,
+// so the bar reads as a thick line rather than a row-filling block.
+const RECT_Y0 = 0.4;
+const RECT_Y1 = 0.6;
 
-const positionPercent = (firstMs: number, lastMs: number, gteMs: number, lteMs: number) => {
-  const span = lteMs - gteMs;
-  const left = ((firstMs - gteMs) / span) * 100;
-  const width = Math.max(0, ((lastMs - firstMs) / span) * 100);
-  return { left, width };
-};
-
-export interface GanttBarProps {
-  episode: GanttEpisode;
-  gteMs: number;
-  lteMs: number;
-  /** When the bar fires onClick (e.g. navigate to episode details). */
-  onClick?: (episode: GanttEpisode) => void;
+interface SegmentDetails {
+  kind: 'segment';
+  episodeId: string;
+  status: AlertEpisodeStatus;
+  x0Ms: number;
+  x1Ms: number;
 }
 
-const formatTimestamp = (ms: number) => new Date(ms).toLocaleString();
+interface TransitionDatum {
+  x: number;
+  y: number;
+  episodeId: string;
+  status: AlertEpisodeStatus;
+  // Populated when getEpisodeHref is provided so the click handler can
+  // navigate without re-resolving the URL or filtering by series id.
+  href?: string;
+}
 
-const formatDuration = (ms: number) => {
-  if (!Number.isFinite(ms) || ms <= 0) return '0m';
-  const totalMinutes = Math.round(ms / 60_000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  if (hours === 0) return `${minutes}m`;
-  if (minutes === 0) return `${hours}h`;
-  return `${hours}h ${minutes}m`;
+const groupBy = <T, K extends string>(items: T[], key: (item: T) => K): Record<K, T[]> => {
+  return items.reduce((acc, item) => {
+    const k = key(item);
+    if (!acc[k]) acc[k] = [];
+    acc[k].push(item);
+    return acc;
+  }, {} as Record<K, T[]>);
 };
 
-/**
- * One episode rendered as a positioned pill on the Gantt track. Recovered
- * episodes get a solid teal fill plus an end-cap dot at the recovery time;
- * open episodes fade to transparent at their right edge with a ringed live
- * dot. Hover for an EuiToolTip with start/end/duration.
- */
-export const GanttBar: React.FC<GanttBarProps> = ({ episode, gteMs, lteMs, onClick }) => {
-  const { euiTheme } = useEuiTheme();
-  const { left, width } = positionPercent(episode.firstMs, episode.lastMs, gteMs, lteMs);
+interface TooltipPanelProps {
+  euiTheme: EuiThemeComputed;
+  status: AlertEpisodeStatus;
+  episodeId: string;
+  primaryLine: string;
+  secondaryLine?: string;
+  durationLabel?: string;
+}
 
-  const fill = episode.isOpen
-    ? `linear-gradient(to right, ${euiTheme.colors.danger} 60%, transparent)`
-    : euiTheme.colors.success;
-
-  const tooltip = (
-    <EuiText size="xs">
-      <div>
-        <strong>
-          {episode.isOpen
-            ? i18n.translate('xpack.alertingV2.ruleDetails.gantt.tooltipOpen', {
-                defaultMessage: 'Open episode',
-              })
-            : i18n.translate('xpack.alertingV2.ruleDetails.gantt.tooltipRecovered', {
-                defaultMessage: 'Recovered episode',
-              })}
-        </strong>
-      </div>
-      <div>
-        {i18n.translate('xpack.alertingV2.ruleDetails.gantt.tooltipStart', {
-          defaultMessage: 'Started: {when}',
-          values: { when: formatTimestamp(episode.firstMs) },
-        })}
-      </div>
-      <div>
-        {episode.isOpen
-          ? i18n.translate('xpack.alertingV2.ruleDetails.gantt.tooltipLastEvent', {
-              defaultMessage: 'Last event: {when}',
-              values: { when: formatTimestamp(episode.lastMs) },
-            })
-          : i18n.translate('xpack.alertingV2.ruleDetails.gantt.tooltipRecoveredAt', {
-              defaultMessage: 'Recovered: {when}',
-              values: { when: formatTimestamp(episode.lastMs) },
-            })}
-      </div>
-      <div>
-        {i18n.translate('xpack.alertingV2.ruleDetails.gantt.tooltipDuration', {
-          defaultMessage: 'Duration: {duration}',
-          values: { duration: formatDuration(episode.durationMs) },
-        })}
-      </div>
-    </EuiText>
-  );
-
-  const liveDotRingColor = `${euiTheme.colors.danger}33`; // ~20% alpha hex
-
+const TooltipPanel: React.FC<TooltipPanelProps> = ({
+  euiTheme,
+  status,
+  episodeId,
+  primaryLine,
+  secondaryLine,
+  durationLabel,
+}) => {
   return (
-    <EuiToolTip content={tooltip} position="top" disableScreenReaderOutput>
-      <button
-        type="button"
-        onClick={onClick ? () => onClick(episode) : undefined}
-        aria-label={i18n.translate('xpack.alertingV2.ruleDetails.gantt.barAriaLabel', {
-          defaultMessage: '{state} episode starting {when}',
-          values: {
-            state: episode.isOpen ? 'Open' : 'Recovered',
-            when: formatTimestamp(episode.firstMs),
-          },
-        })}
-        css={css`
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          height: ${BAR_HEIGHT_PX}px;
-          min-width: ${euiTheme.size.s};
-          border: 0;
-          padding: 0;
-          margin: 0;
-          background: ${fill};
-          border-radius: 9999px;
-          cursor: ${onClick ? 'pointer' : 'default'};
-
-          &:focus-visible {
-            outline: 2px solid ${euiTheme.colors.primary};
-            outline-offset: 2px;
-          }
-        `}
-        style={{ left: pct(left), width: pct(width) }}
-        data-test-subj={episode.isOpen ? 'ganttBarOpen' : 'ganttBarRecovered'}
-      >
-        <span
-          aria-hidden
+    <div
+      css={css`
+        background: ${euiTheme.colors.emptyShade};
+        border: 1px solid ${euiTheme.colors.lightShade};
+        border-radius: ${euiTheme.border.radius.small};
+        max-width: 280px;
+      `}
+    >
+      <EuiText size="xs">
+        <div
           css={css`
-            position: absolute;
-            top: 50%;
-            right: -${END_DOT_OFFSET_PX}px;
-            transform: translateY(-50%);
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            justify-content: center;
-            width: ${euiTheme.size.base};
-            height: ${euiTheme.size.base};
-            // border-radius: 9999px;
-            ${episode.isOpen ? `box-shadow: 0 0 0 2px ${liveDotRingColor};` : ''}
+            gap: ${euiTheme.size.xs};
+            padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+            border-bottom: 1px solid ${euiTheme.colors.lightShade};
           `}
         >
-          <EuiIcon
-            type="dot"
-            color={episode.isOpen ? euiTheme.colors.danger : euiTheme.colors.success}
-            size="s"
+          <span
+            css={css`
+              display: inline-block;
+              width: 8px;
+              height: 8px;
+              border-radius: 50%;
+              background: ${ganttStatusColor(euiTheme, status)};
+            `}
           />
-        </span>
-      </button>
-    </EuiToolTip>
+          <strong>{ganttStatusLabel(status)}</strong>
+        </div>
+        <div
+          css={css`
+            padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+          `}
+        >
+          <div>{primaryLine}</div>
+          {secondaryLine && <div>{secondaryLine}</div>}
+          {durationLabel && <div>{durationLabel}</div>}
+          <div
+            css={css`
+              margin-top: ${euiTheme.size.xs};
+            `}
+          >
+            {i18n.translate('xpack.alertingV2.ruleDetails.gantt.tooltip.episodeId', {
+              defaultMessage: 'Episode id: {id}',
+              values: { id: episodeId },
+            })}
+          </div>
+        </div>
+      </EuiText>
+    </div>
+  );
+};
+
+export interface GanttLaneProps {
+  lane: GanttSeries;
+  gteMs: number;
+  lteMs: number;
+  height: number;
+  onSegmentClick?: (episodeId: string) => void;
+  getEpisodeHref?: (episodeId: string) => string;
+}
+
+/**
+ * One series rendered as a thin elastic-charts lane: rect annotations color
+ * each state segment between consecutive events. A hidden line series
+ * anchors the chart's domain since rect annotations alone don't establish
+ * one.
+ */
+export const GanttLane: React.FC<GanttLaneProps> = ({
+  lane,
+  gteMs,
+  lteMs,
+  height,
+  onSegmentClick,
+  getEpisodeHref,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const charts = useService(PluginStart('charts')) as ChartsPluginStart;
+  const baseTheme = charts.theme.useChartsBaseTheme();
+
+  const segmentsByStatus = useMemo(
+    () => groupBy<GanttSegment, AlertEpisodeStatus>(lane.segments, (s) => s.status),
+    [lane.segments]
+  );
+
+  const transitionsByStatus = useMemo(
+    () => groupBy<GanttTransition, AlertEpisodeStatus>(lane.transitions, (t) => t.status),
+    [lane.transitions]
+  );
+
+  const handleAnnotationClick = useCallback(
+    (annotations: { rects: Array<{ datum: RectAnnotationDatum }> }) => {
+      const datum = annotations.rects[0]?.datum;
+      const details = datum?.details as SegmentDetails | undefined;
+      if (details?.episodeId && onSegmentClick) {
+        onSegmentClick(details.episodeId);
+      }
+    },
+    [onSegmentClick]
+  );
+
+  // Transition dots open episode details in a new tab. The href is baked
+  // into each TransitionDatum at build time, so the hidden anchor series
+  // (whose datum has no href) is naturally ignored.
+  const handleElementClick = useCallback<ElementClickListener>((elements) => {
+    const first = elements[0];
+    if (!Array.isArray(first)) return;
+    const [geometry] = first as XYChartElementEvent;
+    const datum = geometry?.datum as TransitionDatum | undefined;
+    if (datum?.href) {
+      window.open(datum.href, '_blank', 'noopener,noreferrer');
+    }
+  }, []);
+
+  return (
+    <div
+      css={css`
+        height: ${height}px;
+      `}
+      data-test-subj="ganttLane"
+    >
+      <Chart size={{ height }}>
+        <Settings
+          showLegend={false}
+          baseTheme={baseTheme}
+          locale={i18n.getLocale()}
+          xDomain={{ min: gteMs, max: lteMs }}
+          onAnnotationClick={onSegmentClick ? handleAnnotationClick : undefined}
+          onElementClick={getEpisodeHref ? handleElementClick : undefined}
+          theme={{
+            chartMargins: { top: 0, right: 0, bottom: 0, left: 0 },
+            chartPaddings: { top: 0, right: 0, bottom: 0, left: 0 },
+          }}
+        />
+        {/* Tooltip for transition dots — series tooltips are driven by the
+            chart-level <Tooltip>, while rect annotations have their own
+            customTooltip below. */}
+        <Tooltip
+          header="none"
+          body={({ items }) => {
+            const datum = items?.[0]?.datum as TransitionDatum | undefined;
+            if (!datum?.episodeId) return null;
+            return (
+              <TooltipPanel
+                euiTheme={euiTheme}
+                status={datum.status}
+                episodeId={datum.episodeId}
+                primaryLine={i18n.translate(
+                  'xpack.alertingV2.ruleDetails.gantt.tooltip.transitionTime',
+                  {
+                    defaultMessage: 'Transitioned at {when}',
+                    values: { when: formatTimestamp(datum.x) },
+                  }
+                )}
+              />
+            );
+          }}
+        />
+        {/* Hidden left axis with an explicit fixed domain so every lane
+            renders rect annotations at the exact same pixel height. Without
+            it elastic-charts auto-fits per-chart and heights drift. */}
+        <Axis id="left" position={Position.Left} hide domain={{ min: 0, max: 1, fit: false }} />
+        {STATUS_ORDER.map((status) => {
+          const segments = segmentsByStatus[status] ?? [];
+          if (segments.length === 0) return null;
+          const fill = ganttStatusColor(euiTheme, status);
+          return (
+            <RectAnnotation
+              key={`rect-${status}`}
+              id={`gantt-lane-${lane.groupHash}-rect-${status}`}
+              dataValues={
+                segments.map((s) => ({
+                  coordinates: { x0: s.x0Ms, x1: s.x1Ms, y0: RECT_Y0, y1: RECT_Y1 },
+                  details: {
+                    kind: 'segment',
+                    episodeId: s.episodeId,
+                    status: s.status,
+                    x0Ms: s.x0Ms,
+                    x1Ms: s.x1Ms,
+                  },
+                })) as unknown as RectAnnotationDatum[]
+              }
+              style={{ fill, strokeWidth: 0, opacity: 1 }}
+              customTooltip={({ details }) => {
+                const d = details as SegmentDetails | undefined;
+                if (!d) return null;
+                return (
+                  <TooltipPanel
+                    euiTheme={euiTheme}
+                    status={d.status}
+                    episodeId={d.episodeId}
+                    primaryLine={i18n.translate('xpack.alertingV2.ruleDetails.gantt.tooltip.from', {
+                      defaultMessage: 'From: {when}',
+                      values: { when: formatTimestamp(d.x0Ms) },
+                    })}
+                    secondaryLine={i18n.translate('xpack.alertingV2.ruleDetails.gantt.tooltip.to', {
+                      defaultMessage: 'To: {when}',
+                      values: { when: formatTimestamp(d.x1Ms) },
+                    })}
+                    durationLabel={i18n.translate(
+                      'xpack.alertingV2.ruleDetails.gantt.tooltip.duration',
+                      {
+                        defaultMessage: 'Duration: {duration}',
+                        values: { duration: formatDuration(d.x1Ms - d.x0Ms) },
+                      }
+                    )}
+                  />
+                );
+              }}
+            />
+          );
+        })}
+        <LineSeries
+          id={`gantt-lane-${lane.groupHash}-anchor`}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={[
+            { x: gteMs, y: 0 },
+            { x: lteMs, y: 1 },
+          ]}
+          color="rgba(0,0,0,0)"
+          hideInLegend
+          filterSeriesInTooltip={() => false}
+          lineSeriesStyle={{
+            line: { visible: false, opacity: 0 },
+            point: { visible: 'never' },
+          }}
+        />
+        {/* One LineSeries per status carrying that status's transition
+            timestamps. The connecting line is hidden and only the points
+            render — guarantees a fixed-radius dot at every state change
+            even when the time window is wide and rect annotations would
+            otherwise compress to sub-pixel widths. */}
+        {STATUS_ORDER.map((status) => {
+          const transitions = transitionsByStatus[status] ?? [];
+          if (transitions.length === 0) return null;
+          const color = ganttStatusColor(euiTheme, status);
+          return (
+            <LineSeries
+              key={`dots-${status}`}
+              id={`gantt-lane-${lane.groupHash}-dots-${status}`}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['y']}
+              data={transitions.map<TransitionDatum>((t) => ({
+                x: t.tsMs,
+                y: 0.5,
+                episodeId: t.episodeId,
+                status: t.status,
+                href: getEpisodeHref?.(t.episodeId),
+              }))}
+              color={color}
+              hideInLegend
+              lineSeriesStyle={{
+                line: { visible: false, opacity: 0 },
+                point: {
+                  visible: 'always',
+                  radius: 3,
+                  fill: euiTheme.colors.emptyShade,
+                  stroke: color,
+                  strokeWidth: 2,
+                },
+              }}
+            />
+          );
+        })}
+      </Chart>
+    </div>
   );
 };

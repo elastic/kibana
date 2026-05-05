@@ -31,10 +31,7 @@ import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
-import type {
-  EpisodesFilterState,
-  EpisodesSortState,
-} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
@@ -52,7 +49,9 @@ import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_
 import { paths } from '../../constants';
 import { useEpisodesTimeRange } from './hooks/use_episodes_time_range';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
+import { useEpisodesUrlState } from './hooks/use_episodes_url_state';
 import { EpisodeAssigneeCell } from './components/episode_assignee_cell';
+import { ActiveGroupChip } from './components/active_group_chip';
 
 const PAGE_SIZE = 1000;
 
@@ -117,8 +116,9 @@ export const AlertEpisodesListPage = () => {
 
   const { timeRange, handleTimeChange } = useEpisodesTimeRange(timefilter);
 
-  const [filterState, setFilterState] = useState<EpisodesFilterState>({});
-  const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
+  const { filterState, setFilterState, sortState, setSortState } = useEpisodesUrlState({
+    data: services.data,
+  });
   const [columns, setColumns] = useState<string[]>([
     'episode.status',
     '@timestamp',
@@ -147,19 +147,22 @@ export const AlertEpisodesListPage = () => {
     [sortState.sortField, sortState.sortDirection]
   );
 
-  const onSort = useCallback((nextSort: string[][]) => {
-    if (!nextSort.length) {
-      setSortState(DEFAULT_SORT);
-      return;
-    }
-    const [field, dir] = nextSort[nextSort.length - 1];
-    if (field != null && dir != null) {
-      setSortState({
-        sortField: String(field),
-        sortDirection: dir === 'asc' ? 'asc' : 'desc',
-      });
-    }
-  }, []);
+  const onSort = useCallback(
+    (nextSort: string[][]) => {
+      if (!nextSort.length) {
+        setSortState(DEFAULT_SORT);
+        return;
+      }
+      const [field, dir] = nextSort[nextSort.length - 1];
+      if (field != null && dir != null) {
+        setSortState({
+          sortField: String(field),
+          sortDirection: dir === 'asc' ? 'asc' : 'desc',
+        });
+      }
+    },
+    [setSortState]
+  );
 
   const ruleIds = useMemo(
     () => [...new Set(episodesData?.map((row) => row['rule.id']) ?? [])],
@@ -306,6 +309,22 @@ export const AlertEpisodesListPage = () => {
             isLoading={isLoading}
             services={services}
           />
+          {filterState.groupHash && (
+            <>
+              <EuiSpacer size="s" />
+              <ActiveGroupChip
+                groupHash={filterState.groupHash}
+                groupingValues={filterState.groupingValues}
+                onClear={() =>
+                  setFilterState((prev) => ({
+                    ...prev,
+                    groupHash: null,
+                    groupingValues: null,
+                  }))
+                }
+              />
+            </>
+          )}
           <EuiSpacer size="s" />
         </EuiFlexItem>
         <EuiFlexItem

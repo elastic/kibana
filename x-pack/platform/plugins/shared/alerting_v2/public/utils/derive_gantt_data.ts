@@ -6,30 +6,41 @@
  */
 
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { RuleEventRow } from '../queries/alert_series_activity/rule_events_query';
 import type { SeriesGroupingValuesByHash } from '../queries/alert_series_activity/series_grouping_values_query';
 
 export type GanttSortPolicy = 'started_asc' | 'started_desc' | 'longest_open' | 'recently_active';
 
 export const GANTT_TOP_N_DEFAULT = 8;
 
-export interface GanttEpisode {
+/** A horizontal colored span inside a lane, between two consecutive events. */
+export interface GanttSegment {
   episodeId: string;
   status: AlertEpisodeStatus;
-  firstMs: number;
-  lastMs: number;
-  durationMs: number;
-  isOpen: boolean;
+  /** Inclusive epoch ms of the segment's left edge (the event that opened it). */
+  x0Ms: number;
+  /** Epoch ms of the segment's right edge (the next event, or `lteMs` for the open tail). */
+  x1Ms: number;
+}
+
+/** A point marker inside a lane at a status-change timestamp. */
+export interface GanttTransition {
+  episodeId: string;
+  status: AlertEpisodeStatus;
+  tsMs: number;
 }
 
 export interface GanttSeries {
   groupHash: string;
   groupingValues: Record<string, string | null>;
-  episodes: GanttEpisode[];
+  segments: GanttSegment[];
+  transitions: GanttTransition[];
   firstEventMs: number;
   lastEventMs: number;
   hasOpenEpisode: boolean;
   longestOpenDurationMs: number;
+  /** Number of distinct episodes contributing to this series in the visible window. */
+  episodeCount: number;
 }
 
 export interface GanttSummary {
@@ -71,61 +82,126 @@ const compareSeries = (a: GanttSeries, b: GanttSeries, sort: GanttSortPolicy): n
   }
 };
 
+interface ParsedEvent {
+  episodeId: string;
+  status: AlertEpisodeStatus;
+  tsMs: number;
+  groupHash: string;
+}
+
 /**
- * Derive Gantt-chart-ready rows + summary stats from a flat episodes response,
- * grouped by `group_hash` and sorted by the chosen policy. Episodes inside a
- * series are always sorted ascending by start time so bars layer left-to-right.
+ * Derive Gantt-chart-ready lanes + summary stats from raw rule event rows.
+ * Each lane (series) splits its episodes into one segment per state span:
+ * the segment between event N and event N+1 takes event N's status. An open
+ * episode (last event is not INACTIVE) emits a tail segment running to
+ * `lteMs`.
  */
 export const deriveGanttData = (
-  episodes: AlertEpisode[],
+  eventRows: RuleEventRow[],
   groupingValuesByHash: SeriesGroupingValuesByHash,
   sort: GanttSortPolicy,
+  lteMs: number,
   topN: number = GANTT_TOP_N_DEFAULT
 ): GanttData => {
-  const seriesByHash = new Map<string, GanttSeries>();
+  const eventsBySeries = new Map<string, ParsedEvent[]>();
 
-  for (const ep of episodes) {
-    const firstMs = Date.parse(ep.first_timestamp);
-    const lastMs = Date.parse(ep.last_timestamp);
-    if (!Number.isFinite(firstMs) || !Number.isFinite(lastMs)) continue;
-
-    const status = ep['episode.status'];
-    const open = isOpenStatus(status);
-    const durationMs = Math.max(0, lastMs - firstMs);
-
-    const ganttEp: GanttEpisode = {
-      episodeId: ep['episode.id'],
-      status,
-      firstMs,
-      lastMs,
-      durationMs,
-      isOpen: open,
+  for (const row of eventRows) {
+    const tsMs = Date.parse(row['@timestamp']);
+    if (!Number.isFinite(tsMs)) continue;
+    const ev: ParsedEvent = {
+      episodeId: row['episode.id'],
+      status: row['episode.status'],
+      tsMs,
+      groupHash: row.group_hash,
     };
-
-    const existing = seriesByHash.get(ep.group_hash);
-    if (existing) {
-      existing.episodes.push(ganttEp);
-      existing.firstEventMs = Math.min(existing.firstEventMs, firstMs);
-      existing.lastEventMs = Math.max(existing.lastEventMs, lastMs);
-      existing.hasOpenEpisode = existing.hasOpenEpisode || open;
-      if (open && durationMs > existing.longestOpenDurationMs) {
-        existing.longestOpenDurationMs = durationMs;
-      }
+    const list = eventsBySeries.get(row.group_hash);
+    if (list) {
+      list.push(ev);
     } else {
-      seriesByHash.set(ep.group_hash, {
-        groupHash: ep.group_hash,
-        groupingValues: groupingValuesByHash[ep.group_hash] ?? EMPTY_GROUPING_VALUES,
-        episodes: [ganttEp],
-        firstEventMs: firstMs,
-        lastEventMs: lastMs,
-        hasOpenEpisode: open,
-        longestOpenDurationMs: open ? durationMs : 0,
-      });
+      eventsBySeries.set(row.group_hash, [ev]);
     }
   }
 
-  for (const series of seriesByHash.values()) {
-    series.episodes.sort((a, b) => a.firstMs - b.firstMs);
+  const seriesByHash = new Map<string, GanttSeries>();
+
+  for (const [groupHash, events] of eventsBySeries) {
+    events.sort((a, b) => a.tsMs - b.tsMs);
+
+    const eventsByEpisode = new Map<string, ParsedEvent[]>();
+    for (const ev of events) {
+      const list = eventsByEpisode.get(ev.episodeId);
+      if (list) list.push(ev);
+      else eventsByEpisode.set(ev.episodeId, [ev]);
+    }
+
+    const segments: GanttSegment[] = [];
+    const transitions: GanttTransition[] = [];
+    let hasOpenEpisode = false;
+    let longestOpenDurationMs = 0;
+
+    // Coalesce consecutive same-status events into a single segment per
+    // episode. Without this, a rule that re-fires the same status every tick
+    // would emit one tiny rect per tick — at full-window zoom they render as
+    // a striped band because of sub-pixel anti-aliasing on each edge.
+    const pushSegment = (s: GanttSegment) => {
+      const last = segments[segments.length - 1];
+      if (
+        last &&
+        last.episodeId === s.episodeId &&
+        last.status === s.status &&
+        last.x1Ms === s.x0Ms
+      ) {
+        last.x1Ms = s.x1Ms;
+      } else {
+        segments.push(s);
+      }
+    };
+
+    for (const [episodeId, episodeEvents] of eventsByEpisode) {
+      // A transition is the first event of the episode plus every event whose
+      // status differs from the previous one. Re-fires of the same status are
+      // not real transitions and would otherwise stack dots on top of each
+      // other.
+      let lastTransitionStatus: AlertEpisodeStatus | undefined;
+      for (const ev of episodeEvents) {
+        if (ev.status !== lastTransitionStatus) {
+          transitions.push({ episodeId, status: ev.status, tsMs: ev.tsMs });
+          lastTransitionStatus = ev.status;
+        }
+      }
+
+      for (let i = 0; i < episodeEvents.length; i++) {
+        const ev = episodeEvents[i];
+        const next = episodeEvents[i + 1];
+        if (next) {
+          if (next.tsMs > ev.tsMs) {
+            pushSegment({ episodeId, status: ev.status, x0Ms: ev.tsMs, x1Ms: next.tsMs });
+          }
+        } else if (isOpenStatus(ev.status)) {
+          // Tail segment for an open episode: extend to the visible window's
+          // right edge so the rect reads as "still ongoing".
+          if (lteMs > ev.tsMs) {
+            pushSegment({ episodeId, status: ev.status, x0Ms: ev.tsMs, x1Ms: lteMs });
+          }
+          hasOpenEpisode = true;
+          const firstTs = episodeEvents[0]?.tsMs ?? ev.tsMs;
+          const openDuration = Math.max(0, lteMs - firstTs);
+          if (openDuration > longestOpenDurationMs) longestOpenDurationMs = openDuration;
+        }
+      }
+    }
+
+    seriesByHash.set(groupHash, {
+      groupHash,
+      groupingValues: groupingValuesByHash[groupHash] ?? EMPTY_GROUPING_VALUES,
+      segments,
+      transitions,
+      firstEventMs: events[0].tsMs,
+      lastEventMs: events[events.length - 1].tsMs,
+      hasOpenEpisode,
+      longestOpenDurationMs,
+      episodeCount: eventsByEpisode.size,
+    });
   }
 
   const allRows = [...seriesByHash.values()].sort((a, b) => compareSeries(a, b, sort));
@@ -133,20 +209,29 @@ export const deriveGanttData = (
   const visibleRows = allRows.slice(0, topN);
   const hiddenRowCount = Math.max(0, totalRowCount - visibleRows.length);
 
+  // Summary aggregates: episode-level stats over every event row, regardless
+  // of which series ends up visible.
+  const allEpisodes = new Map<string, ParsedEvent[]>();
+  for (const list of eventsBySeries.values()) {
+    for (const ev of list) {
+      const ep = allEpisodes.get(ev.episodeId);
+      if (ep) ep.push(ev);
+      else allEpisodes.set(ev.episodeId, [ev]);
+    }
+  }
+
   let recovered = 0;
   let stillOpen = 0;
   const recoveredDurations: number[] = [];
-  for (const ep of episodes) {
-    const open = isOpenStatus(ep['episode.status']);
-    if (open) {
+  for (const episodeEvents of allEpisodes.values()) {
+    episodeEvents.sort((a, b) => a.tsMs - b.tsMs);
+    const last = episodeEvents[episodeEvents.length - 1];
+    if (isOpenStatus(last.status)) {
       stillOpen++;
     } else {
       recovered++;
-      const firstMs = Date.parse(ep.first_timestamp);
-      const lastMs = Date.parse(ep.last_timestamp);
-      if (Number.isFinite(firstMs) && Number.isFinite(lastMs)) {
-        recoveredDurations.push(Math.max(0, lastMs - firstMs));
-      }
+      const first = episodeEvents[0];
+      recoveredDurations.push(Math.max(0, last.tsMs - first.tsMs));
     }
   }
 
@@ -155,7 +240,7 @@ export const deriveGanttData = (
     hiddenRowCount,
     totalRowCount,
     summary: {
-      episodesStarted: episodes.length,
+      episodesStarted: allEpisodes.size,
       recovered,
       stillOpen,
       medianDurationMs: median(recoveredDurations),

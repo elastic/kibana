@@ -5,97 +5,191 @@
  * 2.0.
  */
 
-import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import type { RuleEventRow } from '../queries/alert_series_activity/rule_events_query';
 import { deriveGanttData } from './derive_gantt_data';
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 const T0 = Date.UTC(2026, 3, 1, 0, 0, 0); // 2026-04-01
+const NOW = T0 + 7 * DAY_MS;
 
-const buildEpisode = (overrides: Partial<AlertEpisode> & { firstMs: number; lastMs: number }) => {
-  const { firstMs, lastMs, ...rest } = overrides;
-  return {
-    '@timestamp': new Date(lastMs).toISOString(),
-    'episode.id': 'ep-1',
-    'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
-    'rule.id': 'rule-1',
-    group_hash: 'gh-1',
-    first_timestamp: new Date(firstMs).toISOString(),
-    last_timestamp: new Date(lastMs).toISOString(),
-    duration: lastMs - firstMs,
-    ...rest,
-  } as AlertEpisode;
-};
+interface EventSpec {
+  episodeId: string;
+  groupHash?: string;
+  status: AlertEpisodeStatus;
+  tsMs: number;
+}
+
+const event = ({ episodeId, groupHash = 'gh-A', status, tsMs }: EventSpec): RuleEventRow => ({
+  '@timestamp': new Date(tsMs).toISOString(),
+  'episode.id': episodeId,
+  'episode.status': status,
+  'rule.id': 'rule-1',
+  group_hash: groupHash,
+});
 
 describe('deriveGanttData', () => {
-  it('groups episodes by group_hash and sorts episodes asc within each row', () => {
-    const episodes: AlertEpisode[] = [
-      buildEpisode({
-        'episode.id': 'ep-2',
-        group_hash: 'gh-A',
-        firstMs: T0 + 2 * HOUR_MS,
-        lastMs: T0 + 3 * HOUR_MS,
+  it('emits one segment per event-pair within an episode and a transition per event', () => {
+    const events: RuleEventRow[] = [
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.PENDING, tsMs: T0 }),
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 + HOUR_MS }),
+      event({
+        episodeId: 'ep-1',
+        status: ALERT_EPISODE_STATUS.RECOVERING,
+        tsMs: T0 + 2 * HOUR_MS,
       }),
-      buildEpisode({
-        'episode.id': 'ep-1',
-        group_hash: 'gh-A',
-        firstMs: T0,
-        lastMs: T0 + HOUR_MS,
-      }),
-      buildEpisode({
-        'episode.id': 'ep-3',
-        group_hash: 'gh-B',
-        firstMs: T0 + HOUR_MS,
-        lastMs: T0 + 2 * HOUR_MS,
-      }),
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 3 * HOUR_MS }),
     ];
 
-    const result = deriveGanttData(episodes, {}, 'started_asc');
+    const result = deriveGanttData(events, {}, 'started_asc', NOW);
+    const row = result.rows[0];
 
-    expect(result.totalRowCount).toBe(2);
-    expect(result.rows.map((r) => r.groupHash)).toEqual(['gh-A', 'gh-B']);
-    expect(result.rows[0].episodes.map((e) => e.episodeId)).toEqual(['ep-1', 'ep-2']);
+    expect(row.segments).toEqual([
+      {
+        episodeId: 'ep-1',
+        status: ALERT_EPISODE_STATUS.PENDING,
+        x0Ms: T0,
+        x1Ms: T0 + HOUR_MS,
+      },
+      {
+        episodeId: 'ep-1',
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        x0Ms: T0 + HOUR_MS,
+        x1Ms: T0 + 2 * HOUR_MS,
+      },
+      {
+        episodeId: 'ep-1',
+        status: ALERT_EPISODE_STATUS.RECOVERING,
+        x0Ms: T0 + 2 * HOUR_MS,
+        x1Ms: T0 + 3 * HOUR_MS,
+      },
+    ]);
+    expect(row.transitions.map((t) => t.status)).toEqual([
+      ALERT_EPISODE_STATUS.PENDING,
+      ALERT_EPISODE_STATUS.ACTIVE,
+      ALERT_EPISODE_STATUS.RECOVERING,
+      ALERT_EPISODE_STATUS.INACTIVE,
+    ]);
+    expect(row.hasOpenEpisode).toBe(false);
   });
 
-  it('classifies non-inactive statuses as open and tracks longest open duration', () => {
-    const episodes: AlertEpisode[] = [
-      buildEpisode({
-        'episode.id': 'open-long',
-        group_hash: 'gh-A',
-        'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
-        firstMs: T0,
-        lastMs: T0 + 5 * HOUR_MS,
-      }),
-      buildEpisode({
-        'episode.id': 'open-short',
-        group_hash: 'gh-A',
-        'episode.status': ALERT_EPISODE_STATUS.PENDING,
-        firstMs: T0 + 6 * HOUR_MS,
-        lastMs: T0 + 7 * HOUR_MS,
+  it('emits a transition only when the status actually changes', () => {
+    const events: RuleEventRow[] = [
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 }),
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 + HOUR_MS }),
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 + 2 * HOUR_MS }),
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 3 * HOUR_MS }),
+    ];
+
+    const result = deriveGanttData(events, {}, 'started_asc', NOW);
+
+    expect(result.rows[0].transitions).toEqual([
+      { episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 },
+      { episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 3 * HOUR_MS },
+    ]);
+  });
+
+  it('coalesces consecutive same-status events within an episode into one segment', () => {
+    const events: RuleEventRow[] = [
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 }),
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 + HOUR_MS }),
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 + 2 * HOUR_MS }),
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 3 * HOUR_MS }),
+    ];
+
+    const result = deriveGanttData(events, {}, 'started_asc', NOW);
+
+    expect(result.rows[0].segments).toEqual([
+      {
+        episodeId: 'ep-1',
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        x0Ms: T0,
+        x1Ms: T0 + 3 * HOUR_MS,
+      },
+    ]);
+  });
+
+  it('extends the tail segment to lteMs for open episodes and tracks longest open', () => {
+    const events: RuleEventRow[] = [
+      event({ episodeId: 'open-long', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 }),
+      event({
+        episodeId: 'open-short',
+        status: ALERT_EPISODE_STATUS.PENDING,
+        tsMs: T0 + 6 * HOUR_MS,
       }),
     ];
 
-    const result = deriveGanttData(episodes, {}, 'started_asc');
+    const result = deriveGanttData(events, {}, 'started_asc', NOW);
+    const row = result.rows[0];
 
-    expect(result.rows[0].hasOpenEpisode).toBe(true);
-    expect(result.rows[0].longestOpenDurationMs).toBe(5 * HOUR_MS);
-    expect(result.rows[0].episodes.every((e) => e.isOpen)).toBe(true);
+    expect(row.hasOpenEpisode).toBe(true);
+    expect(row.longestOpenDurationMs).toBe(NOW - T0);
+    const tail = row.segments.find((s) => s.episodeId === 'open-long');
+    expect(tail).toEqual({
+      episodeId: 'open-long',
+      status: ALERT_EPISODE_STATUS.ACTIVE,
+      x0Ms: T0,
+      x1Ms: NOW,
+    });
     expect(result.summary.stillOpen).toBe(2);
     expect(result.summary.recovered).toBe(0);
   });
 
-  it('caps visible rows at topN and reports hiddenRowCount', () => {
-    const episodes: AlertEpisode[] = Array.from({ length: 12 }, (_, i) =>
-      buildEpisode({
-        'episode.id': `ep-${i}`,
-        group_hash: `gh-${i}`,
-        firstMs: T0 + i * HOUR_MS,
-        lastMs: T0 + (i + 1) * HOUR_MS,
-      })
-    );
+  it('groups events by group_hash into separate lanes', () => {
+    const events: RuleEventRow[] = [
+      event({
+        episodeId: 'ep-1',
+        groupHash: 'gh-A',
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        tsMs: T0,
+      }),
+      event({
+        episodeId: 'ep-1',
+        groupHash: 'gh-A',
+        status: ALERT_EPISODE_STATUS.INACTIVE,
+        tsMs: T0 + HOUR_MS,
+      }),
+      event({
+        episodeId: 'ep-2',
+        groupHash: 'gh-B',
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        tsMs: T0 + 2 * HOUR_MS,
+      }),
+      event({
+        episodeId: 'ep-2',
+        groupHash: 'gh-B',
+        status: ALERT_EPISODE_STATUS.INACTIVE,
+        tsMs: T0 + 3 * HOUR_MS,
+      }),
+    ];
 
-    const result = deriveGanttData(episodes, {}, 'started_asc', 8);
+    const result = deriveGanttData(events, {}, 'started_asc', NOW);
+
+    expect(result.totalRowCount).toBe(2);
+    expect(result.rows.map((r) => r.groupHash)).toEqual(['gh-A', 'gh-B']);
+  });
+
+  it('caps visible rows at topN and reports hiddenRowCount', () => {
+    const events: RuleEventRow[] = [];
+    for (let i = 0; i < 12; i++) {
+      events.push(
+        event({
+          episodeId: `ep-${i}`,
+          groupHash: `gh-${i}`,
+          status: ALERT_EPISODE_STATUS.ACTIVE,
+          tsMs: T0 + i * HOUR_MS,
+        }),
+        event({
+          episodeId: `ep-${i}`,
+          groupHash: `gh-${i}`,
+          status: ALERT_EPISODE_STATUS.INACTIVE,
+          tsMs: T0 + i * HOUR_MS + 30 * 60_000,
+        })
+      );
+    }
+
+    const result = deriveGanttData(events, {}, 'started_asc', NOW, 8);
 
     expect(result.rows).toHaveLength(8);
     expect(result.hiddenRowCount).toBe(4);
@@ -103,28 +197,25 @@ describe('deriveGanttData', () => {
   });
 
   it('computes summary stats with median duration over recovered episodes only', () => {
-    const episodes: AlertEpisode[] = [
-      buildEpisode({
-        'episode.id': 'r1',
-        firstMs: T0,
-        lastMs: T0 + HOUR_MS, // 1h
+    const events: RuleEventRow[] = [
+      event({ episodeId: 'r1', groupHash: 'gh-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 }),
+      event({
+        episodeId: 'r1',
+        groupHash: 'gh-1',
+        status: ALERT_EPISODE_STATUS.INACTIVE,
+        tsMs: T0 + HOUR_MS,
       }),
-      buildEpisode({
-        'episode.id': 'r2',
-        group_hash: 'gh-2',
-        firstMs: T0,
-        lastMs: T0 + 3 * HOUR_MS, // 3h
+      event({ episodeId: 'r2', groupHash: 'gh-2', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 }),
+      event({
+        episodeId: 'r2',
+        groupHash: 'gh-2',
+        status: ALERT_EPISODE_STATUS.INACTIVE,
+        tsMs: T0 + 3 * HOUR_MS,
       }),
-      buildEpisode({
-        'episode.id': 'r3',
-        group_hash: 'gh-3',
-        firstMs: T0,
-        lastMs: T0 + 5 * HOUR_MS, // 5h — open, excluded from median
-        'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
-      }),
+      event({ episodeId: 'r3', groupHash: 'gh-3', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 }),
     ];
 
-    const result = deriveGanttData(episodes, {}, 'started_asc');
+    const result = deriveGanttData(events, {}, 'started_asc', NOW);
 
     expect(result.summary.episodesStarted).toBe(3);
     expect(result.summary.recovered).toBe(2);
@@ -133,41 +224,76 @@ describe('deriveGanttData', () => {
   });
 
   it('attaches groupingValues from the lookup map', () => {
-    const episodes: AlertEpisode[] = [
-      buildEpisode({ group_hash: 'gh-A', firstMs: T0, lastMs: T0 + HOUR_MS }),
+    const events: RuleEventRow[] = [
+      event({
+        episodeId: 'ep-1',
+        groupHash: 'gh-A',
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        tsMs: T0,
+      }),
+      event({
+        episodeId: 'ep-1',
+        groupHash: 'gh-A',
+        status: ALERT_EPISODE_STATUS.INACTIVE,
+        tsMs: T0 + HOUR_MS,
+      }),
     ];
 
-    const result = deriveGanttData(episodes, { 'gh-A': { 'host.name': 'web-01' } }, 'started_asc');
+    const result = deriveGanttData(
+      events,
+      { 'gh-A': { 'host.name': 'web-01' } },
+      'started_asc',
+      NOW
+    );
 
     expect(result.rows[0].groupingValues).toEqual({ 'host.name': 'web-01' });
   });
 
   it('sorts by recently_active and longest_open as expected', () => {
-    const episodes: AlertEpisode[] = [
-      buildEpisode({
-        group_hash: 'gh-old',
-        firstMs: T0,
-        lastMs: T0 + HOUR_MS,
+    const events: RuleEventRow[] = [
+      event({
+        episodeId: 'old',
+        groupHash: 'gh-old',
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        tsMs: T0,
       }),
-      buildEpisode({
-        group_hash: 'gh-recent',
-        firstMs: T0 + 2 * DAY_MS,
-        lastMs: T0 + 2 * DAY_MS + HOUR_MS,
+      event({
+        episodeId: 'old',
+        groupHash: 'gh-old',
+        status: ALERT_EPISODE_STATUS.INACTIVE,
+        tsMs: T0 + HOUR_MS,
       }),
-      buildEpisode({
-        group_hash: 'gh-long-open',
-        'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
-        firstMs: T0,
-        lastMs: T0 + 3 * DAY_MS,
+      event({
+        episodeId: 'recent',
+        groupHash: 'gh-recent',
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        tsMs: T0 + 2 * DAY_MS,
+      }),
+      event({
+        episodeId: 'recent',
+        groupHash: 'gh-recent',
+        status: ALERT_EPISODE_STATUS.INACTIVE,
+        tsMs: T0 + 2 * DAY_MS + HOUR_MS,
+      }),
+      event({
+        episodeId: 'long-open',
+        groupHash: 'gh-long-open',
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        tsMs: T0,
+      }),
+      // Give the long-open lane a fresh event so it sorts first by recently_active.
+      event({
+        episodeId: 'long-open',
+        groupHash: 'gh-long-open',
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        tsMs: T0 + 3 * DAY_MS,
       }),
     ];
 
-    expect(deriveGanttData(episodes, {}, 'recently_active').rows.map((r) => r.groupHash)).toEqual([
-      'gh-long-open',
-      'gh-recent',
-      'gh-old',
-    ]);
-    expect(deriveGanttData(episodes, {}, 'longest_open').rows.map((r) => r.groupHash)[0]).toBe(
+    expect(
+      deriveGanttData(events, {}, 'recently_active', NOW).rows.map((r) => r.groupHash)
+    ).toEqual(['gh-long-open', 'gh-recent', 'gh-old']);
+    expect(deriveGanttData(events, {}, 'longest_open', NOW).rows.map((r) => r.groupHash)[0]).toBe(
       'gh-long-open'
     );
   });
