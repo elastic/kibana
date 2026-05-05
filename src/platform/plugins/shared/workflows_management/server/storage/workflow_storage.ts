@@ -38,6 +38,7 @@ const storageSettings = {
       managed: types.boolean({}),
       managedBy: types.keyword({}),
       definitionHash: types.keyword({ index: false }),
+      managedTemplateValues: types.object({ enabled: false }),
       originSystemWorkflowId: types.keyword({}),
       lifecycle: types.keyword({}),
       updated_at: types.date({}), // We sort by this
@@ -67,6 +68,7 @@ export interface WorkflowProperties {
   managed?: boolean;
   managedBy?: string | null;
   definitionHash?: string | null;
+  managedTemplateValues?: Record<string, unknown> | null;
   originSystemWorkflowId?: string | null;
   lifecycle?: 'static' | 'dynamic' | null;
   deleted_at: Date | null;

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import type {
@@ -88,6 +89,30 @@ export class WorkflowCrudService {
 
     const response = await this.deps.workflowStorage.getClient().search({
       query: { bool: { must, must_not } },
+      size: 1000,
+      track_total_hits: false,
+    });
+
+    return response.hits.hits
+      .filter((hit): hit is typeof hit & { _id: string; _source: WorkflowProperties } =>
+        Boolean(hit._id && hit._source)
+      )
+      .map((hit) => ({
+        id: hit._id,
+        source: hit._source,
+      }));
+  }
+
+  async getManagedWorkflowDocumentsAllSpaces(options?: {
+    includeDeleted?: boolean;
+  }): Promise<Array<{ id: string; source: WorkflowProperties }>> {
+    const must: estypes.QueryDslQueryContainer[] = [{ term: { managed: true } }];
+    const mustNot: estypes.QueryDslQueryContainer[] = options?.includeDeleted
+      ? []
+      : [{ exists: { field: 'deleted_at' } }];
+
+    const response = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must, must_not: mustNot } },
       size: 1000,
       track_total_hits: false,
     });

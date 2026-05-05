@@ -439,4 +439,9 @@ export class WorkflowsService {
     await this.ensureInitialized();
     return this.managedWorkflowsService.reconcileManagedWorkflowOrphans(pluginIds, options);
   }
+
+  public async reconcileAutoManagedWorkflowUpdates(): Promise<void> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.reconcileAutoManagedWorkflowUpdates();
+  }
 }

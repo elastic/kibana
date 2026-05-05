@@ -13,10 +13,13 @@ export interface ManagedWorkflowManagement {
   enablement?: 'enforced' | 'restorable';
 }
 
+export type ManagedWorkflowTemplateValues = Record<string, unknown>;
+
 export interface ManagedWorkflowDefinition {
   id: string;
   pluginId: string;
-  yaml: string;
+  yaml?: string;
+  yamlTemplate?: (values: ManagedWorkflowTemplateValues) => string;
   management?: ManagedWorkflowManagement;
 }
 

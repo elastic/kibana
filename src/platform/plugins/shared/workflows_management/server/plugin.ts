@@ -17,7 +17,10 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  ENTITY_MONITOR_WORKFLOW_ID,
+  WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { createWorkflowSmlType } from './agent_builder/sml_types/workflow';
 import { defineRoutes } from './api/routes';
@@ -138,16 +141,9 @@ export class WorkflowsPlugin
 
     if (this.workflowsService) {
       const managedWorkflowPluginIds = plugins.workflowsExtensions.getManagedWorkflowPluginIds();
-      void this.workflowsService
-        .reconcileManagedWorkflowOrphans(managedWorkflowPluginIds)
-        .catch((error) => {
-          this.logger.warn('Workflows Management: Failed to reconcile managed workflow orphans', {
-            error,
-          });
-        });
+      void this.runManagedWorkflowsStartupReconciliation(managedWorkflowPluginIds);
+      void this.initializeManagedWorkflowsOnStart();
     }
-
-    void this.initializeManagedWorkflowsOnStart();
 
     this.logger.debug('Workflows Management: Started');
     return {};
@@ -229,10 +225,34 @@ export class WorkflowsPlugin
         { isStartupReconcile: true },
         WORKFLOWS_MANAGEMENT_PLUGIN_ID
       );
+      await this.workflowsService?.installManagedWorkflow(
+        ENTITY_MONITOR_WORKFLOW_ID,
+        {
+          isStartupReconcile: true,
+          values: {
+            entityId: 'default',
+          },
+        },
+        WORKFLOWS_MANAGEMENT_PLUGIN_ID
+      );
     } catch (error) {
       this.logger.warn('Workflows Management: Failed to initialize managed workflows on start', {
         error,
       });
+    }
+  }
+
+  private async runManagedWorkflowsStartupReconciliation(pluginIds: string[]): Promise<void> {
+    try {
+      await this.workflowsService?.reconcileManagedWorkflowOrphans(pluginIds);
+      await this.workflowsService?.reconcileAutoManagedWorkflowUpdates();
+    } catch (error) {
+      this.logger.warn(
+        'Workflows Management: Failed to complete managed workflows startup reconciliation',
+        {
+          error,
+        }
+      );
     }
   }
 

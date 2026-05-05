@@ -33,3 +33,31 @@ steps:
     enablement: 'restorable',
   },
 };
+
+export const ENTITY_MONITOR_WORKFLOW_ID = 'system-entity-monitor';
+
+export interface EntityMonitorWorkflowTemplateValues {
+  entityId: string;
+}
+
+export const ENTITY_MONITOR_WORKFLOW_EXAMPLE: ManagedWorkflowDefinition = {
+  id: ENTITY_MONITOR_WORKFLOW_ID,
+  pluginId: 'workflowsManagement',
+  yamlTemplate: ({ entityId }) => `name: Entity Monitor - ${entityId}
+enabled: true
+triggers:
+  - type: scheduled
+    with:
+      every: 52m
+steps:
+  - name: check_entity
+    type: console
+    with:
+      message: "Checking entity: ${entityId}"
+`,
+  management: {
+    lifecycle: 'dynamic',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+};

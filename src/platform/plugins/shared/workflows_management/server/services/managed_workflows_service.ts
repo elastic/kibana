@@ -14,6 +14,7 @@ import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
   type ManagedWorkflowId,
+  type ManagedWorkflowTemplateValues,
   type ResolvedManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
 import type {
@@ -62,6 +63,32 @@ export class ManagedWorkflowsService {
     await this.cleanupOrphanManagedWorkflows(options);
   }
 
+  public async reconcileAutoManagedWorkflowUpdates(): Promise<void> {
+    const existingManagedDocs = await this.deps.crudService.getManagedWorkflowDocumentsAllSpaces({
+      includeDeleted: false,
+    });
+
+    for (const { id: workflowDocumentId, source } of existingManagedDocs) {
+      const definitionId = source.originSystemWorkflowId;
+      const owner = source.managedBy;
+      const spaceId = source.spaceId;
+      if (definitionId && owner && spaceId && this.registeredPluginIds.has(owner)) {
+        const definition = getManagedWorkflowDefinition(definitionId);
+        if (definition && definition.management.versionStrategy === 'auto') {
+          await this.installManagedWorkflow(
+            definition.id,
+            {
+              isStartupReconcile: true,
+              spaceId,
+              workflowId: workflowDocumentId,
+            },
+            definition.pluginId
+          );
+        }
+      }
+    }
+  }
+
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
     options?: InstallManagedWorkflowOptions,
@@ -76,15 +103,22 @@ export class ManagedWorkflowsService {
     const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
     const spaceId = options?.spaceId ?? DEFAULT_MANAGED_WORKFLOW_SPACE_ID;
     const now = new Date().toISOString();
-    const definitionHash = computeDefinitionHash(definition.yaml);
+    const definitionHash = this.computeManagedDefinitionHash(definition);
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
       workflowDocumentId,
       spaceId
     );
+    const { yaml, managedTemplateValues } = this.resolveManagedWorkflowYaml({
+      definition,
+      values: options?.values,
+      existingTemplateValues: existing?.managedTemplateValues,
+    });
 
     if (!existing) {
       const document = this.buildManagedWorkflowDocument({
         definition,
+        yaml,
+        managedTemplateValues,
         spaceId,
         now,
         definitionHash,
@@ -100,7 +134,9 @@ export class ManagedWorkflowsService {
     }
 
     if (existing.definitionHash === definitionHash) {
-      return;
+      if (this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)) {
+        return;
+      }
     }
 
     if (definition.management.versionStrategy === 'on_adopt' && options?.isStartupReconcile) {
@@ -110,6 +146,8 @@ export class ManagedWorkflowsService {
     const enabled = definition.management.enablement === 'enforced' ? undefined : existing.enabled;
     const document = this.buildManagedWorkflowDocument({
       definition,
+      yaml,
+      managedTemplateValues,
       spaceId,
       now,
       definitionHash,
@@ -199,14 +237,17 @@ export class ManagedWorkflowsService {
 
   private buildManagedWorkflowDocument(params: {
     definition: ResolvedManagedWorkflowDefinition;
+    yaml: string;
+    managedTemplateValues: ManagedWorkflowTemplateValues | null;
     spaceId: string;
     now: string;
     definitionHash: string;
     enabled?: boolean;
     createdAt?: string;
   }): WorkflowProperties {
-    const { definition, spaceId, now, definitionHash, createdAt } = params;
-    const parsed = parseYamlToJSONWithoutValidation(definition.yaml);
+    const { definition, yaml, managedTemplateValues, spaceId, now, definitionHash, createdAt } =
+      params;
+    const parsed = parseYamlToJSONWithoutValidation(yaml);
 
     let workflowModel: EsWorkflowCreate | null = null;
     if (parsed.success && parsed.json && typeof parsed.json === 'object') {
@@ -221,7 +262,7 @@ export class ManagedWorkflowsService {
 
     const yamlDefinedEnabled = workflowModel?.enabled ?? true;
     const resolvedEnabled = params.enabled ?? yamlDefinedEnabled;
-    const resolvedYaml = updateYamlField(definition.yaml, 'enabled', resolvedEnabled);
+    const resolvedYaml = updateYamlField(yaml, 'enabled', resolvedEnabled);
     const resolvedDefinition = workflowModel?.definition
       ? {
           ...workflowModel.definition,
@@ -243,6 +284,7 @@ export class ManagedWorkflowsService {
       managed: true,
       managedBy: definition.pluginId,
       definitionHash,
+      managedTemplateValues,
       originSystemWorkflowId: definition.id,
       lifecycle: definition.management.lifecycle,
       deleted_at: null,
@@ -294,6 +336,58 @@ export class ManagedWorkflowsService {
     }
 
     return id;
+  }
+
+  private resolveManagedWorkflowYaml(params: {
+    definition: ResolvedManagedWorkflowDefinition;
+    values?: ManagedWorkflowTemplateValues;
+    existingTemplateValues?: Record<string, unknown> | null;
+  }): { yaml: string; managedTemplateValues: ManagedWorkflowTemplateValues | null } {
+    const { definition, values, existingTemplateValues } = params;
+
+    if (definition.yamlTemplate) {
+      const templateValues = values ?? existingTemplateValues ?? {};
+      const yaml = definition.yamlTemplate(templateValues);
+      return {
+        yaml,
+        managedTemplateValues: templateValues,
+      };
+    }
+
+    if (!definition.yaml) {
+      throw new Error(
+        `Managed workflow '${definition.id}' must define either yaml or yamlTemplate`
+      );
+    }
+    if (values) {
+      throw new Error(
+        `Managed workflow '${definition.id}' does not define yamlTemplate but values were provided`
+      );
+    }
+
+    return {
+      yaml: definition.yaml,
+      managedTemplateValues: null,
+    };
+  }
+
+  private computeManagedDefinitionHash(definition: ResolvedManagedWorkflowDefinition): string {
+    if (definition.yamlTemplate) {
+      return computeDefinitionHash(definition.yamlTemplate.toString());
+    }
+    if (!definition.yaml) {
+      throw new Error(
+        `Managed workflow '${definition.id}' must define either yaml or yamlTemplate`
+      );
+    }
+    return computeDefinitionHash(definition.yaml);
+  }
+
+  private areTemplateValuesEqual(
+    existing: Record<string, unknown> | null | undefined,
+    next: Record<string, unknown> | null
+  ): boolean {
+    return JSON.stringify(existing ?? null) === JSON.stringify(next ?? null);
   }
 
   private async cleanupOrphanManagedWorkflows(options?: { spaceId?: string }): Promise<void> {

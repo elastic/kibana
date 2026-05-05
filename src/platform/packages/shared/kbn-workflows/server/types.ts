@@ -14,6 +14,7 @@ export interface ManagedWorkflowOperationOptions {
   spaceId?: string;
   workflowId?: string;
   workflowIdSuffix?: string;
+  values?: Record<string, unknown>;
 }
 
 export interface ExecuteManagedWorkflowOptions extends ManagedWorkflowOperationOptions {
