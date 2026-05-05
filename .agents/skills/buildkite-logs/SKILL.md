@@ -32,6 +32,15 @@ If the token is missing, ask the user to export it:
 
 ---
 
+## URL takes priority
+
+**If the user provides a Buildkite URL, always extract the build number from that URL and fetch it directly. Never fall back to "latest build for the PR" when the user has given an explicit URL.**
+
+Pattern: `https://buildkite.com/elastic/kibana-pull-request/builds/<BUILD_NUMBER>[/...]`
+Extract `<BUILD_NUMBER>` and use it immediately. Do not query by PR number instead.
+
+---
+
 ## Fetch build by number
 
 ```bash
@@ -48,12 +57,27 @@ To get a build number from a Buildkite URL like
 
 ## Fetch latest build for a PR
 
+The API returns builds **newest-first**, so `.[0]` is always the most recent build.
+
 ```bash
 PR=<number>
 curl -sf -H "$BK_AUTH" \
   "$BASE/organizations/$ORG/pipelines/$PIPELINE/builds?pull_request_id=$PR&per_page=1" \
   | jq '.[0] | {number,state,branch,web_url,jobs:[.jobs[]|{id,name,state,exit_status}]}'
 ```
+
+When the user reports a failure without a URL, use the `state` filter to fetch only failed
+builds directly — no page-size guessing needed:
+
+```bash
+curl -sf -H "$BK_AUTH" \
+  "$BASE/organizations/$ORG/pipelines/$PIPELINE/builds?pull_request_id=$PR&state[]=failed&state[]=failing&per_page=1" \
+  | jq '.[0] | {number,state,branch,web_url,jobs:[.jobs[]|{id,name,state,exit_status}]}'
+```
+
+Valid `state` values include: `running`, `passed`, `failing`, `failed`, `canceled`, `finished`
+(where `finished` matches `passed`, `failed`, `blocked`, `canceled`).
+Also supports arrays: `state[]=failed&state[]=failing`.
 
 ---
 

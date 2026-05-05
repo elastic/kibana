@@ -157,6 +157,7 @@
               "lineNumber": 79,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "TOptions",
               "trackAdoption": false
             }
           ]
@@ -219,6 +220,7 @@
               "lineNumber": 58,
               "columnNumber": 3,
               "deprecated": false,
+              "docsReferencedTypeName": "OutputOptions",
               "trackAdoption": false
             }
           ]
@@ -325,6 +327,7 @@
                 "lineNumber": 25,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "EsqlDocData",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -425,6 +428,7 @@
                 "lineNumber": 44,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetDocsOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -473,6 +477,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NlToEsqlTaskParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -571,6 +576,7 @@
             "lineNumber": 23,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "NlToEsqlTaskParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1770,7 +1776,15 @@
           "tags": [],
           "label": "getClient",
           "description": [
-            "\nCreates an {@link InferenceClient}, scoped to a request.\n"
+            "\nCreates an ",
+            {
+              "pluginId": "inference",
+              "scope": "server",
+              "docId": "kibInferencePluginApi",
+              "section": "def-server.InferenceClient",
+              "text": "InferenceClient"
+            },
+            ", scoped to a request.\n"
           ],
           "signature": [
             "<T extends ",
@@ -1814,6 +1828,7 @@
               "lineNumber": 124,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "T",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1827,7 +1842,15 @@
           "tags": [],
           "label": "getChatModel",
           "description": [
-            "\nCreates a langchain {@link InferenceChatModel} that will be using the inference framework\nunder the hood.\n"
+            "\nCreates a langchain ",
+            {
+              "pluginId": "inference",
+              "scope": "server",
+              "docId": "kibInferencePluginApi",
+              "section": "def-server.InferenceChatModel",
+              "text": "InferenceChatModel"
+            },
+            " that will be using the inference framework\nunder the hood.\n"
           ],
           "signature": [
             "(options: ",
@@ -1862,6 +1885,7 @@
               "lineNumber": 141,
               "columnNumber": 18,
               "deprecated": false,
+              "docsReferencedTypeName": "CreateChatModelOptions",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1913,6 +1937,7 @@
               "lineNumber": 149,
               "columnNumber": 22,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1966,6 +1991,7 @@
               "lineNumber": 157,
               "columnNumber": 25,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2040,6 +2066,7 @@
               "lineNumber": 167,
               "columnNumber": 34,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2055,7 +2082,23 @@
           "tags": [],
           "label": "getClientWithoutRequest",
           "description": [
-            "\nCreates an {@link InferenceClient} using pre-scoped services instead of a\n{@link KibanaRequest}. This is useful for background tasks (e.g. alerting rule\nexecutors) that have scoped clients but no HTTP request context.\n\nNote: anonymization features are not available on clients created this way.\n"
+            "\nCreates an ",
+            {
+              "pluginId": "inference",
+              "scope": "server",
+              "docId": "kibInferencePluginApi",
+              "section": "def-server.InferenceClient",
+              "text": "InferenceClient"
+            },
+            " using pre-scoped services instead of a\n",
+            {
+              "pluginId": "inference",
+              "scope": "server",
+              "docId": "kibInferencePluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            ". This is useful for background tasks (e.g. alerting rule\nexecutors) that have scoped clients but no HTTP request context.\n\nNote: anonymization features are not available on clients created this way.\n"
           ],
           "signature": [
             "(actionsClient: ",
@@ -2122,6 +2165,7 @@
               "lineNumber": 180,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "PublicMethodsOf",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -2141,6 +2185,7 @@
               "lineNumber": 181,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "ElasticsearchClient",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2156,7 +2201,15 @@
           ],
           "label": "getConnectorByIdWithoutClientRequest",
           "description": [
-            "\nRetrieves a specific inference connector by its ID, using pre-scoped services\ninstead of a {@link KibanaRequest}. This is useful for background tasks (e.g.\nalerting rule executors) that have scoped clients but no HTTP request.\n"
+            "\nRetrieves a specific inference connector by its ID, using pre-scoped services\ninstead of a ",
+            {
+              "pluginId": "inference",
+              "scope": "server",
+              "docId": "kibInferencePluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            ". This is useful for background tasks (e.g.\nalerting rule executors) that have scoped clients but no HTTP request.\n"
           ],
           "signature": [
             "(id: string, actionsClient: ",
@@ -2243,6 +2296,7 @@
               "lineNumber": 197,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "PublicMethodsOf",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -2262,6 +2316,7 @@
               "lineNumber": 198,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "ElasticsearchClient",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2315,6 +2370,7 @@
               "lineNumber": 207,
               "columnNumber": 27,
               "deprecated": false,
+              "docsReferencedTypeName": "InferenceTaskType",
               "trackAdoption": false,
               "isRequired": false
             }
@@ -2374,6 +2430,26 @@
           "returnComment": [
             "A promise that resolves to the inference endpoint metadata"
           ]
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.installTokenUsageDashboard",
+          "type": "Function",
+          "tags": [],
+          "label": "installTokenUsageDashboard",
+          "description": [
+            "\nInstalls the managed inference token usage dashboard (and its data view) into\nthe default space. Idempotent: existing assets are overwritten.\n\nCallers are responsible for gating this on whether token usage tracking is\nenabled — the inference plugin no longer self-installs the dashboard."
+          ],
+          "signature": [
+            "() => Promise<void>"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 218,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -2473,6 +2549,7 @@
             "lineNumber": 27,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "ChatCompleteAPI",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2546,6 +2623,7 @@
             "lineNumber": 29,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "ChatCompleteAPI",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2590,6 +2668,7 @@
             "lineNumber": 21,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "RestOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2634,6 +2713,7 @@
             "lineNumber": 22,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "BoundRestOptions",
             "trackAdoption": false,
             "isRequired": true
           }

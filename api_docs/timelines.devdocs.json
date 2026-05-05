@@ -319,7 +319,7 @@
                     "id": "def-public.getTableSkipFocus.$1.getFocusedCell.$1",
                     "type": "Object",
                     "tags": [],
-                    "label": "__0",
+                    "label": "{\n  containerElement,\n  tableClassName,\n}",
                     "description": [],
                     "signature": [
                       "{ containerElement: HTMLElement | null; tableClassName: string; }"
@@ -968,7 +968,7 @@
             "id": "def-public.OnColumnFocused.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  newFocusedColumn,\n  newFocusedColumnAriaColindex,\n}",
             "description": [],
             "signature": [
               "{ newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }"
@@ -1103,6 +1103,7 @@
               "lineNumber": 26,
               "columnNumber": 20,
               "deprecated": false,
+              "docsReferencedTypeName": "LastUpdatedAtProps",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1187,6 +1188,7 @@
               "lineNumber": 29,
               "columnNumber": 30,
               "deprecated": false,
+              "docsReferencedTypeName": "Store",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1282,6 +1284,7 @@
             "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Fields",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1370,6 +1373,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SearchHit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1801,6 +1805,7 @@
                 "lineNumber": 18,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Ecs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4588,7 +4593,7 @@
         "label": "TimelineEqlRequestOptionsInput",
         "description": [],
         "signature": [
-          "{ [x: string]: unknown; }"
+          "{ entityType: any; filterStatus: any; sort: { direction: any; field: string; esTypes?: string[] | undefined; type?: string | undefined; }[]; filterQuery: any; fieldRequested: string[]; language: any; indexType?: string | undefined; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; runtimeMappings?: Record<string, { type: any; script: any; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; params?: any; pagination?: { [x: string]: unknown; activePage: number; querySize: number; cursorStart?: number | undefined; } | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; timestampField?: string | undefined; size?: number | undefined; runTimeMappings?: Record<string, { type: any; script: any; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/eql.ts",
         "lineNumber": 26,
@@ -4605,7 +4610,7 @@
         "label": "TimelineEventsAllOptionsInput",
         "description": [],
         "signature": [
-          "{ [x: string]: unknown; }"
+          "{ entityType: any; filterStatus: any; fieldRequested: string[]; sort: { direction: any; field: string; esTypes: string[]; type?: string | undefined; }[]; filterQuery: any; fields: any[]; language: any; factoryQueryType: any; indexType?: string | undefined; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; params?: any; pagination?: { [x: string]: unknown; activePage: number; querySize: number; cursorStart?: number | undefined; } | undefined; authFilter?: Record<string, never> | undefined; dateRangeField?: string | undefined; excludeEcsData?: boolean | undefined; runtimeMappings?: Record<string, { type: any; script: any; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_all.ts",
         "lineNumber": 42,
@@ -4622,7 +4627,7 @@
         "label": "TimelineEventsDetailsRequestOptionsInput",
         "description": [],
         "signature": [
-          "{ [x: string]: unknown; }"
+          "{ indexName: string; eventId: string; factoryQueryType: any; indexType?: string | undefined; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; filterQuery?: any; defaultIndex?: string[] | undefined; entityType?: any; params?: any; filterStatus?: any; pagination?: { [x: string]: unknown; activePage: number; querySize: number; cursorStart?: number | undefined; } | undefined; authFilter?: Record<string, never> | undefined; runtimeMappings?: Record<string, { type: any; script: any; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_details.ts",
         "lineNumber": 21,
@@ -4639,7 +4644,7 @@
         "label": "TimelineEventsLastEventTimeRequestOptionsInput",
         "description": [],
         "signature": [
-          "{ [x: string]: unknown; }"
+          "{ indexKey: any; details: { hostName?: string | null | undefined; userName?: string | null | undefined; ip?: string | null | undefined; }; factoryQueryType: any; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
         "lineNumber": 44,
@@ -4656,7 +4661,7 @@
         "label": "TimelineKpiRequestOptionsInput",
         "description": [],
         "signature": [
-          "{ [x: string]: unknown; }"
+          "{ filterQuery: any; entityType: any; filterStatus: any; factoryQueryType: any; indexType?: string | undefined; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; runtimeMappings?: Record<string, { type: any; script: any; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; params?: any; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/kpi.ts",
         "lineNumber": 16,

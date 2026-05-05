@@ -210,6 +210,7 @@
                 "lineNumber": 23,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]
@@ -418,6 +419,7 @@
                 "lineNumber": 80,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Storage",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -748,6 +750,7 @@
                 "lineNumber": 37,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -784,6 +787,7 @@
                 "lineNumber": 41,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -940,6 +944,7 @@
                 "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1477,6 +1482,7 @@
                 "lineNumber": 15,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "IStorage",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1682,6 +1688,7 @@
             "lineNumber": 51,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "AbortSignal",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1720,6 +1727,7 @@
             "lineNumber": 32,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1737,6 +1745,7 @@
             "lineNumber": 32,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1893,6 +1902,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "History",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1934,6 +1944,7 @@
             "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "History",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1948,7 +1959,15 @@
         "tags": [],
         "label": "createKbnUrlStateStorage",
         "description": [
-          "\nCreates {@link IKbnUrlStateStorage} state storage"
+          "\nCreates ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.IKbnUrlStateStorage",
+            "text": "IKbnUrlStateStorage"
+          },
+          " state storage"
         ],
         "signature": [
           "({ useHash, useHashQuery, history, onGetError, onSetError, }?: { useHash: boolean; useHashQuery?: boolean | undefined; history?: ",
@@ -2057,6 +2076,7 @@
                     "lineNumber": 71,
                     "columnNumber": 19,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Error",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -2093,6 +2113,7 @@
                     "lineNumber": 72,
                     "columnNumber": 19,
                     "deprecated": false,
+                    "docsReferencedTypeName": "Error",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -2103,7 +2124,14 @@
           }
         ],
         "returnComment": [
-          "- {@link IKbnUrlStateStorage }"
+          "- ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.IKbnUrlStateStorage",
+            "text": "IKbnUrlStateStorage"
+          }
         ],
         "initialIsOpen": false
       },
@@ -2437,6 +2465,7 @@
             "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "History",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2504,6 +2533,7 @@
             "lineNumber": 38,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "History",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2518,7 +2548,16 @@
         "tags": [],
         "label": "createSessionStorageStateStorage",
         "description": [
-          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\nCreates ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.ISessionStorageStateStorage",
+            "text": "ISessionStorageStateStorage"
+          },
+          "\n",
+          "guide"
         ],
         "signature": [
           "(storage?: Storage) => ",
@@ -2552,12 +2591,20 @@
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Storage",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "- {@link ISessionStorageStateStorage }"
+          "- ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.ISessionStorageStateStorage",
+            "text": "ISessionStorageStateStorage"
+          }
         ],
         "initialIsOpen": false
       },
@@ -2608,6 +2655,7 @@
             "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StartServicesAccessor",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2659,6 +2707,7 @@
             "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2708,6 +2757,7 @@
             "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2727,6 +2777,7 @@
             "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PureTransitions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2784,6 +2835,7 @@
             "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2803,6 +2855,7 @@
             "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PureTransitions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2822,6 +2875,7 @@
             "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PureSelectors",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2848,6 +2902,7 @@
             "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateStateContainerOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -2862,7 +2917,17 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.StateContainer",
+            "text": "State Containers"
+          },
+          " with react\nRefer to ",
+          "guide",
+          " for details"
         ],
         "signature": [
           "<Container extends ",
@@ -2974,6 +3039,7 @@
             "lineNumber": 23,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "Storage",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3038,6 +3104,7 @@
             "lineNumber": 14,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "HTMLElement",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3075,6 +3142,7 @@
             "lineNumber": 18,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "HTMLElement",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3225,6 +3293,7 @@
             "lineNumber": 14,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Location",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3365,6 +3434,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -3433,6 +3503,7 @@
             "lineNumber": 32,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "IParsedUrlQuery",
             "trackAdoption": false
           },
           {
@@ -3449,6 +3520,7 @@
             "lineNumber": 33,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "IUrlQueryMapperOptions",
             "trackAdoption": false
           }
         ],
@@ -3521,6 +3593,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Promise",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3558,6 +3631,7 @@
             "lineNumber": 34,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3688,6 +3762,7 @@
                     "lineNumber": 79,
                     "columnNumber": 32,
                     "deprecated": false,
+                    "docsReferencedTypeName": "NavigateToAppOptions",
                     "trackAdoption": false
                   }
                 ]
@@ -3790,6 +3865,7 @@
                     "lineNumber": 93,
                     "columnNumber": 23,
                     "deprecated": false,
+                    "docsReferencedTypeName": "SavedObjectNotFound",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -3868,6 +3944,7 @@
             "lineNumber": 15,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "History",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3997,6 +4074,7 @@
             "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4014,6 +4092,7 @@
             "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SetStateToKbnUrlHashOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4045,7 +4124,9 @@
         "tags": [],
         "label": "syncState",
         "description": [
-          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
+          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo ",
+          "here",
+          " for a complete guide and examples.\n"
         ],
         "signature": [
           "({\n  storageKey,\n  stateStorage,\n  stateContainer,\n}: ",
@@ -4117,12 +4198,20 @@
             "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IStateSyncConfig",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "- {@link ISyncStateRef }"
+          "- ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.ISyncStateRef",
+            "text": "ISyncStateRef"
+          }
         ],
         "initialIsOpen": false
       },
@@ -4205,6 +4294,7 @@
             "lineNumber": 198,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4245,6 +4335,7 @@
             "lineNumber": 32,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "IParsedUrlQuery",
             "trackAdoption": false
           },
           {
@@ -4261,6 +4352,7 @@
             "lineNumber": 33,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "IUrlQueryMapperOptions",
             "trackAdoption": false
           }
         ],
@@ -4357,6 +4449,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Container",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4410,6 +4503,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Comparator",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4426,7 +4520,15 @@
         "tags": [],
         "label": "useContainerState",
         "description": [
-          "\nReact hooks that returns the latest state of a {@link StateContainer}.\n"
+          "\nReact hooks that returns the latest state of a ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.StateContainer",
+            "text": "StateContainer"
+          },
+          ".\n"
         ],
         "signature": [
           "<Container extends ",
@@ -4469,12 +4571,21 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Container",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "- latest {@link StateContainer } state"
+          "- latest ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.StateContainer",
+            "text": "StateContainer"
+          },
+          " state"
         ],
         "initialIsOpen": false
       },
@@ -4485,7 +4596,15 @@
         "tags": [],
         "label": "withNotifyOnErrors",
         "description": [
-          "\nHelper for configuring {@link IKbnUrlStateStorage} to notify about inner errors\n"
+          "\nHelper for configuring ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.IKbnUrlStateStorage",
+            "text": "IKbnUrlStateStorage"
+          },
+          " to notify about inner errors\n"
         ],
         "signature": [
           "(toasts: ",
@@ -4602,6 +4721,7 @@
                 "lineNumber": 71,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "State",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4615,7 +4735,15 @@
             "tags": [],
             "label": "state$",
             "description": [
-              "\n{@link Observable} of state"
+              "\n",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Observable",
+                "text": "Observable"
+              },
+              " of state"
             ],
             "signature": [
               "Observable",
@@ -4705,6 +4833,7 @@
                 "lineNumber": 51,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4789,6 +4918,7 @@
                 "lineNumber": 23,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4827,6 +4957,7 @@
                 "lineNumber": 28,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4844,6 +4975,7 @@
                 "lineNumber": 28,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4891,6 +5023,7 @@
                 "lineNumber": 1109,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               },
               {
@@ -4961,6 +5094,7 @@
                 "lineNumber": 55,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4977,7 +5111,16 @@
         "tags": [],
         "label": "IKbnUrlStateStorage",
         "description": [
-          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
+          "\nKbnUrlStateStorage is a state storage for ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.syncState",
+            "text": "syncState"
+          },
+          " utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n",
+          "Refer to this guide for more info"
         ],
         "signature": [
           {
@@ -5049,6 +5192,7 @@
                 "lineNumber": 38,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "State",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5205,7 +5349,15 @@
         "tags": [],
         "label": "INullableBaseStateContainer",
         "description": [
-          "\nExtension of {@link BaseStateContainer} with one constraint: set state should handle `null` as incoming state"
+          "\nExtension of ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.BaseStateContainer",
+            "text": "BaseStateContainer"
+          },
+          " with one constraint: set state should handle `null` as incoming state"
         ],
         "signature": [
           {
@@ -5277,7 +5429,24 @@
         "tags": [],
         "label": "ISessionStorageStateStorage",
         "description": [
-          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\n",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.IStateStorage",
+            "text": "IStateStorage"
+          },
+          " for storing state in browser ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Storage",
+            "text": "Storage"
+          },
+          "\n",
+          "guide"
         ],
         "signature": [
           {
@@ -5349,6 +5518,7 @@
                 "lineNumber": 18,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "State",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5401,7 +5571,23 @@
         "tags": [],
         "label": "IStateStorage",
         "description": [
-          "\nAny StateStorage have to implement IStateStorage interface\nStateStorage is responsible for:\n* state serialisation / deserialization\n* persisting to and retrieving from storage\n\nFor an example take a look at already implemented {@link IKbnUrlStateStorage} and {@link ISessionStorageStateStorage} state storages"
+          "\nAny StateStorage have to implement IStateStorage interface\nStateStorage is responsible for:\n* state serialisation / deserialization\n* persisting to and retrieving from storage\n\nFor an example take a look at already implemented ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.IKbnUrlStateStorage",
+            "text": "IKbnUrlStateStorage"
+          },
+          " and ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.ISessionStorageStateStorage",
+            "text": "ISessionStorageStateStorage"
+          },
+          " state storages"
         ],
         "path": "src/platform/plugins/shared/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
         "lineNumber": 12,
@@ -5458,6 +5644,7 @@
                 "lineNumber": 25,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "State",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5549,7 +5736,15 @@
             "tags": [],
             "label": "cancel",
             "description": [
-              "\nOptional method to cancel any pending activity\n{@link syncState} will call it during destroy, if it is provided by IStateStorage"
+              "\nOptional method to cancel any pending activity\n",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.syncState",
+                "text": "syncState"
+              },
+              " will call it during destroy, if it is provided by IStateStorage"
             ],
             "signature": [
               "(() => void) | undefined"
@@ -5572,7 +5767,14 @@
         "tags": [],
         "label": "IStateSyncConfig",
         "description": [
-          "\nConfig for setting up state syncing with {@link stateSync}"
+          "\nConfig for setting up state syncing with ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.stateSync",
+            "text": "stateSync"
+          }
         ],
         "signature": [
           {
@@ -5612,7 +5814,23 @@
             "tags": [],
             "label": "stateContainer",
             "description": [
-              "\nState container to keep in sync with storage, have to implement {@link INullableBaseStateContainer} interface\nWe encourage to use {@link BaseStateContainer} as a state container,\nbut it is also possible to implement own custom container for advanced use cases"
+              "\nState container to keep in sync with storage, have to implement ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.INullableBaseStateContainer",
+                "text": "INullableBaseStateContainer"
+              },
+              " interface\nWe encourage to use ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.BaseStateContainer",
+                "text": "BaseStateContainer"
+              },
+              " as a state container,\nbut it is also possible to implement own custom container for advanced use cases"
             ],
             "signature": [
               {
@@ -5637,7 +5855,15 @@
             "tags": [],
             "label": "stateStorage",
             "description": [
-              "\nState storage to use,\nState storage is responsible for serialising / deserialising and persisting / retrieving stored state\n\nThere are common strategies already implemented:\nsee {@link IKbnUrlStateStorage}\nwhich replicate what State (AppState, GlobalState) in legacy world did\n"
+              "\nState storage to use,\nState storage is responsible for serialising / deserialising and persisting / retrieving stored state\n\nThere are common strategies already implemented:\nsee ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.IKbnUrlStateStorage",
+                "text": "IKbnUrlStateStorage"
+              },
+              "\nwhich replicate what State (AppState, GlobalState) in legacy world did\n"
             ],
             "signature": [
               "StateStorage"
@@ -5757,6 +5983,7 @@
                 "lineNumber": 19,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5926,6 +6153,7 @@
                 "lineNumber": 12,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6130,7 +6358,15 @@
         "tags": [],
         "label": "ReduxLikeStateContainer",
         "description": [
-          "\nFully featured state container which matches Redux store interface. Extends {@link StateContainer}.\nAllows to use state container with redux libraries."
+          "\nFully featured state container which matches Redux store interface. Extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.StateContainer",
+            "text": "StateContainer"
+          },
+          ".\nAllows to use state container with redux libraries."
         ],
         "signature": [
           {
@@ -6207,6 +6443,7 @@
                 "lineNumber": 131,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "State",
                 "trackAdoption": false
               },
               {
@@ -6224,6 +6461,7 @@
                 "lineNumber": 132,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TransitionDescription",
                 "trackAdoption": false
               }
             ]
@@ -6273,6 +6511,7 @@
                 "lineNumber": 106,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "Reducer",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6312,6 +6551,7 @@
                 "lineNumber": 107,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "TransitionDescription",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6363,6 +6603,7 @@
                 "lineNumber": 108,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "Middleware",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6415,7 +6656,31 @@
         "tags": [],
         "label": "StateContainer",
         "description": [
-          "\nFully featured state container with {@link Selector | Selectors} and {@link Transition | Transitions}. Extends {@link BaseStateContainer}."
+          "\nFully featured state container with ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Selector",
+            "text": "Selectors"
+          },
+          " and ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Transition",
+            "text": "Transitions"
+          },
+          ". Extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.BaseStateContainer",
+            "text": "BaseStateContainer"
+          },
+          "."
         ],
         "signature": [
           {
@@ -6506,7 +6771,15 @@
         "tags": [],
         "label": "BaseState",
         "description": [
-          "\nBase {@link StateContainer} state shape"
+          "\nBase ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.StateContainer",
+            "text": "StateContainer"
+          },
+          " state shape"
         ],
         "signature": [
           "object"
@@ -6525,7 +6798,15 @@
         "tags": [],
         "label": "Comparator",
         "description": [
-          "\nUsed to compare state, see {@link useContainerSelector}."
+          "\nUsed to compare state, see ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.useContainerSelector",
+            "text": "useContainerSelector"
+          },
+          "."
         ],
         "signature": [
           "(previous: Result, current: Result) => boolean"
@@ -6551,6 +6832,7 @@
             "lineNumber": 179,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Result",
             "trackAdoption": false
           },
           {
@@ -6567,6 +6849,7 @@
             "lineNumber": 179,
             "columnNumber": 53,
             "deprecated": false,
+            "docsReferencedTypeName": "Result",
             "trackAdoption": false
           }
         ],
@@ -6613,6 +6896,7 @@
             "lineNumber": 197,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MapStateToProps",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -6630,6 +6914,7 @@
                 "lineNumber": 186,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "State",
                 "trackAdoption": false
               }
             ]
@@ -6670,6 +6955,7 @@
             "lineNumber": 116,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],
@@ -6714,6 +7000,7 @@
             "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false
           }
         ],
@@ -6758,6 +7045,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false
           }
         ],
@@ -6789,7 +7077,14 @@
         "tags": [],
         "label": "MapStateToProps",
         "description": [
-          "\nState container state to component props mapper.\nSee {@link Connect}"
+          "\nState container state to component props mapper.\nSee ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.Connect",
+            "text": "Connect"
+          }
         ],
         "signature": [
           "(state: State) => StateProps"
@@ -6815,6 +7110,7 @@
             "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false
           }
         ],
@@ -6875,6 +7171,7 @@
             "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false
           }
         ],
@@ -6919,6 +7216,7 @@
             "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false
           }
         ],
@@ -7019,6 +7317,7 @@
             "lineNumber": 151,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "Args",
             "trackAdoption": false
           }
         ],
@@ -7059,6 +7358,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false
           }
         ],
@@ -7099,6 +7399,7 @@
             "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false
           },
           {
@@ -7116,6 +7417,7 @@
             "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TransitionDescription",
             "trackAdoption": false
           }
         ],
@@ -7152,6 +7454,7 @@
             "lineNumber": 151,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "Args",
             "trackAdoption": false
           }
         ],
@@ -7188,6 +7491,7 @@
             "lineNumber": 11,
             "columnNumber": 23,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],
@@ -7259,7 +7563,14 @@
         "tags": [],
         "label": "UnboxState",
         "description": [
-          "\nUtility type for inferring state shape from {@link StateContainer}"
+          "\nUtility type for inferring state shape from ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.StateContainer",
+            "text": "StateContainer"
+          }
         ],
         "signature": [
           "Container extends ",
@@ -7353,6 +7664,7 @@
                 "lineNumber": 36,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ParsedQuery",
                 "trackAdoption": false
               },
               {
@@ -7755,6 +8067,7 @@
                 "lineNumber": 16,
                 "columnNumber": 68,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -7800,6 +8113,7 @@
             "lineNumber": 51,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "AbortSignal",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -8026,6 +8340,7 @@
             "lineNumber": 27,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -8102,6 +8417,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MigrateFunctionsObject",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -8125,6 +8441,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MigrateFunctionsObject",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -8178,6 +8495,7 @@
             "lineNumber": 41,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaResponseFactory",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -8201,6 +8519,7 @@
             "lineNumber": 41,
             "columnNumber": 63,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnServerError",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -8262,6 +8581,7 @@
             "lineNumber": 11,
             "columnNumber": 23,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],
@@ -8318,6 +8638,7 @@
                 "lineNumber": 36,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ParsedQuery",
                 "trackAdoption": false
               },
               {
@@ -8736,6 +9057,7 @@
                 "lineNumber": 23,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]
@@ -9364,6 +9686,7 @@
             "lineNumber": 51,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "AbortSignal",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -9519,6 +9842,7 @@
             "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -9568,6 +9892,7 @@
             "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -9587,6 +9912,7 @@
             "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PureTransitions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -9644,6 +9970,7 @@
             "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -9663,6 +9990,7 @@
             "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PureTransitions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -9682,6 +10010,7 @@
             "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PureSelectors",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -9708,6 +10037,7 @@
             "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateStateContainerOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -9722,7 +10052,17 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.StateContainer",
+            "text": "State Containers"
+          },
+          " with react\nRefer to ",
+          "guide",
+          " for details"
         ],
         "signature": [
           "<Container extends ",
@@ -9815,6 +10155,7 @@
             "lineNumber": 29,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],
@@ -10111,6 +10452,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MigrateFunctionsObject",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -10134,6 +10476,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MigrateFunctionsObject",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -10201,6 +10544,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MigrateFunctionsObject",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -10233,6 +10577,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "VersionedState",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -10312,6 +10657,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Promise",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -10432,6 +10778,7 @@
             "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -10449,6 +10796,7 @@
             "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SetStateToKbnUrlHashOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -10531,6 +10879,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Container",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -10584,6 +10933,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Comparator",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -10600,7 +10950,15 @@
         "tags": [],
         "label": "useContainerState",
         "description": [
-          "\nReact hooks that returns the latest state of a {@link StateContainer}.\n"
+          "\nReact hooks that returns the latest state of a ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.StateContainer",
+            "text": "StateContainer"
+          },
+          ".\n"
         ],
         "signature": [
           "<Container extends ",
@@ -10643,12 +11001,21 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Container",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "- latest {@link StateContainer } state"
+          "- latest ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.StateContainer",
+            "text": "StateContainer"
+          },
+          " state"
         ],
         "initialIsOpen": false
       }
@@ -10735,6 +11102,7 @@
                 "lineNumber": 71,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "State",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10748,7 +11116,15 @@
             "tags": [],
             "label": "state$",
             "description": [
-              "\n{@link Observable} of state"
+              "\n",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.Observable",
+                "text": "Observable"
+              },
+              " of state"
             ],
             "signature": [
               "Observable",
@@ -10810,6 +11186,7 @@
                 "lineNumber": 55,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10948,6 +11325,7 @@
                 "lineNumber": 56,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -10967,6 +11345,7 @@
                 "lineNumber": 56,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11011,6 +11390,7 @@
                 "lineNumber": 67,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -11075,6 +11455,7 @@
                 "lineNumber": 78,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11177,6 +11558,7 @@
                 "lineNumber": 130,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -11194,6 +11576,7 @@
                 "lineNumber": 130,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11238,6 +11621,7 @@
                 "lineNumber": 141,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -11302,6 +11686,7 @@
                 "lineNumber": 152,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11317,7 +11702,15 @@
             "tags": [],
             "label": "migrateToLatest",
             "description": [
-              "\nA function which receives the state of an older object and version and\nshould migrate the state of the object to the latest possible version using\nthe `.migrations` dictionary provided on a {@link PersistableState} item.\n"
+              "\nA function which receives the state of an older object and version and\nshould migrate the state of the object to the latest possible version using\nthe `.migrations` dictionary provided on a ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.PersistableState",
+                "text": "PersistableState"
+              },
+              " item.\n"
             ],
             "signature": [
               "((state: ",
@@ -11359,6 +11752,7 @@
                 "lineNumber": 163,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11404,7 +11798,15 @@
         "tags": [],
         "label": "ReduxLikeStateContainer",
         "description": [
-          "\nFully featured state container which matches Redux store interface. Extends {@link StateContainer}.\nAllows to use state container with redux libraries."
+          "\nFully featured state container which matches Redux store interface. Extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.StateContainer",
+            "text": "StateContainer"
+          },
+          ".\nAllows to use state container with redux libraries."
         ],
         "signature": [
           {
@@ -11481,6 +11883,7 @@
                 "lineNumber": 131,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "State",
                 "trackAdoption": false
               },
               {
@@ -11498,6 +11901,7 @@
                 "lineNumber": 132,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TransitionDescription",
                 "trackAdoption": false
               }
             ]
@@ -11547,6 +11951,7 @@
                 "lineNumber": 106,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "Reducer",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11586,6 +11991,7 @@
                 "lineNumber": 107,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "TransitionDescription",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11637,6 +12043,7 @@
                 "lineNumber": 108,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "Middleware",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11689,7 +12096,31 @@
         "tags": [],
         "label": "StateContainer",
         "description": [
-          "\nFully featured state container with {@link Selector | Selectors} and {@link Transition | Transitions}. Extends {@link BaseStateContainer}."
+          "\nFully featured state container with ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.Selector",
+            "text": "Selectors"
+          },
+          " and ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.Transition",
+            "text": "Transitions"
+          },
+          ". Extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.BaseStateContainer",
+            "text": "BaseStateContainer"
+          },
+          "."
         ],
         "signature": [
           {
@@ -11852,7 +12283,15 @@
         "tags": [],
         "label": "BaseState",
         "description": [
-          "\nBase {@link StateContainer} state shape"
+          "\nBase ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.StateContainer",
+            "text": "StateContainer"
+          },
+          " state shape"
         ],
         "signature": [
           "object"
@@ -11871,7 +12310,15 @@
         "tags": [],
         "label": "Comparator",
         "description": [
-          "\nUsed to compare state, see {@link useContainerSelector}."
+          "\nUsed to compare state, see ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.useContainerSelector",
+            "text": "useContainerSelector"
+          },
+          "."
         ],
         "signature": [
           "(previous: Result, current: Result) => boolean"
@@ -11897,6 +12344,7 @@
             "lineNumber": 179,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Result",
             "trackAdoption": false
           },
           {
@@ -11913,6 +12361,7 @@
             "lineNumber": 179,
             "columnNumber": 53,
             "deprecated": false,
+            "docsReferencedTypeName": "Result",
             "trackAdoption": false
           }
         ],
@@ -11959,6 +12408,7 @@
             "lineNumber": 197,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MapStateToProps",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -11976,6 +12426,7 @@
                 "lineNumber": 186,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "State",
                 "trackAdoption": false
               }
             ]
@@ -12016,6 +12467,7 @@
             "lineNumber": 116,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],
@@ -12060,6 +12512,7 @@
             "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false
           }
         ],
@@ -12104,6 +12557,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false
           }
         ],
@@ -12161,7 +12615,14 @@
         "tags": [],
         "label": "MapStateToProps",
         "description": [
-          "\nState container state to component props mapper.\nSee {@link Connect}"
+          "\nState container state to component props mapper.\nSee ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.Connect",
+            "text": "Connect"
+          }
         ],
         "signature": [
           "(state: State) => StateProps"
@@ -12187,6 +12648,7 @@
             "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false
           }
         ],
@@ -12247,6 +12709,7 @@
             "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false
           }
         ],
@@ -12283,6 +12746,7 @@
             "lineNumber": 100,
             "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "FromVersion",
             "trackAdoption": false
           }
         ],
@@ -12406,6 +12870,7 @@
             "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SerializableRecord",
             "trackAdoption": false
           },
           {
@@ -12463,6 +12928,7 @@
             "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false
           }
         ],
@@ -12563,6 +13029,7 @@
             "lineNumber": 151,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "Args",
             "trackAdoption": false
           }
         ],
@@ -12603,6 +13070,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false
           }
         ],
@@ -12643,6 +13111,7 @@
             "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "State",
             "trackAdoption": false
           },
           {
@@ -12660,6 +13129,7 @@
             "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TransitionDescription",
             "trackAdoption": false
           }
         ],
@@ -12696,6 +13166,7 @@
             "lineNumber": 151,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "Args",
             "trackAdoption": false
           }
         ],
@@ -12732,6 +13203,7 @@
             "lineNumber": 11,
             "columnNumber": 23,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],
@@ -12744,7 +13216,14 @@
         "tags": [],
         "label": "UnboxState",
         "description": [
-          "\nUtility type for inferring state shape from {@link StateContainer}"
+          "\nUtility type for inferring state shape from ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.StateContainer",
+            "text": "StateContainer"
+          }
         ],
         "signature": [
           "Container extends ",
@@ -12815,6 +13294,7 @@
                 "lineNumber": 36,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ParsedQuery",
                 "trackAdoption": false
               },
               {

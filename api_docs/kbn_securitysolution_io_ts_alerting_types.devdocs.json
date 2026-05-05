@@ -616,7 +616,15 @@
         "tags": [],
         "label": "SavedObjectAttributeSingle",
         "description": [
-          "\nTODO: This type are originally from \"src/core/types/saved_objects.ts\", once that is package friendly remove\nthis copied type.\n\nDon't use this type, it's simply a helper type for {@link SavedObjectAttribute}\n"
+          "\nTODO: This type are originally from \"src/core/types/saved_objects.ts\", once that is package friendly remove\nthis copied type.\n\nDon't use this type, it's simply a helper type for ",
+          {
+            "pluginId": "@kbn/securitysolution-io-ts-alerting-types",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionIoTsAlertingTypesPluginApi",
+            "section": "def-common.SavedObjectAttribute",
+            "text": "SavedObjectAttribute"
+          },
+          "\n"
         ],
         "signature": [
           "string | number | boolean | ",

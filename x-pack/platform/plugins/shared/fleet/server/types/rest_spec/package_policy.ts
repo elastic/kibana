@@ -31,13 +31,24 @@ import { BulkRequestBodySchema } from './common';
 
 export const GetPackagePoliciesRequestSchema = {
   query: schema.object({
-    page: schema.maybe(schema.number({ defaultValue: 1 })),
-    perPage: schema.maybe(schema.number({ defaultValue: 20 })),
-    sortField: schema.maybe(schema.string()),
-    sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-    showUpgradeable: schema.maybe(schema.boolean()),
+    page: schema.maybe(schema.number({ defaultValue: 1, meta: { description: 'Page number' } })),
+    perPage: schema.maybe(
+      schema.number({ defaultValue: 20, meta: { description: 'Number of results per page' } })
+    ),
+    sortField: schema.maybe(schema.string({ meta: { description: 'Field to sort results by' } })),
+    sortOrder: schema.maybe(
+      schema.oneOf([schema.literal('desc'), schema.literal('asc')], {
+        meta: { description: 'Sort order, ascending or descending' },
+      })
+    ),
+    showUpgradeable: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When true, only show policies with available upgrades' },
+      })
+    ),
     kuery: schema.maybe(
       schema.string({
+        meta: { description: 'A KQL query string to filter results' },
         validate: (value: string) => {
           const validationObj = validateKuery(
             value,
@@ -52,9 +63,15 @@ export const GetPackagePoliciesRequestSchema = {
       })
     ),
     format: schema.maybe(
-      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)], {
+        meta: { description: 'Format for the response: simplified or legacy' },
+      })
     ),
-    withAgentCount: schema.maybe(schema.boolean()),
+    withAgentCount: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When true, include the agent count per package policy' },
+      })
+    ),
   }),
 };
 
@@ -62,7 +79,9 @@ export const BulkGetPackagePoliciesRequestSchema = {
   body: BulkRequestBodySchema,
   query: schema.object({
     format: schema.maybe(
-      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)], {
+        meta: { description: 'Format for the response: simplified or legacy' },
+      })
     ),
   }),
 };
@@ -73,11 +92,13 @@ export const BulkGetPackagePoliciesResponseBodySchema = schema.object({
 
 export const GetOnePackagePolicyRequestSchema = {
   params: schema.object({
-    packagePolicyId: schema.string(),
+    packagePolicyId: schema.string({ meta: { description: 'The ID of the package policy' } }),
   }),
   query: schema.object({
     format: schema.maybe(
-      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)], {
+        meta: { description: 'Format for the response: simplified or legacy' },
+      })
     ),
   }),
 };
@@ -93,7 +114,9 @@ export const CreatePackagePolicyRequestSchema = {
   ),
   query: schema.object({
     format: schema.maybe(
-      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)], {
+        meta: { description: 'Format for the response: simplified or legacy' },
+      })
     ),
   }),
 };
@@ -110,7 +133,9 @@ export const UpdatePackagePolicyRequestSchema = {
   ]),
   query: schema.object({
     format: schema.maybe(
-      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)], {
+        meta: { description: 'Format for the response: simplified or legacy' },
+      })
     ),
   }),
 };
@@ -144,10 +169,14 @@ export const DeletePackagePoliciesResponseBodySchema = schema.arrayOf(
 
 export const DeleteOnePackagePolicyRequestSchema = {
   params: schema.object({
-    packagePolicyId: schema.string(),
+    packagePolicyId: schema.string({ meta: { description: 'The ID of the package policy' } }),
   }),
   query: schema.object({
-    force: schema.maybe(schema.boolean()),
+    force: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When true, delete the package policy even if it is managed' },
+      })
+    ),
   }),
 };
 

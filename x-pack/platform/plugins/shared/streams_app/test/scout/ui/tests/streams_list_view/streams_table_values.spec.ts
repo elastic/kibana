@@ -6,6 +6,7 @@
  */
 
 import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import { generateLogsData } from '../../fixtures/generators';
 
@@ -114,20 +115,53 @@ test.describe(
     });
 
     test('should display correct doc count in the table', async ({ pageObjects, page }) => {
-      // In serverless, indexing the failed docs takes longer, so we need to wait to ensure the doc counts are correct
-      await page.waitForTimeout(30000);
-      await page.reload();
-
-      // Verify the document count for each stream in the default time range - last 15 minutes
-      await pageObjects.streams.verifyDocCount(GOOD_QUALITY_STREAM, 50);
-      await pageObjects.streams.verifyDocCount(DEGRADED_QUALITY_STREAM, 52);
-      await pageObjects.streams.verifyDocCount(POOR_QUALITY_STREAM, 60);
+      // Poll all three counts together: failure-store settling lags indexing on serverless.
+      await expect
+        .poll(
+          async () => {
+            await page.reload();
+            await pageObjects.streams.expectStreamsTableVisible();
+            const [good, degraded, poor] = await Promise.all([
+              page
+                .locator(`[data-test-subj="streamsDocCount-${GOOD_QUALITY_STREAM}"]`)
+                .textContent(),
+              page
+                .locator(`[data-test-subj="streamsDocCount-${DEGRADED_QUALITY_STREAM}"]`)
+                .textContent(),
+              page
+                .locator(`[data-test-subj="streamsDocCount-${POOR_QUALITY_STREAM}"]`)
+                .textContent(),
+            ]);
+            return { good, degraded, poor };
+          },
+          { timeout: 90_000, intervals: [5000] }
+        )
+        .toStrictEqual({ good: '50', degraded: '52', poor: '60' });
     });
 
-    test('should display correct data quality badge', async ({ pageObjects }) => {
-      await pageObjects.streams.verifyDataQuality(GOOD_QUALITY_STREAM, 'Good');
-      await pageObjects.streams.verifyDataQuality(DEGRADED_QUALITY_STREAM, 'Degraded');
-      await pageObjects.streams.verifyDataQuality(POOR_QUALITY_STREAM, 'Poor');
+    test('should display correct data quality badge', async ({ pageObjects, page }) => {
+      // Reload between iterations: the list view caches doc-count promises per page mount.
+      await expect
+        .poll(
+          async () => {
+            await page.reload();
+            await pageObjects.streams.expectStreamsTableVisible();
+            const [good, degraded, poor] = await Promise.all([
+              page
+                .locator(`[data-test-subj="dataQualityIndicator-${GOOD_QUALITY_STREAM}"]`)
+                .textContent(),
+              page
+                .locator(`[data-test-subj="dataQualityIndicator-${DEGRADED_QUALITY_STREAM}"]`)
+                .textContent(),
+              page
+                .locator(`[data-test-subj="dataQualityIndicator-${POOR_QUALITY_STREAM}"]`)
+                .textContent(),
+            ]);
+            return { good, degraded, poor };
+          },
+          { timeout: 90_000, intervals: [5000] }
+        )
+        .toStrictEqual({ good: 'Good', degraded: 'Degraded', poor: 'Poor' });
     });
 
     test('should display correct retention in the table', async ({ pageObjects, config }) => {
