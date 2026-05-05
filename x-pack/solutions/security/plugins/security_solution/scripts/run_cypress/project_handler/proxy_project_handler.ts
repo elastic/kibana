@@ -180,6 +180,9 @@ export class ProxyHandler extends ProjectHandler {
 
   // Wait until Project is initialized
   waitForProjectInitialized(projectId: string): Promise<void> {
+    let lastPhase: string | undefined;
+    let attempts = 0;
+
     if (process.env.MKI_FORCE_PROJECT_INIT_TIMEOUT === '1') {
       return Promise.reject(
         new ProjectInitTimeoutError({
@@ -190,9 +193,6 @@ export class ProxyHandler extends ProjectHandler {
         })
       );
     }
-
-    let lastPhase: string | undefined;
-    let attempts = 0;
 
     const fetchProjectStatusAttempt = async (attemptNum: number) => {
       this.log.info(`Retry number ${attemptNum} to check if project is initialized.`);
