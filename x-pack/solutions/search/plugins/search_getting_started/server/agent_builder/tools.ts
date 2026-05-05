@@ -98,11 +98,14 @@ const setFeatureSchema = z.object({
     .describe(
       'The featureId of the Kibana AI feature to configure, exactly as returned by the list_inference_features tool.'
     ),
-  endpointId: z
-    .string()
-    .nullable()
+  endpointIds: z
+    .array(z.string())
     .describe(
-      'The inference endpoint connector ID to assign (e.g. ".elser_model_2"). Pass null to clear the admin override and revert to the recommended or default endpoint.'
+      'Ordered list of inference endpoint connector IDs to assign to this feature. ' +
+        'The first entry is the primary/preferred model; subsequent entries are fallbacks. ' +
+        'To set a single model pass a one-element array, e.g. ["openai-gpt-4o"]. ' +
+        'To reorder existing models supply them in the new desired order. ' +
+        'To clear the admin override entirely and revert to the recommended/default endpoint pass an empty array [].'
     ),
 });
 
@@ -113,9 +116,12 @@ export const createSetInferenceFeatureTool = (
   type: ToolType.builtin,
   tags: ['search'],
   description:
-    'Assigns an inference endpoint to a specific Kibana AI feature, or clears an existing admin override. Use this after listing available endpoints with list_inference_endpoints and features with list_inference_features.',
+    'Assigns an ordered list of inference endpoints to a specific Kibana AI feature. ' +
+    'The first endpoint in the list becomes the primary model; the rest are fallbacks. ' +
+    'Use this to assign a single model, reorder multiple models, or clear the admin override. ' +
+    'Always call list_inference_features first to confirm the featureId, and list_inference_endpoints to discover available endpoint IDs.',
   schema: setFeatureSchema,
-  handler: async ({ featureId, endpointId }, context) => {
+  handler: async ({ featureId, endpointIds }, context) => {
     const [, startDeps] = await coreSetup.getStartServices();
     const siePlugin = startDeps.searchInferenceEndpoints;
 
@@ -131,20 +137,18 @@ export const createSetInferenceFeatureTool = (
     }
 
     try {
-      await siePlugin.endpoints.setForFeature(featureId, endpointId);
+      await siePlugin.endpoints.setForFeature(featureId, endpointIds);
+      const message =
+        endpointIds.length === 0
+          ? `Admin override cleared for feature "${featureId}". It will now use the recommended or default endpoint.`
+          : `Feature "${featureId}" endpoint order updated: [${endpointIds.join(
+              ', '
+            )}]. The first entry is the primary model.`;
       return {
         results: [
           {
             type: ToolResultType.other,
-            data: {
-              success: true,
-              featureId,
-              assignedEndpointId: endpointId,
-              message:
-                endpointId !== null
-                  ? `Feature "${featureId}" is now assigned to endpoint "${endpointId}".`
-                  : `Admin override cleared for feature "${featureId}". It will now use the recommended or default endpoint.`,
-            },
+            data: { success: true, featureId, endpointIds, message },
           },
         ],
       };

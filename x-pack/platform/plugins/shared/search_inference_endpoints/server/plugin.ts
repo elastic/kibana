@@ -180,7 +180,7 @@ export class SearchInferenceEndpointsPlugin
         register: featureRegistry.register.bind(featureRegistry),
       },
       endpoints: {
-        setForFeature: async (featureId: string, endpointId: string | null) => {
+        setForFeature: async (featureId: string, endpointIds: string[]) => {
           const soClient = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
           let currentFeatures: InferenceSettingsAttributes['features'] = [];
           try {
@@ -195,7 +195,7 @@ export class SearchInferenceEndpointsPlugin
           const idx = currentFeatures.findIndex((f) => f.feature_id === featureId);
           const entry = {
             feature_id: featureId,
-            endpoints: endpointId ? [{ id: endpointId }] : [],
+            endpoints: endpointIds.map((id) => ({ id })),
           };
           const updatedFeatures =
             idx >= 0
