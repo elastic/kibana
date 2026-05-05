@@ -423,7 +423,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'src/platform/packages/shared/kbn-kbn-client/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-mcp-dev-server/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-test-saml-auth/**/*.{js,mjs,ts,tsx}',
-  'src/platform/plugins/shared/workflows_management/server/connectors/workflows/**/*.{js,mjs,ts,tsx}',
   'src/platform/test/api_integration/apis/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/examples/alerting_example/server/rule_types/**/*.{js,mjs,ts,tsx}',
   'x-pack/packages/kbn-synthetics-private-location/**/*.{js,mjs,ts,tsx}',
