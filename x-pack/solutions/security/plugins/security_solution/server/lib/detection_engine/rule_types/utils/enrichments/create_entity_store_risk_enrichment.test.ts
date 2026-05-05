@@ -269,6 +269,6 @@ describe('createEntityStoreEnrichment', () => {
     });
 
     expect(result).toEqual({});
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Host Risk'));
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Host Risk'));
   });
 });
