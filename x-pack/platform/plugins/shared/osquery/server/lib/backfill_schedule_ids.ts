@@ -36,17 +36,24 @@ import {
  * One-time migration that assigns stable `schedule_id` + `start_date` to every
  * pack query that doesn't already have them. The task marks itself as completed
  * after the first successful run; subsequent executions are no-ops.
+ *
+ * `isRruleFeatureEnabled` flows the wire-boundary feature-flag gate (D25) into
+ * the policy push the backfill triggers — even though backfill itself never
+ * touches RRULE state, it re-emits the policy doc and SHOULD honor the flag
+ * for consistency with create/update_pack routes.
  */
 export const backfillScheduleIds = async ({
   coreStart,
   osqueryContext,
   logger,
   abortController,
+  isRruleFeatureEnabled = false,
 }: {
   coreStart: CoreStart;
   osqueryContext: OsqueryAppContextService;
   logger: Logger;
   abortController?: AbortController;
+  isRruleFeatureEnabled?: boolean;
 }): Promise<{ hadFailures: boolean }> => {
   const internalClient = await getInternalSavedObjectsClient(coreStart);
 
@@ -123,12 +130,18 @@ export const backfillScheduleIds = async ({
                   set(draft, `${packPath}.pack_id`, packSO.id);
                   // D13 wire format: pack-level schedule travels as
                   // `default_*_schedule` slots; per-query map carries only
-                  // overrides plus per-query metadata.
-                  const packConfigPayload = convertSOQueriesToPackConfig(updatedQueries, spaceId, {
-                    schedule_type: packSO.attributes.schedule_type,
-                    interval: packSO.attributes.interval,
-                    rrule_schedule: packSO.attributes.rrule_schedule,
-                  });
+                  // overrides plus per-query metadata. D25: feature-flag
+                  // gating at the wire boundary.
+                  const packConfigPayload = convertSOQueriesToPackConfig(
+                    updatedQueries,
+                    spaceId,
+                    {
+                      schedule_type: packSO.attributes.schedule_type,
+                      interval: packSO.attributes.interval,
+                      rrule_schedule: packSO.attributes.rrule_schedule,
+                    },
+                    { isRruleFeatureEnabled }
+                  );
                   set(draft, `${packPath}.queries`, packConfigPayload.queries);
                   if (packConfigPayload.default_native_schedule != null) {
                     set(

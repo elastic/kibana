@@ -204,11 +204,18 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     const packKey = makePackKey(packSO.attributes.name, spaceId);
                     // D13 wire format: pack-level schedule travels as
                     // `default_*_schedule`; per-query map carries only
-                    // overrides plus per-query metadata.
+                    // overrides plus per-query metadata. D25: the converter
+                    // honors the feature flag at the wire boundary so
+                    // disabling the flag falls back to legacy interval
+                    // emission even if the SO carries RRULE state.
                     const packConfigPayload = convertSOQueriesToPackConfig(
                       queries,
                       spaceId,
-                      packSchedule
+                      packSchedule,
+                      {
+                        isRruleFeatureEnabled:
+                          osqueryContext.experimentalFeatures.rruleScheduling,
+                      }
                     );
                     set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
                       shard: policyShards[agentPolicyId] ?? 100,

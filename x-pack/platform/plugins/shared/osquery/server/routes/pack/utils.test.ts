@@ -377,6 +377,126 @@ describe('Pack utils', () => {
     });
   });
 
+  // D25 (architect-review C3): wire-boundary feature-flag gate. Even if the
+  // SO carries RRULE state from a prior flag-on session, when the flag is
+  // disabled the converter SHALL emit the legacy interval shape — no
+  // `default_rrule_schedule`, no per-query `rrule_schedule`. See
+  // `proposal.md` "Rollback".
+  describe('convertSOQueriesToPackConfig — D25 feature-flag rollback gate', () => {
+    const packRrule: RRuleScheduleConfig = {
+      rrule: 'FREQ=DAILY',
+      start_date: '2024-01-01T00:00:00.000Z',
+    };
+    const queryRrule: RRuleScheduleConfig = {
+      rrule: 'FREQ=WEEKLY;BYDAY=MO',
+      start_date: '2024-02-01T00:00:00.000Z',
+    };
+    const baseQuery = { query: 'SELECT 1' };
+
+    test('flag off — pack RRULE on the SO is dropped from the wire', () => {
+      const queries = { q1: { ...baseQuery, interval: 3600 } };
+      const result = convertSOQueriesToPackConfig(
+        queries,
+        undefined,
+        { schedule_type: 'rrule', rrule_schedule: packRrule },
+        { isRruleFeatureEnabled: false }
+      );
+
+      expect(result).not.toHaveProperty('default_rrule_schedule');
+      expect(result).not.toHaveProperty('default_native_schedule');
+      // Per-query interval is preserved (legacy emission).
+      expect(result.queries.q1).toEqual({ query: 'SELECT 1', interval: 3600 });
+    });
+
+    test('flag off — pack-level interval on the SO is dropped from the wire', () => {
+      // Pack-level `interval` was introduced together with the RRULE
+      // feature; when the flag is off the converter MUST NOT emit
+      // `default_native_schedule` either, falling back to per-query
+      // legacy interval emission.
+      const queries = { q1: { ...baseQuery, interval: 3600 } };
+      const result = convertSOQueriesToPackConfig(
+        queries,
+        undefined,
+        { schedule_type: 'interval', interval: 1800 },
+        { isRruleFeatureEnabled: false }
+      );
+
+      expect(result).not.toHaveProperty('default_native_schedule');
+      expect(result.queries.q1).toEqual({ query: 'SELECT 1', interval: 3600 });
+    });
+
+    test('flag off — per-query rrule override is dropped, falls back to query interval', () => {
+      const queries = {
+        q1: {
+          ...baseQuery,
+          interval: 3600,
+          schedule_type: 'rrule' as const,
+          rrule_schedule: queryRrule,
+        },
+      };
+      const result = convertSOQueriesToPackConfig(queries, undefined, undefined, {
+        isRruleFeatureEnabled: false,
+      });
+
+      expect(result.queries.q1).toEqual({ query: 'SELECT 1', interval: 3600 });
+      expect(result.queries.q1).not.toHaveProperty('rrule_schedule');
+    });
+
+    test('flag off — per-query rrule override without legacy interval emits no schedule', () => {
+      const queries = {
+        q1: {
+          ...baseQuery,
+          schedule_type: 'rrule' as const,
+          rrule_schedule: queryRrule,
+        },
+      };
+      const result = convertSOQueriesToPackConfig(queries, undefined, undefined, {
+        isRruleFeatureEnabled: false,
+      });
+
+      expect(result.queries.q1).toEqual({ query: 'SELECT 1' });
+      expect(result.queries.q1).not.toHaveProperty('rrule_schedule');
+      expect(result.queries.q1).not.toHaveProperty('interval');
+    });
+
+    test('flag off — default_space_id still emitted (not gated by RRULE flag)', () => {
+      const queries = { q1: { ...baseQuery, interval: 3600 } };
+      const result = convertSOQueriesToPackConfig(
+        queries,
+        'my-space',
+        { schedule_type: 'rrule', rrule_schedule: packRrule },
+        { isRruleFeatureEnabled: false }
+      );
+
+      expect(result.default_space_id).toBe('my-space');
+    });
+
+    test('flag on — full RRULE wire shape (parity with default test)', () => {
+      const queries = { q1: { ...baseQuery, interval: 3600 } };
+      const result = convertSOQueriesToPackConfig(
+        queries,
+        undefined,
+        { schedule_type: 'rrule', rrule_schedule: packRrule },
+        { isRruleFeatureEnabled: true }
+      );
+
+      expect(result.default_rrule_schedule).toEqual(packRrule);
+      expect(result.queries.q1).toEqual({ query: 'SELECT 1' });
+    });
+
+    test('default (no options) preserves existing test semantics', () => {
+      // Existing call sites that don't specify `options` use the default
+      // (`isRruleFeatureEnabled: true`), so pre-D25 tests don't need updates.
+      const queries = { q1: { ...baseQuery, interval: 3600 } };
+      const result = convertSOQueriesToPackConfig(queries, undefined, {
+        schedule_type: 'rrule',
+        rrule_schedule: packRrule,
+      });
+
+      expect(result.default_rrule_schedule).toEqual(packRrule);
+    });
+  });
+
   describe('validateScheduleFields', () => {
     const validRrule: RRuleScheduleConfig = {
       rrule: 'FREQ=DAILY',
@@ -451,6 +571,72 @@ describe('Pack utils', () => {
             rrule_schedule: { rrule: '   ', start_date: '2024-01-01T00:00:00.000Z' },
           })
         ).toMatch(/non-empty RFC 5545 string/);
+      });
+
+      // D24 (architect-review M3): parse-as-validate. Run the same parser
+      // the form uses so unparseable RRULE strings are rejected with 400
+      // instead of reaching beats and producing a silent agent failure.
+      test('rejects unparseable rrule string ("garbage")', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'garbage', start_date: '2024-01-01T00:00:00.000Z' },
+          })
+        ).toMatch(/`rrule_schedule.rrule` is invalid/);
+      });
+
+      test('rejects rrule missing FREQ part', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'BYDAY=MO,WE', start_date: '2024-01-01T00:00:00.000Z' },
+          })
+        ).toMatch(/RRULE is missing required FREQ part/);
+      });
+
+      test('rejects rrule with invalid FREQ value', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=BANANA', start_date: '2024-01-01T00:00:00.000Z' },
+          })
+        ).toMatch(/Invalid RRULE FREQ value/);
+      });
+
+      test('rejects rrule with malformed BYDAY', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: {
+              rrule: 'FREQ=WEEKLY;BYDAY=MO,XX',
+              start_date: '2024-01-01T00:00:00.000Z',
+            },
+          })
+        ).toMatch(/`rrule_schedule.rrule` is invalid/);
+      });
+
+      test('accepts a valid RRULE with recognized parts', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: {
+              rrule: 'FREQ=WEEKLY;BYDAY=MO,WE,FR;INTERVAL=2',
+              start_date: '2024-01-01T00:00:00.000Z',
+            },
+          })
+        ).toBeNull();
+      });
+
+      test('accepts a valid RRULE that carries unknown parts (forward-compat)', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: {
+              rrule: 'FREQ=WEEKLY;BYDAY=MO;BYHOUR=9',
+              start_date: '2024-01-01T00:00:00.000Z',
+            },
+          })
+        ).toBeNull();
       });
 
       test('rejects rrule with invalid start_date', () => {

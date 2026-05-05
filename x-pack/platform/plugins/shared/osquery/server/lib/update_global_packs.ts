@@ -17,12 +17,23 @@ import type { OsqueryAppContextService } from './osquery_app_context_services';
 import type { PackSavedObject } from '../common/types';
 import { convertSOQueriesToPackConfig, makePackKey } from '../routes/pack/utils';
 
+/**
+ * Updates an incoming package policy to embed every "global" pack (i.e. shards
+ * `*`) into the agent policy's osquery input. Called from the Fleet
+ * `packagePolicyCreate` callback in `plugin.ts`.
+ *
+ * `isRruleFeatureEnabled` flows from the plugin-scope `experimentalFeatures`
+ * captured at setup, threaded through here so the wire-boundary feature-flag
+ * gate (D25) applies to global packs the same way it does to user-driven
+ * pack create/update routes — see proposal.md "Rollback".
+ */
 export const updateGlobalPacksCreateCallback = async (
   packagePolicy: NewPackagePolicy,
   packsClient: SavedObjectsClient,
   allPacks: PackSavedObject[],
   osqueryContext: OsqueryAppContextService,
-  spaceId?: string
+  spaceId?: string,
+  isRruleFeatureEnabled = false
 ) => {
   const agentPolicyService = osqueryContext.getAgentPolicyService();
 
@@ -73,17 +84,24 @@ export const updateGlobalPacksCreateCallback = async (
       }
 
       const resolvedSpaceId = spaceId || 'default';
+
       map(packsContainingShardForPolicy, (pack) => {
         const packKey = makePackKey(pack.name, resolvedSpaceId);
         // D13 wire format: pack-level schedule travels as `default_*_schedule`.
+        // D25: feature-flag gating at the wire boundary.
         set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
           shard: 100,
           pack_id: pack.saved_object_id,
-          ...convertSOQueriesToPackConfig(pack.queries, resolvedSpaceId, {
-            schedule_type: pack.schedule_type,
-            interval: pack.interval,
-            rrule_schedule: pack.rrule_schedule,
-          }),
+          ...convertSOQueriesToPackConfig(
+            pack.queries,
+            resolvedSpaceId,
+            {
+              schedule_type: pack.schedule_type,
+              interval: pack.interval,
+              rrule_schedule: pack.rrule_schedule,
+            },
+            { isRruleFeatureEnabled }
+          ),
         });
       });
 

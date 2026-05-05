@@ -28,6 +28,7 @@ import { DEFAULT_PLATFORM } from '../../../common/constants';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import { MAX_SPLAY_SECONDS } from '../../../common';
 import { isSplayWithinMax, parseSplay } from '../../../common/utils/splay_utils';
+import { parseRRule } from '../../../common/utils/rrule_parser';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
@@ -164,6 +165,23 @@ export interface PackConfigPayload {
 }
 
 /**
+ * Options bag for {@link convertSOQueriesToPackConfig}.
+ *
+ * `isRruleFeatureEnabled` is the wire-boundary safety gate for the RRULE
+ * feature flag (D25). When `false`, the converter ignores any RRULE state
+ * carried on the SO from a prior flag-on session and emits the legacy
+ * per-query interval shape — see `proposal.md` "Rollback" and
+ * `pack-rrule-propagation` spec "Wire-boundary feature-flag gating".
+ *
+ * Default is `true` so existing call sites and tests retain current
+ * semantics; production routes SHOULD pass the resolved
+ * `osqueryContext.experimentalFeatures.rruleScheduling`.
+ */
+export interface ConvertSOQueriesToPackConfigOptions {
+  isRruleFeatureEnabled?: boolean;
+}
+
+/**
  * Converts stored pack queries into the Fleet-facing config each policy ships
  * to osquerybeat. Returns a structured payload (D13) — pack-level schedule is
  * surfaced as `default_native_schedule` / `default_rrule_schedule`, and each
@@ -187,12 +205,22 @@ export interface PackConfigPayload {
  *
  * `space_id` is emitted once at the pack level as `default_space_id`. There
  * is no per-query space override in osquery, so we never have to keep both.
+ *
+ * Feature-flag gating (D25): when `options.isRruleFeatureEnabled === false`,
+ * the converter pretends the SO carries no RRULE state at all. `packSchedule`
+ * is treated as undefined and per-query `schedule_type`/`rrule_schedule` are
+ * dropped from the output. Per-query `interval` is preserved (legacy
+ * behavior). This is the rollback safety net described in `proposal.md`.
  */
 export const convertSOQueriesToPackConfig = (
   queries: SOPackQuery[] | Record<string, PackQueryInput>,
   spaceId?: string,
-  packSchedule?: PackSchedule
+  packSchedule?: PackSchedule,
+  options: ConvertSOQueriesToPackConfigOptions = {}
 ): PackConfigPayload => {
+  const { isRruleFeatureEnabled = true } = options;
+  const effectivePackSchedule = isRruleFeatureEnabled ? packSchedule : undefined;
+
   const queriesMap = reduce(
     queries as SOPackQuery[],
     (
@@ -213,16 +241,18 @@ export const convertSOQueriesToPackConfig = (
       // Emit per-query schedule fields only for explicit overrides or — in the
       // legacy-pack case — to preserve the query's own interval. Pack-level
       // defaults travel via `default_*_schedule` and are merged in by beats.
+      // Flag off (D25): rrule overrides are ignored; interval falls through.
       let scheduleFields: Record<string, unknown>;
-      if (querySchedule === 'rrule' && queryRrule) {
+      if (isRruleFeatureEnabled && querySchedule === 'rrule' && queryRrule) {
         scheduleFields = { rrule_schedule: queryRrule };
-      } else if (querySchedule === 'interval' && queryInterval != null) {
+      } else if (isRruleFeatureEnabled && querySchedule === 'interval' && queryInterval != null) {
         scheduleFields = { interval: queryInterval };
-      } else if (packSchedule?.schedule_type) {
+      } else if (effectivePackSchedule?.schedule_type) {
         // Pack has a default; query inherits it. No per-query schedule field.
         scheduleFields = {};
       } else {
-        // Legacy pack (no default): preserve the query's own interval if any.
+        // Legacy pack (no default) — or feature flag off: preserve the
+        // query's own interval if any.
         scheduleFields = queryInterval != null ? { interval: queryInterval } : {};
       }
 
@@ -246,10 +276,13 @@ export const convertSOQueriesToPackConfig = (
 
   const payload: PackConfigPayload = { queries: queriesMap };
 
-  if (packSchedule?.schedule_type === 'rrule' && packSchedule.rrule_schedule) {
-    payload.default_rrule_schedule = packSchedule.rrule_schedule;
-  } else if (packSchedule?.schedule_type === 'interval' && packSchedule.interval != null) {
-    payload.default_native_schedule = { interval: packSchedule.interval };
+  if (effectivePackSchedule?.schedule_type === 'rrule' && effectivePackSchedule.rrule_schedule) {
+    payload.default_rrule_schedule = effectivePackSchedule.rrule_schedule;
+  } else if (
+    effectivePackSchedule?.schedule_type === 'interval' &&
+    effectivePackSchedule.interval != null
+  ) {
+    payload.default_native_schedule = { interval: effectivePackSchedule.interval };
   }
 
   if (spaceId) {
@@ -383,6 +416,15 @@ const isValidIsoDate = (value: string): boolean => {
 const validateRruleConfig = (config: RRuleScheduleConfig): string | null => {
   if (!config.rrule || typeof config.rrule !== 'string' || config.rrule.trim() === '') {
     return '`rrule_schedule.rrule` must be a non-empty RFC 5545 string';
+  }
+
+  // D24: drive the same parser the form uses so unparseable strings (e.g.
+  // `"garbage"`, missing `FREQ`, malformed `BYDAY`) are rejected at the API
+  // edge instead of reaching beats and producing a silent agent failure.
+  try {
+    parseRRule(config.rrule);
+  } catch (err) {
+    return `\`rrule_schedule.rrule\` is invalid: ${err.message}`;
   }
 
   if (!config.start_date || !isValidIsoDate(config.start_date)) {

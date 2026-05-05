@@ -162,4 +162,44 @@ describe('serializeRRule', () => {
       expect(serializeRRule(parsed)).toBe(serialized);
     });
   });
+
+  // L4 (architect-review follow-up): JS object key iteration order is
+  // specified for non-numeric string keys, but the assertion that "_unknown
+  // parts come out in insertion order, after recognized parts" must be
+  // robust to any RRULE part name a future spec might allow. These tests
+  // pin the contract.
+  describe('_unknown stable ordering on round-trip', () => {
+    it('preserves _unknown insertion order through parse → serialize', () => {
+      const original = 'FREQ=WEEKLY;BYDAY=MO,WE;BYHOUR=9;BYMINUTE=30;WKST=MO';
+      const parsed = parseRRule(original);
+      expect(parsed._unknown).toEqual({ BYHOUR: '9', BYMINUTE: '30', WKST: 'MO' });
+      expect(serializeRRule(parsed)).toBe(original);
+    });
+
+    it('preserves a different _unknown insertion order through parse → serialize', () => {
+      const original = 'FREQ=DAILY;WKST=SU;BYHOUR=12;BYSETPOS=1';
+      const parsed = parseRRule(original);
+      expect(serializeRRule(parsed)).toBe(original);
+    });
+
+    it('emits all recognized parts before any _unknown, regardless of source order', () => {
+      const sourceWithUnknownInterleaved = 'FREQ=WEEKLY;BYHOUR=9;BYDAY=MO;WKST=MO';
+      const parsed = parseRRule(sourceWithUnknownInterleaved);
+      // Recognized parts (FREQ, INTERVAL, BYMONTH, BYMONTHDAY, BYDAY) come first;
+      // unknown parts (BYHOUR, WKST) follow in insertion order.
+      expect(serializeRRule(parsed)).toBe('FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;WKST=MO');
+    });
+
+    it('preserves _unknown values whose names start with a digit-adjacent character', () => {
+      // Guard rail: even if a future RRULE spec permits non-alphabetic part
+      // names, insertion order must hold. We construct the _unknown record
+      // explicitly so the test does not depend on parser tolerance.
+      expect(
+        serializeRRule({
+          freq: Frequency.DAILY,
+          _unknown: { Z_PART: '1', A_PART: '2' },
+        })
+      ).toBe('FREQ=DAILY;Z_PART=1;A_PART=2');
+    });
+  });
 });

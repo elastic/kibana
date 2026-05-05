@@ -337,13 +337,23 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       set(draft, `inputs[0].config.osquery.value.packs.${pk}`, {
                         shard: policyShards[agentPolicyId] ?? 100,
                         pack_id: updatedPackSO.id,
-                        queries: convertSOQueriesToPackConfig(
+                        // D13 wire format: pack-level schedule travels as
+                        // `default_*_schedule`; per-query map carries only
+                        // overrides plus per-query metadata. Spread the
+                        // payload so `default_*_schedule` / `default_space_id`
+                        // land at the pack level (not nested under `queries`).
+                        // D25: feature-flag gating at the wire boundary.
+                        ...convertSOQueriesToPackConfig(
                           updatedPackSO.attributes.queries,
                           spaceId,
                           {
                             schedule_type: updatedPackSO.attributes.schedule_type,
                             interval: updatedPackSO.attributes.interval,
                             rrule_schedule: updatedPackSO.attributes.rrule_schedule,
+                          },
+                          {
+                            isRruleFeatureEnabled:
+                              osqueryContext.experimentalFeatures.rruleScheduling,
                           }
                         ),
                       });
@@ -428,12 +438,21 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       pack_id: updatedPackSO.id,
                       // D13 wire format: pack-level schedule travels as
                       // `default_*_schedule`; per-query map carries only
-                      // overrides plus per-query metadata.
-                      ...convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, spaceId, {
-                        schedule_type: updatedPackSO.attributes.schedule_type,
-                        interval: updatedPackSO.attributes.interval,
-                        rrule_schedule: updatedPackSO.attributes.rrule_schedule,
-                      }),
+                      // overrides plus per-query metadata. D25: feature-flag
+                      // gating at the wire boundary.
+                      ...convertSOQueriesToPackConfig(
+                        updatedPackSO.attributes.queries,
+                        spaceId,
+                        {
+                          schedule_type: updatedPackSO.attributes.schedule_type,
+                          interval: updatedPackSO.attributes.interval,
+                          rrule_schedule: updatedPackSO.attributes.rrule_schedule,
+                        },
+                        {
+                          isRruleFeatureEnabled:
+                            osqueryContext.experimentalFeatures.rruleScheduling,
+                        }
+                      ),
                     });
 
                     return draft;
@@ -466,12 +485,21 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       pack_id: updatedPackSO.id,
                       // D13 wire format: pack-level schedule travels as
                       // `default_*_schedule`; per-query map carries only
-                      // overrides plus per-query metadata.
-                      ...convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, spaceId, {
-                        schedule_type: updatedPackSO.attributes.schedule_type,
-                        interval: updatedPackSO.attributes.interval,
-                        rrule_schedule: updatedPackSO.attributes.rrule_schedule,
-                      }),
+                      // overrides plus per-query metadata. D25: feature-flag
+                      // gating at the wire boundary.
+                      ...convertSOQueriesToPackConfig(
+                        updatedPackSO.attributes.queries,
+                        spaceId,
+                        {
+                          schedule_type: updatedPackSO.attributes.schedule_type,
+                          interval: updatedPackSO.attributes.interval,
+                          rrule_schedule: updatedPackSO.attributes.rrule_schedule,
+                        },
+                        {
+                          isRruleFeatureEnabled:
+                            osqueryContext.experimentalFeatures.rruleScheduling,
+                        }
+                      ),
                     });
 
                     return draft;
