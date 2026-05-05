@@ -16,7 +16,6 @@ export {
   ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH as INSIGHTS_API_PATH,
   ALERTING_V2_RULE_DOCTOR_RUN_API_PATH as RULE_DOCTOR_RUN_API_PATH,
 } from '@kbn/alerting-v2-constants';
-export { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../../common/advanced_settings';
 export { ALERT_EVENTS_DATA_STREAM } from '../../../server/resources/datastreams/alert_events';
 export { ALERT_ACTIONS_DATA_STREAM } from '../../../server/resources/datastreams/alert_actions';
 export { RULE_DOCTOR_INSIGHTS_INDEX } from '../../../server/resources/indices/rule_doctor_insights';

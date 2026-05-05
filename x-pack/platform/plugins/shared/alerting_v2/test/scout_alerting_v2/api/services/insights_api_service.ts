@@ -26,8 +26,8 @@ const INSIGHT_DEFAULTS: Omit<RuleDoctorInsightDoc, 'insight_id' | '@timestamp'> 
   justification: 'Generated for Scout API tests',
   rule_ids: [],
   data: {},
-  current: null,
-  proposed: null,
+  current: {},
+  proposed: {},
   space_id: 'default',
 };
 

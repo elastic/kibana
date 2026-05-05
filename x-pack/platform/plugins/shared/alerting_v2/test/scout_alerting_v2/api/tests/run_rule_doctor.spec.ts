@@ -10,31 +10,20 @@ import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { RULE_DOCTOR_DEDUP_WORKFLOW_ID } from '../../../../server/workflows/load_workflows';
 import { apiTest, testData } from '../fixtures';
-import {
-  RULE_DOCTOR_RUN_API_PATH,
-  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
-} from '../../common/constants';
+import { RULE_DOCTOR_RUN_API_PATH } from '../../common/constants';
 
 apiTest.describe('Rule Doctor run API', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
+  apiTest.beforeAll(async ({ requestAuth }) => {
     adminCredentials = await requestAuth.getApiKeyForAdmin();
     viewerCredentials = await requestAuth.getApiKeyForViewer();
-
-    await kbnClient.uiSettings.update({
-      [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-    });
   });
 
-  apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+  apiTest.afterAll(async ({ apiClient }) => {
     await apiClient.delete(`/api/workflows/workflow/${RULE_DOCTOR_DEDUP_WORKFLOW_ID}?force=true`, {
       headers: { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-    });
-
-    await kbnClient.uiSettings.update({
-      [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
     });
   });
 
