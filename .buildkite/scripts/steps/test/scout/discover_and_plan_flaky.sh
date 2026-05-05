@@ -17,11 +17,17 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
+# `SCOUT_DISCOVERY_TARGET` is computed at pipeline-generation time from the
+# `branch` field in package.json in .buildkite/pipelines/flaky_tests/pipeline.ts
+# and injected as step-level env. Hard-require it here so a missing value fails
+# loudly instead of silently defaulting to a wrong target.
+: "${SCOUT_DISCOVERY_TARGET:?SCOUT_DISCOVERY_TARGET must be set by the flaky pipeline generator}"
+
 echo '--- Update Scout Test Config Manifests'
 node scripts/scout.js update-test-config-manifests --concurrencyLimit 3
 
-echo '--- Discover Playwright Configs'
-node scripts/scout discover-playwright-configs --include-custom-servers --save
+echo "--- Discover Playwright Configs (target=$SCOUT_DISCOVERY_TARGET)"
+node scripts/scout discover-playwright-configs --include-custom-servers --target "$SCOUT_DISCOVERY_TARGET" --save
 cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
 buildkite-agent artifact upload "scout_playwright_configs.json"
 
