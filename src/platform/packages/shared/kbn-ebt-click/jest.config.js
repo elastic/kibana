@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EbtClickAttrs } from './types';
-
-/** Maps an EbtClickAttrs object to the corresponding `data-ebt-*` HTML attributes. */
-export function getEbtProps(ebt: EbtClickAttrs): Record<string, string> {
-  return {
-    'data-ebt-action': ebt.action,
-    'data-ebt-element': ebt.element,
-    ...(ebt.detail && { 'data-ebt-detail': ebt.detail }),
-  };
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-ebt-click'],
+};
