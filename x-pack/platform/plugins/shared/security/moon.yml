@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/spaces-plugin'
+  - '@kbn/core-spaces-common'
   - '@kbn/task-manager-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/es-ui-shared-plugin'

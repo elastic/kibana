@@ -886,7 +886,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerFeatures('management', features);
 
     const manifestManager = new ManifestManager({
-      savedObjectsClientFactory: new SavedObjectsClientFactory(core.savedObjects, core.http),
+      savedObjectsClientFactory: new SavedObjectsClientFactory(core.savedObjects),
       savedObjectsClient,
       exceptionListClient,
       artifactClient: new EndpointArtifactClient(

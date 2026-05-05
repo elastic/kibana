@@ -6,12 +6,12 @@
  */
 
 import datemath from '@kbn/datemath';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { Range } from '../../../../../common/entity_analytics/risk_engine';
 
 export const convertDateToISOString = (dateString: string): string => {
@@ -30,23 +30,16 @@ export const convertRangeToISO = (range: Range): Range => ({
 });
 
 export const buildFakeScopedRequest = ({
-  coreStart,
   namespace,
 }: {
   coreStart: CoreStart;
   namespace: string;
 }): KibanaRequest => {
-  const rawRequest = {
+  return kibanaRequestFactory({
     headers: {},
     path: '/',
-  };
-
-  const request = kibanaRequestFactory(rawRequest);
-  const scopedPath = addSpaceIdToPath('/', namespace);
-
-  coreStart.http.basePath.set(request, scopedPath);
-
-  return request;
+    app: { spaceId: asSpaceId(namespace) },
+  });
 };
 
 /**

@@ -139,8 +139,7 @@ export class EndpointAppContextService {
     }
 
     const savedObjectsFactory = new SavedObjectsClientFactory(
-      dependencies.savedObjectsServiceStart,
-      this.setupDependencies.httpServiceSetup
+      dependencies.savedObjectsServiceStart
     );
 
     this.savedObjectsFactoryService = savedObjectsFactory;
