@@ -26,11 +26,6 @@ interface ServiceHeaderBadgesProps {
   alertsTabHref: string;
 }
 
-interface HeaderFetchResult {
-  alertsCount: number;
-  anomalyScore?: number;
-}
-
 export function ServiceHeaderBadges({
   serviceName,
   environment,
@@ -52,64 +47,54 @@ export function ServiceHeaderBadges({
     services: { telemetry },
   } = useKibana<ApmPluginStartDeps & ApmServices>();
 
-  const { data, status } = useFetcher(
+  const { data: alertsData, status: alertsStatus } = useFetcher(
     (callApmApi) => {
-      const tasks: Array<Promise<Partial<HeaderFetchResult>>> = [];
-
-      if (isAlertingAvailable && canReadAlerts) {
-        tasks.push(
-          callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
-            params: {
-              path: { serviceName },
-              query: { start, end, environment },
-            },
-          })
-            .then((res) => ({ alertsCount: res.alertsCount }))
-            .catch(() => ({ alertsCount: 0 }))
-        );
-      }
-
-      if (canReadMlJobs) {
-        tasks.push(
-          callApmApi('GET /internal/apm/services/{serviceName}/anomaly_score', {
-            params: {
-              path: { serviceName },
-              query: { start, end, environment },
-            },
-          })
-            .then((res) => ({ anomalyScore: res.anomalyScore }))
-            .catch((): Partial<HeaderFetchResult> => ({}))
-        );
-      }
-
-      if (tasks.length === 0) {
+      if (!(isAlertingAvailable && canReadAlerts)) {
         return;
       }
-
-      return Promise.all(tasks).then((parts) => {
-        const merged: HeaderFetchResult = { alertsCount: 0 };
-        for (const part of parts) {
-          if (part.alertsCount !== undefined) {
-            merged.alertsCount = part.alertsCount;
-          }
-          if (part.anomalyScore !== undefined) {
-            merged.anomalyScore = part.anomalyScore;
-          }
-        }
-        return merged;
-      });
+      return callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
+        params: {
+          path: { serviceName },
+          query: { start, end, environment },
+        },
+      })
+        .then((res) => ({ alertsCount: res.alertsCount }))
+        .catch(() => ({ alertsCount: 0 }));
     },
-    [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts, canReadMlJobs],
+    [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts],
     { showToastOnError: false }
   );
 
-  const alertsCount = data?.alertsCount ?? 0;
+  const { data: anomalyData, status: anomalyStatus } = useFetcher(
+    (callApmApi) => {
+      if (!canReadMlJobs) {
+        return;
+      }
+      return callApmApi('GET /internal/apm/services/{serviceName}/anomaly_score', {
+        params: {
+          path: { serviceName },
+          query: { start, end, environment },
+        },
+      })
+        .then((res) => ({ anomalyScore: res.anomalyScore }))
+        .catch((): { anomalyScore?: number } => ({}));
+    },
+    [serviceName, start, end, environment, canReadMlJobs],
+    { showToastOnError: false }
+  );
+
+  const alertsCount = alertsData?.alertsCount ?? 0;
 
   const showAlertsBadge =
-    isAlertingAvailable && canReadAlerts && status === FETCH_STATUS.SUCCESS && alertsCount > 0;
+    isAlertingAvailable &&
+    canReadAlerts &&
+    alertsStatus === FETCH_STATUS.SUCCESS &&
+    alertsCount > 0;
 
   const showAnomaliesBadge =
-    canReadMlJobs && status === FETCH_STATUS.SUCCESS && data?.anomalyScore !== undefined;
+    canReadMlJobs &&
+    anomalyStatus === FETCH_STATUS.SUCCESS &&
+    anomalyData?.anomalyScore !== undefined;
 
   const showSloBadge = canReadSlos && sloFetchStatus === FETCH_STATUS.SUCCESS;
 
@@ -169,7 +154,7 @@ export function ServiceHeaderBadges({
       )}
       {showAnomaliesBadge && (
         <EuiFlexItem grow={false} data-test-subj="serviceHeaderAnomaliesBadge">
-          <AnomaliesBadge score={data?.anomalyScore} />
+          <AnomaliesBadge score={anomalyData?.anomalyScore} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

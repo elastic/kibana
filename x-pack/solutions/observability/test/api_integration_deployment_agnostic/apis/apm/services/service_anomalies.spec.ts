@@ -73,7 +73,7 @@ export default function ServiceAnomalies({ getService }: DeploymentAgnosticFtrPr
       await apmSynthtraceEsClient.clean();
     });
 
-    it('returns 200 with a body that only includes optional anomalyScore', async () => {
+    it('returns 200 with {} or { anomalyScore: number } and no other keys', async () => {
       const response = await getServiceAnomalyScore({
         name: serviceName,
         environment: 'testing',
@@ -82,8 +82,10 @@ export default function ServiceAnomalies({ getService }: DeploymentAgnosticFtrPr
       expect(response.status).to.be(200);
       expect(response.body).to.be.an('object');
       const keys = Object.keys(response.body);
-      expect(keys.every((k) => k === 'anomalyScore')).to.be(true);
-      if (keys.length > 0) {
+      if (keys.length === 0) {
+        expect(response.body).to.eql({});
+      } else {
+        expect(keys).to.eql(['anomalyScore']);
         expect(response.body.anomalyScore).to.be.a('number');
       }
     });

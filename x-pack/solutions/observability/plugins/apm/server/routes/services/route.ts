@@ -943,10 +943,8 @@ const serviceAnomalyScoreRoute = createApmServerRoute({
         serviceName,
       });
     } catch (error) {
-      if (Boom.isBoom(error) && error.output.statusCode === 501) {
-        return {};
-      }
       if (
+        (Boom.isBoom(error) && error.output.statusCode === 501) ||
         error instanceof UnknownMLCapabilitiesError ||
         error instanceof InsufficientMLCapabilities ||
         error instanceof MLPrivilegesUninitialized

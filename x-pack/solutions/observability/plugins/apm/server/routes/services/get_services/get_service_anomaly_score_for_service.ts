@@ -13,8 +13,8 @@ export interface ServiceAnomalyScoreResponse {
 }
 
 /**
- * Max ML record score for a single service in the time range (same source as service inventory).
- * Uses `getServiceAnomalies` with a service-name scoped query, then picks the row for `serviceName`.
+ * Max ML record score for a single service in the time range (same aggregation as service inventory).
+ * Uses `getServiceAnomalies` with an exact `term` on the ML partition field so short names do not wildcard-match many services.
  */
 export async function getServiceAnomalyScoreForService({
   mlClient,
@@ -34,7 +34,7 @@ export async function getServiceAnomalyScoreForService({
     environment,
     start,
     end,
-    searchQuery: serviceName,
+    exactServiceName: serviceName,
   });
 
   const row = serviceAnomalies.find((item) => item.serviceName === serviceName);

@@ -103,10 +103,17 @@ function setupMocks({
     sloFetchStatus,
   });
 
-  mockUseFetcher.mockReturnValue({
-    data: { alertsCount, anomalyScore },
-    status: FETCH_STATUS.SUCCESS,
-  });
+  // `ServiceHeaderBadges` calls `useFetcher` twice: alerts count, then anomaly score.
+  mockUseFetcher.mockReset();
+  mockUseFetcher
+    .mockReturnValueOnce({
+      data: { alertsCount },
+      status: FETCH_STATUS.SUCCESS,
+    })
+    .mockReturnValueOnce({
+      data: { anomalyScore },
+      status: FETCH_STATUS.SUCCESS,
+    });
 
   mockKibanaServices.mockReturnValue({
     services: {
@@ -235,6 +242,20 @@ describe('ServiceHeaderBadges', () => {
 
     expect(screen.getByTestId('serviceHeaderAnomaliesBadge')).toBeInTheDocument();
     expect(screen.getByText(/Critical \(82\)/)).toBeInTheDocument();
+  });
+
+  it('hides anomalies badge when ML jobs cannot be read even if anomaly score data is present', () => {
+    setupMocks({
+      canReadMlJobs: false,
+      alertsCount: 0,
+      anomalyScore: 80,
+      mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
+      sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
+    });
+    const { container } = renderBadges();
+
+    expect(screen.queryByTestId('serviceHeaderAnomaliesBadge')).not.toBeInTheDocument();
+    expect(container.firstChild).toBeNull();
   });
 
   it('hides anomalies badge when ML can be read but no anomaly score is available', () => {

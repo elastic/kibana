@@ -49,7 +49,7 @@ describe('getServiceAnomalyScoreForService', () => {
     expect(result).toEqual({ anomalyScore: 88.5 });
     expect(getServiceAnomaliesModule.getServiceAnomalies).toHaveBeenCalledWith(
       expect.objectContaining({
-        searchQuery: 'my-service',
+        exactServiceName: 'my-service',
       })
     );
   });
