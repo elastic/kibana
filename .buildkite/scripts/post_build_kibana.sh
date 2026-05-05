@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 
 # [rspack-transition] avoid shipping bundle sizes while RSPack is not the default
 if [[ "${KBN_USE_RSPACK:-}" == "true" ]]; then
