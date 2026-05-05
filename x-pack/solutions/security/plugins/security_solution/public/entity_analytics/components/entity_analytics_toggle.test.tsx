@@ -31,6 +31,7 @@ jest.mock('../hooks/use_toggle_entity_analytics', () => ({
 let mockUseToggleReturn: {
   status: EntityAnalyticsStatus;
   isLoading: boolean;
+  isStatusLoading: boolean;
   toggle: jest.Mock;
   errors: { riskEngine: string[]; entityStore: string[] };
 };
@@ -106,6 +107,7 @@ describe('EntityAnalyticsToggle', () => {
     mockUseToggleReturn = {
       status: 'not_installed',
       isLoading: false,
+      isStatusLoading: false,
       toggle: mockToggle,
       errors: { riskEngine: [], entityStore: [] },
     };
@@ -194,6 +196,13 @@ describe('EntityAnalyticsToggle', () => {
     render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
     const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).not.toBeChecked();
+    expect(toggle).toBeDisabled();
+  });
+
+  it('disables the switch while initial status queries are still loading', () => {
+    mockUseToggleReturn.isStatusLoading = true;
+    render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).toBeDisabled();
   });
 });
