@@ -32,9 +32,6 @@ export type { ImpactedCardProps } from './impacted_card';
 export { CriticalityDonut } from './criticality_donut';
 export type { CriticalityDonutProps } from './criticality_donut';
 
-export { BlastRadiusEntityFlyout } from './blast_radius_entity_flyout';
-export type { BlastRadiusEntityFlyoutProps } from './blast_radius_entity_flyout';
-
 export { InfoPanel } from './info_panel';
 export type { InfoPanelProps, InfoPanelColor } from './info_panel';
 
@@ -52,9 +49,6 @@ export type {
   RecommendationsPlanPanelProps,
   RecommendationStep,
 } from './recommendations_plan_panel';
-
-export { SignificantEventsFlyout } from './significant_events_flyout';
-export type { SignificantEventsFlyoutProps, SignificantEvent } from './significant_events_flyout';
 
 export { SignificantEventDetailBody } from './significant_event_detail_body';
 export type {
