@@ -55,6 +55,7 @@ describe('invokeValidationWorkflow', () => {
     getWorkflow: jest.fn(),
     getWorkflowExecution: jest.fn(),
     runWorkflow: jest.fn(),
+    scheduleWorkflow: jest.fn(),
   };
 
   const defaultValidationWorkflowId = 'workflow-validate-default';
@@ -477,6 +478,12 @@ describe('invokeValidationWorkflow', () => {
         })
       );
     });
+
+    it('returns workflowName in workflowExecution', async () => {
+      const result = await invokeValidationWorkflow(defaultProps);
+
+      expect(result.workflowExecution?.workflowName).toBe('Attack Discovery Validation');
+    });
   });
 
   describe('polling with includeOutput', () => {
@@ -878,6 +885,16 @@ describe('invokeValidationWorkflow', () => {
         `Validation workflow (id: ${defaultValidationWorkflowId}) not found. It may have been deleted. Reconfigure the validation workflow in Attack Discovery settings.`
       );
     });
+
+    it('does NOT include workflowName in the validation-failed event workflowExecutions', async () => {
+      await expect(invokeValidationWorkflow(defaultProps)).rejects.toThrow();
+
+      const failedCall = mockWriteAttackDiscoveryEvent.mock.calls.find(
+        (call: unknown[]) => (call[0] as Record<string, unknown>)?.action === 'validation-failed'
+      );
+
+      expect(failedCall![0].workflowExecutions.validation).not.toHaveProperty('workflowName');
+    });
   });
 
   describe('when workflow has no definition', () => {
@@ -1113,6 +1130,20 @@ describe('invokeValidationWorkflow', () => {
         })
       );
     });
+
+    it('includes workflowName in the validation-failed event workflowExecutions', async () => {
+      await expect(invokeValidationWorkflow(defaultProps)).rejects.toThrow();
+
+      const failedCall = mockWriteAttackDiscoveryEvent.mock.calls.find(
+        (call: unknown[]) => (call[0] as Record<string, unknown>)?.action === 'validation-failed'
+      );
+
+      expect(failedCall![0].workflowExecutions.validation).toEqual(
+        expect.objectContaining({
+          workflowName: 'Attack Discovery Validation',
+        })
+      );
+    });
   });
 
   describe('when workflow is initially running and then completes', () => {
@@ -1233,6 +1264,7 @@ describe('invokeValidationWorkflow', () => {
         getWorkflow: jest.fn().mockResolvedValue(mockWorkflow),
         getWorkflowExecution: jest.fn().mockResolvedValue(mockPendingExecution),
         runWorkflow: jest.fn().mockResolvedValue('workflow-run-id'),
+        scheduleWorkflow: jest.fn().mockResolvedValue('workflow-run-id'),
       };
 
       // Verify the API would return non-terminal status

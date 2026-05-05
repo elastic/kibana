@@ -265,8 +265,8 @@ describe('verifyWorkflowIntegrity', () => {
         optionalWarnings: [
           {
             error: 'create failed',
-            key: 'esql_example_alert_retrieval',
-            workflowId: 'esql-id',
+            key: 'run_example',
+            workflowId: 'run-id',
           },
         ],
       });
@@ -282,7 +282,7 @@ describe('verifyWorkflowIntegrity', () => {
 
       expect(result.updatedIds).toEqual(defaultWorkflowIds);
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('esql_example_alert_retrieval')
+        expect.stringContaining('run_example')
       );
     });
 

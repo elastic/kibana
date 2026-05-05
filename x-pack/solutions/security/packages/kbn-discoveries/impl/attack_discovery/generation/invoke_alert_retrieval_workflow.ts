@@ -96,6 +96,19 @@ export interface WorkflowsManagementApi {
     inputs: Record<string, unknown>,
     request: KibanaRequest
   ) => Promise<string>;
+  /**
+   * Schedules the workflow via the task manager and returns the execution ID
+   * immediately, before the workflow actually runs. Use this instead of
+   * `runWorkflow` when the caller needs the execution ID before the workflow
+   * completes (e.g. to write a "started" event while the pipeline is running).
+   */
+  scheduleWorkflow: (
+    workflow: WorkflowExecutionEngineModel,
+    spaceId: string,
+    inputs: Record<string, unknown>,
+    request: KibanaRequest,
+    triggeredBy: string
+  ) => Promise<string>;
 }
 
 /**
@@ -132,6 +145,9 @@ export const invokeAlertRetrievalWorkflow = async ({
   // Initialized with a fallback before the try block so the catch block can reference
   // the most-recent value (updated to the actual run ID once runWorkflow succeeds).
   let workflowRunId = `alert-retrieval-${executionUuid}`;
+  // Captured outside the try block so the catch block can include the human-readable
+  // workflow name in the failure tracker entry (falls back to undefined pre-validation).
+  let workflowName: string | undefined;
 
   logger.info(`Invoking alert retrieval workflow: ${workflowId}`);
 
@@ -142,6 +158,7 @@ export const invokeAlertRetrievalWorkflow = async ({
       rawWorkflow,
       workflowId
     );
+    workflowName = validatedWorkflow.name;
 
     // Step 2: Build workflow inputs
     const workflowInputs = buildAlertRetrievalWorkflowInputs({
@@ -258,6 +275,7 @@ export const invokeAlertRetrievalWorkflow = async ({
 
     const workflowExecution: WorkflowExecutionTracking = {
       workflowId,
+      ...(workflowName != null ? { workflowName } : {}),
       workflowRunId,
     };
 

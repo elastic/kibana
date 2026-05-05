@@ -576,6 +576,9 @@ export const invokeGenerationWorkflow = async ({
   // Captured outside the try block so the catch block can reference it when writing
   // the generate-step-failed event after the workflow fails mid-execution.
   let generateStepStartTime: Date | undefined;
+  // Captured outside the try block so the catch block can include the human-readable
+  // workflow name in the failure tracker entry (falls back to undefined pre-validation).
+  let workflowName: string | undefined;
 
   logger.info(`Invoking generation workflow: ${workflowId}`);
 
@@ -583,7 +586,7 @@ export const invokeGenerationWorkflow = async ({
     // Step 1: Get and validate the workflow
     const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
     const validatedWorkflow = validateWorkflow(rawWorkflow, workflowId);
-    const workflowName = validatedWorkflow.name;
+    workflowName = validatedWorkflow.name;
 
     // Step 2: Build workflow inputs
     const workflowInputs = buildWorkflowInputs({
@@ -615,7 +618,21 @@ export const invokeGenerationWorkflow = async ({
         })}`
     );
 
-    // Step 3: Run the workflow
+    // Step 3: Schedule the workflow to acquire the execution ID BEFORE the workflow runs.
+    //
+    // `runWorkflow` blocks synchronously when called from a fake-request context
+    // (e.g. the attack-discovery.run workflow step), because the execution engine
+    // detects `request.isFakeRequest === true` and runs the workflow inline rather
+    // than dispatching it to the task manager.  With `runWorkflow` the execution ID
+    // is only returned *after* the full LLM call completes (~158 s), so the
+    // `generate-step-started` event would be written too late for the 60-second
+    // tracking polling window in the flyout.
+    //
+    // `scheduleWorkflow` always dispatches via the task manager and returns the
+    // execution ID immediately, before the workflow actually starts running.  We
+    // can therefore write the `generate-step-started` event with the real
+    // execution ID while generation is still in progress, allowing the flyout to
+    // show a link to the running generation workflow.
     const workflowToRun: WorkflowExecutionEngineModel = {
       definition: validatedWorkflow.definition,
       enabled: validatedWorkflow.enabled,
@@ -624,15 +641,17 @@ export const invokeGenerationWorkflow = async ({
       yaml: validatedWorkflow.yaml,
     };
 
-    workflowRunId = await workflowsManagementApi.runWorkflow(
+    workflowRunId = await workflowsManagementApi.scheduleWorkflow(
       workflowToRun,
       spaceId,
       workflowInputs,
-      request
+      request,
+      'attack-discovery-pipeline'
     );
 
     const workflowExecution: WorkflowExecutionTracking = {
       workflowId,
+      ...(workflowName != null ? { workflowName } : {}),
       workflowRunId,
     };
 
@@ -767,6 +786,7 @@ export const invokeGenerationWorkflow = async ({
 
     const workflowExecution: WorkflowExecutionTracking = {
       workflowId,
+      ...(workflowName != null ? { workflowName } : {}),
       workflowRunId,
     };
 

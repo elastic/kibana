@@ -606,6 +606,9 @@ export const invokeValidationWorkflow = async ({
   // the most-recent value (updated to the actual run ID once runWorkflow succeeds).
   let workflowRunId = `validation-${executionUuid}`;
   const generatedCount = generationResult.attackDiscoveries.length;
+  // Captured outside the try block so the catch block can include the human-readable
+  // workflow name in the failure tracker entry (falls back to undefined pre-validation).
+  let workflowName: string | undefined;
 
   logger.info(`Invoking validation workflow: ${workflowId}`);
 
@@ -613,7 +616,7 @@ export const invokeValidationWorkflow = async ({
     // Step 1: Get and validate the workflow
     const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
     const validatedWorkflow = validateWorkflow(rawWorkflow, workflowId);
-    const workflowName = validatedWorkflow.name;
+    workflowName = validatedWorkflow.name;
 
     // Step 2: Build workflow inputs
     const workflowInputs = buildWorkflowInputs({
@@ -653,6 +656,7 @@ export const invokeValidationWorkflow = async ({
 
     const workflowExecution: WorkflowExecutionTracking = {
       workflowId,
+      ...(workflowName != null ? { workflowName } : {}),
       workflowRunId,
     };
 
@@ -753,6 +757,7 @@ export const invokeValidationWorkflow = async ({
 
     const workflowExecution: WorkflowExecutionTracking = {
       workflowId,
+      ...(workflowName != null ? { workflowName } : {}),
       workflowRunId,
     };
 
