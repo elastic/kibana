@@ -216,6 +216,12 @@ export interface DeploymentsModesDefault {
   is_default?: boolean;
 }
 
+// Ordering should be from least to most mature
+export enum AgentlessDeploymentReleaseStatus {
+  Beta = 'beta',
+  GA = 'ga',
+}
+
 export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
   organization?: string;
   division?: string;
@@ -227,6 +233,7 @@ export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
       memory: string;
     };
   };
+  release?: AgentlessDeploymentReleaseStatus;
 }
 export interface DeploymentsModes {
   agentless: DeploymentsModesAgentless;
