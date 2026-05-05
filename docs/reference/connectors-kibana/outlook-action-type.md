@@ -60,7 +60,7 @@ Lists email messages from a mailbox folder. Supports OData filters for finer con
 
 Parameters:
 
-- `folderId` (optional): Folder name or ID. Well-known names: `inbox`, `sentitems`, `drafts`, `deleteditems`, `junkemail`. Omit to list from the full mailbox.
+- `folderId` (optional): Folder name or ID. Well-known names: `inbox`, `sentitems`, `drafts`, `deleteditems`, `junkemail`. If not specified, fetches the full mailbox.
 - `top` (optional): Maximum number of messages (1–100, default 20).
 - `filter` (optional): OData `$filter` expression, for example `isRead eq false` or `receivedDateTime ge 2024-01-01T00:00:00Z`.
 - `orderby` (optional): OData sort expression, for example `receivedDateTime desc` (default).
