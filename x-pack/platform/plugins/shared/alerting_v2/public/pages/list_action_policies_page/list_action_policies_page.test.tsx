@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
@@ -139,6 +140,12 @@ jest.mock('./components/action_policy_actions_cell', () => ({
   ActionPolicyActionsCell: () => <span>Actions cell</span>,
 }));
 
+jest.mock('../../components/action_policy/details_flyout/action_policy_details_flyout', () => ({
+  ActionPolicyDetailsFlyout: ({ policy }: { policy: ActionPolicyResponse }) => (
+    <div data-test-subj="mockedDetailsFlyout">Details flyout for {policy.id}</div>
+  ),
+}));
+
 const createQueryClient = () =>
   new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -256,5 +263,24 @@ describe('ListActionPoliciesPage', () => {
       'Notify',
       'Actions',
     ]);
+  });
+
+  it('opens the details flyout when the policy name link is clicked', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    expect(screen.queryByTestId('mockedDetailsFlyout')).toBeNull();
+
+    await user.click(screen.getByTestId('actionPolicyDetailsLink-policy-1'));
+
+    expect(screen.getByTestId('mockedDetailsFlyout')).toHaveTextContent(
+      'Details flyout for policy-1'
+    );
+  });
+
+  it('does not render the details flyout until a policy is selected', () => {
+    renderPage();
+
+    expect(screen.queryByTestId('mockedDetailsFlyout')).toBeNull();
   });
 });
