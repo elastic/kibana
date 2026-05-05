@@ -34,9 +34,9 @@ import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test
 const { loadActionTypes } = jest.requireMock('../../../lib/action_connector_api') as {
   loadActionTypes: jest.Mock;
 };
-const actualActionConnectorApi = jest.requireActual<typeof import('../../../lib/action_connector_api')>(
-  '../../../lib/action_connector_api'
-);
+const actualActionConnectorApi = jest.requireActual<
+  typeof import('../../../lib/action_connector_api')
+>('../../../lib/action_connector_api');
 
 const defaultEditFlyoutLoadActionTypes: ActionType[] = [
   {

@@ -299,7 +299,9 @@ describe('serializeConnectorSpec', () => {
 
       const defaultEars = serializeConnectorSpec(spec);
       const earsOn = serializeConnectorSpec(spec, { isEarsEnabled: true });
-      type SecretBranch = { properties?: { authType?: { const?: string } } };
+      interface SecretBranch {
+        properties?: { authType?: { const?: string } };
+      }
 
       const defaultProperties = defaultEars.schema.properties as Record<string, unknown>;
       const defaultSecrets = defaultProperties.secrets as Record<string, SecretBranch[]>;
