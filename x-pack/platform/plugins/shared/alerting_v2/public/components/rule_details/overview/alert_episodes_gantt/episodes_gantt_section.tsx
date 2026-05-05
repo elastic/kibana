@@ -14,32 +14,52 @@ import {
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
+  EuiSuperDatePicker,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import type { OnTimeChangeProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import datemath from '@kbn/datemath';
+import { parseDurationToMs } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { useRule } from '../../rule_context';
 import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
-import {
-  deriveGanttData,
-  GANTT_TOP_N_DEFAULT,
-  type GanttSortPolicy,
-} from '../../../../utils/derive_gantt_data';
+import { deriveGanttData, GANTT_TOP_N_DEFAULT } from '../../../../utils/derive_gantt_data';
 import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for_episode';
 import { paths } from '../../../../constants';
 import { GanttChart } from './gantt_chart';
 import { GanttFooter } from './gantt_footer';
 import { GanttLegend } from './gantt_legend';
 import { GanttStatsRow } from './gantt_stats_row';
+import { useGanttTimeRangeUrlState } from './use_gantt_time_range_url_state';
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
-const VISIBLE_WINDOW_MS = 7 * DAY_MS;
+
+const DEFAULT_GANTT_TIME_RANGE = { from: 'now-7d', to: 'now' };
+
+const COMMONLY_USED_RANGES = [
+  { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+  { start: 'now-6h', end: 'now', label: 'Last 6 hours' },
+  { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
+  { start: 'now-7d', end: 'now', label: 'Last 7 days' },
+  { start: 'now-30d', end: 'now', label: 'Last 30 days' },
+];
+
+const resolveGteLte = (from: string, to: string): { gteMs: number; lteMs: number } => {
+  const fromMs = datemath.parse(from)?.valueOf();
+  const toMs = datemath.parse(to, { roundUp: true })?.valueOf();
+  const now = Date.now();
+  return {
+    gteMs: Number.isFinite(fromMs) ? (fromMs as number) : now - 7 * DAY_MS,
+    lteMs: Number.isFinite(toMs) ? (toMs as number) : now,
+  };
+};
 
 export const EpisodesGanttSection: React.FC = () => {
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
@@ -50,24 +70,59 @@ export const EpisodesGanttSection: React.FC = () => {
   const rule = useRule();
   const groupingFields = useMemo(() => rule.grouping?.fields ?? [], [rule.grouping?.fields]);
 
-  const [sort, setSort] = useState<GanttSortPolicy>('started_asc');
+  const [timeRange, setTimeRange] = useGanttTimeRangeUrlState(DEFAULT_GANTT_TIME_RANGE);
+  // Bumped on Refresh to force re-resolution of relative ranges like `now-7d`.
+  const [refreshTick, setRefreshTick] = useState(0);
 
-  const { gteMs, lteMs } = useMemo(() => {
-    const now = Date.now();
-    return { gteMs: now - VISIBLE_WINDOW_MS, lteMs: now };
-  }, []);
+  const handleTimeChange = useCallback(
+    (next: OnTimeChangeProps) => {
+      setTimeRange({ from: next.start, to: next.end });
+    },
+    [setTimeRange]
+  );
+
+  const handleRefresh = useCallback(() => setRefreshTick((n) => n + 1), []);
+
+  const { gteMs, lteMs } = useMemo(
+    () => resolveGteLte(timeRange.from, timeRange.to),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [timeRange.from, timeRange.to, refreshTick]
+  );
+
+  // Lookback buffer: fetch a small window of events BEFORE the visible range
+  // so deriveGanttData can tell whether the first in-window event for an
+  // episode is a real transition or a continuation of a status that was
+  // already in effect. Sized off the rule's evaluation interval — 2× the
+  // schedule absorbs missed ticks / scheduling jitter, with a 1-minute floor
+  // for sub-minute schedules and a 1-hour cap so a long-interval rule
+  // doesn't pull in days of pre-window history.
+  const bufferMs = useMemo(() => {
+    const scheduleMs = parseDurationToMs(rule.schedule.every);
+    const fallback = 60_000;
+    const ms = Number.isFinite(scheduleMs) ? scheduleMs : fallback;
+    return Math.min(Math.max(2 * ms, fallback), 60 * 60_000);
+  }, [rule.schedule.every]);
+  const fetchGteMs = gteMs - bufferMs;
 
   const { events, groupingValuesByHash, isLoading, isError } = useFetchRuleEvents({
     ruleId: rule.id,
-    gteMs,
+    gteMs: fetchGteMs,
     lteMs,
     groupingFields,
     data,
   });
 
   const ganttData = useMemo(
-    () => deriveGanttData(events, groupingValuesByHash, sort, lteMs, GANTT_TOP_N_DEFAULT),
-    [events, groupingValuesByHash, sort, lteMs]
+    () =>
+      deriveGanttData(
+        events,
+        groupingValuesByHash,
+        'recently_active',
+        gteMs,
+        lteMs,
+        GANTT_TOP_N_DEFAULT
+      ),
+    [events, groupingValuesByHash, gteMs, lteMs]
   );
 
   const discoverHref = useMemo(
@@ -115,40 +170,47 @@ export const EpisodesGanttSection: React.FC = () => {
     <EuiPanel hasBorder paddingSize="l" data-test-subj="ruleEpisodesGanttSection">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.alertingV2.ruleDetails.gantt.title', {
+                defaultMessage: 'Alert activity',
+              })}
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>
-                  {i18n.translate('xpack.alertingV2.ruleDetails.gantt.title', {
-                    defaultMessage: 'Alert activity',
+              <EuiSuperDatePicker
+                compressed
+                start={timeRange.from}
+                end={timeRange.to}
+                onTimeChange={handleTimeChange}
+                onRefresh={handleRefresh}
+                isLoading={isLoading}
+                showUpdateButton="iconOnly"
+                commonlyUsedRanges={COMMONLY_USED_RANGES}
+                width="auto"
+                data-test-subj="ruleEpisodesGanttTimeRange"
+              />
+            </EuiFlexItem>
+            {discoverHref && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  iconType="discoverApp"
+                  href={discoverHref}
+                  target="_blank"
+                  data-test-subj="ruleEpisodesGanttExploreInDiscover"
+                >
+                  {i18n.translate('xpack.alertingV2.ruleDetails.gantt.exploreInDiscover', {
+                    defaultMessage: 'Explore in Discover',
                   })}
-                </h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.alertingV2.ruleDetails.gantt.windowCaption', {
-                  defaultMessage: '— last 7 days',
-                })}
-              </EuiText>
-            </EuiFlexItem>
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {discoverHref && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="discoverApp"
-              href={discoverHref}
-              target="_blank"
-              data-test-subj="ruleEpisodesGanttExploreInDiscover"
-            >
-              {i18n.translate('xpack.alertingV2.ruleDetails.gantt.exploreInDiscover', {
-                defaultMessage: 'Explore in Discover',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
@@ -225,10 +287,8 @@ export const EpisodesGanttSection: React.FC = () => {
             onEpisodeClick={onEpisodeClick}
             getEpisodeHref={getEpisodeHref}
           />
-          <EuiSpacer size="m" />
+          <EuiSpacer size="xs" />
           <GanttFooter
-            sort={sort}
-            onSortChange={setSort}
             visibleRowCount={ganttData.rows.length}
             totalRowCount={ganttData.totalRowCount}
             viewAllHref={viewAllHref}

@@ -42,7 +42,7 @@ describe('deriveGanttData', () => {
       event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 3 * HOUR_MS }),
     ];
 
-    const result = deriveGanttData(events, {}, 'started_asc', NOW);
+    const result = deriveGanttData(events, {}, 'started_asc', T0, NOW);
     const row = result.rows[0];
 
     expect(row.segments).toEqual([
@@ -82,7 +82,7 @@ describe('deriveGanttData', () => {
       event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 3 * HOUR_MS }),
     ];
 
-    const result = deriveGanttData(events, {}, 'started_asc', NOW);
+    const result = deriveGanttData(events, {}, 'started_asc', T0, NOW);
 
     expect(result.rows[0].transitions).toEqual([
       { episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 },
@@ -98,7 +98,7 @@ describe('deriveGanttData', () => {
       event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 3 * HOUR_MS }),
     ];
 
-    const result = deriveGanttData(events, {}, 'started_asc', NOW);
+    const result = deriveGanttData(events, {}, 'started_asc', T0, NOW);
 
     expect(result.rows[0].segments).toEqual([
       {
@@ -120,7 +120,7 @@ describe('deriveGanttData', () => {
       }),
     ];
 
-    const result = deriveGanttData(events, {}, 'started_asc', NOW);
+    const result = deriveGanttData(events, {}, 'started_asc', T0, NOW);
     const row = result.rows[0];
 
     expect(row.hasOpenEpisode).toBe(true);
@@ -164,7 +164,7 @@ describe('deriveGanttData', () => {
       }),
     ];
 
-    const result = deriveGanttData(events, {}, 'started_asc', NOW);
+    const result = deriveGanttData(events, {}, 'started_asc', T0, NOW);
 
     expect(result.totalRowCount).toBe(2);
     expect(result.rows.map((r) => r.groupHash)).toEqual(['gh-A', 'gh-B']);
@@ -189,7 +189,7 @@ describe('deriveGanttData', () => {
       );
     }
 
-    const result = deriveGanttData(events, {}, 'started_asc', NOW, 8);
+    const result = deriveGanttData(events, {}, 'started_asc', T0, NOW, 8);
 
     expect(result.rows).toHaveLength(8);
     expect(result.hiddenRowCount).toBe(4);
@@ -215,7 +215,7 @@ describe('deriveGanttData', () => {
       event({ episodeId: 'r3', groupHash: 'gh-3', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 }),
     ];
 
-    const result = deriveGanttData(events, {}, 'started_asc', NOW);
+    const result = deriveGanttData(events, {}, 'started_asc', T0, NOW);
 
     expect(result.summary.episodesStarted).toBe(3);
     expect(result.summary.recovered).toBe(2);
@@ -243,6 +243,7 @@ describe('deriveGanttData', () => {
       events,
       { 'gh-A': { 'host.name': 'web-01' } },
       'started_asc',
+      T0,
       NOW
     );
 
@@ -291,10 +292,61 @@ describe('deriveGanttData', () => {
     ];
 
     expect(
-      deriveGanttData(events, {}, 'recently_active', NOW).rows.map((r) => r.groupHash)
+      deriveGanttData(events, {}, 'recently_active', T0, NOW).rows.map((r) => r.groupHash)
     ).toEqual(['gh-long-open', 'gh-recent', 'gh-old']);
-    expect(deriveGanttData(events, {}, 'longest_open', NOW).rows.map((r) => r.groupHash)[0]).toBe(
-      'gh-long-open'
-    );
+    expect(
+      deriveGanttData(events, {}, 'longest_open', T0, NOW).rows.map((r) => r.groupHash)[0]
+    ).toBe('gh-long-open');
+  });
+
+  it('uses pre-window events as a lookback buffer: clips segments to gteMs and suppresses pre-window transitions', () => {
+    const VISIBLE_GTE = T0 + 4 * HOUR_MS;
+    const VISIBLE_LTE = T0 + 8 * HOUR_MS;
+
+    // Episode that was already ACTIVE before the visible window. Its first
+    // in-window event is another ACTIVE re-fire, then RECOVERING, then
+    // INACTIVE — only the latter two are real transitions.
+    const events: RuleEventRow[] = [
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 + 2 * HOUR_MS }),
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 + 3 * HOUR_MS }),
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 + 5 * HOUR_MS }),
+      event({
+        episodeId: 'ep-1',
+        status: ALERT_EPISODE_STATUS.RECOVERING,
+        tsMs: T0 + 6 * HOUR_MS,
+      }),
+      event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 7 * HOUR_MS }),
+    ];
+
+    const result = deriveGanttData(events, {}, 'started_asc', VISIBLE_GTE, VISIBLE_LTE);
+    const row = result.rows[0];
+
+    // Segment timeline before clip would be:
+    //   ACTIVE [T0+2h, T0+5h] → ACTIVE [T0+5h, T0+6h] (coalesced into ACTIVE [T0+2h, T0+6h])
+    //   RECOVERING [T0+6h, T0+7h]
+    // After clip to VISIBLE_GTE = T0+4h:
+    //   ACTIVE [T0+4h, T0+6h]
+    //   RECOVERING [T0+6h, T0+7h]
+    expect(row.segments).toEqual([
+      {
+        episodeId: 'ep-1',
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        x0Ms: VISIBLE_GTE,
+        x1Ms: T0 + 6 * HOUR_MS,
+      },
+      {
+        episodeId: 'ep-1',
+        status: ALERT_EPISODE_STATUS.RECOVERING,
+        x0Ms: T0 + 6 * HOUR_MS,
+        x1Ms: T0 + 7 * HOUR_MS,
+      },
+    ]);
+
+    // Pre-window ACTIVE transition is dropped; only the in-window status
+    // changes remain.
+    expect(row.transitions.map((t) => ({ status: t.status, tsMs: t.tsMs }))).toEqual([
+      { status: ALERT_EPISODE_STATUS.RECOVERING, tsMs: T0 + 6 * HOUR_MS },
+      { status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 7 * HOUR_MS },
+    ]);
   });
 });

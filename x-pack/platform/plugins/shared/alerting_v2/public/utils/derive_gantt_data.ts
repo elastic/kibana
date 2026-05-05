@@ -100,6 +100,7 @@ export const deriveGanttData = (
   eventRows: RuleEventRow[],
   groupingValuesByHash: SeriesGroupingValuesByHash,
   sort: GanttSortPolicy,
+  gteMs: number,
   lteMs: number,
   topN: number = GANTT_TOP_N_DEFAULT
 ): GanttData => {
@@ -158,12 +159,18 @@ export const deriveGanttData = (
     };
 
     for (const [episodeId, episodeEvents] of eventsByEpisode) {
-      // A transition is the first event of the episode plus every event whose
-      // status differs from the previous one. Re-fires of the same status are
-      // not real transitions and would otherwise stack dots on top of each
-      // other.
-      let lastTransitionStatus: AlertEpisodeStatus | undefined;
+      const collapsedEvents: ParsedEvent[] = [];
       for (const ev of episodeEvents) {
+        const last = collapsedEvents[collapsedEvents.length - 1];
+        if (last && last.tsMs === ev.tsMs) {
+          collapsedEvents[collapsedEvents.length - 1] = ev;
+        } else {
+          collapsedEvents.push(ev);
+        }
+      }
+
+      let lastTransitionStatus: AlertEpisodeStatus | undefined;
+      for (const ev of collapsedEvents) {
         if (ev.status !== lastTransitionStatus) {
           transitions.push({ episodeId, status: ev.status, tsMs: ev.tsMs });
           lastTransitionStatus = ev.status;
@@ -191,11 +198,27 @@ export const deriveGanttData = (
       }
     }
 
+    // Clip to the visible window. Pre-window events are fetched as a
+    // lookback buffer (so we know the episode's status at gteMs and don't
+    // emit a misleading "transition" dot at the left edge), but we don't
+    // want to render anything to the left of gteMs.
+    //
+    // Segments: drop ones fully before gteMs; clip ones straddling gteMs so
+    // they begin at the visible left edge. The status carries over from the
+    // pre-window run, so the bar continues seamlessly.
+    // Transitions: drop ones before gteMs — those are pre-window dots.
+    const clippedSegments: GanttSegment[] = [];
+    for (const s of segments) {
+      if (s.x1Ms <= gteMs) continue;
+      clippedSegments.push(s.x0Ms < gteMs ? { ...s, x0Ms: gteMs } : s);
+    }
+    const clippedTransitions = transitions.filter((t) => t.tsMs >= gteMs);
+
     seriesByHash.set(groupHash, {
       groupHash,
       groupingValues: groupingValuesByHash[groupHash] ?? EMPTY_GROUPING_VALUES,
-      segments,
-      transitions,
+      segments: clippedSegments,
+      transitions: clippedTransitions,
       firstEventMs: events[0].tsMs,
       lastEventMs: events[events.length - 1].tsMs,
       hasOpenEpisode,

@@ -21,7 +21,7 @@ import type {
   RectAnnotationDatum,
   XYChartElementEvent,
 } from '@elastic/charts';
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiHealth, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -29,11 +29,7 @@ import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { PluginStart } from '@kbn/core-di';
 import { useService } from '@kbn/core-di-browser';
-import type {
-  GanttSegment,
-  GanttSeries,
-  GanttTransition,
-} from '../../../../utils/derive_gantt_data';
+import type { GanttSegment, GanttSeries } from '../../../../utils/derive_gantt_data';
 import { ganttStatusColor, ganttStatusLabel } from './gantt_status_palette';
 import { formatDuration, formatTimestamp } from './gantt_format';
 
@@ -48,7 +44,7 @@ const STATUS_ORDER: readonly AlertEpisodeStatus[] = [
   ALERT_EPISODE_STATUS.ACTIVE,
 ];
 
-// Rect annotations span a centered horizontal band, not the full lane height,
+// Rect annotations span a centered horizontal band, not the full row height,
 // so the bar reads as a thick line rather than a row-filling block.
 const RECT_Y0 = 0.4;
 const RECT_Y1 = 0.6;
@@ -98,34 +94,25 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({
   durationLabel,
 }) => {
   return (
-    <div
+    <EuiPanel
+      paddingSize="none"
+      hasBorder
+      hasShadow={false}
+      color="plain"
       css={css`
-        background: ${euiTheme.colors.emptyShade};
-        border: 1px solid ${euiTheme.colors.lightShade};
-        border-radius: ${euiTheme.border.radius.small};
         max-width: 280px;
       `}
     >
       <EuiText size="xs">
         <div
           css={css`
-            display: flex;
-            align-items: center;
-            gap: ${euiTheme.size.xs};
             padding: ${euiTheme.size.xs} ${euiTheme.size.s};
             border-bottom: 1px solid ${euiTheme.colors.lightShade};
           `}
         >
-          <span
-            css={css`
-              display: inline-block;
-              width: 8px;
-              height: 8px;
-              border-radius: 50%;
-              background: ${ganttStatusColor(euiTheme, status)};
-            `}
-          />
-          <strong>{ganttStatusLabel(status)}</strong>
+          <EuiHealth color={ganttStatusColor(euiTheme, status)} textSize="xs">
+            <strong>{ganttStatusLabel(status)}</strong>
+          </EuiHealth>
         </div>
         <div
           css={css`
@@ -147,12 +134,12 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({
           </div>
         </div>
       </EuiText>
-    </div>
+    </EuiPanel>
   );
 };
 
-export interface GanttLaneProps {
-  lane: GanttSeries;
+export interface GanttRowProps {
+  row: GanttSeries;
   gteMs: number;
   lteMs: number;
   height: number;
@@ -161,13 +148,16 @@ export interface GanttLaneProps {
 }
 
 /**
- * One series rendered as a thin elastic-charts lane: rect annotations color
+ * One series rendered as a thin elastic-charts row: rect annotations color
  * each state segment between consecutive events. A hidden line series
  * anchors the chart's domain since rect annotations alone don't establish
  * one.
+ *
+ * The row owns its own chrome (top border, height) so callers just render
+ * `<GanttRow ... />` per series with no wrapper.
  */
-export const GanttLane: React.FC<GanttLaneProps> = ({
-  lane,
+export const GanttRow: React.FC<GanttRowProps> = ({
+  row,
   gteMs,
   lteMs,
   height,
@@ -179,13 +169,17 @@ export const GanttLane: React.FC<GanttLaneProps> = ({
   const baseTheme = charts.theme.useChartsBaseTheme();
 
   const segmentsByStatus = useMemo(
-    () => groupBy<GanttSegment, AlertEpisodeStatus>(lane.segments, (s) => s.status),
-    [lane.segments]
+    () => groupBy<GanttSegment, AlertEpisodeStatus>(row.segments, (s) => s.status),
+    [row.segments]
   );
 
-  const transitionsByStatus = useMemo(
-    () => groupBy<GanttTransition, AlertEpisodeStatus>(lane.transitions, (t) => t.status),
-    [lane.transitions]
+  // Render dots in TIME order, not grouped by status. When two transitions
+  // overlap at the same x (e.g. one episode goes INACTIVE while another
+  // becomes ACTIVE), the later-in-time event paints on top — which matches
+  // intuition: "if ACTIVE happened after INACTIVE, the ACTIVE dot wins".
+  const sortedTransitions = useMemo(
+    () => [...row.transitions].sort((a, b) => a.tsMs - b.tsMs),
+    [row.transitions]
   );
 
   const handleAnnotationClick = useCallback(
@@ -216,8 +210,9 @@ export const GanttLane: React.FC<GanttLaneProps> = ({
     <div
       css={css`
         height: ${height}px;
+        border-top: 1px solid ${euiTheme.colors.lightestShade};
       `}
-      data-test-subj="ganttLane"
+      data-test-subj="ganttRow"
     >
       <Chart size={{ height }}>
         <Settings
@@ -256,7 +251,7 @@ export const GanttLane: React.FC<GanttLaneProps> = ({
             );
           }}
         />
-        {/* Hidden left axis with an explicit fixed domain so every lane
+        {/* Hidden left axis with an explicit fixed domain so every row
             renders rect annotations at the exact same pixel height. Without
             it elastic-charts auto-fits per-chart and heights drift. */}
         <Axis id="left" position={Position.Left} hide domain={{ min: 0, max: 1, fit: false }} />
@@ -267,7 +262,7 @@ export const GanttLane: React.FC<GanttLaneProps> = ({
           return (
             <RectAnnotation
               key={`rect-${status}`}
-              id={`gantt-lane-${lane.groupHash}-rect-${status}`}
+              id={`gantt-row-${row.groupHash}-rect-${status}`}
               dataValues={
                 segments.map((s) => ({
                   coordinates: { x0: s.x0Ms, x1: s.x1Ms, y0: RECT_Y0, y1: RECT_Y1 },
@@ -311,7 +306,7 @@ export const GanttLane: React.FC<GanttLaneProps> = ({
           );
         })}
         <LineSeries
-          id={`gantt-lane-${lane.groupHash}-anchor`}
+          id={`gantt-row-${row.groupHash}-anchor`}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
@@ -320,7 +315,6 @@ export const GanttLane: React.FC<GanttLaneProps> = ({
             { x: gteMs, y: 0 },
             { x: lteMs, y: 1 },
           ]}
-          color="rgba(0,0,0,0)"
           hideInLegend
           filterSeriesInTooltip={() => false}
           lineSeriesStyle={{
@@ -328,45 +322,42 @@ export const GanttLane: React.FC<GanttLaneProps> = ({
             point: { visible: 'never' },
           }}
         />
-        {/* One LineSeries per status carrying that status's transition
-            timestamps. The connecting line is hidden and only the points
-            render — guarantees a fixed-radius dot at every state change
-            even when the time window is wide and rect annotations would
-            otherwise compress to sub-pixel widths. */}
-        {STATUS_ORDER.map((status) => {
-          const transitions = transitionsByStatus[status] ?? [];
-          if (transitions.length === 0) return null;
-          const color = ganttStatusColor(euiTheme, status);
-          return (
-            <LineSeries
-              key={`dots-${status}`}
-              id={`gantt-lane-${lane.groupHash}-dots-${status}`}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor="x"
-              yAccessors={['y']}
-              data={transitions.map<TransitionDatum>((t) => ({
-                x: t.tsMs,
-                y: 0.5,
-                episodeId: t.episodeId,
-                status: t.status,
-                href: getEpisodeHref?.(t.episodeId),
-              }))}
-              color={color}
-              hideInLegend
-              lineSeriesStyle={{
-                line: { visible: false, opacity: 0 },
-                point: {
-                  visible: 'always',
-                  radius: 3,
-                  fill: euiTheme.colors.emptyShade,
-                  stroke: color,
-                  strokeWidth: 2,
-                },
-              }}
-            />
-          );
-        })}
+        {/* Single time-sorted LineSeries for every transition. The connecting
+            line is hidden and only the points render — guarantees a
+            fixed-radius dot at every state change even when the time window
+            is wide and rect annotations compress to sub-pixel widths.
+            pointStyleAccessor sets the stroke per dot based on the datum's
+            status, so painting order = time order = later-in-time wins. */}
+        {sortedTransitions.length > 0 && (
+          <LineSeries
+            id={`gantt-row-${row.groupHash}-dots`}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            data={sortedTransitions.map<TransitionDatum>((t) => ({
+              x: t.tsMs,
+              y: 0.5,
+              episodeId: t.episodeId,
+              status: t.status,
+              href: getEpisodeHref?.(t.episodeId),
+            }))}
+            hideInLegend
+            lineSeriesStyle={{
+              line: { visible: false, opacity: 0 },
+              point: {
+                visible: 'always',
+                radius: 3,
+                fill: euiTheme.colors.emptyShade,
+                strokeWidth: 2,
+              },
+            }}
+            pointStyleAccessor={(datum) => {
+              const d = datum.datum as TransitionDatum;
+              return { stroke: ganttStatusColor(euiTheme, d.status) };
+            }}
+          />
+        )}
       </Chart>
     </div>
   );

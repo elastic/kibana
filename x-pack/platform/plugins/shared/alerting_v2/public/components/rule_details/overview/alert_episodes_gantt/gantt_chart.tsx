@@ -10,12 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { GanttSeries } from '../../../../utils/derive_gantt_data';
-import { GanttLane } from './gantt_bar';
+import { GanttRow } from './gantt_row';
 import { GanttSeriesLabel } from './gantt_series_label';
 import { GanttTimeAxis } from './gantt_time_axis';
 
 const META_COLUMN_WIDTH_PX = 240;
-const ROW_HEIGHT_PX = 28;
+const ROW_HEIGHT_PX = 36;
 
 export interface GanttChartProps {
   rows: GanttSeries[];
@@ -83,22 +83,15 @@ export const GanttChart: React.FC<GanttChartProps> = ({
       <EuiFlexItem>
         <GanttTimeAxis gteMs={gteMs} lteMs={lteMs} />
         {rows.map((row) => (
-          <div
+          <GanttRow
             key={row.groupHash}
-            css={css`
-              border-top: 1px solid ${euiTheme.colors.lightestShade};
-            `}
-            data-test-subj="ganttRow"
-          >
-            <GanttLane
-              lane={row}
-              gteMs={gteMs}
-              lteMs={lteMs}
-              height={ROW_HEIGHT_PX}
-              onSegmentClick={onEpisodeClick}
-              getEpisodeHref={getEpisodeHref}
-            />
-          </div>
+            row={row}
+            gteMs={gteMs}
+            lteMs={lteMs}
+            height={ROW_HEIGHT_PX}
+            onSegmentClick={onEpisodeClick}
+            getEpisodeHref={getEpisodeHref}
+          />
         ))}
       </EuiFlexItem>
     </EuiFlexGroup>

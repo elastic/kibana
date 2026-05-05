@@ -10,27 +10,86 @@ import { EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
+
+const TARGET_TICK_COUNT = 7;
 
 interface Tick {
   ms: number;
   label: string;
 }
 
-const buildDailyTicks = (gteMs: number, lteMs: number, locale: string): Tick[] => {
+interface StepDef {
+  ms: number;
+  /** 'day' = snap to local midnight; 'hour' = snap to local hour; 'minute' = snap to local minute. */
+  unit: 'minute' | 'hour' | 'day';
+}
+
+// Ordered smallest → largest. Picked so adjacent steps are nice multiples.
+const STEPS: StepDef[] = [
+  { ms: 5 * MINUTE_MS, unit: 'minute' },
+  { ms: 15 * MINUTE_MS, unit: 'minute' },
+  { ms: 30 * MINUTE_MS, unit: 'minute' },
+  { ms: HOUR_MS, unit: 'hour' },
+  { ms: 3 * HOUR_MS, unit: 'hour' },
+  { ms: 6 * HOUR_MS, unit: 'hour' },
+  { ms: 12 * HOUR_MS, unit: 'hour' },
+  { ms: DAY_MS, unit: 'day' },
+  { ms: 2 * DAY_MS, unit: 'day' },
+  { ms: 7 * DAY_MS, unit: 'day' },
+  { ms: 14 * DAY_MS, unit: 'day' },
+  { ms: 30 * DAY_MS, unit: 'day' },
+];
+
+const pickStep = (spanMs: number): StepDef => {
+  // Smallest step that still keeps the tick count <= TARGET_TICK_COUNT-ish.
+  for (const step of STEPS) {
+    if (spanMs / step.ms <= TARGET_TICK_COUNT + 2) return step;
+  }
+  return STEPS[STEPS.length - 1];
+};
+
+const snapForward = (ms: number, step: StepDef): number => {
+  const d = new Date(ms);
+  if (step.unit === 'day') {
+    d.setHours(0, 0, 0, 0);
+  } else if (step.unit === 'hour') {
+    d.setMinutes(0, 0, 0);
+  } else {
+    d.setSeconds(0, 0);
+  }
+  let cursor = d.getTime();
+  while (cursor < ms) cursor += step.ms;
+  return cursor;
+};
+
+const buildTicks = (gteMs: number, lteMs: number, locale: string): Tick[] => {
   if (!Number.isFinite(gteMs) || !Number.isFinite(lteMs) || lteMs <= gteMs) return [];
 
-  const formatter = new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' });
-  const ticks: Tick[] = [];
-  // Snap to the next UTC midnight at or after gteMs.
-  const startDay = new Date(gteMs);
-  startDay.setUTCHours(0, 0, 0, 0);
-  let cursor = startDay.getTime();
-  if (cursor < gteMs) cursor += DAY_MS;
+  const span = lteMs - gteMs;
+  const step = pickStep(span);
 
-  while (cursor <= lteMs) {
+  // Label format: time-only when the whole window fits in one local day, otherwise
+  // include the date so adjacent days stay distinguishable.
+  const showDate = step.unit === 'day' || span > DAY_MS;
+  const showTime = step.unit !== 'day';
+  const formatter = new Intl.DateTimeFormat(locale, {
+    month: showDate ? 'short' : undefined,
+    day: showDate ? 'numeric' : undefined,
+    hour: showTime ? '2-digit' : undefined,
+    minute: showTime ? '2-digit' : undefined,
+    hour12: false,
+  });
+
+  const ticks: Tick[] = [];
+  let cursor = snapForward(gteMs, step);
+  // Cap iterations defensively in case of pathological inputs.
+  let i = 0;
+  while (cursor <= lteMs && i++ < 200) {
     ticks.push({ ms: cursor, label: formatter.format(new Date(cursor)) });
-    cursor += DAY_MS;
+    cursor += step.ms;
   }
   return ticks;
 };
@@ -48,7 +107,7 @@ export interface GanttTimeAxisProps {
  */
 export const GanttTimeAxis: React.FC<GanttTimeAxisProps> = ({ gteMs, lteMs }) => {
   const { euiTheme } = useEuiTheme();
-  const ticks = useMemo(() => buildDailyTicks(gteMs, lteMs, i18n.getLocale()), [gteMs, lteMs]);
+  const ticks = useMemo(() => buildTicks(gteMs, lteMs, i18n.getLocale()), [gteMs, lteMs]);
   const span = lteMs - gteMs;
 
   return (
@@ -60,22 +119,29 @@ export const GanttTimeAxis: React.FC<GanttTimeAxisProps> = ({ gteMs, lteMs }) =>
       `}
       data-test-subj="ganttTimeAxis"
     >
-      {ticks.map((tick) => (
-        <div
-          key={tick.ms}
-          css={css`
-            position: absolute;
-            top: 0;
-            transform: translateX(-50%);
-            padding: 0 ${euiTheme.size.xs};
-          `}
-          style={{ left: `${((tick.ms - gteMs) / span) * 100}%` }}
-        >
-          <EuiText size="xs" color="subdued">
-            {tick.label}
-          </EuiText>
-        </div>
-      ))}
+      {ticks.map((tick) => {
+        const pct = ((tick.ms - gteMs) / span) * 100;
+        // Labels are left-anchored at their tick position, so a tick close to
+        // the right edge would overflow the panel. Skip those — the next tick
+        // would have shown the label anyway.
+        if (pct > 90) return null;
+        return (
+          <div
+            key={tick.ms}
+            css={css`
+              position: absolute;
+              top: 0;
+              padding-right: ${euiTheme.size.s};
+              white-space: nowrap;
+            `}
+            style={{ left: `${pct}%` }}
+          >
+            <EuiText size="xs" color="subdued">
+              {tick.label}
+            </EuiText>
+          </div>
+        );
+      })}
     </div>
   );
 };
