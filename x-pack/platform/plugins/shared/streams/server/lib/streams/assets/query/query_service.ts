@@ -12,7 +12,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { ensureMetadata } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
@@ -24,20 +23,24 @@ import {
   QUERY_KQL_BODY,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
+  QUERY_SEARCH_EMBEDDING,
   STREAM_NAME,
   RULE_ID,
   RULE_BACKED,
   ASSET_UUID,
 } from '../fields';
-import { getQueryStorageSettings } from '../storage_settings';
+import {
+  queryStorageSettings,
+  getQueryStorageSettings,
+  type QueryStorageSettings,
+} from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
-import type { InferenceResolver } from './helpers/inference_availability';
+import { getInferenceIdFromIndex } from '../../helpers/get_inference_id_from_index';
 
 export class QueryService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
-    private readonly resolveInference: InferenceResolver,
     private readonly logger: Logger
   ) {}
 
@@ -56,14 +59,19 @@ export class QueryService {
     const isSignificantEventsEnabled =
       (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
 
-    const { inferenceId, available: inferenceAvailable } = await this.resolveInference(esClient);
+    const existingInferenceId = await getInferenceIdFromIndex(
+      esClient,
+      queryStorageSettings.name,
+      QUERY_SEARCH_EMBEDDING,
+      this.logger
+    );
 
-    const settings = getQueryStorageSettings(inferenceId);
+    const storageSettings = getQueryStorageSettings(existingInferenceId);
 
-    const adapter = new StorageIndexAdapter<IndexStorageSettings, StoredQueryLink>(
+    const adapter = new StorageIndexAdapter<QueryStorageSettings, StoredQueryLink>(
       esClient,
       this.logger.get('queries'),
-      settings,
+      storageSettings as QueryStorageSettings,
       {
         migrateSource: (source) => {
           let migrated = source as Record<string, unknown>;
@@ -140,8 +148,7 @@ export class QueryService {
         rulesClient,
         logger: this.logger,
       },
-      isSignificantEventsEnabled,
-      inferenceAvailable
+      isSignificantEventsEnabled
     );
   }
 }

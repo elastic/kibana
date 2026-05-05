@@ -506,7 +506,13 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
               {!noEntityInStore && (
                 <>
                   <AnomalyTableProvider
-                    criteriaFields={hostToCriteria(hostDetailsForOverview, euidApi?.euid)}
+                    criteriaFields={hostToCriteria({
+                      hostItem: hostDetailsForOverview,
+                      euid: euidApi?.euid,
+                      entityRecord: entityStoreV2Enabled
+                        ? entityFromStoreResult.entityRecord
+                        : undefined,
+                    })}
                     filterQuery={buildAnomaliesTableInfluencersFilterQuery({
                       euid: euidApi?.euid,
                       entityType: 'host',

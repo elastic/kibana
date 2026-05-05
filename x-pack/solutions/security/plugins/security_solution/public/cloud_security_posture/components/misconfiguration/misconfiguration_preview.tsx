@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
 import { useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
@@ -19,19 +18,12 @@ import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import {
-  buildEuidCspPreviewOptions,
-  inferEntityTypeFromIdentityFields,
-} from '../../utils/build_euid_csp_preview_options';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
-import { useUiSetting } from '../../../common/lib/kibana';
 
 interface MisconfigurationPreviewDistributionBarProps {
   key: string;
@@ -111,24 +103,16 @@ const MisconfigurationPreviewScore = ({
 };
 
 export const MisconfigurationsPreview = ({
-  identityFields,
   isPreviewMode,
   openDetailsPanel,
+  passedFindings,
+  failedFindings,
 }: {
-  identityFields: IdentityFields;
   isPreviewMode: boolean;
+  passedFindings: number;
+  failedFindings: number;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
-  const euidApi = useEntityStoreEuidApi();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
-  const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions(
-      inferEntityTypeFromIdentityFields(identityFields),
-      identityFields,
-      euidApi,
-      { entityStoreV2Enabled }
-    )
-  );
   const findingsStats = useGetFindingsStats(passedFindings, failedFindings);
 
   useEffect(() => {
@@ -160,7 +144,7 @@ export const MisconfigurationsPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasMisconfigurationFindings ? 'chevronLimitLeft' : '',
+        iconType: !isPreviewMode ? 'chevronLimitLeft' : '',
         title: (
           <EuiTitle
             css={css`
@@ -174,7 +158,7 @@ export const MisconfigurationsPreview = ({
             />
           </EuiTitle>
         ),
-        link: hasMisconfigurationFindings ? link : undefined,
+        link,
       }}
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >
