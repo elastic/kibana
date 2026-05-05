@@ -28,7 +28,7 @@
         "label": "LegacyLensStateApi",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-        "lineNumber": 70,
+        "lineNumber": 83,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -55,7 +55,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-            "lineNumber": 71,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -199,16 +199,16 @@
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
             "docId": "kibKbnLensCommon-2PluginApi",
-            "section": "def-common.LensSerializedAPIConfig",
-            "text": "LensSerializedAPIConfig"
+            "section": "def-common.LensWireAPIConfig",
+            "text": "LensWireAPIConfig"
           },
           "; applySerializedState: (state?: ",
           {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
             "docId": "kibKbnLensCommon-2PluginApi",
-            "section": "def-common.LensSerializedAPIConfig",
-            "text": "LensSerializedAPIConfig"
+            "section": "def-common.LensWireAPIConfig",
+            "text": "LensWireAPIConfig"
           },
           " | undefined) => ",
           {
@@ -327,16 +327,16 @@
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
             "docId": "kibKbnLensCommon-2PluginApi",
-            "section": "def-common.LensSerializedAPIConfig",
-            "text": "LensSerializedAPIConfig"
+            "section": "def-common.LensWireAPIConfig",
+            "text": "LensWireAPIConfig"
           },
           "; getSerializedStateByValue: () => ",
           {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
             "docId": "kibKbnLensCommon-2PluginApi",
-            "section": "def-common.LensSerializedAPIConfig",
-            "text": "LensSerializedAPIConfig"
+            "section": "def-common.LensWireAPIConfig",
+            "text": "LensWireAPIConfig"
           },
           "; viewMode$: ",
           {
@@ -585,7 +585,7 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-        "lineNumber": 79,
+        "lineNumber": 92,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -788,7 +788,106 @@
           "[] | undefined; forceDSL?: boolean | undefined; isNewPanel?: boolean | undefined; ref_id?: string | undefined; attributes?: undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-common-2",
+        "id": "def-common.LensByValueFlattenedSerializedAPIConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "LensByValueFlattenedSerializedAPIConfig",
+        "description": [
+          "\nBy-value Lens panel config in flattened wire shape (dashboard app API with `lens.apiFormat`).\nChart API fields from ",
+          {
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensApiConfig",
+            "text": "LensApiConfig"
+          },
+          " sit at the root next to panel metadata."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & {}>> & ",
+          {
+            "pluginId": "embeddable",
+            "scope": "server",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-server.SerializedDrilldowns",
+            "text": "SerializedDrilldowns"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; } & {}>> & ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensApiConfig",
+            "text": "LensApiConfig"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
         "lineNumber": 58,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-common-2",
+        "id": "def-common.LensByValuePanelConfigs",
+        "type": "Type",
+        "tags": [],
+        "label": "LensByValuePanelConfigs",
+        "description": [
+          "\nPanel-level connfigurations that should be persisted for by-value Lens panels.\nExcludes runtime/inherited state from unified search and dashboard contexts."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & {}>> & ",
+          {
+            "pluginId": "embeddable",
+            "scope": "server",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-server.SerializedDrilldowns",
+            "text": "SerializedDrilldowns"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; } & {}>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -827,19 +926,19 @@
           },
           "<Readonly<{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; } & {}>> & { attributes: ",
           {
-            "pluginId": "@kbn/lens-common",
-            "scope": "common",
-            "docId": "kibKbnLensCommonPluginApi",
-            "section": "def-common.LensSavedObjectAttributes",
-            "text": "LensSavedObjectAttributes"
-          },
-          " | ",
-          {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
             "docId": "kibKbnLensEmbeddableUtilsPluginApi",
             "section": "def-common.LensApiConfig",
             "text": "LensApiConfig"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.LensSavedObjectAttributes",
+            "text": "LensSavedObjectAttributes"
           },
           " | undefined; ref_id?: string | undefined; }"
         ],
@@ -969,16 +1068,16 @@
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
             "docId": "kibKbnLensCommon-2PluginApi",
-            "section": "def-common.LensSerializedAPIConfig",
-            "text": "LensSerializedAPIConfig"
+            "section": "def-common.LensWireAPIConfig",
+            "text": "LensWireAPIConfig"
           },
           "; applySerializedState: (state?: ",
           {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
             "docId": "kibKbnLensCommon-2PluginApi",
-            "section": "def-common.LensSerializedAPIConfig",
-            "text": "LensSerializedAPIConfig"
+            "section": "def-common.LensWireAPIConfig",
+            "text": "LensWireAPIConfig"
           },
           " | undefined) => ",
           {
@@ -1097,16 +1196,16 @@
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
             "docId": "kibKbnLensCommon-2PluginApi",
-            "section": "def-common.LensSerializedAPIConfig",
-            "text": "LensSerializedAPIConfig"
+            "section": "def-common.LensWireAPIConfig",
+            "text": "LensWireAPIConfig"
           },
           "; getSerializedStateByValue: () => ",
           {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
             "docId": "kibKbnLensCommon-2PluginApi",
-            "section": "def-common.LensSerializedAPIConfig",
-            "text": "LensSerializedAPIConfig"
+            "section": "def-common.LensWireAPIConfig",
+            "text": "LensWireAPIConfig"
           },
           "; viewMode$: ",
           {
@@ -1355,7 +1454,7 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-        "lineNumber": 119,
+        "lineNumber": 132,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1567,7 +1666,40 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
-        "lineNumber": 60,
+        "lineNumber": 66,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-common-2",
+        "id": "def-common.LensWireAPIConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "LensWireAPIConfig",
+        "description": [
+          "\nThe full wire-level serialized type that includes the flattened lens by value variant.\nUsed at serialization/deserialization boundaries where the panel config\nmay arrive in the flat wire shape (with `lens.apiFormat` enabled)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensSerializedAPIConfig",
+            "text": "LensSerializedAPIConfig"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensByValueFlattenedSerializedAPIConfig",
+            "text": "LensByValueFlattenedSerializedAPIConfig"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
+        "lineNumber": 76,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

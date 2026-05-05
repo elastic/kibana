@@ -553,7 +553,7 @@ describe('DispatcherService integration tests', () => {
       new FetchRulesStep(rulesSoService),
       new ApplyMaintenanceWindowStep(mwService),
       new FetchPoliciesStep(npSoService),
-      new EvaluateMatchersStep(),
+      new EvaluateMatchersStep(mockLoggerService),
       new BuildGroupsStep(),
       new ApplyThrottlingStep(queryService, mockLoggerService),
       new DispatchStep(mockLoggerService, mockWfm),

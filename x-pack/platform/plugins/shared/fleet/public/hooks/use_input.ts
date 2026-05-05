@@ -140,9 +140,10 @@ export function useSecretInput(
         setValue('');
       },
     },
-    cancelEdit: () => {
+    cancelEdit: useCallback(() => {
       setValue(initialValue || '');
-    },
+      setErrors(undefined);
+    }, [initialValue]),
     validate: () => {
       if (validate) {
         const newErrors = validate(value);
