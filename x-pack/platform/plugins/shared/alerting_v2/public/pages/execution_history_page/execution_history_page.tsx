@@ -77,6 +77,11 @@ const buildColumns = (
     name: i18n.translate('xpack.alertingV2.executionHistory.columns.outcome', {
       defaultMessage: 'Outcome',
     }),
+    render: (outcome: PolicyExecutionHistoryItem['outcome']) => (
+      <EuiBadge color="hollow" iconType={outcome === 'dispatched' ? 'check' : 'clock'}>
+        {outcome}
+      </EuiBadge>
+    ),
   },
   {
     field: 'episode_count',
@@ -273,6 +278,9 @@ export const ExecutionHistoryPage = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         }
+        description={i18n.translate('xpack.alertingV2.executionHistory.pageDescription', {
+          defaultMessage: 'Showing dispatcher decisions from the last 24 hours.',
+        })}
       />
       <EuiSpacer size="l" />
       <EuiTabs>

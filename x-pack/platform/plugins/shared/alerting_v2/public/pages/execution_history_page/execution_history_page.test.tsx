@@ -134,6 +134,15 @@ describe('ExecutionHistoryPage', () => {
     expect(screen.getByTestId('executionHistoryDenormalizationTip')).toBeInTheDocument();
   });
 
+  it('shows the 24h time window in the page description', () => {
+    mockFetchResult();
+    renderPage();
+
+    expect(
+      screen.getByText(/Showing dispatcher decisions from the last 24 hours/i)
+    ).toBeInTheDocument();
+  });
+
   it('shows the empty state when there are no items', () => {
     mockFetchResult();
     renderPage();
