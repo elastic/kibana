@@ -19,6 +19,9 @@ export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
     params: schema.object({
       checkGroup: schema.string(),
     }),
+    query: schema.object({
+      remoteName: schema.maybe(schema.string()),
+    }),
   },
   handler: async ({
     syntheticsEsClient,
@@ -26,15 +29,18 @@ export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
     response,
   }): Promise<SyntheticsJourneyApiResponse> => {
     const { checkGroup } = request.params;
+    const { remoteName } = request.query;
 
     const [steps, details] = await Promise.all([
       getJourneySteps({
         syntheticsEsClient,
         checkGroup,
+        remoteName,
       }),
       getJourneyDetails({
         syntheticsEsClient,
         checkGroup,
+        remoteName,
       }),
     ]);
 

@@ -25,8 +25,14 @@ export const useMonitorQueryFilters = (): {
   const localMonitorQueryId = useMonitorQueryId();
 
   // For remote monitors, the location is not in the local locations list so
-  // selectedLocation is null. Derive the location label from the latest ping's
-  // observer.geo.name field, which is the canonical location label in ping docs.
+  // `selectedLocation` should be null — but `useSelectedLocation` resolves
+  // against the *local* locations list and may match by ID, returning a local
+  // location whose label differs from the remote ping's `observer.geo.name`.
+  // We therefore ignore `selectedLocation` entirely when `remoteName` is set,
+  // and require the ping-derived label before rendering. This avoids a race
+  // where embeddables briefly query with the wrong label and render
+  // "(null)" until the ping resolves.
+  const isRemote = Boolean(remoteName);
   const pingLocationLabel = latestPing?.observer?.geo?.name;
 
   // The embeddable filters ping docs by `monitor.id`. For project monitors
@@ -42,34 +48,26 @@ export const useMonitorQueryFilters = (): {
       return {};
     }
 
-    // For remote monitors, the location may not be resolvable from the local
-    // locations list. Fall back to using the URL locationId for filtering.
-    const hasLocation = selectedLocation || urlLocationId;
-    if (!hasLocation) {
-      return {};
-    }
-
-    // Build location filter values. For local monitors, pass both label and id
-    // because in 8.6.0, observer.geo.name was mapped to the id. For remote
-    // monitors, we need the actual observer.geo.name value from the ping data
-    // because urlLocationId is the location ID (e.g. "us-east4-a") but the
-    // observer.geo.name field contains the label (e.g. "North America - US East").
     let locationFilterValues: string[];
-    if (selectedLocation) {
-      locationFilterValues = [selectedLocation.label, selectedLocation.id];
-    } else if (pingLocationLabel) {
-      // Remote monitor with ping data available: use the actual label
-      // from observer.geo.name plus the ID for backwards compat with
-      // pre-8.6 data where observer.geo.name contained the ID.
+    if (isRemote) {
+      // Remote monitor: only render once we have the canonical
+      // `observer.geo.name` from a ping. The URL `locationId` alone is
+      // unreliable because the embeddable filters by `observer.geo.name`
+      // (a label), not the location id.
+      if (!pingLocationLabel) {
+        return {};
+      }
       const values = new Set<string>();
       values.add(pingLocationLabel);
       if (urlLocationId) values.add(urlLocationId);
       locationFilterValues = [...values];
     } else {
-      // Remote monitor but ping hasn't loaded yet — don't render the
-      // embeddables with a filter that won't match. Return empty so the
-      // consuming components show nothing until we have the correct label.
-      return {};
+      // Local monitor: use the resolved selected location. Pass both label
+      // and id because pre-8.6 data mapped `observer.geo.name` to the id.
+      if (!selectedLocation) {
+        return {};
+      }
+      locationFilterValues = [selectedLocation.label, selectedLocation.id];
     }
 
     return {
@@ -82,8 +80,8 @@ export const useMonitorQueryFilters = (): {
           values: locationFilterValues,
         },
       ],
-      // For remote monitors, override the index pattern to use CCS syntax
-      ...(remoteName
+      // Remote monitors live on the remote cluster's synthetics indices.
+      ...(isRemote
         ? {
             dataTypesIndexPatterns: {
               synthetics: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}`,
@@ -91,5 +89,5 @@ export const useMonitorQueryFilters = (): {
           }
         : {}),
     };
-  }, [monitorQueryId, selectedLocation, remoteName, urlLocationId, pingLocationLabel]);
+  }, [monitorQueryId, selectedLocation, isRemote, remoteName, urlLocationId, pingLocationLabel]);
 };

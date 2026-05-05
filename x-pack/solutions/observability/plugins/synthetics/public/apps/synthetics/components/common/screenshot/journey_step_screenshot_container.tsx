@@ -10,6 +10,7 @@ import useIntersection from 'react-use/lib/useIntersection';
 
 import { getScreenshotUrl } from './journey_screenshot_dialog';
 import { SyntheticsSettingsContext } from '../../../contexts';
+import { useGetUrlParams } from '../../../hooks';
 
 import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
 import { JourneyScreenshotPreview } from '../monitor_test_result/journey_screenshot_preview';
@@ -44,9 +45,10 @@ export const JourneyStepScreenshotContainer = ({
   const intersectionRef = React.useRef<HTMLImageElement>(null);
 
   const { basePath } = useContext(SyntheticsSettingsContext);
+  const { remoteName } = useGetUrlParams();
 
   const imgPath = checkGroup
-    ? getScreenshotUrl({ basePath, checkGroup, stepNumber: initialStepNumber })
+    ? getScreenshotUrl({ basePath, checkGroup, stepNumber: initialStepNumber, remoteName })
     : '';
 
   const intersection = useIntersection(intersectionRef, {

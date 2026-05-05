@@ -296,7 +296,14 @@ export function MonitorDetailFlyout(props: Props) {
     application?.navigateToApp('synthetics', {
       path: `/monitor/${configId}${query ? `?${query}` : ''}`,
     });
-  }, [application, configId, locationId, monitor?.remote?.remoteName, monitor?.remote?.kibanaUrl, monitor?.monitorQueryId]);
+  }, [
+    application,
+    configId,
+    locationId,
+    monitor?.remote?.remoteName,
+    monitor?.remote?.kibanaUrl,
+    monitor?.monitorQueryId,
+  ]);
 
   const editLink = useEditMonitorLocator({ configId, spaces });
 
@@ -721,13 +728,5 @@ const VIEW_ON_REMOTE_CLUSTER_TEXT = i18n.translate(
   'xpack.synthetics.monitorList.viewOnRemoteClusterText',
   {
     defaultMessage: 'View on remote cluster',
-  }
-);
-
-const REMOTE_URL_UNAVAILABLE_TEXT = i18n.translate(
-  'xpack.synthetics.monitorList.remoteUrlUnavailableText',
-  {
-    defaultMessage:
-      'The remote Kibana URL is not available. Ensure the remote cluster has server.publicBaseUrl configured.',
   }
 );

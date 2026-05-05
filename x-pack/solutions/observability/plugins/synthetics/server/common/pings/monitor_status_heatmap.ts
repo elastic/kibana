@@ -45,9 +45,14 @@ export async function queryMonitorHeatmap({
               },
             },
           },
+          // Project monitors on remote clusters can have a different
+          // `monitor.id` from the configId we have on hand, so accept either
+          // `monitor.id` or `config_id`. This also keeps the local-monitor
+          // case unchanged for documents whose `monitor.id == config_id`.
           {
-            term: {
-              'monitor.id': monitorId,
+            bool: {
+              should: [{ term: { 'monitor.id': monitorId } }, { term: { config_id: monitorId } }],
+              minimum_should_match: 1,
             },
           },
           {

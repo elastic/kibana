@@ -9,9 +9,11 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { SyntheticsEsClient } from '../lib';
 import { asMutableArray } from '../../common/utils/as_mutable_array';
 import type { JourneyStep } from '../../common/runtime_types/ping/synthetics';
+import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 
 export interface GetJourneyStepsParams {
   checkGroup: string;
+  remoteName?: string;
 }
 
 type ResultType = JourneyStep & { '@timestamp': string };
@@ -19,10 +21,15 @@ type ResultType = JourneyStep & { '@timestamp': string };
 export const getJourneySteps = async ({
   syntheticsEsClient,
   checkGroup,
+  remoteName,
 }: GetJourneyStepsParams & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<JourneyStep[]> => {
   const params = {
+    // For remote monitors, target the remote cluster's synthetics indices
+    // via CCS syntax so step/end and step/screenshot docs come from the
+    // origin cluster.
+    ...(remoteName ? { index: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` } : {}),
     query: {
       bool: {
         filter: [

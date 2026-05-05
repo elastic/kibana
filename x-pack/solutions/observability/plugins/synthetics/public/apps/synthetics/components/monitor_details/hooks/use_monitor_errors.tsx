@@ -8,6 +8,8 @@ import { useTimeZone } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useSelectedLocation } from './use_selected_location';
+import { useSelectedMonitor } from './use_selected_monitor';
+import { useMonitorLatestPing } from './use_monitor_latest_ping';
 import type { Ping, PingState } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
@@ -23,15 +25,26 @@ export function useMonitorErrors(monitorIdArg?: string) {
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, remoteName } = useGetUrlParams();
 
+  const { isRemote } = useSelectedMonitor();
   const selectedLocation = useSelectedLocation();
+  const { latestPing } = useMonitorLatestPing();
+
+  // Remote monitors don't appear in the local locations list, so
+  // `useSelectedLocation` returns null. Fall back to the latest ping's
+  // `observer.geo.name` so the query can still filter by location.
+  const resolvedLocationLabel =
+    selectedLocation?.label ?? (isRemote ? latestPing?.observer?.geo?.name : undefined);
 
   const timeZone = useTimeZone();
 
   const { data, loading } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      // For remote monitors, target the remote cluster's synthetics indices
+      // via CCS syntax. `useReduxEsSearch` forwards the `index` to bsearch
+      // unchanged.
+      index: remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN,
       size: 0,
       query: {
         bool: {
@@ -54,7 +67,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
             },
             {
               term: {
-                'observer.geo.name': selectedLocation?.label,
+                'observer.geo.name': resolvedLocationLabel,
               },
             },
           ],
@@ -86,10 +99,18 @@ export function useMonitorErrors(monitorIdArg?: string) {
         },
       },
     },
-    [lastRefresh, monitorId, monitorIdArg, dateRangeStart, dateRangeEnd, selectedLocation?.label],
+    [
+      lastRefresh,
+      monitorId,
+      monitorIdArg,
+      dateRangeStart,
+      dateRangeEnd,
+      resolvedLocationLabel,
+      remoteName,
+    ],
     {
       name: `getMonitorErrors/${dateRangeStart}/${dateRangeEnd}`,
-      isRequestReady: Boolean(selectedLocation?.label),
+      isRequestReady: Boolean(resolvedLocationLabel),
     }
   );
 

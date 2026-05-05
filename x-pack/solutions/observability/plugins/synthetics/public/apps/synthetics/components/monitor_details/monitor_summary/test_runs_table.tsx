@@ -91,11 +91,17 @@ export const TestRunsTable = ({
   }, [pings, sortField, sortDirection]);
 
   const pingsError = useSelector(selectPingsError);
-  const { monitor } = useSelectedMonitor();
+  const { monitor, isRemote } = useSelectedMonitor();
   const selectedLocation = useSelectedLocation();
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
-  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
+  // Remote monitors have no local saved object, so the `monitor` ref is null
+  // and the configured monitor type is unknown on the client. Fall back to
+  // the type carried on the recent pings so the table renders the correct
+  // browser/HTTP layout (Screenshot column, journey row click target, etc.).
+  const isBrowserMonitor =
+    monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER ||
+    (isRemote && pings.some((ping) => ping.monitor?.type === MONITOR_TYPES.BROWSER));
 
   const { expandedRows, setExpandedRows } = useExpandedPingList(pings);
 

@@ -18,13 +18,18 @@ import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
+  remoteName?: string;
 }
 
-export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
+export async function fetchScreenshotBlockSet(
+  params: string[],
+  remoteName?: string
+): Promise<ScreenshotBlockDoc[]> {
   const response = await apiService.post<{ result: ScreenshotBlockDoc[] }>(
     SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
     {
       hashes: params,
+      ...(remoteName ? { remoteName } : {}),
     }
   );
   return response.result;
@@ -35,7 +40,7 @@ export async function fetchBrowserJourney(
 ): Promise<SyntheticsJourneyApiResponse> {
   return apiService.get(
     SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
-    undefined,
+    params.remoteName ? { remoteName: params.remoteName } : undefined,
     SyntheticsJourneyApiResponseType
   );
 }

@@ -80,7 +80,7 @@ export const LastTestRunComponent = ({
   stepsData?: SyntheticsJourneyApiResponse;
   isErrorDetails?: boolean;
 }) => {
-  const { monitor, isRemote } = useSelectedMonitor();
+  const { monitor } = useSelectedMonitor();
   const { euiTheme } = useEuiTheme();
 
   const selectedLocation = useSelectedLocation();

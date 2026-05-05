@@ -7,6 +7,7 @@
 
 import type { SyntheticsEsClient } from '../lib';
 import type { ScreenshotBlockDoc } from '../../common/runtime_types';
+import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 
 interface ScreenshotBlockResultType {
   _id: string;
@@ -21,12 +22,17 @@ interface ScreenshotBlockResultType {
 export const getJourneyScreenshotBlocks = async ({
   blockIds,
   syntheticsEsClient,
+  remoteName,
 }: {
   blockIds: string[];
+  remoteName?: string;
 } & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<ScreenshotBlockDoc[]> => {
   const body = {
+    // Ref-based screenshots are stored as separate block docs on the same
+    // synthetics indices. Reach across CCS for remote monitors.
+    ...(remoteName ? { index: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` } : {}),
     query: {
       bool: {
         filter: [

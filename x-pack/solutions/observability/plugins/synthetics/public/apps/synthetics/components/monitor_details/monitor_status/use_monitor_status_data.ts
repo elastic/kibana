@@ -8,11 +8,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import useDebounce from 'react-use/lib/useDebounce';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 import type { MonitorStatusPanelProps, MonitorStatusTimeBin } from './monitor_status_data';
 import {
   dateToMilli,
@@ -22,6 +23,7 @@ import {
   createStatusTimeBins,
 } from './monitor_status_data';
 import { useSelectedLocation } from '../hooks/use_selected_location';
+import { useGetUrlParams } from '../../../hooks';
 import {
   clearMonitorStatusHeatmapAction,
   quietGetMonitorStatusHeatmapAction,
@@ -45,12 +47,27 @@ export const useMonitorStatusData = ({
   remoteName,
 }: Props) => {
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const { monitor } = useSelectedMonitor({ refetchMonitorEnabled: !monitorIdOverride });
+  const { monitor, isRemote } = useSelectedMonitor({ refetchMonitorEnabled: !monitorIdOverride });
   const location = useSelectedLocation({ refetchMonitorEnabled: !monitorIdOverride });
   const pageLocation = useLocation();
+  const { remoteName: remoteNameFromUrl } = useGetUrlParams();
+  const resolvedRemoteName = remoteName ?? remoteNameFromUrl;
 
-  const resolvedMonitorId = monitorIdOverride ?? monitor?.id;
-  const resolvedLocationLabel = locationLabelOverride ?? location?.label;
+  const { monitorId: urlMonitorId } = useParams<{ monitorId: string }>();
+  const { latestPing } = useMonitorLatestPing();
+
+  // Remote monitors have no local saved object, so `monitor?.id` is null and
+  // the local `useSelectedLocation` lookup returns null because the location
+  // is not in the local locations list. Fall back to URL configId and the
+  // latest ping's `observer.geo.name` (mirrors the remote-aware fallbacks
+  // used by the recent-pings hook). The server query accepts either
+  // `monitor.id` OR `config_id`, so configId is sufficient.
+  const resolvedMonitorId =
+    monitorIdOverride ?? monitor?.id ?? (isRemote ? urlMonitorId : undefined);
+  const resolvedLocationLabel =
+    locationLabelOverride ??
+    location?.label ??
+    (isRemote ? latestPing?.observer?.geo?.name : undefined);
 
   const fromMillis = dateToMilli(from);
   const toMillis = dateToMilli(to);
@@ -89,7 +106,7 @@ export const useMonitorStatusData = ({
           from,
           to,
           interval: minsPerBin,
-          remoteName,
+          remoteName: resolvedRemoteName,
         })
       );
     }
@@ -100,9 +117,9 @@ export const useMonitorStatusData = ({
     minsPerBin,
     resolvedLocationLabel,
     resolvedMonitorId,
-    remoteName,
     lastRefresh,
     debouncedBinsCount,
+    resolvedRemoteName,
   ]);
 
   useEffect(() => {

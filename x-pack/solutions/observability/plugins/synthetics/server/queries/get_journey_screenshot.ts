@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsEsClient } from '../lib';
 import type { RefResult, FullScreenshot } from '../../common/runtime_types/ping/synthetics';
+import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 
 interface ResultType {
   _source: RefResult | FullScreenshot;
@@ -21,13 +22,18 @@ export const getJourneyScreenshot = async ({
   checkGroup,
   stepIndex,
   syntheticsEsClient,
+  remoteName,
 }: {
   checkGroup: string;
   stepIndex: number;
+  remoteName?: string;
 } & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<ScreenshotReturnTypesUnion> => {
   const body = {
+    // For remote monitors, screenshots/refs live on the remote cluster's
+    // synthetics indices, so reach across CCS.
+    ...(remoteName ? { index: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` } : {}),
     track_total_hits: true,
     size: 0,
     query: {

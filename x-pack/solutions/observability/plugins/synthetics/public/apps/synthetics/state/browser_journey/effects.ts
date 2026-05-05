@@ -36,8 +36,23 @@ export function* browserJourneyEffects() {
 
 function* fetchBlocks(hashes: string[]) {
   yield put(setBlockLoadingAction(hashes));
-  const blocks: ScreenshotBlockDoc[] = yield call(fetchScreenshotBlockSet, hashes);
+  // Screenshot blocks are fetched by a generic saga that has no React or
+  // store context for the active monitor. Resolve `remoteName` from the URL
+  // so the POST body carries it through to the server route, mirroring how
+  // the rest of the monitor detail page reads from `?remoteName=`.
+  const remoteName = readRemoteNameFromUrl();
+  const blocks: ScreenshotBlockDoc[] = yield call(fetchScreenshotBlockSet, hashes, remoteName);
   yield put(putBlocksAction({ blocks }));
+}
+
+function readRemoteNameFromUrl(): string | undefined {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    const value = new URLSearchParams(window.location.search).get('remoteName');
+    return value ?? undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function* fetchScreenshotBlocks() {

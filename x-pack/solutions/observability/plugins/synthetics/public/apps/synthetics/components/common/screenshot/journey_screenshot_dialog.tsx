@@ -24,6 +24,7 @@ import {
 import styled from '@emotion/styled';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { SyntheticsSettingsContext } from '../../../contexts';
+import { useGetUrlParams } from '../../../hooks';
 import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
 
 import { ScreenshotImage } from './screenshot_image';
@@ -49,7 +50,8 @@ export const JourneyScreenshotDialog = ({
   const [stepNumber, setStepNumber] = useState(initialStepNumber);
 
   const { basePath } = useContext(SyntheticsSettingsContext);
-  const imgPath = getScreenshotUrl({ basePath, checkGroup, stepNumber });
+  const { remoteName } = useGetUrlParams();
+  const imgPath = getScreenshotUrl({ basePath, checkGroup, stepNumber, remoteName });
 
   const imageResult = useRetrieveStepImage({
     hasIntersected: true,
@@ -232,18 +234,23 @@ export const getScreenshotUrl = ({
   basePath,
   checkGroup,
   stepNumber,
+  remoteName,
 }: {
   basePath: string;
   checkGroup?: string;
   stepNumber: number;
+  remoteName?: string;
 }) => {
   if (!checkGroup) {
     return '';
   }
-  return `${basePath}${SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT.replace(
+  const path = `${basePath}${SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT.replace(
     '{checkGroup}',
     checkGroup
   ).replace('{stepIndex}', stepNumber.toString())}`;
+  // Encoded as a query param so the server route validation reads it from
+  // `request.query.remoteName` and forwards it to the underlying ES query.
+  return remoteName ? `${path}?remoteName=${encodeURIComponent(remoteName)}` : path;
 };
 
 const prevAriaLabel = i18n.translate('xpack.synthetics.monitor.step.previousStep', {

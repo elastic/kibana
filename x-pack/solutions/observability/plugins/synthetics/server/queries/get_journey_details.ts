@@ -9,9 +9,11 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { SyntheticsEsClient } from '../lib';
 import { createEsParams } from '../lib';
 import type { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
+import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 
 export interface GetJourneyDetails {
   checkGroup: string;
+  remoteName?: string;
 }
 
 type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string } }) | JourneyStep;
@@ -19,10 +21,18 @@ type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string
 export const getJourneyDetails = async ({
   syntheticsEsClient,
   checkGroup,
+  remoteName,
 }: GetJourneyDetails & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<SyntheticsJourneyApiResponse['details']> => {
+  // For remote monitors, target the remote cluster's synthetics indices via
+  // CCS syntax. Apply to all three queries (current journey + previous/next
+  // sibling journeys).
+  const ccsIndexOverride = remoteName
+    ? { index: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` }
+    : {};
   const params = createEsParams({
+    ...ccsIndexOverride,
     query: {
       bool: {
         filter: [
@@ -61,6 +71,7 @@ export const getJourneyDetails = async ({
 
   if (journeySource && foundJourney) {
     const baseSiblingParams = createEsParams({
+      ...ccsIndexOverride,
       query: {
         bool: {
           must_not: [
