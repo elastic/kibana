@@ -7,7 +7,6 @@
 
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
-import axios from 'axios';
 import { createVerify } from 'crypto';
 import AdmZip from 'adm-zip';
 import { cloneDeep } from 'lodash';
@@ -53,37 +52,44 @@ export class ArtifactService {
   public async getArtifact(name: string): Promise<Manifest> {
     this.logger.debug('Getting artifact', { name } as LogMeta);
 
-    return axios
-      .get(this.getManifestUrl(), {
-        headers: this.headers(name),
-        timeout: this.cdnConfig?.requestTimeout,
-        validateStatus: (status) => status < 500,
-        responseType: 'arraybuffer',
-      })
-      .then(async (response) => {
-        switch (response.status) {
-          case 200:
-            const manifest = {
-              data: await this.getManifest(name, response.data),
-              modified: true,
-            };
-            if (response.headers && response.headers.etag) {
-              const cacheEntry = {
-                manifest: { ...manifest, modified: false },
-                etag: response.headers?.etag ?? '',
-              };
-              this.cache.set(name, cacheEntry);
-            }
-            return cloneDeep(manifest);
-          case 304:
-            return cloneDeep(this.getCachedManifest(name));
-          case 404:
-            this.cache.delete(name);
-            throw new ManifestNotFoundError(this.manifestUrl!);
-          default:
-            throw Error(`Failed to download manifest, unexpected status code: ${response.status}`);
+    const response = await fetch(this.getManifestUrl(), {
+      headers: this.headers(name),
+      signal: this.timeoutSignal(),
+    });
+
+    if (response.status >= 500) {
+      throw Error(`Failed to download manifest, unexpected status code: ${response.status}`);
+    }
+
+    switch (response.status) {
+      case 200: {
+        const body = Buffer.from(await response.arrayBuffer());
+        const manifest = {
+          data: await this.getManifest(name, body),
+          modified: true,
+        };
+        const etag = response.headers.get('etag');
+        if (etag) {
+          this.cache.set(name, {
+            manifest: { ...manifest, modified: false },
+            etag,
+          });
         }
-      });
+        return cloneDeep(manifest);
+      }
+      case 304:
+        return cloneDeep(this.getCachedManifest(name));
+      case 404:
+        this.cache.delete(name);
+        throw new ManifestNotFoundError(this.manifestUrl!);
+      default:
+        throw Error(`Failed to download manifest, unexpected status code: ${response.status}`);
+    }
+  }
+
+  private timeoutSignal(): AbortSignal | undefined {
+    const timeout = this.cdnConfig?.requestTimeout;
+    return typeof timeout === 'number' ? AbortSignal.timeout(timeout) : undefined;
   }
 
   private getManifestUrl() {
@@ -123,8 +129,13 @@ export class ArtifactService {
     const artifact = manifest?.artifacts?.[name];
     if (artifact) {
       const url = `${this.cdnConfig?.url}${artifact.relative_url}`;
-      const artifactResponse = await axios.get(url, { timeout: this.cdnConfig?.requestTimeout });
-      return artifactResponse.data;
+      const artifactResponse = await fetch(url, { signal: this.timeoutSignal() });
+      if (!artifactResponse.ok) {
+        throw Error(
+          `Failed to download artifact '${name}', unexpected status code: ${artifactResponse.status}`
+        );
+      }
+      return artifactResponse.json();
     } else {
       throw new ArtifactNotFoundError(name);
     }
