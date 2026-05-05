@@ -164,8 +164,15 @@ export const accessSummaryHiddenDescription = i18n.translate(
 export const accessSummaryCount = (users: number, roles: number) =>
   i18n.translate('xpack.agentBuilder.acl.summary.count', {
     defaultMessage:
-      '{users, plural, =0 {} one {# user} other {# users}}{both, select, true { · } other {}}{roles, plural, =0 {} one {# role} other {# roles}} have additional access.',
-    values: { users, roles, both: users > 0 && roles > 0 ? 'true' : 'false' },
+      '{users, plural, =0 {} one {# user} other {# users}}{both, select, true { · } other {}}{roles, plural, =0 {} one {# role} other {# roles}} {total, plural, one {has} other {have}} additional access.',
+    values: {
+      users,
+      roles,
+      both: users > 0 && roles > 0 ? 'true' : 'false',
+      // Verb agrees with the combined principal count: a single user OR a single role → "has";
+      // any combination totalling two or more (including "1 user · 1 role") → "have".
+      total: users + roles,
+    },
   });
 
 export const accessSummaryLoading = i18n.translate('xpack.agentBuilder.acl.summary.loading', {
