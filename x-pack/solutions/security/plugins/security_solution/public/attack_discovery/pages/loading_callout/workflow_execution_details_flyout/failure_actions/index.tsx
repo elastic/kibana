@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { ATTACK_DISCOVERY_PATH } from '../../../../../../common/constants';
+import { APP_UI_ID, ATTACK_DISCOVERY_PATH } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { AggregatedWorkflowExecution } from '../../types';
 import { useWorkflowEditorLink } from '../../../use_workflow_editor_link';
@@ -73,7 +73,7 @@ const FailureActionsComponent: React.FC<FailureActionsProps> = ({
 
       case 'attack_discovery_settings':
         try {
-          href = application.getUrlForApp('securitySolution', {
+          href = application.getUrlForApp(APP_UI_ID, {
             path: ATTACK_DISCOVERY_PATH,
           });
         } catch {

@@ -453,7 +453,7 @@ describe('FailureActions', () => {
       );
 
       expect(mockGetUrlForApp).toHaveBeenCalledWith(
-        'securitySolution',
+        'securitySolutionUI',
         expect.objectContaining({ path: '/attack_discovery' })
       );
     });

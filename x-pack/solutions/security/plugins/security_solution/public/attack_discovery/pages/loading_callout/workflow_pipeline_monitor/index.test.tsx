@@ -2764,4 +2764,112 @@ describe('WorkflowPipelineMonitor', () => {
       expect(inspectButtons).toHaveLength(3);
     });
   });
+
+  describe('multi-step validation workflow collapsing', () => {
+    // Simulates the "Validation with transform" workflow which has 3 internal steps
+    // all sharing pipelinePhase: 'validate_discoveries'
+    const multiStepValidationExecutions: StepExecutionWithLink[] = [
+      createMockStep({
+        executionTimeMs: 98,
+        finishedAt: '2024-01-01T00:00:00.098Z',
+        id: 'step-retrieval',
+        pipelinePhase: 'retrieve_alerts',
+        status: ExecutionStatus.COMPLETED,
+        stepId: 'retrieve_alerts',
+        topologicalIndex: 0,
+        workflowId: 'workflow-retrieval',
+        workflowRunId: 'run-retrieval',
+      }),
+      createMockStep({
+        executionTimeMs: 81000,
+        finishedAt: '2024-01-01T00:01:21.098Z',
+        id: 'step-gen',
+        pipelinePhase: 'generate_discoveries',
+        startedAt: '2024-01-01T00:00:00.098Z',
+        status: ExecutionStatus.COMPLETED,
+        stepId: 'generate_discoveries',
+        topologicalIndex: 1,
+        workflowId: 'workflow-generation',
+        workflowRunId: 'run-generation',
+      }),
+      createMockStep({
+        executionTimeMs: 50,
+        finishedAt: '2024-01-01T00:01:21.148Z',
+        id: 'step-val',
+        pipelinePhase: 'validate_discoveries',
+        startedAt: '2024-01-01T00:01:21.098Z',
+        status: ExecutionStatus.COMPLETED,
+        stepId: 'validate_discoveries',
+        topologicalIndex: 2,
+        workflowDescription: 'Validates attack discoveries, transforms all text fields to uppercase, then persists them',
+        workflowId: 'workflow-validation',
+        workflowName: 'Validation with transform',
+        workflowRunId: 'run-validation',
+      }),
+      createMockStep({
+        executionTimeMs: 16,
+        finishedAt: '2024-01-01T00:01:21.164Z',
+        id: 'step-transform',
+        pipelinePhase: 'validate_discoveries',
+        startedAt: '2024-01-01T00:01:21.148Z',
+        status: ExecutionStatus.COMPLETED,
+        stepId: 'transform_to_uppercase',
+        topologicalIndex: 3,
+        workflowDescription: 'Validates attack discoveries, transforms all text fields to uppercase, then persists them',
+        workflowId: 'workflow-validation',
+        workflowName: 'Validation with transform',
+        workflowRunId: 'run-validation',
+      }),
+    ];
+
+    it('renders exactly three pipeline steps even when the validation workflow has multiple internal steps', () => {
+      render(
+        <TestProviders>
+          <WorkflowPipelineMonitor
+            {...defaultProps}
+            stepExecutions={multiStepValidationExecutions}
+            workflowRunId="run-validation"
+          />
+        </TestProviders>
+      );
+
+      const stepTitles = document.querySelectorAll('.euiStep__title');
+
+      expect(stepTitles).toHaveLength(3);
+      expect(stepTitles[0]).toHaveTextContent('Alert retrieval');
+      expect(stepTitles[1]).toHaveTextContent('Generation');
+      expect(stepTitles[2]).toHaveTextContent('Validation');
+    });
+
+    it('does not render a step titled "Transform To Uppercase" for an internal validation workflow step', () => {
+      render(
+        <TestProviders>
+          <WorkflowPipelineMonitor
+            {...defaultProps}
+            stepExecutions={multiStepValidationExecutions}
+            workflowRunId="run-validation"
+          />
+        </TestProviders>
+      );
+
+      expect(screen.queryByText('Transform To Uppercase')).not.toBeInTheDocument();
+    });
+
+    it('renders the validation workflow name as a link inside the collapsed Validation step', () => {
+      render(
+        <TestProviders>
+          <WorkflowPipelineMonitor
+            {...defaultProps}
+            stepExecutions={multiStepValidationExecutions}
+            workflowRunId="run-validation"
+          />
+        </TestProviders>
+      );
+
+      const nameElement = screen.getByTestId('stepWorkflowName');
+
+      expect(nameElement).toHaveTextContent('Validation with transform');
+      expect(nameElement.tagName).toBe('A');
+    });
+  });
 });

@@ -24,11 +24,13 @@ import { getStepExecutionTime } from '../helpers/get_step_execution_time';
  * from repeating when a custom alert retrieval workflow has multiple steps.
  */
 export interface WorkflowGroupStepsProps {
+  badge?: React.ReactNode;
   inspectButton?: React.ReactNode;
   steps: StepExecutionWithLink[];
 }
 
 const WorkflowGroupStepsComponent: React.FC<WorkflowGroupStepsProps> = ({
+  badge,
   inspectButton,
   steps,
 }) => {
@@ -140,11 +142,13 @@ const WorkflowGroupStepsComponent: React.FC<WorkflowGroupStepsProps> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       )}
-      {(compositeStatus === ExecutionStatus.RUNNING ||
+      {(badge != null ||
+        compositeStatus === ExecutionStatus.RUNNING ||
         totalExecutionTimeMs != null ||
         inspectButton != null) && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {badge != null && <EuiFlexItem grow={false}>{badge}</EuiFlexItem>}
             {compositeStatus === ExecutionStatus.RUNNING && (
               <EuiFlexItem grow={false}>
                 <LiveTimer

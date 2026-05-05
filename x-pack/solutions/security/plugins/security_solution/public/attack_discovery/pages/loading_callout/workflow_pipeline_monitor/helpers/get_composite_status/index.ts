@@ -38,5 +38,7 @@ export const getCompositeStatus = (subSteps: StepExecutionWithLink[]): Execution
     return ExecutionStatus.PENDING;
   }
 
-  return ExecutionStatus.RUNNING;
+  // Remaining terminal-ish states (CANCELLED, SKIPPED, WAITING, etc.) —
+  // use the first step's status rather than falsely claiming RUNNING.
+  return subSteps[0].status;
 };

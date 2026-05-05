@@ -11,6 +11,7 @@ import type { StepExecutionWithLink } from '../../../types';
 import {
   CANONICAL_STEP_ORDER,
   getCanonicalOrder,
+  groupStepsByPhase,
   groupStepsByWorkflow,
   isAlertRetrievalStep,
   isPersistenceStep,
@@ -108,6 +109,95 @@ describe('isPersistenceStep', () => {
 
   it('returns false for an alert retrieval step', () => {
     expect(isPersistenceStep(createStep({ stepId: 'retrieve_alerts' }))).toBe(false);
+  });
+});
+
+describe('groupStepsByPhase', () => {
+  it('returns empty map for empty input', () => {
+    expect(groupStepsByPhase([])).toEqual(new Map());
+  });
+
+  it('groups steps with the same pipelinePhase together', () => {
+    const steps = [
+      createStep({
+        id: 's1',
+        pipelinePhase: 'validate_discoveries',
+        stepId: 'validate_discoveries',
+      }),
+      createStep({
+        id: 's2',
+        pipelinePhase: 'validate_discoveries',
+        stepId: 'transform_to_uppercase',
+      }),
+      createStep({
+        id: 's3',
+        pipelinePhase: 'generate_discoveries',
+        stepId: 'generate_discoveries',
+      }),
+    ];
+
+    const groups = groupStepsByPhase(steps);
+
+    expect(groups.size).toBe(2);
+    expect(groups.get('validate_discoveries')?.map((s) => s.id)).toEqual(['s1', 's2']);
+    expect(groups.get('generate_discoveries')?.map((s) => s.id)).toEqual(['s3']);
+  });
+
+  it('uses stepId as group key when pipelinePhase is undefined', () => {
+    const steps = [createStep({ id: 's1', pipelinePhase: undefined, stepId: 'custom_step' })];
+
+    const groups = groupStepsByPhase(steps);
+
+    expect(groups.has('custom_step')).toBe(true);
+    expect(groups.get('custom_step')?.map((s) => s.id)).toEqual(['s1']);
+  });
+
+  it('preserves insertion order of groups', () => {
+    const steps = [
+      createStep({
+        id: 's1',
+        pipelinePhase: 'validate_discoveries',
+        stepId: 'validate_discoveries',
+      }),
+      createStep({
+        id: 's2',
+        pipelinePhase: 'generate_discoveries',
+        stepId: 'generate_discoveries',
+      }),
+      createStep({
+        id: 's3',
+        pipelinePhase: 'validate_discoveries',
+        stepId: 'transform_to_uppercase',
+      }),
+    ];
+
+    const groups = groupStepsByPhase(steps);
+    const keys = [...groups.keys()];
+
+    expect(keys[0]).toBe('validate_discoveries');
+    expect(keys[1]).toBe('generate_discoveries');
+  });
+
+  it('groups two steps with same pipelinePhase and one without into separate groups', () => {
+    const steps = [
+      createStep({
+        id: 's1',
+        pipelinePhase: 'validate_discoveries',
+        stepId: 'validate_discoveries',
+      }),
+      createStep({
+        id: 's2',
+        pipelinePhase: 'validate_discoveries',
+        stepId: 'transform_uppercase',
+      }),
+      createStep({ id: 's3', pipelinePhase: undefined, stepId: 'standalone_step' }),
+    ];
+
+    const groups = groupStepsByPhase(steps);
+
+    expect(groups.size).toBe(2);
+    expect(groups.get('validate_discoveries')).toHaveLength(2);
+    expect(groups.get('standalone_step')).toHaveLength(1);
   });
 });
 

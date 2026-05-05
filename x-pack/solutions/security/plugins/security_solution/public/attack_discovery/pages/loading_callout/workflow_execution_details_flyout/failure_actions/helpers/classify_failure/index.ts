@@ -119,7 +119,7 @@ const buildActions = (
     case 'workflow_deleted':
       return [
         {
-          label: 'Reconfigure in Attack Discovery settings',
+          label: 'Reconfigure in Attack discovery settings',
           linkType: 'attack_discovery_settings',
         },
       ];
