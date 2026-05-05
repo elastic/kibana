@@ -331,7 +331,7 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
   state: {
     type: 'keyword',
     _meta: {
-      description: 'The state of the features identification task (success, failure, or canceled)',
+      description: 'The state of features identification (success, failure, or canceled)',
     },
   },
   filters_capped: {

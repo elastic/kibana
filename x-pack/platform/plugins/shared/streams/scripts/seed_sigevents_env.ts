@@ -101,8 +101,8 @@ run(
 
     // Step ordering matters — dependencies:
     //   logs       → must exist before alerts (ESQL runs against seeded logs)
-    //   queries    → must be promoted before rule_ids can be read (needed by alerts + tasks)
-    //   features + queries + insights → all consumed by tasks (task payload embeds all three)
+    //   queries    → must be promoted before rule_ids can be read (needed by alerts)
+    //   insights   → consumed by the insights task (task payload embeds them)
 
     log.info('Seeding logs…');
     const { failureStartMs, failureEndMs, manifest } = await seedLogs(ctx, esClient, log);

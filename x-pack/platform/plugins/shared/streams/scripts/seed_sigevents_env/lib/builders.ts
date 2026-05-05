@@ -19,8 +19,7 @@ const INFRA_DEP_SUBTYPE: Record<string, string> = {
 
 /**
  * Builds the canonical feature payload objects from the manifest.
- * Used by both seedFeatures (which adds index-only fields status/last_seen) and
- * buildTaskDocs in seed_tasks.ts.
+ * Used by seedFeatures (which adds index-only fields status/last_seen).
  */
 export function buildFeaturePayloads(
   ctx: SeedContext,
@@ -105,7 +104,7 @@ export function buildFeaturePayloads(
 /**
  * Builds the insight payload objects shared by seedInsights (Kibana API) and
  * buildTaskDocs in seed_tasks.ts (.kibana_streams_tasks). Both callers read
- * generatedAt from ctx so the two storage paths always stay in sync.
+ * generatedAt from ctx so the storage paths stay in sync.
  */
 export function buildInsightPayloads(
   ctx: SeedContext,

@@ -9,27 +9,13 @@ import { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { LogsManifest } from '@kbn/synthtrace/src/lib/service_graph_logs/types';
 import type { SeedContext, SeedScenario, SeededQuery } from '../types';
+import { deterministicId } from '../types';
 import { buildFeaturePayloads, buildInsightPayloads } from '../lib/builders';
 
-const FEATURES_TASK_TYPE = 'streams_features_identification';
-const QUERIES_TASK_TYPE = 'streams_significant_events_queries_generation';
-const ONBOARDING_TASK_TYPE = 'streams_onboarding';
 const INSIGHTS_TASK_TYPE = 'streams_insights_discovery';
 
-/** Returns the per-stream task doc IDs. Single source of truth for both
- *  seedTasks (which creates them) and cleanTasks (which deletes them).
- *
- *  ID conventions mirror the live system: features, queries, and onboarding
- *  are per-stream (`${type}_${streamName}`). The insights task is a global
- *  singleton handled separately — see `INSIGHTS_TASK_TYPE` usages below.
- */
-function streamTaskDocIds(streamName: string): string[] {
-  return [
-    `${FEATURES_TASK_TYPE}_${streamName}`,
-    `${QUERIES_TASK_TYPE}_${streamName}`,
-    `${ONBOARDING_TASK_TYPE}_${streamName}`,
-  ];
-}
+const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
+const KI_ONBOARDING_WORKFLOW_UUID = 'workflow-68c0af3c-dbfa-536b-bdda-dc598f389ab3';
 
 const TEMP_SEED_USER = 'seed_sigevents_tasks_tmp';
 const TEMP_SEED_PASSWORD = 'seed_sigevents_tasks_tmp_pass!';
@@ -88,19 +74,16 @@ async function withTempSuperuser<T>(
   }
 }
 
-/** Build all 4 task doc objects for a seed run. */
-function buildTaskDocs(
+function seedOnboardingExecutionId(streamName: string): string {
+  return deterministicId('seed-onboarding', streamName);
+}
+
+function buildWorkflowExecutionDoc(
   ctx: SeedContext,
   manifest: LogsManifest,
-  scenario: SeedScenario,
-  seededQueries: SeededQuery[],
-  log: ToolingLog
+  seededQueries: SeededQuery[]
 ) {
-  // Re-uses shared builders so the task payload matches what was indexed/POSTed by the
-  // individual seed steps. Features include uuid (from buildFeaturePayloads). Insights use
-  // ctx.generatedAt — same value passed to seedInsights — so both storage paths stay in sync.
   const features = buildFeaturePayloads(ctx, manifest);
-
   const queries = seededQueries.map((q) => ({
     title: q.title,
     esql: { query: q.esql },
@@ -108,63 +91,63 @@ function buildTaskDocs(
     description: q.description ?? '',
     evidence: [],
   }));
+  const tokensZero = { prompt: 0, completion: 0 };
+  const executionId = seedOnboardingExecutionId(ctx.streamName);
 
-  const insights = buildInsightPayloads(ctx, scenario, seededQueries);
-
-  const baseTask = (
-    id: string,
-    type: string,
-    params: Record<string, unknown>,
-    payload: unknown
-  ) => ({
-    id,
-    type,
+  return {
+    id: executionId,
+    spaceId: 'default',
+    workflowId: KI_ONBOARDING_WORKFLOW_UUID,
     status: 'completed',
-    space: '*',
-    created_at: ctx.generatedAt,
-    last_completed_at: ctx.generatedAt,
-    task: { params, payload },
-  });
+    isTestRun: false,
+    createdAt: ctx.generatedAt,
+    startedAt: ctx.generatedAt,
+    finishedAt: ctx.generatedAt,
+    duration: 5000,
+    triggeredBy: 'manual',
+    executedBy: 'elastic',
+    concurrencyGroupKey: `streams-ki-onboarding-${ctx.streamName}`,
+    context: {
+      inputs: { streamName: ctx.streamName },
+      output: {
+        streamName: ctx.streamName,
+        featuresSkipped: false,
+        featuresConnectorUsed: '',
+        discoveredFeatures: features,
+        featuresTokensUsed: tokensZero,
+        queriesSkipped: false,
+        queriesConnectorUsed: '',
+        persistedQueries: queries,
+        queriesTokensUsed: tokensZero,
+      },
+    },
+    workflowDefinition: {},
+    yaml: '',
+    error: null,
+    cancelRequested: false,
+    scopeStack: [],
+  };
+}
 
+/** Build task doc objects for a seed run (insights only — features/queries/onboarding
+ *  are now handled by workflows, not Task Manager). */
+function buildTaskDocs(ctx: SeedContext, scenario: SeedScenario, seededQueries: SeededQuery[]) {
+  const insights = buildInsightPayloads(ctx, scenario, seededQueries);
   const tokensZero = { prompt: 0, completion: 0 };
 
-  const [featuresId, queriesId, onboardingId] = streamTaskDocIds(ctx.streamName);
-  // The insights task is a global singleton — its ID is the type itself (no stream suffix).
-  const insightsId = INSIGHTS_TASK_TYPE;
-
   return [
-    baseTask(
-      featuresId,
-      FEATURES_TASK_TYPE,
-      { streamName: ctx.streamName, start: 0, end: 0 },
-      { features }
-    ),
-    baseTask(
-      queriesId,
-      QUERIES_TASK_TYPE,
-      { streamName: ctx.streamName, start: 0, end: 0 },
-      { queries, tokensUsed: tokensZero }
-    ),
-    baseTask(
-      onboardingId,
-      ONBOARDING_TASK_TYPE,
-      {
-        streamName: ctx.streamName,
-        from: 0,
-        to: 0,
-        steps: ['features_identification', 'queries_generation'],
+    {
+      id: INSIGHTS_TASK_TYPE,
+      type: INSIGHTS_TASK_TYPE,
+      status: 'completed',
+      space: '*',
+      created_at: ctx.generatedAt,
+      last_completed_at: ctx.generatedAt,
+      task: {
+        params: { streamNames: [ctx.streamName] },
+        payload: { insights, tokensUsed: { ...tokensZero, cached: 0 } },
       },
-      {
-        featuresTaskResult: { status: 'completed', features },
-        queriesTaskResult: { status: 'completed', queries, tokensUsed: tokensZero },
-      }
-    ),
-    baseTask(
-      insightsId,
-      INSIGHTS_TASK_TYPE,
-      { streamNames: [ctx.streamName] },
-      { insights, tokensUsed: { ...tokensZero, cached: 0 } }
-    ),
+    },
   ];
 }
 
@@ -176,8 +159,9 @@ export async function seedTasks(
   esClient: Client,
   log: ToolingLog
 ): Promise<void> {
+  // Insights task docs go into the system index (requires superuser)
   await withTempSuperuser(esClient, ctx, log, async (sysClient) => {
-    const taskDocs = buildTaskDocs(ctx, manifest, scenario, seededQueries, log);
+    const taskDocs = buildTaskDocs(ctx, scenario, seededQueries);
     for (const doc of taskDocs) {
       await sysClient.index({
         index: '.kibana_streams_tasks',
@@ -188,6 +172,16 @@ export async function seedTasks(
       log.info(`seedTasks: indexed task doc "${doc.id}"`);
     }
   });
+
+  // Onboarding workflow execution doc (regular index, no superuser needed)
+  const wfDoc = buildWorkflowExecutionDoc(ctx, manifest, seededQueries);
+  await esClient.index({
+    index: WORKFLOWS_EXECUTIONS_INDEX,
+    id: wfDoc.id,
+    document: wfDoc,
+    refresh: 'wait_for',
+  });
+  log.info(`seedTasks: indexed workflow execution doc "${wfDoc.id}"`);
 }
 
 export async function cleanTasks(
@@ -196,11 +190,7 @@ export async function cleanTasks(
   log: ToolingLog
 ): Promise<void> {
   await withTempSuperuser(esClient, ctx, log, async (sysClient) => {
-    // Per-stream task docs + the global insights singleton. The insights task is deleted
-    // here because this seeder manages a single stream at a time and re-seeding recreates
-    // it. If multi-stream support is added, the insights task deletion should be guarded
-    // to only run when all seeded streams are being cleaned simultaneously.
-    const ids = [...streamTaskDocIds(ctx.streamName), INSIGHTS_TASK_TYPE];
+    const ids = [INSIGHTS_TASK_TYPE];
     await Promise.all(
       ids.map(async (id) => {
         try {
@@ -219,4 +209,20 @@ export async function cleanTasks(
       })
     );
   });
+
+  // Clean seeded workflow execution doc (regular index, no superuser needed)
+  const wfId = seedOnboardingExecutionId(ctx.streamName);
+  try {
+    await esClient.delete({
+      index: WORKFLOWS_EXECUTIONS_INDEX,
+      id: wfId,
+      refresh: 'wait_for',
+    });
+    log.info(`cleanTasks: deleted workflow execution doc "${wfId}"`);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (!msg.includes('not_found') && !msg.includes('index_not_found')) {
+      throw err;
+    }
+  }
 }

@@ -11,7 +11,7 @@ import type { MemoryService } from '../memory';
 /**
  * Memory tool definitions and callbacks for use in discovery flows
  * (executeAsReasoningAgent). Read-only tools only — writing happens
- * in the dedicated memory_generation task after discovery completes.
+ * via the memory generation endpoint after discovery completes.
  */
 
 export interface MemoryDiscoveryTools {
