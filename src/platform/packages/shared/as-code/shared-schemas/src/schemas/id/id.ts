@@ -26,10 +26,16 @@ export const asCodeIdSchema = schema.string({
 
 /**
  * Object schema with a single `ref_id` property (reference to another library item by id).
+ * We don't reuse the `asCodeIdSchema` here because it must work for objects created before the ID validation was added.
  */
 export const asCodeRefIdSchema = schema.object(
   {
-    ref_id: asCodeIdSchema,
+    ref_id: schema.string({
+      meta: {
+        description: 'Unique identifier of the referenced library item.',
+      },
+      minLength: 1,
+    }),
   },
   {
     meta: {
