@@ -6,7 +6,7 @@
  */
 import { useMemo } from 'react';
 import type { HttpSetup } from '@kbn/core/public';
-import { getSpaceIdFromPath, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { getSpaceIdFromPath, addSpaceIdToPath } from '@kbn/spaces-utils';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useKibana } from './use_kibana';
 import { useSpaceId } from './use_space_id';

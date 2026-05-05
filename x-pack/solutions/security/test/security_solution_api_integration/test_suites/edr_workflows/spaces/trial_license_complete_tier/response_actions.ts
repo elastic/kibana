@@ -27,7 +27,8 @@ import type {
   PromiseResolvedValue,
   ResponseActionApiResponse,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
-import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   ACTION_DETAILS_ROUTE,
   BASE_ENDPOINT_ACTION_ROUTE,

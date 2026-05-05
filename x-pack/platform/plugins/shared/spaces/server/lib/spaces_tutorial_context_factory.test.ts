@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
@@ -34,12 +34,9 @@ describe('createSpacesTutorialContextFactory', () => {
   });
 
   it('should create context with the current space id for the default space', async () => {
-    service.setup({
-      basePath: coreMock.createSetup().http.basePath,
-    });
+    service.setup();
     const contextFactory = createSpacesTutorialContextFactory(() =>
       service.start({
-        basePath: coreMock.createStart().http.basePath,
         spacesClientService: spacesClientServiceMock.createStart(),
       })
     );

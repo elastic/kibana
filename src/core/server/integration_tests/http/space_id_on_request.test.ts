@@ -15,7 +15,7 @@ import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
-import { createConfigService, type HttpService } from '@kbn/core-http-server-mocks';
+import { createConfigService } from '@kbn/core-http-server-mocks';
 
 import { createInternalHttpService } from '../utilities';
 
@@ -25,7 +25,7 @@ const setupDeps = {
   userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 
-let server: HttpService;
+let server: ReturnType<typeof createInternalHttpService>;
 
 const start = async (configOverrides: { basePath?: string; rewriteBasePath?: boolean } = {}) => {
   const logger = loggingSystemMock.create();

@@ -8,6 +8,7 @@
  */
 
 import type { IBasePath } from '@kbn/core-http-browser';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { lazyObject } from '@kbn/lazy-object';
 
 const createBasePathMock = ({
@@ -22,6 +23,7 @@ const createBasePathMock = ({
     publicBaseUrl,
     serverBasePath,
     assetsHrefBase,
+    spaceId: DEFAULT_SPACE_ID,
   });
 
   return mock;

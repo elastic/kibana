@@ -25,12 +25,13 @@ import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/pu
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { Role } from '@kbn/security-plugin-types-common';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
 
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
 import { handleApiError } from './handle_api_error';
 import { useTabs } from './hooks/use_tabs';
 import { useEditSpaceServices, useEditSpaceStore } from './provider';
-import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
+import { ENTER_SPACE_PATH, type Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';

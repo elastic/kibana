@@ -12,8 +12,8 @@ import type { FakeRawRequest, IBasePath, KibanaRequest } from '@kbn/core-http-se
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
 
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { AnonymousAuthenticationProvider } from '../authentication';

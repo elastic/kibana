@@ -6,7 +6,7 @@
  */
 
 import datemath from '@kbn/datemath';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';

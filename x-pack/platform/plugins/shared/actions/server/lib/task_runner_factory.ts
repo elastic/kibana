@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import {
   createTaskRunError,

@@ -9,7 +9,7 @@ import axios from 'axios';
 import { format } from 'url';
 import { pickBy } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 

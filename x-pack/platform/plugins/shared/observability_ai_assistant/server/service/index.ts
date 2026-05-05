@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { once } from 'lodash';
 import pRetry from 'p-retry';

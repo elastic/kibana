@@ -9,8 +9,10 @@ import { EuiCard, EuiLoadingSpinner, EuiTextColor, useEuiTheme } from '@elastic/
 import { css } from '@emotion/react';
 import React, { lazy, Suspense } from 'react';
 
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
+
 import type { Space } from '../../../common';
-import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
+import { ENTER_SPACE_PATH } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
 

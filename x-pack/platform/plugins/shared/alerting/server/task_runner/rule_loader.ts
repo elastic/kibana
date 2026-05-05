@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';

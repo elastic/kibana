@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
 
 import { SECURITY_APP_PATH } from '../../../../schedules/constants';
 
