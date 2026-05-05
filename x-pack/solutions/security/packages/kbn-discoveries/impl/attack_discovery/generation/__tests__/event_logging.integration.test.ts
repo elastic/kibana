@@ -83,6 +83,7 @@ describe('Event Logging Integration', () => {
     getWorkflow: jest.fn(),
     getWorkflowExecution: jest.fn(),
     runWorkflow: jest.fn(),
+    scheduleWorkflow: jest.fn(),
   };
 
   const baseWorkflowConfig = {
@@ -341,11 +342,17 @@ describe('Event Logging Integration', () => {
             if (workflow.id === 'workflow-default-alert-retrieval') {
               return 'alert-retrieval-run-id';
             }
-            if (workflow.id === 'workflow-generation') {
-              return 'generation-run-id';
-            }
             if (workflow.id === 'workflow-validate') {
               return 'validation-run-id';
+            }
+            return 'unknown-run-id';
+          }
+        );
+
+        (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockImplementation(
+          async (workflow: { id: string }) => {
+            if (workflow.id === 'workflow-generation') {
+              return 'generation-run-id';
             }
             return 'unknown-run-id';
           }
@@ -618,7 +625,7 @@ describe('Event Logging Integration', () => {
         (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
           mockGenerationWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
           'generation-run-id'
         );
         (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(

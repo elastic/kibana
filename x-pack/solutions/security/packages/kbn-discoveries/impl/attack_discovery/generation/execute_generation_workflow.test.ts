@@ -56,7 +56,6 @@ jest.mock('../../lib/telemetry/report_workflow_telemetry', () => ({
 
 const mockWorkflowInitService = {
   ensureWorkflowsForSpace: jest.fn().mockResolvedValue({
-    esql_example_alert_retrieval: 'workflow-esql-example-alert-retrieval',
     default_alert_retrieval: 'workflow-default-alert-retrieval',
     generation: 'workflow-generation',
     validate: 'workflow-validate',

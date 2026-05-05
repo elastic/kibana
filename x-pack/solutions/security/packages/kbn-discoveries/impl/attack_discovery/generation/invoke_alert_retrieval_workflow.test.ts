@@ -53,6 +53,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
     getWorkflow: jest.fn(),
     getWorkflowExecution: jest.fn(),
     runWorkflow: jest.fn(),
+    scheduleWorkflow: jest.fn(),
   };
 
   const workflowId = 'workflow-default-alert-retrieval';
@@ -239,6 +240,12 @@ describe('invokeAlertRetrievalWorkflow', () => {
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Alert retrieval workflow completed: 2 alerts retrieved'
       );
+    });
+
+    it('returns workflowName in workflowExecutions', async () => {
+      const result = await invokeAlertRetrievalWorkflow(defaultProps);
+
+      expect(result.workflowExecutions[0].workflowName).toBe('Attack Discovery Alert Retrieval');
     });
 
     describe('workflow inputs', () => {
@@ -457,6 +464,16 @@ describe('invokeAlertRetrievalWorkflow', () => {
       await expect(invokeAlertRetrievalWorkflow(defaultProps)).rejects.toThrow(
         `Alert retrieval workflow (id: ${workflowId}) not found. It may have been deleted. Reconfigure the alert retrieval workflow in Attack Discovery settings.`
       );
+    });
+
+    it('does NOT include workflowName in the failed event workflowExecutions', async () => {
+      await expect(invokeAlertRetrievalWorkflow(defaultProps)).rejects.toThrow();
+
+      const failedCall = mockWriteAttackDiscoveryEvent.mock.calls.find(
+        (call: unknown[]) => (call[0] as Record<string, unknown>)?.action === 'alert-retrieval-failed'
+      );
+
+      expect(failedCall![0].workflowExecutions.alertRetrieval[0]).not.toHaveProperty('workflowName');
     });
   });
 
@@ -766,6 +783,20 @@ describe('invokeAlertRetrievalWorkflow', () => {
         'Alert retrieval workflow failed: Failed to run workflow'
       );
     });
+
+    it('includes workflowName in the failed event workflowExecutions', async () => {
+      await expect(invokeAlertRetrievalWorkflow(defaultProps)).rejects.toThrow();
+
+      const failedCall = mockWriteAttackDiscoveryEvent.mock.calls.find(
+        (call: unknown[]) => (call[0] as Record<string, unknown>)?.action === 'alert-retrieval-failed'
+      );
+
+      expect(failedCall![0].workflowExecutions.alertRetrieval[0]).toEqual(
+        expect.objectContaining({
+          workflowName: 'Attack Discovery Alert Retrieval',
+        })
+      );
+    });
   });
 
   describe('when output has api_config as string', () => {
@@ -978,6 +1009,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
         getWorkflow: jest.fn().mockResolvedValue(mockWorkflow),
         getWorkflowExecution: jest.fn().mockResolvedValue(mockPendingExecution),
         runWorkflow: jest.fn().mockResolvedValue('workflow-run-id'),
+        scheduleWorkflow: jest.fn().mockResolvedValue('workflow-run-id'),
       };
 
       // We need to test with a very short timeout to avoid slow tests
