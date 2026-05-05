@@ -15,6 +15,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
@@ -437,6 +439,17 @@ describe('Jira service', () => {
       );
     });
 
+    test('createIncident throws user error on 400 response', async () => {
+      const mockError = Object.assign(new Error('Request failed with status code 400'), {
+        response: { status: 400, data: { errors: {}, errorMessages: [] } },
+      });
+      requestMock.mockRejectedValue(mockError);
+
+      const error = await service.createIncident(incident).catch((err) => err);
+
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+    });
+
     describe('otherFields', () => {
       test('it should call request with correct arguments', async () => {
         const otherFields = { foo0: 'bar', foo1: true, foo2: 2 };
@@ -568,6 +581,17 @@ describe('Jira service', () => {
       await expect(service.updateIncident(incident)).rejects.toThrow(
         '[Action][Jira]: Unable to update incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
+    });
+
+    test('updateIncident throws user error on 400 response', async () => {
+      const mockError = Object.assign(new Error('Request failed with status code 400'), {
+        response: { status: 400, data: { errors: {}, errorMessages: [] } },
+      });
+      requestMock.mockRejectedValue(mockError);
+
+      const error = await service.updateIncident(incident).catch((err) => err);
+
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
     });
 
     describe('otherFields', () => {

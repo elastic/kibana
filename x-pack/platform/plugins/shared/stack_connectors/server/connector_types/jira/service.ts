@@ -18,6 +18,7 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { CONNECTOR_NAME } from '@kbn/connector-schemas/jira';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type {
   CreateCommentParams,
   CreateIncidentParams,
@@ -256,6 +257,11 @@ export const createExternalService = (
           error.response?.data
         )}`
       );
+
+      if (error?.response?.status === 400) {
+        throw createTaskRunError(error, TaskErrorSource.USER);
+      }
+
       throw error;
     }
   };
@@ -301,6 +307,11 @@ export const createExternalService = (
           error.message
         }. Reason: ${createErrorMessage(error.response?.data)}`
       );
+
+      if (error?.response?.status === 400) {
+        throw createTaskRunError(error, TaskErrorSource.USER);
+      }
+
       throw error;
     }
   };

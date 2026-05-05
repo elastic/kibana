@@ -10,6 +10,8 @@
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import {
   createExternalService,
   type ScheduleWorkflowServiceFunction,
@@ -215,6 +217,46 @@ describe('Workflows Service', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Error running workflow test-workflow-id: Workflow execution failed'
       );
+    });
+
+    it('runWorkflow classifies disabled workflow error as user error', async () => {
+      const mockWorkflowService: WorkflowsServiceFunction = jest
+        .fn()
+        .mockRejectedValue(
+          new Error('Workflow is disabled: test-workflow-id. Enable the workflow to run it.')
+        );
+
+      const service = createExternalService(
+        actionId,
+        mockLogger,
+        mockConfigurationUtilities,
+        mockConnectorUsageCollector,
+        mockRequest,
+        mockWorkflowService
+      );
+
+      const params = {
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+      };
+
+      const error = await service.runWorkflow(params).catch((err) => err);
+
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
     });
 
     it('should handle empty workflow run response', async () => {
@@ -454,6 +496,47 @@ describe('Workflows Service', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Error scheduling workflow test-workflow-id: Scheduling failed'
       );
+    });
+
+    it('scheduleWorkflow classifies disabled workflow error as user error', async () => {
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
+        .fn()
+        .mockRejectedValue(
+          new Error('Workflow is disabled: test-workflow-id. Enable the workflow to run it.')
+        );
+
+      const service = createExternalService(
+        actionId,
+        mockLogger,
+        mockConfigurationUtilities,
+        mockConnectorUsageCollector,
+        mockRequest,
+        undefined,
+        mockScheduleWorkflowService
+      );
+
+      const params = {
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+      };
+
+      const error = await service.scheduleWorkflow(params).catch((err) => err);
+
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
     });
 
     it('should handle empty workflow run response', async () => {

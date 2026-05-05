@@ -11,6 +11,7 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
 import type {
   ExternalService,
@@ -75,7 +76,11 @@ export const createExternalService = (
       };
     } catch (error) {
       logger.error(`Error running workflow ${workflowId}: ${error.message}`);
-      throw createServiceError(error, `Unable to run workflow ${workflowId}`);
+      const serviceError = createServiceError(error, `Unable to run workflow ${workflowId}`);
+      if (error.message.startsWith('Workflow is disabled:')) {
+        throw createTaskRunError(serviceError, TaskErrorSource.USER);
+      }
+      throw serviceError;
     }
   };
 
@@ -112,7 +117,11 @@ export const createExternalService = (
       return workflowRunId;
     } catch (error) {
       logger.error(`Error scheduling workflow ${workflowId}: ${error.message}`);
-      throw createServiceError(error, `Unable to schedule workflow ${workflowId}`);
+      const serviceError = createServiceError(error, `Unable to schedule workflow ${workflowId}`);
+      if (error.message.startsWith('Workflow is disabled:')) {
+        throw createTaskRunError(serviceError, TaskErrorSource.USER);
+      }
+      throw serviceError;
     }
   };
 
