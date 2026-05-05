@@ -17,11 +17,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { getBundledYamlEntries, resetBundledYamlEntriesCache } from '.';
 
 const REQUIRED_KEYS = ['default_alert_retrieval', 'generation', 'validate'] as const;
-const OPTIONAL_KEYS = [
-  'custom_validation_example',
-  'esql_example_alert_retrieval',
-  'run_example',
-] as const;
+const OPTIONAL_KEYS = ['custom_validation_example', 'run_example'] as const;
 const ALL_KEYS = [...REQUIRED_KEYS, ...OPTIONAL_KEYS] as const;
 
 const allFilesImpl = (filePath: unknown): string => {
@@ -31,9 +27,6 @@ const allFilesImpl = (filePath: unknown): string => {
   }
   if (path.includes('default_attack_discovery_alert_retrieval')) {
     return 'alert_retrieval: yaml content';
-  }
-  if (path.includes('attack_discovery_esql_example')) {
-    return 'esql_example: yaml content';
   }
   if (path.includes('attack_discovery_generation')) {
     return 'generation: yaml content';
@@ -61,10 +54,10 @@ describe('getBundledYamlEntries', () => {
       mockReadFileSync.mockImplementation(allFilesImpl);
     });
 
-    it('returns a map with exactly 6 entries (3 required + 3 optional)', () => {
+    it('returns a map with exactly 5 entries (3 required + 2 optional)', () => {
       const result = getBundledYamlEntries(logger);
 
-      expect(result.size).toBe(6);
+      expect(result.size).toBe(5);
     });
 
     it('returns entries for all 3 required workflow keys', () => {
@@ -75,7 +68,7 @@ describe('getBundledYamlEntries', () => {
       }
     });
 
-    it('returns entries for all 3 optional workflow keys', () => {
+    it('returns entries for all 2 optional workflow keys', () => {
       const result = getBundledYamlEntries(logger);
 
       for (const key of OPTIONAL_KEYS) {
@@ -134,7 +127,7 @@ describe('getBundledYamlEntries', () => {
       getBundledYamlEntries(logger);
       getBundledYamlEntries(logger);
 
-      expect(mockReadFileSync).toHaveBeenCalledTimes(6); // once per workflow (3 required + 3 optional)
+      expect(mockReadFileSync).toHaveBeenCalledTimes(5); // once per workflow (3 required + 2 optional)
     });
   });
 
@@ -150,7 +143,7 @@ describe('getBundledYamlEntries', () => {
       const result = getBundledYamlEntries(logger);
 
       expect(result.has('generation')).toBe(false);
-      expect(result.size).toBe(5);
+      expect(result.size).toBe(4);
       expect(logger.warn).toHaveBeenCalledWith(expect.any(Function));
     });
 
@@ -165,7 +158,7 @@ describe('getBundledYamlEntries', () => {
       const result = getBundledYamlEntries(logger);
 
       expect(result.has('custom_validation_example')).toBe(false);
-      expect(result.size).toBe(5);
+      expect(result.size).toBe(4);
       expect(logger.warn).toHaveBeenCalledWith(expect.any(Function));
     });
 
@@ -191,7 +184,7 @@ describe('getBundledYamlEntries', () => {
       const result = getBundledYamlEntries(logger);
 
       expect(result.size).toBe(0);
-      expect(logger.warn).toHaveBeenCalledTimes(6); // one warning per missing file
+      expect(logger.warn).toHaveBeenCalledTimes(5); // one warning per missing file
     });
   });
 
@@ -229,7 +222,7 @@ describe('getBundledYamlEntries', () => {
       expect(result.get('generation')?.yaml).toBe('updated yaml');
     });
 
-    it('returns entries for all 6 keys after reset', () => {
+    it('returns entries for all 5 keys after reset', () => {
       mockReadFileSync.mockImplementation(allFilesImpl);
       getBundledYamlEntries(logger);
       resetBundledYamlEntriesCache();
