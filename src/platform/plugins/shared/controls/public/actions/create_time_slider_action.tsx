@@ -15,23 +15,27 @@ import {
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableApiContext, PresentationContainer } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   apiCanPinPanels,
   apiHasType,
   apiIsPresentationContainer,
+  apiPublishesChildren,
 } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+
 import { ADD_PANEL_CONTROL_GROUP } from './constants';
 
 const compatibilityCheck = (api: unknown | null) =>
   apiIsPresentationContainer(api) && apiCanPinPanels(api);
 
-const isDisabled = (api: PresentationContainer) =>
-  Object.values(api.children$.getValue()).some(
+const isDisabled = (api: unknown) => {
+  if (!compatibilityCheck(api)) throw new IncompatibleActionError();
+  return Object.values(api.children$.getValue()).some(
     (child) => apiHasType(child) && child.type === TIME_SLIDER_CONTROL
   );
+};
 
 export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_TIME_SLIDER,
@@ -39,7 +43,6 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
   grouping: [ADD_PANEL_CONTROL_GROUP],
   getIconType: () => 'controls',
   getDisplayNameTooltip: ({ embeddable }) => {
-    if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
     if (isDisabled(embeddable)) {
       return i18n.translate('controls.timeSlider.disabledTooltop', {
         defaultMessage: 'You can only add one time slider control per dashboard.',
@@ -49,16 +52,10 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
       defaultMessage: 'Add a time slider control to your dashboard.',
     });
   },
-  couldBecomeCompatible: ({ embeddable }) => compatibilityCheck(embeddable),
-  getCompatibilityChangesSubject: ({ embeddable }) =>
-    apiIsPresentationContainer(embeddable)
-      ? embeddable.children$.pipe(map(() => undefined))
-      : undefined,
   isCompatible: async ({ embeddable }) => compatibilityCheck(embeddable),
-  isDisabled: ({ embeddable }) => {
-    if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
-    return isDisabled(embeddable);
-  },
+  isDisabled: ({ embeddable }) => isDisabled(embeddable),
+  getDisabledStateChangesSubject: ({ embeddable }) =>
+    apiPublishesChildren(embeddable) ? embeddable.children$.pipe(map(() => undefined)) : undefined,
   execute: async ({ embeddable }) => {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
     await embeddable.addPinnedPanel({

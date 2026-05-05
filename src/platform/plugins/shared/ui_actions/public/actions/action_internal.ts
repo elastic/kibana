@@ -30,6 +30,7 @@ export class ActionInternal<
   public readonly showNotification?: boolean;
 
   public readonly isDisabled: Action<Context>['isDisabled'];
+  public readonly getDisabledStateChangesSubject?: Action<Context>['getDisabledStateChangesSubject'];
   public readonly getCompatibilityChangesSubject?: Action<Context>['getCompatibilityChangesSubject'];
   public readonly couldBecomeCompatible?: Action<Context>['couldBecomeCompatible'];
   public errorLogged?: boolean;
@@ -52,6 +53,9 @@ export class ActionInternal<
     }
     if (this.definition.couldBecomeCompatible) {
       this.couldBecomeCompatible = definition.couldBecomeCompatible;
+    }
+    if (this.definition.getDisabledStateChangesSubject) {
+      this.getDisabledStateChangesSubject = definition.getDisabledStateChangesSubject;
     }
   }
 

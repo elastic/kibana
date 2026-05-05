@@ -7,16 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useEffect, useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
+import { merge, switchMap, type Observable } from 'rxjs';
+
 import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
 import type { PresentableGroup } from '@kbn/ui-actions-browser/src/types';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { triggers } from '@kbn/ui-actions-plugin/public';
 
+import type { DashboardApi } from '../../../dashboard_api/types';
 import { uiActionsService } from '../../../services/kibana_services';
 import type { MenuItem, MenuItemGroup } from './types';
-import type { DashboardApi } from '../../../dashboard_api/types';
 
-export async function getMenuItemGroups(api: DashboardApi): Promise<MenuItemGroup[]> {
+export const useMenuItemGroups = ({
+  dashboardApi,
+}: {
+  dashboardApi: DashboardApi;
+}): { groups: MenuItemGroup[] | undefined; loading: boolean; error: Error | undefined } => {
+  const [groups, setGroups] = useState<MenuItemGroup[] | undefined>();
+
+  const {
+    value: menuGroupsResult,
+    loading,
+    error,
+  } = useAsync(async () => {
+    return await getMenuItemGroups(dashboardApi);
+  }, [dashboardApi]);
+
+  useEffect(() => setGroups(menuGroupsResult?.groups), [menuGroupsResult?.groups]);
+
+  useEffect(() => {
+    if (!menuGroupsResult?.recalculate$) return;
+    const recalculateSubscription = menuGroupsResult.recalculate$
+      .pipe(
+        switchMap(async () => {
+          return await getMenuItemGroups(dashboardApi);
+        })
+      )
+      .subscribe((result) => {
+        setGroups(result.groups);
+      });
+
+    return () => {
+      recalculateSubscription?.unsubscribe();
+    };
+  }, [dashboardApi, menuGroupsResult?.recalculate$]);
+
+  return { loading, error, groups };
+};
+
+export async function getMenuItemGroups(
+  api: DashboardApi
+): Promise<{ recalculate$: Observable<undefined>; groups: MenuItemGroup[] }> {
   const groups: Record<string, MenuItemGroup> = {};
   const addPanelContext = {
     embeddable: api,
@@ -34,6 +77,7 @@ export async function getMenuItemGroups(api: DashboardApi): Promise<MenuItemGrou
     }
     groups[group.id].items.push(item);
   }
+  const disabledStateChangesSubjects: Array<Observable<undefined> | undefined> = [];
 
   (
     await uiActionsService.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, { embeddable: api })
@@ -41,6 +85,9 @@ export async function getMenuItemGroups(api: DashboardApi): Promise<MenuItemGrou
     const actionGroups = Array.isArray(action.grouping) ? action.grouping : [ADD_PANEL_OTHER_GROUP];
     actionGroups.forEach((group) => {
       const actionName = action.getDisplayName(addPanelContext);
+      if (action.getDisabledStateChangesSubject) {
+        disabledStateChangesSubjects.push(action.getDisabledStateChangesSubject(addPanelContext));
+      }
       pushItem(group, {
         id: action.id,
         name: actionName,
@@ -68,14 +115,17 @@ export async function getMenuItemGroups(api: DashboardApi): Promise<MenuItemGrou
     });
   });
 
-  return Object.values(groups)
-    .map((group) => {
-      group.items.sort((itemA, itemB) => {
-        return itemA.order === itemB.order
-          ? itemA.name.localeCompare(itemB.name)
-          : itemB.order - itemA.order;
-      });
-      return group;
-    })
-    .sort((groupA, groupB) => groupB.order - groupA.order);
+  return {
+    recalculate$: merge(...disabledStateChangesSubjects),
+    groups: Object.values(groups)
+      .map((group) => {
+        group.items.sort((itemA, itemB) => {
+          return itemA.order === itemB.order
+            ? itemA.name.localeCompare(itemB.name)
+            : itemB.order - itemA.order;
+        });
+        return group;
+      })
+      .sort((groupA, groupB) => groupB.order - groupA.order),
+  };
 }

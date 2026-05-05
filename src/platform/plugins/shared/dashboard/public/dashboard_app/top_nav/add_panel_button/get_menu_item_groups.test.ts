@@ -70,7 +70,7 @@ describe('getMenuItemGroups', () => {
       openOverlay: () => {},
       clearOverlays: () => {},
     };
-    const groups = await getMenuItemGroups(api);
+    const { groups } = await getMenuItemGroups(api);
     expect(groups.length).toBe(2);
 
     expect(groups[0].title).toBe('Visualizations');
@@ -109,7 +109,7 @@ describe('getMenuItemGroups', () => {
       openOverlay: () => {},
       clearOverlays: () => {},
     };
-    const groups = await getMenuItemGroups(api);
+    const { groups } = await getMenuItemGroups(api);
     expect(groups.length).toBe(1);
     expect(groups[0].items.length).toBe(1);
     expect(groups[0].items[0].isDisabled).toBe(true);

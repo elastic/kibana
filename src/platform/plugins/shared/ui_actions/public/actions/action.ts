@@ -120,6 +120,11 @@ export interface Action<Context extends object = object, ActionExtension extends
   isDisabled?(context: ActionExecutionContext<Context>): boolean;
 
   /**
+   * @returns an Observable that emits when this action's disabled state should be recalculated.
+   */
+  getDisabledStateChangesSubject?: (context: Context) => Observable<undefined> | undefined;
+
+  /**
    * Determines if notification should be shown in menu for that action
    *
    */
@@ -174,6 +179,11 @@ export type ActionDefinition<
    * Determines if the action is disabled or not
    */
   isDisabled?(context: ActionDefinitionContext<Context>): boolean;
+
+  /**
+   * @returns an Observable that emits when this action's disabled state should be recalculated.
+   */
+  getDisabledStateChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   /**
    * Determines if notification should be shown in menu for that action
