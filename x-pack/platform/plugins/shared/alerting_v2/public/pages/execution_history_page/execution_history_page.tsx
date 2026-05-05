@@ -99,6 +99,7 @@ const buildColumns = (
 
 const policiesEmptyState = (
   <EuiEmptyPrompt
+    data-test-subj="executionHistoryEmptyPrompt"
     iconType="clock"
     title={
       <h2>
