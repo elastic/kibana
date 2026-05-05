@@ -14,8 +14,8 @@ import type { IWaterfall } from './waterfall_container/waterfall/waterfall_helpe
 import type { TraceItem } from '../../../../../common/waterfall/unified_trace_item';
 import { getTraceParentChildrenMap } from '../../../shared/trace_waterfall/use_trace_waterfall';
 import {
-  EBT_CLICK_ACTION_VIEW_FULL_TRACE,
-  EBT_ELEMENT_WATERFALL_VIEW_FULL_TRACE,
+  TRACE_WATERFALL_EBT_CLICK_ACTIONS,
+  TRACE_WATERFALL_EBT_ELEMENTS,
 } from '../../../shared/trace_waterfall/ebt_constants';
 
 function FullTraceButton({
@@ -35,8 +35,8 @@ function FullTraceButton({
       data-test-subj="apmFullTraceButtonViewFullTraceButton"
       {...(onClick
         ? getEbtProps({
-            action: EBT_CLICK_ACTION_VIEW_FULL_TRACE,
-            element: EBT_ELEMENT_WATERFALL_VIEW_FULL_TRACE,
+            action: TRACE_WATERFALL_EBT_CLICK_ACTIONS.VIEW_FULL_TRACE,
+            element: TRACE_WATERFALL_EBT_ELEMENTS.SUMMARY_VIEW_FULL_TRACE,
           })
         : {})}
       iconType="chartWaterfall"

@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// --- Elements ---
-export const EBT_ELEMENT_DOC_VIEWER_SIMILAR_ERRORS = 'docViewerSimilarErrors';
+export const LOGS_DOC_VIEWER_EBT_ELEMENTS = {
+  SIMILAR_ERRORS: 'docViewerSimilarErrors',
+} as const;
 
-// --- Details ---
-export const EBT_DETAIL_LOG_DOC = 'logDoc';
+export const LOGS_DOC_VIEWER_EBT_DETAILS = {
+  LOG_DOC: 'logDoc',
+} as const;

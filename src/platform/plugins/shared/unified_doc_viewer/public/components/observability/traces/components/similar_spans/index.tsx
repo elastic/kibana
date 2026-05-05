@@ -18,7 +18,7 @@ import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
 import { getEsqlQuery } from './get_esql_query';
-import { EBT_ELEMENT_DOC_VIEWER_SIMILAR_SPANS, EBT_DETAIL_SPAN_DOC } from '../../ebt_constants';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
 
 const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.similarSpans', {
   defaultMessage: 'Similar spans',
@@ -66,7 +66,10 @@ export function SimilarSpans({
     esql: esqlQueryString,
     tabLabel: sectionTitle,
     dataTestSubj: 'docViewerSimilarSpansOpenInDiscoverButton',
-    ebt: { element: EBT_ELEMENT_DOC_VIEWER_SIMILAR_SPANS, detail: EBT_DETAIL_SPAN_DOC },
+    ebt: {
+      element: TRACES_DOC_VIEWER_EBT_ELEMENTS.SIMILAR_SPANS,
+      detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+    },
   });
 
   const actions = useMemo(

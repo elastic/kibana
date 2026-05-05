@@ -39,9 +39,9 @@ import { useFetchSpanLinks } from './use_fetch_span_links';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
 import {
-  EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
-  EBT_DETAIL_SPAN_DOC,
-  EBT_CLICK_ACTION_FILTER_SPAN_LINKS,
+  TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS,
+  TRACES_DOC_VIEWER_EBT_ELEMENTS,
+  TRACES_DOC_VIEWER_EBT_DETAILS,
 } from '../../ebt_constants';
 
 const sectionTitle = i18n.translate(
@@ -130,7 +130,10 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
     esql: esqlQueryString,
     tabLabel: sectionTitle,
     dataTestSubj: 'docViewerSpanLinksOpenInDiscoverButton',
-    ebt: { element: EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS, detail: EBT_DETAIL_SPAN_DOC },
+    ebt: {
+      element: TRACES_DOC_VIEWER_EBT_ELEMENTS.SPAN_LINKS,
+      detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+    },
   });
   const actions = useMemo(
     () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
@@ -181,9 +184,9 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
                   )}
                   data-test-subj="unifiedDocViewerSpanLinkTypeSelect"
                   {...getEbtProps({
-                    action: EBT_CLICK_ACTION_FILTER_SPAN_LINKS,
-                    element: EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
-                    detail: EBT_DETAIL_SPAN_DOC,
+                    action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.FILTER_SPAN_LINKS,
+                    element: TRACES_DOC_VIEWER_EBT_ELEMENTS.SPAN_LINKS,
+                    detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
                   })}
                   options={selectOptions}
                   value={type}

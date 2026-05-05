@@ -28,11 +28,7 @@ import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DocumentDetailFlyout } from './waterfall_flyout/document_detail_flyout';
 import { FlyoutContentId } from '../../common/constants';
 import type { TraceDocFlyoutType } from '../../common/types';
-import {
-  EBT_ELEMENT_DOC_VIEWER_WATERFALL_ROW,
-  EBT_ELEMENT_DOC_VIEWER_WATERFALL_ERROR_BADGE,
-  EBT_ELEMENT_DOC_VIEWER_WATERFALL_SERVICE_BADGE,
-} from '../../ebt_constants';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS } from '../../ebt_constants';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -186,9 +182,9 @@ export const FullScreenWaterfall = ({
             onNodeClick={onNodeClick}
             onErrorClick={onErrorClick}
             ebt={{
-              row: { element: EBT_ELEMENT_DOC_VIEWER_WATERFALL_ROW },
-              errorBadge: { element: EBT_ELEMENT_DOC_VIEWER_WATERFALL_ERROR_BADGE },
-              serviceBadge: { element: EBT_ELEMENT_DOC_VIEWER_WATERFALL_SERVICE_BADGE },
+              row: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ROW },
+              errorBadge: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ERROR_BADGE },
+              serviceBadge: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
             }}
           />
         </div>

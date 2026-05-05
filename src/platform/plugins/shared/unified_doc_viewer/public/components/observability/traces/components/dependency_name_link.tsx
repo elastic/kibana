@@ -17,7 +17,7 @@ import React from 'react';
 import { SpanIcon } from '@kbn/apm-ui-shared';
 import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
-import { EBT_CLICK_ACTION_VIEW_DEPENDENCY } from '../ebt_constants';
+import { TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS } from '../ebt_constants';
 
 interface DependencyNameLinkProps {
   dependencyName: string;
@@ -84,7 +84,7 @@ export function DependencyNameLink({
     <EuiLink
       {...routeLinkProps}
       data-test-subj="unifiedDocViewSpanOverviewDependencyNameLink"
-      {...getEbtProps({ action: EBT_CLICK_ACTION_VIEW_DEPENDENCY, ...ebt })}
+      {...getEbtProps({ action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.VIEW_DEPENDENCY, ...ebt })}
     >
       {content}
     </EuiLink>

@@ -25,13 +25,13 @@ import {
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
-import { EBT_ELEMENT_DOC_VIEWER_ERRORS, EBT_DETAIL_SPAN_DOC } from '../../ebt_constants';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
 import { DiscoverEsqlLink } from '../discover_esql_link';
 
 const errorEbt = {
   action: EBT_CLICK_ACTIONS.VIEW_ERROR,
-  element: EBT_ELEMENT_DOC_VIEWER_ERRORS,
-  detail: EBT_DETAIL_SPAN_DOC,
+  element: TRACES_DOC_VIEWER_EBT_ELEMENTS.ERRORS,
+  detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
 };
 
 function createWhereClause({

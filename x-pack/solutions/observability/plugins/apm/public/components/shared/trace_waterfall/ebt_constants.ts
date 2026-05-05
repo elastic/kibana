@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-export const EBT_CLICK_ACTION_VIEW_FULL_TRACE = 'viewFullTrace';
+export const TRACE_WATERFALL_EBT_CLICK_ACTIONS = {
+  VIEW_FULL_TRACE: 'viewFullTrace',
+} as const;
 
-export const EBT_ELEMENT_WATERFALL_ROW = 'waterfallRow';
-export const EBT_ELEMENT_WATERFALL_ERROR_BADGE = 'waterfallErrorBadge';
-export const EBT_ELEMENT_WATERFALL_SERVICE_BADGE = 'waterfallServiceBadge';
-export const EBT_ELEMENT_FLYOUT_WATERFALL_ROW = 'flyoutWaterfallRow';
-export const EBT_ELEMENT_FLYOUT_WATERFALL_ERROR_BADGE = 'flyoutWaterfallErrorBadge';
-export const EBT_ELEMENT_FLYOUT_WATERFALL_SERVICE_BADGE = 'flyoutWaterfallServiceBadge';
-export const EBT_ELEMENT_WATERFALL_VIEW_FULL_TRACE = 'waterfallSummaryViewFullTrace';
-export const EBT_ELEMENT_FLYOUT_WATERFALL_OPEN_IN_DISCOVER = 'flyoutWaterfallOpenInDiscover';
-export const EBT_ELEMENT_FLYOUT_WATERFALL_OPEN_IN_APM = 'flyoutWaterfallOpenInApm';
+export const TRACE_WATERFALL_EBT_ELEMENTS = {
+  WATERFALL_ROW: 'waterfallRow',
+  WATERFALL_ERROR_BADGE: 'waterfallErrorBadge',
+  WATERFALL_SERVICE_BADGE: 'waterfallServiceBadge',
+  FLYOUT_WATERFALL_ROW: 'flyoutWaterfallRow',
+  FLYOUT_WATERFALL_ERROR_BADGE: 'flyoutWaterfallErrorBadge',
+  FLYOUT_WATERFALL_SERVICE_BADGE: 'flyoutWaterfallServiceBadge',
+  SUMMARY_VIEW_FULL_TRACE: 'waterfallSummaryViewFullTrace',
+  FLYOUT_OPEN_IN_DISCOVER: 'flyoutWaterfallOpenInDiscover',
+  FLYOUT_OPEN_IN_APM: 'flyoutWaterfallOpenInApm',
+} as const;

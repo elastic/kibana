@@ -16,7 +16,7 @@ import {
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
-import { EBT_CLICK_ACTION_VIEW_TRANSACTION } from '../ebt_constants';
+import { TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS } from '../ebt_constants';
 
 interface TransactionNameLinkProps {
   serviceName?: string;
@@ -77,7 +77,7 @@ export function TransactionNameLink({
         <EuiLink
           {...routeLinkProps}
           data-test-subj="unifiedDocViewerObservabilityTracesTransactionNameLink"
-          {...getEbtProps({ action: EBT_CLICK_ACTION_VIEW_TRANSACTION, ...ebt })}
+          {...getEbtProps({ action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.VIEW_TRANSACTION, ...ebt })}
         >
           {content}
         </EuiLink>

@@ -19,9 +19,9 @@ import type { SpanLinkType } from '.';
 import { ServiceNameWithIcon } from '../service_name_with_icon';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 import {
-  EBT_CLICK_ACTION_VIEW_TRACE,
-  EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
-  EBT_DETAIL_SPAN_DOC,
+  TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS,
+  TRACES_DOC_VIEWER_EBT_ELEMENTS,
+  TRACES_DOC_VIEWER_EBT_DETAILS,
 } from '../../ebt_constants';
 import { DiscoverEsqlLink } from '../discover_esql_link';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
@@ -32,12 +32,12 @@ import {
 } from './create_span_links_where_clauses';
 
 const spanLinksEbtBase = {
-  element: EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
-  detail: EBT_DETAIL_SPAN_DOC,
+  element: TRACES_DOC_VIEWER_EBT_ELEMENTS.SPAN_LINKS,
+  detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
 };
 const spanNameEbt = { action: EBT_CLICK_ACTIONS.VIEW_SPAN, ...spanLinksEbtBase };
 const serviceNameEbt = { action: EBT_CLICK_ACTIONS.VIEW_SERVICE, ...spanLinksEbtBase };
-const traceIdEbt = { action: EBT_CLICK_ACTION_VIEW_TRACE, ...spanLinksEbtBase };
+const traceIdEbt = { action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.VIEW_TRACE, ...spanLinksEbtBase };
 
 const SpanNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDetails }) => {
   const { indexes } = useDataSourcesContext();

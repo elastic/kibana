@@ -17,11 +17,7 @@ import { TraceWaterfallFlyoutFooter } from './flyout_footer';
 import { useLogsIndexPattern } from '../../../../../hooks/use_logs_index_pattern';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { FullTraceWaterfallRenderer } from '../../../../shared/trace_waterfall/full_trace_waterfall_renderer';
-import {
-  EBT_ELEMENT_FLYOUT_WATERFALL_ROW,
-  EBT_ELEMENT_FLYOUT_WATERFALL_ERROR_BADGE,
-  EBT_ELEMENT_FLYOUT_WATERFALL_SERVICE_BADGE,
-} from '../../../../shared/trace_waterfall/ebt_constants';
+import { TRACE_WATERFALL_EBT_ELEMENTS } from '../../../../shared/trace_waterfall/ebt_constants';
 
 const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
 
@@ -124,9 +120,9 @@ export function TraceWaterfallFlyout({
           onNodeClick={onNodeClick}
           onErrorClick={onErrorClick}
           ebt={{
-            row: { element: EBT_ELEMENT_FLYOUT_WATERFALL_ROW },
-            errorBadge: { element: EBT_ELEMENT_FLYOUT_WATERFALL_ERROR_BADGE },
-            serviceBadge: { element: EBT_ELEMENT_FLYOUT_WATERFALL_SERVICE_BADGE },
+            row: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_ROW },
+            errorBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_ERROR_BADGE },
+            serviceBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_SERVICE_BADGE },
           }}
         />
       </EuiFlyoutBody>

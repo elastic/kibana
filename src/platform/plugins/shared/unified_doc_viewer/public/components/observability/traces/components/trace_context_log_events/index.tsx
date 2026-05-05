@@ -16,7 +16,7 @@ import { useLogsQuery } from '../../hooks/use_logs_query';
 import { createTraceContextWhereClause } from '../../common/create_trace_context_where_clause';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
-import { EBT_ELEMENT_DOC_VIEWER_LOGS, EBT_DETAIL_SPAN_DOC } from '../../ebt_constants';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
 
 const logsTitle = i18n.translate('unifiedDocViewer.observability.traces.section.logs.title', {
   defaultMessage: 'Logs',
@@ -64,7 +64,10 @@ export function TraceContextLogEvents({
     esql: esqlQueryString,
     tabLabel: logsTitle,
     dataTestSubj: 'unifiedDocViewerLogsOpenInDiscoverButton',
-    ebt: { element: EBT_ELEMENT_DOC_VIEWER_LOGS, detail: EBT_DETAIL_SPAN_DOC },
+    ebt: {
+      element: TRACES_DOC_VIEWER_EBT_ELEMENTS.LOGS,
+      detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+    },
   });
 
   const actions = useMemo(

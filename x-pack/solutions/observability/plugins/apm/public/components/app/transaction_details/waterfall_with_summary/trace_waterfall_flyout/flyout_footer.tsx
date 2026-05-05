@@ -20,10 +20,7 @@ import React, { useState } from 'react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useDiscoverHref } from '../../../../shared/links/discover_links/use_discover_href';
-import {
-  EBT_ELEMENT_FLYOUT_WATERFALL_OPEN_IN_DISCOVER,
-  EBT_ELEMENT_FLYOUT_WATERFALL_OPEN_IN_APM,
-} from '../../../../shared/trace_waterfall/ebt_constants';
+import { TRACE_WATERFALL_EBT_ELEMENTS } from '../../../../shared/trace_waterfall/ebt_constants';
 
 interface Props {
   traceId: string;
@@ -91,7 +88,7 @@ export function TraceWaterfallFlyoutFooter({ traceId, rangeFrom, rangeTo }: Prop
                         data-test-subj="apmTraceWaterfallOpenInDiscover"
                         {...getEbtProps({
                           action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
-                          element: EBT_ELEMENT_FLYOUT_WATERFALL_OPEN_IN_DISCOVER,
+                          element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_OPEN_IN_DISCOVER,
                         })}
                         href={discoverHref}
                         onClick={() => setIsPopoverOpen(false)}
@@ -109,7 +106,7 @@ export function TraceWaterfallFlyoutFooter({ traceId, rangeFrom, rangeTo }: Prop
                         data-test-subj="apmTraceWaterfallOpenInApm"
                         {...getEbtProps({
                           action: EBT_CLICK_ACTIONS.OPEN_IN_APM,
-                          element: EBT_ELEMENT_FLYOUT_WATERFALL_OPEN_IN_APM,
+                          element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_OPEN_IN_APM,
                         })}
                         href={apmHref}
                         onClick={() => setIsPopoverOpen(false)}

@@ -25,11 +25,9 @@ import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_l
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
 import type { TraceDocFlyoutType } from '../../common/types';
 import {
-  EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY,
-  EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY_EXPAND_BUTTON,
-  EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY_WATERFALL_AREA,
-  EBT_DETAIL_SPAN_DOC,
-  EBT_CLICK_ACTION_EXPAND_TRACE,
+  TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS,
+  TRACES_DOC_VIEWER_EBT_ELEMENTS,
+  TRACES_DOC_VIEWER_EBT_DETAILS,
 } from '../../ebt_constants';
 
 interface Props {
@@ -71,7 +69,7 @@ function InternalTraceWaterfall({
   docId,
   serviceName,
   dataView,
-  ebtDetail = EBT_DETAIL_SPAN_DOC,
+  ebtDetail = TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
 }: Props) {
   const { data, discoverShared } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
@@ -139,7 +137,7 @@ function InternalTraceWaterfall({
     esql: esqlQueryString,
     tabLabel: sectionTitle,
     dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
-    ebt: { element: EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY, detail: ebtDetail },
+    ebt: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.TRACE_SUMMARY, detail: ebtDetail },
   });
 
   const actionId = 'traceWaterfallFullScreenAction';
@@ -244,8 +242,8 @@ function InternalTraceWaterfall({
         id: actionId,
         dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
         ebt: {
-          action: EBT_CLICK_ACTION_EXPAND_TRACE,
-          element: EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY_EXPAND_BUTTON,
+          action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.EXPAND_TRACE,
+          element: TRACES_DOC_VIEWER_EBT_ELEMENTS.TRACE_SUMMARY_EXPAND_BUTTON,
           detail: ebtDetail,
         },
       },
@@ -289,8 +287,8 @@ function InternalTraceWaterfall({
         <div
           data-test-subj="unifiedDocViewerTraceSummaryTraceWaterfallClickArea"
           {...getEbtProps({
-            action: EBT_CLICK_ACTION_EXPAND_TRACE,
-            element: EBT_ELEMENT_DOC_VIEWER_TRACE_SUMMARY_WATERFALL_AREA,
+            action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.EXPAND_TRACE,
+            element: TRACES_DOC_VIEWER_EBT_ELEMENTS.TRACE_SUMMARY_WATERFALL_AREA,
             detail: ebtDetail,
           })}
           aria-label={fullScreenButtonLabel}

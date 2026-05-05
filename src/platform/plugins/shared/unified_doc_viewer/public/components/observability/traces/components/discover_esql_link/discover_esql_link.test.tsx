@@ -15,7 +15,7 @@ import { DiscoverEsqlLink } from '.';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useDocViewerExtensionActionsContext } from '../../../../../hooks/use_doc_viewer_extension_actions';
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
-import { EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS, EBT_DETAIL_SPAN_DOC } from '../../ebt_constants';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
 
 jest.mock('../../../../../hooks/use_discover_link_and_esql_query', () => ({
   useDiscoverLinkAndEsqlQuery: jest.fn(),
@@ -32,8 +32,8 @@ describe('DiscoverEsqlLink', () => {
   const dataTestSubj = 'discoverEsqlLink';
   const ebt = {
     action: EBT_CLICK_ACTIONS.VIEW_SPAN,
-    element: EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS,
-    detail: EBT_DETAIL_SPAN_DOC,
+    element: TRACES_DOC_VIEWER_EBT_ELEMENTS.SPAN_LINKS,
+    detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
   };
 
   beforeEach(() => {
@@ -83,8 +83,8 @@ describe('DiscoverEsqlLink', () => {
     const link = getByTestId(dataTestSubj);
     expect(link).toHaveAttribute('href', '/app/discover#/?_a=1');
     expect(link).toHaveAttribute('data-ebt-action', EBT_CLICK_ACTIONS.VIEW_SPAN);
-    expect(link).toHaveAttribute('data-ebt-element', EBT_ELEMENT_DOC_VIEWER_SPAN_LINKS);
-    expect(link).toHaveAttribute('data-ebt-detail', EBT_DETAIL_SPAN_DOC);
+    expect(link).toHaveAttribute('data-ebt-element', TRACES_DOC_VIEWER_EBT_ELEMENTS.SPAN_LINKS);
+    expect(link).toHaveAttribute('data-ebt-detail', TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC);
   });
 
   it('calls openInNewTab on plain left click when esqlQueryString is available', () => {
