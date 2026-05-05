@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { createSmlCrawlerStateStorage } from './sml_crawler_state_storage';
+import { createSmlStorage } from './sml_storage';
 import { SmlCrawlerImpl } from './sml_crawler';
 import type { SmlTypeDefinition, SmlListItem } from './types';
 
@@ -27,9 +28,30 @@ jest.mock('./sml_crawler_state_storage', () => {
   };
 });
 
+const EXPECTED_SCHEMA_VERSION = 'current-schema-hash';
+
+jest.mock('@kbn/storage-adapter', () => ({
+  getSchemaVersion: jest.fn().mockReturnValue(EXPECTED_SCHEMA_VERSION),
+}));
+
 jest.mock('./sml_storage', () => ({
   smlIndexName: '.test-sml-data',
+  storageSettings: { name: '.test-sml-data', schema: { properties: {} } },
+  createSmlStorage: jest.fn(),
 }));
+
+jest.mock('./sml_service', () => ({
+  isNotFoundError: jest.fn(
+    (error: unknown) => (error as { statusCode?: number })?.statusCode === 404
+  ),
+}));
+
+const mockSmlClient = {
+  clean: jest.fn().mockResolvedValue({ acknowledged: true }),
+  existsIndex: jest.fn().mockResolvedValue(false),
+};
+
+const getMockSmlClient = () => mockSmlClient;
 
 const getMockStateClient = () =>
   (createSmlCrawlerStateStorage as jest.Mock)({ logger: {}, esClient: {} }).getClient();
@@ -65,6 +87,11 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> => {
     delete: jest.fn().mockResolvedValue({ acknowledged: true }),
     deleteIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
     get: jest.fn().mockResolvedValue({}),
+    getMapping: jest.fn().mockResolvedValue({
+      '.test-sml-data-000001': {
+        mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION } },
+      },
+    }),
   };
   return {
     indices,
@@ -89,6 +116,11 @@ describe('SmlCrawlerImpl', () => {
     mockStateClient = getMockStateClient();
     mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
     mockStateClient.bulk.mockResolvedValue({ errors: false, items: [] });
+    mockSmlClient.existsIndex.mockResolvedValue(false);
+    mockSmlClient.clean.mockResolvedValue({ acknowledged: true });
+    (createSmlStorage as jest.Mock).mockReturnValue({
+      getClient: jest.fn().mockReturnValue(getMockSmlClient()),
+    });
   });
 
   describe('new items detected', () => {
@@ -450,6 +482,69 @@ describe('SmlCrawlerImpl', () => {
             op.index?.document?.update_action === 'create'
         );
       expect(createOp).toBeDefined();
+    });
+  });
+
+  describe('schema version check', () => {
+    it('schema mismatch: cleans index and forces full re-index of all items', async () => {
+      mockSmlClient.existsIndex.mockResolvedValue(true);
+      (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
+        '.test-sml-data-000001': {
+          mappings: { _meta: { version: 'old-schema-hash' } },
+        },
+      });
+
+      const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
+      const definition = createMockDefinition({
+        list: jest.fn().mockReturnValue(yieldPages(items)),
+      });
+      mockStateClient.search
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 1 } } })
+        .mockResolvedValue({ hits: { hits: [] } });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient });
+
+      expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('schema version mismatch'));
+      const createOp = mockStateClient.bulk.mock.calls
+        .flatMap((c: unknown[]) => (c[0] as { operations?: unknown[] }).operations ?? [])
+        .find(
+          (op: { index?: { document?: { update_action?: string } } }) =>
+            op.index?.document?.update_action === 'create'
+        );
+      expect(createOp).toBeDefined();
+    });
+
+    it('schema matches: does not clean the index', async () => {
+      mockSmlClient.existsIndex.mockResolvedValue(true);
+
+      const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
+      const definition = createMockDefinition({
+        list: jest.fn().mockReturnValue(yieldPages(items)),
+      });
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient });
+
+      expect(mockSmlClient.clean).not.toHaveBeenCalled();
+    });
+
+    it('index does not exist: skips schema check entirely', async () => {
+      mockSmlClient.existsIndex.mockResolvedValue(false);
+
+      const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
+      const definition = createMockDefinition({
+        list: jest.fn().mockReturnValue(yieldPages(items)),
+      });
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient });
+
+      expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+      expect(mockSmlClient.clean).not.toHaveBeenCalled();
     });
   });
 

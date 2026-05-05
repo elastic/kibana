@@ -12,6 +12,7 @@ import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
   SelectBasicFieldSchema,
   ConditionRenderProps,
@@ -32,7 +33,7 @@ export const SelectBasic = ({ label, metadata, name, type, isRequired }: SelectB
   return (
     <UseField
       key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
       component={SelectField}
       config={{ validations }}
       componentProps={{

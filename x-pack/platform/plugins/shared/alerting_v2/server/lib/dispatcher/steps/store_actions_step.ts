@@ -12,7 +12,7 @@ import {
 } from '../../../resources/datastreams/alert_actions';
 import type {
   AlertEpisode,
-  NotificationGroup,
+  ActionGroup,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
@@ -98,7 +98,7 @@ export class StoreActionsStep implements DispatcherStep {
             rule_id: firstEpisode?.rule_id ?? 'unknown',
             group_hash: firstEpisode?.group_hash ?? 'unknown',
             last_series_event_timestamp: now.toISOString(),
-            notification_group_id: group.id,
+            action_group_id: group.id,
             source: 'internal',
             reason: `notified by policy ${group.policyId}`,
             space_id: spaceId,
@@ -113,7 +113,7 @@ export class StoreActionsStep implements DispatcherStep {
             episode,
             actionType: 'unmatched',
             now,
-            reason: 'no matching notification policy',
+            reason: 'no matching action policy',
             spaceId: spaceIdForEpisode(episode),
           })
         ),
@@ -126,8 +126,8 @@ export class StoreActionsStep implements DispatcherStep {
 
 function getUnmatchedEpisodes(
   dispatchable: readonly AlertEpisode[],
-  dispatch: readonly NotificationGroup[],
-  throttled: readonly NotificationGroup[]
+  dispatch: readonly ActionGroup[],
+  throttled: readonly ActionGroup[]
 ): AlertEpisode[] {
   const handledEpisodeKeys = new Set<string>();
   for (const group of [...dispatch, ...throttled]) {

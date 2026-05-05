@@ -152,12 +152,13 @@ export const buildEsqlFetchSubscribe = ({
 
     const { viewMode } = getCurrentTab().appState;
     const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
-
     // If the index pattern hasn't changed, but the available columns have changed
     // due to transformational commands, mark the associated profile state fields to reset
     if (!indexPatternChanged && allColumnsChanged) {
       internalState.dispatch(
-        injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+        // This reset comes from the current fetch, so keep the same resetId.
+        // Otherwise the snapshot taken at fetch start looks stale when cleanup runs.
+        injectCurrentTab(internalStateActions.setProfileStateFieldsToResetWithoutResetId)({
           fieldsToReset: ['columns'],
         })
       );

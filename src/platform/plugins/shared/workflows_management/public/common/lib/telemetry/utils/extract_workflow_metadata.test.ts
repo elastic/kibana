@@ -28,13 +28,13 @@ const metadata = (workflow: Record<string, unknown>) =>
   extractWorkflowMetadata(workflow as Partial<WorkflowYaml>);
 
 // Mock parseWorkflowYamlForAutocomplete for extractStepInfoFromWorkflowYaml tests
-jest.mock('../../../../../common/lib/yaml/parse_workflow_yaml_for_autocomplete', () => ({
+jest.mock('@kbn/workflows-yaml', () => ({
   parseWorkflowYamlForAutocomplete: jest.fn(),
 }));
 
-const { parseWorkflowYamlForAutocomplete } = jest.requireMock(
-  '../../../../../common/lib/yaml/parse_workflow_yaml_for_autocomplete'
-) as { parseWorkflowYamlForAutocomplete: jest.Mock };
+const { parseWorkflowYamlForAutocomplete } = jest.requireMock('@kbn/workflows-yaml') as {
+  parseWorkflowYamlForAutocomplete: jest.Mock;
+};
 
 /** Runtime triggers can include registered custom trigger ids (e.g. cases.updated). */
 function asRuntimeTriggers(triggers: unknown): WorkflowYaml['triggers'] {

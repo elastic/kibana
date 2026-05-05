@@ -138,6 +138,7 @@
                 "lineNumber": 72,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "FormatEditorProps",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -161,6 +162,7 @@
                 "lineNumber": 72,
                 "columnNumber": 69,
                 "deprecated": false,
+                "docsReferencedTypeName": "FormatEditorState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -366,7 +368,14 @@
         "tags": [],
         "label": "FormatEditorProps",
         "description": [
-          "\nProps for received by {@link FieldFormatEditor}"
+          "\nProps for received by ",
+          {
+            "pluginId": "dataViewFieldEditor",
+            "scope": "public",
+            "docId": "kibDataViewFieldEditorPluginApi",
+            "section": "def-public.FieldFormatEditor",
+            "text": "FieldFormatEditor"
+          }
         ],
         "signature": [
           {
@@ -479,6 +488,7 @@
                 "lineNumber": 22,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "FieldFormatParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -882,6 +892,7 @@
                 "lineNumber": 18,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeleteFieldFunc",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1167,6 +1178,7 @@
               "lineNumber": 42,
               "columnNumber": 14,
               "deprecated": false,
+              "docsReferencedTypeName": "OpenFieldEditorOptions",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1223,6 +1235,7 @@
               "lineNumber": 47,
               "columnNumber": 19,
               "deprecated": false,
+              "docsReferencedTypeName": "OpenFieldDeleteModalOptions",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1320,6 +1333,7 @@
               "lineNumber": 1109,
               "columnNumber": 10,
               "deprecated": false,
+              "docsReferencedTypeName": "P",
               "trackAdoption": false
             },
             {

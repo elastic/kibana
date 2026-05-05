@@ -86,6 +86,7 @@ enabled:
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/discover/embeddable/config.ts
+  - src/platform/test/functional/apps/discover/embeddable_2/config.ts
   - src/platform/test/functional/apps/discover/esql_1/config.ts
   - src/platform/test/functional/apps/discover/esql_2/config.ts
   - src/platform/test/functional/apps/discover/esql_3/config.ts
@@ -211,6 +212,7 @@ enabled:
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_common.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_unified_attachments.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/platform/test/cases_api_integration/spaces_only/config.ts
   - x-pack/platform/test/disable_ems/config.ts
@@ -319,7 +321,8 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/short_tests/config.ts
   - x-pack/platform/test/functional/apps/ml/stack_management_jobs/config.ts
   - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
-  - x-pack/platform/test/functional/apps/monitoring/config.ts
+  - x-pack/platform/test/functional/apps/monitoring/config.group1.ts
+  - x-pack/platform/test/functional/apps/monitoring/config.group2.ts
   - x-pack/platform/test/functional/apps/painless_lab/config.ts
   - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
@@ -462,16 +465,13 @@ enabled:
   - x-pack/platform/test/api_integration/apis/grok_debugger/config.ts
   - x-pack/platform/test/api_integration/apis/file_upload/config.ts
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
-  - x-pack/platform/test/api_integration/apis/logstash/config.ts
   - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/platform/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
-  - x-pack/platform/test/api_integration/apis/maps/config.ts
   - x-pack/platform/test/api_integration/apis/lens/config.ts
   - x-pack/platform/test/api_integration/apis/ml/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/platform/test/api_integration/apis/osquery/config.ts
-  - x-pack/platform/test/api_integration/apis/search/config.ts
   - x-pack/platform/test/api_integration/apis/search_inference_endpoints/config.ts
   - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
@@ -499,3 +499,4 @@ enabled:
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_ccr.stateful.config.ts
   - x-pack/platform/test/api_integration/apis/streams/streams_without_security.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.alerting_v2.stateful.config.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_definitions.feature_flag.stateful.config.ts

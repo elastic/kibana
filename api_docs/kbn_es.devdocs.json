@@ -109,6 +109,7 @@
                 "lineNumber": 137,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallSourceOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -149,6 +150,7 @@
                 "lineNumber": 149,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "DownloadSnapshotOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -189,6 +191,7 @@
                 "lineNumber": 164,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallSnapshotOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -247,6 +250,7 @@
                 "lineNumber": 179,
                 "columnNumber": 45,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallArchiveOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -501,6 +505,7 @@
                 "lineNumber": 248,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "EsClusterExecOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -558,6 +563,7 @@
                 "lineNumber": 294,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "EsClusterExecOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -638,6 +644,7 @@
                 "lineNumber": 622,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "ServerlessOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -678,6 +685,7 @@
                 "lineNumber": 649,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "DockerOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -865,6 +873,7 @@
             "lineNumber": 478,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1029,6 +1038,7 @@
             "lineNumber": 463,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -84,6 +84,7 @@
                 "lineNumber": 46,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -142,6 +143,7 @@
                 "lineNumber": 56,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -165,6 +167,7 @@
                 "lineNumber": 57,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "AppSetupUIPluginDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -218,6 +221,7 @@
                 "lineNumber": 138,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -241,6 +245,7 @@
                 "lineNumber": 138,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "AppStartUIPluginDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -697,6 +702,7 @@
                 "lineNumber": 2292,
                 "columnNumber": 73,
                 "deprecated": false,
+                "docsReferencedTypeName": "E",
                 "trackAdoption": false
               }
             ]

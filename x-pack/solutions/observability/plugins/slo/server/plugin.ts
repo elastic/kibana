@@ -21,10 +21,10 @@ import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin
 import { DEPRECATED_ALERTING_CONSUMERS, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
-import { registerOverviewEmbeddableTransforms } from './lib/embeddables/register_overview_embeddable_transforms';
-import { registerErrorBudgetEmbeddableTransforms } from './lib/embeddables/register_error_budget_embeddable_transforms';
-import { registerAlertsEmbeddableTransforms } from './lib/embeddables/register_alerts_embeddable_transforms';
-import { registerBurnRateEmbeddableTransforms } from './lib/embeddables/register_burn_rate_embeddable_transforms';
+import { registerOverviewEmbeddable } from './lib/embeddables/register_overview_embeddable';
+import { registerErrorBudgetEmbeddable } from './lib/embeddables/register_error_budget_embeddable';
+import { registerAlertsEmbeddable } from './lib/embeddables/register_alerts_embeddable';
+import { registerBurnRateEmbeddable } from './lib/embeddables/register_burn_rate_embeddable';
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
@@ -62,6 +62,7 @@ import type {
   SLOServerStart,
 } from './types';
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
+import { CompositeSloSummaryTask } from './services/tasks/composite_slo_summary_task/composite_slo_summary_task';
 import { registerDataProviders } from './agent_builder/register_data_provider';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
@@ -77,6 +78,7 @@ export class SLOPlugin
   private orphanSummaryCleanupTask?: OrphanSummaryCleanupTask;
   private tempSummaryCleanupTask?: TempSummaryCleanupTask;
   private staleInstancesCleanupTask?: StaleInstancesCleanupTask;
+  private compositeSloSummaryTask?: CompositeSloSummaryTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.logger = this.initContext.logger.get();
@@ -292,6 +294,13 @@ export class SLOPlugin
       config: this.config,
     });
 
+    this.compositeSloSummaryTask = new CompositeSloSummaryTask({
+      core,
+      taskManager: plugins.taskManager,
+      logFactory: this.initContext.logger,
+      config: this.config,
+    });
+
     new BulkDeleteTask({
       core,
       taskManager: plugins.taskManager,
@@ -305,10 +314,10 @@ export class SLOPlugin
       config: this.config,
     });
 
-    registerOverviewEmbeddableTransforms(plugins.embeddable);
-    registerErrorBudgetEmbeddableTransforms(plugins.embeddable);
-    registerAlertsEmbeddableTransforms(plugins.embeddable);
-    registerBurnRateEmbeddableTransforms(plugins.embeddable);
+    registerOverviewEmbeddable(plugins.embeddable);
+    registerErrorBudgetEmbeddable(plugins.embeddable);
+    registerAlertsEmbeddable(plugins.embeddable);
+    registerBurnRateEmbeddable(plugins.embeddable);
 
     return {};
   }
@@ -319,6 +328,7 @@ export class SLOPlugin
     this.orphanSummaryCleanupTask?.start(plugins).catch(() => {});
     this.tempSummaryCleanupTask?.start(plugins).catch(() => {});
     this.staleInstancesCleanupTask?.start(plugins).catch(() => {});
+    this.compositeSloSummaryTask?.start(plugins).catch(() => {});
 
     return {
       getSloClientWithRequest: async (request: KibanaRequest) => {

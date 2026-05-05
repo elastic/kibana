@@ -28,7 +28,7 @@
         "label": "AllocateAction",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 146,
+        "lineNumber": 155,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +44,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 147,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -60,7 +60,7 @@
               "{} | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 148,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -76,7 +76,7 @@
               "{} | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 149,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -92,7 +92,7 @@
               "{ [attribute: string]: string; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 150,
+            "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -108,7 +108,7 @@
         "label": "CommonPhaseSettings",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 175,
+        "lineNumber": 184,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -121,7 +121,7 @@
             "label": "phaseEnabled",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 176,
+            "lineNumber": 185,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -162,7 +162,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 184,
+        "lineNumber": 193,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -175,7 +175,7 @@
             "label": "waitForSnapshotPolicy",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 185,
+            "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -191,7 +191,7 @@
         "label": "DownsampleAction",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 167,
+        "lineNumber": 176,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -204,7 +204,7 @@
             "label": "fixed_interval",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 168,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -220,7 +220,7 @@
         "label": "ForcemergeAction",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 161,
+        "lineNumber": 170,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -233,7 +233,7 @@
             "label": "max_num_segments",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 162,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -249,7 +249,7 @@
               "\"best_compression\" | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 164,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -530,7 +530,7 @@
         "label": "PhaseWithMinAge",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 179,
+        "lineNumber": 188,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -543,7 +543,7 @@
             "label": "selectedMinimumAge",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 180,
+            "lineNumber": 189,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -556,7 +556,7 @@
             "label": "selectedMinimumAgeUnits",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 181,
+            "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -773,7 +773,7 @@
         "label": "RolloverAction",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 72,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -789,7 +789,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 73,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -805,7 +805,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 74,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -821,7 +821,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 75,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -837,7 +837,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 76,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -855,7 +855,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 77,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -966,13 +966,31 @@
             "tags": [],
             "label": "force_merge_index",
             "description": [
-              "\nWe do not configure this value in the UI as it is an advanced setting that will\nnot suit the vast majority of cases."
+              "\nControls whether the searchable snapshot action should force merge the managed index to a one segment\nbefore creating the snapshot. Defaults to `true`."
             ],
             "signature": [
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SearchableSnapshotAction.force_merge_on_clone",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "force_merge_on_clone",
+            "description": [
+              "\nControls how the force merge (when enabled) is executed.\n\n- `true` (default): clone the index with 0 replicas and force merge the clone before creating the snapshot.\n- `false`: skip cloning and force merge the managed index directly.\n\nOnly valid when `force_merge_index` is `true`. Introduced in ES 9.2.1+."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1067,7 +1085,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 111,
+        "lineNumber": 120,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1123,7 +1141,7 @@
               " | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 112,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1156,7 +1174,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 135,
+        "lineNumber": 144,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1172,7 +1190,7 @@
               "{ wait_for_snapshot?: { policy: string; } | undefined; delete?: { delete_searchable_snapshot?: boolean | undefined; } | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 136,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1205,7 +1223,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 126,
+        "lineNumber": 135,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1229,7 +1247,7 @@
               " | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 127,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1262,7 +1280,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 83,
+        "lineNumber": 92,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1326,7 +1344,7 @@
               " | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 84,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1490,7 +1508,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 99,
+        "lineNumber": 108,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1554,7 +1572,7 @@
               " | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 100,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1570,7 +1588,7 @@
         "label": "SetPriorityAction",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 171,
+        "lineNumber": 180,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1586,7 +1604,7 @@
               "number | null"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 172,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1602,7 +1620,7 @@
         "label": "ShrinkAction",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-        "lineNumber": 155,
+        "lineNumber": 164,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1618,7 +1636,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 156,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1634,7 +1652,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 157,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1650,7 +1668,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
-            "lineNumber": 158,
+            "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

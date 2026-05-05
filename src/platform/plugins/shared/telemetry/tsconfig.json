@@ -9,7 +9,7 @@
     "server/**/*",
     "common/**/*",
     "../../../../../typings/**/*",
-    "schema/*.json",
+    "schema/*",
   ],
   "kbn_references": [
     "@kbn/core",

@@ -614,7 +614,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           400
         );
         expect((response as any).message).to.eql(
-          'Desired stream state is invalid: Stream name cannot contain "<".'
+          'Desired stream state is invalid: Stream name cannot contain "<", ">".'
         );
       });
 

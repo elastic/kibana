@@ -6,6 +6,7 @@
  */
 
 import type { Runner } from '@kbn/agent-builder-server';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { AgentBuilderConfig } from '../config';
 import type {
   InternalSetupServices,
@@ -105,6 +106,7 @@ export class ServiceManager {
     securityPlugin,
     trackingService,
     analyticsService,
+    searchInferenceEndpoints,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -117,6 +119,15 @@ export class ServiceManager {
         throw new Error('Trying to access runner before initialization');
       }
       return runner;
+    };
+
+    // eslint-disable-next-line prefer-const
+    let executionService: AgentExecutionService | undefined;
+    const getExecutionService = () => {
+      if (!executionService) {
+        throw new Error('Execution service not yet initialized');
+      }
+      return executionService;
     };
 
     const attachments = this.services.attachments.start({
@@ -163,6 +174,8 @@ export class ServiceManager {
       spaces,
       config: this.config,
       getToolRegistry: tools.getRegistry,
+      analyticsService,
+      trackingService,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -182,6 +195,8 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       hooks,
+      getExecutionService,
+      searchInferenceEndpoints,
     });
     runner = runnerFactory.getRunner();
 
@@ -210,9 +225,10 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       meteringService: this.services.metering,
+      searchInferenceEndpoints,
     });
 
-    const execution = createAgentExecutionService({
+    executionService = createAgentExecutionService({
       logger: logger.get('execution'),
       elasticsearch,
       taskManager,
@@ -227,6 +243,7 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       meteringService: this.services.metering,
+      searchInferenceEndpoints,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
@@ -239,7 +256,7 @@ export class ServiceManager {
       conversations,
       runnerFactory,
       auditLogService,
-      execution,
+      execution: executionService,
       taskHandler,
       hooks,
       spaces,

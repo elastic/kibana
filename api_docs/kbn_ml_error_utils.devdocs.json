@@ -88,6 +88,7 @@
                 "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "MLErrorObject",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -111,6 +112,7 @@
                 "lineNumber": 26,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "ErrorType",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -168,6 +170,7 @@
             "lineNumber": 117,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "ErrorType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -228,6 +231,7 @@
             "lineNumber": 25,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "ErrorType",
             "trackAdoption": false,
             "isRequired": false
           }

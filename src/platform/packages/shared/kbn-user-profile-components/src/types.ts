@@ -39,8 +39,12 @@ export interface UserSettingsData {
   contrastMode?: ContrastModeValue;
   solutionNavOptOut?: boolean;
   /**
-   * Stringified JSON map of space id → whether the Agent Builder announcement modal was dismissed
-   * for that space (`true` = dismissed). Used for per-user, per-space dismissal.
+   * Whether the Agent Builder announcement modal was dismissed for the current user (all spaces).
+   */
+  agentBuilderAnnouncementModalSeen?: boolean;
+  /**
+   * Legacy: stringified JSON map of space id → dismissed (`true`). Superseded by
+   * `agentBuilderAnnouncementModalSeen`; read for backward compatibility.
    */
   agentBuilderAnnouncementModalSeenBySpaceJson?: string;
 }

@@ -33,4 +33,10 @@ export interface WorkflowsExtensionsStartContract<TStepDefinition extends Common
    * @returns True if definition for the step type is registered, false otherwise
    */
   hasStepDefinition(stepTypeId: string): boolean;
+
+  /**
+   * Resolves when all async loaders have settled.
+   * Check before using the extensions to guarantee the registries are ready.
+   */
+  isReady(): Promise<void>;
 }

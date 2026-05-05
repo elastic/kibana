@@ -9,14 +9,14 @@ import type { SigEventsTuningConfig } from '@kbn/streams-plugin/common';
 
 interface FieldBounds {
   min: number;
-  max: number;
+  max?: number;
   integer?: boolean;
 }
 
 const FIELD_BOUNDS: Record<keyof SigEventsTuningConfig, FieldBounds> = {
   sample_size: { min: 1, max: 100, integer: true },
   max_iterations: { min: 1, max: 20, integer: true },
-  feature_ttl_days: { min: 1, max: 90, integer: true },
+  feature_ttl_days: { min: 1, integer: true },
   entity_filtered_ratio: { min: 0, max: 1 },
   diverse_ratio: { min: 0, max: 1 },
   max_excluded_features_in_prompt: { min: 0, max: 50, integer: true },
@@ -52,8 +52,12 @@ export function validateSigEventsTuningConfig(parsed: Record<string, unknown>): 
     if (bounds.integer && !Number.isInteger(value)) {
       errors.push(`"${key}" must be an integer`);
     }
-    if (value < bounds.min || value > bounds.max) {
-      errors.push(`"${key}" must be between ${bounds.min} and ${bounds.max}`);
+    if (value < bounds.min || (typeof bounds.max === 'number' && value > bounds.max)) {
+      if (typeof bounds.max === 'number') {
+        errors.push(`"${key}" must be between ${bounds.min} and ${bounds.max}`);
+      } else {
+        errors.push(`"${key}" must be at least ${bounds.min}`);
+      }
     }
   }
 

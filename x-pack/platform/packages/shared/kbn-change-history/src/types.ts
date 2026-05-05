@@ -10,7 +10,6 @@ import type {
   Refresh,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
-
 /**
  * Represents a single document in the change history.
  */
@@ -85,11 +84,6 @@ export interface ChangeHistoryDocument {
 
   /** Optional metadata about the event. Information that does not form part of the diff or ECS schema. */
   metadata?: Record<string, unknown>;
-
-  kibana?: {
-    // /** Kibana space ID that the change event belongs to. (ie `default` etc) */
-    space_ids: string;
-  };
 
   service: {
     type: 'kibana';

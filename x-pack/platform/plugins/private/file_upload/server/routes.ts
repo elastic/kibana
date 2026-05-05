@@ -241,7 +241,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             }),
             body: schema.object({
               index: schema.string(),
-              data: schema.arrayOf(schema.any()),
+              data: schema.arrayOf(schema.any(), { maxSize: 50000 }),
               settings: schema.maybe(schema.any()),
               /** Mappings */
               mappings: schema.any(),
@@ -259,7 +259,8 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
                       id: schema.maybe(schema.string()),
                       pipeline: schema.maybe(schema.any()),
                     })
-                  )
+                  ),
+                  { maxSize: 50000 }
                 )
               ),
             }),
@@ -407,7 +408,10 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           request: {
             body: schema.object({
               /** Index or indexes for which to return the time range. */
-              index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+              index: schema.oneOf([
+                schema.string(),
+                schema.arrayOf(schema.string(), { maxSize: 10000 }),
+              ]),
               /** Name of the time field in the index. */
               timeFieldName: schema.string(),
               /** Query to match documents in the index(es). */
@@ -463,7 +467,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         validate: {
           request: {
             body: schema.object({
-              docs: schema.arrayOf(schema.any()),
+              docs: schema.arrayOf(schema.any(), { maxSize: 10000 }),
               pipeline: schema.any(),
               timeField: schema.string(),
             }),

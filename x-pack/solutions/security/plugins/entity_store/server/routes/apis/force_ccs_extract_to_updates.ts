@@ -25,7 +25,7 @@ const bodySchema = z.object({
   indexPatterns: z.array(z.string()).min(1),
   fromDateISO: z.string().datetime(),
   toDateISO: z.string().datetime(),
-  docsLimit: z.number().int().positive().optional(),
+  docsLimit: z.number().int().min(1).optional(),
 });
 
 export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter) {
@@ -33,6 +33,9 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
     .post({
       path: ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES,
       access: 'internal',
+      summary: 'Force cross-cluster search extraction',
+      description:
+        'Trigger an immediate cross-cluster search extraction for the specified entity type, index patterns, and date range.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

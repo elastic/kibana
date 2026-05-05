@@ -51,6 +51,7 @@
             "lineNumber": 26,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "SidebarProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }

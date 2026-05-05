@@ -7,9 +7,12 @@
 
 import { ToolManager, createToolManager } from './tool_manager';
 import type { StructuredTool } from '@langchain/core/tools';
-import { ToolManagerToolType } from '@kbn/agent-builder-server/runner/tool_manager';
-import type { ExecutableTool } from '@kbn/agent-builder-server';
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import {
+  ToolManagerToolType,
+  type BrowserToolWithOrigin,
+  type ExecutableToolWithOrigin,
+} from '@kbn/agent-builder-server/runner/tool_manager';
+import { ToolOrigin } from '@kbn/agent-builder-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod/v4';
 
@@ -29,6 +32,9 @@ jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
       invoke: jest.fn(),
     } as unknown as StructuredTool;
   }),
+  sanitizeToolId: jest.fn((toolId: string) =>
+    toolId.replaceAll('.', '_').replace(/[^a-zA-Z0-9_-]/g, '')
+  ),
 }));
 
 jest.mock('@kbn/agent-builder-genai-utils/langchain/tools', () => ({
@@ -71,8 +77,9 @@ describe('ToolManager', () => {
 
   const createMockExecutableTool = (
     id: string,
-    description: string = 'Test tool'
-  ): ExecutableTool => ({
+    description: string = 'Test tool',
+    origin: ToolOrigin = ToolOrigin.registry
+  ): ExecutableToolWithOrigin => ({
     id,
     type: 'builtin' as any,
     description,
@@ -81,18 +88,21 @@ describe('ToolManager', () => {
     configuration: {},
     getSchema: async () => z.object({}),
     execute: jest.fn(),
+    origin,
   });
 
   const createMockBrowserTool = (
     id: string,
-    description: string = 'Browser tool'
-  ): BrowserApiToolMetadata => ({
+    description: string = 'Browser tool',
+    origin: ToolOrigin = ToolOrigin.internal
+  ): BrowserToolWithOrigin => ({
     id,
     description,
     schema: {
       type: 'object',
       properties: {},
     },
+    origin,
   });
 
   describe('constructor', () => {
@@ -639,6 +649,38 @@ describe('ToolManager', () => {
     });
   });
 
+  describe('tool origin metadata', () => {
+    it('stores and retrieves origin entries by internal tool id', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: [
+          createMockExecutableTool('registry.tool', 'registry tool', ToolOrigin.registry),
+          createMockExecutableTool('inline.tool', 'inline tool', ToolOrigin.inline),
+        ],
+        logger: mockLogger,
+      });
+
+      expect(toolManager.getToolOrigin('registry.tool')).toBe(ToolOrigin.registry);
+      expect(toolManager.getToolOrigin('inline.tool')).toBe(ToolOrigin.inline);
+      expect(toolManager.getToolOrigin('missing.tool')).toBeUndefined();
+    });
+
+    it('overwrites existing entries when a newer origin is provided', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('tool.id', 'tool', ToolOrigin.inline),
+        logger: mockLogger,
+      });
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('tool.id', 'tool', ToolOrigin.registry),
+        logger: mockLogger,
+      });
+
+      expect(toolManager.getToolOrigin('tool.id')).toBe(ToolOrigin.registry);
+    });
+  });
+
   describe('LRU eviction', () => {
     it('evicts least recently used tool when capacity is exceeded', async () => {
       const capacity = 3;
@@ -777,7 +819,7 @@ describe('ToolManager', () => {
 
     it('returns the summarizer for a tool with summarizeToolReturn', async () => {
       const summarizer = jest.fn();
-      const tool: ExecutableTool = {
+      const tool: ExecutableToolWithOrigin = {
         ...createMockExecutableTool('tool-with-summarizer'),
         summarizeToolReturn: summarizer,
       };
@@ -805,11 +847,11 @@ describe('ToolManager', () => {
     it('returns the latest summarizer when a tool is re-added', async () => {
       const summarizer1 = jest.fn();
       const summarizer2 = jest.fn();
-      const tool1: ExecutableTool = {
+      const tool1: ExecutableToolWithOrigin = {
         ...createMockExecutableTool('tool-1'),
         summarizeToolReturn: summarizer1,
       };
-      const tool2: ExecutableTool = {
+      const tool2: ExecutableToolWithOrigin = {
         ...createMockExecutableTool('tool-1'),
         summarizeToolReturn: summarizer2,
       };

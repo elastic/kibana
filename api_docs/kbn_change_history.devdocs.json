@@ -203,6 +203,7 @@
                 "lineNumber": 103,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -269,6 +270,7 @@
                 "lineNumber": 147,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "ObjectChange",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -294,6 +296,7 @@
                 "lineNumber": 147,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogChangeHistoryOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -386,6 +389,7 @@
                 "lineNumber": 167,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogChangeHistoryOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -510,6 +514,7 @@
                 "lineNumber": 273,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetChangeHistoryOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -534,7 +539,7 @@
           "\nOutput of the diff calculation"
         ],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 180,
+        "lineNumber": 174,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -550,7 +555,7 @@
               "{ total: number; additions: number; deletions: number; updates: number; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 184,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -568,7 +573,7 @@
               "\"default\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 190,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -586,7 +591,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 192,
+            "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -604,7 +609,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 194,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -622,7 +627,7 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 196,
+            "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -640,7 +645,7 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 198,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -658,7 +663,7 @@
           "\nInput for the diff calculation"
         ],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 171,
+        "lineNumber": 165,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -674,7 +679,7 @@
               "Record<string, any> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 175,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -690,7 +695,7 @@
               "Record<string, any> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 176,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -713,7 +718,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 177,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -731,7 +736,7 @@
           "\nRepresents a single document in the change history."
         ],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 14,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -746,7 +751,7 @@
               "ISO8601 timestamp when the target object was changed (successful write confirmed)."
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 18,
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -762,7 +767,7 @@
               "{ version: \"9.3.0\"; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 21,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -778,7 +783,7 @@
               "{ id?: string | undefined; name: string; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -794,7 +799,7 @@
               "{ id: string; module: string; dataset: string; action: string; type: \"deletion\" | \"creation\" | \"change\"; reason?: string | undefined; created?: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 33,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -810,7 +815,7 @@
               "{ id: string; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 50,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -826,7 +831,7 @@
               "{ id: string; type: string; index?: string | undefined; hash: string; sequence?: number | undefined; diff?: { type: \"default\"; fields: string[]; before: Record<string, unknown>; } | undefined; fields: { hashed: string[]; }; snapshot: Record<string, unknown>; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -844,7 +849,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -862,23 +867,7 @@
               "Record<string, unknown> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 86,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/change-history",
-            "id": "def-common.ChangeHistoryDocument.kibana",
-            "type": "Object",
-            "tags": [],
-            "label": "kibana",
-            "description": [],
-            "signature": [
-              "{ space_ids: string; } | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 89,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -894,7 +883,7 @@
               "{ type: \"kibana\"; version: string; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 94,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -912,7 +901,7 @@
           "\nFields hashed due to sensitive nature (PII, Secret keys, etc) or being very large (base64 blob)"
         ],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 164,
+        "lineNumber": 158,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -935,7 +924,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 168,
+            "lineNumber": 162,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -953,7 +942,7 @@
           "\nFields excluded from diff calculation"
         ],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 157,
+        "lineNumber": 151,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -976,7 +965,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 161,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -992,7 +981,7 @@
         "label": "GetChangeHistoryOptions",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 142,
+        "lineNumber": 136,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1009,7 +998,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 143,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1026,7 +1015,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 144,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1042,7 +1031,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 145,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1058,7 +1047,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 146,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1076,7 +1065,7 @@
           "\nResult from a history query."
         ],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 149,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1089,7 +1078,7 @@
             "label": "total",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 153,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1112,7 +1101,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 154,
+            "lineNumber": 148,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1183,6 +1172,7 @@
                 "lineNumber": 44,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1241,6 +1231,7 @@
                 "lineNumber": 45,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "ObjectChange",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1264,6 +1255,7 @@
                 "lineNumber": 45,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogChangeHistoryOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1346,6 +1338,7 @@
                 "lineNumber": 46,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogChangeHistoryOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1456,6 +1449,7 @@
                 "lineNumber": 51,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetChangeHistoryOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1473,7 +1467,7 @@
         "label": "LogChangeHistoryOptions",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 118,
+        "lineNumber": 112,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1488,7 +1482,7 @@
               "Action performed by the user (`rule_create`, `rule_update`, `rule_delete`, etc.). Some Audit log examples (@see https://www.elastic.co/docs/reference/kibana/kibana-audit-events#xpack-security-ecs-audit-logging)"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 119,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1503,7 +1497,7 @@
               "Current login name for user that generated the change."
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 121,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1521,7 +1515,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 123,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1536,7 +1530,7 @@
               "Kibana space that the event belongs to. (ie `default` etc)."
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 125,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1554,7 +1548,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 127,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1580,7 +1574,7 @@
               ", \"tags\" | \"event\" | \"metadata\">> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 129,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1605,7 +1599,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 134,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1630,7 +1624,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 136,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1649,7 +1643,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 138,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1665,7 +1659,7 @@
         "label": "ObjectChange",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-        "lineNumber": 101,
+        "lineNumber": 95,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1683,7 +1677,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 102,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1698,7 +1692,7 @@
               "The `object.type`. Allows multiple object types per data stream."
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 104,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1713,7 +1707,7 @@
               "The `object.id`. Uniquely identifies this object in Kibana within its `type`"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 106,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1731,7 +1725,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 108,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1749,7 +1743,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 110,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1767,7 +1761,7 @@
               "Record<string, any> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 112,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1785,7 +1779,7 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
-            "lineNumber": 114,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

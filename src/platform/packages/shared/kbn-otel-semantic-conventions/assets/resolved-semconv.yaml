@@ -1665,6 +1665,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -1703,6 +1709,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -1751,7 +1767,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -1783,15 +1799,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -1973,6 +1989,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -2017,6 +2041,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -2372,6 +2405,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -2410,6 +2449,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -2458,7 +2507,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -2490,15 +2539,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -2684,6 +2733,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -2728,6 +2785,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -3188,7 +3254,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -3220,15 +3286,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -3939,7 +4005,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -3971,15 +4037,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -4649,7 +4715,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -4681,15 +4747,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -10766,6 +10832,323 @@ groups:
             - stability
           locally_overridden_fields:
             - role
+  - id: entity.k8s.node.system_container
+    type: entity
+    brief: |
+      A Kubernetes Node System Container.
+    stability: development
+    attributes:
+      - name: k8s.node.system_container.name
+        type: string
+        brief: |
+          The name of the system container running on the K8s Node.
+        examples:
+          - kubelet
+          - runtime
+          - pods
+          - misc
+        requirement_level: recommended
+        stability: development
+        role: identifying
+    name: k8s.node.system_container
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/entities.yaml
+      attributes:
+        k8s.node.system_container.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - role
+  - id: entity.k8s.persistentvolume
+    type: entity
+    brief: |
+      A Kubernetes [PersistentVolume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) object.
+    stability: development
+    attributes:
+      - name: k8s.persistentvolume.annotation
+        type: template[string]
+        brief: |
+          The annotation placed on the PersistentVolume, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.
+        examples:
+          - kubernetes.io/aws-ebs
+          - ''
+        requirement_level: opt_in
+        note: |
+          Examples:
+
+          - An annotation `pv.kubernetes.io/provisioned-by` with value `kubernetes.io/aws-ebs` SHOULD be recorded as
+            the `k8s.persistentvolume.annotation.pv.kubernetes.io/provisioned-by` attribute with value `"kubernetes.io/aws-ebs"`.
+          - An annotation `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolume.annotation.data` attribute with value `""`.
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolume.label
+        type: template[string]
+        brief: |
+          The label placed on the PersistentVolume, the `<key>` being the label name, the value being the label value, even if the value is empty.
+        examples:
+          - ssd
+          - ''
+        requirement_level: opt_in
+        note: |
+          Examples:
+
+          - A label `type` with value `ssd` SHOULD be recorded as
+            the `k8s.persistentvolume.label.type` attribute with value `"ssd"`.
+          - A label `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolume.label.data` attribute with value `""`.
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolume.name
+        type: string
+        brief: |
+          The name of the PersistentVolume.
+        examples:
+          - pv-data-01
+        requirement_level: recommended
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolume.reclaim_policy
+        type:
+          members:
+            - id: delete
+              value: Delete
+              brief: The volume will be deleted when released from its claim.
+              stability: development
+            - id: recycle
+              value: Recycle
+              brief: The volume will be recycled (basic scrub) when released from its claim.
+              stability: development
+            - id: retain
+              value: Retain
+              brief: The volume will be retained when released from its claim.
+              stability: development
+        brief: |
+          The reclaim policy of the PersistentVolume.
+        examples:
+          - Delete
+          - Retain
+          - Recycle
+        requirement_level: opt_in
+        note: |
+          This attribute aligns with the `persistentVolumeReclaimPolicy` field of the
+          [K8s PersistentVolumeSpec](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeSpec).
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolume.uid
+        type: string
+        brief: |
+          The UID of the PersistentVolume.
+        examples:
+          - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
+        requirement_level: required
+        stability: development
+        role: identifying
+      - name: k8s.storageclass.name
+        type: string
+        brief: |
+          The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.
+        examples:
+          - gold.storageclass.storage.k8s.io
+        requirement_level: recommended
+        stability: development
+        role: descriptive
+    name: k8s.persistentvolume
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/entities.yaml
+      attributes:
+        k8s.persistentvolume.annotation:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.persistentvolume.label:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.persistentvolume.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - role
+        k8s.persistentvolume.reclaim_policy:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.persistentvolume.uid:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.storageclass.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+  - id: entity.k8s.persistentvolumeclaim
+    type: entity
+    brief: |
+      A Kubernetes [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims) object.
+    stability: development
+    attributes:
+      - name: k8s.persistentvolumeclaim.annotation
+        type: template[string]
+        brief: |
+          The annotation placed on the PersistentVolumeClaim, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.
+        examples:
+          - kubernetes.io/aws-ebs
+          - ''
+        requirement_level: opt_in
+        note: |
+          Examples:
+
+          - An annotation `volume.beta.kubernetes.io/storage-provisioner` with value `kubernetes.io/aws-ebs` SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.annotation.volume.beta.kubernetes.io/storage-provisioner` attribute with value `"kubernetes.io/aws-ebs"`.
+          - An annotation `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.annotation.data` attribute with value `""`.
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolumeclaim.label
+        type: template[string]
+        brief: |
+          The label placed on the PersistentVolumeClaim, the `<key>` being the label name, the value being the label value, even if the value is empty.
+        examples:
+          - my-app
+          - ''
+        requirement_level: opt_in
+        note: |
+          Examples:
+
+          - A label `app` with value `my-app` SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.label.app` attribute with value `"my-app"`.
+          - A label `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.label.data` attribute with value `""`.
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolumeclaim.name
+        type: string
+        brief: |
+          The name of the PersistentVolumeClaim.
+        examples:
+          - pvc-data-01
+        requirement_level: recommended
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolumeclaim.uid
+        type: string
+        brief: |
+          The UID of the PersistentVolumeClaim.
+        examples:
+          - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
+        requirement_level: required
+        stability: development
+        role: identifying
+      - name: k8s.storageclass.name
+        type: string
+        brief: |
+          The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.
+        examples:
+          - gold.storageclass.storage.k8s.io
+        requirement_level: recommended
+        stability: development
+        role: descriptive
+    name: k8s.persistentvolumeclaim
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/entities.yaml
+      attributes:
+        k8s.persistentvolumeclaim.annotation:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.persistentvolumeclaim.label:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.persistentvolumeclaim.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - role
+        k8s.persistentvolumeclaim.uid:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.storageclass.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
   - id: entity.k8s.pod
     type: entity
     brief: |
@@ -14607,6 +14990,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -14645,6 +15034,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -14693,7 +15092,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -14725,15 +15124,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -14916,6 +15315,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -14960,6 +15367,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -21755,7 +22171,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -22010,7 +22426,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -32025,7 +32441,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -32277,7 +32693,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -32519,7 +32935,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -32759,7 +33175,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -33055,7 +33471,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -33304,7 +33720,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -33544,7 +33960,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -44838,6 +45254,78 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+  - id: metric.k8s.node.system_container.cpu.time
+    type: metric
+    brief: Node's system container CPU time.
+    note: |
+      This metric is derived from the [CPUStats.UsageCoreNanoSeconds](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L236) field of the [ContainerStats](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L157C6-L157C20) of [Node.SystemContainers](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L40) of the Kubelet's stats API.
+    stability: development
+    metric_name: k8s.node.system_container.cpu.time
+    instrument: counter
+    unit: s
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.node.system_container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.node.system_container.cpu.usage
+    type: metric
+    brief: Node's system container CPU usage, measured in cpus.
+    note: |
+      This metric is derived from the [CPUStats.UsageNanoCores](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L233) field of the [ContainerStats](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L157C6-L157C20) of [Node.SystemContainers](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L40) of the Kubelet's stats API.
+    stability: development
+    metric_name: k8s.node.system_container.cpu.usage
+    instrument: gauge
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.node.system_container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.node.system_container.memory.usage
+    type: metric
+    brief: Node's system container memory usage.
+    note: |
+      This metric is derived from the [MemoryStats.UsageBytes](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L252) field of the [ContainerStats](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L157C6-L157C20) of [Node.SystemContainers](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L40) of the Kubelet's stats API.
+    stability: development
+    metric_name: k8s.node.system_container.memory.usage
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.node.system_container
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.node.system_container.memory.working_set
+    type: metric
+    brief: The amount of working set memory.
+    note: |
+      This metric is derived from the [MemoryStats.WorkingSetBytes](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L256) field of the [ContainerStats](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L157C6-L157C20) of [Node.SystemContainers](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L40) of the Kubelet's stats API.
+    stability: development
+    metric_name: k8s.node.system_container.memory.working_set
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.node.system_container
+    annotations:
+      code_generation:
+        metric_value_type: int
   - id: metric.k8s.node.uptime
     type: metric
     brief: The time the Node has been running.
@@ -44857,6 +45345,186 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
+  - id: metric.k8s.persistentvolume.status.phase
+    type: metric
+    brief: Number of PersistentVolumes in a given phase.
+    note: |
+      All possible phases should be reported at each interval to avoid gaps in the time series.
+      This metric is derived from the `.status.phase` field of the
+      [K8s PersistentVolumeStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeStatus).
+    stability: development
+    attributes:
+      - name: k8s.persistentvolume.status.phase
+        type:
+          members:
+            - id: available
+              value: Available
+              brief: The volume is available and not yet bound to a claim.
+              stability: development
+            - id: bound
+              value: Bound
+              brief: The volume is bound to a claim.
+              stability: development
+            - id: failed
+              value: Failed
+              brief: The volume has failed its automatic reclamation.
+              stability: development
+            - id: pending
+              value: Pending
+              brief: The volume is being provisioned.
+              stability: development
+            - id: released
+              value: Released
+              brief: The claim has been deleted but the volume is not yet available.
+              stability: development
+        brief: |
+          The phase of the PersistentVolume.
+        examples:
+          - Pending
+          - Available
+          - Bound
+          - Released
+          - Failed
+        requirement_level: required
+        note: |
+          This attribute aligns with the `phase` field of the
+          [K8s PersistentVolumeStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeStatus).
+        stability: development
+    metric_name: k8s.persistentvolume.status.phase
+    instrument: updowncounter
+    unit: '{persistentvolume}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+      attributes:
+        k8s.persistentvolume.status.phase:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    entity_associations:
+      - k8s.persistentvolume
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.persistentvolume.storage.capacity
+    type: metric
+    brief: The storage capacity of the PersistentVolume.
+    note: |
+      This metric is derived from the `.spec.capacity.storage` field of the [K8s PersistentVolumeSpec](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeSpec).
+    stability: development
+    metric_name: k8s.persistentvolume.storage.capacity
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.persistentvolume
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.persistentvolumeclaim.status.phase
+    type: metric
+    brief: Number of PersistentVolumeClaims in a given phase.
+    note: |
+      All possible phases should be reported at each interval to avoid gaps in the time series.
+      This metric is derived from the `.status.phase` field of the
+      [K8s PersistentVolumeClaimStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimStatus).
+    stability: development
+    attributes:
+      - name: k8s.persistentvolumeclaim.status.phase
+        type:
+          members:
+            - id: bound
+              value: Bound
+              brief: The claim is bound to a volume.
+              stability: development
+            - id: lost
+              value: Lost
+              brief: The claim has lost its underlying volume (the volume does not exist anymore).
+              stability: development
+            - id: pending
+              value: Pending
+              brief: The claim has not yet been bound to a volume.
+              stability: development
+        brief: |
+          The phase of the PersistentVolumeClaim.
+        examples:
+          - Pending
+          - Bound
+          - Lost
+        requirement_level: required
+        note: |
+          This attribute aligns with the `phase` field of the
+          [K8s PersistentVolumeClaimStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimStatus).
+        stability: development
+    metric_name: k8s.persistentvolumeclaim.status.phase
+    instrument: updowncounter
+    unit: '{persistentvolumeclaim}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+      attributes:
+        k8s.persistentvolumeclaim.status.phase:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    entity_associations:
+      - k8s.persistentvolumeclaim
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.persistentvolumeclaim.storage.capacity
+    type: metric
+    brief: The actual storage capacity provisioned for the PersistentVolumeClaim.
+    note: |
+      Only available when the PVC is bound. May differ from the requested capacity due to provisioner rounding.
+      This metric is derived from the `.status.capacity.storage` field of the
+      [K8s PersistentVolumeClaimStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimStatus).
+    stability: development
+    metric_name: k8s.persistentvolumeclaim.storage.capacity
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.persistentvolumeclaim
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.persistentvolumeclaim.storage.request
+    type: metric
+    brief: The storage requested by the PersistentVolumeClaim.
+    note: |
+      This metric is derived from the `.spec.resources.requests.storage` field of the [K8s PersistentVolumeClaimSpec](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimSpec).
+    stability: development
+    metric_name: k8s.persistentvolumeclaim.storage.request
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.persistentvolumeclaim
+    annotations:
+      code_generation:
+        metric_value_type: int
   - id: metric.k8s.pod.cpu.time
     type: metric
     brief: Total CPU time consumed.
@@ -70794,7 +71462,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -70906,6 +71574,11 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level: recommended
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -70948,6 +71621,15 @@ groups:
         brief: The name of the model that generated the response.
         examples:
           - gpt-4-0613
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
         requirement_level: recommended
         stability: development
       - name: gen_ai.retrieval.documents
@@ -71108,7 +71790,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -71140,15 +71822,15 @@ groups:
             ]
         requirement_level: recommended
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.tool.description
         type: string
@@ -73475,6 +74157,17 @@ groups:
           - node-1
         requirement_level: recommended
         stability: release_candidate
+      - name: k8s.node.system_container.name
+        type: string
+        brief: |
+          The name of the system container running on the K8s Node.
+        examples:
+          - kubelet
+          - runtime
+          - pods
+          - misc
+        requirement_level: recommended
+        stability: development
       - name: k8s.node.uid
         type: string
         brief: |
@@ -73483,6 +74176,190 @@ groups:
           - 1eb3a0c6-0477-4080-a9cb-0cb7db65c6a2
         requirement_level: recommended
         stability: release_candidate
+      - name: k8s.persistentvolume.annotation
+        type: template[string]
+        brief: |
+          The annotation placed on the PersistentVolume, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.
+        examples:
+          - kubernetes.io/aws-ebs
+          - ''
+        requirement_level: recommended
+        note: |
+          Examples:
+
+          - An annotation `pv.kubernetes.io/provisioned-by` with value `kubernetes.io/aws-ebs` SHOULD be recorded as
+            the `k8s.persistentvolume.annotation.pv.kubernetes.io/provisioned-by` attribute with value `"kubernetes.io/aws-ebs"`.
+          - An annotation `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolume.annotation.data` attribute with value `""`.
+        stability: development
+      - name: k8s.persistentvolume.label
+        type: template[string]
+        brief: |
+          The label placed on the PersistentVolume, the `<key>` being the label name, the value being the label value, even if the value is empty.
+        examples:
+          - ssd
+          - ''
+        requirement_level: recommended
+        note: |
+          Examples:
+
+          - A label `type` with value `ssd` SHOULD be recorded as
+            the `k8s.persistentvolume.label.type` attribute with value `"ssd"`.
+          - A label `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolume.label.data` attribute with value `""`.
+        stability: development
+      - name: k8s.persistentvolume.name
+        type: string
+        brief: |
+          The name of the PersistentVolume.
+        examples:
+          - pv-data-01
+        requirement_level: recommended
+        stability: development
+      - name: k8s.persistentvolume.reclaim_policy
+        type:
+          members:
+            - id: delete
+              value: Delete
+              brief: The volume will be deleted when released from its claim.
+              stability: development
+            - id: recycle
+              value: Recycle
+              brief: The volume will be recycled (basic scrub) when released from its claim.
+              stability: development
+            - id: retain
+              value: Retain
+              brief: The volume will be retained when released from its claim.
+              stability: development
+        brief: |
+          The reclaim policy of the PersistentVolume.
+        examples:
+          - Delete
+          - Retain
+          - Recycle
+        requirement_level: recommended
+        note: |
+          This attribute aligns with the `persistentVolumeReclaimPolicy` field of the
+          [K8s PersistentVolumeSpec](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeSpec).
+        stability: development
+      - name: k8s.persistentvolume.status.phase
+        type:
+          members:
+            - id: available
+              value: Available
+              brief: The volume is available and not yet bound to a claim.
+              stability: development
+            - id: bound
+              value: Bound
+              brief: The volume is bound to a claim.
+              stability: development
+            - id: failed
+              value: Failed
+              brief: The volume has failed its automatic reclamation.
+              stability: development
+            - id: pending
+              value: Pending
+              brief: The volume is being provisioned.
+              stability: development
+            - id: released
+              value: Released
+              brief: The claim has been deleted but the volume is not yet available.
+              stability: development
+        brief: |
+          The phase of the PersistentVolume.
+        examples:
+          - Pending
+          - Available
+          - Bound
+          - Released
+          - Failed
+        requirement_level: recommended
+        note: |
+          This attribute aligns with the `phase` field of the
+          [K8s PersistentVolumeStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeStatus).
+        stability: development
+      - name: k8s.persistentvolume.uid
+        type: string
+        brief: |
+          The UID of the PersistentVolume.
+        examples:
+          - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
+        requirement_level: recommended
+        stability: development
+      - name: k8s.persistentvolumeclaim.annotation
+        type: template[string]
+        brief: |
+          The annotation placed on the PersistentVolumeClaim, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.
+        examples:
+          - kubernetes.io/aws-ebs
+          - ''
+        requirement_level: recommended
+        note: |
+          Examples:
+
+          - An annotation `volume.beta.kubernetes.io/storage-provisioner` with value `kubernetes.io/aws-ebs` SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.annotation.volume.beta.kubernetes.io/storage-provisioner` attribute with value `"kubernetes.io/aws-ebs"`.
+          - An annotation `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.annotation.data` attribute with value `""`.
+        stability: development
+      - name: k8s.persistentvolumeclaim.label
+        type: template[string]
+        brief: |
+          The label placed on the PersistentVolumeClaim, the `<key>` being the label name, the value being the label value, even if the value is empty.
+        examples:
+          - my-app
+          - ''
+        requirement_level: recommended
+        note: |
+          Examples:
+
+          - A label `app` with value `my-app` SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.label.app` attribute with value `"my-app"`.
+          - A label `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.label.data` attribute with value `""`.
+        stability: development
+      - name: k8s.persistentvolumeclaim.name
+        type: string
+        brief: |
+          The name of the PersistentVolumeClaim.
+        examples:
+          - pvc-data-01
+        requirement_level: recommended
+        stability: development
+      - name: k8s.persistentvolumeclaim.status.phase
+        type:
+          members:
+            - id: bound
+              value: Bound
+              brief: The claim is bound to a volume.
+              stability: development
+            - id: lost
+              value: Lost
+              brief: The claim has lost its underlying volume (the volume does not exist anymore).
+              stability: development
+            - id: pending
+              value: Pending
+              brief: The claim has not yet been bound to a volume.
+              stability: development
+        brief: |
+          The phase of the PersistentVolumeClaim.
+        examples:
+          - Pending
+          - Bound
+          - Lost
+        requirement_level: recommended
+        note: |
+          This attribute aligns with the `phase` field of the
+          [K8s PersistentVolumeClaimStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimStatus).
+        stability: development
+      - name: k8s.persistentvolumeclaim.uid
+        type: string
+        brief: |
+          The UID of the PersistentVolumeClaim.
+        examples:
+          - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
+        requirement_level: recommended
+        stability: development
       - name: k8s.pod.annotation
         type: template[string]
         brief: |
@@ -80080,6 +80957,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -80118,6 +81001,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -80166,7 +81059,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -80198,15 +81091,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -80386,6 +81279,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -80430,6 +81331,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -80775,7 +81685,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -80883,6 +81793,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -80928,6 +81844,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -80976,7 +81902,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -81008,15 +81934,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -81230,6 +82156,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -81283,6 +82217,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -82170,6 +83113,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -82208,6 +83157,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -82256,7 +83215,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -82288,15 +83247,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -82494,6 +83453,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -82538,6 +83505,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -92450,7 +93426,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -92792,7 +93768,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -93516,7 +94492,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -93624,6 +94600,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -93669,6 +94651,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -93717,7 +94709,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -93749,15 +94741,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -93953,6 +94945,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -94006,6 +95006,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -94390,7 +95399,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -94568,7 +95577,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -94600,15 +95609,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -95259,7 +96268,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -95437,7 +96446,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -95469,15 +96478,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -96140,7 +97149,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -99241,6 +100250,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -99279,6 +100294,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -99327,7 +100352,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -99359,15 +100384,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -99599,6 +100624,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -99643,6 +100676,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai

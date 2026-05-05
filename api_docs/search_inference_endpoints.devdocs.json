@@ -115,6 +115,7 @@
                 "lineNumber": 51,
                 "columnNumber": 38,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -339,6 +340,7 @@
                 "lineNumber": 32,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "InferenceFeatureConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }

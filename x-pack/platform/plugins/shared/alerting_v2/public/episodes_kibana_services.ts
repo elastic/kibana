@@ -31,4 +31,5 @@ export type AlertEpisodesKibanaServices = CoreStart & {
   charts: ChartsPluginStart;
   storage: Storage;
   toastNotifications: CoreStart['notifications']['toasts'];
+  userProfile: CoreStart['userProfile'];
 };

@@ -8,6 +8,8 @@
 import React from 'react';
 
 import deepEqual from 'fast-deep-equal';
+import * as rt from 'io-ts';
+import { isRight } from 'fp-ts/Either';
 import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants';
 import * as i18n from './translations';
 
@@ -75,10 +77,20 @@ const getVisualizationAttachmentViewObject = ({
   };
 };
 
+const LensDataRt = rt.strict({ data: rt.strict({ state: rt.record(rt.string, rt.unknown) }) });
+
+const lensSchemaValidator = (attachment: unknown): void => {
+  const result = LensDataRt.decode(attachment);
+  if (!isRight(result)) {
+    throw new Error('Invalid lens attachment data: expected { state: Record<string, unknown> }');
+  }
+};
+
 export const getVisualizationAttachmentType = (): UnifiedValueAttachmentType => ({
   id: LENS_ATTACHMENT_TYPE,
   icon: 'document',
   displayName: i18n.VISUALIZATIONS,
   getAttachmentViewObject: getVisualizationAttachmentViewObject,
   getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_VISUALIZATION }),
+  schemaValidator: lensSchemaValidator,
 });

@@ -540,6 +540,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
         <AlertCountInsight
+          entityRecord={observedHost.entityRecord}
           identityFields={hostInsightsIdentityFields}
           entityType={EntityType.host}
           queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-document-details-host-entities`}

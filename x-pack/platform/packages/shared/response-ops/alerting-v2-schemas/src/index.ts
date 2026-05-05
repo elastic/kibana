@@ -14,8 +14,8 @@ export {
   validateEsqlQuery,
   parseDurationToMs,
 } from './validation';
-export * from './notification_policy_data_schema';
-export * from './notification_policy_response_schema';
+export * from './action_policy_data_schema';
+export * from './action_policy_response_schema';
 export * from './alert_action_schema';
 export * from './bulk_operation_schema';
 export type { MatcherContext, MatcherContextFieldDescriptor } from './matcher_context';

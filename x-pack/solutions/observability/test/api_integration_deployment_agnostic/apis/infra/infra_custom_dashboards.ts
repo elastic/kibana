@@ -18,9 +18,14 @@ const getCustomDashboardsUrl = (assetType: string, dashboardSavedObjectId?: stri
     ? `/api/infra/${assetType}/custom-dashboards/${dashboardSavedObjectId}`
     : `/api/infra/${assetType}/custom-dashboards`;
 
+// TDDO: Ideally we should have a deterministic way to know when settings updates are propagated to the UI.
+const CUSTOM_DASHBOARDS_SETTING_PROPAGATION_DELAY_MS = 12_000;
+const CUSTOM_DASHBOARDS_SETTING_PROPAGATION_TIMEOUT_MS = 20_000;
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   describe('Infra Custom Dashboards API', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
@@ -42,284 +47,262 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('GET endpoint for fetching custom dashboard', () => {
-      it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: false,
+    // Stateful cloud requests can hit a different Kibana node before the shared
+    // advanced settings cache has expired.
+    const waitForEnabledCustomDashboardsSetting = async () => {
+      const startedAt = Date.now();
+
+      await retry.tryForTime(CUSTOM_DASHBOARDS_SETTING_PROPAGATION_TIMEOUT_MS, async () => {
+        const response = await supertestWithAdminScope.get(getCustomDashboardsUrl('host'));
+
+        expect(response.status).to.be(200);
+
+        if (Date.now() - startedAt < CUSTOM_DASHBOARDS_SETTING_PROPAGATION_DELAY_MS) {
+          throw new Error('Waiting for custom dashboards setting propagation');
+        }
+      });
+    };
+
+    describe('when custom dashboards are disabled', () => {
+      describe('GET endpoint for fetching custom dashboard', () => {
+        it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
+          await supertestWithAdminScope.get(getCustomDashboardsUrl('host')).expect(403);
         });
 
-        await supertestWithAdminScope.get(getCustomDashboardsUrl('host')).expect(403);
+        it('responds with an error when trying to request a custom dashboard for unsupported asset type', async () => {
+          await supertestWithAdminScope
+            .get(getCustomDashboardsUrl('unsupported-asset-type'))
+            .expect(400);
+        });
       });
 
-      it('responds with an error when trying to request a custom dashboard for unsupported asset type', async () => {
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: false,
-        });
+      describe('POST endpoint for saving custom dashboard', () => {
+        it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
+          const payload: InfraSaveCustomDashboardsRequestPayload = {
+            dashboardSavedObjectId: '123',
+            dashboardFilterAssetIdEnabled: true,
+          };
 
-        await supertestWithAdminScope
-          .get(getCustomDashboardsUrl('unsupported-asset-type'))
-          .expect(400);
+          await supertestWithAdminScope
+            .post(getCustomDashboardsUrl('host'))
+            .send(payload)
+            .expect(403);
+        });
       });
 
-      it('responds with an empty configuration if custom dashboard saved object does not exist', async () => {
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: true,
+      describe('PUT endpoint for updating custom dashboard', () => {
+        it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
+          const payload: InfraSaveCustomDashboardsRequestPayload = {
+            dashboardSavedObjectId: '123',
+            dashboardFilterAssetIdEnabled: true,
+          };
+
+          await supertestWithAdminScope
+            .put(getCustomDashboardsUrl('host', '123'))
+            .send(payload)
+            .expect(403);
         });
-        await kibanaServer.savedObjects.clean({
-          types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
-        });
-
-        const response = await supertestWithAdminScope
-          .get(getCustomDashboardsUrl('host'))
-
-          .expect(200);
-
-        expect(response.body).to.be.eql([]);
       });
 
-      it('responds with the custom dashboard configuration for a given asset type when it exists', async () => {
-        const customDashboard: InfraCustomDashboard = {
-          assetType: 'host',
-          dashboardSavedObjectId: '123',
-          dashboardFilterAssetIdEnabled: true,
-        };
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: true,
+      describe('DELETE endpoint for removing a custom dashboard', () => {
+        it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
+          await supertestWithAdminScope.delete(getCustomDashboardsUrl('host', '123')).expect(403);
         });
-        await kibanaServer.savedObjects.create({
-          type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-          attributes: customDashboard,
-          overwrite: true,
-        });
-
-        const response = await supertestWithAdminScope
-          .get(getCustomDashboardsUrl('host'))
-          .expect(200);
-
-        expect(response.body).to.have.length(1);
-        expect(response.body[0]).to.have.property('dashboardFilterAssetIdEnabled', true);
-        expect(response.body[0]).to.have.property('assetType', 'host');
-        expect(response.body[0]).to.have.property('dashboardSavedObjectId', '123');
       });
     });
 
-    describe('POST endpoint for saving custom dashboard', () => {
-      it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
-        const payload: InfraSaveCustomDashboardsRequestPayload = {
-          dashboardSavedObjectId: '123',
-          dashboardFilterAssetIdEnabled: true,
-        };
+    describe('when custom dashboards are enabled', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          [enableInfrastructureAssetCustomDashboards]: true,
+        });
+        await waitForEnabledCustomDashboardsSetting();
+      });
+
+      after(async () => {
         await kibanaServer.uiSettings.update({
           [enableInfrastructureAssetCustomDashboards]: false,
         });
-
-        await supertestWithAdminScope
-          .post(getCustomDashboardsUrl('host'))
-          .send(payload)
-          .expect(403);
       });
 
-      it('responds with an error when trying to update a custom dashboard for unsupported asset type', async () => {
-        const payload = {
-          dashboardSavedObjectId: '123',
-          dashboardFilterAssetIdEnabled: true,
-        };
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: true,
+      describe('GET endpoint for fetching custom dashboard', () => {
+        it('responds with an empty configuration if custom dashboard saved object does not exist', async () => {
+          const response = await supertestWithAdminScope
+            .get(getCustomDashboardsUrl('host'))
+            .expect(200);
+
+          expect(response.body).to.be.eql([]);
         });
 
-        await supertestWithAdminScope
-          .post(getCustomDashboardsUrl('unsupported-asset-type'))
-          .send(payload)
-          .expect(400);
-      });
-
-      it('creates a new dashboard configuration when saving for the first time', async () => {
-        const payload: InfraSaveCustomDashboardsRequestPayload = {
-          dashboardSavedObjectId: '123',
-          dashboardFilterAssetIdEnabled: true,
-        };
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: true,
-        });
-        await kibanaServer.savedObjects.clean({
-          types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
-        });
-
-        const response = await supertestWithAdminScope
-          .post(getCustomDashboardsUrl('host'))
-          .send(payload)
-          .expect(200);
-
-        expect(response.body).to.have.property('id');
-        expect(response.body).to.have.property('dashboardFilterAssetIdEnabled', true);
-        expect(response.body).to.have.property('assetType', 'host');
-        expect(response.body).to.have.property('dashboardSavedObjectId', '123');
-      });
-
-      it('returns 400 when the dashboard already exist and tries to create it again', async () => {
-        const payload: InfraSaveCustomDashboardsRequestPayload = {
-          dashboardSavedObjectId: '123',
-          dashboardFilterAssetIdEnabled: true,
-        };
-
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: true,
-        });
-        await kibanaServer.savedObjects.clean({
-          types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
-        });
-        await kibanaServer.savedObjects.create({
-          type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-          attributes: {
+        it('responds with the custom dashboard configuration for a given asset type when it exists', async () => {
+          const customDashboard: InfraCustomDashboard = {
             assetType: 'host',
             dashboardSavedObjectId: '123',
             dashboardFilterAssetIdEnabled: true,
-          },
-          overwrite: true,
+          };
+
+          await kibanaServer.savedObjects.create({
+            type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+            attributes: customDashboard,
+            overwrite: true,
+          });
+
+          const response = await supertestWithAdminScope
+            .get(getCustomDashboardsUrl('host'))
+            .expect(200);
+
+          expect(response.body).to.have.length(1);
+          expect(response.body[0]).to.have.property('dashboardFilterAssetIdEnabled', true);
+          expect(response.body[0]).to.have.property('assetType', 'host');
+          expect(response.body[0]).to.have.property('dashboardSavedObjectId', '123');
         });
-
-        const response = await supertestWithAdminScope
-          .post(getCustomDashboardsUrl('host'))
-          .send(payload)
-          .expect(400);
-
-        expect(response.body.error).to.be.eql('Bad Request');
-        expect(response.body.message).to.be.eql(
-          'Dashboard with id 123 has already been linked to host'
-        );
-      });
-    });
-
-    describe('PUT endpoint for updating custom dashboard', () => {
-      it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
-        const payload: InfraSaveCustomDashboardsRequestPayload = {
-          dashboardSavedObjectId: '123',
-          dashboardFilterAssetIdEnabled: true,
-        };
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: false,
-        });
-
-        await supertestWithAdminScope
-          .put(getCustomDashboardsUrl('host', '123'))
-          .send(payload)
-          .expect(403);
       });
 
-      it('responds with an error when trying to update not existing dashboard', async () => {
-        const payload: InfraSaveCustomDashboardsRequestPayload = {
-          dashboardSavedObjectId: '123',
-          dashboardFilterAssetIdEnabled: true,
-        };
-
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: true,
-        });
-
-        await supertestWithAdminScope
-          .put(getCustomDashboardsUrl('host', '000'))
-          .send(payload)
-          .expect(404);
-      });
-
-      it('updates existing dashboard configuration for a given asset type', async () => {
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: true,
-        });
-        await kibanaServer.savedObjects.clean({
-          types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
-        });
-        await kibanaServer.savedObjects.create({
-          type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-          attributes: {
-            assetType: 'host',
-            dashboardSavedObjectId: '456',
-            dashboardFilterAssetIdEnabled: true,
-          },
-          overwrite: true,
-        });
-        const existingDashboardSavedObject = await kibanaServer.savedObjects.create({
-          type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-          attributes: {
-            assetType: 'host',
+      describe('POST endpoint for saving custom dashboard', () => {
+        it('responds with an error when trying to update a custom dashboard for unsupported asset type', async () => {
+          const payload = {
             dashboardSavedObjectId: '123',
             dashboardFilterAssetIdEnabled: true,
-          },
-          overwrite: true,
+          };
+
+          await supertestWithAdminScope
+            .post(getCustomDashboardsUrl('unsupported-asset-type'))
+            .send(payload)
+            .expect(400);
         });
 
-        const payload: InfraSaveCustomDashboardsRequestPayload = {
-          dashboardSavedObjectId: '123',
-          dashboardFilterAssetIdEnabled: false,
-        };
-        const updateResponse = await supertestWithAdminScope
-          .put(getCustomDashboardsUrl('host', existingDashboardSavedObject.id))
-          .send(payload)
-          .expect(200);
-        const getResponse = await supertestWithAdminScope
-          .get(getCustomDashboardsUrl('host'))
-          .expect(200);
-
-        expect(updateResponse.body).to.be.eql({
-          ...payload,
-          assetType: 'host',
-          id: updateResponse.body.id,
-        });
-
-        expect(getResponse.body).to.have.length(2);
-        expect(getResponse.body[0]).to.have.property('dashboardSavedObjectId', '123');
-        expect(getResponse.body[0]).to.have.property('dashboardFilterAssetIdEnabled', false);
-        expect(getResponse.body[0]).to.have.property('assetType', 'host');
-        expect(getResponse.body[1]).to.have.property('dashboardSavedObjectId', '456');
-        expect(getResponse.body[1]).to.have.property('dashboardFilterAssetIdEnabled', true);
-        expect(getResponse.body[1]).to.have.property('assetType', 'host');
-      });
-    });
-
-    describe('DELETE endpoint for removing a custom dashboard', () => {
-      it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: false,
-        });
-
-        await supertestWithAdminScope.delete(getCustomDashboardsUrl('host', '123')).expect(403);
-      });
-
-      it('responds with an error when trying to delete not existing dashboard', async () => {
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: true,
-        });
-
-        await supertestWithAdminScope.delete(getCustomDashboardsUrl('host', '000')).expect(404);
-      });
-
-      it('deletes an existing dashboard', async () => {
-        await kibanaServer.uiSettings.update({
-          [enableInfrastructureAssetCustomDashboards]: true,
-        });
-        await kibanaServer.savedObjects.clean({
-          types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
-        });
-        const existingDashboardSavedObject = await kibanaServer.savedObjects.create({
-          type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-          attributes: {
-            assetType: 'host',
+        it('creates a new dashboard configuration when saving for the first time', async () => {
+          const payload: InfraSaveCustomDashboardsRequestPayload = {
             dashboardSavedObjectId: '123',
             dashboardFilterAssetIdEnabled: true,
-          },
-          overwrite: true,
+          };
+
+          const response = await supertestWithAdminScope
+            .post(getCustomDashboardsUrl('host'))
+            .send(payload)
+            .expect(200);
+
+          expect(response.body).to.have.property('id');
+          expect(response.body).to.have.property('dashboardFilterAssetIdEnabled', true);
+          expect(response.body).to.have.property('assetType', 'host');
+          expect(response.body).to.have.property('dashboardSavedObjectId', '123');
         });
 
-        await supertestWithAdminScope
-          .delete(getCustomDashboardsUrl('host', existingDashboardSavedObject.id))
-          .expect(200);
+        it('returns 400 when the dashboard already exist and tries to create it again', async () => {
+          const payload: InfraSaveCustomDashboardsRequestPayload = {
+            dashboardSavedObjectId: '123',
+            dashboardFilterAssetIdEnabled: true,
+          };
 
-        const afterDeleteResponse = await supertestWithAdminScope
-          .get(getCustomDashboardsUrl('host'))
-          .expect(200);
+          await kibanaServer.savedObjects.create({
+            type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+            attributes: {
+              assetType: 'host',
+              dashboardSavedObjectId: '123',
+              dashboardFilterAssetIdEnabled: true,
+            },
+            overwrite: true,
+          });
 
-        expect(afterDeleteResponse.body).to.be.eql([]);
+          const response = await supertestWithAdminScope
+            .post(getCustomDashboardsUrl('host'))
+            .send(payload)
+            .expect(400);
+
+          expect(response.body.error).to.be.eql('Bad Request');
+          expect(response.body.message).to.be.eql(
+            'Dashboard with id 123 has already been linked to host'
+          );
+        });
+      });
+
+      describe('PUT endpoint for updating custom dashboard', () => {
+        it('responds with an error when trying to update non existing dashboard', async () => {
+          const payload: InfraSaveCustomDashboardsRequestPayload = {
+            dashboardSavedObjectId: '123',
+            dashboardFilterAssetIdEnabled: true,
+          };
+
+          await supertestWithAdminScope
+            .put(getCustomDashboardsUrl('host', '000'))
+            .send(payload)
+            .expect(404);
+        });
+
+        it('updates existing dashboard configuration for a given asset type', async () => {
+          await kibanaServer.savedObjects.create({
+            type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+            attributes: {
+              assetType: 'host',
+              dashboardSavedObjectId: '456',
+              dashboardFilterAssetIdEnabled: true,
+            },
+            overwrite: true,
+          });
+          const existingDashboardSavedObject = await kibanaServer.savedObjects.create({
+            type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+            attributes: {
+              assetType: 'host',
+              dashboardSavedObjectId: '123',
+              dashboardFilterAssetIdEnabled: true,
+            },
+            overwrite: true,
+          });
+
+          const payload: InfraSaveCustomDashboardsRequestPayload = {
+            dashboardSavedObjectId: '123',
+            dashboardFilterAssetIdEnabled: false,
+          };
+          const updateResponse = await supertestWithAdminScope
+            .put(getCustomDashboardsUrl('host', existingDashboardSavedObject.id))
+            .send(payload)
+            .expect(200);
+          const getResponse = await supertestWithAdminScope
+            .get(getCustomDashboardsUrl('host'))
+            .expect(200);
+
+          expect(updateResponse.body).to.be.eql({
+            ...payload,
+            assetType: 'host',
+            id: updateResponse.body.id,
+          });
+
+          expect(getResponse.body).to.have.length(2);
+          expect(getResponse.body[0]).to.have.property('dashboardSavedObjectId', '123');
+          expect(getResponse.body[0]).to.have.property('dashboardFilterAssetIdEnabled', false);
+          expect(getResponse.body[0]).to.have.property('assetType', 'host');
+          expect(getResponse.body[1]).to.have.property('dashboardSavedObjectId', '456');
+          expect(getResponse.body[1]).to.have.property('dashboardFilterAssetIdEnabled', true);
+          expect(getResponse.body[1]).to.have.property('assetType', 'host');
+        });
+      });
+
+      describe('DELETE endpoint for removing a custom dashboard', () => {
+        it('responds with an error when trying to delete not existing dashboard', async () => {
+          await supertestWithAdminScope.delete(getCustomDashboardsUrl('host', '000')).expect(404);
+        });
+
+        it('deletes an existing dashboard', async () => {
+          const existingDashboardSavedObject = await kibanaServer.savedObjects.create({
+            type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+            attributes: {
+              assetType: 'host',
+              dashboardSavedObjectId: '123',
+              dashboardFilterAssetIdEnabled: true,
+            },
+            overwrite: true,
+          });
+
+          await supertestWithAdminScope
+            .delete(getCustomDashboardsUrl('host', existingDashboardSavedObject.id))
+            .expect(200);
+
+          const afterDeleteResponse = await supertestWithAdminScope
+            .get(getCustomDashboardsUrl('host'))
+            .expect(200);
+
+          expect(afterDeleteResponse.body).to.be.eql([]);
+        });
       });
     });
   });

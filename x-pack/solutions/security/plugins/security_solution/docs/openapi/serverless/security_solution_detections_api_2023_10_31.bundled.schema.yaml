@@ -82,12 +82,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -131,6 +142,36 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deletedRule:
+                  summary: Response shape after a rule is deleted
+                  value:
+                    actions: []
+                    created_at: '2020-02-03T11:19:04.259Z'
+                    created_by: elastic
+                    description: Process started by MS Office program in user folder
+                    enabled: false
+                    false_positives: []
+                    from: now-4200s
+                    id: c41d170b-8ba6-4de6-b8ec-76440a35ace3
+                    immutable: false
+                    interval: 1h
+                    language: kuery
+                    max_signals: 100
+                    name: MS Office child process
+                    query: event.action:Process*
+                    references: []
+                    risk_score: 50
+                    rule_id: process_started_by_ms_office_user_folder
+                    severity: low
+                    tags:
+                      - tag
+                    throttle: null
+                    to: now
+                    type: query
+                    updated_at: '2020-02-03T11:19:04.462Z'
+                    updated_by: elastic
+                    version: 3
               schema:
                 $ref: '#/components/schemas/RuleResponse'
           description: Indicates a successful call.
@@ -2759,6 +2800,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              exportByRuleIds:
+                summary: Request body to export a subset of rules
+                value:
+                  objects:
+                    - rule_id: 343580b5-c811-447c-8d2d-2ccf052c6900
+                    - rule_id: 2938c9fa-53eb-4c04-b79c-33cbf041b18d
             schema:
               nullable: true
               type: object
@@ -2782,6 +2830,15 @@ paths:
         '200':
           content:
             application/ndjson:
+              examples:
+                sampleNdjson:
+                  value: >
+                    {"rule_id":"343580b5-c811-447c-8d2d-2ccf052c6900","name":"Example
+                    rule","type":"query","enabled":true}
+
+                    {"exception_list":true}
+
+                    {"export_summary":{"total_rules":1,"exceptions_count":0}}
               schema:
                 description: >
                   An `.ndjson` file containing the returned rules.
@@ -2821,7 +2878,15 @@ paths:
         is returned, with 20 results per page.
       operationId: FindRules
       parameters:
-        - in: query
+        - description: >
+            List of `alert.attributes` field names to return for each rule (for
+            example `name`, `enabled`).
+
+            If omitted, the default field set is returned. Repeat the parameter
+            to pass multiple field names, or
+
+            use comma-separated values when supported by your client.
+          in: query
           name: fields
           required: false
           schema:
@@ -3130,6 +3195,11 @@ paths:
       requestBody:
         content:
           multipart/form-data:
+            examples:
+              rulesFile:
+                summary: Multipart part containing a rule export
+                value:
+                  file: rules_import.ndjson
             schema:
               type: object
               properties:
@@ -3217,6 +3287,15 @@ paths:
             --form "file=@<link to file>"
   /api/detection_engine/rules/preview:
     post:
+      description: >
+        Simulates a detection rule using the same rule type and query logic as a
+        persisted rule, over a short
+
+        time window, without persisting a rule or writing alerts. Use the
+        response to validate queries, see sample
+
+        matching documents, and inspect execution logs. Pair `invocationCount`
+        and `timeframeEnd` to cap run time.
       operationId: RulePreview
       parameters:
         - description: >-
@@ -3230,6 +3309,23 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              queryRule:
+                value:
+                  description: Find matching events
+                  from: now-24h
+                  index:
+                    - logs-*
+                  invocationCount: 1
+                  language: kuery
+                  max_signals: 20
+                  name: Rule preview
+                  query: 'process.name : *'
+                  risk_score: 25
+                  severity: low
+                  timeframeEnd: '2025-01-20T12:00:00.000Z'
+                  to: now
+                  type: query
             schema:
               anyOf:
                 - allOf:
@@ -3258,14 +3354,31 @@ paths:
                     - $ref: '#/components/schemas/RulePreviewParams'
               discriminator:
                 propertyName: type
-        description: >-
-          An object containing tags to add or remove and alert ids the changes
-          will be applied
+        description: >
+          Rule create payload (same shape as `POST /api/detection_engine/rules`
+          for a given `type`) plus
+
+          `invocationCount` and `timeframeEnd` to control how the preview is
+          executed. Optional
+
+          `enable_logged_requests` surfaces Elasticsearch request logging for
+          debugging.
         required: true
       responses:
         '200':
           content:
             application/json:
+              examples:
+                success:
+                  value:
+                    isAborted: false
+                    logs:
+                      - duration: 45
+                        errors: []
+                        requests: []
+                        startedAt: 2025-01-20T10:00:00.000Z
+                        warnings: []
+                    previewId: 7f1c9d1e-4c8a-4a3e-9a5d-0d4f6e1b2a90
               schema:
                 type: object
                 properties:
@@ -3283,6 +3396,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request body].timeframeEnd: expected string, received
+                      null
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -3291,12 +3412,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -3321,35 +3453,91 @@ paths:
                 $ref: '#/components/examples/SetAlertAssigneesBodyRemove'
             schema:
               $ref: '#/components/schemas/SetAlertAssigneesBody'
+        description: User profile IDs to add or remove on each listed alert document ID.
         required: true
       responses:
         '200':
           content:
-            application/ndjson:
+            application/json:
+              description: Elasticsearch update by query or update by IDs response
               examples:
                 add:
                   value:
-                    batches: 1,
-                    deleted: 0,
+                    batches: 1
+                    deleted: 0
                     failures: []
-                    noops: 0,
-                    requests_per_second: '-1,'
+                    noops: 0
+                    requests_per_second: -1
                     retries:
-                      - bulk: 0,
-                      - search: 0
-                    throttled_millis: 0,
-                    throttled_until_millis: 0,
-                    timed_out: false,
-                    took: 76,
-                    total: 1,
-                    updated: 1,
-                    version_conflicts: 0,
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 76
+                    total: 1
+                    updated: 1
+                    version_conflicts: 0
           description: Indicates a successful call.
         '400':
-          description: Invalid request.
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request body].ids: at least one alert id is required to
+                      update assignees
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [POST /api/detection_engine/signals/assignees] is
+                      unauthorized for the current user, this action is granted
+                      by the Kibana Security Solution privileges for cases and
+                      detections
+                    statusCode: 403
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
       summary: Assign and unassign users from detection alerts
       tags:
         - Security Detections API
+        - Alerts API
   /api/detection_engine/signals/search:
     post:
       description: Find and/or aggregate detection alerts that match the given query.
@@ -3428,6 +3616,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      Failed to parse search request: unknown query clause in
+                      bool filter
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -3436,12 +3632,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -3549,6 +3756,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request body].signal_ids: at least one alert id is
+                      required to update status
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -3557,12 +3772,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
@@ -3572,9 +3798,12 @@ paths:
         - Alerts API
   /api/detection_engine/signals/tags:
     post:
-      description: |
-        And tags to detection alerts, and remove them from alerts.
+      description: >
+        Add tags to detection alerts, and remove them from alerts, by alert IDs
+        or a query, in a single request.
+
         > info
+
         > You cannot add and remove the same alert tag in the same request.
       operationId: SetAlertTags
       requestBody:
@@ -3621,6 +3850,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request body].tags: cannot add and remove the same tag in
+                      a single request
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -3629,12 +3866,23 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response

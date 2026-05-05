@@ -55,8 +55,10 @@ export type { ColumnNamespace, ColumnProps } from './src/column';
 export {
   EditAction,
   DeleteAction,
+  InspectAction,
   type EditActionProps,
   type DeleteActionProps,
+  type InspectActionProps,
 } from './src/action';
 export type { ActionNamespace, ActionProps } from './src/action';
 

@@ -22,11 +22,7 @@ import {
   stopHistorySnapshotTask,
 } from '../../tasks/history_snapshot_task';
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
-import {
-  installSharedElasticsearchAssets,
-  installIndicesAndDataStreams,
-  uninstallElasticsearchAssets,
-} from './install_assets';
+import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
@@ -123,8 +119,7 @@ export class AssetManagerClient {
       const logsExtraction = LogExtractionConfig.parse(logsExtractionParams ?? {});
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
 
-      // Phase 1: Install shared ES assets and run independent setup tasks.
-      // All component templates and index templates must exist before any index is created.
+      // Phase 1: Install shared ES assets/storage and run independent setup tasks.
       await Promise.all([
         this.globalStateClient.init({ historySnapshot, logsExtraction }),
 
@@ -151,7 +146,7 @@ export class AssetManagerClient {
         }),
       ]);
 
-      // Phase 2: Create indices and start engines, now that templates are in place.
+      // Phase 2: Initialize engines and start background tasks.
       await Promise.all([
         ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
 
@@ -367,11 +362,9 @@ export class AssetManagerClient {
       }
 
       this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
-      // Those 3 operations have to happen in order: 1. Init engine; 2. Install
-      // Indices & Data Streams; 3. Update engine.
+      // Engine installation is per-type. Shared indices and data streams are created once
+      // during `init()` before parallel engine initialization begins.
       await this.engineDescriptorClient.init(type);
-      await installIndicesAndDataStreams(this.esClient, this.namespace, this.logger);
-      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
       this.logger.debug(`Installed definition: ${type}`);
 
       return true;

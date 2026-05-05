@@ -88,6 +88,7 @@
             "lineNumber": 37,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "ComponentType",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -136,6 +136,7 @@
             "lineNumber": 40,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "ExploratoryViewPageProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -175,6 +176,7 @@
             "lineNumber": 18,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterValueLabelProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -212,6 +214,7 @@
             "lineNumber": 15,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -251,6 +254,7 @@
             "lineNumber": 30,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "SelectableUrlListProps",
             "trackAdoption": false,
             "isRequired": true
           }

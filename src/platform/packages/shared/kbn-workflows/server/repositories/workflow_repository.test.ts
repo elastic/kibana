@@ -1,0 +1,187 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { WorkflowRepository } from './workflow_repository';
+import { WORKFLOW_INDEX_NAME } from '../constants';
+
+describe('WorkflowRepository.areWorkflowsEnabled', () => {
+  let repository: WorkflowRepository;
+  let esClient: { search: jest.Mock };
+
+  beforeEach(() => {
+    esClient = { search: jest.fn() };
+    repository = new WorkflowRepository({
+      esClient: esClient as any,
+      logger: loggingSystemMock.create().get(),
+    });
+  });
+
+  it('returns an empty map without hitting ES when refs is empty', async () => {
+    const result = await repository.areWorkflowsEnabled([]);
+    expect(result.size).toBe(0);
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it('issues a single search for a single-space batch and returns per-workflow enabled flags', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          { _id: 'wf-a', _source: { enabled: true, spaceId: 'default' } },
+          { _id: 'wf-b', _source: { enabled: false, spaceId: 'default' } },
+        ],
+      },
+    });
+
+    const result = await repository.areWorkflowsEnabled([
+      { workflowId: 'wf-a', spaceId: 'default' },
+      { workflowId: 'wf-b', spaceId: 'default' },
+    ]);
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: WORKFLOW_INDEX_NAME,
+        _source: ['enabled', 'spaceId'],
+        size: 2,
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            should: [
+              {
+                bool: {
+                  must: [{ ids: { values: ['wf-a', 'wf-b'] } }, { term: { spaceId: 'default' } }],
+                },
+              },
+            ],
+            minimum_should_match: 1,
+            must_not: { exists: { field: 'deleted_at' } },
+          }),
+        }),
+      })
+    );
+
+    expect(result.get('default:wf-a')).toBe(true);
+    expect(result.get('default:wf-b')).toBe(false);
+  });
+
+  it('emits one should clause per space for multi-space batches', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          { _id: 'wf-a', _source: { enabled: true, spaceId: 'space-1' } },
+          { _id: 'wf-b', _source: { enabled: true, spaceId: 'space-2' } },
+        ],
+      },
+    });
+
+    const result = await repository.areWorkflowsEnabled([
+      { workflowId: 'wf-a', spaceId: 'space-1' },
+      { workflowId: 'wf-b', spaceId: 'space-2' },
+    ]);
+
+    const callArg = esClient.search.mock.calls[0][0];
+    expect(callArg.query.bool.should).toHaveLength(2);
+    expect(callArg.query.bool.should).toEqual(
+      expect.arrayContaining([
+        {
+          bool: {
+            must: [{ ids: { values: ['wf-a'] } }, { term: { spaceId: 'space-1' } }],
+          },
+        },
+        {
+          bool: {
+            must: [{ ids: { values: ['wf-b'] } }, { term: { spaceId: 'space-2' } }],
+          },
+        },
+      ])
+    );
+
+    expect(result.get('space-1:wf-a')).toBe(true);
+    expect(result.get('space-2:wf-b')).toBe(true);
+  });
+
+  it('resolves missing docs to false', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [{ _id: 'wf-a', _source: { enabled: true, spaceId: 'default' } }],
+      },
+    });
+
+    const result = await repository.areWorkflowsEnabled([
+      { workflowId: 'wf-a', spaceId: 'default' },
+      { workflowId: 'wf-missing', spaceId: 'default' },
+    ]);
+
+    expect(result.get('default:wf-a')).toBe(true);
+    expect(result.get('default:wf-missing')).toBe(false);
+  });
+
+  it('dedupes repeated refs so one ES search covers them all', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [{ _id: 'wf-a', _source: { enabled: true, spaceId: 'default' } }],
+      },
+    });
+
+    const result = await repository.areWorkflowsEnabled([
+      { workflowId: 'wf-a', spaceId: 'default' },
+      { workflowId: 'wf-a', spaceId: 'default' },
+      { workflowId: 'wf-a', spaceId: 'default' },
+    ]);
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+    const callArg = esClient.search.mock.calls[0][0];
+    expect(callArg.size).toBe(1);
+    expect(callArg.query.bool.should[0].bool.must[0]).toEqual({ ids: { values: ['wf-a'] } });
+    expect(result.get('default:wf-a')).toBe(true);
+  });
+
+  it('returns the accumulated map (all false) when the index is missing', async () => {
+    const err = new Error('no such index') as Error & { statusCode?: number };
+    err.statusCode = 404;
+    esClient.search.mockRejectedValue(err);
+
+    const result = await repository.areWorkflowsEnabled([
+      { workflowId: 'wf-a', spaceId: 'default' },
+    ]);
+
+    expect(result.size).toBe(0);
+  });
+});
+
+describe('WorkflowRepository.isWorkflowEnabled', () => {
+  it('delegates to areWorkflowsEnabled and reads the keyed flag', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [{ _id: 'wf-a', _source: { enabled: true, spaceId: 'default' } }],
+        },
+      }),
+    };
+    const repository = new WorkflowRepository({
+      esClient: esClient as any,
+      logger: loggingSystemMock.create().get(),
+    });
+
+    await expect(repository.isWorkflowEnabled('wf-a', 'default')).resolves.toBe(true);
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns false when the workflow is missing', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+    };
+    const repository = new WorkflowRepository({
+      esClient: esClient as any,
+      logger: loggingSystemMock.create().get(),
+    });
+
+    await expect(repository.isWorkflowEnabled('wf-a', 'default')).resolves.toBe(false);
+  });
+});

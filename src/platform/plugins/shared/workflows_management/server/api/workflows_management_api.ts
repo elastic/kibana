@@ -13,6 +13,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type {
+  BulkScheduleWorkflowResult,
   CreateWorkflowCommand,
   EsWorkflow,
   EsWorkflowStepExecution,
@@ -35,6 +36,11 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
+import {
+  parseWorkflowYamlToJSON,
+  stringifyWorkflowDefinition,
+  WorkflowValidationError,
+} from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import type {
@@ -42,8 +48,7 @@ import type {
   WorkflowsService,
 } from './workflows_management_service';
 import { WORKFLOW_SML_TYPE } from '../../common/agent_builder/constants';
-import { WorkflowValidationError } from '../../common/lib/errors';
-import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
+import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
 
 // Mirrors SmlIndexAction and SmlStart['indexAttachment'] from @kbn/agent-builder-plugin/server.
 // Declared inline to avoid a circular TS project reference: agent_builder already references
@@ -137,14 +142,26 @@ export interface TestWorkflowParams {
   request: KibanaRequest;
 }
 
+export interface BulkScheduleWorkflowItem {
+  workflow: WorkflowExecutionEngineModel;
+  spaceId: string;
+  inputs: Record<string, unknown>;
+  triggeredBy: string;
+  metadata?: WorkflowExecutionEventDispatchMetadata;
+}
+
 export class WorkflowsManagementApi {
   private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
   private smlLogger: Logger | null = null;
 
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
+    public readonly isWorkflowsAvailable: boolean
   ) {}
+
+  private async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
+    return this.workflowsService.getWorkflowsExecutionEngine();
+  }
 
   public setSmlIndexAttachment(fn: SmlIndexAttachmentFn, logger: Logger): void {
     this.smlIndexAttachment = fn;
@@ -244,7 +261,9 @@ export class WorkflowsManagementApi {
       spaceId,
       request
     );
-    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema);
+    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema, {
+      connectorParamsSchemaResolver,
+    });
     if (parsedYaml.error) {
       throw parsedYaml.error;
     }
@@ -297,12 +316,12 @@ export class WorkflowsManagementApi {
     return result;
   }
 
-  public async disableAllWorkflows(): Promise<{
+  public async disableAllWorkflows(spaceId?: string): Promise<{
     total: number;
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
-    return this.workflowsService.disableAllWorkflows();
+    return this.workflowsService.disableAllWorkflows(spaceId);
   }
 
   public async runWorkflow(
@@ -357,6 +376,29 @@ export class WorkflowsManagementApi {
       request
     );
     return scheduleResponse.workflowExecutionId;
+  }
+
+  public async bulkScheduleWorkflow(
+    items: BulkScheduleWorkflowItem[],
+    request: KibanaRequest
+  ): Promise<BulkScheduleWorkflowResult> {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+
+    const engineItems = items.map((item) => {
+      const { event, ...manualInputs } = item.inputs;
+      const context: Record<string, unknown> = {
+        event,
+        spaceId: item.spaceId,
+        inputs: manualInputs,
+        triggeredBy: item.triggeredBy,
+      };
+      if (item.metadata) {
+        context.metadata = item.metadata;
+      }
+      return { workflow: item.workflow, context };
+    });
+
+    return workflowsExecutionEngine.bulkScheduleWorkflow(engineItems, request);
   }
 
   public async testWorkflow({

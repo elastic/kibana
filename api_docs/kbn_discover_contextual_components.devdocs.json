@@ -33,6 +33,7 @@
             "lineNumber": 91,
             "columnNumber": 25,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -78,6 +79,7 @@
             "lineNumber": 152,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ResourceFieldsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -125,6 +127,7 @@
             "lineNumber": 191,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -186,6 +189,7 @@
             "lineNumber": 220,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "DataTableRecord",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -320,6 +324,7 @@
             "lineNumber": 138,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "DataTableRecord",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -400,6 +405,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -435,6 +441,7 @@
             "lineNumber": 26,
             "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "ResourceProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -486,6 +493,7 @@
             "lineNumber": 129,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "AllSummaryColumnProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -537,6 +545,7 @@
             "lineNumber": 51,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "AllSummaryColumnProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -940,6 +949,7 @@
             "lineNumber": 19,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "DataGridCellValueElementProps",
             "trackAdoption": false
           }
         ],

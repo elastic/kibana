@@ -76,6 +76,7 @@
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DependencyList",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -94,6 +95,7 @@
             "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseAbortableAsyncOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -206,6 +208,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -251,6 +254,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseDebouncedValueOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -317,6 +321,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DebounceOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -426,6 +431,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ThrottleOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -650,6 +656,7 @@
                 "lineNumber": 21,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -667,6 +674,7 @@
                 "lineNumber": 21,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -745,7 +753,7 @@
                 "id": "def-common.UseAbortableAsync.$1.$1",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "__0",
+                "label": "{}",
                 "description": [],
                 "signature": [
                   "{ signal: AbortSignal; } & TAdditionalParameters"
@@ -772,6 +780,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DependencyList",
             "trackAdoption": false
           },
           {

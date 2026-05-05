@@ -155,6 +155,45 @@ describe('WorkflowTemplatingEngine', () => {
     });
   });
 
+  describe('base64_encode filter', () => {
+    it('should base64 encode a plain string', () => {
+      const template = '{{ text | base64_encode }}';
+      const context = { text: 'Hello World' };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe(Buffer.from('Hello World').toString('base64'));
+    });
+
+    it('should base64 encode a Buffer without data corruption', () => {
+      const binaryData = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff, 0xfe]);
+      const template = '${{ data | base64_encode }}';
+      const context = { data: binaryData };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toBe(binaryData.toString('base64'));
+    });
+
+    it('should produce valid base64 that round-trips back to original bytes', () => {
+      const original = Buffer.from([0x00, 0x01, 0x80, 0xff, 0xfe, 0xfd]);
+      const template = '${{ data | base64_encode }}';
+      const context = { data: original };
+      const result = templatingEngine.render({ out: template }, context);
+      const decoded = Buffer.from(result.out as string, 'base64');
+      expect(decoded).toEqual(original);
+    });
+
+    it('should handle empty Buffer', () => {
+      const template = '${{ data | base64_encode }}';
+      const context = { data: Buffer.alloc(0) };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toBe('');
+    });
+
+    it('should handle null/undefined gracefully', () => {
+      const template = '{{ missing | base64_encode }}';
+      const result = templatingEngine.render(template, {});
+      expect(result).toBe(Buffer.from('').toString('base64'));
+    });
+  });
+
   describe('custom entries filter', () => {
     it('should convert an object to an array of {key, value} pairs', () => {
       const template = '${{ data | entries }}';

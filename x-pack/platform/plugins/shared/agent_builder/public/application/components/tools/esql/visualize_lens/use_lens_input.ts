@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { TimeRange } from '@kbn/es-query';
 import useAsync from 'react-use/lib/useAsync';
 

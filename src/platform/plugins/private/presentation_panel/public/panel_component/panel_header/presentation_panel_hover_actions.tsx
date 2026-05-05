@@ -28,12 +28,9 @@ import { buildContextMenuForActions, triggers } from '@kbn/ui-actions-plugin/pub
 
 import { css } from '@emotion/react';
 import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
-import {
-  apiCanLockHoverActions,
-  useBatchedOptionalPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { apiCanLockHoverActions, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
-import { Subscription, switchMap } from 'rxjs';
+import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
 import {
   ON_OPEN_PANEL_MENU,
   PANEL_NOTIFICATION_TRIGGER,
@@ -83,7 +80,7 @@ const createClickHandler =
   };
 
 export interface PresentationPanelHoverActionsProps {
-  api: DefaultPresentationPanelApi | null;
+  api: DefaultPresentationPanelApi;
   index?: number;
   getActions: PresentationPanelInternalProps['getActions'];
   setDragHandle: (id: string, ref: HTMLElement | null) => void;
@@ -120,13 +117,13 @@ export const PresentationPanelHoverActions = ({
     hasLockedHoverActions,
     parentHideTitle,
     disabledActionIds,
-  ] = useBatchedOptionalPublishingSubjects(
-    api?.title$,
-    api?.description$,
-    api?.hideTitle$,
-    api?.hasLockedHoverActions$,
-    (api?.parentApi as Partial<PublishesTitle>)?.hideTitle$,
-    api?.disabledActionIds$
+  ] = useBatchedPublishingSubjects(
+    api.title$ ?? new BehaviorSubject(undefined),
+    api.description$ ?? new BehaviorSubject(undefined),
+    api.hideTitle$ ?? new BehaviorSubject(false),
+    api.hasLockedHoverActions$ ?? new BehaviorSubject(false),
+    (api.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false),
+    api.disabledActionIds$ ?? new BehaviorSubject(undefined)
   );
 
   const hideTitle = hidePanelTitle || parentHideTitle;

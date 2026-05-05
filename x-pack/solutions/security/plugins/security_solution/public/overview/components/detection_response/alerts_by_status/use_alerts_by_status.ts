@@ -10,12 +10,14 @@ import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
 import { useDispatch } from 'react-redux';
-import type { ESBoolQuery, ESQuery } from '../../../../../common/typed_json';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useUiSetting } from '../../../../common/lib/kibana';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { AlertsByStatusAgg, AlertsByStatusResponse, ParsedAlertsData } from './types';
 import {
@@ -51,35 +53,33 @@ const toStoreEntityType = (type: string | undefined): 'host' | 'user' | undefine
 };
 
 /**
- * Builds filter clauses: one `term` per field/value pair (AND semantics via bool.filter).
+ * Builds a bool.filter query wrapping one `term` clause per field/value pair (AND semantics).
  */
 export const buildEntityIdentifierTermFilters = (
   identityFields: Record<string, string>
-): ESQuery[] =>
-  Object.entries(identityFields).map(([fieldName, fieldValue]) => ({
-    term: {
-      [fieldName]: fieldValue,
-    },
-  }));
+): QueryDslQueryContainer => ({
+  bool: {
+    filter: Object.entries(identityFields).map(([fieldName, fieldValue]) => ({
+      term: {
+        [fieldName]: fieldValue,
+      },
+    })),
+  },
+});
 
 export const getAlertsByStatusQuery = ({
   additionalFilters = [],
   from,
   to,
-  identityFields,
+  entityFilters = [],
   runtimeMappings,
 }: {
   from: string;
   to: string;
-  identityFields?: Record<string, string>;
+  entityFilters?: QueryDslQueryContainer[];
   additionalFilters?: ESBoolQuery[];
   runtimeMappings?: Record<string, unknown>;
 }) => {
-  const entityFilters =
-    identityFields != null && Object.keys(identityFields).length > 0
-      ? buildEntityIdentifierTermFilters(identityFields)
-      : [];
-
   return {
     size: 0,
     query: {
@@ -146,6 +146,7 @@ export interface UseAlertsByStatusProps {
    * Required for v2 resolution when filtering by canonical store id; if omitted, a plain `entity.id` term is used.
    */
   entityType?: string;
+  entityRecord?: EntityStoreRecord | null;
   additionalFilters?: ESBoolQuery[];
   from: string;
   to: string;
@@ -168,9 +169,10 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
   to,
   from,
   runtimeMappings,
+  entityRecord: entityRecordInput,
 }) => {
   const dispatch = useDispatch();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const identityFieldsStable =
     identityFields != null && Object.keys(identityFields).length > 0
       ? identityFields
@@ -189,20 +191,28 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
   const { entityRecord, isLoading: entityFromStoreLoading } = entityFromStore;
 
   const euidApi = useEntityStoreEuidApi();
-  const identityFieldsForQuery = useMemo(
-    () =>
-      entityStoreV2Enabled
-        ? euidApi?.euid?.getEntityIdentifiersFromDocument(
-            storeEntityType ?? 'generic',
-            entityRecord
-          )
-        : identityFieldsStable,
-    [entityStoreV2Enabled, euidApi?.euid, storeEntityType, entityRecord, identityFieldsStable]
-  );
+  const entityFilters = useMemo(() => {
+    if (entityStoreV2Enabled && euidApi?.euid) {
+      const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
+        storeEntityType ?? 'generic',
+        entityRecord ?? entityRecordInput
+      );
+      return filter != null ? [filter] : [];
+    }
+    return identityFieldsStable != null && Object.keys(identityFieldsStable).length > 0
+      ? [buildEntityIdentifierTermFilters(identityFieldsStable)]
+      : [];
+  }, [
+    entityStoreV2Enabled,
+    euidApi?.euid,
+    entityRecord,
+    entityRecordInput,
+    identityFieldsStable,
+    storeEntityType,
+  ]);
 
   const skipAlertsQuery =
-    skip ||
-    (shouldResolveEntityIdFromStore && (entityFromStoreLoading || identityFieldsForQuery == null));
+    skip || (shouldResolveEntityIdFromStore && (entityFromStoreLoading || !entityFilters.length));
 
   const isResolvingEntityId = shouldResolveEntityIdFromStore && entityFromStoreLoading;
 
@@ -234,11 +244,11 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       getAlertsByStatusQuery({
         from,
         to,
-        identityFields: identityFieldsForQuery ?? identityFieldsStable,
+        entityFilters: entityFilters ?? [],
         additionalFilters,
         runtimeMappings,
       }),
-    [from, to, identityFieldsForQuery, identityFieldsStable, additionalFilters, runtimeMappings]
+    [from, to, entityFilters, additionalFilters, runtimeMappings]
   );
 
   const {

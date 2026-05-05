@@ -266,6 +266,13 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
               onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'onDelete', value: v })}
             />
           </JsxPropDisplay>
+          <JsxPropDisplay name="onInspect">
+            <InlineCheckbox
+              id={`${idPrefix}-onInspect`}
+              checked={item.onInspect}
+              onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'onInspect', value: v })}
+            />
+          </JsxPropDisplay>
         </JsxPropBlock>
 
         {/* features prop */}
@@ -393,8 +400,9 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
                         col.type === 'actions' &&
                         !item.onEdit &&
                         !item.onDelete &&
-                        !col.actions.some((a) => a.type !== 'edit' && a.type !== 'delete')
-                          ? 'This column is hidden because no item actions (onEdit, onDelete) are configured on the provider and no custom actions are present.'
+                        !item.onInspect &&
+                        !col.actions.some((a) => !['edit', 'delete', 'inspect'].includes(a.type))
+                          ? 'This column is hidden because no item actions (onEdit, onDelete, onInspect) are configured on the provider and no custom actions are present.'
                           : undefined
                       }
                     />

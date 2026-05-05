@@ -34,7 +34,7 @@ const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: 
 
 const mockContext = {
   spaceId: 'default',
-  esClient: { asCurrentUser: {} },
+  esClient: { asCurrentUser: {}, asInternalUser: {} },
   request: {},
   savedObjectsClient: {},
   attachments: { add: mockAttachmentsAdd },
@@ -88,7 +88,7 @@ describe('createSmlAttachTool', () => {
     expect(mockCheckItemsAccess).toHaveBeenCalledWith({
       ids: ['chunk-1'],
       spaceId: 'default',
-      esClient: mockContext.esClient.asCurrentUser,
+      esClient: mockContext.esClient,
       request: mockContext.request,
     });
     expect(result.results).toHaveLength(1);
@@ -107,7 +107,7 @@ describe('createSmlAttachTool', () => {
     expect(mockCheckItemsAccess).toHaveBeenCalledWith({
       ids: [chunkId],
       spaceId: 'default',
-      esClient: mockContext.esClient.asCurrentUser,
+      esClient: mockContext.esClient,
       request: mockContext.request,
     });
     expect(result.results).toHaveLength(1);
@@ -293,7 +293,7 @@ describe('createSmlAttachTool', () => {
     expect(mockCheckItemsAccess).toHaveBeenCalledWith({
       ids: [chunkId],
       spaceId: 'default',
-      esClient: mockContext.esClient.asCurrentUser,
+      esClient: mockContext.esClient,
       request: mockContext.request,
     });
     expect(mockAttachmentsAdd).toHaveBeenCalledTimes(1);

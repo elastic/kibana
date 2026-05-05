@@ -8,9 +8,9 @@
  */
 
 import type { CustomRequestHandlerContext } from '@kbn/core/server';
-import type { WorkflowsRouteHandlerContext } from '@kbn/workflows-extensions/server';
+import type { WorkflowsApiRequestHandlerContext } from '@kbn/workflows/server';
 
 /** Request handler context for example routes; includes workflows from workflows_extensions. */
 export type ExampleRequestHandlerContext = CustomRequestHandlerContext<{
-  workflows: WorkflowsRouteHandlerContext;
+  workflows: WorkflowsApiRequestHandlerContext;
 }>;

@@ -497,6 +497,29 @@ describe('verify_permissions_task', () => {
       );
     });
 
+    it('should query verifier policies across all spaces during cleanup and gate check', async () => {
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({ items: [] } as any)
+        .mockResolvedValueOnce({ items: [] } as any);
+
+      mockSoClient.find.mockResolvedValue({ saved_objects: [] });
+
+      await taskRunner.run();
+
+      expect(mockedAgentPolicyService.list).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.objectContaining({
+          kuery: expect.stringContaining('is_verifier: true'),
+          spaceId: '*',
+        })
+      );
+      // Both the cleanup (Phase 1) and the gate check (Phase 2) must fan out across spaces,
+      // otherwise verifier policies in non-default spaces are invisible and leak forever.
+      expect(mockedAgentPolicyService.list).toHaveBeenCalledTimes(2);
+      expect(mockedAgentPolicyService.list.mock.calls[0][1]).toMatchObject({ spaceId: '*' });
+      expect(mockedAgentPolicyService.list.mock.calls[1][1]).toMatchObject({ spaceId: '*' });
+    });
+
     it('should not cleanup verifier policies within TTL', async () => {
       const twoMinutesAgo = minutesAgo(2);
 
@@ -550,7 +573,7 @@ describe('verify_permissions_task', () => {
       );
     });
 
-    it('should only verify one connector per task run (serial execution gate)', async () => {
+    it('should verify only one connector per task run (one verifier deploy at a time)', async () => {
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({ items: [] } as any)
         .mockResolvedValueOnce({ items: [] } as any);
@@ -581,6 +604,126 @@ describe('verify_permissions_task', () => {
         expect.objectContaining({ id: 'conn-1' }),
         expect.anything()
       );
+    });
+
+    it('should request a follow-up run (runAt ~TTL+buffer) when more eligible connectors remain', async () => {
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({ items: [] } as any)
+        .mockResolvedValueOnce({ items: [] } as any);
+
+      mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
+        policyId: 'verifier-policy-1',
+      });
+
+      mockSoClient.find
+        .mockResolvedValueOnce({
+          saved_objects: [
+            makePackagePolicySO('pp-1', 'conn-1', 'cloudtrail'),
+            makePackagePolicySO('pp-2', 'conn-2', 'guardduty'),
+          ],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [makeConnectorSO('conn-1'), makeConnectorSO('conn-2')],
+        });
+
+      mockSoClient.update.mockResolvedValue({});
+
+      const before = Date.now();
+      const result = (await taskRunner.run()) as { runAt: Date } | undefined;
+      const after = Date.now();
+
+      expect(result).toBeDefined();
+      expect(result!.runAt).toBeInstanceOf(Date);
+      // Expected runAt is (now + TTL_MS + buffer). With TTL_MS = 5 min and buffer = 30 s
+      // the bound is [before + 5:30, after + 5:30].
+      const TTL_MS = 5 * 60 * 1000;
+      const BUFFER_MS = 30 * 1000;
+      expect(result!.runAt.getTime()).toBeGreaterThanOrEqual(before + TTL_MS + BUFFER_MS - 100);
+      expect(result!.runAt.getTime()).toBeLessThanOrEqual(after + TTL_MS + BUFFER_MS + 100);
+    });
+
+    it('should NOT request a follow-up run when only one eligible connector existed', async () => {
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({ items: [] } as any)
+        .mockResolvedValueOnce({ items: [] } as any);
+
+      mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
+        policyId: 'verifier-policy-1',
+      });
+
+      mockSoClient.find
+        .mockResolvedValueOnce({
+          saved_objects: [makePackagePolicySO('pp-1', 'conn-1', 'cloudtrail')],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [makeConnectorSO('conn-1')],
+        });
+
+      mockSoClient.update.mockResolvedValue({});
+
+      const result = await taskRunner.run();
+
+      // Without a return value the task falls back to its 12 h cron.
+      expect(result).toBeUndefined();
+    });
+
+    it('should request a follow-up run when the gate blocks because a verifier is still in flight', async () => {
+      const twoMinutesAgo = minutesAgo(2);
+
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({ items: [] } as any)
+        .mockResolvedValueOnce({
+          items: [
+            {
+              id: 'in-flight-verifier',
+              created_at: twoMinutesAgo,
+              updated_at: twoMinutesAgo,
+            },
+          ],
+        } as any);
+
+      const result = (await taskRunner.run()) as { runAt: Date } | undefined;
+
+      expect(result).toBeDefined();
+      expect(result!.runAt).toBeInstanceOf(Date);
+      // Gate-blocked runs also reschedule so we can drain the queue after the
+      // active verifier's TTL elapses (otherwise we'd wait the full 12 h cron).
+      expect(result!.runAt.getTime()).toBeGreaterThan(Date.now());
+      expect(mockedAgentPolicyService.createVerifierPolicy).not.toHaveBeenCalled();
+    });
+
+    it('should NOT request a follow-up run when the feature flag is off', async () => {
+      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableOTelVerifier: false,
+      } as any);
+
+      const result = await taskRunner.run();
+      expect(result).toBeUndefined();
+    });
+
+    it('should NOT request a follow-up run when an earlier verification fails with no other eligibles', async () => {
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({ items: [] } as any)
+        .mockResolvedValueOnce({ items: [] } as any);
+
+      mockedAgentPolicyService.createVerifierPolicy.mockRejectedValueOnce(
+        new Error('agentless provisioning limit')
+      );
+
+      mockSoClient.find
+        .mockResolvedValueOnce({
+          saved_objects: [makePackagePolicySO('pp-1', 'conn-1', 'cloudtrail')],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [makeConnectorSO('conn-1')],
+        });
+
+      mockSoClient.update.mockResolvedValue({});
+
+      const result = await taskRunner.run();
+
+      // Only one connector, and it failed — no more work this cycle.
+      expect(result).toBeUndefined();
     });
 
     it('should skip all verifications when a non-expired verifier deployment is in flight', async () => {

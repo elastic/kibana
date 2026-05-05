@@ -85,6 +85,7 @@
                 "lineNumber": 31,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "MlLocatorParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -247,6 +248,7 @@
                 "lineNumber": 103,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "MlLocatorParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -510,6 +512,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MlLocatorParams",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -527,6 +530,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DependencyList",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -625,6 +629,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MlLocatorParams",
             "trackAdoption": false,
             "isRequired": true
           },

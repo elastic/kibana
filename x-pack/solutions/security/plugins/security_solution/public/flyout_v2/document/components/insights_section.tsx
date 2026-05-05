@@ -35,6 +35,7 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../shared/hooks/use_default_flyout_properties';
+import { ChildLink } from '../../shared/components/child_link';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -168,7 +169,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
             hit={hit}
             investigationFields={investigationFields}
             scopeId={''}
-            columns={getColumns(cellActionRenderer, isInSecurityApp, '')}
+            columns={getColumns(cellActionRenderer, isInSecurityApp, '', ChildLink)}
           />
         ),
       }),

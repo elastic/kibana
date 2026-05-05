@@ -14,7 +14,12 @@ import {
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { ToolOrigin } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  agentBuilderDefaultAgentId,
+  AgentExecutionMode,
+} from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
@@ -42,6 +47,10 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
+import { createSubagentTool } from './tools/run_subagent';
+import { createSleepTool } from './tools/sleep';
+import { BackgroundExecutionService } from './background_execution_service';
+import { builtinToolToExecutable } from './utils/select_tools';
 import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
@@ -79,6 +88,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     startTime = new Date(),
     configurationOverrides,
     action,
+    executionId,
   },
   context
 ) => {
@@ -108,6 +118,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   if (!pendingRound) {
     context.attachmentStateManager.clearAccessTracking();
   }
+
+  const roundId = uuidv4();
+
+  // Create background execution service from conversation state
+  const backgroundExecutionService = new BackgroundExecutionService({
+    subAgentExecutor: context.subAgentExecutor,
+    initialState: conversation?.state?.background_executions,
+  });
 
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -171,9 +189,37 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
     toolManager.addTools({
       type: ToolManagerToolType.browser,
-      tools: browserApiTools ?? [],
+      tools: (browserApiTools ?? []).map((tool) => ({ ...tool, origin: ToolOrigin.internal })),
     }),
   ]);
+
+  // Register sub-agent and sleep tools if experimental features enabled and not in standalone mode
+  if (experimentalFeatures.subagents && context.executionMode !== AgentExecutionMode.standalone) {
+    const subagentTool = createSubagentTool({
+      agentId: agentId ?? agentBuilderDefaultAgentId,
+      executionId: executionId ?? '',
+      connectorId: context.defaultConnectorId,
+      capabilities,
+      subAgentExecutor: context.subAgentExecutor,
+      abortSignal,
+      backgroundExecutionService,
+    });
+    const sleepTool = createSleepTool();
+    await toolManager.addTools({
+      type: ToolManagerToolType.executable,
+      tools: [
+        {
+          ...builtinToolToExecutable({ tool: subagentTool, runner: context.runner }),
+          origin: ToolOrigin.internal,
+        },
+        {
+          ...builtinToolToExecutable({ tool: sleepTool, runner: context.runner }),
+          origin: ToolOrigin.internal,
+        },
+      ],
+      logger,
+    });
+  }
 
   // Then add dynamic tools
   await toolManager.addTools(
@@ -239,6 +285,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     processedConversation,
     promptFactory,
+    backgroundExecutionService,
+    roundId,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -259,6 +307,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       },
       recursionLimit: graphRecursionLimit,
       callbacks: [],
+      // prevent LangGraph from inheriting the parent graph's
+      // abort signals via the __pregel_abort_signals configurable key. Without this,
+      // the parent graph's cleanup abort cascades to the standalone execution.
+      ...(context.executionMode === AgentExecutionMode.standalone
+        ? { configurable: { __pregel_abort_signals: undefined } }
+        : {}),
     }
   );
 
@@ -290,6 +344,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           promptManager,
           toolManager,
           compactionSummary: compactionResult.summary,
+          backgroundExecutionService,
         }),
       pendingRound,
       startTime,
@@ -298,6 +353,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       attachmentStateManager: context.attachmentStateManager,
       configurationOverrides: effectiveOverrides,
       compactionResult,
+      roundId,
     }),
     evictInternalEvents(),
     shareReplay()
@@ -319,16 +375,20 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 const getConversationState = ({
   promptManager,
   toolManager,
+  backgroundExecutionService,
   compactionSummary,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
+  backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
 }): ConversationInternalState => {
+  const bgState = backgroundExecutionService.getPendingState();
   return {
     prompt: promptManager.dump(),
     dynamic_tool_ids: toolManager.getDynamicToolIds(),
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
+    ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
   };
 };
 

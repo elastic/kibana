@@ -24,14 +24,18 @@ import type {
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { ServerlessServerSetup } from '@kbn/serverless/server/types';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { WorkflowsApiRequestHandlerContext } from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -40,12 +44,12 @@ import type {
 import type { ZodObject } from '@kbn/zod/v4';
 import type { SmlTypeDefinition } from './agent_builder/sml_types/types';
 import type { WorkflowsManagementApi } from './api/workflows_management_api';
-
 export interface WorkflowsServerPluginSetup {
   management: WorkflowsManagementApi;
 }
 
-export type WorkflowsServerPluginStart = Record<string, never>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface WorkflowsServerPluginStart {}
 
 /**
  * AgentBuilder plugin setup contract interface.
@@ -78,7 +82,7 @@ export interface WorkflowsServerPluginSetupDeps {
   taskManager?: TaskManagerSetupContract;
   actions?: ActionsPluginSetupContract;
   alerting?: AlertingServerSetup;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginSetup;
   serverless?: ServerlessServerSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
@@ -88,11 +92,13 @@ export interface WorkflowsServerPluginStartDeps {
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actions: ActionsPluginStartContract;
   security?: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{
+  workflows: WorkflowsApiRequestHandlerContext;
   actions: ActionsApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
   licensing: LicensingApiRequestHandlerContext;

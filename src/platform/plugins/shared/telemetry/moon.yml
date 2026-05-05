@@ -57,7 +57,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
-    - schema/*.json
+    - schema/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

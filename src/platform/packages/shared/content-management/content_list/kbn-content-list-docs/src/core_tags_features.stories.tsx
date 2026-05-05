@@ -27,8 +27,27 @@ import {
 // Storybook Meta
 // =============================================================================
 
-const meta: Meta = {
+interface TagsStoryArgs {
+  scrollableInline: boolean;
+  responsiveBreakpoint: boolean;
+}
+
+const meta: Meta<TagsStoryArgs> = {
   title: 'Content List/Core Features + Tags',
+  argTypes: {
+    scrollableInline: {
+      control: 'boolean',
+      description: 'Enable horizontal scrolling when columns exceed container width.',
+    },
+    responsiveBreakpoint: {
+      control: 'boolean',
+      description: 'Collapse the table into responsive cards on narrow viewports.',
+    },
+  },
+  args: {
+    scrollableInline: true,
+    responsiveBreakpoint: false,
+  },
   decorators: [
     (Story) => (
       <div style={{ padding: '20px', maxWidth: '1200px' }}>
@@ -59,7 +78,10 @@ const { Filters } = ContentListToolbar;
  * - [x] Tag badges in Name column — click to filter (PR 9)
  * - [x] Search bar ↔ filter sync — `tag:name` parsed to `filters.tag` (PR 9)
  */
-const TagsFeaturesWrapper = () => {
+const TagsFeaturesWrapper = ({
+  scrollableInline = true,
+  responsiveBreakpoint = false,
+}: TagsStoryArgs) => {
   const labels = useMemo(
     () => ({
       entity: 'map',
@@ -134,11 +156,21 @@ const TagsFeaturesWrapper = () => {
             <Filters.Sort />
           </Filters>
         </ContentListToolbar>
-        <ContentListTable title="maps table">{tableChildren}</ContentListTable>
+        <ContentListTable title="maps table" {...{ scrollableInline, responsiveBreakpoint }}>
+          {tableChildren}
+        </ContentListTable>
         <ContentListFooter />
       </ContentListProvider>
     ),
-    [labels, dataSource, features, itemConfig, tableChildren]
+    [
+      labels,
+      dataSource,
+      features,
+      itemConfig,
+      tableChildren,
+      scrollableInline,
+      responsiveBreakpoint,
+    ]
   );
 
   return (
@@ -173,7 +205,9 @@ const TagsFeaturesWrapper = () => {
           </ContentListToolbar>
         </EuiFlexItem>
         <EuiFlexItem>
-          <ContentListTable title="maps table">{tableChildren}</ContentListTable>
+          <ContentListTable title="maps table" {...{ scrollableInline, responsiveBreakpoint }}>
+            {tableChildren}
+          </ContentListTable>
         </EuiFlexItem>
         <EuiFlexItem>
           <ContentListFooter />
@@ -201,7 +235,9 @@ const TagsFeaturesWrapper = () => {
  * Cmd (Mac) or Ctrl (Windows/Linux) while clicking to exclude instead.
  * Type `tag:Production` directly in the search bar to see query sync.
  */
-export const TagsFeatures: StoryObj = {
+type Story = StoryObj<TagsStoryArgs>;
+
+export const TagsFeatures: Story = {
   name: 'Core Features + Tags',
-  render: () => <TagsFeaturesWrapper />,
+  render: (args) => <TagsFeaturesWrapper {...args} />,
 };

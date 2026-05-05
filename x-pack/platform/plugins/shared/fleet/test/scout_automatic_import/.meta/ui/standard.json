@@ -1,10 +1,10 @@
 {
-  "sha1": "3a0e746225882b8046890f99b9143bea8e186827",
+  "sha1": "1c090e64c0263b598e159259115e504cc5faef17",
   "tests": [
     {
       "id": "a8aa0860fcd0029-92dfafb28d45a4f",
       "title": "Manage Integrations Table renders the table with all integration rows",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -18,7 +18,7 @@
     {
       "id": "a8aa0860fcd0029-080612633fef9db",
       "title": "Manage Integrations Table shows inline Review & Approve button for completed integrations",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -32,7 +32,7 @@
     {
       "id": "a8aa0860fcd0029-a54583195c69594",
       "title": "Manage Integrations Table shows empty state when no integrations exist",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -46,7 +46,7 @@
     {
       "id": "a8aa0860fcd0029-16bc31c324c4382",
       "title": "Manage Integrations Table filters rows by search text",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -60,7 +60,7 @@
     {
       "id": "a8aa0860fcd0029-b9e7287263e77fc",
       "title": "Manage Integrations Table all menu items are visible when actions button is clicked",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -74,7 +74,7 @@
     {
       "id": "a8aa0860fcd0029-c7a6e7fb100c638",
       "title": "Manage Integrations Table Review & Approve is disabled for approved integration",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -88,7 +88,7 @@
     {
       "id": "a8aa0860fcd0029-da1f673c8ffbe81",
       "title": "Manage Integrations Table Install is enabled for approved integration",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -102,7 +102,7 @@
     {
       "id": "a8aa0860fcd0029-ef1e16038becc69",
       "title": "Manage Integrations Table Install is disabled for pending integration",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -116,7 +116,7 @@
     {
       "id": "a8aa0860fcd0029-95fdb610e9eed04",
       "title": "Manage Integrations Table Download .zip is disabled when not all data streams are successful",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -130,7 +130,7 @@
     {
       "id": "a8aa0860fcd0029-a77e06836c4ae3f",
       "title": "Manage Integrations Table Review & Approve and Download .zip are disabled for pending integration",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -144,7 +144,7 @@
     {
       "id": "a8aa0860fcd0029-d06d532ceb70e63",
       "title": "Manage Integrations Table shows confirm modal when Delete is clicked",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -158,7 +158,7 @@
     {
       "id": "a8aa0860fcd0029-b1d924ff78831dd",
       "title": "Manage Integrations Table cancel closes the confirm modal and the row stays",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -172,7 +172,7 @@
     {
       "id": "a8aa0860fcd0029-e41b749b45f03db",
       "title": "Manage Integrations Table opens Review & Approve modal from the actions menu",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -186,7 +186,7 @@
     {
       "id": "a8aa0860fcd0029-7e94be9a9317279",
       "title": "Manage Integrations Table opens Review & Approve modal from the inline button",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -200,7 +200,7 @@
     {
       "id": "a8aa0860fcd0029-1ab923315d00430",
       "title": "Manage Integrations Table Approve button is disabled until version and category are filled",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -214,133 +214,77 @@
     {
       "id": "a8aa0860fcd0029-40949b575479a8f",
       "title": "Manage Integrations Table Approve flow calls the approve API and closes the modal",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 248,
+        "line": 252,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-c5ee3920e4c0ef4",
+      "title": "Manage Integrations Table Review modal auto-install checkbox: is checked by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 292,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-083b68070d2488c",
+      "title": "Manage Integrations Table Review modal auto-install checkbox: approve with it on calls approve, download, and EPM install then closes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 307,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-8dedd77ac1d3389",
+      "title": "Manage Integrations Table Review modal auto-install checkbox: when off, only the approve API runs (no install download)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 375,
         "column": 7
       }
     },
     {
       "id": "a8aa0860fcd0029-7939591cf209d46",
       "title": "Manage Integrations Table closing the Review & Approve modal via Cancel dismisses it",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 286,
+        "line": 432,
         "column": 7
       }
     },
     {
       "id": "a8aa0860fcd0029-c8cb5322679bfc3",
       "title": "Manage Integrations Table Install calls the download and install APIs then shows success",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 300,
-        "column": 7
-      }
-    },
-    {
-      "id": "a8aa0860fcd0029-8a373e3277e26f9",
-      "title": "Manage Integrations Table Download .zip calls the download API",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 337,
-        "column": 7
-      }
-    },
-    {
-      "id": "a8aa0860fcd0029-b74c3d4757b386d",
-      "title": "Manage Integrations Table Edit navigates to the edit page for the integration",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 367,
-        "column": 7
-      }
-    },
-    {
-      "id": "a8aa0860fcd0029-355de8b7598e285",
-      "title": "Manage Integrations Table confirming delete calls the DELETE API and removes the row",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 373,
-        "column": 7
-      }
-    },
-    {
-      "id": "a8aa0860fcd0029-ea21210d0959a2e",
-      "title": "Manage Integrations Table status filter shows only rows matching the selected status",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 403,
-        "column": 7
-      }
-    },
-    {
-      "id": "a8aa0860fcd0029-adb0f652aef2881",
-      "title": "Manage Integrations Table actions filter shows only rows matching the selected action",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 417,
-        "column": 7
-      }
-    },
-    {
-      "id": "a8aa0860fcd0029-3db0a707a61bf7f",
-      "title": "Manage Integrations Table shows Fail status badge for failed and cancelled integrations",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 431,
-        "column": 7
-      }
-    },
-    {
-      "id": "a8aa0860fcd0029-bbef8ec91ef8b70",
-      "title": "Manage Integrations Table selecting a row shows bulk delete button and deletes on confirm",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -352,72 +296,338 @@
       }
     },
     {
-      "id": "a8aa0860fcd0029-195a9fa22bbbca0",
-      "title": "Manage Integrations Table selecting an approved row shows the bulk install button",
-      "expectedStatus": "skipped",
+      "id": "a8aa0860fcd0029-8a373e3277e26f9",
+      "title": "Manage Integrations Table Download .zip calls the download API",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 485,
+        "line": 483,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-b74c3d4757b386d",
+      "title": "Manage Integrations Table Edit navigates to the edit page for the integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 513,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-355de8b7598e285",
+      "title": "Manage Integrations Table confirming delete calls the DELETE API and removes the row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 519,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-ea21210d0959a2e",
+      "title": "Manage Integrations Table status filter shows only rows matching the selected status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 549,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-adb0f652aef2881",
+      "title": "Manage Integrations Table actions filter shows only rows matching the selected action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 563,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-3db0a707a61bf7f",
+      "title": "Manage Integrations Table shows Fail status badge for failed and cancelled integrations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 577,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-bbef8ec91ef8b70",
+      "title": "Manage Integrations Table selecting a row shows bulk delete button and deletes on confirm",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 592,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-195a9fa22bbbca0",
+      "title": "Manage Integrations Table selecting an approved row shows the bulk install button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 631,
         "column": 7
       }
     },
     {
       "id": "a8aa0860fcd0029-e03907bf43238de",
       "title": "Manage Integrations Table bulk install button is hidden when only non-approved rows are selected",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 490,
+        "line": 636,
         "column": 7
       }
     },
     {
       "id": "a8aa0860fcd0029-37dfcfb900b847d",
       "title": "Manage Integrations Table clicking the integration title navigates to the edit page",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 497,
+        "line": 643,
         "column": 7
       }
     },
     {
       "id": "a8aa0860fcd0029-e5a42fb563d74a4",
       "title": "Manage Integrations Table table renders rows in the order returned by the API",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 505,
+        "line": 651,
         "column": 7
       }
     },
     {
       "id": "a8aa0860fcd0029-99eb001ee00b19c",
       "title": "Manage Integrations Table shows error callout when the integrations API returns an error",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 512,
+        "line": 658,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-49d8966cc6be2a9",
+      "title": "Manage Integrations Table Install is disabled when the same version is already installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 676,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-a204ad8059f3505",
+      "title": "Manage Integrations Table version field shows inline error on blur with an invalid value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 702,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-087f1abac0267de",
+      "title": "Manage Integrations Table version 0.0.0 is blocked with an explicit validation error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 721,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-82c9e91bb4b8e86",
+      "title": "Manage Integrations Table Review modal shows data stream rows returned by the API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 738,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-a7da3cf3edd8808",
+      "title": "Manage Integrations Table Approve button is disabled and category help text is shown when no category is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 778,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-2386e7c88781fc2",
+      "title": "Manage Integrations Table shows Approved badge in the Approval Status column for approved integrations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 803,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-2b0d37318b3cfd3",
+      "title": "Manage Integrations Table actions filter by Approved shows only approved integrations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 813,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-d53d6c26079fd78",
+      "title": "Manage Integrations Table bulk install triggers download and install APIs for each selected approved row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 827,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-e5cf50606ebd1ca",
+      "title": "Manage Integrations Table bulk install is disabled when a mix of approved and non-approved rows are selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 868,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-7e52d45c0326a22",
+      "title": "Manage Integrations Table Review modal shows an error when fetching integration details fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 876,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-53bb5f88e91ae86",
+      "title": "Manage Integrations Table Review modal shows an inline error when the approve API fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 899,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8aa0860fcd0029-77cd2991661e70b",
+      "title": "Manage Integrations Table shows a toast error and keeps the row when delete API fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
+        "line": 942,
         "column": 7
       }
     }

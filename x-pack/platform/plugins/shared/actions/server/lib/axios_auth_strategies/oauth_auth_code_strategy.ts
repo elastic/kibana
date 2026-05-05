@@ -9,6 +9,7 @@ import type { AxiosInstance } from 'axios';
 import type { GetTokenOpts } from '@kbn/connector-specs';
 import type { AxiosErrorWithRetry } from '../axios_utils';
 import { getOAuthAuthorizationCodeAccessToken } from '../get_oauth_authorization_code_access_token';
+import { buildTokenResponseOptions } from '../request_oauth_token';
 import type { AxiosAuthStrategy, AuthStrategyDeps } from './types';
 
 interface OAuthAuthCodeSecrets {
@@ -17,6 +18,9 @@ interface OAuthAuthCodeSecrets {
   tokenUrl?: string;
   scope?: string;
   useBasicAuth?: boolean;
+  accessTokenPath?: string;
+  tokenTypePath?: string;
+  tokenType?: string;
 }
 
 export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
@@ -49,8 +53,16 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
 
         logger.debug(`Attempting token refresh for connectorId ${connectorId} after 401 error`);
 
-        const { clientId, clientSecret, tokenUrl, scope, useBasicAuth } =
-          secrets as OAuthAuthCodeSecrets;
+        const {
+          clientId,
+          clientSecret,
+          tokenUrl,
+          scope,
+          useBasicAuth,
+          accessTokenPath,
+          tokenTypePath,
+          tokenType,
+        } = secrets as OAuthAuthCodeSecrets;
 
         if (!clientId || !clientSecret || !tokenUrl) {
           error.message =
@@ -71,6 +83,11 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
           authMode,
           profileUid,
           forceRefresh: true,
+          tokenResponseOptions: buildTokenResponseOptions({
+            accessTokenPath,
+            tokenTypePath,
+            tokenType,
+          }),
         });
 
         if (!newAccessToken) {
@@ -125,6 +142,11 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
       scope: opts.scope,
       authMode,
       profileUid,
+      tokenResponseOptions: buildTokenResponseOptions({
+        accessTokenPath: opts.accessTokenPath,
+        tokenTypePath: opts.tokenTypePath,
+        tokenType: opts.tokenType,
+      }),
     });
   }
 }

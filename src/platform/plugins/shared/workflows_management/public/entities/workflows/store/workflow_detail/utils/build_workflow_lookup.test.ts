@@ -604,58 +604,106 @@ describe('buildStepSelectionValues', () => {
     return Object.values(steps)[0];
   }
 
-  it('should split config and input from step properties', () => {
+  it('should return empty when valuePaths is undefined', () => {
     const step = getStep(`
 steps:
   - name: s1
     type: my.step
-    connector-id: abc
-    with:
-      owner: securitySolution
-      message: hello
 `);
     const values = buildStepSelectionValues(step);
-    expect(values.config).toEqual({ 'connector-id': 'abc' });
-    expect(values.input).toEqual({ owner: 'securitySolution', message: 'hello' });
+    expect(values).toEqual({ config: {}, input: {} });
   });
 
-  it('should handle nested with paths', () => {
+  it('should include only properties matching valuePaths', () => {
     const step = getStep(`
 steps:
   - name: s1
     type: my.step
-    with:
-      inputs:
-        field1: value1
-        field2: value2
+    proxy:
+      id: p1
+      ssl: true
+    other: ignored
 `);
-    const values = buildStepSelectionValues(step);
-    expect(values.config).toEqual({});
-    expect(values.input).toEqual({ inputs: { field1: 'value1', field2: 'value2' } });
+    const values = buildStepSelectionValues(step, ['config.proxy.ssl', 'config.other']);
+    expect(values).toEqual({
+      config: { other: 'ignored', proxy: { ssl: true } },
+      input: {},
+    });
   });
 
-  it('should handle array values under with', () => {
+  it('should include an input path when requested', () => {
     const step = getStep(`
 steps:
   - name: s1
     type: my.step
     with:
-      field1:
-        - value1
-        - value2
+      owner: a
+      message: hi
 `);
-    const values = buildStepSelectionValues(step);
-    expect(values.input).toEqual({ field1: ['value1', 'value2'] });
+    const values = buildStepSelectionValues(step, ['input.owner']);
+    expect(values).toEqual({
+      config: {},
+      input: { owner: 'a' },
+    });
   });
 
-  it('should return empty objects when step has no custom properties', () => {
+  it('should return empty when valuePaths match nothing', () => {
     const step = getStep(`
 steps:
   - name: s1
     type: my.step
+    foo: 1
 `);
-    const values = buildStepSelectionValues(step);
-    expect(values.config).toEqual({});
-    expect(values.input).toEqual({});
+    const values = buildStepSelectionValues(step, ['config.bar']);
+    expect(values).toEqual({ config: {}, input: {} });
+  });
+
+  it('should not assign onto Object.prototype when path segments include "__proto__"', () => {
+    const probe = '__wmBuildWorkflowLookupProtoProbe';
+    delete (Object.prototype as Record<string, unknown>)[probe];
+    const step = getStep(`
+steps:
+  - name: s1
+    type: my.step
+    __proto__:
+      ${probe}: polluted
+`);
+    buildStepSelectionValues(step, [`config.__proto__.${probe}`]);
+    expect(Object.hasOwn(Object.prototype, probe)).toBe(false);
+    expect((Object.prototype as Record<string, unknown>)[probe]).toBeUndefined();
+  });
+
+  it('should not assign onto Object.prototype when path segments include "constructor"', () => {
+    const probe = '__wmBuildWorkflowLookupProtoProbe';
+    delete (Object.prototype as Record<string, unknown>)[probe];
+    const step = getStep(`
+steps:
+  - name: s1
+    type: my.step
+    constructor:
+      ${probe}: polluted
+`);
+    const values = buildStepSelectionValues(step, [`config.constructor.${probe}`]);
+    expect((Object.prototype as Record<string, unknown>)[probe]).toBeUndefined();
+    expect(({} as Record<string, unknown>)[probe]).toBeUndefined();
+    expect(values.config.constructor).toBeDefined();
+    expect((values.config.constructor as any)[probe]).toBe('polluted');
+  });
+
+  it('should not assign onto Object.prototype when path segments include "prototype"', () => {
+    const probe = '__wmBuildWorkflowLookupProtoProbe';
+    delete (Object.prototype as Record<string, unknown>)[probe];
+    const step = getStep(`
+steps:
+  - name: s1
+    type: my.step
+    prototype:
+      ${probe}: polluted
+`);
+    const values = buildStepSelectionValues(step, [`config.prototype.${probe}`]);
+    expect((Object.prototype as Record<string, unknown>)[probe]).toBeUndefined();
+    expect(({} as Record<string, unknown>)[probe]).toBeUndefined();
+    expect(values.config.prototype).toBeDefined();
+    expect((values.config.prototype as Record<string, unknown>)[probe]).toBe('polluted');
   });
 });

@@ -45,6 +45,7 @@
                 "lineNumber": 60,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -103,6 +104,7 @@
                 "lineNumber": 66,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "WorkflowsSearchParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -191,6 +193,7 @@
                 "lineNumber": 79,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateWorkflowCommand",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -266,6 +269,7 @@
                 "lineNumber": 88,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateWorkflowParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -360,6 +364,7 @@
                 "lineNumber": 106,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "BulkCreateWorkflowsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -454,6 +459,7 @@
                 "lineNumber": 124,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "MgetWorkflowsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -556,6 +562,7 @@
                 "lineNumber": 141,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "ValidateWorkflowParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -614,6 +621,7 @@
                 "lineNumber": 148,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExportWorkflowsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -698,6 +706,7 @@
                 "lineNumber": 161,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetAggsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -776,6 +785,7 @@
                 "lineNumber": 174,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetSchemaParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -843,6 +853,7 @@
                 "lineNumber": 187,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunWorkflowOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -893,6 +904,7 @@
                 "lineNumber": 195,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestWorkflowParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -929,6 +941,7 @@
                 "lineNumber": 202,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunStepCommand",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1005,6 +1018,7 @@
                 "lineNumber": 211,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetWorkflowExecutionsParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1081,6 +1095,7 @@
                 "lineNumber": 221,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetWorkflowStepExecutionsParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1157,6 +1172,7 @@
                 "lineNumber": 231,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetExecutionParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1357,6 +1373,7 @@
                 "lineNumber": 263,
                 "columnNumber": 46,
                 "deprecated": false,
+                "docsReferencedTypeName": "ResumeExecutionParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1433,6 +1450,7 @@
                 "lineNumber": 272,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetExecutionLogsParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1701,6 +1719,7 @@
             "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WorkflowSelectorConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1806,6 +1825,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseMutationOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1869,6 +1889,7 @@
             "lineNumber": 22,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "WorkflowsSearchParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2054,6 +2075,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],

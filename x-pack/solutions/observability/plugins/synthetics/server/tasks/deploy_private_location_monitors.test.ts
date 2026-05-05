@@ -32,6 +32,9 @@ const mockServerSetup = {
   pluginsStart: {
     encryptedSavedObjects: mockEncryptedSo,
   },
+  basePath: {
+    publicBaseUrl: 'https://localhost:5601',
+  },
   logger: mockLogger,
 } as unknown as SyntheticsServerSetup;
 

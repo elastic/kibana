@@ -75,6 +75,7 @@ import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { LayerCellValueActions } from '../types';
 import { EuiThemeProvider } from '@elastic/eui';
+import { getResolvedAnnotationColor } from '@kbn/event-annotation-common';
 import { getFieldFormatsRegistry } from '@kbn/field-formats-plugin/public/mocks';
 import type { CoreSetup } from '@kbn/core/public';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -3150,6 +3151,30 @@ describe('XYChart component', () => {
       expect(groupedAnnotation.length).toEqual(1);
       // styles are default because they are different for both annotations
       expect(groupedAnnotation).toMatchSnapshot();
+    });
+
+    test('should render annotation defaults for dark mode', () => {
+      const { args } = sampleArgsWithAnnotations([
+        createLayerWithAnnotations([defaultLineStaticAnnotation, defaultRangeStaticAnnotation]),
+      ]);
+      const component = mount(
+        <EuiThemeProvider colorMode="dark">
+          <XYChart {...defaultProps} args={args} />
+        </EuiThemeProvider>
+      );
+
+      expect(component.find(LineAnnotation).prop('style')).toEqual({
+        line: {
+          dash: undefined,
+          opacity: 1,
+          stroke: getResolvedAnnotationColor({ color: undefined, isDarkMode: true }),
+          strokeWidth: 1,
+        },
+      });
+      expect(component.find(RectAnnotation).last().prop('style')).toEqual({
+        fill: getResolvedAnnotationColor({ color: undefined, isDarkMode: true, isRange: true }),
+        opacity: 1,
+      });
     });
   });
 

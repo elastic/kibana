@@ -14,70 +14,86 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Identifier for an initialization flow.
  */
+export const InitializationFlowId = lazySchema(() =>
+  z.enum(['create-list-indices', 'security-data-views'])
+);
 export type InitializationFlowId = z.infer<typeof InitializationFlowId>;
-export const InitializationFlowId = z.enum(['create-list-indices', 'security-data-views']);
 export type InitializationFlowIdEnum = typeof InitializationFlowId.enum;
 export const InitializationFlowIdEnum = InitializationFlowId.enum;
 
+export const CreateListIndicesReadyResult = lazySchema(() =>
+  z.object({
+    status: z.literal('ready'),
+  })
+);
 export type CreateListIndicesReadyResult = z.infer<typeof CreateListIndicesReadyResult>;
-export const CreateListIndicesReadyResult = z.object({
-  status: z.literal('ready'),
-});
 
+export const InitializationFlowErrorResult = lazySchema(() =>
+  z.object({
+    status: z.literal('error'),
+    error: z.string().nullable(),
+  })
+);
 export type InitializationFlowErrorResult = z.infer<typeof InitializationFlowErrorResult>;
-export const InitializationFlowErrorResult = z.object({
-  status: z.literal('error'),
-  error: z.string().nullable(),
-});
 
+export const DataViewPayload = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    title: z.string(),
+    patternList: z.array(z.string()),
+  })
+);
 export type DataViewPayload = z.infer<typeof DataViewPayload>;
-export const DataViewPayload = z.object({
-  id: z.string(),
-  title: z.string(),
-  patternList: z.array(z.string()),
-});
 
+export const SecurityDataViewsReadyResult = lazySchema(() =>
+  z.object({
+    status: z.literal('ready'),
+    payload: z.object({
+      defaultDataView: DataViewPayload,
+      alertDataView: DataViewPayload,
+      attackDataView: DataViewPayload.optional(),
+      kibanaDataViews: z.array(DataViewPayload),
+      signalIndexName: z.string(),
+    }),
+  })
+);
 export type SecurityDataViewsReadyResult = z.infer<typeof SecurityDataViewsReadyResult>;
-export const SecurityDataViewsReadyResult = z.object({
-  status: z.literal('ready'),
-  payload: z.object({
-    defaultDataView: DataViewPayload,
-    alertDataView: DataViewPayload,
-    attackDataView: DataViewPayload.optional(),
-    kibanaDataViews: z.array(DataViewPayload),
-    signalIndexName: z.string(),
-  }),
-});
 
 /**
  * Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
  */
+export const InitializationFlowsResult = lazySchema(() =>
+  z.object({
+    'create-list-indices': z
+      .union([CreateListIndicesReadyResult, InitializationFlowErrorResult])
+      .optional(),
+    'security-data-views': z
+      .union([SecurityDataViewsReadyResult, InitializationFlowErrorResult])
+      .optional(),
+  })
+);
 export type InitializationFlowsResult = z.infer<typeof InitializationFlowsResult>;
-export const InitializationFlowsResult = z.object({
-  'create-list-indices': z
-    .union([CreateListIndicesReadyResult, InitializationFlowErrorResult])
-    .optional(),
-  'security-data-views': z
-    .union([SecurityDataViewsReadyResult, InitializationFlowErrorResult])
-    .optional(),
-});
 
+export const InitializeSecuritySolutionRequestBody = lazySchema(() =>
+  z.object({
+    flows: z.array(InitializationFlowId).min(1),
+  })
+);
 export type InitializeSecuritySolutionRequestBody = z.infer<
   typeof InitializeSecuritySolutionRequestBody
 >;
-export const InitializeSecuritySolutionRequestBody = z.object({
-  flows: z.array(InitializationFlowId).min(1),
-});
 export type InitializeSecuritySolutionRequestBodyInput = z.input<
   typeof InitializeSecuritySolutionRequestBody
 >;
 
+export const InitializeSecuritySolutionResponse = lazySchema(() =>
+  z.object({
+    flows: InitializationFlowsResult,
+  })
+);
 export type InitializeSecuritySolutionResponse = z.infer<typeof InitializeSecuritySolutionResponse>;
-export const InitializeSecuritySolutionResponse = z.object({
-  flows: InitializationFlowsResult,
-});

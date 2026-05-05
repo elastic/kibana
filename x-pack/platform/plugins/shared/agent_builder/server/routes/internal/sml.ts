@@ -71,7 +71,7 @@ export function registerInternalSmlRoutes({
       async (ctx, request, response) => {
         const { sml } = getInternalServices();
         const { query, size, skip_content: skipContent } = request.body;
-        const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+        const esClient = (await ctx.core).elasticsearch.client;
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
 
         const { results, total } = await sml.search({
@@ -128,7 +128,7 @@ export function registerInternalSmlRoutes({
         const { conversation_id: conversationId, chunk_ids: chunkIds } = request.body;
         const [coreStart] = await coreSetup.getStartServices();
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
-        const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+        const esClient = (await ctx.core).elasticsearch.client;
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
         const conversationClient = await conversationsService.getScopedClient({ request });
 

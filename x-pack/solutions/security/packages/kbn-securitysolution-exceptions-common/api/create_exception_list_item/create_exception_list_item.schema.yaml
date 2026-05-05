@@ -33,6 +33,21 @@ paths:
                 - $ref: '#/components/schemas/CreateExceptionListItemBlocklistWindows'
                 - $ref: '#/components/schemas/CreateExceptionListItemBlocklistLinux'
                 - $ref: '#/components/schemas/CreateExceptionListItemBlocklistMac'
+            examples:
+              simpleItem:
+                value:
+                  list_id: simple_list
+                  item_id: simple_list_item
+                  name: Sample Exception List Item
+                  type: simple
+                  description: This is a sample detection type exception item.
+                  namespace_type: single
+                  entries:
+                    - type: exists
+                      field: actingProcess.file.signer
+                      operator: excluded
+                  os_types: [linux]
+                  tags: [malware]
       responses:
         200:
           description: Successful response

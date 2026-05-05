@@ -60,8 +60,11 @@ describe('buildExtractionSourceClause', () => {
     toDateISO: '2024-01-02T00:00:00.000Z',
   };
 
-  it('should build FROM, METADATA, and time range with strict lower bound when recoveryId is absent', () => {
-    const clause = buildExtractionSourceClause(baseParams);
+  it('should build FROM, METADATA, and time range with strict lower bound when recoveryId is absent and pagesCursorStart is set', () => {
+    const clause = buildExtractionSourceClause({
+      ...baseParams,
+      logsPageCursorStart: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: '1' },
+    });
     expect(clause).toContain('FROM logs-*, metrics-*');
     expect(clause).toContain('METADATA _index, _id');
     expect(clause).toContain(`${TIMESTAMP_FIELD} > TO_DATETIME("2024-01-01T00:00:00.000Z")`);
@@ -453,8 +456,6 @@ describe('mapPostAggFilterFieldsToRecentForEsql', () => {
     const mapped = mapPostAggFilterFieldsToRecentForEsql(userDef.postAggFilter!, userDef);
     const esql = conditionToESQL(mapped);
     expect(esql).toContain(recentData('event.kind'));
-    expect(esql).toContain(recentData('user.name'));
-    expect(esql).toContain(recentData('host.id'));
     expect(esql).toContain('entity.id');
     expect(esql).not.toContain(recentData('entity.id'));
   });

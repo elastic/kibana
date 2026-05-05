@@ -84,6 +84,10 @@ export enum WorkflowExecutionTelemetryEventTypes {
    * When an event-driven run is marked skipped at task runtime because execution was disabled after scheduling.
    */
   EventDrivenExecutionSuppressed = 'workflows_event_driven_execution_suppressed',
+  /**
+   * When a trigger event is dispatched (emitEvent called) and workflows are resolved/scheduled.
+   */
+  TriggerEventDispatched = 'workflows_trigger_event_dispatched',
 }
 
 /**
@@ -501,13 +505,38 @@ export interface WorkflowExecutionCancelledParams extends BaseWorkflowExecutionT
 }
 
 /**
+ * Telemetry event dispatched when emitEvent is called and trigger subscriptions are resolved.
+ */
+export interface TriggerEventDispatchedParams {
+  eventName: string;
+  triggerId: string;
+  executionEnabled: boolean;
+  logEventsEnabled: boolean;
+  eventChainDepth: number;
+  eventId: string;
+  sourceExecutionId?: string;
+  auditOnly: boolean;
+  subscriberResolutionMs?: number;
+  subscribedCount: number;
+  disabledCount: number;
+  kqlFalseCount: number;
+  kqlErrorCount: number;
+  matchedCount: number;
+  depthSkippedCount: number;
+  scheduledAttemptCount: number;
+  scheduledSuccessCount: number;
+  scheduledFailureCount: number;
+}
+
+/**
  * Union type of all workflow execution telemetry event parameters
  */
 export type WorkflowExecutionTelemetryEventParams =
   | WorkflowExecutionCompletedParams
   | WorkflowExecutionFailedParams
   | WorkflowExecutionCancelledParams
-  | EventDrivenExecutionSuppressedParams;
+  | EventDrivenExecutionSuppressedParams
+  | TriggerEventDispatchedParams;
 
 /**
  * Maps each workflow execution event type to its corresponding params type.
@@ -518,4 +547,5 @@ export interface WorkflowExecutionTelemetryEventsMap {
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed]: WorkflowExecutionFailedParams;
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled]: WorkflowExecutionCancelledParams;
   [WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed]: EventDrivenExecutionSuppressedParams;
+  [WorkflowExecutionTelemetryEventTypes.TriggerEventDispatched]: TriggerEventDispatchedParams;
 }

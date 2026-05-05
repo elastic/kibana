@@ -34,6 +34,9 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
 
 delete:
   summary: Delete cases
@@ -57,7 +60,10 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
-  x-code-samples:
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+  x-codeSamples:
     - label: curl
       lang: curl
       source: |
@@ -107,3 +113,6 @@ patch:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'

@@ -13,6 +13,8 @@ import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import type { StartServices } from '../../types';
+import type { SecurityAppStore } from '../../common/store/types';
 
 jest.mock('../../timelines/components/timeline/cell_rendering/default_cell_renderer');
 
@@ -32,6 +34,10 @@ const mockDefaultCellRenderer = jest.fn((props) => {
 const mockDataView = dataViewMock;
 mockDataView.getFieldByName = jest.fn().mockReturnValue({ type: 'string' } as DataViewField);
 
+const mockServices = {} as StartServices;
+const mockStore = {} as SecurityAppStore;
+const getCellRenderer = getCellRendererForGivenRecord(mockServices, mockStore);
+
 describe('getCellRendererForGivenRecord', () => {
   beforeEach(() => {
     DefaultCellRendererMock.mockImplementation(mockDefaultCellRenderer);
@@ -42,7 +48,7 @@ describe('getCellRendererForGivenRecord', () => {
   });
 
   it('should return cell renderer correctly for allowed fields with correct data format', () => {
-    const cellRenderer = getCellRendererForGivenRecord('kibana.alert.workflow_status');
+    const cellRenderer = getCellRenderer('kibana.alert.workflow_status');
     expect(cellRenderer).toBeDefined();
     const props: DataGridCellValueElementProps = {
       columnId: 'kibana.alert.workflow_status',
@@ -100,8 +106,8 @@ describe('getCellRendererForGivenRecord', () => {
       {}
     );
   });
-  it('should return undefined for non-allowedFields', () => {
-    const cellRenderer = getCellRendererForGivenRecord('non-allowed-field');
+  it('should return undefined for a non-allowed, non-IP field', () => {
+    const cellRenderer = getCellRenderer('some.unknown.field');
     expect(cellRenderer).toBeUndefined();
   });
 });

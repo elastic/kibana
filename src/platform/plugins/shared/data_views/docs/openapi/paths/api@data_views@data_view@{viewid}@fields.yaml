@@ -1,10 +1,24 @@
 post:
-  summary: Update data view fields metadata
+  summary: Update field metadata
   operationId: updateFieldsMetadataDefault
   description: >
-    Update fields presentation metadata such as count, customLabel, customDescription, and format.
+    Update field metadata for a data view.
+    Use this endpoint to set custom labels, custom descriptions, and format overrides for individual fields.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X POST "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/fields" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{"fields":{"field_name":{"customLabel":"My custom label"}}}'
+    - lang: Console
+      source: |
+        POST kbn://api/data_views/data_view/{viewId}/fields
+        {"fields":{"field_name":{"customLabel":"My custom label"}}}
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/view_id.yaml'

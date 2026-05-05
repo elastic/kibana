@@ -1,8 +1,24 @@
 get:
   summary: Get a data view
   operationId: getDataView
+  description: >
+    Retrieve a single data view by its identifier.
+    Data views identify the Elasticsearch data you want to explore and visualize.
+    They can point to one or more data streams, indices, or index aliases, and use optional
+    runtime fields to compute values at query time. Note that data views are not required for
+    ES|QL-based visualizations.
+    To learn more, refer to the [data views documentation](https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views).
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X GET "${KIBANA_URL}/s/{spaceId}/api/data_views/data_view/${DATA_VIEW_ID}" \
+          -H "Authorization: ApiKey ${API_KEY}"
+    - lang: Console
+      source: |
+        GET kbn://s/{spaceId}/api/data_views/data_view/{viewId}
   parameters:
     - $ref: '../components/parameters/view_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'
@@ -27,9 +43,20 @@ delete:
   summary: Delete a data view
   operationId: deleteDataView
   description: >
+    Delete a data view by its identifier.
     WARNING: When you delete a data view, it cannot be recovered.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X DELETE "${KIBANA_URL}/s/{spaceId}/api/data_views/data_view/${DATA_VIEW_ID}" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true"
+    - lang: Console
+      source: |
+        DELETE kbn://s/{spaceId}/api/data_views/data_view/{viewId}
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/view_id.yaml'
@@ -47,8 +74,24 @@ delete:
 post:
   summary: Update a data view
   operationId: updateDataView
+  description: >
+    Update an existing data view.
+    Only the fields provided in the request body are updated.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X POST "${KIBANA_URL}/s/{spaceId}/api/data_views/data_view/${DATA_VIEW_ID}" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{"data_view":{"name":"Updated data view name"}}'
+    - lang: Console
+      source: |
+        POST kbn://s/{spaceId}/api/data_views/data_view/{viewId}
+        {"data_view":{"name":"Updated data view name"}}
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/view_id.yaml'

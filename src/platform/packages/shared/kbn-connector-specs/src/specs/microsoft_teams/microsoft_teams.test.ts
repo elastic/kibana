@@ -66,20 +66,38 @@ describe('MicrosoftTeams', () => {
   });
 
   describe('auth', () => {
-    it('should support bearer and oauth_client_credentials', () => {
+    it('should support bearer, oauth_authorization_code, and oauth_client_credentials', () => {
       const { auth } = MicrosoftTeams;
       expect(auth).toBeDefined();
-      expect(auth?.types).toHaveLength(2);
-      expect(auth?.types[0]).toEqual(
-        expect.objectContaining({
-          type: 'bearer',
-        })
+      expect(auth?.types).toHaveLength(3);
+      expect(auth?.types[0]).toEqual(expect.objectContaining({ type: 'bearer' }));
+      expect(auth?.types[1]).toEqual(expect.objectContaining({ type: 'oauth_authorization_code' }));
+      expect(auth?.types[2]).toEqual(expect.objectContaining({ type: 'oauth_client_credentials' }));
+    });
+
+    it('should have correct oauth_authorization_code defaults', () => {
+      const oauthType = MicrosoftTeams.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
       );
-      expect(auth?.types[1]).toEqual(
-        expect.objectContaining({
-          type: 'oauth_client_credentials',
-        })
-      );
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          scope: expect.stringContaining('offline_access'),
+        },
+      });
+    });
+
+    it('oauth_authorization_code scope should include Teams-required permissions', () => {
+      const oauthType = MicrosoftTeams.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
+      ) as { defaults?: { scope?: string } } | undefined;
+      const scope = oauthType?.defaults?.scope ?? '';
+      expect(scope).toContain('Team.ReadBasic.All');
+      expect(scope).toContain('Channel.ReadBasic.All');
+      expect(scope).toContain('Chat.Read');
+      expect(scope).toContain('ChannelMessage.Read.All');
+      expect(scope).toContain('offline_access');
     });
   });
 
@@ -776,7 +794,7 @@ describe('MicrosoftTeams', () => {
           query: 'test',
         })
       ).rejects.toThrow(
-        'searchMessages requires delegated authentication (bearer token). ' +
+        'searchMessages requires delegated authentication (bearer token or OAuth authorization code). ' +
           'Microsoft Graph does not support app-only (client credentials) access ' +
           'to the /search/query API for chatMessage entities.'
       );
@@ -793,6 +811,20 @@ describe('MicrosoftTeams', () => {
 
       await expect(
         MicrosoftTeams.actions.searchMessages.handler(bearerContext, { query: 'test' })
+      ).resolves.not.toThrow();
+      expect(mockClient.post).toHaveBeenCalled();
+    });
+
+    it('should not throw for delegated auth (oauth_authorization_code)', async () => {
+      const oauthCodeContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_authorization_code' },
+      } as unknown as ActionContext;
+
+      mockClient.post.mockResolvedValue({ data: { value: [] } });
+
+      await expect(
+        MicrosoftTeams.actions.searchMessages.handler(oauthCodeContext, { query: 'test' })
       ).resolves.not.toThrow();
       expect(mockClient.post).toHaveBeenCalled();
     });
@@ -833,6 +865,34 @@ describe('MicrosoftTeams', () => {
       expect(result).toEqual({
         ok: true,
         message: 'Successfully connected to Microsoft Teams: found 3 teams',
+      });
+    });
+
+    it('should use /me/joinedTeams for oauth_authorization_code (delegated) auth', async () => {
+      const oauthCodeContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_authorization_code' },
+      } as unknown as ActionContext;
+
+      const mockResponse = {
+        data: {
+          value: [{ id: 'team-1', displayName: 'Engineering' }],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      if (!MicrosoftTeams.test) {
+        throw new Error('Test handler not defined');
+      }
+      const result = (await MicrosoftTeams.test.handler(oauthCodeContext)) as TestResult;
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/me/joinedTeams',
+        { params: { $select: 'id,displayName' } }
+      );
+      expect(result).toEqual({
+        ok: true,
+        message: 'Successfully connected to Microsoft Teams: found 1 teams',
       });
     });
 

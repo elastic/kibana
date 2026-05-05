@@ -6,7 +6,7 @@
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata, ToolOrigin } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ToolReturnSummarizerFn } from '../tools/builtin';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
@@ -21,6 +21,9 @@ export interface AddToolOptions {
   dynamic?: boolean;
 }
 
+export type ExecutableToolWithOrigin = ExecutableTool & { origin: ToolOrigin };
+export type BrowserToolWithOrigin = BrowserApiToolMetadata & { origin: ToolOrigin };
+
 export enum ToolManagerToolType {
   executable = 'executable',
   browser = 'browser',
@@ -28,13 +31,13 @@ export enum ToolManagerToolType {
 
 export interface ExecutableToolInput {
   type: ToolManagerToolType.executable;
-  tools: ExecutableTool | ExecutableTool[];
+  tools: ExecutableToolWithOrigin | ExecutableToolWithOrigin[];
   logger: Logger;
 }
 
 export interface BrowserToolInput {
   type: ToolManagerToolType.browser;
-  tools: BrowserApiToolMetadata | BrowserApiToolMetadata[];
+  tools: BrowserToolWithOrigin | BrowserToolWithOrigin[];
 }
 
 export type AddToolInput = ExecutableToolInput | BrowserToolInput;
@@ -77,6 +80,11 @@ export interface ToolManager {
    * @returns the tool id mapping
    */
   getToolIdMapping(): Map<string, string>;
+
+  /**
+   * Returns the origin for an internal tool ID, if known.
+   */
+  getToolOrigin(toolId: string): ToolOrigin | undefined;
 
   /**
    * Gets the internal tool IDs of all dynamic tools currently in the tool manager.

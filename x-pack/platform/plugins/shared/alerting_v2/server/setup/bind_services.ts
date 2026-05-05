@@ -20,18 +20,18 @@ import {
   DispatcherServiceInternalToken,
 } from '../lib/dispatcher/tokens';
 import { DISPATCHER_ENABLED_SETTING_ID } from '../lib/dispatcher/ui_settings';
-import { NotificationPolicyClient } from '../lib/notification_policy_client';
-import { NotificationPolicyNamespaceToken } from '../lib/notification_policy_client/tokens';
+import { ActionPolicyClient } from '../lib/action_policy_client';
+import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { RulesClient } from '../lib/rules_client';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
-import { NotificationPolicySavedObjectService } from '../lib/services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import { ActionPolicySavedObjectService } from '../lib/services/action_policy_saved_object_service/action_policy_saved_object_service';
 import {
-  NotificationPolicySavedObjectsClientToken,
-  NotificationPolicySavedObjectServiceInternalToken,
-  NotificationPolicySavedObjectServiceScopedToken,
-} from '../lib/services/notification_policy_saved_object_service/tokens';
+  ActionPolicySavedObjectsClientToken,
+  ActionPolicySavedObjectServiceInternalToken,
+  ActionPolicySavedObjectServiceScopedToken,
+} from '../lib/services/action_policy_saved_object_service/tokens';
 import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
@@ -59,7 +59,7 @@ import { UserService } from '../lib/services/user_service/user_service';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
-  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import {
@@ -72,7 +72,7 @@ import type { AlertingServerSetupDependencies, AlertingServerStartDependencies }
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
-  bind(NotificationPolicyNamespaceToken)
+  bind(ActionPolicyNamespaceToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
@@ -80,14 +80,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return spaces.spacesService.spaceIdToNamespace(spaceId);
     })
     .inRequestScope();
-  bind(NotificationPolicyClient)
+  bind(ActionPolicyClient)
     .toDynamicValue(({ get }) => {
-      return new NotificationPolicyClient(
-        get(NotificationPolicySavedObjectServiceScopedToken),
+      return new ActionPolicyClient(
+        get(ActionPolicySavedObjectServiceScopedToken),
         get(UserService),
         get(ApiKeyService),
         get(EncryptedSavedObjectsClientToken),
-        get(NotificationPolicyNamespaceToken)
+        get(ActionPolicyNamespaceToken)
       );
     })
     .inRequestScope();
@@ -147,33 +147,31 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           'encryptedSavedObjects'
         )
       );
-      return eso.getClient({ includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE] });
+      return eso.getClient({ includedHiddenTypes: [ACTION_POLICY_SAVED_OBJECT_TYPE] });
     })
     .inSingletonScope();
 
-  bind(NotificationPolicySavedObjectsClientToken)
+  bind(ActionPolicySavedObjectsClientToken)
     .toResolvedValue(
       (savedObjectsClientFactory) =>
         savedObjectsClientFactory({
-          includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE],
+          includedHiddenTypes: [ACTION_POLICY_SAVED_OBJECT_TYPE],
         }),
       [SavedObjectsClientFactory]
     )
     .inRequestScope();
 
-  bind(NotificationPolicySavedObjectService).toSelf().inRequestScope();
-  bind(NotificationPolicySavedObjectServiceScopedToken).toService(
-    NotificationPolicySavedObjectService
-  );
-  bind(NotificationPolicySavedObjectServiceInternalToken)
+  bind(ActionPolicySavedObjectService).toSelf().inRequestScope();
+  bind(ActionPolicySavedObjectServiceScopedToken).toService(ActionPolicySavedObjectService);
+  bind(ActionPolicySavedObjectServiceInternalToken)
     .toDynamicValue(({ get }) => {
       const savedObjects = get(CoreStart('savedObjects'));
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
       const internalClient = savedObjects.createInternalRepository([
-        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
       ]);
       const esoClient = get(EncryptedSavedObjectsClientToken);
-      return new NotificationPolicySavedObjectService(internalClient, spaces, esoClient);
+      return new ActionPolicySavedObjectService(internalClient, spaces, esoClient);
     })
     .inSingletonScope();
 
@@ -245,8 +243,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(DirectorService).toSelf().inSingletonScope();
   bind(TransitionStrategyFactory).toSelf().inSingletonScope();
 
-  // Strategies are registered via TransitionStrategyToken for multi-injection.
-  // Order matters: specialized strategies first, fallback (BasicTransitionStrategy) last.
   bind(TransitionStrategyToken).to(CountTimeframeStrategy).inSingletonScope();
   bind(TransitionStrategyToken).to(BasicTransitionStrategy).inSingletonScope();
 }

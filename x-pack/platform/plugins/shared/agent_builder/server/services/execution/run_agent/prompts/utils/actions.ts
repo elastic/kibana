@@ -14,8 +14,10 @@ import {
   generateFakeToolCallId,
 } from '@kbn/agent-builder-genai-utils/langchain/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/formatting';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import type {
   AgentErrorAction,
   HandoverAction,
@@ -24,6 +26,7 @@ import type {
 } from '../../actions';
 import {
   isAgentErrorAction,
+  isBackgroundExecutionCompleteAction,
   isHandoverAction,
   isToolCallAction,
   isExecuteToolAction,
@@ -61,6 +64,9 @@ export const formatResearcherActionHistory = ({
     if (isAgentErrorAction(action)) {
       // returns a single [AI, user] tuple
       formatted.push(...formatErrorAction(action));
+    }
+    if (isBackgroundExecutionCompleteAction(action)) {
+      formatted.push(createUserMessage(formatSystemNotice(action.execution)));
     }
   }
 
@@ -130,7 +136,7 @@ const formatErrorAction = ({ error }: AgentErrorAction): BaseMessage[] => {
       createToolCallMessage({ toolCallId, toolName: error.meta.toolName, args: callArgs }),
       createToolResultMessage({
         toolCallId,
-        content: `ERROR: called a tool which was not available - ${error.message}`,
+        content: `ERROR: tool_not_found - called a tool which was not available: ${error.message}`,
       }),
     ];
   }
@@ -144,7 +150,7 @@ const formatErrorAction = ({ error }: AgentErrorAction): BaseMessage[] => {
       createToolCallMessage({ toolCallId, toolName: error.meta.toolName, args: callArgs }),
       createToolResultMessage({
         toolCallId,
-        content: `ERROR: called a tool which was not available - ${error.meta.validationError} ${error.message}`,
+        content: `ERROR: tool_validation_error - called a tool with invalid parameters - ${error.meta.validationError} ${error.message}`,
       }),
     ];
   }
@@ -166,4 +172,28 @@ const isExecutionError = <TCode extends AgentExecutionErrorCode>(
   code: TCode
 ): error is AgentBuilderAgentExecutionError<TCode> => {
   return error.meta.errCode === code;
+};
+
+export const formatSystemNotice = (execution: BackgroundExecutionState): string => {
+  const { status, execution_id: executionId } = execution;
+
+  const outcome = execution.error
+    ? {
+        message: 'A background agent execution has failed.',
+        detail: { tagName: 'error', children: [execution.error.message] },
+      }
+    : {
+        message: 'A background agent execution has completed.',
+        detail: { tagName: 'result', children: [execution.response?.message ?? 'No response'] },
+      };
+
+  return generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      { tagName: 'message', children: [outcome.message] },
+      { tagName: 'execution-id', children: [executionId] },
+      { tagName: 'status', children: [status] },
+      outcome.detail,
+    ],
+  });
 };

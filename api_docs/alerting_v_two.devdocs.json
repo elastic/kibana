@@ -152,10 +152,10 @@
         "label": "PluginConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly ui: Readonly<{} & { enabled: boolean; }>; readonly invalidateApiKeysTask: Readonly<{} & { interval: string; removalDelay: string; }>; }"
+          "{ readonly enabled: boolean; readonly invalidateApiKeysTask: Readonly<{} & { interval: string; removalDelay: string; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting_v2/server/config.ts",
-        "lineNumber": 23,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -12,11 +12,11 @@
 FROM {{{baseImageName}}} AS builder
 
 {{#ubi}}
-RUN microdnf install -y findutils tar gzip
+RUN microdnf install -y findutils tar gzip{{#tarZstd}} zstd{{/tarZstd}}
 {{/ubi}}
 {{#wolfi}}
 RUN for iter in 1 2 3 4 5; do \
-      apk --no-cache add curl && break; \
+      apk --no-cache add curl gnutar{{#tarZstd}} zstd{{/tarZstd}} && break; \
       echo "apk add failed (attempt $iter/5), retrying in $((iter * 10))s..."; \
       sleep $((iter * 10)); \
       [ $iter -eq 5 ] && exit 1; \
@@ -32,14 +32,14 @@ RUN cd /tmp && \
   cd -
 {{/usePublicArtifact}}
 {{^usePublicArtifact}}
-COPY {{artifactTarball}} /tmp/kibana.tar.gz
+COPY {{artifactTarball}} /tmp/kibana.{{tarExt}}
 {{/usePublicArtifact}}
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
 RUN tar \
   --strip-components=1 \
-  -zxf /tmp/kibana.tar.gz
+  {{#tarZstd}}-I zstd -xf{{/tarZstd}}{{^tarZstd}}-zxf{{/tarZstd}} /tmp/kibana.{{tarExt}}
 
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.

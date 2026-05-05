@@ -19,7 +19,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { EmbeddableStateTransfer } from './state_transfer';
 import { setKibanaServices } from './kibana_services';
-import { registerReactEmbeddableFactory } from './react_embeddable_system';
+import { registerEmbeddablePublicDefinition } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
 import type {
   EmbeddableSetup,
@@ -55,7 +55,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
     return {
       registerDrilldown,
-      registerReactEmbeddableFactory,
+      registerEmbeddablePublicDefinition,
       registerAddFromLibraryType,
       registerLegacyURLTransform,
     };

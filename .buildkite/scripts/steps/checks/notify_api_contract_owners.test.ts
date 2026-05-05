@@ -30,6 +30,7 @@ describe('buildCommentBody', () => {
     expect(body).toContain('| `/api/spaces/space` `GET`');
     expect(body).toContain('elasticstack_kibana_space');
     expect(body).toContain('@elastic/kibana-security');
+    expect(body).toContain('| oasdiffId | Source |');
   });
 
   it('deduplicates owners in the cc line', () => {
@@ -85,5 +86,32 @@ describe('buildCommentBody', () => {
 
     expect(body).toContain('| `/api/spaces/space` |');
     expect(body).not.toMatch(/`GET`|`POST`|`PUT`|`DELETE`/);
+  });
+
+  it('renders oasdiffId and source in the table when present', () => {
+    const body = buildCommentBody([
+      entry({
+        oasdiffId: 'request-property-removed',
+        source: '/components/schemas/Output/properties/name',
+      }),
+    ]);
+
+    expect(body).toContain('`request-property-removed`');
+    expect(body).toContain('`/components/schemas/Output/properties/name`');
+  });
+
+  it('renders empty cells when oasdiffId and source are missing', () => {
+    const body = buildCommentBody([entry()]);
+    const dataRow = body.split('\n').find((l) => l.includes('`/api/spaces/space`'))!;
+
+    expect(dataRow).toContain('|  |  |');
+  });
+
+  it('includes granular suppression guidance in the what-to-do section', () => {
+    const body = buildCommentBody([entry()]);
+
+    expect(body).toContain('`oasdiffId`');
+    expect(body).toContain('`source`');
+    expect(body).toContain('scope the allowlist entry');
   });
 });

@@ -115,11 +115,10 @@ export function QuickSearchVisor({
 
     setIsNlLoading(true);
     try {
-      const sourceNames = selectedSources.map((s) => s.label);
       const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
         body: JSON.stringify({
-          query: trimmed,
-          sources: sourceNames.length ? sourceNames : undefined,
+          nlInstruction: trimmed,
+          currentQuery: query,
         }),
       });
       if (result.content) {
@@ -136,14 +135,7 @@ export function QuickSearchVisor({
     } finally {
       setIsNlLoading(false);
     }
-  }, [
-    nlValue,
-    isNlLoading,
-    core.http,
-    core.notifications.toasts,
-    onUpdateAndSubmitQuery,
-    selectedSources,
-  ]);
+  }, [nlValue, isNlLoading, core.http, core.notifications.toasts, onUpdateAndSubmitQuery, query]);
 
   const checkConnectorAvailability = useCallback(async () => {
     if (connectorCheckRef.current) return;

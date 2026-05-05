@@ -483,11 +483,13 @@ export class StreamsClient {
     name,
     where: condition,
     status,
+    draft,
   }: {
     parent: string;
     name: string;
     where: Condition;
     status: RoutingStatus;
+    draft?: boolean;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -513,6 +515,7 @@ export class StreamsClient {
                   destination: name,
                   where: condition,
                   status,
+                  ...(draft ? { draft: true } : {}),
                 }),
               },
             },
@@ -533,6 +536,7 @@ export class StreamsClient {
               wired: {
                 fields: {},
                 routing: [],
+                ...(draft ? { draft: true } : {}),
               },
               failure_store: { inherit: {} },
             },
@@ -797,6 +801,37 @@ export class StreamsClient {
       create_snapshot_repository:
         privileges.cluster[CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE] === true,
     };
+  }
+
+  async getPrivilegesPerStream(
+    names: string[]
+  ): Promise<Record<string, { read_failure_store: boolean }>> {
+    if (!this.dependencies.isSecurityEnabled) {
+      // Security disabled - all streams have all privileges
+      const result: Record<string, { read_failure_store: boolean }> = {};
+      names.forEach((name) => {
+        result[name] = { read_failure_store: true };
+      });
+      return result;
+    }
+
+    const privileges = await this.dependencies.esClient.security.hasPrivileges({
+      index: [
+        {
+          names,
+          privileges: ['read_failure_store'],
+        },
+      ],
+    });
+
+    const result: Record<string, { read_failure_store: boolean }> = {};
+    names.forEach((name) => {
+      result[name] = {
+        read_failure_store: privileges.index[name]?.read_failure_store ?? false,
+      };
+    });
+
+    return result;
   }
 
   /**

@@ -139,4 +139,25 @@ describe('ExpressionRow', () => {
 
     expect(helpText).toMatchSnapshot();
   });
+
+  it('should include inclusive range comparators in threshold options', async () => {
+    const expression = {
+      metric: 'system.load.1',
+      comparator: COMPARATORS.GREATER_THAN,
+      threshold: [0.5],
+      timeSize: 1,
+      timeUnit: 'm',
+      aggType: 'avg',
+    };
+    const { wrapper, update } = await setup(expression as MetricExpression);
+    wrapper.find('button[data-test-subj="thresholdPopover"]').simulate('click');
+    await update();
+
+    const comparatorOptionValues = wrapper
+      .find('select[data-test-subj="comparatorOptionsComboBox"] option')
+      .map((option) => option.prop('value'));
+
+    expect(comparatorOptionValues).toContain(COMPARATORS.BETWEEN_INCLUSIVE);
+    expect(comparatorOptionValues).toContain(COMPARATORS.NOT_BETWEEN_INCLUSIVE);
+  });
 });

@@ -14,6 +14,7 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
@@ -24,6 +25,8 @@ import { createSearchEmbeddableFactory } from './embeddable';
 import { initializeLocatorServices } from './locator';
 import { registerSampleData } from './sample_data';
 import { getUiSettings } from './ui_settings';
+import { registerAttachments } from './agent_builder/register_attachments';
+import { registerSkill } from './agent_builder/register_skill';
 import type { ConfigSchema } from './config';
 import { appLocatorGetLocationCommon } from '../common/app_locator_get_location';
 import {
@@ -47,6 +50,7 @@ export class DiscoverServerPlugin
   public setup(
     core: CoreSetup,
     plugins: {
+      agentBuilder?: AgentBuilderPluginSetup;
       data: DataPluginSetup;
       embeddable: EmbeddableSetup;
       home?: HomeServerPluginSetup;
@@ -70,7 +74,8 @@ export class DiscoverServerPlugin
     }
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
-    plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(SEARCH_EMBEDDABLE_TYPE, {
+      title: 'Discover session',
       getTransforms: (drilldownTransforms) =>
         getSearchEmbeddableTransforms(drilldownTransforms, () => this.embeddableTransformsEnabled),
       getSchema: (getDrilldownsSchema) =>
@@ -78,6 +83,11 @@ export class DiscoverServerPlugin
           ? getDiscoverSessionEmbeddableSchema(getDrilldownsSchema)
           : undefined,
     });
+
+    if (plugins.agentBuilder) {
+      registerAttachments(plugins.agentBuilder);
+      registerSkill(plugins.agentBuilder);
+    }
 
     core.pricing.registerProductFeatures([
       {

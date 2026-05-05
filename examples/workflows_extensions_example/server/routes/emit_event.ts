@@ -45,8 +45,7 @@ export function registerEmitEventRoute(router: IRouter<ExampleRequestHandlerCont
     async (context, request, response) => {
       try {
         const workflows = await context.workflows;
-        const client = workflows.getWorkflowsClient();
-        await client.emitEvent(CUSTOM_TRIGGER_ID, {
+        await workflows.emitEvent(CUSTOM_TRIGGER_ID, {
           message: request.body.message,
           ...(request.body.source !== undefined && { source: request.body.source }),
           ...(request.body.category !== undefined && { category: request.body.category }),

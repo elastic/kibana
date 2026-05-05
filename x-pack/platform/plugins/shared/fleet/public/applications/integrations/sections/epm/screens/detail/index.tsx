@@ -49,6 +49,7 @@ import {
   useGetSettingsQuery,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
+import { isOnlyAgentlessIntegration } from '../../../../../../../common/services/agentless_policy_helper';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../services';
@@ -436,6 +437,11 @@ export function Detail() {
         integration ?? undefined
       );
 
+      const isAgentlessByDefault =
+        agentlessStatus.isAgentless &&
+        (isOnlyAgentlessIntegration(packageInfo ?? undefined, integration ?? undefined) ||
+          agentlessStatus.isDefaultDeploymentMode);
+
       const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
@@ -445,7 +451,7 @@ export function Detail() {
         pkgkey,
         prerelease,
         isAgentlessIntegration: agentlessStatus.isAgentless,
-        isAgentlessDefault: agentlessStatus.isDefaultDeploymentMode,
+        isAgentlessByDefault,
       });
 
       /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath

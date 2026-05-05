@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -32,6 +32,7 @@ import {
 import { normalizeTitleName } from '../../common/lib/helper_functions';
 import { useTelemetry } from '../telemetry_context';
 import { LicensePaywallCard } from '../license_paywall/license_paywall_card';
+import { AutomaticImportTelemetryEventType } from '../../../common/telemetry/types';
 
 const INTEGRATIONS_APP_ID = 'integrations';
 const INTEGRATIONS_MANAGE_PATH = '/browse?view=manage';
@@ -58,11 +59,18 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
   const [isDeleteIntegrationModalVisible, setIsDeleteIntegrationModalVisible] = useState(false);
   const deleteIntegrationModalTitleId = useGeneratedHtmlId();
   const { reportCancelButtonClicked, reportDoneButtonClicked } = useTelemetry();
+  // Reanalysis updates data streams on the server but not integration form fields, so
+  // useFormIsModified stays false; allow Done so the user can leave after scheduling reanalysis.
+  const [reanalysisJustScheduled, setReanalysisJustScheduled] = useState(false);
 
   const performCancelNavigation = useCallback(() => {
-    reportCancelButtonClicked();
-    navigateToManage();
-  }, [navigateToManage, reportCancelButtonClicked]);
+    reportCancelButtonClicked({ integrationId });
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigateToManage();
+    }
+  }, [integrationId, navigateToManage, reportCancelButtonClicked]);
 
   const handleCancel = useCallback(() => {
     if (shouldOfferIntegrationDelete) {
@@ -90,9 +98,17 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
   }, [deleteIntegrationMutation, integrationId, navigateToManage]);
 
   const handleDone = useCallback(() => {
-    reportDoneButtonClicked();
+    reportDoneButtonClicked({ integrationId });
     submit();
-  }, [reportDoneButtonClicked, submit]);
+  }, [integrationId, reportDoneButtonClicked, submit]);
+
+  const handleDataStreamReanalyzeSuccess = useCallback(() => {
+    setReanalysisJustScheduled(true);
+  }, []);
+
+  useEffect(() => {
+    setReanalysisJustScheduled(false);
+  }, [integrationId]);
 
   return (
     <>
@@ -100,7 +116,7 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
         <KibanaPageTemplate.Header pageTitle={i18n.PAGE_TITLE_NEW_INTEGRATION} />
         <KibanaPageTemplate.Section>
           <ConnectorSelector />
-          <ManagementContents />
+          <ManagementContents onDataStreamReanalyzeSuccess={handleDataStreamReanalyzeSuccess} />
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
       <ButtonsFooter
@@ -108,7 +124,7 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
         isActionDisabled={
           !hasDataStreams ||
           isDeletingDataStream ||
-          (Boolean(integrationId) && !isNewlyCreated && !isFormModified)
+          (Boolean(integrationId) && !isNewlyCreated && !isFormModified && !reanalysisJustScheduled)
         }
         isCancelDisabled={isDeletingDataStream}
         onCancel={handleCancel}
@@ -147,7 +163,21 @@ export const IntegrationManagement = React.memo(() => {
 
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration, isLoading, isError } = useGetIntegrationById(integrationId);
-  const { reportCancelButtonClicked } = useTelemetry();
+  const { reportCancelButtonClicked, sessionId } = useTelemetry();
+  const { telemetry } = services;
+
+  useEffect(() => {
+    if (integrationId) {
+      telemetry?.reportEvent(AutomaticImportTelemetryEventType.EditIntegrationPageLoaded, {
+        sessionId,
+        integrationId,
+      });
+    } else {
+      telemetry?.reportEvent(AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded, {
+        sessionId,
+      });
+    }
+  }, [telemetry, sessionId, integrationId]);
   const { createUpdateIntegrationMutation } = useCreateUpdateIntegration();
 
   const integrationsHomeHref = useMemo(
@@ -160,9 +190,9 @@ export const IntegrationManagement = React.memo(() => {
   }, [application]);
 
   const handlePaywallCancel = useCallback(() => {
-    reportCancelButtonClicked();
+    reportCancelButtonClicked({ integrationId });
     application.navigateToUrl(integrationsHomeHref);
-  }, [application, integrationsHomeHref, reportCancelButtonClicked]);
+  }, [application, integrationId, integrationsHomeHref, reportCancelButtonClicked]);
 
   const initialFormData = useMemo(() => {
     if (!integration) return undefined;

@@ -107,6 +107,7 @@ export class Config {
   public getScoutTestConfig(): ScoutTestConfig {
     return {
       serverless: this.get('serverless'),
+      http2: this.get('http2'),
       uiam: this.get('esServerlessOptions.uiam', false),
       projectType: this.get('serverless')
         ? getProjectType(this.get('kbnTestServer.serverArgs'))

@@ -21,8 +21,19 @@ paths:
     get:
       summary: Get all data views
       operationId: getAllDataViewsDefault
+      description: |
+        Retrieve a list of all data views. Use this endpoint to identify available data views in the current Kibana space.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/data_views" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/data_views
       responses:
         '200':
           description: Indicates a successful call.
@@ -61,8 +72,23 @@ paths:
     post:
       summary: Create a data view
       operationId: createDataViewDefaultw
+      description: |
+        Create a data view. Data views identify the Elasticsearch data you want to explore and visualize. They can point to one or more data streams, indices, or index aliases, and use optional runtime fields to compute values at query time. Note that data views are not required for ES|QL-based visualizations. To learn more, refer to the [data views documentation](https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views).
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/data_views/data_view" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"data_view":{"title":"logstash-*","name":"My Logstash data view"}}'
+        - lang: Console
+          source: |
+            POST kbn://api/data_views/data_view
+            {"data_view":{"title":"logstash-*","name":"My Logstash data view"}}
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -91,8 +117,19 @@ paths:
     get:
       summary: Get a data view
       operationId: getDataViewDefault
+      description: |
+        Retrieve a single data view by its identifier. Data views identify the Elasticsearch data you want to explore and visualize. They can point to one or more data streams, indices, or index aliases, and use optional runtime fields to compute values at query time. Note that data views are not required for ES|QL-based visualizations. To learn more, refer to the [data views documentation](https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views).
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/data_views/data_view/{viewId}
       parameters:
         - $ref: '#/components/parameters/view_id'
       responses:
@@ -115,9 +152,19 @@ paths:
       summary: Delete a data view
       operationId: deleteDataViewDefault
       description: |
-        WARNING: When you delete a data view, it cannot be recovered.
+        Delete a data view by its identifier. WARNING: When you delete a data view, it cannot be recovered.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/data_views/data_view/{viewId}
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/view_id'
@@ -133,8 +180,23 @@ paths:
     post:
       summary: Update a data view
       operationId: updateDataViewDefault
+      description: |
+        Update an existing data view. Only the fields provided in the request body are updated.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"data_view":{"name":"Updated data view name"}}'
+        - lang: Console
+          source: |
+            POST kbn://api/data_views/data_view/{viewId}
+            {"data_view":{"name":"Updated data view name"}}
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/view_id'
@@ -162,12 +224,25 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/data_view/{viewId}/fields:
     post:
-      summary: Update data view fields metadata
+      summary: Update field metadata
       operationId: updateFieldsMetadataDefault
       description: |
-        Update fields presentation metadata such as count, customLabel, customDescription, and format.
+        Update field metadata for a data view. Use this endpoint to set custom labels, custom descriptions, and format overrides for individual fields.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/fields" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"fields":{"field_name":{"customLabel":"My custom label"}}}'
+        - lang: Console
+          source: |
+            POST kbn://api/data_views/data_view/{viewId}/fields
+            {"fields":{"field_name":{"customLabel":"My custom label"}}}
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/view_id'
@@ -206,8 +281,23 @@ paths:
     post:
       summary: Create a runtime field
       operationId: createRuntimeFieldDefault
+      description: |
+        Create a runtime field for a data view. Runtime fields are computed at query time using a [Painless script](https://www.elastic.co/docs/explore-analyze/scripting/modules-scripting-painless) and do not require reindexing. If no `script` is provided, the runtime field returns the corresponding value from the document `_source`.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"name":"hour_of_day","runtimeField":{"type":"long","script":{"source":"emit(doc['"'"'timestamp'"'"'].value.getHour())"}}}'
+        - lang: Console
+          source: |
+            POST kbn://api/data_views/data_view/{viewId}/runtime_field
+            {"name":"hour_of_day","runtimeField":{"type":"long","script":{"source":"emit(doc['timestamp'].value.getHour())"}}}
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/view_id'
@@ -242,8 +332,23 @@ paths:
     put:
       summary: Create or update a runtime field
       operationId: createUpdateRuntimeFieldDefault
+      description: |
+        Create or update a runtime field for a data view. If the runtime field already exists, it is replaced with the new definition.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"name":"hour_of_day","runtimeField":{"type":"long","script":{"source":"emit(doc['"'"'timestamp'"'"'].value.getHour())"}}}'
+        - lang: Console
+          source: |
+            PUT kbn://api/data_views/data_view/{viewId}/runtime_field
+            {"name":"hour_of_day","runtimeField":{"type":"long","script":{"source":"emit(doc['timestamp'].value.getHour())"}}}
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - name: viewId
@@ -298,8 +403,19 @@ paths:
     get:
       summary: Get a runtime field
       operationId: getRuntimeFieldDefault
+      description: |
+        Retrieve a single runtime field by name from a data view.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field/${FIELD_NAME}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/data_views/data_view/{viewId}/runtime_field/{fieldName}
       parameters:
         - $ref: '#/components/parameters/field_name'
         - $ref: '#/components/parameters/view_id'
@@ -327,10 +443,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     delete:
-      summary: Delete a runtime field from a data view
+      summary: Delete a runtime field
       operationId: deleteRuntimeFieldDefault
+      description: |
+        Delete a runtime field from a data view.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field/${FIELD_NAME}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/data_views/data_view/{viewId}/runtime_field/{fieldName}
       parameters:
         - $ref: '#/components/parameters/field_name'
         - $ref: '#/components/parameters/view_id'
@@ -346,8 +474,23 @@ paths:
     post:
       summary: Update a runtime field
       operationId: updateRuntimeFieldDefault
+      description: |
+        Update an existing runtime field in a data view. Only the fields provided in the request body are updated.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field/${FIELD_NAME}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"runtimeField":{"type":"long","script":{"source":"emit(doc['"'"'timestamp'"'"'].value.getHour())"}}}'
+        - lang: Console
+          source: |
+            POST kbn://api/data_views/data_view/{viewId}/runtime_field/{fieldName}
+            {"runtimeField":{"type":"long","script":{"source":"emit(doc['timestamp'].value.getHour())"}}}
       parameters:
         - $ref: '#/components/parameters/field_name'
         - $ref: '#/components/parameters/view_id'
@@ -385,8 +528,19 @@ paths:
     get:
       summary: Get the default data view
       operationId: getDefaultDataViewDefault
+      description: |
+        Retrieve the identifier of the default data view for the current Kibana space.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/data_views/default" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/data_views/default
       responses:
         '200':
           description: Indicates a successful call.
@@ -409,8 +563,23 @@ paths:
     post:
       summary: Set the default data view
       operationId: setDefaultDatailViewDefault
+      description: |
+        Set the default data view for the current Kibana space. The default data view is used as a fallback when no specific data view is selected.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/data_views/default" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"data_view_id":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","force":true}'
+        - lang: Console
+          source: |
+            POST kbn://api/data_views/default
+            {"data_view_id":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","force":true}
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -455,9 +624,22 @@ paths:
       summary: Swap saved object references
       operationId: swapDataViewsDefault
       description: |
-        Changes saved object references from one data view identifier to another. WARNING: Misuse can break large numbers of saved objects! Practicing with a backup is recommended.
+        Swap saved object references from one data view to another. Use this endpoint to update dashboards, visualizations, and other saved objects that reference a data view. WARNING: Misuse can break large numbers of saved objects! Use the [`_preview`](https://www.elastic.co/docs/api/doc/kibana/operation/operation-previewswapdataviewsdefault) endpoint to see which saved objects would be affected before making changes.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/data_views/swap_references" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"fromId":"abcd-efg","toId":"xyz-123","delete":true}'
+        - lang: Console
+          source: |
+            POST kbn://api/data_views/swap_references
+            {"fromId":"abcd-efg","toId":"xyz-123","delete":true}
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -497,12 +679,25 @@ paths:
                           description: The saved object type.
   /api/data_views/swap_references/_preview:
     post:
-      summary: Preview a saved object reference swap
+      summary: Preview swap references
       operationId: previewSwapDataViewsDefault
       description: |
-        Preview the impact of swapping saved object references from one data view identifier to another.
+        Preview the effect of swapping saved object references from one data view to another. Returns the list of affected saved objects without making any changes.
       tags:
         - data views
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/data_views/swap_references/_preview" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"fromId":"abcd-efg","toId":"xyz-123"}'
+        - lang: Console
+          source: |
+            POST kbn://api/data_views/swap_references/_preview
+            {"fromId":"abcd-efg","toId":"xyz-123"}
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -537,6 +732,7 @@ components:
   examples:
     get_data_views_response:
       summary: The get all data views API returns a list of data views.
+      description: A list of available data views including their identifiers, names, and index patterns.
       value:
         data_view:
           - id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
@@ -557,6 +753,7 @@ components:
             name: Kibana Sample Data Logs
     create_data_view_request:
       summary: Create a data view with runtime fields.
+      description: Create a data view for logstash indices that includes a runtime field which extracts the shape name from a source field.
       value:
         data_view:
           title: logstash-*
@@ -568,6 +765,7 @@ components:
                 source: emit(doc['shape_name'].value)
     get_data_view_response:
       summary: The get data view API returns a JSON object that contains information about the data view.
+      description: A complete data view object including all fields, runtime fields, and metadata.
       value:
         data_view:
           id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
@@ -1495,6 +1693,7 @@ components:
             - default
     update_data_view_request:
       summary: Update some properties for a data view.
+      description: Update the title, time field, and other properties of an existing data view.
       value:
         data_view:
           title: kibana_sample_data_ecommerce
@@ -1504,6 +1703,7 @@ components:
         refresh_fields: true
     update_field_metadata_request:
       summary: Update metadata for multiple fields.
+      description: Update the popularity count, custom label, and custom description for specific fields in a data view.
       value:
         fields:
           field1:
@@ -1514,6 +1714,7 @@ components:
             customDescription: Field 2 description
     create_runtime_field_request:
       summary: Create a runtime field.
+      description: Create a long-type runtime field that emits a value derived from the foo source field.
       value:
         name: runtimeFoo
         runtimeField:
@@ -1522,6 +1723,7 @@ components:
             source: emit(doc["foo"].value)
     get_runtime_field_response:
       summary: The get runtime field API returns a JSON object that contains information about the runtime field (`hour_of_day`) and the data view (`d3d7af60-4c81-11e8-b3d7-01146121b73d`).
+      description: The runtime field definition along with the parent data view.
       value:
         fields:
           - count: 0
@@ -2021,27 +2223,32 @@ components:
           name: Kibana Sample Data Flights
     update_runtime_field_request:
       summary: Update an existing runtime field on a data view.
+      description: Update the script of an existing runtime field.
       value:
         runtimeField:
           script:
             source: emit(doc["bar"].value)
     get_default_data_view_response:
       summary: The get default data view API returns the default data view identifier.
+      description: The identifier of the default data view for the current Kibana space.
       value:
         data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
     set_default_data_view_request:
       summary: Set the default data view identifier.
+      description: Set the default data view, using the force flag to overwrite an existing default.
       value:
         data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
         force: true
     swap_data_view_request:
       summary: Swap references from data view ID "abcd-efg" to "xyz-123" and remove the data view that is no longer referenced.
+      description: Swap all saved object references from one data view to another and delete the source data view afterward.
       value:
         fromId: abcd-efg
         toId: xyz-123
         delete: true
     preview_swap_data_view_request:
       summary: Preview swapping references from data view ID "abcd-efg" to "xyz-123".
+      description: Preview the saved objects that would be affected by swapping references from one data view to another.
       value:
         fromId: abcd-efg
         toId: xyz-123

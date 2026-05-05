@@ -13,40 +13,42 @@ import { getMockPresentationContainer } from '@kbn/presentation-publishing/inter
 import type { PublishesDataViews, PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React, { useImperativeHandle } from 'react';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { PresentationPanel } from '.';
 import { uiActions } from '../kibana_services';
-import { getMockPresentationPanelCompatibleComponent } from '../mocks';
 import * as openCustomizePanel from '../panel_actions/customize_panel_action/open_customize_panel';
-import type {
-  DefaultPresentationPanelApi,
-  PanelCompatibleComponent,
-  PresentationPanelInternalProps,
-} from './types';
+import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
 import { EuiThemeProvider } from '@elastic/eui';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 describe('Presentation panel', () => {
+  function getComponent(api?: DefaultPresentationPanelApi) {
+    return async () => ({
+      Component: () => (
+        <div data-test-subj="testPresentationPanelInternalComponent">This is a test component</div>
+      ),
+      componentApi: api ?? { uuid: 'test' },
+    });
+  }
+
   const editPanelSpy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
 
   const renderPresentationPanel = async ({
     props,
     api,
   }: {
-    props?: Omit<PresentationPanelInternalProps, 'Component'>;
+    props?: Omit<PresentationPanelInternalProps, 'Component' | 'componentApi'>;
     api?: DefaultPresentationPanelApi;
   }) => {
-    render(
-      <PresentationPanel {...props} Component={getMockPresentationPanelCompatibleComponent(api)} />
-    );
+    render(<PresentationPanel {...props} getComponent={getComponent(api)} />);
     await waitFor(() => {
       expect(screen.getByTestId('embeddablePanel')).toBeInTheDocument();
     });
   };
 
   it('renders internal component', async () => {
-    render(<PresentationPanel Component={getMockPresentationPanelCompatibleComponent()} />);
+    await renderPresentationPanel({});
     await waitFor(() =>
       expect(screen.getByTestId('testPresentationPanelInternalComponent')).toBeInTheDocument()
     );
@@ -60,7 +62,7 @@ describe('Presentation panel', () => {
     };
     render(
       <EuiThemeProvider>
-        <PresentationPanel Component={getMockPresentationPanelCompatibleComponent(api)} />
+        <PresentationPanel getComponent={getComponent(api)} />
       </EuiThemeProvider>
     );
     await waitFor(() => expect(screen.getByTestId('embeddableError')).toBeInTheDocument());
@@ -72,15 +74,14 @@ describe('Presentation panel', () => {
       throw new Error('simulated error during rendering');
       return <div />;
     }
-    function getComponent(api?: DefaultPresentationPanelApi): Promise<PanelCompatibleComponent> {
-      return Promise.resolve(
-        React.forwardRef((_, apiRef) => {
-          useImperativeHandle(apiRef, () => api ?? { uuid: 'test' });
-          return <ComponentThatThrows />;
-        })
-      );
-    }
-    render(<PresentationPanel Component={getComponent()} />);
+    render(
+      <PresentationPanel
+        getComponent={async () => ({
+          Component: ComponentThatThrows,
+          componentApi: { uuid: 'test' },
+        })}
+      />
+    );
     await waitFor(() => expect(screen.getByTestId('euiErrorBoundary')).toBeInTheDocument());
   });
 
@@ -369,10 +370,7 @@ describe('Presentation panel', () => {
       };
       const { container } = render(
         <EuiThemeProvider>
-          <PresentationPanel
-            Component={getMockPresentationPanelCompatibleComponent(api)}
-            titleHighlight="cpu"
-          />
+          <PresentationPanel getComponent={getComponent(api)} titleHighlight="cpu" />
         </EuiThemeProvider>
       );
       await waitFor(() => {

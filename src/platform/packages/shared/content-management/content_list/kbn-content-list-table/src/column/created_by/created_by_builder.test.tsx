@@ -110,15 +110,24 @@ describe('created by column builder', () => {
     expect(result).toBeUndefined();
   });
 
-  it('uses custom title and width when provided', () => {
+  it('uses custom title and layout props when provided', () => {
     const result = buildCreatedByColumn(
-      { columnTitle: 'Owner', width: '72px' } satisfies CreatedByColumnProps,
+      {
+        columnTitle: 'Owner',
+        width: '8em',
+        minWidth: '8em',
+        maxWidth: '12em',
+        truncateText: true,
+      } satisfies CreatedByColumnProps,
       defaultContext
     );
 
     expect(result).toMatchObject({
       name: 'Owner',
-      width: '72px',
+      width: '8em',
+      minWidth: '8em',
+      maxWidth: '12em',
+      truncateText: true,
     });
   });
 

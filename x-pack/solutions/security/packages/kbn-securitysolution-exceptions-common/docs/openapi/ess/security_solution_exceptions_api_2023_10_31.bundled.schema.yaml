@@ -31,6 +31,30 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              addItems:
+                value:
+                  items:
+                    - description: This is a sample detection type exception item.
+                      entries:
+                        - field: actingProcess.file.signer
+                          operator: excluded
+                          type: exists
+                        - field: host.name
+                          operator: included
+                          type: match_any
+                          value:
+                            - saturn
+                            - jupiter
+                      item_id: simple_list_item
+                      list_id: simple_list
+                      name: Sample Exception List Item
+                      namespace_type: single
+                      os_types:
+                        - linux
+                      tags:
+                        - malware
+                      type: simple
             schema:
               example:
                 items:
@@ -192,7 +216,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - examples:
+        - description: >
+            `single` deletes the list in the current Kibana space; `agnostic`
+            deletes a global list. Must match the
+
+            list you are removing when using `list_id` or `id`.
+          examples:
             agnostic:
               value: agnostic
             single:
@@ -326,7 +355,13 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - examples:
+        - description: >
+            When `single`, the list is resolved in the current Kibana space.
+            When `agnostic`, the list is a global
+
+            (space-agnostic) container. Required for looking up the correct list
+            when `list_id` is not unique.
+          examples:
             agnostic:
               value: agnostic
             single:
@@ -457,6 +492,18 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createDetection:
+                value:
+                  description: This is a sample detection type exception list.
+                  list_id: simple_list
+                  name: Sample Detection Exception List
+                  namespace_type: single
+                  os_types:
+                    - linux
+                  tags:
+                    - malware
+                  type: detection
             schema:
               example:
                 description: This is a sample detection type exception list.
@@ -658,6 +705,18 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              fullReplace:
+                value:
+                  description: Different description
+                  list_id: simple_list
+                  name: Updated exception list name
+                  os_types:
+                    - linux
+                  tags:
+                    - draft
+                    - malware
+                  type: detection
             schema:
               example:
                 description: Different description
@@ -807,12 +866,16 @@ paths:
       description: Duplicate an existing exception list.
       operationId: DuplicateExceptionList
       parameters:
-        - in: query
+        - description: The `list_id` of the existing exception list to copy (source list).
+          in: query
           name: list_id
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - examples:
+        - description: >-
+            Scope in which the source list is defined (`single` = current space,
+            `agnostic` = all spaces).
+          examples:
             agnostic:
               value: agnostic
             single:
@@ -916,14 +979,21 @@ paths:
               examples:
                 notFound:
                   value:
-                    message": 'exception list id: "foo" does not exist'
-                    status_code": 404
+                    message: 'exception list id: "foo" does not exist'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Exception list not found
         '405':
           content:
             application/json:
+              examples:
+                notAllowed:
+                  value:
+                    message: >-
+                      Cannot duplicate: list is immutable or the operation is
+                      not allowed in this state
+                    status_code: 405
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list to duplicate not found response
@@ -946,17 +1016,26 @@ paths:
       description: Export an exception list and its associated items to an NDJSON file.
       operationId: ExportExceptionList
       parameters:
-        - in: query
+        - description: >-
+            Exception list's internal `id` (UUID) returned on create; use with
+            `list_id` and `namespace_type` for an unambiguous target.
+          in: query
           name: id
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionListId'
-        - in: query
+        - description: >-
+            Human-readable `list_id` of the exception list to export, as shown
+            in the UI and API responses.
+          in: query
           name: list_id
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - examples:
+        - description: >
+            `single` exports a list in the current Kibana space; `agnostic`
+            exports a global (space-agnostic) list.
+          examples:
             agnostic:
               value: agnostic
             single:
@@ -1308,6 +1387,10 @@ paths:
       requestBody:
         content:
           multipart/form-data:
+            examples:
+              ndjsonUpload:
+                value:
+                  file: exception_lists.ndjson
             schema:
               type: object
               properties:
@@ -1404,6 +1487,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      Multipart part `file` is required and must contain a valid
+                      .ndjson exception list export
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1477,7 +1568,11 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListItemHumanId'
-        - examples:
+        - description: >
+            `single` deletes the item in the current Kibana space; `agnostic`
+            deletes an item in a space-agnostic list. Must match the list that
+            owns the item.
+          examples:
             agnostic:
               value: agnostic
             single:
@@ -1529,13 +1624,15 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
+                    statusCode: 400
               schema:
-                example:
-                  error: Bad Request
-                  message: >-
-                    [request query]: namespace_type.0: Invalid enum value.
-                    Expected 'agnostic' | 'single', received 'blob'
-                  statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
                   - $ref: '#/components/schemas/SiemErrorResponse'
@@ -1621,7 +1718,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListItemHumanId'
-        - examples:
+        - description: >
+            `single` fetches the item in the current space; `agnostic` fetches a
+            global (space-agnostic) item. Must
+
+            match how the list was created.
+          examples:
             agnostic:
               value: agnostic
             single:
@@ -1756,6 +1858,23 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              simpleItem:
+                value:
+                  description: This is a sample detection type exception item.
+                  entries:
+                    - field: actingProcess.file.signer
+                      operator: excluded
+                      type: exists
+                  item_id: simple_list_item
+                  list_id: simple_list
+                  name: Sample Exception List Item
+                  namespace_type: single
+                  os_types:
+                    - linux
+                  tags:
+                    - malware
+                  type: simple
             schema:
               oneOf:
                 - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
@@ -2049,6 +2168,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              updateItem:
+                value:
+                  description: Updated description
+                  id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                  name: Updated name
+                  namespace_type: single
+                  type: simple
             schema:
               oneOf:
                 - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
@@ -2220,7 +2347,10 @@ paths:
             items:
               $ref: '#/components/schemas/ExceptionNamespaceType'
             type: array
-        - in: query
+        - description: >
+            Free-text search term applied to exception list item fields (for
+            example a hostname or file path fragment).
+          in: query
           name: search
           required: false
           schema:
@@ -2413,7 +2543,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - examples:
+        - description: >
+            `single` returns summary for a list in the current space; `agnostic`
+            for a space-agnostic list. Must
+
+            line up with `id` / `list_id` used to look up the list.
+          examples:
             agnostic:
               value: agnostic
             single:
