@@ -8,22 +8,12 @@
 import { renderHook } from '@testing-library/react';
 import { useUnifiedWaterfallFetcher } from './use_unified_waterfall_fetcher';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
-import * as useKibanaModule from '../../../context/kibana_context/use_kibana';
 
 describe('useUnifiedWaterfallFetcher', () => {
   const mockUseFetcher = jest.spyOn(useFetcherModule, 'useFetcher');
-  const mockUseKibana = jest.spyOn(useKibanaModule, 'useKibana');
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // By default, useUnified = true (enabled) for most tests
-    mockUseKibana.mockReturnValue({
-      services: {
-        uiSettings: {
-          get: jest.fn().mockReturnValue(true),
-        },
-      },
-    } as any);
   });
 
   it('returns initial data when fetch has not started', () => {
@@ -172,41 +162,6 @@ describe('useUnifiedWaterfallFetcher', () => {
     expect(mockCallApmApi).not.toHaveBeenCalled();
   });
 
-  it('does not call API when useUnified is false (default)', () => {
-    // useUnified = false means legacy is used, so unified fetcher should skip API call
-    mockUseKibana.mockReturnValue({
-      services: {
-        uiSettings: {
-          get: jest.fn().mockReturnValue(false),
-        },
-      },
-    } as any);
-
-    mockUseFetcher.mockReturnValue({
-      data: undefined,
-      status: useFetcherModule.FETCH_STATUS.NOT_INITIATED,
-      error: undefined,
-      refetch: jest.fn(),
-    });
-
-    renderHook(() =>
-      useUnifiedWaterfallFetcher({
-        start: '2025-01-15T00:00:00.000Z',
-        end: '2025-01-15T01:00:00.000Z',
-        traceId: 'trace-123',
-        entryTransactionId: 'tx-1',
-      })
-    );
-
-    const fetcherFn = mockUseFetcher.mock.calls[0][0];
-    const mockCallApmApi = jest.fn();
-
-    const result = fetcherFn(mockCallApmApi, {} as AbortSignal);
-
-    expect(result).toBeUndefined();
-    expect(mockCallApmApi).not.toHaveBeenCalled();
-  });
-
   it('calls API with correct parameters when all params are provided', () => {
     mockUseFetcher.mockReturnValue({
       data: undefined,
@@ -269,7 +224,6 @@ describe('useUnifiedWaterfallFetcher', () => {
       '2025-01-15T01:00:00.000Z',
       'tx-1',
       'test-service',
-      true,
     ]);
   });
 });
