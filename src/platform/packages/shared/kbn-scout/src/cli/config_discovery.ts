@@ -13,7 +13,12 @@ import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { saveFlattenedConfigGroups, saveModuleDiscoveryInfo } from '../tests_discovery/file_utils';
-import { markModulesAffectedStatus } from '../tests_discovery/affected_modules';
+import {
+  filterModulesByAffectedConfigs,
+  markModulesAffectedStatusFromSet,
+} from '../tests_discovery/affected_modules';
+import { resolveScoutTestingScope } from '../tests_discovery/testing_scope';
+import { readCodeChanges } from '../tests_discovery/code_changes';
 import {
   filterModulesByScoutCiConfig,
   getScoutCiExcludedConfigs,
@@ -254,38 +259,56 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const flatten = flagsReader.boolean('flatten');
   const includeCustomServers = flagsReader.boolean('include-custom-servers');
   const selectiveTesting = flagsReader.boolean('selective-testing');
-  const affectedModulesPath = flagsReader.string('affected-modules');
+  const codeChangesPath = flagsReader.string('code-changes');
 
-  if (selectiveTesting && !affectedModulesPath) {
+  if (selectiveTesting && !codeChangesPath) {
     throw createFailError(
-      '--selective-testing requires --affected-modules (JSON array of @kbn/ IDs from list_affected).'
+      '--selective-testing requires --code-changes (JSON file with mergeBase, changedFiles, affectedModules).'
     );
   }
 
-  // Build initial module discovery info
+  // Resolve a shape-agnostic testing scope for this run. The resolver owns
+  // the critical-files / tests-only / dependency-tree decision tree so other
+  // Scout CLIs (e.g. create-test-tracks) can reuse it.
+  const codeChanges = codeChangesPath ? readCodeChanges(codeChangesPath) : null;
+  const scope = resolveScoutTestingScope(codeChanges, selectiveTesting, log);
+
+  // Build initial module discovery info.
   const modulesWithTests = buildModuleDiscoveryInfo();
 
-  // --affected-modules: keep every Scout module that passes target/CI filters; set isAffected
-  // per module so CI step labels can use an "affected " prefix where the PR touched that @kbn/ ID.
-  const modulesAfterAffectedMark = affectedModulesPath
-    ? markModulesAffectedStatus(modulesWithTests, affectedModulesPath, log)
+  // Annotate every module with isAffected so CI step labels can carry an
+  // "affected " prefix even on full-suite runs that pass code-changes info.
+  // Marking is independent of the testing scope.
+  const modulesAfterMark = codeChanges
+    ? markModulesAffectedStatusFromSet(modulesWithTests, new Set(codeChanges.affectedModules), log)
     : modulesWithTests;
 
-  // --selective-testing: narrow to affected module groups only.
-  const limitDiscoveryToAffectedModules = selectiveTesting;
-
-  const modulesForTargetTags = limitDiscoveryToAffectedModules
-    ? modulesAfterAffectedMark.filter((m) => m.isAffected === true)
-    : modulesAfterAffectedMark;
-
-  if (limitDiscoveryToAffectedModules) {
-    log.info(
-      `Selective testing: Scout discovery limited to affected modules (${modulesForTargetTags.length} of ${modulesAfterAffectedMark.length})`
-    );
-  } else {
-    log.info(
-      `Full suite run: all ${modulesAfterAffectedMark.length} discovered module(s) will be included (selective testing is disabled)`
-    );
+  // Translate the scope into a concrete module list for the target-tag step.
+  let modulesForTargetTags: ModuleDiscoveryInfo[];
+  switch (scope.kind) {
+    case 'full':
+      modulesForTargetTags = modulesAfterMark;
+      if (scope.reason === 'selective-disabled' && !codeChanges) {
+        log.info(
+          `Full suite run: all ${modulesAfterMark.length} discovered module(s) will be included (selective testing is disabled)`
+        );
+      }
+      break;
+    case 'tests-only':
+      modulesForTargetTags = filterModulesByAffectedConfigs(
+        modulesAfterMark,
+        scope.affectedConfigPaths
+      );
+      log.info(
+        `Selective testing: Scout discovery limited to affected configs (${modulesForTargetTags.length} module(s))`
+      );
+      break;
+    case 'dependency-tree':
+      modulesForTargetTags = modulesAfterMark.filter((m) => m.isAffected === true);
+      log.info(
+        `Selective testing: Scout discovery limited to affected modules (${modulesForTargetTags.length} of ${modulesAfterMark.length})`
+      );
+      break;
   }
 
   // Filter modules by target tags and compute server run flags
@@ -328,10 +351,14 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
  * - Standard: Lists modules grouped by plugin/package with their configs and tags
  * - Flattened: Groups configs by deployment mode (stateful/serverless), group, and run mode
  *
- * Affected modules:
- * - With --affected-modules, all modules are still considered; isAffected flags drive the
- *   "affected " Buildkite step prefix. With --selective-testing, only affected module groups
- *   are emitted; those steps keep the same prefix.
+ * Selective testing (PR pipelines):
+ * - With --code-changes <file> alone, every module is annotated with isAffected so CI
+ *   step labels can carry an "affected " prefix.
+ * - Adding --selective-testing narrows the output to one of three auto-selected modes:
+ *     1. Full suite — critical Scout files touched (selective testing skipped, full run)
+ *     2. Tests-only fast path — every changed file lives in a Scout test scope; only
+ *        the Playwright configs owning those files are emitted
+ *     3. Dependency-tree mode — filter by affected @kbn/ modules (graph traversal)
  */
 export const discoverPlaywrightConfigsCmd: Command<void> = {
   name: 'discover-playwright-configs',
@@ -349,13 +376,14 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
                               - 'local-stateful-only': @local-stateful-* tags only
                               - 'mki': @cloud-serverless-* tags
                               - 'ech': @cloud-stateful-* tags
-    --affected-modules <file>  Path to a JSON file of affected @kbn/ module IDs (list_affected).
-                              All Scout modules still go through discovery; each module is marked
-                              isAffected so CI can prefix steps with "affected " when the PR
-                              touches that module. Combine with --selective-testing to emit only
-                              affected module groups.
-    --selective-testing       Requires --affected-modules.
-                              Limits output / Scout CI steps to affected modules; labels unchanged.
+    --code-changes <file>     Path to a JSON file describing the PR's diff:
+                                { "mergeBase": string, "changedFiles": string[],
+                                  "affectedModules": string[] }
+                              On its own: marks isAffected on each module (no filtering).
+                              With --selective-testing: auto-selects between the
+                              critical-files / tests-only fast path / dependency-tree modes.
+    --selective-testing       Narrow the output to only the modules/configs the PR's diff
+                              actually affects. Requires --code-changes.
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
     --validate                Validate that all discovered modules are registered in Scout CI config
     --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
@@ -369,35 +397,23 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
     # Discover configs for local targets (@local-*)
     node scripts/scout discover-playwright-configs --target local
 
-    # Discover only local stateful configs (@local-stateful-*)
-    node scripts/scout discover-playwright-configs --target local-stateful-only
-
-    # Discover cloud serverless configs (@cloud-serverless-*)
-    node scripts/scout discover-playwright-configs --target mki
-
-    # Discover cloud stateful configs (@cloud-stateful-*)
-    node scripts/scout discover-playwright-configs --target ech
-
-    # Discover local custom-server configs only
-    node scripts/scout discover-playwright-configs --include-custom-servers
-
-    # Validate discovered configs against CI configuration
-    node scripts/scout discover-playwright-configs --validate
-
     # Save filtered configs for CI use
     node scripts/scout discover-playwright-configs --save
 
+    # PR pipeline: selective testing with auto-selected mode (tests-only / dep-tree)
+    node scripts/scout discover-playwright-configs \\
+      --code-changes .scout/code_changes.json \\
+      --selective-testing --save
+
+    # Full suite + "affected" labels (no filtering, just labeling)
+    node scripts/scout discover-playwright-configs \\
+      --code-changes .scout/code_changes.json --save
+
     # Save flattened configs for Cloud test execution
     node scripts/scout discover-playwright-configs --flatten --save
-
-    # Affected-module labels on every Scout group (full CI matrix)
-    node scripts/scout discover-playwright-configs --affected-modules .scout/affected_modules.json --save
-
-    # Only affected module groups (selective testing for PRs)
-    node scripts/scout discover-playwright-configs --affected-modules .scout/affected_modules.json --selective-testing --save
   `,
   flags: {
-    string: ['target', 'affected-modules'],
+    string: ['target', 'code-changes'],
     boolean: ['save', 'validate', 'flatten', 'include-custom-servers', 'selective-testing'],
     default: {
       target: 'all',

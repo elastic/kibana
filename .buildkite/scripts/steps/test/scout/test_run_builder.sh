@@ -69,32 +69,32 @@ else
   export AFFECTED_MERGE_BASE="${GITHUB_PR_MERGE_BASE:-HEAD~1}"
 
   mkdir -p .scout
-  export AFFECTED_MODULES_FILE=".scout/affected_modules.json"
+  export CODE_CHANGES_FILE=".scout/code_changes.json"
 
-  # Computes affected modules (writes AFFECTED_MODULES_FILE) and checks whether
-  # any critical Scout files were touched.
-  SCOUT_CRITICAL_FILES_TOUCHED=$(ts-node "$(dirname "${0}")/resolve_selective_testing.ts")
-  echo "Critical Scout files touched: ${SCOUT_CRITICAL_FILES_TOUCHED}"
+  # Build the generic code-changes file (changed files + affected @kbn/ modules)
+  # that the Scout CLI will use to auto-select between the tests-only fast path
+  # and the dependency-tree fallback.
+  ts-node "$(dirname "${0}")/resolve_selective_testing.ts"
 
-  echo "--- Discover Playwright Configs and upload to Buildkite artifacts (affected modules detected)"
+  echo "--- Discover Playwright Configs and upload to Buildkite artifacts"
   SELECTIVE_SCOUT_DISCOVERY_FLAG=()
   if [[ "${SELECTIVE_TESTING_ENABLED:-}" == "true" ]] \
-    && ! is_pr_with_label "scout:run-all-tests" \
-    && [[ "$SCOUT_CRITICAL_FILES_TOUCHED" != "true" ]]; then
+    && ! is_pr_with_label "scout:run-all-tests"; then
     SELECTIVE_SCOUT_DISCOVERY_FLAG=(--selective-testing)
-    echo "Selective testing: enabled (--selective-testing flag will be passed to discover-playwright-configs)"
+    echo "Selective testing: enabled (Scout CLI will auto-select tests-only / dependency-tree mode based on the diff)"
   else
-    echo "Selective testing is disabled"
-    echo "Reason: SELECTIVE_TESTING_ENABLED=${SELECTIVE_TESTING_ENABLED:-false}, 'scout:run-all-tests' label=$(is_pr_with_label "scout:run-all-tests" && echo yes || echo no), 'critical files touched'=${SCOUT_CRITICAL_FILES_TOUCHED}"
+    echo "Selective testing: disabled"
+    echo "Reason: SELECTIVE_TESTING_ENABLED=${SELECTIVE_TESTING_ENABLED:-false}, 'scout:run-all-tests' label=$(is_pr_with_label "scout:run-all-tests" && echo yes || echo no)"
   fi
   node scripts/scout discover-playwright-configs \
     --include-custom-servers \
     --target "$SCOUT_DISCOVERY_TARGET" \
-    --affected-modules "$AFFECTED_MODULES_FILE" \
+    --code-changes "$CODE_CHANGES_FILE" \
     "${SELECTIVE_SCOUT_DISCOVERY_FLAG[@]}" \
     --save
   cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
   buildkite-agent artifact upload "scout_playwright_configs.json"
+  buildkite-agent artifact upload "$CODE_CHANGES_FILE"
 fi
 
 source .buildkite/scripts/steps/test/scout/upload_report_events.sh

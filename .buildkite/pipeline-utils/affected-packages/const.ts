@@ -50,19 +50,6 @@ export const CRITICAL_FILES_JEST_INTEGRATION_TESTS = [
   '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
 ];
 
-export const CRITICAL_FILES_SCOUT = [
-  'package.json',
-  'yarn.lock',
-  'tsconfig.json',
-  '.node-version',
-  '.nvmrc',
-  'src/setup_node_env/**/*',
-  'packages/kbn-babel-preset/**/*',
-  'src/platform/packages/shared/kbn-repo-info/**/*',
-  'src/platform/packages/shared/kbn-scout/**/*',
-  'src/platform/packages/private/kbn-scout-reporting/**/*',
-  'scripts/scout.js',
-  '.buildkite/scripts/steps/test/scout/**/*',
-  '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
-  '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
-];
+// CRITICAL_FILES_SCOUT was moved to '@kbn/scout-info' and is consumed by
+// `node scripts/scout discover-playwright-configs --change-summary` (the
+// Scout CLI now owns Scout-specific selective-testing decisions).
