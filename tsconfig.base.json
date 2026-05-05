@@ -120,6 +120,8 @@
       "@kbn/analytics-ftr-helpers-plugin/*": ["src/platform/test/analytics/plugins/analytics_ftr_helpers/*"],
       "@kbn/analytics-plugin-a-plugin": ["src/platform/test/analytics/plugins/analytics_plugin_a"],
       "@kbn/analytics-plugin-a-plugin/*": ["src/platform/test/analytics/plugins/analytics_plugin_a/*"],
+      "@kbn/announcement": ["src/platform/packages/shared/shared-ux/display/kbn-announcement"],
+      "@kbn/announcement/*": ["src/platform/packages/shared/shared-ux/display/kbn-announcement/*"],
       "@kbn/anonymization-common": ["x-pack/platform/packages/shared/ai-infra/anonymization-common"],
       "@kbn/anonymization-common/*": ["x-pack/platform/packages/shared/ai-infra/anonymization-common/*"],
       "@kbn/anonymization-plugin": ["x-pack/platform/plugins/shared/anonymization"],
