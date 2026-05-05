@@ -378,6 +378,7 @@ export const getESQL = (
   const rangeClause = [lower, upper].filter(Boolean).join(' and ');
 
   const query = /* SQL */ `
+  SET unmapped_fields="nullify";
   FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND KQL("${rangeClause}")
     | RENAME kibana.alert.risk_score as risk_score,
@@ -547,6 +548,7 @@ export const getBaseScoreESQL = (
   const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
 
   const query = /* esql */ `
+  SET unmapped_fields="nullify";
   FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
@@ -605,6 +607,7 @@ export const getBaseScoreESQLByIds = (
   const idsClause = entityIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
 
   const query = /* esql */ `
+  SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
@@ -688,6 +691,7 @@ export const getResolutionScoreESQLByIds = (
   const idsClause = resolutionTargetIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
 
   const query = /* esql */ `
+  SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
