@@ -7,7 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DEFAULT_EXTERNAL_LINK_OPTIONS = {
-  encode_url: true,
-  open_in_new_tab: true,
-};
+export { withPerformanceMetrics } from './with_performance_metrics';
+export type { PerformanceMetricsOptions } from './with_performance_metrics';
