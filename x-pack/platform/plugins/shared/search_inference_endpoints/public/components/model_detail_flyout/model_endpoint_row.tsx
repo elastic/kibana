@@ -109,7 +109,9 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
               {preconfigured ? (
                 <>
                   <EuiScreenReaderOnly>
-                    <span id={preconfiguredTooltipDescriptionId}>{preconfiguredTooltipContent}</span>
+                    <span id={preconfiguredTooltipDescriptionId}>
+                      {preconfiguredTooltipContent}
+                    </span>
                   </EuiScreenReaderOnly>
                   <EuiToolTip content={preconfiguredTooltipContent}>
                     <span
