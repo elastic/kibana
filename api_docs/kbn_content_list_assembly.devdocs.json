@@ -89,7 +89,7 @@
           "<TName>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-        "lineNumber": 198,
+        "lineNumber": 197,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -107,7 +107,7 @@
               "TName"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-            "lineNumber": 208,
+            "lineNumber": 207,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -137,7 +137,7 @@
               "<TPresetMap, TOutput, TContext>"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-            "lineNumber": 211,
+            "lineNumber": 210,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -152,7 +152,7 @@
                   "- The part definition."
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 239,
+                "lineNumber": 238,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -167,7 +167,7 @@
                       "- Part name (e.g., `'column'`, `'filter'`)."
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                    "lineNumber": 240,
+                    "lineNumber": 239,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -208,7 +208,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-            "lineNumber": 243,
+            "lineNumber": 242,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -226,7 +226,7 @@
                   "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 266,
+                "lineNumber": 265,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "ReactNode",
@@ -243,7 +243,7 @@
                   "- Optional parsing options."
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 267,
+                "lineNumber": 266,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -261,7 +261,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                    "lineNumber": 267,
+                    "lineNumber": 266,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -286,7 +286,7 @@
           "\nA non-part child from the React tree.\n\nPassthrough children that are not declarative parts (e.g., plain text,\nunknown components) are preserved in source order."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
-        "lineNumber": 59,
+        "lineNumber": 69,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -304,7 +304,7 @@
               "\"child\""
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
-            "lineNumber": 66,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -322,7 +322,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
-            "lineNumber": 68,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -428,6 +428,44 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.ParsedPart.componentType",
+            "type": "Function",
+            "tags": [],
+            "label": "componentType",
+            "description": [
+              "\nThe original component function from the React element's `type` field.\n\nCarried through from parsing so that the resolver can look up the\nper-component-instance resolver registered via `createComponent`. This\nis the only way to distinguish two custom parts that share the same\npart name but were created by different `createComponent` calls — the\ncomponent function reference is unique per call."
+            ],
+            "signature": [
+              "((...args: unknown[]) => unknown) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.ParsedPart.componentType.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "unknown[]"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
+                "lineNumber": 66,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -895,15 +933,7 @@
             ],
             "label": "createComponent",
             "description": [
-              "\nCreate a component without a preset (e.g., custom columns).\n\nUse this for parts that get their identity from `props.id` rather\nthan a static preset name. Optionally provide a `resolve` callback\nto handle custom parts in `part.resolve()`, eliminating the need\nfor manual casts in consumer code.\n\nOptionally provide a `skeleton` callback — the fallback skeleton\nresolver invoked by ",
-              {
-                "pluginId": "@kbn/content-list-assembly",
-                "scope": "public",
-                "docId": "kibKbnContentListAssemblyPluginApi",
-                "section": "def-public.resolveSkeleton",
-                "text": "resolveSkeleton"
-              },
-              " when no preset skeleton\nis registered.\n"
+              "\nCreate a component without a preset (e.g., custom columns or custom filters).\n\nEach call returns a **unique** `FC` reference. When a `resolve` or `skeleton`\ncallback is provided, it is bound exclusively to that component reference.\nThis means multiple `createComponent` calls for the same part — e.g. two\n`RecentsFilter` instances from different history sources — each dispatch to\ntheir own resolver independently. The resolver is looked up from the\ncomponent function carried on the parsed part (`ParsedPart.componentType`),\nso there is no global shared slot that can be overwritten.\n"
             ],
             "signature": [
               "<P>(options?: { resolve?: ((attributes: P, context: TContext) => TOutput | undefined) | undefined; skeleton?: ((attributes: P, context: TContext) => ",
@@ -932,7 +962,7 @@
                   "- Optional configuration."
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 172,
+                "lineNumber": 171,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -944,13 +974,13 @@
                     "tags": [],
                     "label": "resolve",
                     "description": [
-                      "- Fallback resolver for parts without a preset."
+                      "- Resolver bound to this specific component instance."
                     ],
                     "signature": [
                       "((attributes: P, context: TContext) => TOutput | undefined) | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                    "lineNumber": 173,
+                    "lineNumber": 172,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -966,7 +996,7 @@
                           "P"
                         ],
                         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                        "lineNumber": 173,
+                        "lineNumber": 172,
                         "columnNumber": 16,
                         "deprecated": false,
                         "docsReferencedTypeName": "P",
@@ -984,7 +1014,7 @@
                           "TContext"
                         ],
                         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                        "lineNumber": 173,
+                        "lineNumber": 172,
                         "columnNumber": 31,
                         "deprecated": false,
                         "docsReferencedTypeName": "TContext",
@@ -1001,7 +1031,7 @@
                     "tags": [],
                     "label": "skeleton",
                     "description": [
-                      "- Fallback skeleton resolver for parts without"
+                      "- Skeleton resolver bound to this specific component instance."
                     ],
                     "signature": [
                       "((attributes: P, context: TContext) => ",
@@ -1015,7 +1045,7 @@
                       " | undefined) | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                    "lineNumber": 174,
+                    "lineNumber": 173,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1031,7 +1061,7 @@
                           "P"
                         ],
                         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                        "lineNumber": 174,
+                        "lineNumber": 173,
                         "columnNumber": 17,
                         "deprecated": false,
                         "docsReferencedTypeName": "P",
@@ -1049,7 +1079,7 @@
                           "TContext"
                         ],
                         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                        "lineNumber": 174,
+                        "lineNumber": 173,
                         "columnNumber": 32,
                         "deprecated": false,
                         "docsReferencedTypeName": "TContext",
@@ -1081,7 +1111,7 @@
               "<C extends (...args: any[]) => null>(component: C, options?: { preset?: (keyof TPresetMap & string) | undefined; } | undefined) => C"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-            "lineNumber": 177,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1099,7 +1129,7 @@
                   "C"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 189,
+                "lineNumber": 188,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "C",
@@ -1116,7 +1146,7 @@
                   "- Optional preset name."
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                "lineNumber": 190,
+                "lineNumber": 189,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1132,7 +1162,7 @@
                       "(keyof TPresetMap & string) | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-                    "lineNumber": 190,
+                    "lineNumber": 189,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1241,7 +1271,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
-        "lineNumber": 309,
+        "lineNumber": 308,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1274,7 +1304,7 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
-        "lineNumber": 72,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

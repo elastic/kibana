@@ -118,8 +118,8 @@
       "tags": [],
       "label": "AgentBuilderPluginSetup",
       "description": [],
-      "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-      "lineNumber": 77,
+      "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+      "lineNumber": 119,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -136,8 +136,8 @@
       "description": [
         "\nPublic start contract for the browser-side agentBuilder plugin."
       ],
-      "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-      "lineNumber": 79,
+      "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+      "lineNumber": 121,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -160,8 +160,8 @@
               "text": "AgentsServiceStartContract"
             }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 83,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 125,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -184,8 +184,8 @@
               "text": "AttachmentServiceStartContract"
             }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 87,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 129,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -208,8 +208,8 @@
               "text": "ToolServiceStartContract"
             }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 91,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 133,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -232,8 +232,8 @@
               "text": "EventsServiceStartContract"
             }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 95,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 137,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -249,12 +249,24 @@
           ],
           "signature": [
             "(options?: ",
-            "OpenConversationSidebarOptions",
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.OpenConversationSidebarOptions",
+              "text": "OpenConversationSidebarOptions"
+            },
             " | undefined) => ",
-            "OpenConversationSidebarReturn"
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.OpenConversationSidebarReturn",
+              "text": "OpenConversationSidebarReturn"
+            }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 99,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 141,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -269,11 +281,17 @@
                 "- Configuration options for the sidebar"
               ],
               "signature": [
-                "OpenConversationSidebarOptions",
+                {
+                  "pluginId": "@kbn/agent-builder-browser",
+                  "scope": "common",
+                  "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                  "section": "def-common.OpenConversationSidebarOptions",
+                  "text": "OpenConversationSidebarOptions"
+                },
                 " | undefined"
               ],
-              "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 116,
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 158,
               "columnNumber": 14,
               "deprecated": false,
               "docsReferencedTypeName": "OpenConversationSidebarOptions",
@@ -296,11 +314,17 @@
           ],
           "signature": [
             "(options?: ",
-            "OpenConversationSidebarOptions",
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.OpenConversationSidebarOptions",
+              "text": "OpenConversationSidebarOptions"
+            },
             " | undefined) => void"
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 117,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 159,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -313,11 +337,17 @@
               "label": "options",
               "description": [],
               "signature": [
-                "OpenConversationSidebarOptions",
+                {
+                  "pluginId": "@kbn/agent-builder-browser",
+                  "scope": "common",
+                  "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                  "section": "def-common.OpenConversationSidebarOptions",
+                  "text": "OpenConversationSidebarOptions"
+                },
                 " | undefined"
               ],
-              "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 122,
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 164,
               "columnNumber": 16,
               "deprecated": false,
               "docsReferencedTypeName": "OpenConversationSidebarOptions",
@@ -336,11 +366,17 @@
           "description": [],
           "signature": [
             "(config: ",
-            "EmbeddableConversationProps",
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.EmbeddableConversationProps",
+              "text": "EmbeddableConversationProps"
+            },
             ") => void"
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 123,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 165,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -353,10 +389,16 @@
               "label": "config",
               "description": [],
               "signature": [
-                "EmbeddableConversationProps"
+                {
+                  "pluginId": "@kbn/agent-builder-browser",
+                  "scope": "common",
+                  "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                  "section": "def-common.EmbeddableConversationProps",
+                  "text": "EmbeddableConversationProps"
+                }
               ],
-              "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 123,
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 165,
               "columnNumber": 19,
               "deprecated": false,
               "docsReferencedTypeName": "EmbeddableConversationProps",
@@ -376,8 +418,8 @@
           "signature": [
             "() => void"
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 124,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 166,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -398,8 +440,8 @@
             "AttachmentInput",
             "<string, unknown>) => void"
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 125,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 167,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -417,8 +459,8 @@
                 "AttachmentInput",
                 "<string, unknown>"
               ],
-              "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 131,
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 173,
               "columnNumber": 19,
               "deprecated": false,
               "docsReferencedTypeName": "AttachmentInput",
@@ -448,8 +490,8 @@
             },
             ">"
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 132,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 174,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -466,8 +508,8 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 152,
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 194,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -485,8 +527,8 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 153,
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 195,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -504,8 +546,8 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 154,
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 196,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -713,8 +755,8 @@
         "tags": [],
         "label": "ConversationListOptions",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/agent_builder/server/services/conversation/client/types.ts",
-        "lineNumber": 31,
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation_list.ts",
+        "lineNumber": 8,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -729,8 +771,8 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/agent_builder/server/services/conversation/client/types.ts",
-            "lineNumber": 32,
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation_list.ts",
+            "lineNumber": 9,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -747,8 +789,8 @@
         "description": [
           "\nAgentBuilder conversations service's start contract (read-only)."
         ],
-        "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-        "lineNumber": 255,
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 174,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -767,16 +809,16 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>; }) => Promise<",
               {
-                "pluginId": "agentBuilder",
-                "scope": "server",
-                "docId": "kibAgentBuilderPluginApi",
-                "section": "def-server.ReadOnlyConversationClient",
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ReadOnlyConversationClient",
                 "text": "ReadOnlyConversationClient"
               },
               ">"
             ],
-            "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 259,
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -788,8 +830,8 @@
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                "lineNumber": 262,
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 181,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -805,8 +847,8 @@
                       "KibanaRequest",
                       "<unknown, unknown, unknown, any>"
                     ],
-                    "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                    "lineNumber": 262,
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                    "lineNumber": 181,
                     "columnNumber": 27,
                     "deprecated": false,
                     "trackAdoption": false
@@ -828,8 +870,8 @@
         "description": [
           "\nA read-only conversation client exposing only get and list operations."
         ],
-        "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-        "lineNumber": 241,
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 160,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -854,8 +896,8 @@
               },
               ">"
             ],
-            "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 245,
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -870,8 +912,8 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                "lineNumber": 248,
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 167,
                 "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -892,10 +934,10 @@
             "signature": [
               "(options?: ",
               {
-                "pluginId": "agentBuilder",
-                "scope": "server",
-                "docId": "kibAgentBuilderPluginApi",
-                "section": "def-server.ConversationListOptions",
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ConversationListOptions",
                 "text": "ConversationListOptions"
               },
               " | undefined) => Promise<",
@@ -908,8 +950,8 @@
               },
               "[]>"
             ],
-            "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 249,
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -923,16 +965,16 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "agentBuilder",
-                    "scope": "server",
-                    "docId": "kibAgentBuilderPluginApi",
-                    "section": "def-server.ConversationListOptions",
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.ConversationListOptions",
                     "text": "ConversationListOptions"
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                "lineNumber": 252,
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 171,
                 "columnNumber": 8,
                 "deprecated": false,
                 "docsReferencedTypeName": "ConversationListOptions",
@@ -2650,10 +2692,10 @@
         "tags": [],
         "label": "ToolsSetup",
         "description": [
-          "\nAgentBuilder tool service's setup contract"
+          "\nAgentBuilder tool service's setup contract."
         ],
-        "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-        "lineNumber": 96,
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2690,12 +2732,11 @@
               },
               ">) => void"
             ],
-            "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 100,
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "agentBuilder",
@@ -2709,32 +2750,8 @@
                     "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
                     "docId": "kibKbnAgentBuilderServerPluginApi",
-                    "section": "def-common.StaticEsqlTool",
-                    "text": "StaticEsqlTool"
-                  },
-                  " | ",
-                  {
-                    "pluginId": "@kbn/agent-builder-server",
-                    "scope": "common",
-                    "docId": "kibKbnAgentBuilderServerPluginApi",
-                    "section": "def-common.StaticIndexSearchTool",
-                    "text": "StaticIndexSearchTool"
-                  },
-                  " | ",
-                  {
-                    "pluginId": "@kbn/agent-builder-server",
-                    "scope": "common",
-                    "docId": "kibKbnAgentBuilderServerPluginApi",
-                    "section": "def-common.StaticWorkflowTool",
-                    "text": "StaticWorkflowTool"
-                  },
-                  " | ",
-                  {
-                    "pluginId": "@kbn/agent-builder-server",
-                    "scope": "common",
-                    "docId": "kibKbnAgentBuilderServerPluginApi",
-                    "section": "def-common.BuiltinToolDefinition",
-                    "text": "BuiltinToolDefinition"
+                    "section": "def-common.StaticToolRegistration",
+                    "text": "StaticToolRegistration"
                   },
                   "<RunInput, ",
                   {
@@ -2746,14 +2763,16 @@
                   },
                   ">"
                 ],
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/services/tools/types.ts",
-                "lineNumber": 15,
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 38,
                 "columnNumber": 45,
                 "deprecated": false,
                 "docsReferencedTypeName": "StaticToolRegistration",
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2765,10 +2784,10 @@
         "tags": [],
         "label": "ToolsStart",
         "description": [
-          "\nAgentBuilder tool service's start contract"
+          "\nAgentBuilder tool service's start contract."
         ],
-        "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-        "lineNumber": 122,
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2801,8 +2820,8 @@
               },
               ">"
             ],
-            "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 126,
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2856,8 +2875,8 @@
               },
               ">"
             ],
-            "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 130,
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2869,8 +2888,8 @@
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                "lineNumber": 133,
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 52,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2886,8 +2905,8 @@
                       "KibanaRequest",
                       "<unknown, unknown, unknown, any>"
                     ],
-                    "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                    "lineNumber": 133,
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                    "lineNumber": 52,
                     "columnNumber": 25,
                     "deprecated": false,
                     "trackAdoption": false
@@ -3056,9 +3075,11 @@
       "type": "Interface",
       "tags": [],
       "label": "AgentBuilderPluginSetup",
-      "description": [],
-      "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-      "lineNumber": 186,
+      "description": [
+        "\nSetup contract of the agentBuilder plugin."
+      ],
+      "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+      "lineNumber": 192,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3073,10 +3094,16 @@
             "\nAgents setup contract, which can be used to register built-in agents."
           ],
           "signature": [
-            "AgentsSetup"
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.AgentsSetup",
+              "text": "AgentsSetup"
+            }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 187,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 196,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3092,15 +3119,15 @@
           ],
           "signature": [
             {
-              "pluginId": "agentBuilder",
-              "scope": "server",
-              "docId": "kibAgentBuilderPluginApi",
-              "section": "def-server.ToolsSetup",
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.ToolsSetup",
               "text": "ToolsSetup"
             }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 191,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 200,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3115,10 +3142,16 @@
             "\nAttachments setup contract, which can be used to register attachment types."
           ],
           "signature": [
-            "AttachmentsSetup"
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.AttachmentsSetup",
+              "text": "AttachmentsSetup"
+            }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 195,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 204,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3141,8 +3174,8 @@
               "text": "HooksServiceSetup"
             }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 199,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 208,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3157,10 +3190,16 @@
             "\nSkills setup contract, which can be used to register skills."
           ],
           "signature": [
-            "SkillsSetup"
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.SkillsSetup",
+              "text": "SkillsSetup"
+            }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 203,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 212,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3175,10 +3214,16 @@
             "\nPlugins setup contract, which can be used to register built-in plugins."
           ],
           "signature": [
-            "PluginsSetup"
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.PluginsSetup",
+              "text": "PluginsSetup"
+            }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 207,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 216,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3194,15 +3239,15 @@
           ],
           "signature": [
             {
-              "pluginId": "@kbn/agent-builder-genai-utils",
-              "scope": "server",
-              "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
-              "section": "def-server.TopSnippetsConfig",
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.TopSnippetsConfig",
               "text": "TopSnippetsConfig"
             }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 211,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 220,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3220,8 +3265,8 @@
       "description": [
         "\nStart contract of the agentBuilder plugin."
       ],
-      "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-      "lineNumber": 265,
+      "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+      "lineNumber": 227,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3236,10 +3281,16 @@
             "\nAgents service, to execute agents."
           ],
           "signature": [
-            "AgentsStart"
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.AgentsStart",
+              "text": "AgentsStart"
+            }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 269,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 231,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3255,15 +3306,15 @@
           ],
           "signature": [
             {
-              "pluginId": "agentBuilder",
-              "scope": "server",
-              "docId": "kibAgentBuilderPluginApi",
-              "section": "def-server.ToolsStart",
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.ToolsStart",
               "text": "ToolsStart"
             }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 273,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 235,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3278,10 +3329,16 @@
             "\nSkills service, to manage and access skills."
           ],
           "signature": [
-            "SkillsStart"
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.SkillsStart",
+              "text": "SkillsStart"
+            }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 277,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 239,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3296,10 +3353,16 @@
             "\nPlugins service, to query built-in and persisted plugins."
           ],
           "signature": [
-            "PluginsStart"
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.PluginsStart",
+              "text": "PluginsStart"
+            }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 281,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 243,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3314,10 +3377,16 @@
             "\nExecution service, to execute agents and retrieve execution status."
           ],
           "signature": [
-            "ExecutionStart"
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.ExecutionStart",
+              "text": "ExecutionStart"
+            }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 285,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 247,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3332,10 +3401,16 @@
             "\nRuntime utilities for consumers that need to interact with LLM models\noutside of the agent builder's built-in tool/agent execution flow."
           ],
           "signature": [
-            "RuntimeStart"
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.RuntimeStart",
+              "text": "RuntimeStart"
+            }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 289,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 251,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3351,15 +3426,15 @@
           ],
           "signature": [
             {
-              "pluginId": "agentBuilder",
-              "scope": "server",
-              "docId": "kibAgentBuilderPluginApi",
-              "section": "def-server.ConversationsStart",
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.ConversationsStart",
               "text": "ConversationsStart"
             }
           ],
-          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 294,
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 256,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
