@@ -247,7 +247,7 @@ export const ExecutionHistoryPage = () => {
             iconType="bell"
             title={i18n.translate('xpack.alertingV2.executionHistory.newEventsBannerTitle', {
               defaultMessage:
-                '{count, plural, one {# new event} other {# new events}} since you opened this page',
+                '{count, plural, one {# new event} other {# new events}} since the last refresh',
               values: { count: newEventsCount },
             })}
           >

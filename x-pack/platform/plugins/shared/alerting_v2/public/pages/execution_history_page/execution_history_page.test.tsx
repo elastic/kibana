@@ -216,7 +216,7 @@ describe('ExecutionHistoryPage', () => {
     renderPage();
 
     expect(screen.getByTestId('executionHistoryNewEventsBanner')).toBeInTheDocument();
-    expect(screen.getByText(/3 new events since you opened this page/i)).toBeInTheDocument();
+    expect(screen.getByText(/3 new events since the last refresh/i)).toBeInTheDocument();
   });
 
   it('hides the new-events banner when count is 0', () => {
