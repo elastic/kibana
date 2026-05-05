@@ -184,7 +184,7 @@ describe('ListExecutionHistoryRoute', () => {
     });
   });
 
-  it('returns the page/perPage/total from the service in the response', async () => {
+  it('returns the page/perPage/totalEvents from the service in the response', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest();
     const route = buildRoute(request as unknown as KibanaRequest, mocks, {
@@ -197,7 +197,7 @@ describe('ListExecutionHistoryRoute', () => {
     await route.handle();
 
     const okCall = (mocks.deps.response.ok as jest.Mock).mock.calls[0][0];
-    expect(okCall.body).toMatchObject({ page: 4, perPage: 25, total: 137, items: [] });
+    expect(okCall.body).toMatchObject({ page: 4, perPage: 25, totalEvents: 137, items: [] });
   });
 
   it('passes empty arrays to bulk getters when no events are returned', async () => {

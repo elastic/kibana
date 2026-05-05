@@ -65,13 +65,18 @@ const buildItem = (
 
 const mockFetchResult = (
   overrides: Partial<{
-    data: { items: PolicyExecutionHistoryItem[]; page: number; perPage: number; total: number };
+    data: {
+      items: PolicyExecutionHistoryItem[];
+      page: number;
+      perPage: number;
+      totalEvents: number;
+    };
     isFetching: boolean;
     isError: boolean;
   }> = {}
 ) => {
   mockUseFetchExecutionHistory.mockReturnValue({
-    data: { items: [], page: 1, perPage: 50, total: 0 },
+    data: { items: [], page: 1, perPage: 50, totalEvents: 0 },
     isFetching: false,
     isError: false,
     refetch: mockRefetch,
@@ -99,6 +104,13 @@ describe('ExecutionHistoryPage', () => {
     expect(screen.getByRole('tab', { name: 'Policies' })).toHaveAttribute('aria-selected', 'true');
   });
 
+  it('renders the denormalization info tooltip next to the title', () => {
+    mockFetchResult();
+    renderPage();
+
+    expect(screen.getByTestId('executionHistoryDenormalizationTip')).toBeInTheDocument();
+  });
+
   it('shows the empty state when there are no items', () => {
     mockFetchResult();
     renderPage();
@@ -114,7 +126,7 @@ describe('ExecutionHistoryPage', () => {
         items: [buildItem()],
         page: 1,
         perPage: 50,
-        total: 1,
+        totalEvents: 1,
       },
     });
     renderPage();
@@ -137,7 +149,7 @@ describe('ExecutionHistoryPage', () => {
         ],
         page: 1,
         perPage: 50,
-        total: 1,
+        totalEvents: 1,
       },
     });
     renderPage();
@@ -170,7 +182,7 @@ describe('ExecutionHistoryPage', () => {
         items: [buildItem()],
         page: 1,
         perPage: 50,
-        total: 1,
+        totalEvents: 1,
       },
     });
     renderPage();

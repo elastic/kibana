@@ -12,7 +12,7 @@ import { ExecutionHistoryApi } from './execution_history_api';
 describe('ExecutionHistoryApi', () => {
   const buildApi = () => {
     const http = {
-      get: jest.fn().mockResolvedValue({ items: [], page: 1, perPage: 50, total: 0 }),
+      get: jest.fn().mockResolvedValue({ items: [], page: 1, perPage: 50, totalEvents: 0 }),
     };
     const api = new ExecutionHistoryApi(http as unknown as HttpStart);
     return { api, http };
@@ -55,7 +55,7 @@ describe('ExecutionHistoryApi', () => {
       items: [{ '@timestamp': '2026-05-05T10:00:00Z' }],
       page: 2,
       perPage: 25,
-      total: 137,
+      totalEvents: 137,
     };
     http.get.mockResolvedValueOnce(fakeResponse);
 

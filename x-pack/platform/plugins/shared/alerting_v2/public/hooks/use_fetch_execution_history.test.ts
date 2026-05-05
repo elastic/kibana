@@ -41,7 +41,7 @@ describe('useFetchExecutionHistory', () => {
   });
 
   it('calls listExecutionHistory with the provided page and perPage', async () => {
-    mockListExecutionHistory.mockResolvedValue({ items: [], page: 2, perPage: 25, total: 0 });
+    mockListExecutionHistory.mockResolvedValue({ items: [], page: 2, perPage: 25, totalEvents: 0 });
 
     renderHook(() => useFetchExecutionHistory({ page: 2, perPage: 25 }), {
       wrapper: createWrapper(),
@@ -57,7 +57,7 @@ describe('useFetchExecutionHistory', () => {
       items: [{ '@timestamp': '2026-05-05T10:00:00Z' }],
       page: 1,
       perPage: 50,
-      total: 1,
+      totalEvents: 1,
     };
     mockListExecutionHistory.mockResolvedValue(fakeResponse);
 
@@ -82,7 +82,7 @@ describe('useFetchExecutionHistory', () => {
   });
 
   it('uses a query key derived from page and perPage', async () => {
-    mockListExecutionHistory.mockResolvedValue({ items: [], page: 1, perPage: 50, total: 0 });
+    mockListExecutionHistory.mockResolvedValue({ items: [], page: 1, perPage: 50, totalEvents: 0 });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const wrapper = ({ children }: { children: React.ReactNode }) =>
       React.createElement(QueryClientProvider, { client: queryClient }, children);
@@ -94,12 +94,12 @@ describe('useFetchExecutionHistory', () => {
       items: [],
       page: 1,
       perPage: 50,
-      total: 0,
+      totalEvents: 0,
     });
   });
 
   it('refetches when page or perPage change', async () => {
-    mockListExecutionHistory.mockResolvedValue({ items: [], page: 1, perPage: 50, total: 0 });
+    mockListExecutionHistory.mockResolvedValue({ items: [], page: 1, perPage: 50, totalEvents: 0 });
 
     const { rerender } = renderHook(
       ({ page, perPage }) => useFetchExecutionHistory({ page, perPage }),

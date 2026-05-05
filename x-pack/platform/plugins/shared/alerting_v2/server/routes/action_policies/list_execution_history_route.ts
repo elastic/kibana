@@ -49,7 +49,7 @@ const listExecutionHistoryResponseSchema = z.object({
   items: z.array(policyExecutionHistoryItemSchema),
   page: z.number(),
   perPage: z.number(),
-  total: z.number(),
+  totalEvents: z.number(),
 });
 
 @injectable()
@@ -118,7 +118,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
         items,
         page: result.page,
         perPage: result.perPage,
-        total: result.total,
+        totalEvents: result.total,
       },
     });
   }

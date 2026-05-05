@@ -24,7 +24,7 @@ export interface PolicyExecutionHistoryResponse {
   items: PolicyExecutionHistoryItem[];
   page: number;
   perPage: number;
-  total: number;
+  totalEvents: number;
 }
 
 export interface ListExecutionHistoryParams {

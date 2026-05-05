@@ -14,6 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiPageHeader,
   EuiSpacer,
@@ -149,7 +150,7 @@ export const ExecutionHistoryPage = () => {
     perPage,
   });
   const items = data?.items ?? [];
-  const total = data?.total ?? 0;
+  const totalEvents = data?.totalEvents ?? 0;
   const columns = buildColumns(setPolicyToViewId);
 
   const onTableChange = ({
@@ -164,7 +165,7 @@ export const ExecutionHistoryPage = () => {
   const pagination = {
     pageIndex: page,
     pageSize: perPage,
-    totalItemCount: total,
+    totalItemCount: totalEvents,
     pageSizeOptions: [10, 25, 50, 100],
   };
 
@@ -187,10 +188,28 @@ export const ExecutionHistoryPage = () => {
     <>
       <EuiPageHeader
         pageTitle={
-          <FormattedMessage
-            id="xpack.alertingV2.executionHistory.pageTitle"
-            defaultMessage="Execution history"
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.alertingV2.executionHistory.pageTitle"
+                defaultMessage="Execution history"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span data-test-subj="executionHistoryDenormalizationTip">
+                <EuiIconTip
+                  type="info"
+                  content={i18n.translate(
+                    'xpack.alertingV2.executionHistory.denormalizationTooltip',
+                    {
+                      defaultMessage:
+                        'Pagination is by event. A single event may show as multiple rows — one per rule referenced by the event.',
+                    }
+                  )}
+                />
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
       />
       <EuiSpacer size="l" />
