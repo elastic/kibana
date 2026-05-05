@@ -7,7 +7,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 7442
+  alertingVTwo: 8551
   apm: 16978
   apmSourcesAccess: 779
   automaticImport: 13257
@@ -87,7 +87,7 @@ pageLoadAssetSize:
   home: 9251
   imageEmbeddable: 1732
   inbox: 935
-  indexLifecycleManagement: 29229
+  indexLifecycleManagement: 32333
   indexManagement: 316
   inference: 5751
   infra: 45673
@@ -181,7 +181,7 @@ pageLoadAssetSize:
   snapshotRestore: 16909
   spaces: 22966
   stackAlerts: 1717
-  stackConnectors: 67445
+  stackConnectors: 65112
   streams: 6521
   streamsApp: 56877
   synthetics: 18443
@@ -194,7 +194,7 @@ pageLoadAssetSize:
   unifiedDocViewer: 568
   unifiedSearch: 511
   upgradeAssistant: 1822
-  uptime: 37818
+  uptime: 37803
   urlDrilldown: 1267
   urlForwarding: 1412
   usageCollection: 223
