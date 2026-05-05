@@ -22,6 +22,9 @@ jest.mock('../../application/breadcrumb_context', () => ({
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'chrome') return { docTitle: { change: jest.fn() } };
+    if (token === 'application') {
+      return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
+    }
     return {};
   },
   CoreStart: (key: string) => key,
@@ -55,6 +58,16 @@ jest.mock(
     ),
   })
 );
+
+jest.mock('../../components/rule/flyouts/rule_summary_flyout_container', () => ({
+  RuleSummaryFlyoutContainer: ({ ruleId, onClose }: { ruleId: string; onClose: () => void }) => (
+    <div data-test-subj={`mockRuleFlyout-${ruleId}`}>
+      <button data-test-subj="mockRuleFlyoutClose" onClick={onClose} type="button">
+        close
+      </button>
+    </div>
+  ),
+}));
 
 const buildItem = (
   overrides: Partial<PolicyExecutionHistoryItem> = {}
@@ -203,11 +216,47 @@ describe('ExecutionHistoryPage', () => {
     expect(screen.queryByTestId('mockFlyout-policy-1')).not.toBeInTheDocument();
   });
 
-  it('queries with default page=1 and perPage=50', () => {
+  it('opens the rule flyout when the rule link is clicked and closes it on dismiss', async () => {
+    mockFetchResult({
+      data: {
+        items: [buildItem()],
+        page: 1,
+        perPage: 50,
+        totalEvents: 1,
+      },
+    });
+    renderPage();
+
+    expect(screen.queryByTestId('mockRuleFlyout-rule-1')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'My Rule' }));
+    expect(screen.getByTestId('mockRuleFlyout-rule-1')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('mockRuleFlyoutClose'));
+    expect(screen.queryByTestId('mockRuleFlyout-rule-1')).not.toBeInTheDocument();
+  });
+
+  it('renders workflow pills as links to the workflows app', () => {
+    mockFetchResult({
+      data: {
+        items: [buildItem()],
+        page: 1,
+        perPage: 50,
+        totalEvents: 1,
+      },
+    });
+    renderPage();
+
+    const workflowLink = screen.getByRole('link', { name: 'My Workflow' });
+    expect(workflowLink).toHaveAttribute('href', '/app/workflows/wf-1');
+    expect(workflowLink).toHaveAttribute('target', '_blank');
+  });
+
+  it('queries with default page=1 and perPage=100', () => {
     mockFetchResult();
     renderPage();
 
-    expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({ page: 1, perPage: 50 });
+    expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({ page: 1, perPage: 100 });
   });
 
   it('shows the new-events banner when count > 0', () => {

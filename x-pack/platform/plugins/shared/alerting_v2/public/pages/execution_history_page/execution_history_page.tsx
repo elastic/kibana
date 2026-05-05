@@ -25,7 +25,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
+import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useCountNewExecutionHistoryEvents } from '../../hooks/use_count_new_execution_history_events';
 import { useFetchExecutionHistory } from '../../hooks/use_fetch_execution_history';
@@ -37,7 +40,9 @@ const RULES_TAB_ID = 'rules';
 type TabId = typeof POLICIES_TAB_ID | typeof RULES_TAB_ID;
 
 const buildColumns = (
-  onPolicyClick: (policyId: string) => void
+  onPolicyClick: (policyId: string) => void,
+  onRuleClick: (ruleId: string) => void,
+  getWorkflowUrl: (workflowId: string) => string
 ): Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> => [
   {
     field: '@timestamp',
@@ -59,7 +64,9 @@ const buildColumns = (
     name: i18n.translate('xpack.alertingV2.executionHistory.columns.rule', {
       defaultMessage: 'Rule',
     }),
-    render: (item: PolicyExecutionHistoryItem) => item.rule.name ?? item.rule.id,
+    render: (item: PolicyExecutionHistoryItem) => (
+      <EuiLink onClick={() => onRuleClick(item.rule.id)}>{item.rule.name ?? item.rule.id}</EuiLink>
+    ),
   },
   {
     field: 'outcome',
@@ -90,7 +97,15 @@ const buildColumns = (
         <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
           {workflows.map((w) => (
             <EuiFlexItem key={w.id} grow={false}>
-              <EuiBadge color="hollow">{w.name ?? w.id}</EuiBadge>
+              <EuiBadge
+                color="hollow"
+                iconType="workflow"
+                href={getWorkflowUrl(w.id)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {w.name ?? w.id}
+              </EuiBadge>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
@@ -136,7 +151,7 @@ const rulesPlaceholder = (
   />
 );
 
-const DEFAULT_PER_PAGE = 50;
+const DEFAULT_PER_PAGE = 100;
 
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
@@ -145,15 +160,20 @@ export const ExecutionHistoryPage = () => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
+  const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
   const [lastSeenAt, setLastSeenAt] = useState(() => new Date().toISOString());
 
   const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
     page: page + 1,
     perPage,
   });
+  const application = useService(CoreStart('application'));
+  const getWorkflowUrl = (workflowId: string) =>
+    application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${workflowId}` });
+
   const items = data?.items ?? [];
   const totalEvents = data?.totalEvents ?? 0;
-  const columns = buildColumns(setPolicyToViewId);
+  const columns = buildColumns(setPolicyToViewId, setRuleToViewId, getWorkflowUrl);
 
   const { data: newCountData } = useCountNewExecutionHistoryEvents({
     since: lastSeenAt,
@@ -308,6 +328,9 @@ export const ExecutionHistoryPage = () => {
           policyId={policyToViewId}
           onClose={() => setPolicyToViewId(null)}
         />
+      )}
+      {ruleToViewId && (
+        <RuleSummaryFlyoutContainer ruleId={ruleToViewId} onClose={() => setRuleToViewId(null)} />
       )}
     </>
   );
