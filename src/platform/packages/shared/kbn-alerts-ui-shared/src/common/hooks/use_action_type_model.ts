@@ -109,7 +109,7 @@ export function useActionTypeModel({
       actionTypeModel: shouldFetchSpec ? specBasedModel : registeredModel,
       isLoading: shouldFetchSpec && isLoading,
       error: normalizeError(error),
-      isFromSpec: registeredModel == null && specBasedModel != null,
+      isFromSpec: shouldFetchSpec && specBasedModel != null,
       refetch: () => {
         void refetch();
       },
