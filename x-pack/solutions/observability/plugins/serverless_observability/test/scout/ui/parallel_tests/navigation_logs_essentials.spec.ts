@@ -70,8 +70,7 @@ test.describe(
 
       await test.step('Workflows', async () => {
         await nav.navItemInPrimaryByDeepLinkId('workflows').click();
-        await expect(page.testSubj.locator('workflowsPage')).toBeVisible();
-        await expect(nav.activeNavItemByDeepLinkId('workflows')).toBeVisible();
+        await expect(page.testSubj.locator('workflowsServerlessTierAccessDenied')).toBeVisible();
       });
 
       await test.step('Alerts', async () => {

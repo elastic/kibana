@@ -13,6 +13,7 @@ import { Agent as HttpsAgent } from 'https';
 import apm from 'elastic-apm-node';
 import type { Server, Request } from '@hapi/hapi';
 import HapiProxy from '@hapi/h2o2';
+import Chalk from 'chalk';
 import { take } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { createServer, getServerOptions } from '@kbn/server-http-tools';
@@ -80,11 +81,12 @@ export class Http1BasePathProxyServer implements BasePathProxyServer {
 
     await this.server.start();
 
+    const proxyUrl = Url.format({
+      host: this.server.info.uri,
+      pathname: this.httpConfig.basePath,
+    });
     this.log.write(
-      `basepath proxy server running at ${Url.format({
-        host: this.server.info.uri,
-        pathname: this.httpConfig.basePath,
-      })}`
+      Chalk.green('basepath proxy server running at ') + Chalk.cyan.bold.underline(proxyUrl)
     );
   }
 

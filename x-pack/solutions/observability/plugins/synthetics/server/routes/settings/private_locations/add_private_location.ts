@@ -74,8 +74,9 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
     });
 
     if (
-      !agentPolicy.space_ids?.includes(ALL_SPACES_ID) &&
-      !formattedLocation.spaces!.every((s) => agentPolicySpaces.includes(s))
+      !agentPolicySpaces.includes(ALL_SPACES_ID) &&
+      formattedLocation.spaces &&
+      !formattedLocation.spaces.every((s) => agentPolicySpaces.includes(s))
     ) {
       return response.badRequest({
         body: {

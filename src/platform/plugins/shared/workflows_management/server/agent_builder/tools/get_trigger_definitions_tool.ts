@@ -12,7 +12,7 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import { AlertEventSchema, BaseEventSchema, builtInTriggerDefinitions } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { workflowTools } from '../../../common/agent_builder/constants';
-import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { AgentBuilderPluginSetup } from '../../types';
 
 const LARGE_ENUM_THRESHOLD = 20;
 
@@ -68,9 +68,7 @@ function getEventContextSchema(triggerTypeId: string): unknown {
   return zodToJsonSchemaSafe(BaseEventSchema);
 }
 
-export function registerGetTriggerDefinitionsTool(
-  agentBuilder: AgentBuilderPluginSetupContract
-): void {
+export function registerGetTriggerDefinitionsTool(agentBuilder: AgentBuilderPluginSetup): void {
   agentBuilder.tools.register({
     id: workflowTools.getTriggerDefinitions,
     type: ToolType.builtin,
