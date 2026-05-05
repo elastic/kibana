@@ -218,7 +218,47 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "workflowsExecutionEngine",
+        "id": "def-server.resolveWorkflowEventsModeFromOn",
+        "type": "Function",
+        "tags": [],
+        "label": "resolveWorkflowEventsModeFromOn",
+        "description": [
+          "\nResolves `on.workflowEvents` the same way event-driven scheduling does: unknown or omitted -> `avoid-loop`."
+        ],
+        "signature": [
+          "(on: Record<string, unknown> | null | undefined) => \"ignore\" | \"allow-all\" | \"avoid-loop\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_execution_engine/server/trigger_events/lib/resolve_workflow_events_mode_from_on.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExecutionEngine",
+            "id": "def-server.resolveWorkflowEventsModeFromOn.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "on",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | null | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_execution_engine/server/trigger_events/lib/resolve_workflow_events_mode_from_on.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "workflowsExecutionEngine",
