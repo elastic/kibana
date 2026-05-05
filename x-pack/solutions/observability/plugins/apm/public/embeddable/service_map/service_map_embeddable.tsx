@@ -19,7 +19,13 @@ import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_con
 import { EmptyPrompt } from '../../components/app/service_map/empty_prompt';
 import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
+import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
 import { ServiceMapGraph } from '../../components/app/service_map/graph';
+import { ServiceMapSloFlyoutProvider } from '../../components/app/service_map/service_map_slo_flyout_context';
+import {
+  SloOverviewFlyout,
+  useSloOverviewFlyout,
+} from '../../components/shared/slo_overview_flyout';
 import { getServiceMapUrl } from './get_service_map_url';
 import type { Environment } from '../../../common/environment_rt';
 
@@ -78,12 +84,13 @@ export function ServiceMapEmbeddable({
     }
   }, [license, hasValidLicense, isServiceMapEnabled, onBlockingError]);
 
-  const { start: resolvedStart, end: resolvedEnd } = useMemo(
-    () => getDateRange({ rangeFrom, rangeTo }),
-    [rangeFrom, rangeTo]
-  );
-  const start = resolvedStart ?? rangeFrom;
-  const end = resolvedEnd ?? rangeTo;
+  const { start, end } = useMemo(() => {
+    const { start: parsedStart, end: parsedEnd } = getDateRange({ rangeFrom, rangeTo });
+    return { start: parsedStart ?? rangeFrom, end: parsedEnd ?? rangeTo };
+  }, [rangeFrom, rangeTo]);
+
+  const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
+    useSloOverviewFlyout();
 
   const { data, status, error } = useServiceMap({
     environment,
@@ -92,6 +99,15 @@ export function ServiceMapEmbeddable({
     end,
     serviceGroupId,
     serviceName,
+  });
+
+  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
+    environment,
+    start,
+    end,
+    kuery,
+    nodes: data.nodes,
+    nodesStatus: status,
   });
 
   if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
@@ -173,33 +189,44 @@ export function ServiceMapEmbeddable({
     serviceGroupId,
   });
 
+  const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
+
   return (
-    <div
-      data-test-subj="apmServiceMapEmbeddable"
-      style={{
-        width: '100%',
-        height: '100%',
-        minWidth: EMBEDDABLE_MIN_WIDTH,
-        minHeight: EMBEDDABLE_MIN_HEIGHT,
-        position: 'relative' as const,
-        boxSizing: 'border-box',
-      }}
-    >
-      {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-      <ServiceMapGraph
-        height="100%"
-        nodes={data.nodes}
-        edges={data.edges}
-        serviceName={serviceName}
-        highlightedServiceName={serviceName}
-        environment={environment}
-        kuery={kuery}
-        start={start}
-        end={end}
-        isFullscreen={false}
-        fullMapHref={fullMapHref}
-        isEmbedded
-      />
-    </div>
+    <ServiceMapSloFlyoutProvider onSloBadgeClick={openSloOverviewFlyout}>
+      <div
+        data-test-subj="apmServiceMapEmbeddable"
+        style={{
+          width: '100%',
+          height: '100%',
+          minWidth: EMBEDDABLE_MIN_WIDTH,
+          minHeight: EMBEDDABLE_MIN_HEIGHT,
+          position: 'relative' as const,
+          boxSizing: 'border-box',
+        }}
+      >
+        {isLoading && <LoadingSpinner />}
+        <ServiceMapGraph
+          height="100%"
+          nodes={isLoading ? [] : nodesForGraph}
+          edges={isLoading ? [] : data.edges}
+          serviceName={serviceName}
+          highlightedServiceName={serviceName}
+          environment={environment}
+          kuery={kuery}
+          start={start}
+          end={end}
+          isFullscreen={false}
+          fullMapHref={fullMapHref}
+          isEmbedded
+        />
+      </div>
+      {sloOverviewFlyout && (
+        <SloOverviewFlyout
+          serviceName={sloOverviewFlyout.serviceName}
+          agentName={sloOverviewFlyout.agentName}
+          onClose={closeSloOverviewFlyout}
+        />
+      )}
+    </ServiceMapSloFlyoutProvider>
   );
 }

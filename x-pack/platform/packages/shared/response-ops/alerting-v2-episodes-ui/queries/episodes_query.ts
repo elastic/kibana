@@ -24,6 +24,12 @@ export interface AlertEpisode {
   first_timestamp: string;
   last_timestamp: string;
   duration: number;
+  last_ack_action?: 'ack' | 'unack';
+  last_assignee_uid?: string | null;
+  last_snooze_action?: 'snooze' | 'unsnooze';
+  snooze_expiry?: string;
+  last_deactivate_action?: 'activate' | 'deactivate';
+  last_tags?: string[];
 }
 
 export const ALERT_EPISODE_FIELDS = [
@@ -35,6 +41,12 @@ export const ALERT_EPISODE_FIELDS = [
   'first_timestamp',
   'last_timestamp',
   'duration',
+  'last_ack_action',
+  'last_assignee_uid',
+  'last_snooze_action',
+  'snooze_expiry',
+  'last_deactivate_action',
+  'last_tags',
 ] as const;
 
 export interface EpisodesFilterState {
@@ -80,17 +92,22 @@ const addGroupHashActionStats = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`INLINE STATS last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-                       last_tags = LAST(tags, @timestamp) WHERE action_type IN ("tag") BY group_hash`;
+                       last_snooze_action     = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
+                       snooze_expiry          = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
+                       last_tags              = LAST(tags, @timestamp)        WHERE action_type == "tag"
+          BY group_hash`;
 };
 
-const addEpisodeAssigneeStats = (query: ComposerQuery) => {
-  // COALESCE handles the field-name mismatch: .rule-events uses `episode.id`
-  // while .alert-actions uses `episode_id` (snake_case).
-
+const addEpisodeIdActionStats = (query: ComposerQuery) => {
+  // `.rule-events` documents carry the nested `episode.id`, while `.alert-actions`
+  // documents carry a flat `episode_id` — unify them so INLINE STATS groups both
+  // sides under the same key.
   // prettier-ignore
   query
-    .pipe`EVAL _ep_id = COALESCE(episode_id, episode.id)`
-    .pipe`INLINE STATS last_assignee_uid = LAST(assignee_uid, @timestamp) WHERE action_type IN ("assign") BY _ep_id`;
+    .pipe`EVAL episode_id = COALESCE(\`episode.id\`, episode_id)`
+    .pipe`INLINE STATS last_ack_action      = LAST(action_type,  @timestamp) WHERE action_type IN ("ack", "unack"),
+                       last_assignee_uid    = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"
+          BY episode_id`;
 };
 
 const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
@@ -119,14 +136,14 @@ export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
     query.pipe(
       `WHERE ((type == "alert" AND QSTR(${escapeStringValue(
         trimmedSearch
-      )})) OR (action_type IN ("deactivate", "activate", "tag", "assign")))`
+      )})) OR (action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag", "ack", "unack", "assign")))`
     );
   } else {
-    query.where`type == "alert" OR action_type IN ("deactivate", "activate", "tag", "assign")`;
+    query.where`type == "alert" OR action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
   }
 
   addGroupHashActionStats(query);
-  addEpisodeAssigneeStats(query);
+  addEpisodeIdActionStats(query);
   query.where`type == "alert"`;
   addEpisodeAggregation(query);
   // Derive effective status: overridden to "inactive" when the latest action is "deactivate"
