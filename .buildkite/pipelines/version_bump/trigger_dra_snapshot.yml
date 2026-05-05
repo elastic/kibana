@@ -1,12 +1,8 @@
 steps:
-  - label: 'Dry run gate: DRA snapshot'
-    key: gate-dra-snapshot
-    command: .buildkite/scripts/steps/version_bump/dry_run_gate.sh trigger-dra-snapshot
-
   - name: Trigger DRA Snapshot Build
     key: trigger-dra-snapshot
+    if: build.env("DRY_RUN") != "true"
     trigger: kibana-artifacts-snapshot
     async: false
-    depends_on: gate-dra-snapshot
     build:
       branch: '${BRANCH}'

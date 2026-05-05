@@ -1,14 +1,9 @@
 steps:
-  - label: 'Dry run gate: ES build & promote'
-    key: gate-es-build-and-promote
-    command: .buildkite/scripts/steps/version_bump/dry_run_gate.sh build-es-snapshot promote-es-snapshot
-
   - key: build-es-snapshot
     label: Build ES Snapshot
     trigger: kibana-elasticsearch-snapshot-build
     async: false
     if: build.env("DRY_RUN") != "true"
-    depends_on: gate-es-build-and-promote
     build:
       branch: $BRANCH
       env:
