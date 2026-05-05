@@ -26,12 +26,18 @@ concurrency:
   cancel-in-progress: true
 
 engine:
-  id: opencode
-  version: '1.2.14'
-  model: openai/gpt-5.4
+  id: claude
+  version: "2.1.111"
+  model: opus[1m]
+  max-turns: 120
   env:
-    OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    OPENAI_BASE_URL: ${{ vars.LITELLM_BASE_URL }}
+    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
+    ENABLE_PROMPT_CACHING_1H: "1"
+    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
 tools:
   github:
