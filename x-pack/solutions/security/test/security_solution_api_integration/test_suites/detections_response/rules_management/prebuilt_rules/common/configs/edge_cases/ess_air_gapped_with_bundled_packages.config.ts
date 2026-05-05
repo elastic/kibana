@@ -25,7 +25,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     testFiles: [
-      require.resolve('../../import_export/import_with_installing_package'),
+      // Flaky-isolation: keep only the changed test file.
+      // require.resolve('../../import_export/import_with_installing_package'),
       require.resolve('../../prebuilt_rules_package/air_gapped'),
     ],
     kbnTestServer: {

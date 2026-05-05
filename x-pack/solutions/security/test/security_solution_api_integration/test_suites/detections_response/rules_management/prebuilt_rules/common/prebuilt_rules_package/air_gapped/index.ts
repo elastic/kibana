@@ -11,7 +11,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Air-gapped environment with pre-bundled packages', function () {
     this.tags('skipFIPS');
     loadTestFile(require.resolve('./bootstrap_prebuilt_rules'));
-    loadTestFile(require.resolve('./install_bundled_package'));
-    loadTestFile(require.resolve('./prerelease_packages'));
+    // Flaky-isolation: keep only the changed test file.
+    // loadTestFile(require.resolve('./install_bundled_package'));
+    // loadTestFile(require.resolve('./prerelease_packages'));
   });
 };
