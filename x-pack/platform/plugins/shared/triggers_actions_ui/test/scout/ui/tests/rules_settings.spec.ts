@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, makeEsQueryRule } from '../fixtures';
@@ -15,11 +16,23 @@ const FLAPPING_OFF_PROMPT_SUBJ = 'rulesSettingsFlappingOffPrompt';
 const FLAPPING_TOGGLE_SUBJ = 'rulesSettingsFlappingEnableSwitch';
 const LOOK_BACK_INPUT_SUBJ = 'lookBackWindowRangeInput';
 const STATUS_CHANGE_INPUT_SUBJ = 'statusChangeThresholdRangeInput';
-const SPINNER_SUBJ = 'centerJustifiedSpinner';
 
 const DEFAULT_LOOK_BACK = 10;
 const DEFAULT_STATUS_CHANGE_THRESHOLD = 10;
 const DEFAULT_QUERY_DELAY = 10;
+
+const openRulesSettingsFlyout = async (page: ScoutPage) => {
+  await page.testSubj.click(SETTINGS_LINK_SUBJ);
+
+  const flyout = page.testSubj.locator(FLYOUT_SUBJ);
+  await expect(flyout).toBeVisible();
+
+  // Wait for the flyout's settings controls rather than the generic
+  // `centerJustifiedSpinner`, which also exists in the underlying rules list.
+  await expect(flyout.getByTestId(FLAPPING_TOGGLE_SUBJ)).toBeVisible();
+
+  return flyout;
+};
 
 test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
   let createdRuleId: string | undefined;
@@ -69,33 +82,28 @@ test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
   });
 
   test('opens the rules settings flyout with the configured values', async ({ page }) => {
-    await page.testSubj.click(SETTINGS_LINK_SUBJ);
-    await expect(page.testSubj.locator(FLYOUT_SUBJ)).toBeVisible();
-    await expect(page.testSubj.locator(SPINNER_SUBJ)).toBeHidden();
+    const flyout = await openRulesSettingsFlyout(page);
 
     // Flapping is enabled, so the "off" prompt is hidden and the inputs are
     // shown at the configured values.
-    await expect(page.testSubj.locator(FLAPPING_OFF_PROMPT_SUBJ)).toBeHidden();
-    await expect(page.testSubj.locator(FLAPPING_TOGGLE_SUBJ)).toBeVisible();
-    await expect(page.testSubj.locator(LOOK_BACK_INPUT_SUBJ)).toHaveValue(
-      String(DEFAULT_LOOK_BACK)
-    );
-    await expect(page.testSubj.locator(STATUS_CHANGE_INPUT_SUBJ)).toHaveValue(
+    await expect(flyout.getByTestId(FLAPPING_OFF_PROMPT_SUBJ)).toBeHidden();
+    await expect(flyout.getByTestId(FLAPPING_TOGGLE_SUBJ)).toBeVisible();
+    await expect(flyout.getByTestId(LOOK_BACK_INPUT_SUBJ)).toHaveValue(String(DEFAULT_LOOK_BACK));
+    await expect(flyout.getByTestId(STATUS_CHANGE_INPUT_SUBJ)).toHaveValue(
       String(DEFAULT_STATUS_CHANGE_THRESHOLD)
     );
 
     // Query-delay UI is gated behind a feature flag that is not on in
     // the Scout stateful/classic config (and was disabled in the original
     // FTR spec for the same reason).
-    await expect(page.testSubj.locator('queryDelayRangeInput')).toBeHidden();
+    await expect(flyout.getByTestId('queryDelayRangeInput')).toBeHidden();
   });
 
   test('modifies the rules settings and persists them', async ({ page }) => {
-    await page.testSubj.click(SETTINGS_LINK_SUBJ);
-    await expect(page.testSubj.locator(SPINNER_SUBJ)).toBeHidden();
+    const flyout = await openRulesSettingsFlyout(page);
 
-    const lookBackInput = page.testSubj.locator(LOOK_BACK_INPUT_SUBJ);
-    const statusChangeInput = page.testSubj.locator(STATUS_CHANGE_INPUT_SUBJ);
+    const lookBackInput = flyout.getByTestId(LOOK_BACK_INPUT_SUBJ);
+    const statusChangeInput = flyout.getByTestId(STATUS_CHANGE_INPUT_SUBJ);
 
     // EUI range inputs accept arrow keys to step the value.
     await lookBackInput.focus();
@@ -111,26 +119,25 @@ test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
     await expect(statusChangeInput).toHaveValue(String(DEFAULT_STATUS_CHANGE_THRESHOLD - 5));
 
     // Disable flapping
-    await page.testSubj.click(FLAPPING_TOGGLE_SUBJ);
-    await expect(page.testSubj.locator(FLAPPING_OFF_PROMPT_SUBJ)).toBeVisible();
+    await flyout.getByTestId(FLAPPING_TOGGLE_SUBJ).click();
+    await expect(flyout.getByTestId(FLAPPING_OFF_PROMPT_SUBJ)).toBeVisible();
 
     // Save and verify the flyout closes
     await page.testSubj.click('rulesSettingsFlyoutSaveButton');
-    await expect(page.testSubj.locator(FLYOUT_SUBJ)).toBeHidden();
+    await expect(flyout).toBeHidden();
 
     // Reopen and confirm the new values were persisted
-    await page.testSubj.click(SETTINGS_LINK_SUBJ);
-    await expect(page.testSubj.locator(SPINNER_SUBJ)).toBeHidden();
+    const reopenedFlyout = await openRulesSettingsFlyout(page);
 
     // Flapping was just turned off, so the off-prompt is shown — flip it
     // back on so the inputs are visible to assert against.
-    await expect(page.testSubj.locator(FLAPPING_OFF_PROMPT_SUBJ)).toBeVisible();
-    await page.testSubj.click(FLAPPING_TOGGLE_SUBJ);
+    await expect(reopenedFlyout.getByTestId(FLAPPING_OFF_PROMPT_SUBJ)).toBeVisible();
+    await reopenedFlyout.getByTestId(FLAPPING_TOGGLE_SUBJ).click();
 
-    await expect(page.testSubj.locator(LOOK_BACK_INPUT_SUBJ)).toHaveValue(
+    await expect(reopenedFlyout.getByTestId(LOOK_BACK_INPUT_SUBJ)).toHaveValue(
       String(DEFAULT_LOOK_BACK + 5)
     );
-    await expect(page.testSubj.locator(STATUS_CHANGE_INPUT_SUBJ)).toHaveValue(
+    await expect(reopenedFlyout.getByTestId(STATUS_CHANGE_INPUT_SUBJ)).toHaveValue(
       String(DEFAULT_STATUS_CHANGE_THRESHOLD - 5)
     );
   });

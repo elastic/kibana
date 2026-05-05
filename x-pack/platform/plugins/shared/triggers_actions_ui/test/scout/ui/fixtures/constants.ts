@@ -10,16 +10,10 @@ export const SHORTER_TIMEOUT = 5000 as const;
 
 export const RULE_DETAILS_APP_PATH = 'management/insightsAndAlerting/triggersActions';
 export const CONNECTORS_APP_PATH = '/app/management/insightsAndAlerting/triggersActionsConnectors';
-// Maintenance Windows is registered under Stack Management's `insightsAndAlerting` section,
-// not as a standalone app — `gotoApp` resolves to /app/<id>, which 404s for this page.
 export const MAINTENANCE_WINDOWS_APP_PATH =
   '/app/management/insightsAndAlerting/maintenanceWindows';
 
-// Shared CSS selectors for the connectors list page. These couple to EUI's
-// internal class names; if the EUI version changes them, update here once.
-// Ideally the source component would expose dynamic data-test-subj attributes
-// (e.g. `actionsTable-loaded`) so we could drop the `:not(.euiBasicTable-loading)`
-// trick — file a ticket if this becomes a maintenance burden.
+// Shared CSS selectors for the connectors list page.
 export const CONNECTORS_LIST_SELECTORS = {
   SEARCH_INPUT: '[data-test-subj="actionsList"] .euiFieldSearch',
   TABLE_LOADED: '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)',
