@@ -7,6 +7,7 @@ steps:
     label: Build ES Snapshot
     trigger: kibana-elasticsearch-snapshot-build
     async: false
+    if: build.env("DRY_RUN") != "true"
     depends_on: gate-es-build-and-promote
     build:
       branch: $BRANCH
@@ -15,6 +16,7 @@ steps:
 
   - key: promote-es-snapshot
     label: 'Upload promote step'
+    if: build.env("DRY_RUN") != "true"
     depends_on: build-es-snapshot
     command: |
       ES_SNAPSHOT_MANIFEST="$(buildkite-agent meta-data get es_snapshot_manifest)"
