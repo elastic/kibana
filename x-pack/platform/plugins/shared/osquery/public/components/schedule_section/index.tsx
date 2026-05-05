@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
-import { useWatch } from 'react-hook-form';
+import React, { useEffect, useMemo } from 'react';
+import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useFormContext, useWatch } from 'react-hook-form';
 
 import type { ScheduleType } from '../../../common/schedule';
 import { IntervalField } from '../../form/interval_field';
@@ -19,9 +20,19 @@ import { StopAfterField } from './stop_after_field';
 
 interface ScheduleSectionProps {
   isDisabled?: boolean;
+  /**
+   * When set, the {@link ScheduleTypeSelector} is locked to this mode and the
+   * form's `schedule_type` is forced to match. Used by `QueryFlyout` to enforce
+   * the same-mode constraint (D11): per-query overrides change the schedule
+   * details but not the mode, which is set at the pack level.
+   */
+  lockedScheduleType?: ScheduleType;
 }
 
-const ScheduleSectionComponent: React.FC<ScheduleSectionProps> = ({ isDisabled = false }) => {
+const ScheduleSectionComponent: React.FC<ScheduleSectionProps> = ({
+  isDisabled = false,
+  lockedScheduleType,
+}) => {
   // `defaultValue` is intentionally omitted: passing one to `useWatch` would
   // shadow the form's `defaultValues.schedule_type` on the first render
   // (RHF 7.x quirk), making the panel render IntervalField even when the
@@ -30,15 +41,39 @@ const ScheduleSectionComponent: React.FC<ScheduleSectionProps> = ({ isDisabled =
     name: 'schedule_type',
   });
 
+  const { setValue } = useFormContext<{ schedule_type: ScheduleType }>();
+
+  // Sync the form's `schedule_type` to the pack-level lock so a query starting
+  // in the wrong mode (e.g. legacy interval default on an rrule pack) lands on
+  // the correct render path without relying on parent re-mounts.
+  useEffect(() => {
+    if (lockedScheduleType && scheduleType !== lockedScheduleType) {
+      setValue('schedule_type', lockedScheduleType, { shouldDirty: false });
+    }
+  }, [lockedScheduleType, scheduleType, setValue]);
+
   const intervalEuiFieldProps = useMemo(() => ({ append: 's', isDisabled }), [isDisabled]);
+  const effectiveType = lockedScheduleType ?? scheduleType;
+  const isTypeLocked = lockedScheduleType != null;
 
   return (
     <div data-test-subj="osquery-schedule-section">
-      <ScheduleTypeSelector isDisabled={isDisabled} />
+      <ScheduleTypeSelector isDisabled={isDisabled} isTypeLocked={isTypeLocked} />
+      {isTypeLocked && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued" data-test-subj="osquery-schedule-type-locked-help">
+            {i18n.translate('xpack.osquery.scheduleSection.typeSelector.lockedHelp', {
+              defaultMessage:
+                'Overrides change the schedule details; mode is set at the pack level.',
+            })}
+          </EuiText>
+        </>
+      )}
       <EuiSpacer size="m" />
 
       <EuiPanel hasShadow={false} hasBorder color="subdued" paddingSize="m">
-        {scheduleType === 'interval' ? (
+        {effectiveType === 'interval' ? (
           <IntervalField euiFieldProps={intervalEuiFieldProps} />
         ) : (
           <>

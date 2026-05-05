@@ -90,7 +90,12 @@ const rruleScheduleConfigSchema = schema.object(
 );
 
 export const packSchemaV3 = packSchemaV2.extends({
-  schedule_type: schema.maybe(schema.oneOf([schema.literal('interval'), schema.literal('rrule')])),
-  interval: schema.maybe(schema.number()),
-  rrule_schedule: schema.maybe(rruleScheduleConfigSchema),
+  // Nullable so update routes can clear the prior-mode pack-level field on a
+  // schedule_type transition (D14) — the SO mapping accepts null and the
+  // discriminated read/find responses then drop the slot entirely.
+  schedule_type: schema.maybe(
+    schema.nullable(schema.oneOf([schema.literal('interval'), schema.literal('rrule')]))
+  ),
+  interval: schema.maybe(schema.nullable(schema.number())),
+  rrule_schedule: schema.maybe(schema.nullable(rruleScheduleConfigSchema)),
 });

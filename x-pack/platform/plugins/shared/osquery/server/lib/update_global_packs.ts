@@ -75,10 +75,11 @@ export const updateGlobalPacksCreateCallback = async (
       const resolvedSpaceId = spaceId || 'default';
       map(packsContainingShardForPolicy, (pack) => {
         const packKey = makePackKey(pack.name, resolvedSpaceId);
+        // D13 wire format: pack-level schedule travels as `default_*_schedule`.
         set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
           shard: 100,
           pack_id: pack.saved_object_id,
-          queries: convertSOQueriesToPackConfig(pack.queries, resolvedSpaceId, {
+          ...convertSOQueriesToPackConfig(pack.queries, resolvedSpaceId, {
             schedule_type: pack.schedule_type,
             interval: pack.interval,
             rrule_schedule: pack.rrule_schedule,

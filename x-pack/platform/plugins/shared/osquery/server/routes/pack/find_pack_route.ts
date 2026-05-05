@@ -22,6 +22,7 @@ import type { PackResponseData } from './types';
 import { findPacksRequestQuerySchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { findPackResponseSchema } from './response_schemas';
+import { buildDiscriminatedScheduleResponseFields } from './utils';
 
 export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -110,11 +111,10 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             updated_by: attributes.updated_by,
             updated_by_profile_uid: attributes.updated_by_profile_uid,
             saved_object_id: pack.id,
-            ...(attributes.schedule_type != null ? { schedule_type: attributes.schedule_type } : {}),
-            ...(attributes.interval != null ? { interval: attributes.interval } : {}),
-            ...(attributes.rrule_schedule != null
-              ? { rrule_schedule: attributes.rrule_schedule }
-              : {}),
+            // Discriminated by `schedule_type` (D14): SOs that have been
+            // transitioned between modes carry stale prior-mode fields that
+            // SHALL NOT be returned.
+            ...buildDiscriminatedScheduleResponseFields(attributes),
             policy_ids: policyIds,
             read_only: attributes.version !== undefined && osqueryPackAssetReference,
           };

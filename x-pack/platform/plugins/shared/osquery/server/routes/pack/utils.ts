@@ -139,35 +139,61 @@ export const convertSOQueriesToPack = (queries: SOPackQuery[] | Record<string, P
   );
 
 /**
+ * Pack default for native (interval) scheduling on the Fleet wire. Beats
+ * matches the literal field name `default_native_schedule` via Go struct tags
+ * in `beats#48767/internal/config/osquery.go`; renaming would require a
+ * coordinated agent change. See D13.
+ */
+export interface DefaultNativeSchedule {
+  interval: number;
+  start_date?: string;
+}
+
+/**
+ * Wire-format result of {@link convertSOQueriesToPackConfig} (D13). Pack-level
+ * fields are emitted as `default_*_schedule` defaults; the per-query map
+ * carries only fields that differ from the pack default plus per-query
+ * metadata. Beats's `MergeQueryWithPackScheduleDefaults` then fills in the
+ * defaults for queries that omit them.
+ */
+export interface PackConfigPayload {
+  default_native_schedule?: DefaultNativeSchedule;
+  default_rrule_schedule?: RRuleScheduleConfig;
+  default_space_id?: string;
+  queries: Record<string, Record<string, unknown>>;
+}
+
+/**
  * Converts stored pack queries into the Fleet-facing config each policy ships
- * to osquerybeat. This is also where the pack-level schedule (interval or
- * RRULE) is "fanned out" onto each query.
+ * to osquerybeat. Returns a structured payload (D13) — pack-level schedule is
+ * surfaced as `default_native_schedule` / `default_rrule_schedule`, and each
+ * query carries only the fields it overrides.
  *
- * Fan-out priority (per query):
+ * Per-query emission rules:
  *
- * 1. Per-query override with `schedule_type === 'rrule'` wins — emit the
- *    query's own `rrule_schedule`, strip `interval`.
- * 2. Per-query override with `schedule_type === 'interval'` wins — emit the
- *    query's own `interval`, strip `rrule_schedule`.
- * 3. No per-query override, pack is on RRULE — stamp pack's `rrule_schedule`
- *    onto the query, strip `interval`.
- * 4. No per-query override, pack is on interval — stamp pack's `interval`
- *    onto the query, strip `rrule_schedule`.
- * 5. Legacy (no pack schedule, no per-query override) — preserve the query's
- *    own `interval`, unchanged.
+ * 1. Per-query override with `schedule_type === 'rrule'` and a valid
+ *    `rrule_schedule` — emit `rrule_schedule` on the query.
+ * 2. Per-query override with `schedule_type === 'interval'` and a valid
+ *    `interval` — emit `interval` on the query.
+ * 3. No per-query override and pack has any default — emit no schedule
+ *    fields on the query (beats applies the pack default at merge time).
+ * 4. No per-query override and pack has no default (legacy) — preserve the
+ *    query's own `interval`.
  *
- * Mutual exclusivity: a fanned-out query always has `interval` XOR
- * `rrule_schedule`, never both.
+ * Mutual exclusivity: a per-query payload SHALL carry `interval` XOR
+ * `rrule_schedule`, never both. `schedule_type` is an internal Kibana
+ * discriminator and is intentionally not emitted to Fleet — osquerybeat
+ * infers mode from field presence.
  *
- * `schedule_type` is an internal Kibana discriminator and is intentionally not
- * emitted to Fleet — osquerybeat only checks for `rrule_schedule` presence.
+ * `space_id` is emitted once at the pack level as `default_space_id`. There
+ * is no per-query space override in osquery, so we never have to keep both.
  */
 export const convertSOQueriesToPackConfig = (
   queries: SOPackQuery[] | Record<string, PackQueryInput>,
   spaceId?: string,
   packSchedule?: PackSchedule
-) =>
-  reduce(
+): PackConfigPayload => {
+  const queriesMap = reduce(
     queries as SOPackQuery[],
     (
       acc: Record<string, Record<string, unknown>>,
@@ -184,16 +210,19 @@ export const convertSOQueriesToPackConfig = (
         ...remaining
       } = rest;
 
+      // Emit per-query schedule fields only for explicit overrides or — in the
+      // legacy-pack case — to preserve the query's own interval. Pack-level
+      // defaults travel via `default_*_schedule` and are merged in by beats.
       let scheduleFields: Record<string, unknown>;
       if (querySchedule === 'rrule' && queryRrule) {
         scheduleFields = { rrule_schedule: queryRrule };
       } else if (querySchedule === 'interval' && queryInterval != null) {
         scheduleFields = { interval: queryInterval };
-      } else if (packSchedule?.schedule_type === 'rrule' && packSchedule.rrule_schedule) {
-        scheduleFields = { rrule_schedule: packSchedule.rrule_schedule };
-      } else if (packSchedule?.schedule_type === 'interval' && packSchedule.interval != null) {
-        scheduleFields = { interval: packSchedule.interval };
+      } else if (packSchedule?.schedule_type) {
+        // Pack has a default; query inherits it. No per-query schedule field.
+        scheduleFields = {};
       } else {
+        // Legacy pack (no default): preserve the query's own interval if any.
         scheduleFields = queryInterval != null ? { interval: queryInterval } : {};
       }
 
@@ -208,13 +237,27 @@ export const convertSOQueriesToPackConfig = (
           : {}),
         ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
         ...resultType,
-        ...(spaceId ? { space_id: spaceId } : {}),
       };
 
       return acc;
     },
     {} as Record<string, Record<string, unknown>>
   );
+
+  const payload: PackConfigPayload = { queries: queriesMap };
+
+  if (packSchedule?.schedule_type === 'rrule' && packSchedule.rrule_schedule) {
+    payload.default_rrule_schedule = packSchedule.rrule_schedule;
+  } else if (packSchedule?.schedule_type === 'interval' && packSchedule.interval != null) {
+    payload.default_native_schedule = { interval: packSchedule.interval };
+  }
+
+  if (spaceId) {
+    payload.default_space_id = spaceId;
+  }
+
+  return payload;
+};
 
 export const policyHasPack = (
   packagePolicy: PackagePolicy,
@@ -286,7 +329,52 @@ interface ScheduleInputFields {
   rrule_schedule?: RRuleScheduleConfig;
 }
 
+/**
+ * Discriminate response-shape pack-level schedule fields by `schedule_type`,
+ * dropping any stale prior-mode field that may still live on the SO after a
+ * mode transition (see D14, `update_pack_route.ts` cleanup comment).
+ *
+ * Mirrors the shape used in `update_pack_route.ts` so create/update/copy/read/
+ * find responses agree byte-for-byte on which slots are present.
+ */
+export const buildDiscriminatedScheduleResponseFields = (
+  attributes: ScheduleInputFields
+): {
+  schedule_type?: ScheduleType;
+  interval?: number;
+  rrule_schedule?: RRuleScheduleConfig;
+} => {
+  if (attributes.schedule_type === 'rrule') {
+    return attributes.rrule_schedule
+      ? { schedule_type: 'rrule', rrule_schedule: attributes.rrule_schedule }
+      : { schedule_type: 'rrule' };
+  }
+
+  if (attributes.schedule_type === 'interval') {
+    return attributes.interval != null
+      ? { schedule_type: 'interval', interval: attributes.interval }
+      : { schedule_type: 'interval' };
+  }
+
+  return {};
+};
+
+/**
+ * Strict RFC 3339 datetime regex.
+ *
+ * Matches `YYYY-MM-DDTHH:MM:SS` followed by an optional fractional seconds part
+ * and a timezone offset (`Z` or `±HH:MM`). Loose forms accepted by `Date.parse`
+ * (e.g. `2024-01-01`, `01/02/2024`) are intentionally rejected — beats parses
+ * with `time.Parse(time.RFC3339, …)` which mirrors this strictness, and the
+ * OpenAPI schema declares `format: date-time`.
+ */
+const RFC_3339_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+
 const isValidIsoDate = (value: string): boolean => {
+  if (typeof value !== 'string' || !RFC_3339_REGEX.test(value)) {
+    return false;
+  }
+
   const ts = Date.parse(value);
 
   return !Number.isNaN(ts);
@@ -298,12 +386,12 @@ const validateRruleConfig = (config: RRuleScheduleConfig): string | null => {
   }
 
   if (!config.start_date || !isValidIsoDate(config.start_date)) {
-    return '`rrule_schedule.start_date` must be a valid ISO 8601 datetime string';
+    return '`rrule_schedule.start_date` must be a valid RFC 3339 datetime string (e.g. "2024-01-01T00:00:00.000Z")';
   }
 
   if (config.end_date != null) {
     if (!isValidIsoDate(config.end_date)) {
-      return '`rrule_schedule.end_date` must be a valid ISO 8601 datetime string';
+      return '`rrule_schedule.end_date` must be a valid RFC 3339 datetime string (e.g. "2024-01-01T00:00:00.000Z")';
     }
 
     if (Date.parse(config.end_date) <= Date.parse(config.start_date)) {
@@ -320,7 +408,7 @@ const validateRruleConfig = (config: RRuleScheduleConfig): string | null => {
     }
 
     if (!isSplayWithinMax(parsed)) {
-      return `\`rrule_schedule.splay\` exceeds the maximum of ${MAX_SPLAY_SECONDS} seconds (1 hour)`;
+      return `\`rrule_schedule.splay\` exceeds the maximum of ${MAX_SPLAY_SECONDS} seconds (12 hours)`;
     }
   }
 
@@ -339,10 +427,16 @@ const validateRruleConfig = (config: RRuleScheduleConfig): string | null => {
  *
  * Per-query rules: identical, except `interval` may also be present without
  * `schedule_type` (legacy behavior — the existing per-query interval mode).
+ *
+ * Cross-level rule (D11): when called with `scope === 'query'` and a non-null
+ * `packScheduleType`, the query override SHALL use the same mode as the pack.
+ * Mixed-mode packs are rejected here because osquerybeat enforces a single
+ * mode per pack — see `beats#48767/pack_schedule.go::ValidatePackQueriesAfterMerge`.
  */
 export const validateScheduleFields = (
   scope: 'pack' | 'query',
-  fields: ScheduleInputFields
+  fields: ScheduleInputFields,
+  packScheduleType?: ScheduleType
 ): string | null => {
   const { schedule_type: type, interval, rrule_schedule: rrule } = fields;
 
@@ -355,6 +449,10 @@ export const validateScheduleFields = (
       return `\`schedule_type: 'rrule'\` is mutually exclusive with \`interval\``;
     }
 
+    if (scope === 'query' && packScheduleType && packScheduleType !== 'rrule') {
+      return `query override mode \`'rrule'\` does not match pack mode \`'${packScheduleType}'\` — a pack and its queries must share one schedule mode`;
+    }
+
     return validateRruleConfig(rrule);
   }
 
@@ -365,6 +463,10 @@ export const validateScheduleFields = (
 
     if (rrule) {
       return `\`schedule_type: 'interval'\` is mutually exclusive with \`rrule_schedule\``;
+    }
+
+    if (scope === 'query' && packScheduleType && packScheduleType !== 'interval') {
+      return `query override mode \`'interval'\` does not match pack mode \`'${packScheduleType}'\` — a pack and its queries must share one schedule mode`;
     }
 
     return null;
@@ -462,7 +564,7 @@ export const extractAndValidatePackScheduleFromBody = <
 
   if (body.queries) {
     for (const [queryId, queryData] of Object.entries(body.queries)) {
-      const queryError = validateScheduleFields('query', queryData);
+      const queryError = validateScheduleFields('query', queryData, body.schedule_type);
       if (queryError) {
         return { ok: false, error: `Query "${queryId}": ${queryError}` };
       }

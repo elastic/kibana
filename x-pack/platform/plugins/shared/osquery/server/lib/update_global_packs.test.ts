@@ -242,15 +242,18 @@ describe('updateGlobalPacksCreateCallback', () => {
       mockOsqueryContext
     );
 
+    // D13 wire format: pack-level `default_space_id` is emitted once at the
+    // pack level instead of stamping `space_id` onto every query. The legacy
+    // pack here has no schedule_type so per-query `interval` is preserved.
     expect(result.inputs[0].config?.osquery?.value?.packs?.['default--embedded-pack']).toEqual({
       shard: 100,
       pack_id: 'pack-so-id-4',
+      default_space_id: 'default',
       queries: {
         query1: {
           name: 'test-query',
           query: 'SELECT * FROM listening_ports;',
           interval: 1800,
-          space_id: 'default',
         },
       },
     });

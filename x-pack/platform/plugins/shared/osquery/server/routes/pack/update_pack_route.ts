@@ -43,6 +43,7 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { StartPlugins } from '../../types';
 import { PLUGIN_ID } from '../../../common';
 import {
+  buildDiscriminatedScheduleResponseFields,
   convertSOQueriesToPack,
   convertPackQueriesToSO,
   convertSOQueriesToPackConfig,
@@ -231,13 +232,50 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const references = getUpdatedReferences();
 
-        // Trade-off on schedule transitions: SavedObjectsClient.update is a
-        // shallow merge, and Kibana's pack mappings reject `null` for
-        // `interval`. So switching `schedule_type` from 'interval' → 'rrule' (or
-        // vice versa) leaves the prior mode's value as a stale attribute on the
-        // SO. The active mode is unambiguous because Fleet-config fan-out and
-        // the API response are both built from the validated `packSchedule`
-        // (discriminated by `schedule_type`), not from the raw SO.
+        // Schedule-transition cleanup (D14): SavedObjectsClient.update is a
+        // shallow merge. Without explicit nulling, switching `schedule_type`
+        // from 'interval' → 'rrule' (or vice versa) would leave the prior
+        // mode's pack-level field as a stale attribute on the SO. The pack SO
+        // schema (`packSchemaV3`) marks these slots nullable so we can clear
+        // them at write time and keep read/find responses honest about the
+        // current mode.
+        const priorScheduleType = currentPackSO.attributes.schedule_type;
+        const nextScheduleType = packSchedule.schedule_type;
+        const isModeTransition =
+          nextScheduleType != null &&
+          priorScheduleType != null &&
+          priorScheduleType !== nextScheduleType;
+
+        // The SO config-schema for `schedule_type`, `interval`, and
+        // `rrule_schedule` accepts null (see `packSchemaV3`) so this null-write
+        // pattern reaches the SO client; the type assertion below lets us
+        // keep the consumer-facing `PackSavedObject` type strictly non-null.
+        const scheduleAttributeUpdate: Record<string, unknown> = {};
+
+        if (nextScheduleType != null) {
+          scheduleAttributeUpdate.schedule_type = nextScheduleType;
+        }
+
+        if (nextScheduleType === 'interval') {
+          scheduleAttributeUpdate.interval = packSchedule.interval ?? null;
+          if (isModeTransition) {
+            scheduleAttributeUpdate.rrule_schedule = null;
+          }
+        } else if (nextScheduleType === 'rrule') {
+          scheduleAttributeUpdate.rrule_schedule = packSchedule.rrule_schedule ?? null;
+          if (isModeTransition) {
+            scheduleAttributeUpdate.interval = null;
+          }
+        } else {
+          if (packSchedule.interval != null) {
+            scheduleAttributeUpdate.interval = packSchedule.interval;
+          }
+
+          if (packSchedule.rrule_schedule) {
+            scheduleAttributeUpdate.rrule_schedule = packSchedule.rrule_schedule;
+          }
+        }
+
         await spaceScopedClient.update<PackSavedObject>(
           packSavedObjectType,
           request.params.id,
@@ -250,9 +288,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             updated_by: username,
             updated_by_profile_uid: profileUid,
             shards: convertShardsToArray(shards),
-            ...(packSchedule.schedule_type ? { schedule_type: packSchedule.schedule_type } : {}),
-            ...(packSchedule.interval != null ? { interval: packSchedule.interval } : {}),
-            ...(packSchedule.rrule_schedule ? { rrule_schedule: packSchedule.rrule_schedule } : {}),
+            ...(scheduleAttributeUpdate as Partial<PackSavedObject>),
           },
           {
             refresh: 'wait_for',
@@ -390,15 +426,14 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     set(draft, `inputs[0].config.osquery.value.packs.${pk}`, {
                       shard: policyShards[agentPolicyId] ?? 100,
                       pack_id: updatedPackSO.id,
-                      queries: convertSOQueriesToPackConfig(
-                        updatedPackSO.attributes.queries,
-                        spaceId,
-                        {
-                          schedule_type: updatedPackSO.attributes.schedule_type,
-                          interval: updatedPackSO.attributes.interval,
-                          rrule_schedule: updatedPackSO.attributes.rrule_schedule,
-                        }
-                      ),
+                      // D13 wire format: pack-level schedule travels as
+                      // `default_*_schedule`; per-query map carries only
+                      // overrides plus per-query metadata.
+                      ...convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, spaceId, {
+                        schedule_type: updatedPackSO.attributes.schedule_type,
+                        interval: updatedPackSO.attributes.interval,
+                        rrule_schedule: updatedPackSO.attributes.rrule_schedule,
+                      }),
                     });
 
                     return draft;
@@ -429,15 +464,14 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     set(draft, `inputs[0].config.osquery.value.packs.${pk}`, {
                       shard: policyShards[agentPolicyId] ?? 100,
                       pack_id: updatedPackSO.id,
-                      queries: convertSOQueriesToPackConfig(
-                        updatedPackSO.attributes.queries,
-                        spaceId,
-                        {
-                          schedule_type: updatedPackSO.attributes.schedule_type,
-                          interval: updatedPackSO.attributes.interval,
-                          rrule_schedule: updatedPackSO.attributes.rrule_schedule,
-                        }
-                      ),
+                      // D13 wire format: pack-level schedule travels as
+                      // `default_*_schedule`; per-query map carries only
+                      // overrides plus per-query metadata.
+                      ...convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, spaceId, {
+                        schedule_type: updatedPackSO.attributes.schedule_type,
+                        interval: updatedPackSO.attributes.interval,
+                        rrule_schedule: updatedPackSO.attributes.rrule_schedule,
+                      }),
                     });
 
                     return draft;
@@ -450,25 +484,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const { attributes } = updatedPackSO;
 
-        // Build discriminated schedule fields for the response: emit only the
-        // fields that match the active `schedule_type`. Stale attributes left
-        // on the SO by transition merges (see comment near the update call) are
-        // intentionally not surfaced.
-        const responseScheduleFields: Pick<
-          PackResponseData,
-          'schedule_type' | 'interval' | 'rrule_schedule'
-        > =
-          attributes.schedule_type === 'rrule'
-            ? {
-                schedule_type: 'rrule',
-                rrule_schedule: attributes.rrule_schedule,
-              }
-            : attributes.schedule_type === 'interval'
-            ? {
-                schedule_type: 'interval',
-                interval: attributes.interval,
-              }
-            : {};
+        // Build discriminated schedule fields for the response so the prior
+        // mode's slot is never returned after a `schedule_type` transition
+        // (D14). Stale attributes are also cleared at write-time above, but
+        // the discrimination keeps responses honest even for SOs that
+        // predate the cleanup.
+        const responseScheduleFields = buildDiscriminatedScheduleResponseFields(attributes);
 
         const data: PackResponseData = {
           name: attributes.name,

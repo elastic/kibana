@@ -37,6 +37,14 @@ export interface ScheduleFormData {
   splay_enabled: boolean;
   splay_value: number;
   splay_unit: SplayUnit;
+  /**
+   * Verbatim splay string preserved for round-tripping compound Go durations
+   * (e.g. `"1h30m"`) that the single-unit splay form cannot represent. Set on
+   * deserialize when the SO carries a compound splay; the serializer emits
+   * this value unchanged. Cleared as soon as the user edits `splay_value` or
+   * `splay_unit`, at which point the form's normal serialization takes over.
+   */
+  splay_raw?: string;
 
   frequency: ScheduleFrequency;
   repeat_every: number;
@@ -72,6 +80,7 @@ export const DEFAULT_SCHEDULE_FORM_VALUES: ScheduleFormData = {
   splay_enabled: false,
   splay_value: DEFAULT_SPLAY_VALUE,
   splay_unit: 'minutes',
+  splay_raw: undefined,
 
   frequency: 'daily',
   repeat_every: DEFAULT_REPEAT_EVERY,

@@ -28,6 +28,7 @@ import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import {
+  buildDiscriminatedScheduleResponseFields,
   convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
   extractAndValidatePackScheduleFromBody,
@@ -201,10 +202,18 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     }
 
                     const packKey = makePackKey(packSO.attributes.name, spaceId);
+                    // D13 wire format: pack-level schedule travels as
+                    // `default_*_schedule`; per-query map carries only
+                    // overrides plus per-query metadata.
+                    const packConfigPayload = convertSOQueriesToPackConfig(
+                      queries,
+                      spaceId,
+                      packSchedule
+                    );
                     set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
                       shard: policyShards[agentPolicyId] ?? 100,
                       pack_id: packSO.id,
-                      queries: convertSOQueriesToPackConfig(queries, spaceId, packSchedule),
+                      ...packConfigPayload,
                     });
 
                     return draft;
@@ -219,17 +228,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const { attributes } = packSO;
 
-        // Mirror the discriminated response shape in update_pack_route: only the
-        // fields matching the active `schedule_type` are surfaced.
-        const responseScheduleFields: Pick<
-          PackResponseData,
-          'schedule_type' | 'interval' | 'rrule_schedule'
-        > =
-          attributes.schedule_type === 'rrule'
-            ? { schedule_type: 'rrule', rrule_schedule: attributes.rrule_schedule }
-            : attributes.schedule_type === 'interval'
-            ? { schedule_type: 'interval', interval: attributes.interval }
-            : {};
+        // Mirror the discriminated response shape used in read/find/update
+        // routes — D14. Only the fields matching the active `schedule_type`
+        // are surfaced.
+        const responseScheduleFields = buildDiscriminatedScheduleResponseFields(attributes);
 
         const data: PackResponseData = {
           name: attributes.name,

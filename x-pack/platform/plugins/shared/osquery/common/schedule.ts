@@ -6,10 +6,10 @@
  */
 
 /**
- * Maximum allowed splay duration in seconds (1 hour). Aligned with osquerybeat's
- * `MaxSplay = time.Hour` constant.
+ * Maximum allowed splay duration in seconds (12 hours). Aligned with osquerybeat's
+ * `MaxSplay = 12 * time.Hour` constant.
  */
-export const MAX_SPLAY_SECONDS = 3600;
+export const MAX_SPLAY_SECONDS = 43200;
 
 /**
  * Discriminator for which scheduling mode a pack or pack query uses.
@@ -40,7 +40,7 @@ export interface RRuleScheduleConfig {
   end_date?: string;
   /**
    * Optional Go duration string for splay (random execution delay), e.g.
-   * `"30s"`, `"5m"`, `"1h"`. Maximum 1 hour (`MAX_SPLAY_SECONDS`).
+   * `"30s"`, `"5m"`, `"1h"`. Maximum 12 hours (`MAX_SPLAY_SECONDS`).
    */
   splay?: string;
   /** Optional per-query timeout in seconds. */

@@ -132,10 +132,11 @@ describe('updatePackRoute — Phase 4 RRULE scheduling', () => {
     const updateArgs = client.update.mock.calls[0][2];
     expect(updateArgs.schedule_type).toBe('rrule');
     expect(updateArgs.rrule_schedule).toEqual(validRrule);
-    expect(updateArgs.interval).toBeUndefined();
+    // D14: prior-mode pack-level field is null-cleared on transition.
+    expect(updateArgs.interval).toBeNull();
 
-    // Response is discriminated by `schedule_type`, so the stale `interval` left
-    // on the SO is intentionally not surfaced to clients.
+    // Response is discriminated by `schedule_type`, so the now-cleared
+    // `interval` is not surfaced to clients.
     const body = response.ok.mock.calls[0][0]?.body as any;
     expect(body.data.schedule_type).toBe('rrule');
     expect(body.data.rrule_schedule).toEqual(validRrule);
@@ -167,7 +168,8 @@ describe('updatePackRoute — Phase 4 RRULE scheduling', () => {
     const updateArgs = client.update.mock.calls[0][2];
     expect(updateArgs.schedule_type).toBe('interval');
     expect(updateArgs.interval).toBe(900);
-    expect(updateArgs.rrule_schedule).toBeUndefined();
+    // D14: prior-mode pack-level field is null-cleared on transition.
+    expect(updateArgs.rrule_schedule).toBeNull();
 
     const body = response.ok.mock.calls[0][0]?.body as any;
     expect(body.data.schedule_type).toBe('interval');

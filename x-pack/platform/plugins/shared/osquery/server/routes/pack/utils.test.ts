@@ -6,6 +6,7 @@
  */
 
 import {
+  buildDiscriminatedScheduleResponseFields,
   convertSOQueriesToPack,
   convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
@@ -79,53 +80,57 @@ describe('Pack utils', () => {
   });
   describe('convertSOQueriesToPackConfig', () => {
     test('converts to pack with converting query to single line', () => {
-      const convertedQueries = convertSOQueriesToPackConfig(getTestQueries());
-      expect(convertedQueries).toStrictEqual(getOneLiner({}));
+      const result = convertSOQueriesToPackConfig(getTestQueries());
+      expect(result.queries).toStrictEqual(getOneLiner({}));
+      expect(result).not.toHaveProperty('default_native_schedule');
+      expect(result).not.toHaveProperty('default_rrule_schedule');
+      expect(result).not.toHaveProperty('default_space_id');
     });
 
     test('if snapshot true and removed true - return empty {}', () => {
-      const convertedQueries = convertSOQueriesToPackConfig(
+      const result = convertSOQueriesToPackConfig(
         getTestQueries({ snapshot: true, removed: true })
       );
-      expect(convertedQueries).toStrictEqual(getOneLiner({}));
+      expect(result.queries).toStrictEqual(getOneLiner({}));
     });
     test('if snapshot true and removed false - return empty {}', () => {
-      const convertedQueries = convertSOQueriesToPackConfig(
+      const result = convertSOQueriesToPackConfig(
         getTestQueries({ snapshot: true, removed: false })
       );
-      expect(convertedQueries).toStrictEqual(getOneLiner({}));
+      expect(result.queries).toStrictEqual(getOneLiner({}));
     });
     test('converts with results snapshot set false', () => {
-      const convertedQueries = convertSOQueriesToPackConfig(
+      const result = convertSOQueriesToPackConfig(
         getTestQueries({ snapshot: false, removed: true })
       );
-      expect(convertedQueries).toStrictEqual(getOneLiner({ snapshot: false, removed: true }));
+      expect(result.queries).toStrictEqual(getOneLiner({ snapshot: false, removed: true }));
     });
     test('converts with both results set to false', () => {
-      const convertedQueries = convertSOQueriesToPackConfig(
+      const result = convertSOQueriesToPackConfig(
         getTestQueries({ snapshot: false, removed: false })
       );
-      expect(convertedQueries).toStrictEqual(getOneLiner({ removed: false, snapshot: false }));
+      expect(result.queries).toStrictEqual(getOneLiner({ removed: false, snapshot: false }));
     });
 
     test('passes through schedule_id and start_date', () => {
-      const convertedQueries = convertSOQueriesToPackConfig(
+      const result = convertSOQueriesToPackConfig(
         getTestQueries({ schedule_id: 'uuid-abc', start_date: '2024-01-01T00:00:00.000Z' })
       );
-      expect(convertedQueries).toStrictEqual(
+      expect(result.queries).toStrictEqual(
         getOneLiner({ schedule_id: 'uuid-abc', start_date: '2024-01-01T00:00:00.000Z' })
       );
     });
 
-    test('injects space_id when provided', () => {
-      const convertedQueries = convertSOQueriesToPackConfig(getTestQueries(), 'my-space');
-      expect(convertedQueries).toStrictEqual(getOneLiner({ space_id: 'my-space' }));
+    test('emits default_space_id at pack level instead of stamping space_id per query (D13)', () => {
+      const result = convertSOQueriesToPackConfig(getTestQueries(), 'my-space');
+      expect(result.default_space_id).toBe('my-space');
+      expect(result.queries.default).not.toHaveProperty('space_id');
+      expect(result.queries).toStrictEqual(getOneLiner({}));
     });
 
     test('does not inject pack_id into queries (pack_id belongs at pack level)', () => {
-      const convertedQueries = convertSOQueriesToPackConfig(getTestQueries(), 'my-space');
-      expect(convertedQueries).toStrictEqual(getOneLiner({ space_id: 'my-space' }));
-      expect(convertedQueries.default).not.toHaveProperty('pack_id');
+      const result = convertSOQueriesToPackConfig(getTestQueries(), 'my-space');
+      expect(result.queries.default).not.toHaveProperty('pack_id');
     });
   });
 
@@ -166,7 +171,7 @@ describe('Pack utils', () => {
     });
   });
 
-  describe('convertSOQueriesToPackConfig — schedule fan-out', () => {
+  describe('convertSOQueriesToPackConfig — D13 default_*_schedule wire format', () => {
     const packRrule: RRuleScheduleConfig = {
       rrule: 'FREQ=DAILY',
       start_date: '2024-01-01T00:00:00.000Z',
@@ -180,7 +185,7 @@ describe('Pack utils', () => {
       query: 'SELECT 1',
     };
 
-    test('pack RRULE is inherited by queries without overrides (interval stripped)', () => {
+    test('pack RRULE lands in default_rrule_schedule; queries inherit by omission', () => {
       const queries = {
         q1: { ...baseQuery, interval: 3600 },
         q2: { ...baseQuery, interval: 7200 },
@@ -191,19 +196,14 @@ describe('Pack utils', () => {
         rrule_schedule: packRrule,
       });
 
-      expect(result.q1).toEqual({
-        query: 'SELECT 1',
-        rrule_schedule: packRrule,
-      });
-      expect(result.q2).toEqual({
-        query: 'SELECT 1',
-        rrule_schedule: packRrule,
-      });
-      expect(result.q1).not.toHaveProperty('interval');
-      expect(result.q2).not.toHaveProperty('interval');
+      expect(result.default_rrule_schedule).toEqual(packRrule);
+      expect(result.queries.q1).toEqual({ query: 'SELECT 1' });
+      expect(result.queries.q2).toEqual({ query: 'SELECT 1' });
+      expect(result.queries.q1).not.toHaveProperty('rrule_schedule');
+      expect(result.queries.q1).not.toHaveProperty('interval');
     });
 
-    test('per-query RRULE override takes precedence over pack RRULE', () => {
+    test('per-query RRULE override emits rrule_schedule on the query only', () => {
       const queries = {
         inherits: { ...baseQuery, interval: 3600 },
         overrides: {
@@ -219,32 +219,13 @@ describe('Pack utils', () => {
         rrule_schedule: packRrule,
       });
 
-      expect(result.inherits.rrule_schedule).toEqual(packRrule);
-      expect(result.overrides.rrule_schedule).toEqual(queryRrule);
-      expect(result.overrides).not.toHaveProperty('interval');
+      expect(result.default_rrule_schedule).toEqual(packRrule);
+      expect(result.queries.inherits).not.toHaveProperty('rrule_schedule');
+      expect(result.queries.overrides.rrule_schedule).toEqual(queryRrule);
+      expect(result.queries.overrides).not.toHaveProperty('interval');
     });
 
-    test('per-query interval override takes precedence over pack RRULE', () => {
-      const queries = {
-        inherits: { ...baseQuery, interval: 3600 },
-        overrides: {
-          ...baseQuery,
-          interval: 900,
-          schedule_type: 'interval' as const,
-        },
-      };
-
-      const result = convertSOQueriesToPackConfig(queries, undefined, {
-        schedule_type: 'rrule',
-        rrule_schedule: packRrule,
-      });
-
-      expect(result.inherits).toEqual({ query: 'SELECT 1', rrule_schedule: packRrule });
-      expect(result.overrides).toEqual({ query: 'SELECT 1', interval: 900 });
-      expect(result.overrides).not.toHaveProperty('rrule_schedule');
-    });
-
-    test('pack-level interval is inherited by queries without overrides', () => {
+    test('pack-level interval lands in default_native_schedule', () => {
       const queries = {
         q1: { ...baseQuery, interval: 3600 },
         q2: { ...baseQuery, interval: 7200 },
@@ -255,29 +236,10 @@ describe('Pack utils', () => {
         interval: 1800,
       });
 
-      expect(result.q1).toEqual({ query: 'SELECT 1', interval: 1800 });
-      expect(result.q2).toEqual({ query: 'SELECT 1', interval: 1800 });
-      expect(result.q1).not.toHaveProperty('rrule_schedule');
-    });
-
-    test('per-query RRULE override takes precedence over pack interval', () => {
-      const queries = {
-        inherits: { ...baseQuery, interval: 3600 },
-        overrides: {
-          ...baseQuery,
-          schedule_type: 'rrule' as const,
-          rrule_schedule: queryRrule,
-        },
-      };
-
-      const result = convertSOQueriesToPackConfig(queries, undefined, {
-        schedule_type: 'interval',
-        interval: 1800,
-      });
-
-      expect(result.inherits).toEqual({ query: 'SELECT 1', interval: 1800 });
-      expect(result.overrides).toEqual({ query: 'SELECT 1', rrule_schedule: queryRrule });
-      expect(result.overrides).not.toHaveProperty('interval');
+      expect(result.default_native_schedule).toEqual({ interval: 1800 });
+      expect(result.queries.q1).toEqual({ query: 'SELECT 1' });
+      expect(result.queries.q2).toEqual({ query: 'SELECT 1' });
+      expect(result).not.toHaveProperty('default_rrule_schedule');
     });
 
     test('legacy pack (no packSchedule) preserves query interval unchanged', () => {
@@ -288,11 +250,13 @@ describe('Pack utils', () => {
 
       const result = convertSOQueriesToPackConfig(queries);
 
-      expect(result.q1).toEqual({ query: 'SELECT 1', interval: 3600 });
-      expect(result.q2).toEqual({ query: 'SELECT 1', interval: 7200 });
+      expect(result).not.toHaveProperty('default_native_schedule');
+      expect(result).not.toHaveProperty('default_rrule_schedule');
+      expect(result.queries.q1).toEqual({ query: 'SELECT 1', interval: 3600 });
+      expect(result.queries.q2).toEqual({ query: 'SELECT 1', interval: 7200 });
     });
 
-    test('mixed: pack RRULE + one RRULE override + one interval override', () => {
+    test('mixed: pack RRULE default + per-query overrides; default_space_id collapsed', () => {
       const queries = {
         inherits: { ...baseQuery, interval: 3600 },
         rrule_override: {
@@ -301,11 +265,6 @@ describe('Pack utils', () => {
           schedule_type: 'rrule' as const,
           rrule_schedule: queryRrule,
         },
-        interval_override: {
-          ...baseQuery,
-          interval: 300,
-          schedule_type: 'interval' as const,
-        },
       };
 
       const result = convertSOQueriesToPackConfig(queries, 'my-space', {
@@ -313,35 +272,19 @@ describe('Pack utils', () => {
         rrule_schedule: packRrule,
       });
 
-      expect(result.inherits).toEqual({
-        query: 'SELECT 1',
-        rrule_schedule: packRrule,
-        space_id: 'my-space',
-      });
-      expect(result.rrule_override).toEqual({
+      expect(result.default_rrule_schedule).toEqual(packRrule);
+      expect(result.default_space_id).toBe('my-space');
+      expect(result.queries.inherits).toEqual({ query: 'SELECT 1' });
+      expect(result.queries.rrule_override).toEqual({
         query: 'SELECT 1',
         rrule_schedule: queryRrule,
-        space_id: 'my-space',
       });
-      expect(result.interval_override).toEqual({
-        query: 'SELECT 1',
-        interval: 300,
-        space_id: 'my-space',
-      });
+      expect(result.queries.inherits).not.toHaveProperty('space_id');
+      expect(result.queries.rrule_override).not.toHaveProperty('space_id');
     });
 
-    test('mutual exclusivity: fanned-out query never has both interval and rrule_schedule', () => {
+    test('per-query overrides never carry both interval and rrule_schedule', () => {
       const cases = [
-        {
-          label: 'pack RRULE + query has stale interval',
-          packSchedule: { schedule_type: 'rrule' as const, rrule_schedule: packRrule },
-          query: { ...baseQuery, interval: 3600 },
-        },
-        {
-          label: 'pack interval + query has stale rrule_schedule (no discriminator)',
-          packSchedule: { schedule_type: 'interval' as const, interval: 1800 },
-          query: { ...baseQuery, interval: 3600, rrule_schedule: queryRrule },
-        },
         {
           label: "query schedule_type='rrule' overriding pack interval",
           packSchedule: { schedule_type: 'interval' as const, interval: 1800 },
@@ -366,8 +309,8 @@ describe('Pack utils', () => {
 
       for (const { label, packSchedule, query } of cases) {
         const result = convertSOQueriesToPackConfig({ q: query }, undefined, packSchedule);
-        const hasInterval = 'interval' in result.q;
-        const hasRrule = 'rrule_schedule' in result.q;
+        const hasInterval = 'interval' in result.queries.q;
+        const hasRrule = 'rrule_schedule' in result.queries.q;
         expect({ label, hasInterval, hasRrule, bothSet: hasInterval && hasRrule }).toEqual({
           label,
           hasInterval,
@@ -377,7 +320,7 @@ describe('Pack utils', () => {
       }
     });
 
-    test('does not leak schedule_type into Fleet output', () => {
+    test('does not leak schedule_type into Fleet output (queries or pack-level)', () => {
       const queries = {
         q1: {
           ...baseQuery,
@@ -393,11 +336,12 @@ describe('Pack utils', () => {
 
       const result = convertSOQueriesToPackConfig(queries);
 
-      expect(result.q1).not.toHaveProperty('schedule_type');
-      expect(result.q2).not.toHaveProperty('schedule_type');
+      expect(result).not.toHaveProperty('schedule_type');
+      expect(result.queries.q1).not.toHaveProperty('schedule_type');
+      expect(result.queries.q2).not.toHaveProperty('schedule_type');
     });
 
-    test('per-query schedule_type="rrule" without rrule_schedule falls through to pack schedule', () => {
+    test('per-query schedule_type="rrule" without rrule_schedule falls through to pack default', () => {
       const queries = {
         q1: {
           ...baseQuery,
@@ -411,10 +355,11 @@ describe('Pack utils', () => {
         interval: 1800,
       });
 
-      expect(result.q1).toEqual({ query: 'SELECT 1', interval: 1800 });
+      expect(result.default_native_schedule).toEqual({ interval: 1800 });
+      expect(result.queries.q1).toEqual({ query: 'SELECT 1' });
     });
 
-    test('per-query schedule_type="interval" without interval falls through to pack schedule', () => {
+    test('per-query schedule_type="interval" without interval falls through to pack default', () => {
       const queries = {
         q1: {
           ...baseQuery,
@@ -427,7 +372,8 @@ describe('Pack utils', () => {
         rrule_schedule: packRrule,
       });
 
-      expect(result.q1).toEqual({ query: 'SELECT 1', rrule_schedule: packRrule });
+      expect(result.default_rrule_schedule).toEqual(packRrule);
+      expect(result.queries.q1).toEqual({ query: 'SELECT 1' });
     });
   });
 
@@ -516,6 +462,55 @@ describe('Pack utils', () => {
         ).toMatch(/`rrule_schedule.start_date`/);
       });
 
+      test('rejects loose date-only start_date (RFC 3339 strictness)', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2024-01-01' },
+          })
+        ).toMatch(/`rrule_schedule.start_date`/);
+      });
+
+      test('rejects loose US-style start_date (RFC 3339 strictness)', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '01/02/2024' },
+          })
+        ).toMatch(/`rrule_schedule.start_date`/);
+      });
+
+      test('accepts RFC 3339 start_date with Z suffix', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2024-01-01T00:00:00Z' },
+          })
+        ).toBeNull();
+      });
+
+      test('accepts RFC 3339 start_date with milliseconds', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2024-01-01T00:00:00.000Z' },
+          })
+        ).toBeNull();
+      });
+
+      test('rejects loose end_date (RFC 3339 strictness)', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: {
+              rrule: 'FREQ=DAILY',
+              start_date: '2024-01-01T00:00:00.000Z',
+              end_date: '2024-12-31',
+            },
+          })
+        ).toMatch(/`rrule_schedule.end_date`/);
+      });
+
       test('rejects end_date that is before start_date', () => {
         expect(
           validateScheduleFields('pack', {
@@ -529,20 +524,29 @@ describe('Pack utils', () => {
         ).toMatch(/`rrule_schedule.end_date` must be after/);
       });
 
-      test('rejects splay greater than 1 hour', () => {
+      test('rejects splay greater than 12 hours', () => {
+        expect(
+          validateScheduleFields('pack', {
+            schedule_type: 'rrule',
+            rrule_schedule: { ...validRrule, splay: '13h' },
+          })
+        ).toMatch(/exceeds the maximum of 43200 seconds/);
+      });
+
+      test('accepts splay at 2 hours', () => {
         expect(
           validateScheduleFields('pack', {
             schedule_type: 'rrule',
             rrule_schedule: { ...validRrule, splay: '2h' },
           })
-        ).toMatch(/exceeds the maximum of 3600 seconds/);
+        ).toBeNull();
       });
 
-      test('accepts splay of 1 hour', () => {
+      test('accepts splay at 12 hours (boundary)', () => {
         expect(
           validateScheduleFields('pack', {
             schedule_type: 'rrule',
-            rrule_schedule: { ...validRrule, splay: '1h' },
+            rrule_schedule: { ...validRrule, splay: '12h' },
           })
         ).toBeNull();
       });
@@ -576,6 +580,91 @@ describe('Pack utils', () => {
         expect(
           validateScheduleFields('query', { schedule_type: 'rrule', rrule_schedule: validRrule })
         ).toBeNull();
+      });
+    });
+
+    describe('same-mode constraint (D11)', () => {
+      test('accepts same-mode rrule override on rrule pack', () => {
+        expect(
+          validateScheduleFields(
+            'query',
+            { schedule_type: 'rrule', rrule_schedule: validRrule },
+            'rrule'
+          )
+        ).toBeNull();
+      });
+
+      test('accepts same-mode interval override on interval pack', () => {
+        expect(
+          validateScheduleFields('query', { schedule_type: 'interval', interval: 600 }, 'interval')
+        ).toBeNull();
+      });
+
+      test('rejects cross-mode interval override on rrule pack', () => {
+        expect(
+          validateScheduleFields('query', { schedule_type: 'interval', interval: 600 }, 'rrule')
+        ).toMatch(/does not match pack mode `'rrule'`/);
+      });
+
+      test('rejects cross-mode rrule override on interval pack', () => {
+        expect(
+          validateScheduleFields(
+            'query',
+            { schedule_type: 'rrule', rrule_schedule: validRrule },
+            'interval'
+          )
+        ).toMatch(/does not match pack mode `'interval'`/);
+      });
+
+      test('accepts query without override regardless of pack mode', () => {
+        expect(validateScheduleFields('query', { interval: 3600 }, 'rrule')).toBeNull();
+        expect(validateScheduleFields('query', {}, 'rrule')).toBeNull();
+        expect(validateScheduleFields('query', {}, 'interval')).toBeNull();
+      });
+    });
+  });
+
+  describe('buildDiscriminatedScheduleResponseFields', () => {
+    const validRrule = {
+      rrule: 'FREQ=DAILY',
+      start_date: '2024-01-01T00:00:00.000Z',
+    };
+
+    test('legacy SO with no schedule_type returns empty object', () => {
+      expect(buildDiscriminatedScheduleResponseFields({})).toEqual({});
+    });
+
+    test('rrule SO returns rrule slot only and drops stale interval', () => {
+      expect(
+        buildDiscriminatedScheduleResponseFields({
+          schedule_type: 'rrule',
+          rrule_schedule: validRrule,
+          // Stale field left over after a 'interval' → 'rrule' transition.
+          interval: 3600,
+        })
+      ).toEqual({ schedule_type: 'rrule', rrule_schedule: validRrule });
+    });
+
+    test('interval SO returns interval slot only and drops stale rrule_schedule', () => {
+      expect(
+        buildDiscriminatedScheduleResponseFields({
+          schedule_type: 'interval',
+          interval: 1800,
+          // Stale field left over after a 'rrule' → 'interval' transition.
+          rrule_schedule: validRrule,
+        })
+      ).toEqual({ schedule_type: 'interval', interval: 1800 });
+    });
+
+    test('rrule SO with missing rrule_schedule still discriminates by type', () => {
+      expect(buildDiscriminatedScheduleResponseFields({ schedule_type: 'rrule' })).toEqual({
+        schedule_type: 'rrule',
+      });
+    });
+
+    test('interval SO with missing interval still discriminates by type', () => {
+      expect(buildDiscriminatedScheduleResponseFields({ schedule_type: 'interval' })).toEqual({
+        schedule_type: 'interval',
       });
     });
   });
@@ -725,6 +814,69 @@ describe('Pack utils', () => {
         interval: undefined,
         rrule_schedule: undefined,
       });
+    });
+
+    test('feature flag ON rejects cross-mode override on rrule pack (D11)', () => {
+      const result = extractAndValidatePackScheduleFromBody(
+        {
+          schedule_type: 'rrule' as const,
+          rrule_schedule: validRrule,
+          queries: {
+            q_mixed: {
+              query: 'SELECT 1',
+              schedule_type: 'interval' as const,
+              interval: 600,
+            },
+          },
+        },
+        true
+      );
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.error).toMatch(/^Query "q_mixed":/);
+      expect(result.error).toMatch(/does not match pack mode `'rrule'`/);
+    });
+
+    test('feature flag ON rejects cross-mode override on interval pack (D11)', () => {
+      const result = extractAndValidatePackScheduleFromBody(
+        {
+          schedule_type: 'interval' as const,
+          interval: 1800,
+          queries: {
+            q_mixed: {
+              query: 'SELECT 1',
+              schedule_type: 'rrule' as const,
+              rrule_schedule: validRrule,
+            },
+          },
+        },
+        true
+      );
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.error).toMatch(/^Query "q_mixed":/);
+      expect(result.error).toMatch(/does not match pack mode `'interval'`/);
+    });
+
+    test('feature flag ON accepts same-mode rrule override on rrule pack (D11)', () => {
+      const result = extractAndValidatePackScheduleFromBody(
+        {
+          schedule_type: 'rrule' as const,
+          rrule_schedule: validRrule,
+          queries: {
+            q_same: {
+              query: 'SELECT 1',
+              schedule_type: 'rrule' as const,
+              rrule_schedule: {
+                rrule: 'FREQ=WEEKLY;BYDAY=MO',
+                start_date: '2024-02-01T00:00:00.000Z',
+              },
+            },
+          },
+        },
+        true
+      );
+      expect(result.ok).toBe(true);
     });
   });
 });

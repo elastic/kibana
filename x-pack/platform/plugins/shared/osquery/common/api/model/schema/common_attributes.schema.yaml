@@ -322,7 +322,7 @@ components:
           type: string
           format: date-time
         splay:
-          description: 'Optional Go duration string (e.g. `30s`, `5m`, `1h`). Maximum 1 hour.'
+          description: 'Optional Go duration string (e.g. `30s`, `5m`, `1h`). Maximum 12 hours.'
           example: '5m'
           type: string
         timeout:

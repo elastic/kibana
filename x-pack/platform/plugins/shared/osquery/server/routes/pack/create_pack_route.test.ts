@@ -306,25 +306,33 @@ describe('createPackRoute — Phase 7 Fleet config fan-out integration', () => {
   };
 
   /**
-   * Pull the fanned-out per-query map from the `packagePolicyService.update`
-   * call. Mirrors what the route writes to
-   * `inputs[0].config.osquery.value.packs.<spaceId>--<packName>.queries`.
+   * Pull the full pack entry the route writes to
+   * `inputs[0].config.osquery.value.packs.<spaceId>--<packName>`. After D13
+   * the entry exposes `default_native_schedule` / `default_rrule_schedule` /
+   * `default_space_id` at the pack level alongside the per-query map.
    */
-  const getFleetQueriesFromUpdateCall = (updateMock: jest.Mock) => {
+  const getFleetPackEntryFromUpdateCall = (updateMock: jest.Mock) => {
     expect(updateMock).toHaveBeenCalledTimes(1);
     const updatedPolicy = updateMock.mock.calls[0][3];
     const packKey = 'default--pack-fleet';
     const packEntry = updatedPolicy.inputs?.[0]?.config?.osquery?.value?.packs?.[packKey];
     expect(packEntry).toBeDefined();
 
-    return packEntry.queries as Record<string, Record<string, unknown>>;
+    return packEntry as {
+      pack_id: string;
+      shard?: number;
+      default_native_schedule?: { interval: number; start_date?: string };
+      default_rrule_schedule?: Record<string, unknown>;
+      default_space_id?: string;
+      queries: Record<string, Record<string, unknown>>;
+    };
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('creates a pack with pack-level RRULE and fans it out onto every query (interval stripped)', async () => {
+  it('creates a pack with pack-level RRULE: emits default_rrule_schedule, queries inherit by omission (D13)', async () => {
     const packRrule = {
       rrule: 'FREQ=WEEKLY;BYDAY=MO,WE,FR',
       start_date: '2024-01-01T00:00:00.000Z',
@@ -345,17 +353,22 @@ describe('createPackRoute — Phase 7 Fleet config fan-out integration', () => {
     await handler(buildContext(), request, response);
 
     expect(response.ok).toHaveBeenCalled();
-    const fleetQueries = getFleetQueriesFromUpdateCall(updateMock);
+    const packEntry = getFleetPackEntryFromUpdateCall(updateMock);
 
-    expect(fleetQueries.q1).toMatchObject({ query: 'SELECT 1', rrule_schedule: packRrule });
-    expect(fleetQueries.q2).toMatchObject({ query: 'SELECT 2', rrule_schedule: packRrule });
-    expect(fleetQueries.q1).not.toHaveProperty('interval');
-    expect(fleetQueries.q2).not.toHaveProperty('interval');
-    expect(fleetQueries.q1).not.toHaveProperty('schedule_type');
-    expect(fleetQueries.q2).not.toHaveProperty('schedule_type');
+    expect(packEntry.default_rrule_schedule).toEqual(packRrule);
+    expect(packEntry).not.toHaveProperty('default_native_schedule');
+    expect(packEntry.default_space_id).toBe('default');
+
+    expect(packEntry.queries.q1).toMatchObject({ query: 'SELECT 1' });
+    expect(packEntry.queries.q1).not.toHaveProperty('rrule_schedule');
+    expect(packEntry.queries.q1).not.toHaveProperty('interval');
+    expect(packEntry.queries.q1).not.toHaveProperty('space_id');
+    expect(packEntry.queries.q1).not.toHaveProperty('schedule_type');
+    expect(packEntry.queries.q2).toMatchObject({ query: 'SELECT 2' });
+    expect(packEntry.queries.q2).not.toHaveProperty('rrule_schedule');
   });
 
-  it('creates a pack with pack-level interval and fans it out onto every query (rrule_schedule absent)', async () => {
+  it('creates a pack with pack-level interval: emits default_native_schedule (D13)', async () => {
     const { handler, request, response, updateMock } = setupRouteWithFleet(
       {
         queries: {
@@ -371,21 +384,23 @@ describe('createPackRoute — Phase 7 Fleet config fan-out integration', () => {
     await handler(buildContext(), request, response);
 
     expect(response.ok).toHaveBeenCalled();
-    const fleetQueries = getFleetQueriesFromUpdateCall(updateMock);
+    const packEntry = getFleetPackEntryFromUpdateCall(updateMock);
 
-    expect(fleetQueries.q1).toMatchObject({ query: 'SELECT 1', interval: 1800 });
-    expect(fleetQueries.q2).toMatchObject({ query: 'SELECT 2', interval: 1800 });
-    expect(fleetQueries.q1).not.toHaveProperty('rrule_schedule');
-    expect(fleetQueries.q2).not.toHaveProperty('rrule_schedule');
+    expect(packEntry.default_native_schedule).toEqual({ interval: 1800 });
+    expect(packEntry).not.toHaveProperty('default_rrule_schedule');
+
+    expect(packEntry.queries.q1).toMatchObject({ query: 'SELECT 1' });
+    expect(packEntry.queries.q1).not.toHaveProperty('interval');
+    expect(packEntry.queries.q1).not.toHaveProperty('rrule_schedule');
   });
 
-  it('creates a pack with pack RRULE + one per-query interval override and emits a mixed Fleet config', async () => {
+  it('mixed: pack RRULE default + one per-query interval override is rejected (D11 same-mode)', async () => {
     const packRrule = {
       rrule: 'FREQ=DAILY',
       start_date: '2024-01-01T00:00:00.000Z',
     };
 
-    const { handler, request, response, updateMock } = setupRouteWithFleet(
+    const { handler, request, response } = setupRouteWithFleet(
       {
         queries: {
           inherits: { query: 'SELECT 1', interval: 3600 },
@@ -403,20 +418,43 @@ describe('createPackRoute — Phase 7 Fleet config fan-out integration', () => {
 
     await handler(buildContext(), request, response);
 
+    expect(response.badRequest).toHaveBeenCalled();
+  });
+
+  it('pack RRULE default + per-query rrule override emits both: default at pack, override on the query (D13)', async () => {
+    const packRrule = {
+      rrule: 'FREQ=DAILY',
+      start_date: '2024-01-01T00:00:00.000Z',
+    };
+    const queryRrule = {
+      rrule: 'FREQ=WEEKLY;BYDAY=MO',
+      start_date: '2024-02-01T00:00:00.000Z',
+    };
+
+    const { handler, request, response, updateMock } = setupRouteWithFleet(
+      {
+        queries: {
+          inherits: { query: 'SELECT 1' },
+          override: {
+            query: 'SELECT 2',
+            schedule_type: 'rrule',
+            rrule_schedule: queryRrule,
+          },
+        },
+        schedule_type: 'rrule',
+        rrule_schedule: packRrule,
+      },
+      { packSavedObjectAttributes: { schedule_type: 'rrule', rrule_schedule: packRrule } }
+    );
+
+    await handler(buildContext(), request, response);
+
     expect(response.ok).toHaveBeenCalled();
-    const fleetQueries = getFleetQueriesFromUpdateCall(updateMock);
+    const packEntry = getFleetPackEntryFromUpdateCall(updateMock);
 
-    expect(fleetQueries.inherits).toMatchObject({
-      query: 'SELECT 1',
-      rrule_schedule: packRrule,
-    });
-    expect(fleetQueries.inherits).not.toHaveProperty('interval');
-
-    expect(fleetQueries.override).toMatchObject({
-      query: 'SELECT 2',
-      interval: 300,
-    });
-    expect(fleetQueries.override).not.toHaveProperty('rrule_schedule');
-    expect(fleetQueries.override).not.toHaveProperty('schedule_type');
+    expect(packEntry.default_rrule_schedule).toEqual(packRrule);
+    expect(packEntry.queries.inherits).not.toHaveProperty('rrule_schedule');
+    expect(packEntry.queries.override.rrule_schedule).toEqual(queryRrule);
+    expect(packEntry.queries.override).not.toHaveProperty('schedule_type');
   });
 });

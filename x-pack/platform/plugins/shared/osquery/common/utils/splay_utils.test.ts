@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { isSplayWithinMax, parseSplay, serializeSplay, splayInSeconds } from './splay_utils';
+import {
+  isSplayWithinMax,
+  parseSplay,
+  parseSplayPermissive,
+  serializeSplay,
+  splayInSeconds,
+} from './splay_utils';
 
 describe('splayInSeconds', () => {
   it('converts seconds, minutes, and hours', () => {
@@ -16,17 +22,18 @@ describe('splayInSeconds', () => {
 });
 
 describe('isSplayWithinMax', () => {
-  it('accepts values up to the 1-hour cap', () => {
+  it('accepts values up to the 12-hour cap', () => {
     expect(isSplayWithinMax({ value: 1, unit: 'seconds' })).toBe(true);
-    expect(isSplayWithinMax({ value: 3600, unit: 'seconds' })).toBe(true);
-    expect(isSplayWithinMax({ value: 60, unit: 'minutes' })).toBe(true);
-    expect(isSplayWithinMax({ value: 1, unit: 'hours' })).toBe(true);
+    expect(isSplayWithinMax({ value: 43200, unit: 'seconds' })).toBe(true);
+    expect(isSplayWithinMax({ value: 720, unit: 'minutes' })).toBe(true);
+    expect(isSplayWithinMax({ value: 2, unit: 'hours' })).toBe(true);
+    expect(isSplayWithinMax({ value: 12, unit: 'hours' })).toBe(true);
   });
 
-  it('rejects values above the 1-hour cap', () => {
-    expect(isSplayWithinMax({ value: 3601, unit: 'seconds' })).toBe(false);
-    expect(isSplayWithinMax({ value: 61, unit: 'minutes' })).toBe(false);
-    expect(isSplayWithinMax({ value: 2, unit: 'hours' })).toBe(false);
+  it('rejects values above the 12-hour cap', () => {
+    expect(isSplayWithinMax({ value: 43201, unit: 'seconds' })).toBe(false);
+    expect(isSplayWithinMax({ value: 721, unit: 'minutes' })).toBe(false);
+    expect(isSplayWithinMax({ value: 13, unit: 'hours' })).toBe(false);
   });
 
   it('rejects non-positive or non-integer values', () => {
@@ -67,12 +74,20 @@ describe('serializeSplay', () => {
     );
   });
 
-  it('throws when the duration exceeds the 1-hour cap', () => {
-    expect(() => serializeSplay({ value: 3601, unit: 'seconds' })).toThrowError(
-      /must not exceed 3600 seconds/
+  it('throws when the duration exceeds the 12-hour cap', () => {
+    expect(() => serializeSplay({ value: 43201, unit: 'seconds' })).toThrowError(
+      /must not exceed 43200 seconds/
     );
-    expect(() => serializeSplay({ value: 2, unit: 'hours' })).toThrowError(
-      /must not exceed 3600 seconds/
+    expect(() => serializeSplay({ value: 13, unit: 'hours' })).toThrowError(
+      /must not exceed 43200 seconds/
+    );
+  });
+
+  it('accepts boundary values (2h and 12h pass; 13h fails)', () => {
+    expect(serializeSplay({ value: 2, unit: 'hours' })).toBe('2h');
+    expect(serializeSplay({ value: 12, unit: 'hours' })).toBe('12h');
+    expect(() => serializeSplay({ value: 13, unit: 'hours' })).toThrowError(
+      /must not exceed 43200 seconds/
     );
   });
 });
@@ -118,5 +133,30 @@ describe('parseSplay', () => {
     for (const state of cases) {
       expect(parseSplay(serializeSplay(state))).toEqual(state);
     }
+  });
+});
+
+describe('parseSplayPermissive', () => {
+  it('returns simple kind for single-unit durations', () => {
+    expect(parseSplayPermissive('30s')).toEqual({ kind: 'simple', value: 30, unit: 'seconds' });
+    expect(parseSplayPermissive('5m')).toEqual({ kind: 'simple', value: 5, unit: 'minutes' });
+    expect(parseSplayPermissive('1h')).toEqual({ kind: 'simple', value: 1, unit: 'hours' });
+  });
+
+  it('returns compound kind for multi-segment durations', () => {
+    expect(parseSplayPermissive('1h30m')).toEqual({ kind: 'compound', raw: '1h30m' });
+    expect(parseSplayPermissive('45m30s')).toEqual({ kind: 'compound', raw: '45m30s' });
+    expect(parseSplayPermissive('1h30m45s')).toEqual({ kind: 'compound', raw: '1h30m45s' });
+  });
+
+  it('rejects unsupported strings', () => {
+    expect(() => parseSplayPermissive('5d')).toThrowError(/expected a Go duration/);
+    expect(() => parseSplayPermissive('')).toThrowError(/expected a Go duration/);
+    expect(() => parseSplayPermissive('garbage')).toThrowError(/expected a Go duration/);
+  });
+
+  it('rejects non-string input', () => {
+    // @ts-expect-error -- exercising runtime guard
+    expect(() => parseSplayPermissive(undefined)).toThrowError(/must be a string/);
   });
 });

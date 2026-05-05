@@ -231,14 +231,14 @@ describe('ScheduleSection', () => {
       });
     });
 
-    it('rejects splay durations larger than 1 hour', async () => {
+    it('rejects splay durations larger than 12 hours', async () => {
       renderSection();
       await enterRruleMode({
         frequency: 'daily',
         start_date: '2024-01-01T00:00:00.000Z',
         splay_enabled: true,
-        splay_value: 90,
-        splay_unit: 'minutes',
+        splay_value: 13,
+        splay_unit: 'hours',
       });
 
       let isValid = true;
@@ -248,8 +248,27 @@ describe('ScheduleSection', () => {
 
       expect(isValid).toBe(false);
       await waitFor(() => {
-        expect(screen.getByText('Splay duration must not exceed 1 hour')).toBeInTheDocument();
+        expect(screen.getByText('Splay duration must not exceed 12 hours')).toBeInTheDocument();
       });
+    });
+
+    it('accepts splay durations at the 12-hour boundary', async () => {
+      renderSection();
+      await enterRruleMode({
+        frequency: 'daily',
+        start_date: '2024-01-01T00:00:00.000Z',
+        splay_enabled: true,
+        splay_value: 12,
+        splay_unit: 'hours',
+        end_date_enabled: false,
+      });
+
+      let isValid = false;
+      await act(async () => {
+        isValid = await formHandleRef.current!.trigger();
+      });
+
+      expect(isValid).toBe(true);
     });
 
     it('passes validation for a complete weekly recurrence', async () => {

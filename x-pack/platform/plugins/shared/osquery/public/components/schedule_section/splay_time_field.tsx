@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useController, useWatch } from 'react-hook-form';
+import { useController, useFormContext, useWatch } from 'react-hook-form';
 
 import { isSplayWithinMax, type SplayUnit } from '../../../common/utils/splay_utils';
 import { DEFAULT_SPLAY_VALUE } from './types';
@@ -51,6 +51,14 @@ interface SplayTimeFieldProps {
 const SplayTimeFieldComponent: React.FC<SplayTimeFieldProps> = ({ isDisabled = false }) => {
   const splayUnit = useWatch<{ splay_unit: SplayUnit }, 'splay_unit'>({ name: 'splay_unit' });
   const splayValue = useWatch<{ splay_value: number }, 'splay_value'>({ name: 'splay_value' });
+  const { setValue } = useFormContext<{ splay_raw?: string }>();
+  // Clears the compound-passthrough slot the moment the user edits the
+  // single-unit value/unit inputs, so the serializer falls back to building
+  // a fresh duration string from form state instead of round-tripping the
+  // original compound value (see D16, schedule_serializer.ts).
+  const clearSplayRaw = useCallback(() => {
+    setValue('splay_raw', undefined, { shouldDirty: true });
+  }, [setValue]);
 
   const {
     field: { value: enabled, onChange: onEnabledChange },
@@ -79,7 +87,7 @@ const SplayTimeFieldComponent: React.FC<SplayTimeFieldProps> = ({ isDisabled = f
 
         if (!isSplayWithinMax({ value: next, unit: splayUnit })) {
           return i18n.translate('xpack.osquery.scheduleSection.splay.maxErrorMessage', {
-            defaultMessage: 'Splay duration must not exceed 1 hour',
+            defaultMessage: 'Splay duration must not exceed 12 hours',
           });
         }
 
@@ -101,7 +109,7 @@ const SplayTimeFieldComponent: React.FC<SplayTimeFieldProps> = ({ isDisabled = f
 
         if (!isSplayWithinMax({ value: splayValue, unit: splayUnit })) {
           return i18n.translate('xpack.osquery.scheduleSection.splay.maxErrorMessage', {
-            defaultMessage: 'Splay duration must not exceed 1 hour',
+            defaultMessage: 'Splay duration must not exceed 12 hours',
           });
         }
 
@@ -120,15 +128,17 @@ const SplayTimeFieldComponent: React.FC<SplayTimeFieldProps> = ({ isDisabled = f
   const handleValueChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onValueChange(event.target.valueAsNumber || 0);
+      clearSplayRaw();
     },
-    [onValueChange]
+    [onValueChange, clearSplayRaw]
   );
 
   const handleUnitChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       onUnitChange(event.target.value as SplayUnit);
+      clearSplayRaw();
     },
-    [onUnitChange]
+    [onUnitChange, clearSplayRaw]
   );
 
   const unitSelectOptions = useMemo(
@@ -170,7 +180,7 @@ const SplayTimeFieldComponent: React.FC<SplayTimeFieldProps> = ({ isDisabled = f
         <EuiText size="xs" color="subdued">
           {i18n.translate('xpack.osquery.scheduleSection.splay.description', {
             defaultMessage:
-              "Randomly delay execution within the query's interval (1 second – 1 hour).",
+              "Randomly delay execution within the query's interval (1 second – 12 hours).",
           })}
         </EuiText>
       }

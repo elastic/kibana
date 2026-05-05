@@ -213,7 +213,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               {overridePackSchedule && (
                 <>
                   <EuiSpacer size="m" />
-                  <ScheduleSection />
+                  <ScheduleSection lockedScheduleType={packDefaultSchedule?.schedule_type} />
                 </>
               )}
               <EuiSpacer />

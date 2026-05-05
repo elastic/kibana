@@ -11,7 +11,7 @@ import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import type { RRuleFields } from '../../../common/utils/rrule_serializer';
 import { serializeRRule } from '../../../common/utils/rrule_serializer';
 import { parseRRule } from '../../../common/utils/rrule_parser';
-import { parseSplay, serializeSplay } from '../../../common/utils/splay_utils';
+import { parseSplayPermissive, serializeSplay } from '../../../common/utils/splay_utils';
 import type { ScheduleFormData, ScheduleFrequency } from '../../components/schedule_section';
 import { DEFAULT_SCHEDULE_FORM_VALUES } from '../../components/schedule_section';
 
@@ -95,10 +95,17 @@ export const serializeSchedule = (form: ScheduleFormData): ScheduleApiFields => 
     }
 
     if (form.splay_enabled) {
-      rruleConfig.splay = serializeSplay({
-        value: form.splay_value,
-        unit: form.splay_unit,
-      });
+      // Compound durations (e.g. "1h30m") that beats produces via
+      // `time.ParseDuration` cannot be represented in the single-unit splay
+      // form. The deserializer stashes them in `splay_raw`; round-trip the
+      // raw string verbatim until the user actively edits the splay field
+      // (which clears `splay_raw`).
+      rruleConfig.splay = form.splay_raw
+        ? form.splay_raw
+        : serializeSplay({
+            value: form.splay_value,
+            unit: form.splay_unit,
+          });
     }
 
     return {
@@ -130,12 +137,21 @@ export const deserializeSchedule = (api: ScheduleApiFields): ScheduleFormData =>
     let splayValue = DEFAULT_SCHEDULE_FORM_VALUES.splay_value;
     let splayUnit = DEFAULT_SCHEDULE_FORM_VALUES.splay_unit;
     let splayEnabled = false;
+    let splayRaw: string | undefined;
     if (api.rrule_schedule.splay) {
       try {
-        const parsed = parseSplay(api.rrule_schedule.splay);
-        splayValue = parsed.value;
-        splayUnit = parsed.unit;
-        splayEnabled = true;
+        const parsed = parseSplayPermissive(api.rrule_schedule.splay);
+        if (parsed.kind === 'simple') {
+          splayValue = parsed.value;
+          splayUnit = parsed.unit;
+          splayEnabled = true;
+        } else {
+          // Compound duration (e.g. "1h30m"): preserve verbatim so a re-save
+          // doesn't silently drop the value (D16). Form leaves the
+          // value/unit at defaults; touching either clears `splay_raw`.
+          splayRaw = parsed.raw;
+          splayEnabled = true;
+        }
       } catch {
         splayEnabled = false;
       }
@@ -150,6 +166,7 @@ export const deserializeSchedule = (api: ScheduleApiFields): ScheduleFormData =>
       splay_enabled: splayEnabled,
       splay_value: splayValue,
       splay_unit: splayUnit,
+      splay_raw: splayRaw,
       frequency: RRULE_TO_FORM_FREQUENCY[fields.freq],
       repeat_every: fields.interval ?? DEFAULT_SCHEDULE_FORM_VALUES.repeat_every,
       byweekday: fields.byweekday ?? DEFAULT_SCHEDULE_FORM_VALUES.byweekday,

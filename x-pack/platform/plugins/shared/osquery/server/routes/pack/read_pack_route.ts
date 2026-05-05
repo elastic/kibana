@@ -17,7 +17,7 @@ import type { PackSavedObject } from '../../common/types';
 import { PLUGIN_ID } from '../../../common';
 
 import { packSavedObjectType } from '../../../common/types';
-import { convertSOQueriesToPack } from './utils';
+import { buildDiscriminatedScheduleResponseFields, convertSOQueriesToPack } from './utils';
 import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
 import { readPacksRequestParamsSchema } from '../../../common/api';
@@ -108,11 +108,10 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             // `action_id` for native osqueryd-scheduled queries).
             ({ start_date: _d, ...restQuery }) => restQuery
           ),
-          ...(attributes.schedule_type != null ? { schedule_type: attributes.schedule_type } : {}),
-          ...(attributes.interval != null ? { interval: attributes.interval } : {}),
-          ...(attributes.rrule_schedule != null
-            ? { rrule_schedule: attributes.rrule_schedule }
-            : {}),
+          // Discriminated by `schedule_type` so prior-mode fields left on the SO
+          // by transition merges (e.g. legacy `interval` after switch to rrule)
+          // are not surfaced to consumers — D14.
+          ...buildDiscriminatedScheduleResponseFields(attributes),
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,
           read_only: attributes.version !== undefined && osqueryPackAssetReference,

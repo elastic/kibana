@@ -281,7 +281,7 @@ describe('deserializeSchedule', () => {
     expect(result.splay_unit).toBe('minutes');
   });
 
-  it('falls back to splay disabled when the duration string is not single-unit', () => {
+  it('preserves compound splay durations as splay_raw and keeps splay enabled', () => {
     const result = deserializeSchedule({
       schedule_type: 'rrule',
       rrule_schedule: {
@@ -291,8 +291,80 @@ describe('deserializeSchedule', () => {
       },
     });
 
-    expect(result.splay_enabled).toBe(false);
+    expect(result.splay_enabled).toBe(true);
+    expect(result.splay_raw).toBe('1h30m');
     expect(result.splay_value).toBe(DEFAULT_SCHEDULE_FORM_VALUES.splay_value);
+    expect(result.splay_unit).toBe(DEFAULT_SCHEDULE_FORM_VALUES.splay_unit);
+  });
+
+  it('falls back to splay disabled when the duration string is unparseable', () => {
+    const result = deserializeSchedule({
+      schedule_type: 'rrule',
+      rrule_schedule: {
+        rrule: 'FREQ=DAILY',
+        start_date: '2024-04-01T00:00:00.000Z',
+        splay: 'not-a-duration',
+      },
+    });
+
+    expect(result.splay_enabled).toBe(false);
+  });
+});
+
+describe('compound splay round-trip (D16)', () => {
+  it('round-trips "1h30m" through deserialize → serialize unchanged', () => {
+    const api = {
+      schedule_type: 'rrule' as const,
+      rrule_schedule: {
+        rrule: 'FREQ=DAILY',
+        start_date: '2024-04-01T00:00:00.000Z',
+        splay: '1h30m',
+      },
+    };
+
+    const form = deserializeSchedule(api);
+    const result = serializeSchedule(form);
+
+    expect(result.rrule_schedule?.splay).toBe('1h30m');
+  });
+
+  it('round-trips "45m30s" through deserialize → serialize unchanged', () => {
+    const api = {
+      schedule_type: 'rrule' as const,
+      rrule_schedule: {
+        rrule: 'FREQ=DAILY',
+        start_date: '2024-04-01T00:00:00.000Z',
+        splay: '45m30s',
+      },
+    };
+
+    const form = deserializeSchedule(api);
+    const result = serializeSchedule(form);
+
+    expect(result.rrule_schedule?.splay).toBe('45m30s');
+  });
+
+  it('once splay_raw is cleared (user edited), serializer emits the form value', () => {
+    const api = {
+      schedule_type: 'rrule' as const,
+      rrule_schedule: {
+        rrule: 'FREQ=DAILY',
+        start_date: '2024-04-01T00:00:00.000Z',
+        splay: '1h30m',
+      },
+    };
+
+    const form = deserializeSchedule(api);
+    const edited: ScheduleFormData = {
+      ...form,
+      splay_raw: undefined,
+      splay_value: 10,
+      splay_unit: 'minutes',
+    };
+
+    const result = serializeSchedule(edited);
+
+    expect(result.rrule_schedule?.splay).toBe('10m');
   });
 });
 

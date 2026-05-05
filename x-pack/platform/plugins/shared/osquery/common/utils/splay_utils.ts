@@ -42,6 +42,26 @@ const SUFFIX_TO_UNIT: Record<string, SplayUnit> = {
 const SINGLE_UNIT_DURATION_REGEX = /^(\d+)\s*(s|m|h)$/i;
 
 /**
+ * Compound Go duration: at least one `<number><unit>` segment, allowing units
+ * `h`, `m`, `s`, `ms`, `us`, `µs`, `ns`. Matches `time.ParseDuration` shapes
+ * like `"1h30m"`, `"45m30s"`, `"1h30m45s"`. Decimal values are allowed.
+ */
+const GO_COMPOUND_DURATION_REGEX = /^(?:\d+(?:\.\d+)?(?:ms|us|µs|ns|s|m|h))+$/;
+
+/**
+ * Discriminated result from {@link parseSplayPermissive}.
+ *
+ * - `kind: 'simple'` — the duration is a single-unit value the form can render
+ *   as `value` + `unit` (e.g. `"30s"`, `"5m"`, `"1h"`).
+ * - `kind: 'compound'` — the duration is a multi-segment Go duration that the
+ *   single-unit form input cannot represent (e.g. `"1h30m"`); callers MUST
+ *   round-trip the `raw` string verbatim instead of re-serializing.
+ */
+export type SplayParseResult =
+  | { kind: 'simple'; value: number; unit: SplayUnit }
+  | { kind: 'compound'; raw: string };
+
+/**
  * Total splay duration expressed in seconds. Useful for max validation.
  */
 export const splayInSeconds = (state: SplayFormState): number =>
@@ -49,7 +69,7 @@ export const splayInSeconds = (state: SplayFormState): number =>
 
 /**
  * True when splay is a positive integer and the total duration is within the
- * osquerybeat-enforced max of 1 hour ({@link MAX_SPLAY_SECONDS}).
+ * osquerybeat-enforced max of 12 hours ({@link MAX_SPLAY_SECONDS}).
  */
 export const isSplayWithinMax = (state: SplayFormState): boolean => {
   const { value, unit } = state;
@@ -82,7 +102,7 @@ export const serializeSplay = (state: SplayFormState): string => {
   }
 
   if (splayInSeconds(state) > MAX_SPLAY_SECONDS) {
-    throw new Error(`Splay duration must not exceed ${MAX_SPLAY_SECONDS} seconds (1 hour)`);
+    throw new Error(`Splay duration must not exceed ${MAX_SPLAY_SECONDS} seconds (12 hours)`);
   }
 
   return `${value}${suffix}`;
@@ -91,9 +111,43 @@ export const serializeSplay = (state: SplayFormState): string => {
 /**
  * Parse a single-unit Go duration string (`"30s"`, `"5m"`, `"1h"`) into
  * {@link SplayFormState}. Compound durations (e.g. `"1h30m"`) are intentionally
- * rejected: the splay UI is single-unit, and beats enforces a 1-hour cap. Use
- * the SO field directly when round-tripping foreign formats.
+ * rejected by this strict parser; use {@link parseSplayPermissive} when
+ * round-tripping foreign formats. Beats enforces a 12-hour cap.
  */
+/**
+ * Permissive parser for splay strings encountered on read. Accepts both
+ * single-unit ({@link parseSplay}) and compound Go durations (`"1h30m"`,
+ * `"45m30s"`). Compound durations are returned verbatim as `raw` so callers
+ * can round-trip them through Kibana without rewriting — beats writes splay
+ * via `time.ParseDuration` and may emit compound strings.
+ *
+ * Throws on values that match neither shape (e.g. `"5d"`, `"100ms"` outside
+ * the compound vocabulary, empty string).
+ */
+export const parseSplayPermissive = (duration: string): SplayParseResult => {
+  if (typeof duration !== 'string') {
+    throw new Error('Splay duration must be a string');
+  }
+
+  const trimmed = duration.trim();
+  const singleMatch = SINGLE_UNIT_DURATION_REGEX.exec(trimmed);
+  if (singleMatch) {
+    const value = Number(singleMatch[1]);
+    const unit = SUFFIX_TO_UNIT[singleMatch[2].toLowerCase()];
+    if (Number.isInteger(value) && value > 0) {
+      return { kind: 'simple', value, unit };
+    }
+  }
+
+  if (GO_COMPOUND_DURATION_REGEX.test(trimmed)) {
+    return { kind: 'compound', raw: trimmed };
+  }
+
+  throw new Error(
+    `Invalid splay duration "${duration}": expected a Go duration (e.g. "30s", "5m", "1h", "1h30m")`
+  );
+};
+
 export const parseSplay = (duration: string): SplayFormState => {
   if (typeof duration !== 'string') {
     throw new Error('Splay duration must be a string');

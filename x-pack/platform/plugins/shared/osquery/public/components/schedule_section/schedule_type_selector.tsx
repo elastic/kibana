@@ -43,10 +43,17 @@ const StyledEuiCard = styled(EuiCard)`
 
 interface ScheduleTypeSelectorProps {
   isDisabled?: boolean;
+  /**
+   * When true, both cards render as disabled and the value cannot be changed
+   * via the UI. Used by per-query overrides to enforce the pack-level mode
+   * (D11) — the parent ScheduleSection sets `schedule_type` programmatically.
+   */
+  isTypeLocked?: boolean;
 }
 
 const ScheduleTypeSelectorComponent: React.FC<ScheduleTypeSelectorProps> = ({
   isDisabled = false,
+  isTypeLocked = false,
 }) => {
   const {
     field: { value, onChange },
@@ -55,33 +62,35 @@ const ScheduleTypeSelectorComponent: React.FC<ScheduleTypeSelectorProps> = ({
     defaultValue: 'interval',
   });
 
+  const cardsDisabled = isDisabled || isTypeLocked;
+
   const handleChange = useCallback(
     (next: ScheduleType) => {
-      if (isDisabled || next === value) {
+      if (cardsDisabled || next === value) {
         return;
       }
 
       onChange(next);
     },
-    [isDisabled, onChange, value]
+    [cardsDisabled, onChange, value]
   );
 
   const intervalCardSelectable = useMemo(
     () => ({
       onClick: () => handleChange('interval'),
       isSelected: value === 'interval',
-      isDisabled,
+      isDisabled: cardsDisabled,
     }),
-    [handleChange, isDisabled, value]
+    [handleChange, cardsDisabled, value]
   );
 
   const rruleCardSelectable = useMemo(
     () => ({
       onClick: () => handleChange('rrule'),
       isSelected: value === 'rrule',
-      isDisabled,
+      isDisabled: cardsDisabled,
     }),
-    [handleChange, isDisabled, value]
+    [handleChange, cardsDisabled, value]
   );
 
   return (
@@ -103,7 +112,7 @@ const ScheduleTypeSelectorComponent: React.FC<ScheduleTypeSelectorProps> = ({
                   defaultMessage: 'Interval',
                 })}
                 checked={value === 'interval'}
-                disabled={isDisabled}
+                disabled={cardsDisabled}
                 onChange={noop}
               />
             }
@@ -132,7 +141,7 @@ const ScheduleTypeSelectorComponent: React.FC<ScheduleTypeSelectorProps> = ({
                   defaultMessage: 'Date & time',
                 })}
                 checked={value === 'rrule'}
-                disabled={isDisabled}
+                disabled={cardsDisabled}
                 onChange={noop}
               />
             }

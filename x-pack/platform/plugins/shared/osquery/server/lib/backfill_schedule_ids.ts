@@ -121,15 +121,40 @@ export const backfillScheduleIds = async ({
                   unset(draft, 'id');
                   removePackFromPolicy(draft, packSO.attributes.name, spaceId);
                   set(draft, `${packPath}.pack_id`, packSO.id);
-                  set(
-                    draft,
-                    `${packPath}.queries`,
-                    convertSOQueriesToPackConfig(updatedQueries, spaceId, {
-                      schedule_type: packSO.attributes.schedule_type,
-                      interval: packSO.attributes.interval,
-                      rrule_schedule: packSO.attributes.rrule_schedule,
-                    })
-                  );
+                  // D13 wire format: pack-level schedule travels as
+                  // `default_*_schedule` slots; per-query map carries only
+                  // overrides plus per-query metadata.
+                  const packConfigPayload = convertSOQueriesToPackConfig(updatedQueries, spaceId, {
+                    schedule_type: packSO.attributes.schedule_type,
+                    interval: packSO.attributes.interval,
+                    rrule_schedule: packSO.attributes.rrule_schedule,
+                  });
+                  set(draft, `${packPath}.queries`, packConfigPayload.queries);
+                  if (packConfigPayload.default_native_schedule != null) {
+                    set(
+                      draft,
+                      `${packPath}.default_native_schedule`,
+                      packConfigPayload.default_native_schedule
+                    );
+                  } else {
+                    unset(draft, `${packPath}.default_native_schedule`);
+                  }
+
+                  if (packConfigPayload.default_rrule_schedule != null) {
+                    set(
+                      draft,
+                      `${packPath}.default_rrule_schedule`,
+                      packConfigPayload.default_rrule_schedule
+                    );
+                  } else {
+                    unset(draft, `${packPath}.default_rrule_schedule`);
+                  }
+
+                  if (packConfigPayload.default_space_id != null) {
+                    set(draft, `${packPath}.default_space_id`, packConfigPayload.default_space_id);
+                  } else {
+                    unset(draft, `${packPath}.default_space_id`);
+                  }
 
                   return draft;
                 })

@@ -211,7 +211,7 @@ export const RRuleScheduleConfig = lazySchema(() =>
      */
     end_date: z.string().datetime().optional(),
     /**
-     * Optional Go duration string (e.g. `30s`, `5m`, `1h`). Maximum 1 hour.
+     * Optional Go duration string (e.g. `30s`, `5m`, `1h`). Maximum 12 hours.
      */
     splay: z.string().optional(),
     /**
