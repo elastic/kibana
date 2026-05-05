@@ -26,6 +26,13 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.4.0 [kibana-9.4.0-release-notes]
 
+:::{important} - New recommended {{kib}} instance minimum size of 2 GB
+
+We now recommended that your {{kib}} instances have at least 2 GB of memory, especially when using Platinum or Enterprise {{kib}} features, and for production workloads.
+
+New {{ech}} deployments now default to 2 GB of RAM for each {{kib}} instance. 
+:::
+
 ### Features and enhancements [kibana-9.4.0-features-enhancements]
 
 **Alerting**:
@@ -224,7 +231,6 @@ For the Elastic Observability 9.4.0 release information, refer to [Elastic Obser
 For the Elastic Security 9.4.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
-* Sets the default {{kib}} instance size to 2 GB of RAM for new {{ech}} deployments. For Platinum and Enterprise users, we recommend provisioning at least 2 GB of RAM for {{kib}} instances in all deployment types. Below this size, features such as Security Detection Rules, Reporting, Workflows, and Agent Builder might cause service interruptions.
 * In container deployments, automatically sets the Node.js heap size to 60% of available memory, up to a maximum of 4096 MB, when no heap size is explicitly configured [#246073]({{kib-pull}}246073).
 * Adds a feedback button to {{kib}}'s header [#225074]({{kib-pull}}225074).
 * Remembers the pagination state when navigating back from an edit on the **Users** page, instead of always returning to page 1 and resetting the search [#261152]({{kib-pull}}261152).
