@@ -310,6 +310,15 @@ describe('useDashboardListingTable', () => {
         result.current.itemActionGuard.enabled(itemForActions({ canManageAccessControl: true }))
       ).toBe(true);
     });
+
+    test('returns true when canManageAccessControl is false but the item is not write-restricted', () => {
+      const { result } = renderHook(() => useDashboardListingTable(baseArgs));
+      expect(
+        result.current.itemActionGuard.enabled(
+          itemForActions({ canManageAccessControl: false, accessMode: 'default' })
+        )
+      ).toBe(true);
+    });
   });
 
   describe('itemActionGuard.disabledReason', () => {
@@ -338,6 +347,16 @@ describe('useDashboardListingTable', () => {
           itemForActions({ canManageAccessControl: false, accessMode: 'write_restricted' })
         )
       ).toBe("You don't have permissions to edit this dashboard. Contact the owner to change it.");
+    });
+
+    test('returns undefined when canManageAccessControl is false but the item is not write-restricted', () => {
+      const { result } = renderHook(() => useDashboardListingTable(baseArgs));
+
+      expect(
+        result.current.itemActionGuard.disabledReason(
+          itemForActions({ canManageAccessControl: false, accessMode: 'default' })
+        )
+      ).toBeUndefined();
     });
   });
 });

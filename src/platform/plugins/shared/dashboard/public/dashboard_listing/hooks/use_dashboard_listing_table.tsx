@@ -99,7 +99,10 @@ const buildItemActionGuard = (showWriteControls: boolean): DashboardItemActionGu
       if (dashboardItem.managed) {
         return contentEditorFlyoutStrings.readonlyReason.managedEntity;
       }
-      if (dashboardItem.canManageAccessControl === false) {
+      if (
+        dashboardItem.canManageAccessControl === false &&
+        dashboardItem.accessMode === 'write_restricted'
+      ) {
         return contentEditorFlyoutStrings.readonlyReason.accessControl;
       }
       return undefined;
@@ -253,7 +256,7 @@ export const useDashboardListingTable = ({
                   owner: meta.owner,
                   accessMode: data?.access_control?.access_mode,
                 },
-                createdBy: meta.created_at,
+                createdBy: meta.created_by,
                 userId,
               });
 
