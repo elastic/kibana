@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { asCodeRefIdSchema } from '@kbn/as-code-shared-schemas';
 import {
   compositeRuntimeFieldSchema,
   primitiveRuntimeFieldSchema,
@@ -28,15 +29,9 @@ export const fieldSettingsSchema = schema.oneOf(
   }
 );
 
-export const dataViewReferenceSchema = schema.object(
+export const dataViewReferenceSchema = asCodeRefIdSchema.extends(
   {
     type: schema.literal(AS_CODE_DATA_VIEW_REFERENCE_TYPE),
-    ref_id: schema.string({
-      meta: {
-        description:
-          'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
-      },
-    }),
   },
   { meta: { id: 'kbn-data-view-reference-schema', title: 'Data view reference' } }
 );

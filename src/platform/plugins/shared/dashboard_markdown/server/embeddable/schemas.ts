@@ -9,19 +9,17 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
-import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
+import { asCodeRefIdSchema } from '@kbn/as-code-shared-schemas';
+import {
+  BY_REF_SCHEMA_META,
+  BY_VALUE_SCHEMA_META,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 
 export const markdownByValueStateSchema = schema.object({
   content: schema.string(),
   settings: schema.object({
     open_links_in_new_tab: schema.boolean({ defaultValue: true }),
-  }),
-});
-
-const markdownByReferenceStateSchema = schema.object({
-  ref_id: schema.string({
-    meta: { description: 'The unique identifier of the markdown library item.' },
   }),
 });
 
@@ -33,7 +31,7 @@ export const markdownByValueEmbeddableSchema = schema.allOf(
 );
 
 const markdownByReferenceEmbeddableSchema = schema.allOf(
-  [markdownByReferenceStateSchema, serializedTitlesSchema],
+  [asCodeRefIdSchema, serializedTitlesSchema],
   {
     meta: BY_REF_SCHEMA_META,
   }
@@ -48,8 +46,8 @@ export const markdownEmbeddableSchema = schema.oneOf(
   }
 );
 
-export type MarkdownByValueState = TypeOf<typeof markdownByValueStateSchema>;
-export type MarkdownByReferenceState = TypeOf<typeof markdownByReferenceStateSchema>;
+export type MarkdownByValueState = TypeOf<typeof markdownByValueEmbeddableSchema>;
+export type MarkdownByReferenceState = TypeOf<typeof markdownByReferenceEmbeddableSchema>;
 export type MarkdownEmbeddableState = TypeOf<typeof markdownEmbeddableSchema>;
 
 export type MarkdownSettingsState = MarkdownByValueState['settings'];

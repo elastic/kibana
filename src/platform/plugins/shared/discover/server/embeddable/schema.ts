@@ -10,7 +10,7 @@
 import type { ObjectType, Props, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DataGridDensity } from '@kbn/discover-utils';
-import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
+import { asCodeQuerySchema, asCodeRefIdSchema } from '@kbn/as-code-shared-schemas';
 import { esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
 import {
   BY_REF_SCHEMA_META,
@@ -367,8 +367,7 @@ const getDiscoverSessionByValueEmbeddableSchema = withPanelSchemas(
   { meta: BY_VALUE_SCHEMA_META }
 );
 
-const discoverSessionByReferencePropsSchema = schema.object({
-  ref_id: schema.string(),
+const discoverSessionByReferencePropsSchema = asCodeRefIdSchema.extends({
   selected_tab_id: schema.maybe(
     schema.string({
       meta: {

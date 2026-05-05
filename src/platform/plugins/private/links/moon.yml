@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/embeddable-plugin'
   - '@kbn/presentation-util-plugin'
   - '@kbn/object-versioning'
+  - '@kbn/as-code-shared-schemas'
   - '@kbn/config-schema'
   - '@kbn/content-management-utils'
   - '@kbn/content-management-plugin'
