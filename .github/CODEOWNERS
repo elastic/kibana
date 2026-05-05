@@ -577,6 +577,7 @@ src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appe
 src/platform/packages/shared/kbn-ftr-llm-proxy @elastic/appex-ai-infra
 src/platform/packages/shared/kbn-grok-ui @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
+src/platform/packages/shared/kbn-human-readable-id @elastic/workflows-eng
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
 src/platform/packages/shared/kbn-i18n-react @elastic/kibana-core
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
@@ -3401,6 +3402,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/scripts/steps/code_generation/cases_codegen.sh @elastic/kibana-cases
 /.buildkite/scripts/steps/security @elastic/kibana-security
 /.buildkite/scripts/steps/entity_store_performance @elastic/contextual-security
+/.buildkite/pipelines/build_pr_and_test_entity_store_performance.yml @elastic/contextual-security
 /.buildkite/scripts/steps/test/scout/ @elastic/appex-qa @elastic/kibana-operations
 /.buildkite/scout_ci_config.yml @elastic/appex-qa
 
