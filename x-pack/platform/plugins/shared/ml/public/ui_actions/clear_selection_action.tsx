@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { MlCoreSetup } from '../plugin';
+import { isMlAvailable } from '../../common/license/ml_license';
 
 export const CLEAR_SELECTION_ACTION = 'clearSelectionAction';
 
@@ -33,6 +34,7 @@ export function createClearSelectionAction(
       updateCallback();
     },
     async isCompatible({ updateCallback }) {
+      if (!(await isMlAvailable(getStartServices))) return false;
       return typeof updateCallback === 'function';
     },
   };

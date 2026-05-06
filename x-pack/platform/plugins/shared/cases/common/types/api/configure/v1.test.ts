@@ -43,6 +43,18 @@ import {
   TemplateConfigurationRt,
   ObservableTypesConfigurationRt,
 } from './v1';
+import {
+  CaseConfigureRequestParamsSchema,
+  ConfigurationPatchRequestSchema,
+  ConfigurationRequestSchema,
+  GetConfigurationFindRequestSchema,
+  CustomFieldConfigurationWithoutTypeSchema,
+  TextCustomFieldConfigurationSchema,
+  ToggleCustomFieldConfigurationSchema,
+  NumberCustomFieldConfigurationSchema,
+  TemplateConfigurationSchema,
+  ObservableTypesConfigurationSchema,
+} from '../../api_zod/configure/v1';
 
 describe('configure', () => {
   const serviceNow = {
@@ -186,6 +198,18 @@ describe('configure', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = ConfigurationRequestSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = ConfigurationRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('ConfigurationPatchRequestRt', () => {
@@ -318,6 +342,18 @@ describe('configure', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = ConfigurationPatchRequestSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = ConfigurationPatchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('GetConfigurationFindRequestRt', () => {
@@ -342,6 +378,18 @@ describe('configure', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = GetConfigurationFindRequestSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = GetConfigurationFindRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('CaseConfigureRequestParamsRt', () => {
@@ -365,6 +413,18 @@ describe('configure', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = CaseConfigureRequestParamsSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = CaseConfigureRequestParamsSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
@@ -444,6 +504,21 @@ describe('configure', () => {
         )
       ).toContain('The length of the label is too long. The maximum length is 50.');
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = CustomFieldConfigurationWithoutTypeSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = CustomFieldConfigurationWithoutTypeSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('TextCustomFieldConfigurationRt', () => {
@@ -518,6 +593,21 @@ describe('configure', () => {
         )[0]
       ).toContain('The defaultValue field cannot be an empty string.');
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = TextCustomFieldConfigurationSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = TextCustomFieldConfigurationSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('ToggleCustomFieldConfigurationRt', () => {
@@ -556,6 +646,21 @@ describe('configure', () => {
           })
         )[0]
       ).toContain('Invalid value "foobar" supplied');
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = ToggleCustomFieldConfigurationSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = ToggleCustomFieldConfigurationSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
@@ -643,6 +748,21 @@ describe('configure', () => {
       ).toContain(
         'The defaultValue field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
       );
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = NumberCustomFieldConfigurationSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = NumberCustomFieldConfigurationSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
@@ -965,6 +1085,18 @@ describe('configure', () => {
         );
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = TemplateConfigurationSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = TemplateConfigurationSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('ObservableTypesConfigurationRt', () => {
@@ -1045,6 +1177,24 @@ describe('configure', () => {
         _tag: 'Right',
         right: [{ key, label: 'Observable Label 1' }],
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const validData = [
+        { key: 'observable_key_1', label: 'Observable Label 1' },
+        { key: 'observable_key_2', label: 'Observable Label 2' },
+      ];
+      const result = ObservableTypesConfigurationSchema.safeParse(validData);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(validData);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = ObservableTypesConfigurationSchema.safeParse([
+        { key: 'observable_key_1', label: 'Observable Label 1', foo: 'bar' },
+      ]);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual([{ key: 'observable_key_1', label: 'Observable Label 1' }]);
     });
   });
 });
