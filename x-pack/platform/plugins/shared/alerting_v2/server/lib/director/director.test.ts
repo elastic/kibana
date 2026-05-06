@@ -92,10 +92,11 @@ describe('DirectorService', () => {
 
       expect(result).toHaveLength(1);
 
-      expect(result[0].episode).toEqual({
+      expect(result[0].event.episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
+      expect(result[0].transitioned).toBe(true);
     });
 
     it('sets alerts to pending if the previous alert event state has no episode status', async () => {
@@ -126,10 +127,11 @@ describe('DirectorService', () => {
 
       expect(result).toHaveLength(1);
 
-      expect(result[0].episode).toEqual({
+      expect(result[0].event.episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
+      expect(result[0].transitioned).toBe(true);
     });
 
     it('transitions from inactive to pending', async () => {
@@ -158,10 +160,11 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result[0].event.episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
+      expect(result[0].transitioned).toBe(true);
     });
 
     it('transitions from pending to active', async () => {
@@ -190,10 +193,11 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result[0].event.episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.active,
       });
+      expect(result[0].transitioned).toBe(true);
     });
 
     it('transitions from active to recovering ', async () => {
@@ -222,10 +226,11 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result[0].event.episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.recovering,
       });
+      expect(result[0].transitioned).toBe(true);
     });
 
     it('transitions from recovering to inactive', async () => {
@@ -254,10 +259,44 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result[0].event.episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.inactive,
       });
+      expect(result[0].transitioned).toBe(true);
+    });
+
+    it('reports transitioned as false when status stays the same', async () => {
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'breached',
+        episode: undefined,
+      });
+
+      mockEsClient.esql.query.mockResolvedValue(
+        createLatestAlertEventStateResponse([
+          {
+            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_status: 'breached',
+            last_episode_id: 'existing-episode',
+            last_episode_status: 'active',
+            last_episode_status_count: null,
+            group_hash: 'hash-1',
+          },
+        ])
+      );
+
+      const result = await directorService.run({
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
+
+      expect(result[0].event.episode).toEqual({
+        id: 'existing-episode',
+        status: alertEpisodeStatus.active,
+      });
+      expect(result[0].transitioned).toBe(false);
     });
 
     it('processes multiple alert events correctly', async () => {
@@ -295,15 +334,17 @@ describe('DirectorService', () => {
 
       expect(result).toHaveLength(2);
 
-      expect(result[0].episode).toEqual({
+      expect(result[0].event.episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
       });
+      expect(result[0].transitioned).toBe(false);
 
-      expect(result[1].episode).toEqual({
+      expect(result[1].event.episode).toEqual({
         id: 'episode-2',
         status: alertEpisodeStatus.recovering,
       });
+      expect(result[1].transitioned).toBe(true);
     });
 
     it('generates new episode ID when transitioning from inactive', async () => {
@@ -332,8 +373,8 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      // Should generate new UUID, not use old episode
-      expect(result[0].episode?.id).toBe('mocked-uuid');
+      expect(result[0].event.episode?.id).toBe('mocked-uuid');
+      expect(result[0].transitioned).toBe(true);
     });
 
     it('preserves episode ID when not transitioning from inactive', async () => {
@@ -362,7 +403,7 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode?.id).toBe('existing-episode');
+      expect(result[0].event.episode?.id).toBe('existing-episode');
     });
 
     it('throws when execution context is already aborted before processing', async () => {
@@ -426,11 +467,12 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result[0].event.episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.pending,
         status_count: 2,
       });
+      expect(result[0].transitioned).toBe(false);
     });
 
     it('transitions to active when count threshold is met', async () => {
@@ -463,10 +505,11 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result[0].event.episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
       });
+      expect(result[0].transitioned).toBe(true);
     });
   });
 });

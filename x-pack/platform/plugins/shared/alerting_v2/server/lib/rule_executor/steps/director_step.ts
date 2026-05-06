@@ -47,7 +47,7 @@ export class DirectorStep implements RuleExecutionStep {
         return;
       }
 
-      const processedBatch = await step.director.run({
+      const directorResults = await step.director.run({
         rule,
         executionContext: input.executionContext,
         alertEvents: alertEventsBatch,
@@ -56,7 +56,8 @@ export class DirectorStep implements RuleExecutionStep {
       let transitionedToActive = 0;
       let transitionedToRecovering = 0;
       let transitionedToInactive = 0;
-      for (const event of processedBatch) {
+      for (const { event, transitioned } of directorResults) {
+        if (!transitioned) continue;
         const status = event.episode?.status;
         if (status === 'active') transitionedToActive += 1;
         else if (status === 'recovering') transitionedToRecovering += 1;
@@ -70,7 +71,10 @@ export class DirectorStep implements RuleExecutionStep {
 
       yield {
         type: 'continue',
-        state: { ...state, alertEventsBatch: processedBatch },
+        state: {
+          ...state,
+          alertEventsBatch: directorResults.map(({ event }) => event),
+        },
       };
     });
   }

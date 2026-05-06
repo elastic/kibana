@@ -23,6 +23,11 @@ import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy, StateTransitionResult } from './strategies/types';
 import type { ExecutionContext } from '../execution_context';
 
+export interface DirectorEventResult {
+  event: AlertEvent;
+  transitioned: boolean;
+}
+
 interface RunDirectorParams {
   rule: RuleResponse;
   alertEvents: readonly AlertEvent[];
@@ -50,7 +55,11 @@ export class DirectorService {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  async run({ rule, alertEvents, executionContext }: RunDirectorParams): Promise<AlertEvent[]> {
+  async run({
+    rule,
+    alertEvents,
+    executionContext,
+  }: RunDirectorParams): Promise<DirectorEventResult[]> {
     if (alertEvents.length === 0) {
       return [];
     }
@@ -65,7 +74,7 @@ export class DirectorService {
     alertEvents: readonly AlertEvent[],
     strategy: ITransitionStrategy,
     executionContext: ExecutionContext
-  ): Promise<AlertEvent[]> {
+  ): Promise<DirectorEventResult[]> {
     const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
     const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
@@ -115,7 +124,7 @@ export class DirectorService {
     currentAlertEvent,
     previousAlertEvent,
     strategy,
-  }: CalculateNextStateParams): AlertEvent {
+  }: CalculateNextStateParams): DirectorEventResult {
     const currentStatus = previousAlertEvent?.last_episode_status;
 
     const result: StateTransitionResult = strategy.getNextState({
@@ -129,7 +138,9 @@ export class DirectorService {
       nextStatus: result.status,
     });
 
-    if (currentStatus !== result.status) {
+    const transitioned = currentStatus !== result.status;
+
+    if (transitioned) {
       this.logger.debug({
         message: `State Transition [${currentAlertEvent.group_hash}]: ${
           currentStatus ?? 'unknown'
@@ -138,13 +149,16 @@ export class DirectorService {
     }
 
     return {
-      ...currentAlertEvent,
-      type: alertEventType.alert,
-      episode: {
-        id: episodeId,
-        status: result.status,
-        ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
+      event: {
+        ...currentAlertEvent,
+        type: alertEventType.alert,
+        episode: {
+          id: episodeId,
+          status: result.status,
+          ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
+        },
       },
+      transitioned,
     };
   }
 

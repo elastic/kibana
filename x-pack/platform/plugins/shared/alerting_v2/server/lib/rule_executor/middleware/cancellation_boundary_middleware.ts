@@ -8,6 +8,7 @@
 import { injectable } from 'inversify';
 import type { RuleExecutionMiddleware, RuleExecutionMiddlewareContext } from './types';
 import type { PipelineStateStream } from '../types';
+import { identifyErrorWithStepName } from '../step_error';
 
 /**
  * Global middleware that enforces cancellation checks at step boundaries.
@@ -16,33 +17,42 @@ import type { PipelineStateStream } from '../types';
  * - Cancellation is detected before a step receives data.
  * - Cancellation is detected after a step yields data.
  *
+ * Cancellation errors are tagged with the current step name so the task
+ * runner can populate `cancelled.step` in the execute summary.
  */
 @injectable()
 export class CancellationBoundaryMiddleware implements RuleExecutionMiddleware {
   public readonly name = 'cancellation_boundary';
 
   public execute(
-    _ctx: RuleExecutionMiddlewareContext,
+    ctx: RuleExecutionMiddlewareContext,
     next: (input: PipelineStateStream) => PipelineStateStream,
     input: PipelineStateStream
   ): PipelineStateStream {
-    const guardedInput = this.guardStream(input);
+    const guardedInput = this.guardStream(input, ctx);
     const output = next(guardedInput);
-    return this.guardStream(output);
+    return this.guardStream(output, ctx);
   }
 
-  private guardStream(stream: PipelineStateStream): PipelineStateStream {
+  private guardStream(
+    stream: PipelineStateStream,
+    ctx: RuleExecutionMiddlewareContext
+  ): PipelineStateStream {
     return (async function* () {
-      for await (const result of stream) {
-        if (result.type === 'continue') {
-          result.state.input.executionContext.throwIfAborted();
-        }
+      try {
+        for await (const result of stream) {
+          if (result.type === 'continue') {
+            result.state.input.executionContext.throwIfAborted();
+          }
 
-        yield result;
+          yield result;
 
-        if (result.type === 'halt') {
-          return;
+          if (result.type === 'halt') {
+            return;
+          }
         }
+      } catch (error) {
+        throw identifyErrorWithStepName(error, ctx.step.name);
       }
     })();
   }

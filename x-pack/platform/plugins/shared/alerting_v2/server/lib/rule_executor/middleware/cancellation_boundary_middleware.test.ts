@@ -13,6 +13,7 @@ import {
   createRuleExecutionInput,
   createRulePipelineState,
 } from '../test_utils';
+import { getStepNameFromError } from '../step_error';
 
 describe('CancellationBoundaryMiddleware', () => {
   let middleware: CancellationBoundaryMiddleware;
@@ -69,5 +70,50 @@ describe('CancellationBoundaryMiddleware', () => {
     await expect(
       collectStreamResults(middleware.execute(context, next, createPipelineStream([preState])))
     ).rejects.toThrow(/aborted/i);
+  });
+
+  it('tags the cancellation error with the current step name on input abort', async () => {
+    const abortController = new AbortController();
+    abortController.abort();
+
+    const state = createRulePipelineState({
+      input: createRuleExecutionInput({ abortSignal: abortController.signal }),
+    });
+
+    const next = jest.fn((input) => input);
+    const context = createRuleExecutionMiddlewareContext({ name: 'execute_rule_query' });
+
+    try {
+      await collectStreamResults(middleware.execute(context, next, createPipelineStream([state])));
+      fail('Expected stream to throw');
+    } catch (error) {
+      expect(getStepNameFromError(error)).toBe('execute_rule_query');
+    }
+  });
+
+  it('tags the cancellation error with the current step name on output abort', async () => {
+    const abortController = new AbortController();
+    const preState = createRulePipelineState();
+    const abortedState = createRulePipelineState({
+      input: createRuleExecutionInput({ abortSignal: abortController.signal }),
+    });
+
+    const next = jest.fn().mockReturnValue(
+      (async function* () {
+        abortController.abort();
+        yield { type: 'continue' as const, state: abortedState };
+      })()
+    );
+
+    const context = createRuleExecutionMiddlewareContext({ name: 'store_alert_events' });
+
+    try {
+      await collectStreamResults(
+        middleware.execute(context, next, createPipelineStream([preState]))
+      );
+      fail('Expected stream to throw');
+    } catch (error) {
+      expect(getStepNameFromError(error)).toBe('store_alert_events');
+    }
   });
 });
