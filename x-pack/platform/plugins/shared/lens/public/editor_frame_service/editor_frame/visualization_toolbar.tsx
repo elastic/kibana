@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import type { FramePublicAPI } from '@kbn/lens-common';
 import {
   useLensDispatch,
@@ -60,11 +60,13 @@ export const VisualizationToolbarWrapper = memo(function VisualizationToolbar({
   const { schemaFlyoutEditor: schemaFlyoutEditorEnabled } = getLensFeatureFlags();
 
   if (schemaFlyoutEditorEnabled && hasSchemaForVisualization(activeVisualization.id)) {
-    return SchemaFlyoutEditor({
-      visualizationId: activeVisualization.id,
-      state: visualizationState.state,
-      setState: setVisualizationState,
-    });
+    return (
+      <SchemaFlyoutEditor
+        visualizationId={activeVisualization.id}
+        state={visualizationState.state}
+        setState={setVisualizationState}
+      />
+    );
   }
 
   const { FlyoutToolbarComponent } = activeVisualization;
