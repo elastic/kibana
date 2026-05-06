@@ -22,10 +22,10 @@ import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type { BulkActionsPanelConfig, RowSelection } from '../types';
 import { LastUpdatedAt } from '../components/last_updated_at';
 import { AlertsQueryInspector } from '../components/alerts_query_inspector';
-import { CsvExportButton } from '../components/csv_export_button';
 import { ALERTS_TABLE_TITLE } from '../translations';
 
 const BulkActionsToolbar = lazy(() => import('../components/bulk_actions_toolbar_control'));
+const CsvExportButton = lazy(() => import('../components/csv_export_button'));
 
 const RightControl = memo(
   ({
@@ -52,7 +52,11 @@ const RightControl = memo(
         )}
         <LastUpdatedAt updatedAt={bulkActionsState.updatedAt} />
         {additionalToolbarControls}
-        {showCsvExportButton && <CsvExportButton />}
+        {showCsvExportButton && (
+          <Suspense fallback={null}>
+            <CsvExportButton />
+          </Suspense>
+        )}
       </>
     );
   }

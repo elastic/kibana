@@ -6,46 +6,16 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import ReactDOM from 'react-dom';
 import { EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { encode as risonEncode } from '@kbn/rison';
 import { ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
-import { fetchAlertsIndexNames } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names/fetch_alerts_index_names';
-import type { HttpStart } from '@kbn/core-http-browser';
+import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import moment from 'moment';
 import { REPORTING_MANAGEMENT_HOME, INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
-
-const createSuccessToastText = (http: HttpStart): MountPoint => {
-  const reportingUrl = http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
-  return (element) => {
-    ReactDOM.render(
-      <I18nProvider>
-        <FormattedMessage
-          id="responseOpsAlertsTable.csvExport.successBody"
-          defaultMessage="Track its progress in {link}."
-          values={{
-            link: (
-              <EuiLink href={reportingUrl} target="_blank">
-                <FormattedMessage
-                  id="responseOpsAlertsTable.csvExport.reportingLink"
-                  defaultMessage="Stack Management > Reporting"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </I18nProvider>,
-      element
-    );
-    return () => {
-      ReactDOM.unmountComponentAtNode(element);
-    };
-  };
-};
 
 const CSV_EXPORT_LABEL = i18n.translate('responseOpsAlertsTable.csvExport.buttonLabel', {
   defaultMessage: 'CSV export',
@@ -62,13 +32,18 @@ const CSV_EXPORT_ERROR = i18n.translate('responseOpsAlertsTable.csvExport.errorT
 export const CsvExportButton: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const { services, ruleTypeIds, consumers, query, sort, columns } = useAlertsTableContext();
-  const { http, notifications, settings } = services;
+  const { http, notifications, rendering, settings, application } = services;
+  const { data: indexNames } = useFetchAlertsIndexNamesQuery({ http, ruleTypeIds });
+
+  const { capabilities } = application;
+  const hasCsvReportingCapability =
+    capabilities.dashboard_v2?.downloadCsv === true ||
+    capabilities.reportingLegacy?.generateReport === true;
 
   const handleExport = useCallback(async () => {
     setIsExporting(true);
     try {
-      const indexNames = await fetchAlertsIndexNames({ http, ruleTypeIds });
-      const indexPattern = indexNames.join(',');
+      const indexPattern = (indexNames ?? []).join(',');
 
       const timeZoneSetting = settings.client.get('dateFormat:tz');
       const browserTimezone = moment.tz.zone(timeZoneSetting)?.name ?? moment.tz.guess(true);
@@ -128,9 +103,26 @@ export const CsvExportButton: React.FC = () => {
         body: JSON.stringify({ jobParams: jobParamsRison }),
       });
 
+      const reportingUrl = http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
       notifications.toasts.addSuccess({
         title: CSV_EXPORT_SUCCESS,
-        text: createSuccessToastText(http),
+        text: toMountPoint(
+          <FormattedMessage
+            id="responseOpsAlertsTable.csvExport.successBody"
+            defaultMessage="Track its progress in {link}."
+            values={{
+              link: (
+                <EuiLink href={reportingUrl} target="_blank">
+                  <FormattedMessage
+                    id="responseOpsAlertsTable.csvExport.reportingLink"
+                    defaultMessage="Stack Management > Reporting"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />,
+          rendering
+        ),
         'data-test-subj': 'csvExportStarted',
       });
     } catch (error) {
@@ -142,15 +134,29 @@ export const CsvExportButton: React.FC = () => {
     } finally {
       setIsExporting(false);
     }
-  }, [http, ruleTypeIds, consumers, query, sort, columns, notifications, settings]);
+  }, [
+    http,
+    ruleTypeIds,
+    consumers,
+    query,
+    sort,
+    columns,
+    notifications,
+    rendering,
+    settings,
+    indexNames,
+  ]);
 
   const buttonRef = React.useRef<HTMLButtonElement>(null);
 
   const handleClick = useCallback(async () => {
-    // Weird bug where the tooltip is stuck after clicking the button
     buttonRef.current?.blur();
     await handleExport();
   }, [handleExport]);
+
+  if (!hasCsvReportingCapability) {
+    return null;
+  }
 
   return (
     <EuiToolTip content={CSV_EXPORT_LABEL} delay="long" disableScreenReaderOutput>
@@ -166,3 +172,6 @@ export const CsvExportButton: React.FC = () => {
     </EuiToolTip>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default CsvExportButton;

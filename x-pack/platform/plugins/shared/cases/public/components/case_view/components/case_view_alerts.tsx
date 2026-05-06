@@ -32,7 +32,7 @@ export const CaseViewAlerts = ({
   onAlertsTableLoaded,
 }: CaseViewAlertsProps) => {
   const { services } = useKibana();
-  const { data, http, notifications, fieldFormats, application, licensing, settings } =
+  const { data, http, notifications, rendering, fieldFormats, application, licensing, settings } =
     services as SetRequired<typeof services, 'licensing'>;
   const alertIds = getManualAlertIds(caseData.comments);
   const alertIdsQuery = useMemo(
@@ -97,6 +97,7 @@ export const CaseViewAlerts = ({
                 data,
                 http,
                 notifications,
+                rendering,
                 fieldFormats,
                 application,
                 settings,

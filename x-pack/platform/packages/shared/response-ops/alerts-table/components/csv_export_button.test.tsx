@@ -11,6 +11,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { CsvExportButton } from './csv_export_button';
 
 jest.mock('../contexts/alerts_table_context', () => {
@@ -23,6 +25,18 @@ jest.mock('../contexts/alerts_table_context', () => {
 
 const { useAlertsTableContext } = jest.requireMock('../contexts/alerts_table_context');
 
+jest.mock('@kbn/alerts-ui-shared', () => ({
+  useFetchAlertsIndexNamesQuery: jest.fn().mockReturnValue({
+    data: ['.alerts-security.alerts-default'],
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
+jest.mock('@kbn/react-kibana-mount', () => ({
+  toMountPoint: jest.fn((node) => node),
+}));
+
 jest.mock('@kbn/rison', () => ({
   encode: jest.fn((val) => JSON.stringify(val)),
 }));
@@ -30,6 +44,7 @@ jest.mock('@kbn/rison', () => ({
 describe('CsvExportButton', () => {
   const http = httpServiceMock.createStartContract();
   const notifications = notificationServiceMock.createStartContract();
+  const application = applicationServiceMock.createStartContract();
   const settings = {
     client: {
       get: jest.fn().mockReturnValue('UTC'),
@@ -37,7 +52,7 @@ describe('CsvExportButton', () => {
   };
 
   const defaultContext = {
-    services: { http, notifications, settings },
+    services: { http, notifications, rendering: renderingServiceMock.create(), settings, application },
     ruleTypeIds: ['siem.queryRule'],
     consumers: ['siem'],
     query: { bool: { must: [{ match_all: {} }] } },
@@ -47,15 +62,41 @@ describe('CsvExportButton', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    application.capabilities = {
+      ...application.capabilities,
+      reportingLegacy: { generateReport: true },
+    };
     useAlertsTableContext.mockReturnValue(defaultContext);
-    // fetchAlertsIndexNames calls http.get internally
-    http.get.mockResolvedValue({ index_name: ['.alerts-security.alerts-default'] });
     http.post.mockResolvedValue({});
   });
 
   it('renders the export button', () => {
     render(<CsvExportButton />);
     expect(screen.getByTestId('alerts-csv-export-button')).toBeInTheDocument();
+  });
+
+  it('renders the export button when dashboard_v2.downloadCsv is true', () => {
+    application.capabilities = {
+      ...application.capabilities,
+      reportingLegacy: { generateReport: false },
+      dashboard_v2: { downloadCsv: true },
+    };
+    useAlertsTableContext.mockReturnValue(defaultContext);
+
+    render(<CsvExportButton />);
+    expect(screen.getByTestId('alerts-csv-export-button')).toBeInTheDocument();
+  });
+
+  it('does not render the export button when the user lacks reporting capabilities', () => {
+    application.capabilities = {
+      ...application.capabilities,
+      reportingLegacy: { generateReport: false },
+      dashboard_v2: { downloadCsv: false },
+    };
+    useAlertsTableContext.mockReturnValue(defaultContext);
+
+    const { container } = render(<CsvExportButton />);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('calls the reporting API with correct params on click', async () => {
@@ -72,17 +113,13 @@ describe('CsvExportButton', () => {
     expect(body.jobParams).toBeDefined();
   });
 
-  it('fetches alert index names before exporting', async () => {
+  it('fetches alert index names via the query hook', () => {
+    const { useFetchAlertsIndexNamesQuery } = jest.requireMock('@kbn/alerts-ui-shared');
     render(<CsvExportButton />);
-    await userEvent.click(screen.getByTestId('alerts-csv-export-button'));
 
-    await waitFor(() => {
-      expect(http.get).toHaveBeenCalledWith(
-        expect.stringContaining('/alerts/index'),
-        expect.objectContaining({
-          query: { ruleTypeIds: ['siem.queryRule'] },
-        })
-      );
+    expect(useFetchAlertsIndexNamesQuery).toHaveBeenCalledWith({
+      http,
+      ruleTypeIds: ['siem.queryRule'],
     });
   });
 

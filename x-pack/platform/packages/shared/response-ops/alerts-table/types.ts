@@ -49,6 +49,7 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
@@ -423,6 +424,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     data: DataPublicPluginStart;
     http: HttpStart;
     notifications: NotificationsStart;
+    rendering: RenderingService;
     fieldFormats: FieldFormatsStart;
     application: ApplicationStart;
     licensing: LicensingPluginStart;
