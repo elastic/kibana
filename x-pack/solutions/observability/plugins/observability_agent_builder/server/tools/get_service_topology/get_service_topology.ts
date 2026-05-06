@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { uniq } from 'lodash';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type {
@@ -21,6 +20,7 @@ import { filterDownstreamConnections, filterUpstreamConnections } from './filter
 import { getTraceIdsFromExitSpansTargetingDependency } from './get_trace_ids_from_exit_spans';
 import { getImmediateDownstreamDependencies } from './get_immediate_downstream_dependencies';
 import { findMessagingDependencies } from './find_messaging_dependencies';
+import { expandMessagingConnections } from './expand_messaging_connections';
 
 interface TopologyResources {
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
@@ -212,89 +212,6 @@ async function getUpstreamTopology({
   });
 }
 
-const MAX_MESSAGING_DEPS_TO_EXPAND = 5;
-
-/**
- * For each messaging dependency, find other services that also connect to it.
- * This reveals the other side of the pipeline (e.g., the producer when we started
- * from a consumer, or vice versa). Only returns connections not already present
- * in existingConnections.
- *
- * Caps expansion to MAX_MESSAGING_DEPS_TO_EXPAND to bound the number of ES queries.
- * Each dependency triggers two queries (trace IDs + exit spans), so this prevents
- * unbounded latency when many messaging topics appear in the topology.
- */
-async function expandMessagingConnections({
-  apmEventClient,
-  resources,
-  messagingDeps,
-  existingConnections,
-  startMs,
-  endMs,
-}: {
-  apmEventClient: APMEventClient;
-  resources: TopologyResources;
-  messagingDeps: string[];
-  existingConnections: ConnectionWithKey[];
-  startMs: number;
-  endMs: number;
-}): Promise<ConnectionWithKey[]> {
-  if (messagingDeps.length === 0) {
-    return [];
-  }
-
-  const capped = messagingDeps.slice(0, MAX_MESSAGING_DEPS_TO_EXPAND);
-  if (capped.length < messagingDeps.length) {
-    resources.logger.warn(
-      `Capping messaging expansion to ${MAX_MESSAGING_DEPS_TO_EXPAND} of ${messagingDeps.length} dependencies`
-    );
-  }
-
-  const existingKeys = new Set(existingConnections.map((c) => c._key));
-
-  const perDepResults = await Promise.all(
-    capped.map(async (depName) => {
-      resources.logger.debug(
-        `Expanding messaging dependency "${depName}" to find other connected services`
-      );
-
-      const depTraceIds = await getTraceIdsFromExitSpansTargetingDependency({
-        apmEventClient,
-        dependencyName: depName,
-        start: startMs,
-        end: endMs,
-      });
-
-      if (depTraceIds.length === 0) {
-        return [];
-      }
-
-      const spans = await resources.dataRegistry.getData('apmExitSpanSamples', {
-        request: resources.request,
-        traceIds: depTraceIds,
-        start: startMs,
-        end: endMs,
-      });
-
-      if (!spans) {
-        return [];
-      }
-
-      const newConnections = buildConnectionsFromSpans(spans).filter(
-        (c) => c._dependencyName === depName && !existingKeys.has(c._key)
-      );
-
-      resources.logger.debug(
-        `Found ${newConnections.length} additional connections to messaging dependency "${depName}"`
-      );
-
-      return newConnections;
-    })
-  );
-
-  return perDepResults.flat();
-}
-
 /**
  * Optimized path for direction === 'both': fetches trace samples and exit spans once,
  * then filters in both directions from the shared connection graph.
@@ -387,7 +304,9 @@ async function getBothTopology({
   const messagingDeps = findMessagingDependencies(combinedConnections);
   const messagingConnections = await expandMessagingConnections({
     apmEventClient,
-    resources,
+    dataRegistry: resources.dataRegistry,
+    request: resources.request,
+    logger: resources.logger,
     messagingDeps,
     existingConnections: combinedConnections,
     startMs,
