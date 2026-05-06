@@ -21,18 +21,22 @@ import { ExampleAlreadyExistsError } from './example_already_exists_error';
 type DatasetStorageDocument = DatasetStorageProperties & { _id?: string };
 type DatasetExampleStorageDocument = DatasetExampleStorageProperties & { _id?: string };
 
-const projectSource = <TDoc extends Record<string, unknown>>(
-  source: TDoc,
-  sourceParam: unknown
-): Partial<TDoc> | undefined => {
+/**
+ * Mirrors how the real StorageIndexAdapter handles `_source` projections:
+ * `_source: false` is rejected at runtime (the adapter's `maybeMigrateSource`
+ * throws on a non-object source), and `_source: ['field', ...]` returns a
+ * partial document. Keeping the mock faithful means a regression to
+ * `_source: false` blows up unit tests, not just the adapter-contract suite.
+ */
+const projectSource = <TDoc extends object>(source: TDoc, sourceParam: unknown): Partial<TDoc> => {
   if (sourceParam === false) {
-    return undefined;
+    throw new Error(`Source must be an object, got undefined`);
   }
   if (Array.isArray(sourceParam)) {
     const projected: Record<string, unknown> = {};
     for (const field of sourceParam) {
       if (typeof field === 'string' && field in source) {
-        projected[field] = source[field];
+        projected[field] = (source as Record<string, unknown>)[field];
       }
     }
     return projected as Partial<TDoc>;
@@ -322,7 +326,7 @@ describe('DatasetClient', () => {
 
     await expect(client.datasetExists(created.id)).resolves.toBe(true);
     expect(datasetsStorage.client.search).toHaveBeenLastCalledWith(
-      expect.objectContaining({ _source: false })
+      expect.objectContaining({ _source: ['name'] })
     );
   });
 
@@ -338,7 +342,7 @@ describe('DatasetClient', () => {
     const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
     const exampleToDelete = created.examples[0];
 
-    const wasDeleted = await client.deleteExample(exampleToDelete.id);
+    const wasDeleted = await client.deleteExample(exampleToDelete.id, created.id);
     const fetched = await client.get(created.id);
 
     expect(wasDeleted).toBe(true);
@@ -352,9 +356,9 @@ describe('DatasetClient', () => {
   it('returns false when deleting a non-existent example', async () => {
     const { client } = createClient();
 
-    await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
 
-    const wasDeleted = await client.deleteExample('non-existent-example-id');
+    const wasDeleted = await client.deleteExample('non-existent-example-id', created.id);
 
     expect(wasDeleted).toBe(false);
   });
@@ -431,7 +435,7 @@ describe('DatasetClient', () => {
     expect(fetched?.examples).toHaveLength(0);
     expect(examplesStorage.client.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        _source: false,
+        _source: ['dataset_id'],
         query: { term: { dataset_id: created.id } },
       })
     );
@@ -486,11 +490,15 @@ describe('DatasetClient', () => {
     const exampleToUpdate = created.examples[0];
 
     await expect(
-      client.updateExample(exampleToUpdate.id, {
-        input: baseExampleB.input,
-        output: baseExampleB.output,
-        metadata: baseExampleB.metadata ?? undefined,
-      })
+      client.updateExample(
+        exampleToUpdate.id,
+        {
+          input: baseExampleB.input,
+          output: baseExampleB.output,
+          metadata: baseExampleB.metadata ?? undefined,
+        },
+        created.id
+      )
     ).rejects.toThrow(ExampleAlreadyExistsError);
 
     const dataset = await client.get(created.id);

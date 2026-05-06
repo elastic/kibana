@@ -172,7 +172,7 @@ export class DatasetClient {
     const response = await this.datasetsStorage.search({
       track_total_hits: false,
       size: 1,
-      _source: false,
+      _source: ['name'],
       query: {
         term: {
           _id: datasetId,
@@ -340,14 +340,15 @@ export class DatasetClient {
   async updateExample(
     exampleId: string,
     updates: Partial<Pick<DatasetExampleStorageProperties, 'input' | 'output' | 'metadata'>>,
-    expectedDatasetId?: string
+    expectedDatasetId: string
   ): Promise<ExampleDocument | undefined> {
-    const existing = await this.getExampleById(exampleId);
-    if (!existing) {
+    const ownerDatasetId = await this.getExampleDatasetId(exampleId);
+    if (!ownerDatasetId || ownerDatasetId !== expectedDatasetId) {
       return undefined;
     }
 
-    if (expectedDatasetId && existing.dataset_id !== expectedDatasetId) {
+    const existing = await this.getExampleById(exampleId);
+    if (!existing) {
       return undefined;
     }
 
@@ -388,13 +389,9 @@ export class DatasetClient {
     return this.getExampleById(updatedId);
   }
 
-  async deleteExample(exampleId: string, expectedDatasetId?: string): Promise<boolean> {
+  async deleteExample(exampleId: string, expectedDatasetId: string): Promise<boolean> {
     const datasetId = await this.getExampleDatasetId(exampleId);
-    if (!datasetId) {
-      return false;
-    }
-
-    if (expectedDatasetId && datasetId !== expectedDatasetId) {
+    if (!datasetId || datasetId !== expectedDatasetId) {
       return false;
     }
 
@@ -413,7 +410,7 @@ export class DatasetClient {
     const searchResponse = await this.examplesStorage.search({
       track_total_hits: true,
       size: MAX_EXAMPLES_PER_DATASET,
-      _source: false,
+      _source: ['dataset_id'],
       query: {
         term: {
           dataset_id: datasetId,
