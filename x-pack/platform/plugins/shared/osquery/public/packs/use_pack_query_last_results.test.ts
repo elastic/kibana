@@ -127,7 +127,7 @@ describe('usePackQueryLastResults', () => {
       });
     });
 
-    it('returns null when buckets are empty', async () => {
+    it('returns null when buckets are empty and no actionId fallback exists', async () => {
       const queryClient = createQueryClient();
 
       mockSearchSource.fetch$.mockReturnValue(
@@ -150,6 +150,75 @@ describe('usePackQueryLastResults', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expect(result.current.data).toBeNull();
+    });
+  });
+
+  describe('schedule → action fallback', () => {
+    it('falls back to the actionId branch when the schedule branch finds no docs', async () => {
+      const queryClient = createQueryClient();
+
+      // Three responses, in order:
+      //   1) schedule branch: no buckets → fall through
+      //   2) action branch: latest hit by event.ingested
+      //   3) action branch: range-bound aggs for unique_agents / total docs
+      mockSearchSource.fetch$
+        .mockReturnValueOnce(
+          of({
+            rawResponse: {
+              aggregations: {
+                per_execution: { buckets: [] },
+              },
+            },
+          })
+        )
+        .mockReturnValueOnce(
+          of({
+            rawResponse: {
+              hits: {
+                hits: [
+                  {
+                    fields: {
+                      'event.ingested': ['2023-11-14T22:13:20.000Z'],
+                    },
+                  },
+                ],
+              },
+            },
+          })
+        )
+        .mockReturnValueOnce(
+          of({
+            rawResponse: {
+              hits: { total: 5 },
+              aggregations: {
+                unique_agents: { value: 2 },
+              },
+            },
+          })
+        );
+
+      const { result } = renderHook(
+        () =>
+          usePackQueryLastResults({
+            scheduleId: 'sched-uuid-empty',
+            actionId: 'legacy-action-id',
+            interval: 3600,
+          }),
+        { wrapper: createWrapper(queryClient) }
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      // Returns legacy-shape data (no `executionCount`) so callers fall back
+      // to the action_id link/title.
+      expect(result.current.data).toEqual({
+        lastResultTime: ['2023-11-14T22:13:20.000Z'],
+        uniqueAgentsCount: 2,
+        docCount: 5,
+      });
+
+      // Sanity: we issued the schedule probe + 2 action-branch requests.
+      expect(mockSearchSource.create).toHaveBeenCalledTimes(3);
     });
   });
 

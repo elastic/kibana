@@ -77,12 +77,13 @@ export function getLensAttributes(
   executionCount?: number
 ): TypedLensByValueInput['attributes'] {
   // Scheduled-pack result docs filter by `schedule_id`; live-action docs by `action_id`.
-  const filterField = scheduleId ? 'schedule_id' : 'action_id';
-  const filterValue = scheduleId ?? actionId;
+  const useScheduleFilter = !!scheduleId && typeof executionCount === 'number';
+  const filterField = useScheduleFilter ? 'schedule_id' : 'action_id';
+  const filterValue = useScheduleFilter ? scheduleId : actionId;
   // For scheduled queries, narrow further to a specific execution to match
   // exactly the documents counted in the "Last results" / "Docs" / "Agents"
   // columns; without this the link would return all historical executions.
-  const includeExecutionFilter = scheduleId && typeof executionCount === 'number';
+  const includeExecutionFilter = useScheduleFilter;
   const dataLayer: PersistedIndexPatternLayer = {
     columnOrder: ['8690befd-fd69-4246-af4a-dd485d2a3b38', 'ed999e9d-204c-465b-897f-fe1a125b39ed'],
     columns: {
@@ -134,7 +135,7 @@ export function getLensAttributes(
 
   return {
     visualizationType: 'lnsPie',
-    title: scheduleId ? `Schedule ${scheduleId} results` : `Action ${actionId} results`,
+    title: useScheduleFilter ? `Schedule ${scheduleId} results` : `Action ${actionId} results`,
     references: [
       {
         id: logsDataView.id,
@@ -294,11 +295,12 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
       if (!locator || !logsDataView) return;
 
       // Scheduled-pack docs filter by `schedule_id`; live-action docs by `action_id`.
-      const filterField = scheduleId ? 'schedule_id' : 'action_id';
-      const filterValue = scheduleId ?? actionId;
+      const useScheduleFilter = !!scheduleId && typeof executionCount === 'number';
+      const filterField = useScheduleFilter ? 'schedule_id' : 'action_id';
+      const filterValue = useScheduleFilter ? scheduleId : actionId;
       // For scheduled queries, narrow further to one execution so the link
       // matches exactly the docs counted in the column.
-      const includeExecutionFilter = scheduleId && typeof executionCount === 'number';
+      const includeExecutionFilter = useScheduleFilter;
 
       const newUrl = await locator.getUrl({
         indexPatternId: logsDataView.id,

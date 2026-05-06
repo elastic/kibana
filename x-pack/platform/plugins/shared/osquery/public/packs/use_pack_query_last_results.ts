@@ -36,14 +36,17 @@ interface UsePackQueryLastResultsProps {
 /**
  * Fetches the most recent execution metadata for a pack query.
  *
- * If `scheduleId` is provided, results come from the per-execution `terms` agg
- * over `osquery_meta.schedule_execution_count` (single round-trip). This branch
- * does not honor `startDate` / `endDate` because the latest execution is found
- * by ordering on `event.ingested`.
+ * If `scheduleId` is provided, the schedule branch runs first. It uses a single
+ * `terms` agg over `osquery_meta.schedule_execution_count` to pull the most
+ * recent execution's metadata in one round-trip. This branch does not honor
+ * `startDate` / `endDate` because the latest execution is found by ordering on
+ * `event.ingested`.
  *
- * Otherwise the legacy `actionId` branch is used (one search for the latest
- * hit, one aggregation for `unique_agents` / `docCount`). The `startDate` /
- * `endDate` props apply to that branch only.
+ * If the schedule branch finds no buckets (legacy packs whose docs still carry
+ * `action_id`, or environments mid-migration), we fall back to the legacy
+ * `actionId` branch — one search for the latest hit, one aggregation for
+ * `unique_agents` / `docCount`. The `startDate` / `endDate` props apply to
+ * that branch only.
  */
 export const usePackQueryLastResults = ({
   actionId,
@@ -96,23 +99,25 @@ export const usePackQueryLastResults = ({
           | undefined;
         const buckets = aggregations?.per_execution?.buckets;
 
-        if (!buckets?.length) {
-          return null;
+        if (buckets?.length) {
+          const bucket = buckets[0];
+
+          return {
+            lastResultTime: bucket.max_ingested?.value_as_string
+              ? [bucket.max_ingested.value_as_string]
+              : undefined,
+            uniqueAgentsCount: bucket.unique_agents?.value,
+            docCount: bucket.doc_count,
+            // Bucket key is the value of `osquery_meta.schedule_execution_count`
+            // for the most recent execution. Callers (e.g. View in Discover/Lens)
+            // use this to scope link filters to exactly that execution.
+            executionCount: bucket.key,
+          };
         }
 
-        const bucket = buckets[0];
-
-        return {
-          lastResultTime: bucket.max_ingested?.value_as_string
-            ? [bucket.max_ingested.value_as_string]
-            : undefined,
-          uniqueAgentsCount: bucket.unique_agents?.value,
-          docCount: bucket.doc_count,
-          // Bucket key is the value of `osquery_meta.schedule_execution_count`
-          // for the most recent execution. Callers (e.g. View in Discover/Lens)
-          // use this to scope link filters to exactly that execution.
-          executionCount: bucket.key,
-        };
+        // Schedule branch found nothing — fall through to actionId branch so
+        // legacy docs still surface. `executionCount` stays undefined, which
+        // signals callers to keep the legacy `action_id` link/title.
       }
 
       if (!actionId) return null;

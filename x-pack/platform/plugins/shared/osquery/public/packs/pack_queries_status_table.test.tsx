@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
 
-import { PackQueriesStatusTable } from './pack_queries_status_table';
+import { PackQueriesStatusTable, getLensAttributes } from './pack_queries_status_table';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
 import { usePackQueryLastResults } from './use_pack_query_last_results';
 import { usePackQueryErrors } from './use_pack_query_errors';
@@ -119,6 +119,43 @@ describe('PackQueriesStatusTable', () => {
         }),
       ])
     );
+  });
+
+  describe('getLensAttributes', () => {
+    const logsDataView = {
+      id: 'logs-*',
+      title: 'logs-osquery_manager.result-*',
+    } as Parameters<typeof getLensAttributes>[0];
+
+    it('uses action_id filter and "Action ..." title when no executionCount is provided', () => {
+      // Every pack query carries `schedule_id` after backfill, so passing it
+      // alone is not enough — without `executionCount`, no schedule_id docs
+      // were observed and we must keep the legacy action_id behavior.
+      const attrs = getLensAttributes(logsDataView, 'legacy-action-id', 'some-schedule-uuid');
+
+      expect(attrs.title).toBe('Action legacy-action-id results');
+      expect(attrs.state.filters[0].meta.key).toBe('action_id');
+      expect(attrs.state.filters[0].query).toEqual({
+        match_phrase: { action_id: 'legacy-action-id' },
+      });
+      // No execution-count filter since we're on the legacy path.
+      expect(attrs.state.filters).toHaveLength(1);
+    });
+
+    it('switches to schedule_id filter and adds execution-count filter when executionCount is set', () => {
+      const attrs = getLensAttributes(logsDataView, 'legacy-action-id', 'sched-uuid-aaa', 7);
+
+      expect(attrs.title).toBe('Schedule sched-uuid-aaa results');
+      expect(attrs.state.filters[0].meta.key).toBe('schedule_id');
+      expect(attrs.state.filters[0].query).toEqual({
+        match_phrase: { schedule_id: 'sched-uuid-aaa' },
+      });
+      // Second filter scopes to the specific execution count.
+      expect(attrs.state.filters[1].meta.key).toBe('osquery_meta.schedule_execution_count');
+      expect(attrs.state.filters[1].query).toEqual({
+        match_phrase: { 'osquery_meta.schedule_execution_count': 7 },
+      });
+    });
   });
 
   it('renders metric values returned by the hook in the columns', () => {
