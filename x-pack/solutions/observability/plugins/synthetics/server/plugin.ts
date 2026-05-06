@@ -133,6 +133,7 @@ export class Plugin implements PluginType {
 
     bindAgentBuilder({
       agentBuilder: plugins.agentBuilder,
+      agentContextLayer: plugins.agentContextLayer,
       logger: this.logger,
     });
 

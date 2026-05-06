@@ -128,6 +128,7 @@
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",
+    "@kbn/agent-context-layer-plugin",
     "@kbn/scout-oblt",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/zod"

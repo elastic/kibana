@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import { createMonitorManagementAttachmentType } from './attachments/monitor_management_attachment_type';
 import { createMonitorSmlType } from './sml/monitor_sml_type';
 import { monitorManagementSkill } from './skills';
@@ -14,6 +15,12 @@ import { monitorManagementSkill } from './skills';
 interface BindAgentBuilderOptions {
   /** May be `undefined` when the optional `agentBuilder` plugin is missing. */
   agentBuilder: AgentBuilderPluginSetup | undefined;
+  /**
+   * SML registration moved from `agentBuilder` to the `agentContextLayer`
+   * plugin. Optional for the same reason as `agentBuilder` — deployments
+   * that don't include Agent Builder must still boot.
+   */
+  agentContextLayer: AgentContextLayerPluginSetup | undefined;
   logger: Logger;
 }
 
@@ -25,12 +32,13 @@ export interface BindAgentBuilderResult {
 
 /**
  * Conditionally registers the Synthetics × Agent Builder integration
- * with the `agentBuilder` plugin during `setup()`.
+ * with the `agentBuilder` and `agentContextLayer` plugins during `setup()`.
  *
- * Single gate: the `agentBuilder` plugin is actually present. It's
- * declared optional in `kibana.jsonc` (deployments without Agent Builder
- * — e.g. some on-prem / classic stack flavours — still need to boot),
- * so we have to guard.
+ * Single gate: both plugins are actually present. They're declared
+ * optional in `kibana.jsonc` (deployments without Agent Builder — e.g.
+ * some on-prem / classic stack flavours — still need to boot), so we
+ * have to guard. `agentBuilder` itself depends on `agentContextLayer`,
+ * so in practice they appear or disappear together.
  *
  * No additional Synthetics-side feature flag: the broader Agent Builder
  * UX is itself the gate. When `agentBuilder` is enabled in a Kibana
@@ -44,11 +52,12 @@ export interface BindAgentBuilderResult {
  */
 export const bindAgentBuilder = ({
   agentBuilder,
+  agentContextLayer,
   logger,
 }: BindAgentBuilderOptions): BindAgentBuilderResult => {
-  if (!agentBuilder) {
+  if (!agentBuilder || !agentContextLayer) {
     logger.debug(
-      'Synthetics × Agent Builder integration: agentBuilder plugin not present; skipping.'
+      'Synthetics × Agent Builder integration: agentBuilder or agentContextLayer plugin not present; skipping.'
     );
     return { registered: false, reason: 'plugin_missing' };
   }
@@ -62,9 +71,7 @@ export const bindAgentBuilder = ({
     }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
   );
 
-  agentBuilder.sml.registerType(
-    createMonitorSmlType({ logger }) as Parameters<typeof agentBuilder.sml.registerType>[0]
-  );
+  agentContextLayer.registerType(createMonitorSmlType({ logger }));
 
   agentBuilder.skills.register(monitorManagementSkill);
 

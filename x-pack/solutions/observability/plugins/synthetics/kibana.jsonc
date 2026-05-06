@@ -54,6 +54,7 @@
       "licenseManagement",
       "observabilityAIAssistant",
       "agentBuilder",
+      "agentContextLayer",
       "observabilityAgentBuilder",
       "maintenanceWindows"
     ],

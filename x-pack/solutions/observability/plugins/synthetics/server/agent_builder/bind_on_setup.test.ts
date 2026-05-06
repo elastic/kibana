@@ -7,20 +7,23 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import { MONITOR_MANAGEMENT_ATTACHMENT_TYPE, MONITOR_SML_TYPE } from '../../common/agent_builder';
 import { bindAgentBuilder } from './bind_on_setup';
 import { monitorManagementSkill } from './skills';
 
-const buildAgentBuilderMock = () => {
+const buildMocks = () => {
   const registerType = jest.fn();
   const registerSmlType = jest.fn();
   const registerSkill = jest.fn();
   return {
-    mock: {
+    agentBuilder: {
       attachments: { registerType },
-      sml: { registerType: registerSmlType },
       skills: { register: registerSkill },
     } as unknown as AgentBuilderPluginSetup,
+    agentContextLayer: {
+      registerType: registerSmlType,
+    } as unknown as AgentContextLayerPluginSetup,
     registerType,
     registerSmlType,
     registerSkill,
@@ -28,21 +31,34 @@ const buildAgentBuilderMock = () => {
 };
 
 describe('bindAgentBuilder', () => {
-  it('returns plugin_missing without touching anything when agentBuilder is undefined', () => {
-    const logger = loggerMock.create();
+  it('returns plugin_missing when agentBuilder is undefined', () => {
+    const { agentContextLayer } = buildMocks();
     const result = bindAgentBuilder({
       agentBuilder: undefined,
-      logger,
+      agentContextLayer,
+      logger: loggerMock.create(),
     });
     expect(result).toEqual({ registered: false, reason: 'plugin_missing' });
   });
 
-  it('registers attachment + SML + skill when the agentBuilder plugin is present', () => {
-    const { mock, registerType, registerSmlType, registerSkill } = buildAgentBuilderMock();
+  it('returns plugin_missing when agentContextLayer is undefined', () => {
+    const { agentBuilder } = buildMocks();
+    const result = bindAgentBuilder({
+      agentBuilder,
+      agentContextLayer: undefined,
+      logger: loggerMock.create(),
+    });
+    expect(result).toEqual({ registered: false, reason: 'plugin_missing' });
+  });
+
+  it('registers attachment + SML + skill when both plugins are present', () => {
+    const { agentBuilder, agentContextLayer, registerType, registerSmlType, registerSkill } =
+      buildMocks();
     const logger = loggerMock.create();
 
     const result = bindAgentBuilder({
-      agentBuilder: mock,
+      agentBuilder,
+      agentContextLayer,
       logger,
     });
 
@@ -53,24 +69,24 @@ describe('bindAgentBuilder', () => {
   });
 
   it('registers the attachment type with the correct id', () => {
-    const { mock, registerType } = buildAgentBuilderMock();
-    bindAgentBuilder({ agentBuilder: mock, logger: loggerMock.create() });
+    const { agentBuilder, agentContextLayer, registerType } = buildMocks();
+    bindAgentBuilder({ agentBuilder, agentContextLayer, logger: loggerMock.create() });
     expect(registerType.mock.calls[0][0]).toEqual(
       expect.objectContaining({ id: MONITOR_MANAGEMENT_ATTACHMENT_TYPE })
     );
   });
 
   it('registers the SML type with the correct id', () => {
-    const { mock, registerSmlType } = buildAgentBuilderMock();
-    bindAgentBuilder({ agentBuilder: mock, logger: loggerMock.create() });
+    const { agentBuilder, agentContextLayer, registerSmlType } = buildMocks();
+    bindAgentBuilder({ agentBuilder, agentContextLayer, logger: loggerMock.create() });
     expect(registerSmlType.mock.calls[0][0]).toEqual(
       expect.objectContaining({ id: MONITOR_SML_TYPE })
     );
   });
 
   it('registers the monitor-management skill exactly as defined', () => {
-    const { mock, registerSkill } = buildAgentBuilderMock();
-    bindAgentBuilder({ agentBuilder: mock, logger: loggerMock.create() });
+    const { agentBuilder, agentContextLayer, registerSkill } = buildMocks();
+    bindAgentBuilder({ agentBuilder, agentContextLayer, logger: loggerMock.create() });
     expect(registerSkill).toHaveBeenCalledWith(monitorManagementSkill);
   });
 });
