@@ -8,25 +8,9 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { type Filter, type Query, escapeQuotes } from '@kbn/es-query';
+import { type Filter, type Query } from '@kbn/es-query';
 import { convertFiltersToESQLExpression } from './convert_filters_to_esql';
-
-const getFilterBySearchText = (query?: Query) => {
-  if (!query) {
-    return '';
-  }
-  const searchTextFunc =
-    query.language === 'kuery' ? 'KQL' : query.language === 'lucene' ? 'QSTR' : '';
-
-  if (searchTextFunc && query.query) {
-    const escapedQuery =
-      typeof query.query === 'string' && query.language === 'lucene'
-        ? escapeQuotes(query.query)
-        : query.query;
-    return `${searchTextFunc}("""${escapedQuery}""")`;
-  }
-  return '';
-};
+import { convertQueryToESQLExpression } from './convert_query_to_esql';
 
 const getFinalWhereClause = (
   timeFilter?: string,
@@ -57,7 +41,7 @@ export function getInitialESQLQuery(dataView: DataView, query?: Query, filters?:
       ? `${timeFieldName} >= ?_tstart AND ${timeFieldName} <= ?_tend`
       : '';
 
-  const filterBySearchText = getFilterBySearchText(query);
+  const filterBySearchText = convertQueryToESQLExpression(query);
 
   const { esqlExpression: filtersExpression } = filters?.length
     ? convertFiltersToESQLExpression(filters)
