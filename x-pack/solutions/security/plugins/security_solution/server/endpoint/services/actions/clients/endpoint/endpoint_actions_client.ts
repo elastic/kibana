@@ -184,6 +184,24 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       }
     }
 
+    if (actionRequest.command === 'cancel') {
+      try {
+        const actionToCancel = await getActionDetailsById(
+          this.options.endpointService,
+          this.options.spaceId,
+          actionRequest.parameters.id
+        );
+
+        if (actionToCancel.isCompleted) {
+          throw new ResponseActionsClientError(
+            `Action [${actionRequest.parameters.id}] is already completed and cannot be canceled.`
+          );
+        }
+      } catch (error) {
+        return { isValid: false, error };
+      }
+    }
+
     return super.validateRequest(actionRequest);
   }
 

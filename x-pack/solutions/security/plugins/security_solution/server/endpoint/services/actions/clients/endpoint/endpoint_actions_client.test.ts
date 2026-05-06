@@ -665,6 +665,21 @@ describe('EndpointActionsClient', () => {
         )
       ).resolves.toBeDefined();
     });
+
+    it('should throw error if action is already complete', async () => {
+      getActionDetailsByIdMock.mockResolvedValue({
+        isCompleted: true,
+      });
+
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { id: 'action-123' },
+          })
+        )
+      ).rejects.toThrow('Action [action-123] is already completed and cannot be canceled.');
+    });
   });
 
   describe('#runscript()', () => {
