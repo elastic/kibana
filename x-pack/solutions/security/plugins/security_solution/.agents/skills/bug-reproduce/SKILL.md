@@ -60,28 +60,34 @@ Summarize findings before moving on.
 
 ## Phase 1: Start Services
 
-Start the server yourself — don't ask the user. Use `server_args` from `analysis.json`:
+Start the Scout server yourself — don't ask the user. Use `server_args` from `analysis.json`.
+
+Scout runs on port 5620 and sets up the `cloud-basic` auth provider needed for browser
+reproduction. Don't use the plain dev server — `auth_provider_hint=cloud-basic` won't
+work without Scout's server setup.
 
 ```bash
-# Start Elasticsearch
-node scripts/es snapshot &
+# No feature flags
+node scripts/scout.js start-server --arch stateful --domain classic &
 
-# Start Kibana — no feature flags
-node scripts/kibana --dev --no-base-path &
-
-# Start Kibana — with feature flags
-node scripts/kibana --dev --no-base-path \
-  --xpack.securitySolution.enableExperimental='["someFlag"]' &
+# With feature flags (from analysis.json server_args) — write a Scout config file first
+mkdir -p config_sets/bug_fixer
+cat > config_sets/bug_fixer/kibana.yml << 'EOF'
+xpack.securitySolution.enableExperimental:
+  - featureFlag1
+feature_flags.overrides.some.flag: true
+EOF
+node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet bug_fixer &
 
 # Wait for ready (poll every 10s)
-until curl -s -u elastic:changeme http://localhost:5601/api/status \
+until curl -s -u elastic:changeme http://localhost:5620/api/status \
   | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do
   echo "Waiting for Kibana..."; sleep 10
 done
 ```
 
-Array flag values use JSON format (`["flag1","flag2"]`), not YAML. Pass all config via
-CLI args — not `kibana.dev.yml` — so nothing persists between sessions.
+The `config_sets/bug_fixer/kibana.yml` file is session-specific — write it from
+`server_args` in `analysis.json` each time rather than editing any persistent config file.
 
 While services start, dispatch these as subagents to use the boot time:
 - Read `affected_paths` from `analysis.json`
@@ -89,7 +95,7 @@ While services start, dispatch these as subagents to use the boot time:
 - Read `.agents/skills/bug-fixer/references/classification-guide.md`
 - Read `.agents/skills/bug-fixer/KNOWLEDGE.md`
 
-Stop services: `pkill -f 'node.*scripts/kibana' ; pkill -f 'org.elasticsearch'`
+Stop services: `pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'`
 
 ## Phase 2: Prepare
 
@@ -123,9 +129,9 @@ an API shortcut can mask the real defect entirely.
 Ask yourself: _"Am I about to use curl or an API call to reproduce this?"_ If yes, stop
 and use the browser instead, following the exact steps from the issue.
 
-**Login**: `http://localhost:5601/login` with `elastic` / `changeme`
+**Login**: `http://localhost:5620/login?auth_provider_hint=cloud-basic` with `elastic` / `changeme`
 
-1. `browser_navigate` → `http://localhost:5601/login`
+1. `browser_navigate` → `http://localhost:5620/login?auth_provider_hint=cloud-basic`
 2. `browser_snapshot` — if you see "Please upgrade your browser", call `browser_snapshot`
    again. This is transient; `browser_wait_for` can block indefinitely here.
 3. Log in with `elastic` / `changeme`
