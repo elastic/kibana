@@ -13,7 +13,6 @@ export const PLUGIN_NAME = 'Workflows';
 export const WORKFLOWS_INDEX = '.workflows-workflows';
 export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
-export const GLOBAL_WORKFLOW_SPACE_ID = '*';
 
 export const WORKFLOWS_DOCUMENTATION_URL = 'https://ela.st/workflows-docs';
 

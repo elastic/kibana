@@ -17,6 +17,7 @@ import {
   type ManagedWorkflowTemplateValues,
   type ResolvedManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
   ManagedWorkflowOperationOptions,
@@ -24,7 +25,6 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { parseYamlToJSONWithoutValidation, updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '../../common';
 import { computeDefinitionHash, getTriggerTypesFromDefinition } from '../api/lib/workflow_prepare';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 

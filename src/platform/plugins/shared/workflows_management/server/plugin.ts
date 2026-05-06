@@ -21,6 +21,7 @@ import {
   ENTITY_MONITOR_WORKFLOW_ID,
   WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { createWorkflowSmlType } from './agent_builder/sml_types/workflow';
 import { defineRoutes } from './api/routes';
@@ -47,7 +48,6 @@ import type {
   WorkflowsServerPluginStartDeps,
 } from './types';
 import { registerUISettings } from './ui_settings';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '../common';
 import { stepSchemas } from '../common/step_schemas';
 
 const WORKFLOWS_MANAGEMENT_PLUGIN_ID = 'workflowsManagement';
