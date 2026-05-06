@@ -6,6 +6,7 @@
  */
 
 export const FLYOUT_STORAGE_KEYS = {
+  RIGHT_PANEL_SELECTED_TABS: 'securitySolution.documentDetailsFlyout.rightPanel.selectedTabs.v8.14',
   OVERVIEW_TAB_EXPANDED_SECTIONS:
     'securitySolution.documentDetailsFlyout.overviewSectionExpanded.v8.14',
   THREAT_INTELLIGENCE_TIME_RANGE:

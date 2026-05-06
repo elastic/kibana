@@ -8,88 +8,86 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { JsonTab } from './tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
-import {
-  IOC_DETAILS_OVERVIEW_TAB_TEST_ID,
-  IOC_DETAILS_TABLE_TAB_TEST_ID,
-  IOC_DETAILS_JSON_TAB_TEST_ID,
-} from './test_ids';
+import { JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './components/test_ids';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 
-export const validTabIds: readonly RightPanelPaths[] = ['overview', 'table', 'json'];
-
 export interface RightPanelTabType {
+  /** Unique identifier for the tab, used to track the selected tab. */
   id: RightPanelPaths;
+  /** Rendered tab label shown in the tab bar. */
   name: ReactElement;
+  /** Content rendered when this tab is selected. */
   content: React.ReactElement;
+  /** Test subject for the tab element. */
   'data-test-subj': string;
 }
 
 export interface GetTabsDisplayedOptions {
   /**
-   * The indicator document to render inside each tab
+   * The document to display in the tab content.
    */
-  indicator: Indicator;
+  hit: DataTableRecord;
   /**
-   * Callback to navigate to the table tab from the overview tab
-   */
-  onViewAllFieldsInTable?: () => void;
-  /**
-   * Renderer for cell actions
+   * Cell action renderer for the overview tab visualizations section.
    */
   renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh the flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
- * Returns the tabs to display in the IOC details flyout.
+ * Returns the tabs to display in the document details flyout right panel.
  */
 export const getTabsDisplayed = ({
-  indicator,
-  onViewAllFieldsInTable,
+  hit,
   renderCellActions,
+  onAlertUpdated,
 }: GetTabsDisplayedOptions): RightPanelTabType[] => [
   {
     id: 'overview',
-    'data-test-subj': IOC_DETAILS_OVERVIEW_TAB_TEST_ID,
+    'data-test-subj': OVERVIEW_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.iocDetails.header.overviewTabLabel"
+        id="xpack.securitySolution.flyout.document.header.overviewTabLabel"
         defaultMessage="Overview"
       />
     ),
     content: (
       <OverviewTab
-        indicator={indicator}
-        onViewAllFieldsInTable={onViewAllFieldsInTable}
+        hit={hit}
         renderCellActions={renderCellActions}
+        onAlertUpdated={onAlertUpdated}
       />
     ),
   },
   {
     id: 'table',
-    'data-test-subj': IOC_DETAILS_TABLE_TAB_TEST_ID,
+    'data-test-subj': TABLE_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.iocDetails.header.tableTabLabel"
+        id="xpack.securitySolution.flyout.document.header.tableTabLabel"
         defaultMessage="Table"
       />
     ),
-    content: <TableTab indicator={indicator} renderCellActions={renderCellActions} />,
+    content: <TableTab hit={hit} />,
   },
   {
     id: 'json',
-    'data-test-subj': IOC_DETAILS_JSON_TAB_TEST_ID,
+    'data-test-subj': JSON_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.iocDetails.header.jsonTabLabel"
+        id="xpack.securitySolution.flyout.document.header.jsonTabLabel"
         defaultMessage="JSON"
       />
     ),
-    content: <JsonTab indicator={indicator} />,
+    content: <JsonTab hit={hit} />,
   },
 ];

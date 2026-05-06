@@ -6,21 +6,16 @@
  */
 
 import React, { memo } from 'react';
-import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { JsonTab as SharedJsonTab } from '../../shared/tabs/json_tab';
-
-export const FLYOUT_JSON_TEST_ID = 'indicators-flyout';
+import { PREFIX } from '../../../flyout/shared/test_ids';
 
 export interface JsonTabProps {
-  indicator: Indicator;
+  hit: DataTableRecord;
 }
 
-export const JsonTab = memo(({ indicator }: JsonTabProps) => (
-  <SharedJsonTab
-    value={indicator as unknown as Record<string, unknown>}
-    data-test-subj={FLYOUT_JSON_TEST_ID}
-    isEmpty={Object.keys(indicator.fields).length === 0}
-  />
+export const JsonTab = memo(({ hit }: JsonTabProps) => (
+  <SharedJsonTab value={hit.raw as unknown as Record<string, unknown>} data-test-subj={PREFIX} />
 ));
 
 JsonTab.displayName = 'JsonTab';
