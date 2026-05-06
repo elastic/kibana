@@ -62,7 +62,8 @@ export interface UserProfileUserInfo {
 /**
  * Placeholder for data stored in user profile.
  */
-export type UserProfileData = Record<string, unknown>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface -- This is intentional, so that consumers can augment this type with values they intend to store in the user profile data
+export interface UserProfileData {}
 
 /**
  * Type of the user profile labels structure (currently

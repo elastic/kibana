@@ -51,13 +51,14 @@ import {
   useFormChangesContext,
 } from '@kbn/security-form-components';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type {
-  ContrastModeValue,
-  DarkModeValue,
-  LocaleValue,
-  UserProfileData,
+import {
+  type ContrastModeValue,
+  type DarkModeValue,
+  type LocaleValue,
+  UserAvatar,
+  type UserProfileData,
+  useUpdateUserProfile,
 } from '@kbn/user-profile-components';
-import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
 import { usePrimeUserLocale } from './use_prime_user_locale';
 import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
