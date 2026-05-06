@@ -418,13 +418,8 @@ describe('Jira service', () => {
         throw error;
       });
 
-      const error = await service.createIncident(incident).catch((err) => err);
-
-      expect(error).toEqual(
-        expect.objectContaining({
-          message:
-            '[Action][Jira]: Unable to create incident. Error: An error has occurred. Reason: Required field',
-        })
+      await expect(service.createIncident(incident)).rejects.toThrow(
+        '[Action][Jira]: Unable to create incident. Error: An error has occurred. Reason: Required field'
       );
     });
 
@@ -578,13 +573,8 @@ describe('Jira service', () => {
         throw error;
       });
 
-      const error = await service.updateIncident(incident).catch((err) => err);
-
-      expect(error).toEqual(
-        expect.objectContaining({
-          message:
-            '[Action][Jira]: Unable to update incident with id 1. Error: An error has occurred. Reason: Required field',
-        })
+      await expect(service.updateIncident(incident)).rejects.toThrow(
+        '[Action][Jira]: Unable to update incident with id 1. Error: An error has occurred. Reason: Required field'
       );
     });
 

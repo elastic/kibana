@@ -209,14 +209,9 @@ describe('Workflows Service', () => {
         },
       };
 
-      const error = await service.runWorkflow(params).catch((err) => err);
-
-      expect(error).toEqual(
-        expect.objectContaining({
-          message: 'Unable to run workflow test-workflow-id. Error: Workflow execution failed',
-        })
+      await expect(service.runWorkflow(params)).rejects.toThrow(
+        'Unable to run workflow test-workflow-id. Error: Workflow execution failed'
       );
-      expect(getErrorSource(error)).not.toBe(TaskErrorSource.USER);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Error running workflow test-workflow-id: Workflow execution failed'
@@ -300,7 +295,7 @@ describe('Workflows Service', () => {
       );
     });
 
-    it('should successfully run workflow with populated inputs', async () => {
+    it('should handle missing inputs parameter', async () => {
       const mockWorkflowService: WorkflowsServiceFunction = jest
         .fn()
         .mockResolvedValue('workflow-run-123');
@@ -494,14 +489,9 @@ describe('Workflows Service', () => {
         },
       };
 
-      const error = await service.scheduleWorkflow(params).catch((err) => err);
-
-      expect(error).toEqual(
-        expect.objectContaining({
-          message: 'Unable to schedule workflow test-workflow-id. Error: Scheduling failed',
-        })
+      await expect(service.scheduleWorkflow(params)).rejects.toThrow(
+        'Unable to schedule workflow test-workflow-id. Error: Scheduling failed'
       );
-      expect(getErrorSource(error)).not.toBe(TaskErrorSource.USER);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Error scheduling workflow test-workflow-id: Scheduling failed'

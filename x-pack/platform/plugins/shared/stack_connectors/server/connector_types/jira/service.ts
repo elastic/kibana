@@ -310,7 +310,6 @@ export const createExternalService = (
           error.message
         }. Reason: ${createErrorMessage(error.response?.data)}`
       );
-
       throw error;
     }
   };
