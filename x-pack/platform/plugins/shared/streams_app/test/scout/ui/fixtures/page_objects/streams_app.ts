@@ -1360,6 +1360,16 @@ export class StreamsApp {
     await this.queryStreamUpdatedSuccessToast.waitFor({ state: 'visible' });
   }
 
+  async saveFlyoutQueryStreamCreate() {
+    await this.clickQueryStreamFlyoutSaveButton();
+    await this.queryStreamCreatedSuccessToast.waitFor({ state: 'visible' });
+  }
+
+  async saveFlyoutQueryStreamEdit() {
+    await this.clickQueryStreamFlyoutSaveButton();
+    await this.queryStreamUpdatedSuccessToast.waitFor({ state: 'visible' });
+  }
+
   async clickQueryStreamFormDeleteButton() {
     await this.page.getByTestId('streamsAppQueryStreamFormDeleteButton').click();
   }
@@ -1369,8 +1379,7 @@ export class StreamsApp {
     await this.fillRoutingRuleName(name);
     await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
     await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
-    await this.clickQueryStreamFlyoutSaveButton();
-    await this.queryStreamCreatedSuccessToast.waitFor({ state: 'visible' });
+    await this.saveFlyoutQueryStreamCreate();
   }
 
   async openCreateChildQueryStreamForm() {
