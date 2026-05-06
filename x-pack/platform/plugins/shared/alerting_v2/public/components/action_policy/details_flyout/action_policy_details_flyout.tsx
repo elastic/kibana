@@ -123,7 +123,7 @@ export const ActionPolicyDetailsFlyout = ({
         ) : (
           <FormattedMessage
             id="xpack.alertingV2.actionPolicy.detailsFlyout.scope.global"
-            defaultMessage="Global — matches alerts from any rule in this space"
+            defaultMessage="Global. Matches alerts from any rule in this space"
           />
         ),
     },
