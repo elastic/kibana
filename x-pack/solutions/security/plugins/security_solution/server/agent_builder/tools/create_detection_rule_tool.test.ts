@@ -67,7 +67,7 @@ describe('createDetectionRuleTool', () => {
     mockUiSettingsClient = mockCoreStart.uiSettings.asScopedToClient(
       mockCoreStart.savedObjects.getScopedClient(mockRequest)
     );
-    mockUiSettingsClient.get.mockResolvedValue(true);
+    jest.mocked(mockUiSettingsClient.get).mockResolvedValue(true);
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
@@ -147,7 +147,7 @@ describe('createDetectionRuleTool', () => {
     });
 
     it('returns unavailable when ES|QL is disabled', async () => {
-      mockUiSettingsClient.get.mockResolvedValue(false);
+      jest.mocked(mockUiSettingsClient.get).mockResolvedValue(false);
 
       const availability = await tool.availability?.handler(
         createToolAvailabilityContext(mockRequest, 'default')
