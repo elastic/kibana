@@ -38,12 +38,7 @@ interface ComponentMetricsTabProps {
   componentType: OTelComponentType;
 }
 
-const SUPPORTED_METRIC_TYPES: OTelComponentType[] = [
-  'exporter',
-  'processor',
-  'receiver',
-  'connector',
-];
+const SUPPORTED_METRIC_TYPES: OTelComponentType[] = ['exporter', 'processor', 'receiver'];
 
 type IntervalId = '5m' | '15m' | '1h';
 
@@ -56,7 +51,7 @@ interface IntervalOption {
 const INTERVAL_OPTIONS: Record<IntervalId, IntervalOption> = {
   '5m': {
     timeRangeMs: 5 * 60 * 1000,
-    fixedInterval: '1m', // Using 1m interval for 5m range to ensure we have enough data points for the charts
+    fixedInterval: '1m', // Using 1m interval as it's the minimum interval supported by otel collector
     description: i18n.translate('xpack.fleet.otelUi.componentDetail.metrics.interval5m', {
       defaultMessage: 'Last 5 minutes',
     }),

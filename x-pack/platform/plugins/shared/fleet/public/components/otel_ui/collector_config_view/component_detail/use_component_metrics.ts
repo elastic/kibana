@@ -110,36 +110,6 @@ const COMPONENT_METRICS: Partial<Record<OTelComponentType, ComponentMetricsConfi
       },
     ],
   },
-  connector: {
-    filterField: 'connector',
-    metricGroups: [
-      {
-        id: 'throughput',
-        metrics: [
-          { field: 'otelcol_exporter_sent_metric_points', label: 'Sent metric points/s' },
-          { field: 'otelcol_exporter_sent_spans', label: 'Sent spans/s' },
-          { field: 'otelcol_exporter_sent_log_records', label: 'Sent log records/s' },
-          {
-            field: 'otelcol_receiver_accepted_metric_points',
-            label: 'Accepted metric points/s',
-          },
-          { field: 'otelcol_receiver_accepted_spans', label: 'Accepted spans/s' },
-          { field: 'otelcol_receiver_accepted_log_records', label: 'Accepted log records/s' },
-        ],
-      },
-      {
-        id: 'errors',
-        metrics: [
-          {
-            field: 'otelcol_exporter_send_failed_metric_points',
-            label: 'Failed metric points/s',
-          },
-          { field: 'otelcol_exporter_send_failed_spans', label: 'Failed spans/s' },
-          { field: 'otelcol_exporter_send_failed_log_records', label: 'Failed log records/s' },
-        ],
-      },
-    ],
-  },
 };
 
 interface ThroughputAggregations {
@@ -171,7 +141,7 @@ const buildComponentQuery = (
       subAggs[`${field}_max`] = { max: { field } };
       if (aggType !== 'gauge') {
         subAggs[`${field}_rate`] = {
-          derivative: { gap_policy: 'insert_zeros', buckets_path: `${field}_max`, unit: '1s' },
+          derivative: { gap_policy: 'skip', buckets_path: `${field}_max`, unit: '1s' },
         };
       }
     }
@@ -212,7 +182,7 @@ function readNormalizedValue(agg?: { value: number | null } | { normalized_value
   }
   const val = ('normalized_value' in agg ? agg.normalized_value : agg.value) ?? 0;
 
-  return parseFloat(val.toFixed(2)); // round to 2 decimals
+  return Math.max(0, parseFloat(val.toFixed(2))); // clamp and round to 2 decimals
 }
 
 const mapBucketsToSeries = (
