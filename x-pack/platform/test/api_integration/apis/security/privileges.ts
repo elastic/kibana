@@ -285,6 +285,8 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint_exceptions_read',
         'policy_management_all',
         'policy_management_read',
+        'scripts_management_all',
+        'scripts_management_read',
         'actions_log_management_all',
         'actions_log_management_read',
         'host_isolation_all',
