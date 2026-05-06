@@ -31,6 +31,21 @@ export interface StreamDetailContextValue {
 
 const StreamDetailContext = React.createContext<StreamDetailContextValue | undefined>(undefined);
 
+/**
+ * Surfaces an error message to APM instrumentation and the global error handler
+ * without interrupting the current execution flow.
+ *
+ * A direct `throw` would abort the current call (breaking the page render), and
+ * `console.error` is not captured by our APM instrumentation. Deferring the throw
+ * via `setTimeout` lets the current call complete normally while still triggering
+ * the global `error` / `unhandledrejection` listeners that APM hooks into.
+ */
+const reportSchemaDriftToInstrumentation = (message: string) => {
+  setTimeout(() => {
+    throw new Error(message);
+  }, 0);
+};
+
 export function StreamDetailContextProvider({
   name,
   streamsRepositoryClient,
@@ -99,14 +114,9 @@ export function StreamDetailContextProvider({
           const validationMessage = validationResult.success
             ? 'The response passed non-strict validation but failed strict (DeepStrict) validation — the API response contains extra or unknown fields.'
             : String(validationResult.error);
-          // setTimeout defers the throw to the next event-loop tick so execution here
-          // continues normally (page renders) while the uncaught error still reaches
-          // the global error handler and our APM instrumentation.
-          setTimeout(() => {
-            throw new Error(
-              `[Streams] Stream detail schema validation failed for stream "${name}". ${validationMessage}`
-            );
-          }, 0);
+          reportSchemaDriftToInstrumentation(
+            `[Streams] Stream detail schema validation failed for stream "${name}". ${validationMessage}`
+          );
           return response as Streams.all.GetResponse;
         });
     },
@@ -193,16 +203,11 @@ export function useStreamDetailAsIngestStream() {
       throw new Error('useStreamDetailAsIngestStream can only be used with IngestStreams');
     }
 
-    // setTimeout defers the throw to the next event-loop tick so execution here
-    // continues normally (page renders) while the uncaught error still reaches
-    // the global error handler and our APM instrumentation.
-    setTimeout(() => {
-      throw new Error(
-        `[Streams] useStreamDetailAsIngestStream: definition for stream "${ctx.definition.stream.name}" failed strict schema validation. ` +
-          `The response passed non-strict validation but failed strict (DeepStrict) validation — ` +
-          `the API response contains extra or unknown fields.`
-      );
-    }, 0);
+    reportSchemaDriftToInstrumentation(
+      `[Streams] useStreamDetailAsIngestStream: definition for stream "${ctx.definition.stream.name}" failed strict schema validation. ` +
+        `The response passed non-strict validation but failed strict (DeepStrict) validation — ` +
+        `the API response contains extra or unknown fields.`
+    );
   }
   return ctx as {
     definition: Streams.ingest.all.GetResponse;
