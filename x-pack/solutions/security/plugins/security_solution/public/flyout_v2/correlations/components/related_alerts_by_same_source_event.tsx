@@ -30,9 +30,9 @@ export interface RelatedAlertsBySameSourceEventProps {
    */
   onShowAlert: (id: string, indexName: string) => void;
   /**
-   * Whether to hide the rule preview link
+   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of ChildLink (new flyout system)
    */
-  hidePreviewLink: boolean;
+  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -43,7 +43,7 @@ export const RelatedAlertsBySameSourceEvent: React.FC<RelatedAlertsBySameSourceE
   scopeId,
   eventId,
   onShowAlert,
-  hidePreviewLink,
+  useLegacyExpandableFlyout,
 }) => {
   const { loading, data, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
     originalEventId,
@@ -56,9 +56,9 @@ export const RelatedAlertsBySameSourceEvent: React.FC<RelatedAlertsBySameSourceE
         scopeId,
         dataTestSubj: CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
         onShowAlert,
-        hidePreviewLink,
+        useLegacyExpandableFlyout,
       }),
-    [scopeId, onShowAlert, hidePreviewLink]
+    [scopeId, onShowAlert, useLegacyExpandableFlyout]
   );
 
   return (
