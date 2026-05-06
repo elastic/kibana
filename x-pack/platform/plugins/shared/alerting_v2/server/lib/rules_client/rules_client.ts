@@ -263,19 +263,9 @@ export class RulesClient {
 
     await this.rulesSavedObjectService.delete({ id });
 
-    await this.deleteAttachedSingleRulePolicies(id);
-  }
-
-  private async deleteAttachedSingleRulePolicies(ruleId: string): Promise<void> {
-    const { items } = await this.actionPolicyClient.findActionPolicies({
+    await this.actionPolicyClient.deleteActionPoliciesByFilter({
       type: 'single_rule',
-      ruleId,
-      perPage: 1000,
-    });
-    if (items.length === 0) return;
-
-    await this.actionPolicyClient.bulkActionActionPolicies({
-      actions: items.map((policy) => ({ id: policy.id, action: 'delete' as const })),
+      ruleId: id,
     });
   }
 

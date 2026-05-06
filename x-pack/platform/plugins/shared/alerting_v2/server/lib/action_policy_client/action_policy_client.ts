@@ -472,6 +472,24 @@ export class ActionPolicyClient {
     this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
   }
 
+  public async deleteActionPoliciesByFilter(
+    filter: Pick<FindActionPoliciesParams, 'ruleId' | 'type' | 'destinationType' | 'tags'>
+  ): Promise<BulkActionActionPoliciesResponse> {
+    const ids: string[] = [];
+    const PAGE_SIZE = 100;
+    for (let page = 1; ; page++) {
+      const result = await this.findActionPolicies({ ...filter, page, perPage: PAGE_SIZE });
+      ids.push(...result.items.map((p) => p.id));
+      if (page * PAGE_SIZE >= result.total) break;
+    }
+    if (ids.length === 0) {
+      return { processed: 0, total: 0, errors: [] };
+    }
+    return this.bulkActionActionPolicies({
+      actions: ids.map((id) => ({ id, action: 'delete' as const })),
+    });
+  }
+
   private markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {
     if (!apiKey || createdByUser) {
       return;

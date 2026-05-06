@@ -23,8 +23,7 @@ export function createRulesClient(): {
   const taskManager = taskManagerMock.createStart();
   const { userService } = createUserService();
   const actionPolicyClient = {
-    findActionPolicies: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 20 }),
-    bulkActionActionPolicies: jest
+    deleteActionPoliciesByFilter: jest
       .fn()
       .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
   } as unknown as ActionPolicyClient;

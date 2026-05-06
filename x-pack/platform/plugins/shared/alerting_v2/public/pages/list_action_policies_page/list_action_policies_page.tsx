@@ -124,7 +124,6 @@ export const ListActionPoliciesPage = () => {
   const clonePolicy = (policy: ActionPolicyResponse) => {
     const { name, description, destinations, matcher, groupBy, throttle, tags, groupingMode } =
       policy;
-
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,
