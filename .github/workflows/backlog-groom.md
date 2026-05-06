@@ -271,18 +271,8 @@ Follow the Kibana contribution guidelines:
 
 1. **Identify the root cause** — read the relevant code thoroughly. Do not guess.
 2. **Create or update your implementation** on branch `backlog-groom/issue-${{ github.event.issue.number }}`.
-3. **Follow Kibana code style**:
-   - TypeScript for all new code; no `any` or `unknown`
-   - `import type` for type-only imports
-   - `camelCase` for functions/variables, `PascalCase` for types/components
-   - `snake_case` for new filenames
-   - Single quotes in TS/JS
-   - Prefer early returns and explicit error handling
-   - Use `@elastic/eui` components with Emotion for UI
-4. **Validate your changes**:
-   - Run `node scripts/eslint --fix` on changed files
-   - Run `node scripts/jest <test-file>` for relevant unit tests
-   - Run `node scripts/type_check --project <tsconfig>` scoped to the affected package
+3. **Follow Kibana code style** as defined in [`AGENTS.md`](../../AGENTS.md) (see the *Code Style Guidelines* section).
+4. **Validate your changes** using the linting, type-checking, and testing commands documented in [`AGENTS.md`](../../AGENTS.md).
 5. **Open exactly one PR** using the `create-pull-request` safe output.
 
 ## Pull request contract
@@ -297,12 +287,11 @@ The linked pull request must:
 
 ## Guardrails
 
+Follow the *Contribution Hygiene* guidelines in [`AGENTS.md`](../../AGENTS.md). In addition, the following workflow-specific rules apply:
+
 - Do not re-check trigger eligibility or actor trust; pre-activation handled those.
 - Do not open a second PR for the same issue.
 - Do not change the branch naming convention.
-- Do not modify unrelated files or do broad refactors.
-- Never suppress lint errors with `eslint-disable` or type errors with `@ts-ignore`.
-- Never remove, skip, or comment out tests to make them pass.
 - If you cannot make progress safely, use `noop` with a concise explanation.
 - If the issue is ambiguous or requires design decisions, use `noop` explaining what clarification is needed.
 
