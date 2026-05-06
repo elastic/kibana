@@ -11,6 +11,8 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { ListAgentResponse } from '../../../../common/http_api/agents';
 import type { ListToolsResponse } from '../../../../common/http_api/tools';
+import { deleteAllAgentsFromEs } from '../../../scout_agent_builder_shared/lib/agents_kbn';
+import { CHAT_AGENTS_INDEX } from '../../../scout_agent_builder_shared/lib/constants';
 import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER } from '../fixtures/constants';
 import { spaceUrl } from '../fixtures/space_paths';
@@ -35,6 +37,8 @@ apiTest.describe(
     ];
 
     apiTest.beforeAll(async ({ kbnClient, esClient }) => {
+      await deleteAllAgentsFromEs(esClient, CHAT_AGENTS_INDEX);
+
       for (const spaceId of ['space-1', 'space-2']) {
         await kbnClient.request({
           method: 'POST',

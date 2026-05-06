@@ -11,7 +11,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy } from '@kbn/ftr-llm-proxy';
 import type { SmlSearchHttpResponse } from '@kbn/agent-context-layer-plugin/common/http_api/sml';
-import { smlElasticsearchIndexMappings, smlIndexName } from '../../../../server';
+import {
+  smlElasticsearchIndexMappings,
+  smlIndexName,
+} from '@kbn/agent-context-layer-plugin/server';
 import type { SmlAttachHttpResponse } from '../../../../common/http_api/sml';
 import {
   createGenAiConnectorForProxy,
