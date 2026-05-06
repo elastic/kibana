@@ -118,7 +118,7 @@ describe('Inference Features API', () => {
       );
     });
 
-    it('should include a child feature whose visibilityCondition matches the current UiSetting', async () => {
+    it('should include a feature whose visibilityCondition matches the current uiSetting', async () => {
       uiSettingsGet.mockResolvedValue('classic');
 
       featureRegistry.register({
@@ -141,12 +141,10 @@ describe('Inference Features API', () => {
       await mockRouter.callRoute({});
 
       const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
-      expect(body.features).toHaveLength(2);
       expect(body.features.map((f) => f.featureId)).toEqual(['security', 'elastic_assistant']);
-      expect(body.features[1]).not.toHaveProperty('visibilityCondition');
     });
 
-    it('should exclude a child feature whose visibilityCondition does not match', async () => {
+    it('should exclude a feature whose visibilityCondition does not match', async () => {
       uiSettingsGet.mockResolvedValue('agent');
 
       featureRegistry.register({
@@ -169,109 +167,14 @@ describe('Inference Features API', () => {
       await mockRouter.callRoute({});
 
       const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
-      expect(body.features).toHaveLength(0);
-    });
-
-    it('should keep parent visible when at least one child is visible (mixed visibility)', async () => {
-      uiSettingsGet.mockResolvedValue('classic');
-
-      featureRegistry.register({
-        featureId: 'security',
-        featureName: 'Security',
-        featureDescription: 'Security group.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: [],
-      });
-      featureRegistry.register({
-        featureId: 'visible_child',
-        parentFeatureId: 'security',
-        featureName: 'Visible Child',
-        featureDescription: 'Always visible.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: [],
-      });
-      featureRegistry.register({
-        featureId: 'hidden_child',
-        parentFeatureId: 'security',
-        featureName: 'Hidden Child',
-        featureDescription: 'Hidden under classic.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: [],
-        visibilityCondition: { key: 'aiAssistant:preferredChatExperience', value: 'agent' },
-      });
-
-      await mockRouter.callRoute({});
-
-      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
-      expect(body.features.map((f) => f.featureId)).toEqual(['security', 'visible_child']);
-    });
-
-    it('should exclude parent that has only hidden children', async () => {
-      uiSettingsGet.mockResolvedValue('agent');
-
-      featureRegistry.register({
-        featureId: 'security',
-        featureName: 'Security',
-        featureDescription: 'Security group.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: [],
-      });
-      featureRegistry.register({
-        featureId: 'elastic_assistant',
-        parentFeatureId: 'security',
-        featureName: 'AI Assistant for Security',
-        featureDescription: 'Chat model.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: [],
-        visibilityCondition: { key: 'aiAssistant:preferredChatExperience', value: 'classic' },
-      });
-
-      await mockRouter.callRoute({});
-
-      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
-      const featureIds = body.features.map((f) => f.featureId);
-      expect(featureIds).not.toContain('security');
-    });
-
-    it('cascades a hidden parent to its children', async () => {
-      uiSettingsGet.mockResolvedValue('agent');
-
-      featureRegistry.register({
-        featureId: 'security',
-        featureName: 'Security',
-        featureDescription: 'Security group.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: [],
-        visibilityCondition: { key: 'aiAssistant:preferredChatExperience', value: 'classic' },
-      });
-      featureRegistry.register({
-        featureId: 'unconditional_child',
-        parentFeatureId: 'security',
-        featureName: 'Always Visible Child',
-        featureDescription: 'No condition of its own.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: [],
-      });
-
-      await mockRouter.callRoute({});
-
-      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
-      expect(body.features).toEqual([]);
+      expect(body.features.map((f) => f.featureId)).toEqual(['security']);
     });
 
     it('should fail open and include the feature when uiSettings.get throws', async () => {
       uiSettingsGet.mockRejectedValue(new Error('uiSettings unavailable'));
 
       featureRegistry.register({
-        featureId: 'security',
-        featureName: 'Security',
-        featureDescription: 'Security group.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: [],
-      });
-      featureRegistry.register({
         featureId: 'elastic_assistant',
-        parentFeatureId: 'security',
         featureName: 'AI Assistant for Security',
         featureDescription: 'Chat model.',
         taskType: 'chat_completion',
@@ -282,25 +185,42 @@ describe('Inference Features API', () => {
       await mockRouter.callRoute({});
 
       const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
-      expect(body.features.map((f) => f.featureId)).toEqual(['security', 'elastic_assistant']);
+      expect(body.features.map((f) => f.featureId)).toEqual(['elastic_assistant']);
     });
 
-    it('should strip visibilityCondition from response', async () => {
+    it('reads each unique uiSetting key only once even when multiple features share it', async () => {
       uiSettingsGet.mockResolvedValue('classic');
 
       featureRegistry.register({
-        featureId: 'elastic_assistant',
-        featureName: 'AI Assistant for Security',
-        featureDescription: 'Chat model.',
+        featureId: 'first',
+        featureName: 'First',
+        featureDescription: 'First.',
         taskType: 'chat_completion',
         recommendedEndpoints: [],
-        visibilityCondition: { key: 'aiAssistant:preferredChatExperience', value: 'classic' },
+        visibilityCondition: { key: 'shared_key', value: 'classic' },
+      });
+      featureRegistry.register({
+        featureId: 'second',
+        featureName: 'Second',
+        featureDescription: 'Second.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+        visibilityCondition: { key: 'shared_key', value: 'classic' },
+      });
+      featureRegistry.register({
+        featureId: 'third',
+        featureName: 'Third',
+        featureDescription: 'Third.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+        visibilityCondition: { key: 'other_key', value: 'classic' },
       });
 
       await mockRouter.callRoute({});
 
-      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
-      expect(body.features[0]).not.toHaveProperty('visibilityCondition');
+      expect(uiSettingsGet).toHaveBeenCalledTimes(2);
+      expect(uiSettingsGet).toHaveBeenCalledWith('shared_key');
+      expect(uiSettingsGet).toHaveBeenCalledWith('other_key');
     });
   });
 });

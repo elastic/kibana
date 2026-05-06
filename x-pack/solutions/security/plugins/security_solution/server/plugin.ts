@@ -425,20 +425,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     if (plugins.searchInferenceEndpoints) {
-      // Registered independently here and in `elastic_assistant`. Registration is
-      // idempotent on featureId, so whichever plugin sets up first creates the
-      // parent and the other call is a no-op.
-      plugins.searchInferenceEndpoints.features.register({
-        featureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
-        featureName: 'Security',
-        featureDescription: 'Parent feature for Security',
-        taskType: 'chat_completion',
-        // If no list is set, the Kibana-wide default endpoint will be surfaced first
-        // and the other available endpoints will be made available in the order they're
-        //  returned from the inference API.
-        recommendedEndpoints: [],
-      });
-
+      // The `SECURITY_INFERENCE_PARENT_FEATURE_ID` parent is registered by
+      // `elastic_assistant`, which `security_solution` depends on (so it sets up
+      // first). We only register child features here.
       plugins.searchInferenceEndpoints.features.register({
         parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
         featureId: 'entity_ai_highlight_summary',
