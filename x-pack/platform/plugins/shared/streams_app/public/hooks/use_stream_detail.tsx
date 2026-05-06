@@ -90,17 +90,23 @@ export function StreamDetailContextProvider({
             throw new Error('Stream detail only supports Ingest and Query streams.');
           }
 
-          // In production: log the validation failure and pass the response through as-is to
-          // avoid a completely blank page. Things may partially break downstream, but that is
-          // vastly preferable to the page being completely unusable.
+          // In production: surface the validation failure via a deferred throw so it is
+          // captured by APM / error instrumentation (console.error is not instrumented),
+          // then pass the response through as-is to avoid a completely blank page.
+          // Things may partially break downstream, but that is vastly preferable to the
+          // page being completely unusable.
           const validationResult = Streams.all.GetResponse.right.safeParse(response);
-          // eslint-disable-next-line no-console
-          console.error(
-            `[Streams] Stream detail schema validation failed for stream "${name}".`,
-            validationResult.success
-              ? 'The response passed non-strict validation but failed strict (DeepStrict) validation — the API response contains extra or unknown fields.'
-              : validationResult.error
-          );
+          const validationMessage = validationResult.success
+            ? 'The response passed non-strict validation but failed strict (DeepStrict) validation — the API response contains extra or unknown fields.'
+            : String(validationResult.error);
+          // setTimeout defers the throw to the next event-loop tick so execution here
+          // continues normally (page renders) while the uncaught error still reaches
+          // the global error handler and our APM instrumentation.
+          setTimeout(() => {
+            throw new Error(
+              `[Streams] Stream detail schema validation failed for stream "${name}". ${validationMessage}`
+            );
+          }, 0);
           return response as Streams.all.GetResponse;
         });
     },
@@ -187,12 +193,16 @@ export function useStreamDetailAsIngestStream() {
       throw new Error('useStreamDetailAsIngestStream can only be used with IngestStreams');
     }
 
-    // eslint-disable-next-line no-console
-    console.error(
-      `[Streams] useStreamDetailAsIngestStream: definition for stream "${ctx.definition.stream.name}" failed strict schema validation. ` +
-        `The response passed non-strict validation but failed strict (DeepStrict) validation — ` +
-        `the API response contains extra or unknown fields.`
-    );
+    // setTimeout defers the throw to the next event-loop tick so execution here
+    // continues normally (page renders) while the uncaught error still reaches
+    // the global error handler and our APM instrumentation.
+    setTimeout(() => {
+      throw new Error(
+        `[Streams] useStreamDetailAsIngestStream: definition for stream "${ctx.definition.stream.name}" failed strict schema validation. ` +
+          `The response passed non-strict validation but failed strict (DeepStrict) validation — ` +
+          `the API response contains extra or unknown fields.`
+      );
+    }, 0);
   }
   return ctx as {
     definition: Streams.ingest.all.GetResponse;
