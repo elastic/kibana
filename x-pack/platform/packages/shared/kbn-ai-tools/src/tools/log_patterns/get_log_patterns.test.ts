@@ -12,11 +12,17 @@ import { getSigEventsLogPatternsEsql } from './get_log_patterns';
 const createEsClient = (fields: Record<string, unknown> = { message: {} }) => {
   const fieldCaps = jest.fn().mockResolvedValue({ fields });
   const esql = jest.fn();
+  const rawEsqlQuery = jest.fn();
 
   return {
-    esClient: { fieldCaps, esql } as unknown as TracedElasticsearchClient,
+    esClient: {
+      fieldCaps,
+      esql,
+      client: { esql: { query: rawEsqlQuery } },
+    } as unknown as TracedElasticsearchClient,
     fieldCaps,
     esql,
+    rawEsqlQuery,
   };
 };
 
@@ -63,11 +69,13 @@ describe('getSigEventsLogPatternsEsql', () => {
   });
 
   it('builds ES|QL count, categorize, and composite-key source fetch queries', async () => {
-    const { esClient, esql } = createEsClient({ 'body.text': {} });
+    const { esClient, esql, rawEsqlQuery } = createEsClient({ 'body.text': {} });
     esql
       .mockResolvedValueOnce(countResponse(10))
-      .mockResolvedValueOnce(pass1Response([[['logs-a:doc-1'], 10, 'error']]))
-      .mockResolvedValueOnce(pass2Response([['logs-a', 'doc-1', { body: { text: 'error one' } }]]));
+      .mockResolvedValueOnce(pass1Response([[['logs-a:doc-1'], 10, 'error']]));
+    rawEsqlQuery.mockResolvedValueOnce(
+      pass2Response([['logs-a', 'doc-1', { body: { text: 'error one' } }]])
+    );
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
@@ -92,8 +100,7 @@ describe('getSigEventsLogPatternsEsql', () => {
           'FROM logs-* METADATA _index, _id | EVAL doc_key = CONCAT(_index, ":", _id) | WHERE KQL("service.name:\\"checkout\\"") | STATS representative_key = TOP(doc_key, 1, "desc"), count = COUNT(*) BY pattern = CATEGORIZE(body.text) | SORT count DESC | LIMIT 1000',
       }),
     ]);
-    expect(esql.mock.calls[2]).toEqual([
-      'fetch_sigevents_log_pattern_samples',
+    expect(rawEsqlQuery.mock.calls[0]).toEqual([
       expect.objectContaining({
         query:
           'FROM logs-* METADATA _index, _id, _source | EVAL doc_key = CONCAT(_index, ":", _id) | WHERE doc_key IN ("logs-a:doc-1") | KEEP _index, _id, _source | LIMIT 1',
@@ -138,11 +145,13 @@ describe('getSigEventsLogPatternsEsql', () => {
   });
 
   it('scales sampled counts back to population counts', async () => {
-    const { esClient, esql } = createEsClient();
+    const { esClient, esql, rawEsqlQuery } = createEsClient();
     esql
       .mockResolvedValueOnce(countResponse(1_000_000))
-      .mockResolvedValueOnce(pass1Response([['logs-a:doc-1', 16, 'error']]))
-      .mockResolvedValueOnce(pass2Response([['logs-a', 'doc-1', { message: 'error one' }]]));
+      .mockResolvedValueOnce(pass1Response([['logs-a:doc-1', 16, 'error']]));
+    rawEsqlQuery.mockResolvedValueOnce(
+      pass2Response([['logs-a', 'doc-1', { message: 'error one' }]])
+    );
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
@@ -158,11 +167,12 @@ describe('getSigEventsLogPatternsEsql', () => {
   });
 
   it('sorts by count and deduplicates by sample', async () => {
-    const { esClient, esql } = createEsClient({ message: {}, 'body.text': {} });
+    const { esClient, esql, rawEsqlQuery } = createEsClient({ message: {}, 'body.text': {} });
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(pass1Response([['logs-a:doc-1', 2, 'message low']]))
-      .mockResolvedValueOnce(pass1Response([['logs-b:doc-2', 8, 'body high']]))
+      .mockResolvedValueOnce(pass1Response([['logs-b:doc-2', 8, 'body high']]));
+    rawEsqlQuery
       .mockResolvedValueOnce(pass2Response([['logs-a', 'doc-1', { message: 'same' }]]))
       .mockResolvedValueOnce(pass2Response([['logs-b', 'doc-2', { body: { text: 'same' } }]]));
 
@@ -181,11 +191,13 @@ describe('getSigEventsLogPatternsEsql', () => {
   });
 
   it('drops patterns whose composite key is missing from pass 2', async () => {
-    const { esClient, esql } = createEsClient();
+    const { esClient, esql, rawEsqlQuery } = createEsClient();
     esql
       .mockResolvedValueOnce(countResponse(10))
-      .mockResolvedValueOnce(pass1Response())
-      .mockResolvedValueOnce(pass2Response([['logs-a', 'doc-1', { message: 'error one' }]]));
+      .mockResolvedValueOnce(pass1Response());
+    rawEsqlQuery.mockResolvedValueOnce(
+      pass2Response([['logs-a', 'doc-1', { message: 'error one' }]])
+    );
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
