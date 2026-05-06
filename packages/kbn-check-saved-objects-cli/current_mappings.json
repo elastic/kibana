@@ -4964,6 +4964,22 @@
       }
     }
   },
+  "user-storage": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user-storage-global": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  },
   "user_connector_token": {
     "dynamic": false,
     "properties": {
