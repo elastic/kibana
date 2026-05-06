@@ -303,7 +303,7 @@ lines-and-columns@1.2.4
 loader-runner@4.3.0
 locate-path@6.0.0
 lodash.toarray@4.4.0
-lodash@4.17.23
+lodash@4.18.1
 loose-envify@1.4.0
 luxon@1.28.1
 markdown-escapes@1.0.1
