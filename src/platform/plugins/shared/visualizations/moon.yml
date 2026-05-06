@@ -83,7 +83,6 @@ dependsOn:
   - '@kbn/search-response-warnings'
   - '@kbn/content-management-utils'
   - '@kbn/react-hooks'
-  - '@kbn/presentation-panel-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/css-utils'
@@ -105,26 +104,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

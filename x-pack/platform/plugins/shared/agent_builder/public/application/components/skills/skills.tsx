@@ -24,7 +24,7 @@ export const AgentBuilderSkills = () => {
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderSkillsPage">
       <KibanaPageTemplate.Header
-        pageTitle={labels.skills.title}
+        pageTitle={labels.skills.libraryTitle}
         description={i18n.translate('xpack.agentBuilder.skills.skillsDescription', {
           defaultMessage:
             'Skills define reusable instructions and tool sets that agents use to perform specific tasks. Built-in skills cover common operations, and you can create your own for custom workflows.',

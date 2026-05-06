@@ -17,34 +17,18 @@ import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import {
-  GRAPH_ACTOR_ENTITY_FIELDS,
-  GRAPH_TARGET_ENTITY_FIELDS,
-} from '@kbn/cloud-security-posture-common/constants';
 import { Graph, isEntityNode } from '../../..';
-import { Callout } from '../callout/callout';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
-import { useGraphCallout } from '../../hooks/use_graph_callout';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { useIpPopover } from '../node/ips/ips';
 import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
 import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
 import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
 import { analyzeDocuments } from '../node/label_node/analyze_documents';
-import {
-  EVENT_ID,
-  GRAPH_NODES_LIMIT,
-  RELATED_ENTITY,
-  TOGGLE_SEARCH_BAR_STORAGE_KEY,
-} from '../../common/constants';
+import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import {
-  CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
-  addFilter,
-  // TODO Replace `getFilterValues` with function that gets the current filter state
-  getFilterValues,
-} from '../filters/search_filters';
+import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
@@ -259,8 +243,11 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onOpenEventPreview,
     onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
-    const { searchFilters, setSearchFilters, entityIdsForApi } = useGraphFilters(
+    const emptyEntityIds = useMemo(() => [], []);
+
+    const { searchFilters, setSearchFilters, entityIdsForApi, pinnedEuids } = useGraphFilters(
       scopeId,
+      entityIds ?? emptyEntityIds,
       dataView?.id ?? ''
     );
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
@@ -270,26 +257,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     );
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
-
-    // Merge user-expanded entity IDs with initial entity IDs for the API
-    const mergedEntityIdsForApi = useMemo(() => {
-      const initial = entityIds ?? [];
-      const expanded = entityIdsForApi ?? [];
-
-      if (initial.length === 0 && expanded.length === 0) return undefined;
-
-      // Merge: initial entityIds keep their isOrigin flag, expanded ones are not origin
-      const mergedMap = new Map<string, { id: string; isOrigin: boolean }>();
-      for (const entry of initial) {
-        mergedMap.set(entry.id, entry);
-      }
-      for (const entry of expanded) {
-        if (!mergedMap.has(entry.id)) {
-          mergedMap.set(entry.id, entry);
-        }
-      }
-      return Array.from(mergedMap.values());
-    }, [entityIds, entityIdsForApi]);
 
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
@@ -338,14 +305,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return lastValidEsQuery.current;
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
-    const pinnedIds = useMemo(() => {
-      return getFilterValues(searchFilters, [
-        ...GRAPH_ACTOR_ENTITY_FIELDS,
-        ...GRAPH_TARGET_ENTITY_FIELDS,
-        RELATED_ENTITY,
-      ]).map(String);
-    }, [searchFilters]);
-
     const { data, refresh, isFetching, isError, error } = useFetchGraphData({
       req: {
         query: {
@@ -354,8 +313,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           esQuery,
           start: timeRange.from,
           end: timeRange.to,
-          entityIds: mergedEntityIdsForApi,
-          pinnedIds,
+          entityIds: entityIdsForApi,
+          pinnedIds: pinnedEuids,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },
@@ -500,12 +459,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       relationshipNodeSources,
     ]);
 
-    // Get callout state based on current graph state
-    const calloutState = useGraphCallout(nodes);
-
     const searchFilterCounter = useMemo(() => {
       const filtersCount = searchFilters
-        .filter((filter) => !filter.meta.disabled)
+        .filter((filter) => filter.meta && !filter.meta.disabled)
         .reduce((sum, filter) => {
           if (isCombinedFilter(filter)) {
             return sum + filter.meta.params.length;
@@ -521,6 +477,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const searchWarningMessage =
       searchFilters.filter(
         (filter) =>
+          filter.meta &&
           !filter.meta.disabled &&
           filter.meta.negate &&
           filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER
@@ -594,18 +551,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               interactive={true}
               isLocked={isPopoverOpen}
               showMinimap={true}
-              interactiveBottomRightContent={
-                calloutState.shouldShowCallout ? (
-                  <EuiFlexItem grow={false}>
-                    <Callout
-                      title={calloutState.config.title}
-                      message={calloutState.config.message}
-                      links={calloutState.config.links}
-                      onDismiss={calloutState.onDismiss}
-                    />
-                  </EuiFlexItem>
-                ) : null
-              }
             >
               <Panel position="top-right">
                 <Actions

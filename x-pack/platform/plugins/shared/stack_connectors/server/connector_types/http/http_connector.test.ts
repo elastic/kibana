@@ -9,7 +9,12 @@
 
 import type { Services } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
+import {
+  validateConfig,
+  validateParams,
+  validateSecrets,
+  validateConnector,
+} from '@kbn/actions-plugin/server/lib';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { Logger } from '@kbn/core/server';
@@ -21,7 +26,9 @@ import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server
 
 import type { HttpConnectorType, HttpConnectorTypeExecutorOptions } from './types';
 
-import { getConnectorType, getSystemConnectorType } from '.';
+import { safeJsonStringify } from '@kbn/std';
+import { getErrorResponseMessage } from './errors';
+import { getConnectorType, getSystemConnectorType } from './http_connector';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 
 jest.mock('axios', () => ({
@@ -30,6 +37,24 @@ jest.mock('axios', () => ({
   AxiosError: jest.requireActual('axios').AxiosError,
 }));
 import axios from 'axios';
+import type { AxiosError } from 'axios';
+
+function axiosErrorWithResponseData(
+  data: unknown,
+  headers?: Record<string, string>
+): AxiosError<unknown> {
+  return {
+    isAxiosError: true,
+    name: 'AxiosError',
+    message: 'Request failed with status code 400',
+    response: {
+      status: 400,
+      statusText: 'Bad Request',
+      data,
+      headers: headers ?? {},
+    },
+  } as AxiosError<unknown>;
+}
 import { CRT_FILE, KEY_FILE, PFX_FILE } from '@kbn/connector-schemas/common/auth/mocks';
 import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth';
 import type {
@@ -67,6 +92,27 @@ let connectorType: HttpConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 let connectorUsageCollector: ConnectorUsageCollector;
 
+const emptySecrets: ConnectorTypeSecretsType = {
+  user: null,
+  password: null,
+  crt: null,
+  key: null,
+  pfx: null,
+  clientSecret: null,
+  secretHeaders: null,
+  proxyUsername: null,
+  proxyPassword: null,
+};
+
+const emptyConfig: ConnectorTypeConfigType = {
+  url: '',
+  headers: null,
+  authType: AuthType.Basic,
+  hasAuth: true,
+  hasProxyAuth: false,
+  proxyUrl: null,
+};
+
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
@@ -92,58 +138,41 @@ describe('connectorType', () => {
 
 describe('secrets validation', () => {
   test('succeeds when secrets is valid', () => {
-    const secrets: Record<string, string | null> = {
+    const secrets: ConnectorTypeSecretsType = {
+      ...emptySecrets,
       user: 'bob',
       password: 'supersecret',
-      crt: null,
-      key: null,
-      pfx: null,
-      clientSecret: null,
-      secretHeaders: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
   });
 
   test('fails when secret user is provided, but password is omitted', () => {
     expect(() => {
-      validateSecrets(connectorType, { user: 'bob' }, { configurationUtilities });
+      validateSecrets(connectorType, { ...emptySecrets, user: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
   });
 
   test('succeeds when authentication credentials are omitted', () => {
-    expect(validateSecrets(connectorType, {}, { configurationUtilities })).toEqual({
-      crt: null,
-      key: null,
-      password: null,
-      pfx: null,
-      user: null,
-      clientSecret: null,
-      secretHeaders: null,
-    });
+    expect(validateSecrets(connectorType, emptySecrets, { configurationUtilities })).toEqual(
+      emptySecrets
+    );
   });
 
   test('succeeds when secrets contains a certificate and keyfile', () => {
-    const secrets: Record<string, string | null> = {
+    const secrets: ConnectorTypeSecretsType = {
+      ...emptySecrets,
       password: 'supersecret',
       crt: CRT_FILE,
       key: KEY_FILE,
-      pfx: null,
-      user: null,
-      clientSecret: null,
-      secretHeaders: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
-    const secretsWithoutPassword: Record<string, string | null> = {
+    const secretsWithoutPassword: ConnectorTypeSecretsType = {
+      ...emptySecrets,
       crt: CRT_FILE,
       key: KEY_FILE,
-      pfx: null,
-      user: null,
-      password: null,
-      clientSecret: null,
-      secretHeaders: null,
     };
 
     expect(
@@ -152,25 +181,16 @@ describe('secrets validation', () => {
   });
 
   test('succeeds when secrets contains a pfx', () => {
-    const secrets: Record<string, string | null> = {
+    const secrets: ConnectorTypeSecretsType = {
+      ...emptySecrets,
       password: 'supersecret',
       pfx: PFX_FILE,
-      user: null,
-      crt: null,
-      key: null,
-      clientSecret: null,
-      secretHeaders: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
-    const secretsWithoutPassword: Record<string, string | null> = {
+    const secretsWithoutPassword: ConnectorTypeSecretsType = {
+      ...emptySecrets,
       pfx: PFX_FILE,
-      user: null,
-      password: null,
-      crt: null,
-      key: null,
-      clientSecret: null,
-      secretHeaders: null,
     };
 
     expect(
@@ -180,35 +200,85 @@ describe('secrets validation', () => {
 
   test('fails when secret crt is provided but key omitted, or vice versa', () => {
     expect(() => {
-      validateSecrets(connectorType, { crt: CRT_FILE }, { configurationUtilities });
+      validateSecrets(
+        connectorType,
+        { ...emptySecrets, crt: CRT_FILE },
+        { configurationUtilities }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
     expect(() => {
-      validateSecrets(connectorType, { key: KEY_FILE }, { configurationUtilities });
+      validateSecrets(
+        connectorType,
+        { ...emptySecrets, key: KEY_FILE },
+        { configurationUtilities }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
+  });
+
+  test('fails when proxyUsername is provided but proxyPassword is omitted', () => {
+    expect(() => {
+      validateSecrets(
+        connectorType,
+        {
+          ...emptySecrets,
+          user: 'bob',
+          password: 'supersecret',
+          proxyUsername: 'proxyuser',
+        },
+        { configurationUtilities }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type secrets: proxyUsername and proxyPassword must both be provided, or neither"`
+    );
+  });
+
+  test('fails when proxyPassword is provided but proxyUsername is omitted', () => {
+    expect(() => {
+      validateSecrets(
+        connectorType,
+        {
+          ...emptySecrets,
+          user: 'bob',
+          password: 'supersecret',
+          proxyUsername: null,
+          proxyPassword: 'proxypass',
+        },
+        { configurationUtilities }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type secrets: proxyUsername and proxyPassword must both be provided, or neither"`
+    );
+  });
+
+  test('succeeds when proxyUsername and proxyPassword are both provided', () => {
+    const secrets: ConnectorTypeSecretsType = {
+      ...emptySecrets,
+      user: 'bob',
+      password: 'supersecret',
+      proxyUsername: 'proxyuser',
+      proxyPassword: 'proxypass',
+    };
+    expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
   });
 });
 
 describe('config validation', () => {
   test('config validation passes when only required fields are provided', () => {
-    const config: Record<string, string | boolean | null> = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'http://mylisteningserver:9200/endpoint',
-      authType: AuthType.Basic,
-      hasAuth: true,
-      headers: null,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual(config);
   });
 
   test('config validation passes when a url is specified', () => {
-    const config: Record<string, string | boolean | null> = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'http://mylisteningserver:9200/endpoint',
-      authType: AuthType.Basic,
-      hasAuth: true,
-      headers: null,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual(config);
   });
@@ -226,15 +296,12 @@ describe('config validation', () => {
   });
 
   test('config validation passes when valid headers are provided', () => {
-    // any for testing
-
-    const config: Record<string, any> = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'http://mylisteningserver:9200/endpoint',
       headers: {
         'Content-Type': 'application/json',
       },
-      authType: AuthType.Basic,
-      hasAuth: true,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual(config);
   });
@@ -253,15 +320,12 @@ describe('config validation', () => {
   });
 
   test('config validation passes when kibana config url does not present in allowedHosts', () => {
-    // any for testing
-
-    const config: Record<string, any> = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'http://mylisteningserver.com:9200/endpoint',
       headers: {
         'Content-Type': 'application/json',
       },
-      authType: AuthType.Basic,
-      hasAuth: true,
     };
 
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual(config);
@@ -275,9 +339,8 @@ describe('config validation', () => {
       },
     };
 
-    // any for testing
-
-    const config: Record<string, any> = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'http://mylisteningserver.com:9200/endpoint',
       headers: {
         'Content-Type': 'application/json',
@@ -291,12 +354,111 @@ describe('config validation', () => {
     );
   });
 
+  test('config validation returns an error if proxyUrl is not in allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: (url: string) => {
+        if (url.includes('proxy.example.com')) {
+          throw new Error('proxy url is not present in allowedHosts');
+        }
+      },
+    };
+
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'http://mylisteningserver.com:9200/endpoint',
+      proxyUrl: 'http://proxy.example.com:8080',
+    };
+
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities: configUtils });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: error validation http action config: proxy url is not present in allowedHosts"`
+    );
+  });
+
+  describe('connector validation', () => {
+    test('returns error when hasProxyAuth is true but proxyUrl is missing', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        hasProxyAuth: true,
+      };
+      const secrets: ConnectorTypeSecretsType = {
+        ...emptySecrets,
+        user: 'bob',
+        password: 'supersecret',
+        proxyUsername: 'proxyuser',
+        proxyPassword: 'proxypass',
+      };
+      expect(() => {
+        validateConnector(connectorType, { config, secrets });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: proxyUrl is required when proxy authentication is enabled"`
+      );
+    });
+
+    test('returns error when hasProxyAuth is true but credentials are missing', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        hasProxyAuth: true,
+        proxyUrl: 'http://proxy.example.com:8080',
+      };
+      const secrets: ConnectorTypeSecretsType = {
+        ...emptySecrets,
+        user: 'bob',
+        password: 'supersecret',
+      };
+      expect(() => {
+        validateConnector(connectorType, { config, secrets });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: proxyUsername and proxyPassword are required when proxy authentication is enabled"`
+      );
+    });
+
+    test('succeeds when hasProxyAuth is true with proxyUrl and credentials', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        hasProxyAuth: true,
+        proxyUrl: 'http://proxy.example.com:8080',
+      };
+      const secrets: ConnectorTypeSecretsType = {
+        ...emptySecrets,
+        user: 'bob',
+        password: 'supersecret',
+        proxyUsername: 'proxyuser',
+        proxyPassword: 'proxypass',
+      };
+      expect(() => {
+        validateConnector(connectorType, { config, secrets });
+      }).not.toThrow();
+    });
+
+    test('succeeds when hasProxyAuth is false (no proxy auth)', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        proxyUrl: 'http://proxy.example.com:8080',
+      };
+      const secrets: ConnectorTypeSecretsType = {
+        ...emptySecrets,
+        user: 'bob',
+        password: 'supersecret',
+      };
+      expect(() => {
+        validateConnector(connectorType, { config, secrets });
+      }).not.toThrow();
+    });
+  });
+
   test('config validation fails when using disabled pfx certType', () => {
-    const config: Record<string, string | boolean> = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://mylisteningserver:9200/endpoint',
       authType: AuthType.SSL,
       certType: SSLCertType.PFX,
-      hasAuth: true,
     };
     configurationUtilities.getWebhookSettings = jest.fn(() => ({
       ssl: { pfx: { enabled: false } },
@@ -310,11 +472,10 @@ describe('config validation', () => {
 
   describe('OAuth2 Client Credentials', () => {
     test('throws if required OAuth2 config is missing', async () => {
-      const config = {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
         url: 'https://test.com',
-        hasAuth: true,
         authType: AuthType.OAuth2ClientCredentials,
-        // missing accessTokenUrl, clientId
       };
 
       expect(() => {
@@ -325,9 +486,9 @@ describe('config validation', () => {
     });
 
     test('throws when additionalFields is no valid JSON', async () => {
-      const config = {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
         url: 'https://test.com',
-        hasAuth: true,
         authType: AuthType.OAuth2ClientCredentials,
         accessTokenUrl: 'http://fake.test',
         clientId: 'fake-client-id',
@@ -342,9 +503,9 @@ describe('config validation', () => {
     });
 
     test('throws when additionalFields is "null"', async () => {
-      const config = {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
         url: 'https://test.com',
-        hasAuth: true,
         authType: AuthType.OAuth2ClientCredentials,
         accessTokenUrl: 'http://fake.test',
         clientId: 'fake-client-id',
@@ -359,9 +520,9 @@ describe('config validation', () => {
     });
 
     test('throws when additionalFields is empty', async () => {
-      const config = {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
         url: 'https://test.com',
-        hasAuth: true,
         authType: AuthType.OAuth2ClientCredentials,
         accessTokenUrl: 'http://fake.test',
         clientId: 'fake-client-id',
@@ -376,9 +537,9 @@ describe('config validation', () => {
     });
 
     test('throws when additionalFields is an array', async () => {
-      const config = {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
         url: 'https://test.com',
-        hasAuth: true,
         authType: AuthType.OAuth2ClientCredentials,
         accessTokenUrl: 'http://fake.test',
         clientId: 'fake-client-id',
@@ -405,6 +566,26 @@ describe('params validation', () => {
   test('params validation passes when a valid body is provided', () => {
     const params: Record<string, string> = {
       body: 'count: {{ctx.payload.hits.total}}',
+    };
+    expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
+      method: 'GET',
+      ...params,
+    });
+  });
+
+  test('params validation passes when body is a JSON object', () => {
+    const params = {
+      body: { key: 'value', nested: { n: 1 } },
+    };
+    expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
+      method: 'GET',
+      ...params,
+    });
+  });
+
+  test('params validation passes when body is a JSON array', () => {
+    const params = {
+      body: [{ a: 1 }, 'b'],
     };
     expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
       method: 'GET',
@@ -482,7 +663,7 @@ describe('execute()', () => {
     requestMock.mockResolvedValue({
       status: 200,
       statusText: 'OK',
-      data: { result: 'success' },
+      data: Buffer.from(JSON.stringify({ result: 'success' }), 'utf-8'),
       headers: { 'content-type': 'application/json' },
       config: {},
     });
@@ -490,26 +671,15 @@ describe('execute()', () => {
 
   test('execute with username/password sends request with basic auth', async () => {
     const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      headers: {
-        aheader: 'a value',
-      },
-      authType: AuthType.Basic,
-      hasAuth: true,
+      headers: { aheader: 'a value' },
     };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'POST',
         path: '/my-endpoint',
@@ -535,6 +705,7 @@ describe('execute()', () => {
       },
       logger: expect.any(Object),
       method: 'POST',
+      proxyOverrides: undefined,
       sslOverrides: {},
       url: 'https://abc.def/my-endpoint',
     });
@@ -542,25 +713,19 @@ describe('execute()', () => {
 
   test('execute with secret headers and basic auth', async () => {
     const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      headers: {
-        aheader: 'a value',
-      },
-      authType: AuthType.Basic,
-      hasAuth: true,
+      headers: { aheader: 'a value' },
     };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
       secrets: {
+        ...emptySecrets,
         user: 'abc',
         password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
         secretHeaders: { secretKey: 'secretValue' },
-        clientSecret: null,
       },
       params: {
         method: 'POST',
@@ -588,6 +753,7 @@ describe('execute()', () => {
       },
       logger: expect.any(Object),
       method: 'POST',
+      proxyOverrides: undefined,
       sslOverrides: {},
       url: 'https://abc.def/my-endpoint',
     });
@@ -595,25 +761,19 @@ describe('execute()', () => {
 
   test('execute with secret headers and basic auth when header keys overlap', async () => {
     const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      headers: {
-        aheader: 'a value',
-      },
-      authType: AuthType.Basic,
-      hasAuth: true,
+      headers: { aheader: 'a value' },
     };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
       secrets: {
+        ...emptySecrets,
         user: 'abc',
         password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
         secretHeaders: { Authorization: 'secretAuthorizationValue' },
-        clientSecret: null,
       },
       params: {
         method: 'POST',
@@ -640,6 +800,7 @@ describe('execute()', () => {
       },
       logger: expect.any(Object),
       method: 'POST',
+      proxyOverrides: undefined,
       sslOverrides: {},
       url: 'https://abc.def/my-endpoint',
     });
@@ -647,26 +808,21 @@ describe('execute()', () => {
 
   test('execute with ssl adds ssl settings to sslOverrides', async () => {
     const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      headers: {
-        aheader: 'a value',
-      },
+      headers: { aheader: 'a value' },
       authType: AuthType.SSL,
       certType: SSLCertType.CRT,
-      hasAuth: true,
     };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
       secrets: {
+        ...emptySecrets,
         crt: CRT_FILE,
         key: KEY_FILE,
         password: 'passss',
-        user: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
       },
       params: {
         method: 'POST',
@@ -689,12 +845,9 @@ describe('execute()', () => {
 
   test('execute with exception maxContentLength size exceeded should log the proper error', async () => {
     const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      headers: {
-        aheader: 'a value',
-      },
-      authType: AuthType.Basic,
-      hasAuth: true,
+      headers: { aheader: 'a value' },
     };
     requestMock.mockReset();
     requestMock.mockRejectedValueOnce({
@@ -706,15 +859,7 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'POST',
         path: '/my-endpoint',
@@ -731,26 +876,16 @@ describe('execute()', () => {
 
   test('execute without username/password sends request without basic auth', async () => {
     const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      headers: {
-        aheader: 'a value',
-      },
+      headers: { aheader: 'a value' },
       hasAuth: false,
-    };
-    const secrets: ConnectorTypeSecretsType = {
-      user: null,
-      password: null,
-      pfx: null,
-      crt: null,
-      key: null,
-      clientSecret: null,
-      secretHeaders: null,
     };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
-      secrets,
+      secrets: emptySecrets,
       params: {
         method: 'POST',
         path: '/my-endpoint',
@@ -766,6 +901,84 @@ describe('execute()', () => {
       aheader: 'a value',
     });
     expect(requestMock.mock.calls[0][0].url).toBe('https://abc.def/my-endpoint');
+  });
+
+  test('execute stringifies object body before sending', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    const body = { foo: 'bar', n: 42 };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'POST',
+        path: '/my-endpoint',
+        body,
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].data).toBe(JSON.stringify(body));
+  });
+
+  test('execute stringifies array body before sending', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    const body = [1, { two: true }];
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'POST',
+        path: '/my-endpoint',
+        body,
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].data).toBe(JSON.stringify(body));
+  });
+
+  test('execute throws error if body is not serializable', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    const body = {
+      foo: {
+        toJSON() {
+          throw new Error('foo is not serializable');
+        },
+      },
+    };
+    await expect(
+      connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/my-endpoint',
+          body: body as any,
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      })
+    ).rejects.toThrow('Error serializing request body: foo is not serializable');
   });
 
   test('renders parameter templates as expected', async () => {
@@ -812,25 +1025,27 @@ describe('execute()', () => {
     expect(params.headers?.['X-Custom']).toBe('test-header');
   });
 
+  test('does not apply mustache to non-string body', () => {
+    const paramsWithObjectBody = {
+      body: { x: '{{not_a_template}}' },
+      method: 'POST' as const,
+    };
+    const params = connectorType.renderParameterTemplates!(mockedLogger, paramsWithObjectBody, {
+      not_a_template: 'replaced',
+    });
+    expect(params.body).toEqual({ x: '{{not_a_template}}' });
+  });
+
   test('execute combines base URL and path correctly', async () => {
-    const config = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      authType: AuthType.Basic,
-      hasAuth: true,
-    } as ConnectorTypeConfigType;
+    };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'GET',
         path: '/api/v1/endpoint',
@@ -844,24 +1059,15 @@ describe('execute()', () => {
   });
 
   test('execute combines base URL and path with query string', async () => {
-    const config = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      authType: AuthType.Basic,
-      hasAuth: true,
-    } as ConnectorTypeConfigType;
+    };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'GET',
         path: '/api/v1/endpoint',
@@ -881,23 +1087,12 @@ describe('execute()', () => {
   });
 
   test('execute uses params.url when config.url is not provided', async () => {
-    const config = {
-      authType: AuthType.Basic,
-      hasAuth: true,
-    } as ConnectorTypeConfigType;
+    const config: ConnectorTypeConfigType = { ...emptyConfig };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'GET',
         url: 'https://example.com',
@@ -912,23 +1107,12 @@ describe('execute()', () => {
   });
 
   test('execute returns error when URL is missing', async () => {
-    const config = {
-      authType: AuthType.Basic,
-      hasAuth: true,
-    } as ConnectorTypeConfigType;
+    const config: ConnectorTypeConfigType = { ...emptyConfig };
     const result = await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'GET',
       },
@@ -943,26 +1127,15 @@ describe('execute()', () => {
 
   test('execute merges params headers with config headers', async () => {
     const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      headers: {
-        'Config-Header': 'config-value',
-      },
-      authType: AuthType.Basic,
-      hasAuth: true,
+      headers: { 'Config-Header': 'config-value' },
     };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'POST',
         path: '/my-endpoint',
@@ -983,24 +1156,15 @@ describe('execute()', () => {
   });
 
   test('execute handles fetcher skip_ssl_verification', async () => {
-    const config = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      authType: AuthType.Basic,
-      hasAuth: true,
-    } as ConnectorTypeConfigType;
+    };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'POST',
         path: '/my-endpoint',
@@ -1019,24 +1183,15 @@ describe('execute()', () => {
   });
 
   test('execute handles fetcher follow_redirects false', async () => {
-    const config = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      authType: AuthType.Basic,
-      hasAuth: true,
-    } as ConnectorTypeConfigType;
+    };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'POST',
         path: '/my-endpoint',
@@ -1053,24 +1208,15 @@ describe('execute()', () => {
   });
 
   test('execute handles fetcher max_redirects', async () => {
-    const config = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      authType: AuthType.Basic,
-      hasAuth: true,
-    } as ConnectorTypeConfigType;
+    };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'POST',
         path: '/my-endpoint',
@@ -1087,24 +1233,15 @@ describe('execute()', () => {
   });
 
   test('execute handles fetcher keep_alive', async () => {
-    const config = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      authType: AuthType.Basic,
-      hasAuth: true,
-    } as ConnectorTypeConfigType;
+    };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'POST',
         path: '/my-endpoint',
@@ -1122,24 +1259,15 @@ describe('execute()', () => {
 
   test('execute passes signal to the request call', async () => {
     const controller = new AbortController();
-    const config = {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      authType: AuthType.Basic,
-      hasAuth: true,
-    } as ConnectorTypeConfigType;
+    };
     await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'POST',
         path: '/my-endpoint',
@@ -1154,25 +1282,79 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0].signal).toBe(controller.signal);
   });
 
-  test('execute returns response with status, statusText, headers, and data', async () => {
-    const config = {
+  test('execute passes proxyOverrides to request when config.proxyUrl is set', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
       url: 'https://abc.def',
-      authType: AuthType.Basic,
-      hasAuth: true,
-    } as ConnectorTypeConfigType;
-    const result = await connectorType.executor?.({
+      proxyUrl: 'http://proxy.example.com:8080',
+      proxyVerificationMode: 'certificate',
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'POST',
+        path: '/my-endpoint',
+        body: 'some data',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].proxyOverrides).toEqual({
+      proxyUrl: 'http://proxy.example.com:8080/',
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+      proxySSLSettings: { verificationMode: 'certificate' },
+    });
+  });
+
+  test('execute passes proxyOverrides with credentials in URL when proxy auth is set', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+      hasProxyAuth: true,
+      proxyUrl: 'http://proxy.example.com:8080',
+    };
+    await connectorType.executor?.({
       actionId: 'some-id',
       services,
       config,
       secrets: {
+        ...emptySecrets,
         user: 'abc',
         password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
+        proxyUsername: 'proxyuser',
+        proxyPassword: 'proxypass',
       },
+      params: {
+        method: 'POST',
+        path: '/my-endpoint',
+        body: 'some data',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const proxyOverrides = requestMock.mock.calls[0][0].proxyOverrides;
+    expect(proxyOverrides?.proxyUrl).toBe('http://proxyuser:proxypass@proxy.example.com:8080/');
+    expect(proxyOverrides?.proxySSLSettings).toEqual({ verificationMode: 'full' });
+  });
+
+  test('execute returns response with status, statusText, headers, and data', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    const result = await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
       params: {
         method: 'POST',
         path: '/my-endpoint',
@@ -1188,7 +1370,206 @@ describe('execute()', () => {
       status: 200,
       statusText: 'OK',
       headers: expect.any(Object),
-      data: expect.any(Object),
+      data: { result: 'success' },
+    });
+  });
+
+  test('execute passes responseType arraybuffer to the request call', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'GET',
+        path: '/api',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].responseType).toBe('arraybuffer');
+  });
+
+  describe('response body decoding (text vs binary)', () => {
+    test('should return parsed JSON when content-type is application/json', async () => {
+      const config: ConnectorTypeConfigType = { ...emptyConfig, url: 'https://abc.def' };
+      requestMock.mockResolvedValueOnce({
+        status: 200,
+        statusText: 'OK',
+        data: Buffer.from(JSON.stringify({ id: 1 }), 'utf-8'),
+        headers: { 'content-type': 'application/json' },
+        config: {},
+      });
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/r' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('ok');
+      expect((result?.data as { data: unknown }).data).toEqual({ id: 1 });
+    });
+
+    test('should return plain text for text/plain', async () => {
+      const config: ConnectorTypeConfigType = { ...emptyConfig, url: 'https://abc.def' };
+      requestMock.mockResolvedValueOnce({
+        status: 200,
+        statusText: 'OK',
+        data: Buffer.from('hello', 'utf-8'),
+        headers: { 'content-type': 'text/plain' },
+        config: {},
+      });
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/r' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect((result?.data as { data: unknown }).data).toBe('hello');
+    });
+
+    test('should base64-encode image/png and round-trip bytes', async () => {
+      const config: ConnectorTypeConfigType = { ...emptyConfig, url: 'https://abc.def' };
+      const pngHeader = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+      requestMock.mockResolvedValueOnce({
+        status: 200,
+        statusText: 'OK',
+        data: pngHeader,
+        headers: { 'content-type': 'image/png' },
+        config: {},
+      });
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/img' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      const data = (result?.data as { data: string }).data;
+      expect(typeof data).toBe('string');
+      expect(Buffer.from(data, 'base64')).toEqual(pngHeader);
+    });
+
+    test('should base64-encode application/pdf', async () => {
+      const config: ConnectorTypeConfigType = { ...emptyConfig, url: 'https://abc.def' };
+      const bytes = Buffer.from('%PDF-1.4\n', 'utf-8');
+      requestMock.mockResolvedValueOnce({
+        status: 200,
+        statusText: 'OK',
+        data: bytes,
+        headers: { 'content-type': 'application/pdf' },
+        config: {},
+      });
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/doc' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect((result?.data as { data: string }).data).toBe(bytes.toString('base64'));
+    });
+
+    test('should base64-encode application/octet-stream', async () => {
+      const config: ConnectorTypeConfigType = { ...emptyConfig, url: 'https://abc.def' };
+      const bytes = Buffer.from([0, 1, 2, 255]);
+      requestMock.mockResolvedValueOnce({
+        status: 200,
+        statusText: 'OK',
+        data: bytes,
+        headers: { 'content-type': 'application/octet-stream' },
+        config: {},
+      });
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/bin' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect((result?.data as { data: string }).data).toBe('AAEC/w==');
+    });
+
+    test('should base64-encode when Content-Type is missing', async () => {
+      const config: ConnectorTypeConfigType = { ...emptyConfig, url: 'https://abc.def' };
+      const bytes = Buffer.from([0xde, 0xad]);
+      requestMock.mockResolvedValueOnce({
+        status: 200,
+        statusText: 'OK',
+        data: bytes,
+        headers: {},
+        config: {},
+      });
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/x' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect((result?.data as { data: string }).data).toBe('3q0=');
+    });
+
+    test('should parse JSON when content-type includes charset', async () => {
+      const config: ConnectorTypeConfigType = { ...emptyConfig, url: 'https://abc.def' };
+      requestMock.mockResolvedValueOnce({
+        status: 200,
+        statusText: 'OK',
+        data: Buffer.from('{"ok":true}', 'utf-8'),
+        headers: { 'content-type': 'application/json; charset=utf-8' },
+        config: {},
+      });
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/j' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect((result?.data as { data: unknown }).data).toEqual({ ok: true });
     });
   });
 
@@ -1196,11 +1577,10 @@ describe('execute()', () => {
     test.each([400, 404, 405, 406, 410, 411, 414, 428, 431])(
       'forwards user error source in result for %s error responses',
       async (status) => {
-        const config = {
+        const config: ConnectorTypeConfigType = {
+          ...emptyConfig,
           url: 'https://abc.def',
-          authType: AuthType.Basic,
-          hasAuth: true,
-        } as ConnectorTypeConfigType;
+        };
 
         requestMock.mockRejectedValueOnce(
           createTaskRunError(
@@ -1222,15 +1602,7 @@ describe('execute()', () => {
           actionId: 'some-id',
           services,
           config,
-          secrets: {
-            user: 'abc',
-            password: '123',
-            key: null,
-            crt: null,
-            pfx: null,
-            clientSecret: null,
-            secretHeaders: null,
-          },
+          secrets: { ...emptySecrets, user: 'abc', password: '123' },
           params: {
             method: 'POST',
             path: '/my-endpoint',
@@ -1245,6 +1617,198 @@ describe('execute()', () => {
       }
     );
 
+    it('should return undefined when responseData is null or undefined', () => {
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(null))).toBeUndefined();
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(undefined))).toBeUndefined();
+    });
+
+    it('should return string bodies as-is', () => {
+      expect(getErrorResponseMessage(axiosErrorWithResponseData('plain text error'))).toBe(
+        'plain text error'
+      );
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(''))).toBeUndefined();
+    });
+
+    it('should return top-level string message when present on objects', () => {
+      expect(getErrorResponseMessage(axiosErrorWithResponseData({ message: 'not found' }))).toBe(
+        'not found'
+      );
+    });
+
+    it('should prefer RFC 7807 detail when present on objects', () => {
+      const data = { code: 123, detail: 'x' };
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(data))).toBe('x');
+    });
+
+    it('should stringify objects when message is present but not a string', () => {
+      const data = { message: 500, hint: 'check id' };
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(data))).toBe(
+        safeJsonStringify(data)
+      );
+    });
+
+    it('should summarize arrays of errors when possible', () => {
+      const data = [{ e: 'a' }, 'b'];
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(data))).toBe('b');
+    });
+
+    it('should extract nested error.message when no top-level string message exists', () => {
+      const data = { error: { message: 'Invalid client or Invalid client credentials' } };
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(data))).toBe(
+        'Invalid client or Invalid client credentials'
+      );
+    });
+
+    it('should return string representation for number and boolean bodies', () => {
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(42))).toBe('42');
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(true))).toBe('true');
+    });
+
+    it('includes nested API error message in serviceMessage when body uses error.message shape', async () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'https://abc.def',
+      };
+
+      requestMock.mockRejectedValueOnce({
+        tag: 'err',
+        isAxiosError: true,
+        message: 'Request failed with status code 400',
+        response: {
+          status: 400,
+          statusText: 'Bad Request',
+          headers: { 'content-type': 'application/json' },
+          data: Buffer.from(
+            JSON.stringify({
+              error: {
+                message: 'Invalid client or Invalid client credentials',
+              },
+            }),
+            'utf-8'
+          ),
+        },
+      } as unknown as Error);
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/my-endpoint',
+          body: 'some data',
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe(
+        '[400] Bad Request: Invalid client or Invalid client credentials'
+      );
+    });
+
+    it('extracts top-level message from a JSON error body returned as a Buffer', async () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'https://abc.def',
+      };
+
+      requestMock.mockRejectedValueOnce({
+        tag: 'err',
+        isAxiosError: true,
+        message: 'Request failed with status code 401',
+        response: {
+          status: 401,
+          statusText: 'Unauthorized',
+          headers: { 'content-type': 'application/json' },
+          data: Buffer.from(JSON.stringify({ message: 'API key expired' }), 'utf-8'),
+        },
+      } as unknown as Error);
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/secure' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('[401] Unauthorized: API key expired');
+    });
+
+    it('extracts message from a non-buffer (already-parsed) JSON error body', async () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'https://abc.def',
+      };
+
+      requestMock.mockRejectedValueOnce({
+        tag: 'err',
+        isAxiosError: true,
+        message: 'Request failed with status code 403',
+        response: {
+          status: 403,
+          statusText: 'Forbidden',
+          headers: { 'content-type': 'application/json' },
+          data: { message: 'Insufficient permissions' },
+        },
+      } as unknown as Error);
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/admin' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('[403] Forbidden: Insufficient permissions');
+    });
+
+    it('strips HTML from a text/html error body returned as a Buffer', async () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'https://abc.def',
+      };
+
+      requestMock.mockRejectedValueOnce({
+        tag: 'err',
+        isAxiosError: true,
+        message: 'Request failed with status code 502',
+        response: {
+          status: 502,
+          statusText: 'Bad Gateway',
+          headers: { 'content-type': 'text/html; charset=utf-8' },
+          data: Buffer.from('<html><body><h1>Bad Gateway</h1></body></html>', 'utf-8'),
+        },
+      } as unknown as Error);
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/x' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('[502] Bad Gateway: Bad Gateway');
+    });
+
     it('should log an error if refreshing access token fails', async () => {
       const errorMessage = 'Invalid client or Invalid client credentials';
       (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValueOnce(
@@ -1255,8 +1819,8 @@ describe('execute()', () => {
       const execOptions: HttpConnectorTypeExecutorOptions = {
         actionId: 'test-id',
         config: {
+          ...emptyConfig,
           url: 'https://test.com',
-          hasAuth: true,
           authType: AuthType.OAuth2ClientCredentials,
           accessTokenUrl: 'https://token.url',
           clientId: 'client',
@@ -1267,15 +1831,7 @@ describe('execute()', () => {
           path: '/endpoint',
           body: '{}',
         },
-        secrets: {
-          clientSecret: 'secret',
-          key: null,
-          user: null,
-          password: null,
-          crt: null,
-          pfx: null,
-          secretHeaders: null,
-        },
+        secrets: { ...emptySecrets, clientSecret: 'secret' },
         configurationUtilities,
         logger: mockedLogger,
         services,
@@ -1297,27 +1853,18 @@ describe('execute()', () => {
       const execOptions: HttpConnectorTypeExecutorOptions = {
         actionId: 'test-id',
         config: {
+          ...emptyConfig,
           url: 'https://test.com',
-          hasAuth: true,
           authType: AuthType.OAuth2ClientCredentials,
           accessTokenUrl: 'https://token.url',
           clientId: 'client',
-          headers: null,
         },
         params: {
           method: 'POST',
           path: '/endpoint',
           body: '{}',
         },
-        secrets: {
-          clientSecret: 'secret',
-          key: null,
-          user: null,
-          password: null,
-          crt: null,
-          pfx: null,
-          secretHeaders: null,
-        },
+        secrets: { ...emptySecrets, clientSecret: 'secret' },
         configurationUtilities,
         logger: mockedLogger,
         services,
@@ -1338,27 +1885,18 @@ describe('execute()', () => {
       const execOptions: HttpConnectorTypeExecutorOptions = {
         actionId: 'test-id',
         config: {
+          ...emptyConfig,
           url: 'https://test.com',
-          hasAuth: true,
           authType: AuthType.OAuth2ClientCredentials,
           accessTokenUrl: 'https://token.url',
           clientId: 'client',
-          headers: null,
         },
         params: {
           method: 'POST',
           path: '/endpoint',
           body: '{}',
         },
-        secrets: {
-          clientSecret: 'secret',
-          key: null,
-          user: null,
-          password: null,
-          crt: null,
-          pfx: null,
-          secretHeaders: null,
-        },
+        secrets: { ...emptySecrets, clientSecret: 'secret' },
         configurationUtilities,
         logger: mockedLogger,
         services,
@@ -1378,8 +1916,8 @@ describe('execute()', () => {
       const execOptions: HttpConnectorTypeExecutorOptions = {
         actionId: 'test-id',
         config: {
+          ...emptyConfig,
           url: 'https://test.com',
-          hasAuth: true,
           authType: AuthType.OAuth2ClientCredentials,
           accessTokenUrl: 'https://token.url',
           clientId: 'client',
@@ -1390,15 +1928,7 @@ describe('execute()', () => {
           path: '/endpoint',
           body: '{}',
         },
-        secrets: {
-          clientSecret: 'secret',
-          key: null,
-          user: null,
-          password: null,
-          crt: null,
-          pfx: null,
-          secretHeaders: null,
-        },
+        secrets: { ...emptySecrets, clientSecret: 'secret' },
         configurationUtilities,
         logger: mockedLogger,
         services,

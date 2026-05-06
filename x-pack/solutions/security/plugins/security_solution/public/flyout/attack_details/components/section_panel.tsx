@@ -38,7 +38,7 @@ interface SectionPanelProps {
   icon?: React.ReactNode;
   /** Optional link to make the title clickable (e.g. open left panel) */
   link?: SectionPanelLink;
-  /** Optional icon type for the link (e.g. 'arrowStart') */
+  /** Optional icon type for the link (e.g. 'chevronLimitLeft') */
   linkIconType?: IconType;
   /** Optional data-test-subj for the panel */
   'data-test-subj'?: string;

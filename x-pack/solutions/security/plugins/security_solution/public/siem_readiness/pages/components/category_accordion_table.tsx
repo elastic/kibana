@@ -17,6 +17,7 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
   EuiHorizontalRule,
+  EuiEmptyPrompt,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
@@ -138,6 +139,18 @@ export interface CategoryAccordionTableProps<
   defaultSortDirection?: 'asc' | 'desc';
   /** Optional localStorage key to persist accordion open/closed state */
   storageKey?: string;
+  /** Whether a filter is active (e.g., activeCategories.length < 5). Used to determine empty state message. */
+  isFilterActive?: boolean;
+  /** Custom title for empty state when no data exists. Default: "No data available" */
+  noDataTitle?: string;
+  /** Custom body for empty state when no data exists. Default: "There is no data to display." */
+  noDataBody?: string;
+  /** Custom title for empty state when filters hide all results. Default: "No results found" */
+  noResultsTitle?: string;
+  /** Custom body for empty state when filters hide all results. Default: "Try adjusting your category filter in the configuration panel." */
+  noResultsBody?: string;
+  /** Whether there's unfiltered data available. When false, search/filter controls are hidden. */
+  hasUnfilteredData?: boolean;
 }
 
 export const CategoryAccordionTable = <T extends Record<string, unknown>>({
@@ -162,6 +175,22 @@ export const CategoryAccordionTable = <T extends Record<string, unknown>>({
   defaultSortField,
   defaultSortDirection = 'asc',
   storageKey,
+  isFilterActive = false,
+  noDataTitle = i18n.translate('xpack.securitySolution.siemReadiness.categoryTable.noDataTitle', {
+    defaultMessage: 'No data available',
+  }),
+  noDataBody = i18n.translate('xpack.securitySolution.siemReadiness.categoryTable.noDataBody', {
+    defaultMessage: 'There is no data to display.',
+  }),
+  noResultsTitle = i18n.translate(
+    'xpack.securitySolution.siemReadiness.categoryTable.noResultsTitle',
+    { defaultMessage: 'No results found' }
+  ),
+  noResultsBody = i18n.translate(
+    'xpack.securitySolution.siemReadiness.categoryTable.noResultsBody',
+    { defaultMessage: 'try adjusting your search or filters' }
+  ),
+  hasUnfilteredData = true,
 }: CategoryAccordionTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -235,6 +264,13 @@ export const CategoryAccordionTable = <T extends Record<string, unknown>>({
       .filter((category) => category.items.length > 0);
   }, [categories, searchQuery, filterValue, searchField, filterField, getFieldValue]);
 
+  const isAnyFilterActive = useMemo(() => {
+    if (!hasUnfilteredData) return false;
+    const isSearchActive = searchQuery !== '';
+    const isStatusFilterActive = filterValue !== defaultFilterValue;
+    return isFilterActive || isSearchActive || isStatusFilterActive;
+  }, [hasUnfilteredData, isFilterActive, searchQuery, filterValue, defaultFilterValue]);
+
   // Calculate total counts for display - count unique items by searchField to avoid duplicates
   const totalItemsCount = useMemo(() => {
     const uniqueItems = new Set<string>();
@@ -260,72 +296,79 @@ export const CategoryAccordionTable = <T extends Record<string, unknown>>({
 
   return (
     <>
-      {/* Search and Filter Controls */}
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      {hasUnfilteredData && (
+        <>
+          {/* Search and Filter Controls */}
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.securitySolution.siemReadiness.categoryTable.showing', {
-                  defaultMessage: 'Showing {count} of {total} {itemName}',
-                  values: {
-                    count: totalItemsCount,
-                    total: originalTotalItems,
-                    itemName,
-                  },
-                })}
-              </EuiText>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    {i18n.translate('xpack.securitySolution.siemReadiness.categoryTable.showing', {
+                      defaultMessage: 'Showing {count} of {total} {itemName}',
+                      values: {
+                        count: totalItemsCount,
+                        total: originalTotalItems,
+                        itemName,
+                      },
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    {'|'}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    {i18n.translate(
+                      'xpack.securitySolution.siemReadiness.categoryTable.categories',
+                      {
+                        defaultMessage: '{count} categories',
+                        values: { count: totalCategoriesCount },
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {'|'}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.securitySolution.siemReadiness.categoryTable.categories', {
-                  defaultMessage: '{count} categories',
-                  values: { count: totalCategoriesCount },
-                })}
-              </EuiText>
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiFieldSearch
+                    placeholder={searchPlaceholder}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    isClearable
+                    style={{ width: '320px' }}
+                  />
+                </EuiFlexItem>
+                {filterOptions.length > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiFilterGroup>
+                      {filterOptions.map((option, index) => (
+                        <EuiFilterButton
+                          key={option.value}
+                          hasActiveFilters={filterValue === option.value}
+                          onClick={() => setFilterValue(option.value)}
+                          isSelected={filterValue === option.value}
+                          isToggle
+                          withNext={index < filterOptions.length - 1}
+                        >
+                          {option.label}
+                        </EuiFilterButton>
+                      ))}
+                    </EuiFilterGroup>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiFieldSearch
-                placeholder={searchPlaceholder}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                isClearable
-                style={{ width: `calc(${euiTheme.size.base} * 20)` }}
-              />
-            </EuiFlexItem>
-            {filterOptions.length > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiFilterGroup>
-                  {filterOptions.map((option, index) => (
-                    <EuiFilterButton
-                      key={option.value}
-                      hasActiveFilters={filterValue === option.value}
-                      onClick={() => setFilterValue(option.value)}
-                      isSelected={filterValue === option.value}
-                      isToggle
-                      withNext={index < filterOptions.length - 1}
-                    >
-                      {option.label}
-                    </EuiFilterButton>
-                  ))}
-                </EuiFilterGroup>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       <div
         style={{
@@ -334,64 +377,72 @@ export const CategoryAccordionTable = <T extends Record<string, unknown>>({
           borderRadius: euiTheme.border.radius.medium,
         }}
       >
-        {filteredCategories.map((category, index) => {
-          return (
-            <React.Fragment key={category.category}>
-              <EuiAccordion
-                style={{ padding: `0 ${euiTheme.size.base}` }}
-                id={`accordion-${category.category}`}
-                buttonContent={
-                  <EuiText size="m" style={{ padding: `${euiTheme.size.base} 0` }}>
-                    <strong>{category.category}</strong>
-                  </EuiText>
-                }
-                extraAction={renderExtraAction(category)}
-                paddingSize="none"
-                borders="none"
-                forceState={openAccordions[category.category] ? 'open' : 'closed'}
-                onToggle={() => toggleAccordion(category.category)}
-              >
-                {openAccordions[category.category] && (
-                  <>
-                    <EuiSpacer size="m" />
-                    <EuiInMemoryTable
-                      style={{
-                        border: euiTheme.border.thin,
-                        padding: euiTheme.size.xl,
-                        borderRadius: euiTheme.border.radius.medium,
-                      }}
-                      items={category.items}
-                      columns={columns}
-                      sorting={
-                        defaultSortField
-                          ? {
-                              sort: {
-                                field: defaultSortField,
-                                direction: defaultSortDirection,
-                              },
-                            }
-                          : undefined
-                      }
-                      pagination={{
-                        pageSizeOptions,
-                        initialPageSize,
-                      }}
-                      tableCaption={i18n.translate(
-                        'xpack.securitySolution.siemReadiness.categoryTable.tableCaption',
-                        {
-                          defaultMessage: '{itemName} for {category} category',
-                          values: { itemName, category: category.category },
+        {filteredCategories.length === 0 ? (
+          <EuiEmptyPrompt
+            iconType={isAnyFilterActive ? 'search' : 'documents'}
+            title={<h3>{isAnyFilterActive ? noResultsTitle : noDataTitle}</h3>}
+            body={<p>{isAnyFilterActive ? noResultsBody : noDataBody}</p>}
+          />
+        ) : (
+          filteredCategories.map((category, index) => {
+            return (
+              <React.Fragment key={category.category}>
+                <EuiAccordion
+                  style={{ padding: `0 ${euiTheme.size.base}` }}
+                  id={`accordion-${category.category}`}
+                  buttonContent={
+                    <EuiText size="m" style={{ padding: `${euiTheme.size.base} 0` }}>
+                      <strong>{category.category}</strong>
+                    </EuiText>
+                  }
+                  extraAction={renderExtraAction(category)}
+                  paddingSize="none"
+                  borders="none"
+                  forceState={openAccordions[category.category] ? 'open' : 'closed'}
+                  onToggle={() => toggleAccordion(category.category)}
+                >
+                  {openAccordions[category.category] && (
+                    <>
+                      <EuiSpacer size="m" />
+                      <EuiInMemoryTable
+                        style={{
+                          border: euiTheme.border.thin,
+                          padding: euiTheme.size.xl,
+                          borderRadius: euiTheme.border.radius.medium,
+                        }}
+                        items={category.items}
+                        columns={columns}
+                        sorting={
+                          defaultSortField
+                            ? {
+                                sort: {
+                                  field: defaultSortField,
+                                  direction: defaultSortDirection,
+                                },
+                              }
+                            : undefined
                         }
-                      )}
-                      tableLayout="auto"
-                    />
-                  </>
-                )}
-              </EuiAccordion>
-              {index < filteredCategories.length - 1 && <EuiHorizontalRule margin="m" />}
-            </React.Fragment>
-          );
-        })}
+                        pagination={{
+                          pageSizeOptions,
+                          initialPageSize,
+                        }}
+                        tableCaption={i18n.translate(
+                          'xpack.securitySolution.siemReadiness.categoryTable.tableCaption',
+                          {
+                            defaultMessage: '{itemName} for {category} category',
+                            values: { itemName, category: category.category },
+                          }
+                        )}
+                        tableLayout="fixed"
+                      />
+                    </>
+                  )}
+                </EuiAccordion>
+                {index < filteredCategories.length - 1 && <EuiHorizontalRule margin="m" />}
+              </React.Fragment>
+            );
+          })
+        )}
       </div>
     </>
   );

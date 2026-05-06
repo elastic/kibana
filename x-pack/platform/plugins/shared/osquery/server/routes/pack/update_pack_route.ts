@@ -27,7 +27,7 @@ import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -40,6 +40,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { StartPlugins } from '../../types';
 import { PLUGIN_ID } from '../../../common';
 import {
   convertSOQueriesToPack,
@@ -59,6 +60,7 @@ import type { PackQueryInput } from './utils';
 import { updatePacksRequestBodySchema, updatePacksRequestParamsSchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
 import { escapeFilterValue } from '../utils/generate_copy_name';
+import { updatePackResponseSchema } from './response_schemas';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -85,6 +87,11 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               UpdatePacksRequestBodySchema
             >(updatePacksRequestBodySchema),
           },
+          response: {
+            200: {
+              body: () => updatePackResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
@@ -103,12 +110,14 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
+        const [, startPlugins] = await osqueryContext.getStartServices();
         const currentUser = await getUserInfo({
           request,
-          security: osqueryContext.security,
+          security: (startPlugins as StartPlugins).security,
           logger: osqueryContext.logFactory.get('pack'),
         });
         const username = currentUser?.username ?? undefined;
+        const profileUid = currentUser?.profile_uid ?? undefined;
 
         const {
           name,
@@ -119,10 +128,21 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           shards = {},
         } = request.body;
 
-        const currentPackSO = await spaceScopedClient.get<PackSavedObject>(
-          packSavedObjectType,
-          request.params.id
-        );
+        let currentPackSO;
+        try {
+          currentPackSO = await spaceScopedClient.get<PackSavedObject>(
+            packSavedObjectType,
+            request.params.id
+          );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Pack ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
 
         const existingScheduleIds = keyBy(
           (currentPackSO.attributes.queries ?? []).filter(
@@ -217,6 +237,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             queries: queries && convertPackQueriesToSO(queries),
             updated_at: moment().toISOString(),
             updated_by: username,
+            updated_by_profile_uid: profileUid,
             shards: convertShardsToArray(shards),
           },
           {
@@ -408,8 +429,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           enabled: attributes.enabled,
           created_at: attributes.created_at,
           created_by: attributes.created_by,
+          created_by_profile_uid: attributes.created_by_profile_uid,
           updated_at: attributes.updated_at,
           updated_by: attributes.updated_by,
+          updated_by_profile_uid: attributes.updated_by_profile_uid,
           policy_ids: attributes.policy_ids,
           shards: attributes.shards,
           saved_object_id: updatedPackSO.id,

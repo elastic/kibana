@@ -15,6 +15,7 @@ import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 
@@ -112,7 +113,7 @@ describe('Monitor Detail Flyout', () => {
   });
 
   it('renders loading state while fetching', () => {
-    const { getByRole } = render(
+    const { getByRole, getByText } = render(
       <MonitorDetailFlyout
         configId="123456"
         id="test-id"
@@ -125,13 +126,17 @@ describe('Monitor Detail Flyout', () => {
       {
         state: {
           monitorDetails: {
+            syntheticsMonitor: null,
             syntheticsMonitorLoading: true,
           },
         },
       }
     );
 
-    expect(getByRole('progressbar'));
+    expect(getByRole('dialog')).toBeInTheDocument();
+    expect(getByText('Overview')).toBeInTheDocument();
+    expect(getByText('Performance')).toBeInTheDocument();
+    expect(getByText('Details')).toBeInTheDocument();
   });
 
   it('renders details for fetch success', () => {
@@ -139,7 +144,7 @@ describe('Monitor Detail Flyout', () => {
     jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
     jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
 
-    const { getByRole, getByText, getAllByRole } = render(
+    const { getByRole, getByText } = render(
       <MonitorDetailFlyout
         configId="123456"
         id="test-id"
@@ -168,17 +173,115 @@ describe('Monitor Detail Flyout', () => {
       }
     );
 
-    expect(getByText('Every 1 minute'));
-    expect(getByText('test-id'));
-    expect(getByText('Pending'));
     expect(
       getByRole('heading', {
         level: 2,
       })
     ).toHaveTextContent('test-monitor');
-    const links = getAllByRole('link');
-    expect(links).toHaveLength(2);
-    expect(links[0]).toHaveAttribute('href', 'https://www.elastic.co');
-    expect(links[1]).toHaveAttribute('href', detailLink);
+    expect(getByText('Last 24 hours'));
+    expect(getByText('Overview'));
+    expect(getByText('Performance'));
+    expect(getByText('Details'));
+
+    fireEvent.click(getByText('Details'));
+    expect(getByText('Every 1 minute'));
+    expect(getByText('test-id'));
+  });
+
+  describe('agent builder attachment', () => {
+    const mockSetChatConfig = jest.fn();
+    const mockClearChatConfig = jest.fn();
+    const mockAgentBuilder = {
+      setChatConfig: mockSetChatConfig,
+      clearChatConfig: mockClearChatConfig,
+    };
+
+    const monitorState = {
+      monitorDetails: {
+        syntheticsMonitor: {
+          enabled: true,
+          type: 'http',
+          name: 'test-monitor',
+          schedule: { number: '1', unit: 'm' },
+          tags: ['prod'],
+          config_id: 'test-config-id',
+        } as any,
+      },
+    };
+
+    it('configures attachment when agentBuilder is available and monitor is loaded', () => {
+      render(
+        <MonitorDetailFlyout
+          configId="test-config-id"
+          id="test-id"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: monitorState,
+          core: { agentBuilder: mockAgentBuilder } as any,
+        }
+      );
+
+      expect(mockSetChatConfig).toHaveBeenCalledWith({
+        attachments: [
+          {
+            type: OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
+            data: {
+              attachmentLabel: 'test-monitor monitor',
+              configId: 'test-config-id',
+              monitorName: 'test-monitor',
+              monitorType: 'http',
+            },
+          },
+        ],
+      });
+    });
+
+    it('does not configure attachment when agentBuilder is not available', () => {
+      render(
+        <MonitorDetailFlyout
+          configId="test-config-id"
+          id="test-id"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: monitorState,
+        }
+      );
+
+      expect(mockSetChatConfig).not.toHaveBeenCalled();
+    });
+
+    it('clears attachment config on unmount', () => {
+      const { unmount } = render(
+        <MonitorDetailFlyout
+          configId="test-config-id"
+          id="test-id"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: monitorState,
+          core: { agentBuilder: mockAgentBuilder } as any,
+        }
+      );
+
+      expect(mockSetChatConfig).toHaveBeenCalledTimes(1);
+
+      unmount();
+
+      expect(mockClearChatConfig).toHaveBeenCalledTimes(1);
+    });
   });
 });

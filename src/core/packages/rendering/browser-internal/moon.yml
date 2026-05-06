@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/rendering/browser-internal
 dependsOn:
+  - '@kbn/core-http-browser-internal'
+  - '@kbn/core-doc-links-browser'
+  - '@kbn/core-custom-branding-browser'
   - '@kbn/core-application-browser-internal'
   - '@kbn/core-overlays-browser'
   - '@kbn/core-chrome-browser-internal'
@@ -39,10 +42,12 @@ dependsOn:
   - '@kbn/core-feature-flags-browser'
   - '@kbn/core-chrome-layout'
   - '@kbn/core-feature-flags-browser-mocks'
-  - '@kbn/core-chrome-layout-feature-flags'
   - '@kbn/global-redirect-app-links'
   - '@kbn/core-base-browser-internal'
   - '@kbn/core-base-browser-mocks'
+  - '@kbn/core-http-browser-mocks'
+  - '@kbn/core-doc-links-browser-mocks'
+  - '@kbn/core-custom-branding-browser-mocks'
 tags:
   - shared-browser
   - package
@@ -55,26 +60,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

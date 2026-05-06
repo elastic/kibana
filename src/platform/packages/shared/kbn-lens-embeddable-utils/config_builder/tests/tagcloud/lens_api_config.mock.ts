@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TagcloudState } from '../../schema';
+import type { TagcloudConfig } from '../../schema';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
 
 /**
  * Basic tagcloud chart with ad hoc dataView
  */
 export const basicTagcloudWithAdHocDataView = {
   title: 'Test Tagcloud',
-  type: 'tagcloud',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  type: 'tag_cloud',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -33,17 +37,17 @@ export const basicTagcloudWithAdHocDataView = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies TagcloudState;
+} satisfies TagcloudConfig;
 
 /**
  * Basic tagcloud chart with existing dataView
  */
 export const basicTagcloudWithDataView = {
   title: 'Test Tagcloud',
-  type: 'tagcloud',
-  dataset: {
-    type: 'dataView',
-    id: 'test-id',
+  type: 'tag_cloud',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'test-id',
   },
   metric: {
     operation: 'average',
@@ -58,55 +62,56 @@ export const basicTagcloudWithDataView = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies TagcloudState;
+} satisfies TagcloudConfig;
 
 /**
  * ESQL-based tagcloud chart
  */
 export const basicEsqlTagcloud = {
   title: 'Test Tagcloud',
-  type: 'tagcloud',
-  dataset: {
+  type: 'tag_cloud',
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
   metric: {
-    operation: 'value',
     column: 'bytes',
   },
   tag_by: {
-    operation: 'value',
     column: 'geo.dest',
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies TagcloudState;
+} satisfies TagcloudConfig;
 
 /**
  * Comprehensive tagcloud chart with ad hoc dataView
  */
 export const comprehensiveTagcloudWithAdHocDataView = {
   title: 'Comprehensive Test Tagcloud',
-  type: 'tagcloud',
-  dataset: {
-    type: 'dataView',
-    id: 'my-custom-data-view-id',
+  type: 'tag_cloud',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
+    time_field: '@timestamp',
   },
-  orientation: 'angled',
-  font_size: {
-    min: 35,
-    max: 58,
+  styling: {
+    orientation: 'angled',
+    font_size: {
+      min: 35,
+      max: 58,
+    },
+    caption: { visible: false },
   },
   metric: {
     operation: 'sum',
     field: 'bytes',
     empty_as_null: true,
-    show_metric_label: false,
   },
   tag_by: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 10,
+    limit: 10,
     other_bucket: {
       include_documents_without_field: false,
     },
@@ -143,33 +148,35 @@ export const comprehensiveTagcloudWithAdHocDataView = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies TagcloudState;
+} satisfies TagcloudConfig;
 
 /**
  * Comprehensive tagcloud chart with existing dataView
  */
 export const comprehensiveTagcloudWithDataView = {
   title: 'Comprehensive Test Tagcloud',
-  type: 'tagcloud',
-  dataset: {
-    type: 'dataView',
-    id: 'my-custom-data-view-id',
+  type: 'tag_cloud',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'my-custom-data-view-id',
   },
-  orientation: 'angled',
-  font_size: {
-    min: 35,
-    max: 58,
+  styling: {
+    orientation: 'angled',
+    font_size: {
+      min: 35,
+      max: 58,
+    },
+    caption: { visible: false },
   },
   metric: {
     operation: 'sum',
     field: 'bytes',
     empty_as_null: true,
-    show_metric_label: false,
   },
   tag_by: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 10,
+    limit: 10,
     other_bucket: {
       include_documents_without_field: false,
     },
@@ -206,30 +213,30 @@ export const comprehensiveTagcloudWithDataView = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies TagcloudState;
+} satisfies TagcloudConfig;
 
 /**
  * Comprehensive ESQL-based tagcloud chart
  */
 export const comprehensiveEsqlTagcloud = {
   title: 'Comprehensive Test Tagcloud',
-  type: 'tagcloud',
-  dataset: {
+  type: 'tag_cloud',
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
-  orientation: 'angled',
-  font_size: {
-    min: 35,
-    max: 58,
+  styling: {
+    orientation: 'angled',
+    font_size: {
+      min: 35,
+      max: 58,
+    },
+    caption: { visible: false },
   },
   metric: {
-    operation: 'value',
     column: 'bytes',
-    show_metric_label: false,
   },
   tag_by: {
-    operation: 'value',
     column: 'geo.dest',
     color: {
       mode: 'categorical',
@@ -239,4 +246,4 @@ export const comprehensiveEsqlTagcloud = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies TagcloudState;
+} satisfies TagcloudConfig;

@@ -175,7 +175,7 @@ describe('ES|QL async search strategy', () => {
           expect.objectContaining({
             id: 'foo',
             keep_alive: '60000ms',
-            wait_for_completion_timeout: '100ms',
+            wait_for_completion_timeout: '2000ms',
           }),
           expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })
         );
@@ -197,13 +197,15 @@ describe('ES|QL async search strategy', () => {
         expect(request).toHaveProperty('keep_alive');
       });
 
-      it('calls asyncQueryStop with the given ID when using options.retrieveResults: true', async () => {
+      it('calls asyncQueryStop with the given ID when using options.returnIntermediateResults: true', async () => {
         mockAsyncQueryStop.mockResolvedValueOnce(mockAsyncResponse);
 
         const id = 'FlBvQU5CS3BKVEdPcWM1V2lkYXNUbXccVmNhQl9wcWFRdG1WYzE4N2tsOFNNdzozNjMzOQ==';
         const params = { query: 'from logs* | limit 10' };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-        await esSearch.search({ id, params }, { retrieveResults: true }, mockDeps).toPromise();
+        await esSearch
+          .search({ id, params }, { returnIntermediateResults: true }, mockDeps)
+          .toPromise();
 
         expect(mockAsyncQueryStop).toBeCalled();
         const request = mockAsyncQueryStop.mock.calls[0][0];

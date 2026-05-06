@@ -128,6 +128,7 @@
     "@kbn/esql",
     "@kbn/synthtrace-client",
     "@kbn/scout-oblt",
+    "@kbn/scout-synthtrace",
     "@kbn/licensing-types",
     "@kbn/deeplinks-management",
     "@kbn/content-management-content-editor",
@@ -139,7 +140,7 @@
     "@kbn/react-query",
     "@kbn/content-management-utils",
     "@kbn/maintenance-windows-plugin",
-    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-browser",
     "@kbn/synthtrace",
     "@kbn/fleet-plugin",
     "@kbn/ai-assistant-common",
@@ -150,6 +151,9 @@
     "@kbn/lens-common",
     "@kbn/apm-types",
     "@kbn/apm-types-shared",
+    "@kbn/cps",
+    "@kbn/expressions-plugin",
+    "@kbn/ingest-hub-plugin",
   ],
   "exclude": ["target/**/*"]
 }

@@ -11,17 +11,17 @@ import { TestProviders } from '../../../common/mock';
 import { mockContextValue } from '../shared/mocks/mock_context';
 import { DocumentDetailsContext } from '../shared/context';
 import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
-import { AGENT_ATTACHMENT_BUTTON_TEST_ID, CHAT_BUTTON_TEST_ID } from './components/test_ids';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from '../shared/components/test_ids';
 import { useKibana } from '../../../common/lib/kibana';
-import { useAssistant } from './hooks/use_assistant';
 import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
-import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
+import { FooterAiActions } from '../../../flyout_v2/document/components/footer_ai_actions';
 
-jest.mock('../../../agent_builder/hooks/use_agent_builder_availability');
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../flyout_v2/document/components/footer_ai_actions', () => ({
+  FooterAiActions: jest.fn(() => <div data-test-subj="footerAiActions" />),
+}));
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
   return {
@@ -34,7 +34,6 @@ jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
 jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
-jest.mock('./hooks/use_assistant');
 
 const renderPanelFooter = (isPreview: boolean) =>
   render(
@@ -47,17 +46,7 @@ const renderPanelFooter = (isPreview: boolean) =>
 
 describe('PanelFooter', () => {
   beforeEach(() => {
-    jest.mocked(useAssistant).mockReturnValue({
-      showAssistantOverlay: jest.fn(),
-      showAssistant: true,
-      promptContextId: '',
-    });
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
-      isAgentBuilderEnabled: false,
-      hasAgentBuilderPrivilege: false,
-      isAgentChatExperienceEnabled: false,
-      hasValidAgentBuilderLicense: true,
-    });
+    jest.clearAllMocks();
   });
 
   it('should not render the take action dropdown if preview mode', () => {
@@ -85,33 +74,21 @@ describe('PanelFooter', () => {
     expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render chat button', () => {
+  it('should render footer AI actions with document details context data', () => {
     const { getByTestId } = renderPanelFooter(false);
 
-    expect(getByTestId(CHAT_BUTTON_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render agent button', () => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
-      isAgentBuilderEnabled: true,
-      hasAgentBuilderPrivilege: true,
-      isAgentChatExperienceEnabled: true,
-      hasValidAgentBuilderLicense: true,
-    });
-    const { getByTestId } = renderPanelFooter(false);
-
-    expect(getByTestId(AGENT_ATTACHMENT_BUTTON_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should not render chat button', () => {
-    jest.mocked(useAssistant).mockReturnValue({
-      showAssistantOverlay: jest.fn(),
-      showAssistant: false,
-      promptContextId: '',
-    });
-
-    const { queryByTestId } = renderPanelFooter(true);
-
-    expect(queryByTestId(CHAT_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId('footerAiActions')).toBeInTheDocument();
+    expect(FooterAiActions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataFormattedForFieldBrowser: mockContextValue.dataFormattedForFieldBrowser,
+        hit: expect.objectContaining({
+          raw: expect.objectContaining({
+            _id: mockContextValue.searchHit._id,
+            _index: mockContextValue.searchHit._index,
+          }),
+        }),
+      }),
+      {}
+    );
   });
 });

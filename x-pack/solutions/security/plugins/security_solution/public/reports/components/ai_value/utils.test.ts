@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getPercentInfo, getExcludeAlertsFilters } from './utils';
-import { getPercChange } from '../../../overview/components/detection_response/soc_trends/helpers';
+import { getExcludeAlertsFilters, getPercentInfo } from './utils';
+import { getPercChange } from './helpers';
 import type { EuiThemeComputed } from '@elastic/eui';
 
 // Mock dependencies
-jest.mock('../../../overview/components/detection_response/soc_trends/helpers', () => ({
+jest.mock('./helpers', () => ({
   getPercChange: jest.fn(),
 }));
 

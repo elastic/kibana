@@ -53,6 +53,7 @@
             "lineNumber": 146,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "PerformanceTrackerTypes",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -100,6 +101,7 @@
             "lineNumber": 81,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "PerformanceTrackerOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -172,6 +174,7 @@
             "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PerformanceTrackerMarks",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -213,6 +216,7 @@
             "lineNumber": 169,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "GetMeanFromMeasuresOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -256,6 +260,7 @@
             "lineNumber": 117,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "PerformanceTrackerTypes",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -299,6 +304,7 @@
             "lineNumber": 133,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "PerformanceTrackerTypes",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -339,6 +345,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -390,6 +397,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -415,6 +423,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PerformanceMetricEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -452,6 +461,7 @@
             "lineNumber": 23,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "UsePageReadyProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -534,7 +544,7 @@
             "label": "description",
             "description": [],
             "signature": [
-              "`[ttfmp_alerts] ${string}` | `[ttfmp_onboarding] ${string}` | `[ttfmp_synthetics] ${string}` | `[ttfmp_hosts] ${string}` | `[ttfmp_alert_details] ${string}` | `[ttfmp_services] ${string}` | `[ttfmp_traces] ${string}` | `[ttfmp_dependencies] ${string}` | `[ttfmp_dataset_quality] ${string}` | `[ttfmp_rule_details] ${string}` | `[ttfmp_rules_list] ${string}` | `[ttfmp_slos] ${string}` | `[ttfmp_streams_list] ${string}` | `[ttfmp_streams_detail_retention] ${string}` | `[ttfmp_streams_detail_partitioning] ${string}` | `[ttfmp_streams_detail_processing] ${string}` | `[ttfmp_streams_detail_schema] ${string}` | `[ttfmp_streams_detail_data_quality] ${string}` | `[ttfmp_streams_detail_advanced] ${string}` | `[ttfmp_streams_detail_attachments] ${string}` | `[ttfmp_streams_detail_references] ${string}` | undefined"
+              "`[ttfmp_alerts] ${string}` | `[ttfmp_onboarding] ${string}` | `[ttfmp_synthetics] ${string}` | `[ttfmp_slos] ${string}` | `[ttfmp_hosts] ${string}` | `[ttfmp_alert_details] ${string}` | `[ttfmp_services] ${string}` | `[ttfmp_traces] ${string}` | `[ttfmp_dependencies] ${string}` | `[ttfmp_dataset_quality] ${string}` | `[ttfmp_rule_details] ${string}` | `[ttfmp_rules_list] ${string}` | `[ttfmp_streams_list] ${string}` | `[ttfmp_streams_detail_retention] ${string}` | `[ttfmp_streams_detail_partitioning] ${string}` | `[ttfmp_streams_detail_processing] ${string}` | `[ttfmp_streams_detail_schema] ${string}` | `[ttfmp_streams_detail_data_quality] ${string}` | `[ttfmp_streams_detail_advanced] ${string}` | `[ttfmp_streams_detail_attachments] ${string}` | `[ttfmp_streams_detail_references] ${string}` | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
             "lineNumber": 23,

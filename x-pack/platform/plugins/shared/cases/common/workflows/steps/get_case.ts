@@ -8,32 +8,28 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { CaseResponseProperties } from '../../bundled-types.gen';
 import * as i18n from '../translations';
+import { CasesStepCaseIdSchema, CasesStepSingleCaseOutputSchema } from './shared';
 
 export const GetCaseStepTypeId = 'cases.getCase';
 
-export const InputSchema = z.object({
-  case_id: z.string().min(1, 'case_id is required'),
+const InputSchema = CasesStepCaseIdSchema.extend({
   include_comments: z.boolean().optional().default(false),
 });
 
-export const OutputSchema = z.object({
-  case: CaseResponseProperties,
-});
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type GetCaseStepInputSchema = typeof InputSchema;
-export type GetCaseStepOutputSchema = typeof OutputSchema;
+type GetCaseStepInputSchema = typeof InputSchema;
+type GetCaseStepOutputSchema = typeof OutputSchema;
 
 export type GetCaseStepInput = z.infer<typeof InputSchema>;
-export type GetCaseStepOutput = z.infer<typeof OutputSchema>;
 
 export const getCaseStepCommonDefinition: CommonStepDefinition<
   GetCaseStepInputSchema,
   GetCaseStepOutputSchema
 > = {
   id: GetCaseStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.GET_CASE_STEP_LABEL,
   description: i18n.GET_CASE_STEP_DESCRIPTION,
   documentation: {

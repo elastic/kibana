@@ -24,7 +24,7 @@ const ATTACK_ENTITIES_DETAILS_TEST_ID = 'attack-entities-details';
 export const AttackEntitiesDetails: React.FC = memo(() => {
   const { scopeId } = useAttackDetailsContext();
   const { timestamp } = useHeaderData();
-  const { userNames, hostNames, loading, error } = useAttackEntitiesLists();
+  const { userEntityIdentifiers, hostEntityIdentifiers, loading, error } = useAttackEntitiesLists();
 
   const timestampOrFallback = timestamp ?? '';
 
@@ -43,7 +43,7 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
     );
   }
 
-  const hasEntities = userNames.length > 0 || hostNames.length > 0;
+  const hasEntities = userEntityIdentifiers.length > 0 || hostEntityIdentifiers.length > 0;
 
   if (!hasEntities) {
     return (
@@ -66,18 +66,21 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
             <FormattedMessage
               id="xpack.securitySolution.flyout.attackDetails.left.insights.entities.userDetailsTitle"
               defaultMessage="{userCount, plural, one {User} other {Users}}:"
-              values={{ userCount: userNames.length }}
+              values={{ userCount: userEntityIdentifiers.length }}
             />
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {userNames.map((userName, index) => (
-          <React.Fragment key={`user-${index}-${userName}`}>
+        {userEntityIdentifiers.map((identifiers, index) => (
+          <React.Fragment
+            key={`user-${index}-${identifiers['user.name'] ?? Object.values(identifiers)[0]}`}
+          >
             <UserDetails
-              userName={userName}
+              userName={identifiers['user.name'] ?? Object.values(identifiers)[0]}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
               expandedOnFirstRender={false}
+              isAttackDetails={true}
             />
             <EuiSpacer size="s" />
           </React.Fragment>
@@ -89,18 +92,21 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
             <FormattedMessage
               id="xpack.securitySolution.flyout.attackDetails.left.insights.entities.hostDetailsTitle"
               defaultMessage="{hostCount, plural, one {Host} other {Hosts}}:"
-              values={{ hostCount: hostNames.length }}
+              values={{ hostCount: hostEntityIdentifiers.length }}
             />
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {hostNames.map((hostName, index) => (
-          <React.Fragment key={`host-${index}-${hostName}`}>
+        {hostEntityIdentifiers.map((identifiers, index) => (
+          <React.Fragment
+            key={`host-${index}-${identifiers['host.name'] ?? Object.values(identifiers)[0]}`}
+          >
             <HostDetails
-              hostName={hostName}
+              hostName={identifiers['host.name'] ?? Object.values(identifiers)[0]}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
               expandedOnFirstRender={false}
+              isAttackDetails={true}
             />
             <EuiSpacer size="s" />
           </React.Fragment>

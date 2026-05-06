@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ComponentProps, useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   EuiModal,
   EuiOverlayMask,
@@ -16,7 +16,6 @@ import {
   EuiShowFor,
   EuiSpacer,
   EuiButton,
-  EuiButtonIcon,
   EuiCard,
   EuiIcon,
   EuiModalHeader,
@@ -26,18 +25,19 @@ import {
   EuiModalFooter,
   EuiLink,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
+import { isMac } from '@kbn/shared-ux-utility';
 import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
 } from '../../../common/ui_setting_keys';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
-import { AssistantIcon } from '../../icons/assistant_icon/assistant_icon';
 import type { AIExperienceSelection } from '../../types';
 
 interface AIAssistantHeaderButtonProps {
@@ -54,7 +54,6 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
   triggerOpenChat,
 }) => {
   const [isModalOpen, setModalOpen] = useState(false);
-  const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
 
   const { getUrlForApp } = coreStart.application;
   const { toasts } = coreStart.notifications;
@@ -64,10 +63,30 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
 
   const [selectedType, setSelectedType] = useState<AIExperienceSelection>(AIAssistantType.Default);
 
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
   const onModalClose = useCallback(() => {
+    const shouldRestoreFocus = document.activeElement?.matches(':focus-visible');
     setModalOpen(false);
     setSelectedType(AIAssistantType.Default);
+    if (shouldRestoreFocus) {
+      requestAnimationFrame(() => buttonRef.current?.focus());
+    }
   }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const hasModifier = isMac ? event.metaKey : event.ctrlKey;
+      if (hasModifier && (event.code === 'Semicolon' || event.key === ';')) {
+        event.preventDefault();
+        setModalOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
   const modalTitleId = useGeneratedHtmlId({ prefix: 'aiAssistantModalTitle' });
 
   const applySelection = useCallback(async () => {
@@ -93,49 +112,92 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
       });
     }
   }, [coreStart.settings.client, selectedType, triggerOpenChat, toasts]);
-  const handleConfirmAgent = useCallback(async () => {
-    setConfirmModalOpen(false);
+  const onApply = useCallback(async () => {
     setModalOpen(false);
     await applySelection();
   }, [applySelection]);
 
-  const onApply = useCallback(async () => {
-    if (selectedType === AIChatExperience.Agent) {
-      setConfirmModalOpen(true);
-    } else {
-      setModalOpen(false);
-      await applySelection();
+  const openAIAssistantLabel = i18n.translate(
+    'aiAssistantManagementSelection.navControl.openAIAssistantLabel',
+    {
+      defaultMessage: 'Open AI Assistant',
     }
-  }, [selectedType, applySelection]);
-
-  const AiAssistantHeaderButton: React.FC<
-    ComponentProps<typeof EuiButton> & ComponentProps<typeof EuiButtonIcon>
-  > = (props) => (
-    <>
-      <EuiShowFor sizes={['m', 'l', 'xl']}>
-        <EuiButton {...props} data-test-subj="aiAssistantHeaderButton" />
-      </EuiShowFor>
-      <EuiShowFor sizes={['xs', 's']}>
-        <EuiButtonIcon {...props} display="base" data-test-subj="aiAssistantHeaderButtonIcon" />
-      </EuiShowFor>
-    </>
+  );
+  const shortcutLabel = i18n.translate(
+    'aiAssistantManagementSelection.navControl.keyboardShortcutTooltip',
+    {
+      values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },
+      defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
+    }
+  );
+  const tooltipRef = useRef<EuiToolTip>(null);
+  const [tooltipVisible, setTooltipVisible] = useState(true);
+  const fullTooltipContent = (
+    <div style={{ textAlign: 'center' }}>
+      <span>{openAIAssistantLabel}</span>
+      <br />
+      <span>{shortcutLabel}</span>
+    </div>
   );
 
+  const handleButtonClick = () => {
+    tooltipRef.current?.hideToolTip();
+    setTooltipVisible(false);
+    setModalOpen(true);
+  };
+
+  const textButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      onClick={handleButtonClick}
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+      iconType="aiAssistantLogo"
+      variant="base"
+      size="s"
+      data-test-subj="aiAssistantHeaderButton"
+    >
+      <FormattedMessage
+        id="aiAssistantManagementSelection.headerButton.label"
+        defaultMessage="AI Assistant"
+      />
+    </AiButton>
+  );
+
+  const iconButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      iconOnly
+      iconType="aiAssistantLogo"
+      onClick={handleButtonClick}
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+      aria-label={openAIAssistantLabel}
+      variant="base"
+      size="s"
+      data-test-subj="aiAssistantHeaderButtonIcon"
+    />
+  );
   return (
     <>
-      <AiAssistantHeaderButton
-        iconType={AssistantIcon}
-        onClick={() => setModalOpen(true)}
-        aria-label={i18n.translate('aiAssistantManagementSelection.headerButton.ariaLabel', {
-          defaultMessage: 'Open the AI Assistant selector',
-        })}
-        color="primary"
-        size="s"
-      >
-        {i18n.translate('aiAssistantManagementSelection.headerButton.label', {
-          defaultMessage: 'AI Assistant',
-        })}
-      </AiAssistantHeaderButton>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        {tooltipVisible ? (
+          <EuiToolTip content={shortcutLabel} ref={tooltipRef}>
+            {textButton}
+          </EuiToolTip>
+        ) : (
+          textButton
+        )}
+      </EuiShowFor>
+      <EuiShowFor sizes={['xs', 's']}>
+        {tooltipVisible ? (
+          <EuiToolTip content={fullTooltipContent} ref={tooltipRef}>
+            {iconButton}
+          </EuiToolTip>
+        ) : (
+          iconButton
+        )}
+      </EuiShowFor>
       {isModalOpen && (
         <EuiOverlayMask>
           <EuiModal onClose={onModalClose} aria-labelledby={modalTitleId}>
@@ -212,10 +274,10 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                         justifyContent="center"
                       >
                         <EuiFlexItem grow={false}>
-                          <EuiIcon size="xxl" type="logoObservability" />
+                          <EuiIcon size="xxl" type="logoObservability" aria-hidden={true} />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiIcon size="xxl" type="logoEnterpriseSearch" />
+                          <EuiIcon size="xxl" type="logoEnterpriseSearch" aria-hidden={true} />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     }
@@ -238,7 +300,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       }
                     )}
                     titleSize="xs"
-                    icon={<EuiIcon size="xxl" type="logoSecurity" />}
+                    icon={<EuiIcon size="xxl" type="logoSecurity" aria-hidden={true} />}
                     data-test-subj="aiAssistantSecurityCard"
                     isDisabled={!isSecurityAIAssistantEnabled}
                   />
@@ -247,14 +309,6 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                   <EuiCard
                     display="plain"
                     hasBorder
-                    betaBadgeProps={{
-                      label: i18n.translate(
-                        'aiAssistantManagementSelection.headerButton.betaLabel',
-                        {
-                          defaultMessage: 'BETA',
-                        }
-                      ),
-                    }}
                     selectable={{
                       isSelected: selectedType === AIChatExperience.Agent,
                       onClick: () => setSelectedType(AIChatExperience.Agent),
@@ -266,7 +320,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       }
                     )}
                     titleSize="xs"
-                    icon={<EuiIcon type="productAgent" size="xxl" />}
+                    icon={<EuiIcon type="productAgent" size="xxl" aria-hidden={true} />}
                     data-test-subj="aiAssistantAgentCard"
                     isDisabled={!hasAgentBuilder}
                   />
@@ -302,14 +356,6 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
             </EuiModalFooter>
           </EuiModal>
         </EuiOverlayMask>
-      )}
-
-      {isConfirmModalOpen && (
-        <AIAgentConfirmationModal
-          onConfirm={handleConfirmAgent}
-          onCancel={() => setConfirmModalOpen(false)}
-          docLinks={docLinks}
-        />
       )}
     </>
   );

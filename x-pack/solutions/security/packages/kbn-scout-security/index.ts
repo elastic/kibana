@@ -15,7 +15,6 @@ export { lighthouseTest, apiTest, globalSetupHook, tags } from '@kbn/scout';
 export {
   browserAuthFixture,
   apiServicesFixture,
-  synthtraceFixture,
   createPlaywrightConfig,
   createLazyPageObject,
 } from '@kbn/scout';
@@ -43,6 +42,7 @@ export type {
   SecurityParallelTestFixtures,
   SecurityParallelApiServicesFixture,
   SecurityParallelWorkerFixtures,
+  ThreatMatchRuleCreatePage,
 } from './src/playwright';
 
 // Re-exported Scout core types
@@ -58,12 +58,7 @@ export type {
 } from '@kbn/scout';
 
 // Re-exported fixture types
-export type {
-  ApiServicesFixture,
-  BrowserAuthFixture,
-  SamlAuth,
-  SynthtraceFixture,
-} from '@kbn/scout';
+export type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout';
 
 // Re-exported service & configuration types
 export type {

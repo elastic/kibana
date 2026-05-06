@@ -1,0 +1,112 @@
+{
+  "sha1": "734f411a601467f34fa28f14715349a6218fa22f",
+  "tests": [
+    {
+      "id": "343791488d016cc-1054e603e578b92",
+      "title": "Ingest archives to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/global.setup.ts",
+        "line": 11,
+        "column": 16
+      }
+    },
+    {
+      "id": "3c54375d81c3641-1848d7d14f9644c",
+      "title": "Attack details flyout shows Insights section in attack details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "3c54375d81c3641-4b2a4cd3345df32",
+      "title": "Attack details flyout shows Correlations section in attack details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
+        "line": 59,
+        "column": 14
+      }
+    },
+    {
+      "id": "97e35cdc4d140e2-503e0e64cc584ca",
+      "title": "Attacks page filters renders and opens attacks filtering controls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
+        "line": 33,
+        "column": 14
+      }
+    },
+    {
+      "id": "83af64580ba0bee-6831be53f693f72",
+      "title": "Attacks page smoke renders critical attacks page components",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_page_smoke.spec.ts",
+        "line": 33,
+        "column": 14
+      }
+    },
+    {
+      "id": "f6efc9f182744e4-0cd0946b23ba6e0",
+      "title": "Attacks schedule flyout opens the schedule flyout from attacks page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_schedule.spec.ts",
+        "line": 34,
+        "column": 14
+      }
+    },
+    {
+      "id": "cf8d4b3ea94cc93-6838d4ba4b2f1e3",
+      "title": "Attacks navigation updates side nav based on attacks alignment advanced setting",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/navigation.spec.ts",
+        "line": 27,
+        "column": 14
+      }
+    }
+  ]
+}

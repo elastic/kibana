@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { lensApiStateSchema } from '@kbn/lens-embeddable-utils';
+import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 import {
   lensCommonSavedObjectSchemaV2,
   lensItemDataSchemaV2,
@@ -38,8 +38,8 @@ export const lensItemMetaSchema = schema.object(
 export const lensResponseItemSchema = schema.object(
   {
     id: lensSavedObjectSchemaV2.getPropSchemas().id,
-    data: schema.oneOf([lensApiStateSchema, lensItemDataSchemaV2]),
+    data: schema.oneOf([lensApiConfigSchema, lensItemDataSchemaV2]),
     meta: lensItemMetaSchema,
   },
-  { unknowns: 'forbid' }
+  { unknowns: 'forbid', meta: { id: 'visualizationResponse' } }
 );

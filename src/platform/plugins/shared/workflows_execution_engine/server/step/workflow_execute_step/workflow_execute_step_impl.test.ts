@@ -11,9 +11,9 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowRepository } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
-import { MAX_WORKFLOW_DEPTH } from './constants';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step_impl';
 import type { WorkflowExecuteStepImplInit } from './workflow_execute_step_impl';
+import type { WorkflowsExecutionEngineConfig } from '../../config';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
@@ -21,6 +21,8 @@ import type { StepExecutionRuntime } from '../../workflow_context_manager/step_e
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { isCancellableNode } from '../node_implementation';
+
+const MAX_WORKFLOW_DEPTH = 10;
 
 const createMockInit = (
   overrides: Partial<WorkflowExecuteStepImplInit> = {}
@@ -103,6 +105,9 @@ const createMockInit = (
     workflowExecutionRepository,
     stepExecutionRepository,
     workflowLogger,
+    config: {
+      maxWorkflowDepth: MAX_WORKFLOW_DEPTH,
+    } as WorkflowsExecutionEngineConfig,
     ...overrides,
   };
 };

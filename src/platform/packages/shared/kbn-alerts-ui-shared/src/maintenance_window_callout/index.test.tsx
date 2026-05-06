@@ -10,8 +10,11 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, waitFor, cleanup } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
+import type { KibanaServices } from './types';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
 import { MaintenanceWindowCallout } from '.';
 import { fetchActiveMaintenanceWindows } from './api';
@@ -36,8 +39,15 @@ const TestProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
 };
 
 const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as jest.Mock;
+const platinumLicense = licensingMock.createLicense({
+  license: { type: 'platinum', mode: 'platinum' },
+});
+const basicLicense = licensingMock.createLicense({
+  license: { type: 'basic', mode: 'basic' },
+});
+const license$ = new BehaviorSubject(platinumLicense);
 
-const kibanaServicesMock = {
+const kibanaServicesMock: KibanaServices = {
   application: {
     capabilities: {
       [MAINTENANCE_WINDOW_FEATURE_ID]: {
@@ -68,11 +78,15 @@ const kibanaServicesMock = {
       assetsHrefBase: '',
     },
   },
+  licensing: {
+    license$,
+  },
 };
 
 describe('MaintenanceWindowCallout', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    license$.next(platinumLicense);
   });
 
   afterEach(() => {
@@ -204,6 +218,18 @@ describe('MaintenanceWindowCallout', () => {
     });
 
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should return null and skip fetching when maintenance windows are not licensed', async () => {
+    license$.next(basicLicense);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+
+    const { container } = render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(container).toBeEmptyDOMElement();
+    expect(fetchActiveMaintenanceWindowsMock).not.toHaveBeenCalled();
   });
 
   it('should work as expected if window maintenance privilege is READ', async () => {

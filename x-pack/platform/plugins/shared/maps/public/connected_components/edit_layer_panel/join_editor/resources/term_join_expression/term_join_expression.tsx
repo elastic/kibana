@@ -74,6 +74,9 @@ export function TermJoinExpression(props: Props) {
         />
       }
       repositionOnScroll={true}
+      aria-label={i18n.translate('xpack.maps.termJoinExpression.popoverAriaLabel', {
+        defaultMessage: 'Configure term join',
+      })}
     >
       <TermJoinPopoverContent
         leftSourceName={props.leftSourceName}

@@ -63,7 +63,9 @@ export interface TabbedContentProps
   onEBTEvent: (event: TabsEBTEvent) => void;
   tabContentIdOverride?: string;
   appendRight?: React.ReactNode;
-  /** Optional function to provide additional menu items for tabs */
+  /** Optional function to provide menu items placed after rename/duplicate */
+  getTopTabMenuItems?: (item: TabItem) => TabMenuItem[];
+  /** Optional function to provide additional menu items placed at the end of the menu */
   getAdditionalTabMenuItems?: (item: TabItem) => TabMenuItem[];
 }
 
@@ -107,6 +109,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   disableDragAndDrop = false,
   disableTabsBarMenu = false,
   appendRight,
+  getTopTabMenuItems,
   getAdditionalTabMenuItems,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -188,13 +191,20 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   );
 
   const onSelectRecentlyClosed = useCallback(
-    async (item: TabItem) => {
-      const newItem = createItem();
-      const restoredItem = { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
-      tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
-
+    async (item: RecentlyClosedTabItem) => {
       changeState((prevState) => {
-        const nextState = selectRecentlyClosedTab(prevState, restoredItem);
+        if (maxItemsCount && prevState.items.length >= maxItemsCount) {
+          return prevState;
+        }
+
+        const newItem = createItem();
+        const restoredItem = {
+          ...omit(item, 'closedAt'),
+          id: newItem.id,
+          restoredFromId: item.id,
+        };
+
+        tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
 
         onEBTEvent({
           [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
@@ -202,10 +212,52 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
         });
 
-        return nextState;
+        return selectRecentlyClosedTab(prevState, restoredItem);
       });
     },
-    [changeState, createItem, onEBTEvent]
+    [changeState, createItem, maxItemsCount, onEBTEvent]
+  );
+
+  const onRestoreRecentlyClosedGroup = useCallback(
+    async (itemsToRestore: RecentlyClosedTabItem[]) => {
+      if (itemsToRestore.length === 0) {
+        return;
+      }
+
+      changeState((prevState) => {
+        const remainingCapacity = maxItemsCount
+          ? Math.max(0, maxItemsCount - prevState.items.length)
+          : itemsToRestore.length;
+
+        const restoredItems = itemsToRestore.slice(0, remainingCapacity).map((item) => {
+          const newItem = createItem();
+          return { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
+        });
+
+        if (restoredItems.length === 0) {
+          return prevState;
+        }
+
+        const nextSelectedItem = restoredItems.at(0) ?? prevState.selectedItem;
+        if (nextSelectedItem) {
+          tabsBarApi.current?.moveFocusToNextSelectedItem(nextSelectedItem);
+        }
+
+        restoredItems.forEach((restoredItem) => {
+          onEBTEvent({
+            [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
+            [TabsEventDataKeys.TAB_ID]: restoredItem.restoredFromId ?? restoredItem.id,
+            [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+          });
+        });
+
+        return {
+          items: [...prevState.items, ...restoredItems],
+          selectedItem: nextSelectedItem,
+        };
+      });
+    },
+    [changeState, createItem, maxItemsCount, onEBTEvent]
   );
 
   const onClose = useCallback(
@@ -347,6 +399,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       onDuplicate,
       onCloseOtherTabs,
       onCloseTabsToTheRight,
+      getTopTabMenuItems,
       getAdditionalTabMenuItems,
     });
   }, [
@@ -355,6 +408,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     onDuplicate,
     onCloseOtherTabs,
     onCloseTabsToTheRight,
+    getTopTabMenuItems,
     getAdditionalTabMenuItems,
   ]);
 
@@ -393,6 +447,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
           onSelectRecentlyClosed={onSelectRecentlyClosed}
+          onRestoreRecentlyClosedGroup={onRestoreRecentlyClosedGroup}
           onClearRecentlyClosed={onClearRecentlyClosed}
           onReorder={onReorder}
           onClose={onClose}

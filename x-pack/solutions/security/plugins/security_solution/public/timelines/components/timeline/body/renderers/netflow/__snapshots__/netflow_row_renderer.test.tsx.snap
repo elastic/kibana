@@ -2,47 +2,29 @@
 
 exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 {
-  display: inline-block;
-  font-size: 12px;
-  line-height: 1.5;
-  padding-left: 12px;
-}
-
-.c0 .euiAccordion + div {
-  background-color: #0B1628;
-  padding: 0 8px;
-  border: 1px solid #243147;
-  border-radius: 4px;
-}
-
-.c5 {
+  .c3 {
   margin-right: 5px;
 }
 
-.c4 {
+.c2 {
   margin-right: 5px;
 }
 
-.c3 {
+.c1 {
   margin-right: 3px;
   position: relative;
   top: -1px;
 }
 
-.c2 {
+.c0 {
   margin-right: 10px;
 }
 
-.c1 {
-  margin: 5px 0;
-}
-
 <div
-    class="c0 siemEventsTable__trSupplement--summary siemEventsTable__trSupplement siemEventsTable__trSupplement--summary"
+    class="siemEventsTable__trSupplement siemEventsTable__trSupplement--summary css-1etiyqu-EventsTrSupplement"
   >
     <div
-      class="c1"
+      class="css-1uvwhwp-detailsCss"
     >
       <div
         class="euiFlexGroup emotion-euiFlexGroup-wrap-none-center-center-column"
@@ -56,7 +38,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
             data-test-subj="netflow-columns"
           >
             <div
-              class="euiFlexItem c2 emotion-euiFlexItem-growZero"
+              class="euiFlexItem c0 emotion-euiFlexItem-growZero"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
@@ -135,7 +117,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             <span
                               class="euiBadge__icon emotion-euiBadge__icon-left"
                               color="inherit"
-                              data-euiicon-type="console"
+                              data-euiicon-type="commandLine"
                             />
                             <span
                               class="euiBadge__text emotion-euiBadge__text"
@@ -151,7 +133,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
               </div>
             </div>
             <div
-              class="euiFlexItem c2 emotion-euiFlexItem-growZero"
+              class="euiFlexItem c0 emotion-euiFlexItem-growZero"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
@@ -171,7 +153,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                         class="euiText emotion-euiText-xs"
                       >
                         <span
-                          class="c3"
+                          class="c1"
                           data-euiicon-type="clock"
                         />
                         <span
@@ -202,7 +184,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                         class="euiText emotion-euiText-xs"
                       >
                         <span
-                          class="c3"
+                          class="c1"
                           data-euiicon-type="clock"
                         />
                         <span
@@ -237,7 +219,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                 class="euiText emotion-euiText-xs"
                               >
                                 <span
-                                  class="c3"
+                                  class="c1"
                                   data-euiicon-type="clock"
                                 />
                                 <span
@@ -292,7 +274,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                 <span
                                   class="euiBadge__icon emotion-euiBadge__icon-left"
                                   color="inherit"
-                                  data-euiicon-type="arrowUp"
+                                  data-euiicon-type="chevronSingleUp"
                                 />
                                 <span
                                   class="euiBadge__text emotion-euiBadge__text"
@@ -540,8 +522,8 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                               >
                                                 9987
                                                 <span
-                                                  class="emotion-EuiExternalLinkIcon"
-                                                  data-euiicon-type="popout"
+                                                  class="css-1j75qc1"
+                                                  data-euiicon-type="external"
                                                   role="presentation"
                                                 />
                                                 <span
@@ -833,7 +815,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           >
                             <span
                               color="subdued"
-                              data-euiicon-type="arrowRight"
+                              data-euiicon-type="chevronSingleRight"
                               data-test-subj="arrow-icon"
                             />
                           </div>
@@ -850,7 +832,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           >
                             <span
                               color="subdued"
-                              data-euiicon-type="arrowLeft"
+                              data-euiicon-type="chevronSingleLeft"
                               data-test-subj="arrow-icon"
                             />
                           </div>
@@ -1029,8 +1011,8 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                               >
                                                 80
                                                 <span
-                                                  class="emotion-EuiExternalLinkIcon"
-                                                  data-euiicon-type="popout"
+                                                  class="css-1j75qc1"
+                                                  data-euiicon-type="external"
                                                   role="presentation"
                                                 />
                                                 <span
@@ -1248,7 +1230,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           class="euiBadge__text emotion-euiBadge__text"
                         >
                           <span
-                            class="c4"
+                            class="c2"
                           >
                             ja3
                           </span>
@@ -1261,8 +1243,8 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           >
                             tls.fingerprints.ja3.hash-value
                             <span
-                              class="emotion-EuiExternalLinkIcon"
-                              data-euiicon-type="popout"
+                              class="css-1j75qc1"
+                              data-euiicon-type="external"
                               role="presentation"
                             />
                             <span
@@ -1308,7 +1290,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           class="euiBadge__text emotion-euiBadge__text"
                         >
                           <span
-                            class="c5"
+                            class="c3"
                           >
                             client cert
                           </span>
@@ -1321,8 +1303,8 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           >
                             tls.client_certificate.fingerprint.sha1-value
                             <span
-                              class="emotion-EuiExternalLinkIcon"
-                              data-euiicon-type="popout"
+                              class="css-1j75qc1"
+                              data-euiicon-type="external"
                               role="presentation"
                             />
                             <span
@@ -1368,7 +1350,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           class="euiBadge__text emotion-euiBadge__text"
                         >
                           <span
-                            class="c5"
+                            class="c3"
                           >
                             server cert
                           </span>
@@ -1381,8 +1363,8 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           >
                             tls.server_certificate.fingerprint.sha1-value
                             <span
-                              class="emotion-EuiExternalLinkIcon"
-                              data-euiicon-type="popout"
+                              class="css-1j75qc1"
+                              data-euiicon-type="external"
                               role="presentation"
                             />
                             <span

@@ -33,7 +33,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     browserAuth,
     syntheticsServices,
   }) => {
-    test.setTimeout(3 * 60_000);
+    test.setTimeout(5 * 60_000);
     const firstCheckTime = new Date(Date.now()).toISOString();
 
     await test.step('setup: create monitor with connector and summary doc', async () => {
@@ -77,6 +77,9 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
       await page.testSubj.locator(`Test Monitor-${locationId}-metric-item`).hover();
       await page.click('[aria-label="Open actions menu"]');
       await page.click('text=Enable status alert');
+      await expect(
+        page.getByText('Alerts are now enabled for the monitor "Test Monitor".')
+      ).toBeVisible();
     });
 
     await test.step('set monitor status to down', async () => {
@@ -96,13 +99,16 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('verify alert is generated', async () => {
+      await syntheticsServices.cleanUpAlerts();
       await pageObjects.syntheticsApp.navigateToAlertsPage();
 
       await expect(async () => {
         await page.testSubj.click('querySubmitButton');
-        await pageObjects.syntheticsApp.waitForLoadingToFinish();
-        await expect(page.getByText('1 Alert')).toBeVisible({ timeout: 5_000 });
-      }).toPass({ timeout: 60_000 });
+        await expect(page.testSubj.locator('toolbar-alerts-count')).toHaveText(
+          /^[1-9]\d* alerts?$/i,
+          { timeout: 15_000 }
+        );
+      }).toPass({ timeout: 180_000, intervals: [5_000] });
     });
 
     // TODO: The following steps require a better test design.

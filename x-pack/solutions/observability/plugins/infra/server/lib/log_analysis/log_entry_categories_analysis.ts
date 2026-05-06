@@ -157,7 +157,8 @@ export async function getLogEntryCategoryExamples(
   endTime: number,
   categoryId: number,
   exampleCount: number,
-  resolvedLogView: ResolvedLogView
+  resolvedLogView: ResolvedLogView,
+  projectRouting?: string
 ) {
   const finalizeLogEntryCategoryExamplesSpan = startTracingSpan('get category example log entries');
 
@@ -206,7 +207,8 @@ export async function getLogEntryCategoryExamples(
     startTime,
     endTime,
     category._source.terms,
-    exampleCount
+    exampleCount,
+    projectRouting
   );
 
   const logEntryCategoryExamplesSpan = finalizeLogEntryCategoryExamplesSpan();
@@ -419,15 +421,16 @@ async function fetchLogEntryCategoryExamples(
   startTime: number,
   endTime: number,
   categoryQuery: string,
-  exampleCount: number
+  exampleCount: number,
+  projectRouting?: string
 ) {
   const finalizeEsSearchSpan = startTracingSpan('Fetch examples from ES');
 
   const {
     hits: { hits },
   } = decodeOrThrow(logEntryCategoryExamplesResponseRT)(
-    await requestContext.core.elasticsearch.client.asCurrentUser.search(
-      createLogEntryCategoryExamplesQuery(
+    await requestContext.core.elasticsearch.client.asCurrentUser.search({
+      ...createLogEntryCategoryExamplesQuery(
         indices,
         runtimeMappings,
         timestampField,
@@ -436,8 +439,9 @@ async function fetchLogEntryCategoryExamples(
         endTime,
         categoryQuery,
         exampleCount
-      )
-    )
+      ),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
+    })
   );
 
   const esSearchSpan = finalizeEsSearchSpan();

@@ -37,7 +37,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type {
   AnyRecord,
@@ -93,11 +93,11 @@ export const Zoom: ConnectorSpec = {
     id: '.zoom',
     displayName: 'Zoom',
     description: i18n.translate('core.kibanaConnectorSpecs.zoom.metadata.description', {
-      defaultMessage:
-        'Kibana Stack Connector for Zoom — access meetings, recordings, transcripts, and participants.',
+      defaultMessage: 'Access meetings, recordings, transcripts, and participants in Zoom',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -120,16 +120,30 @@ export const Zoom: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
+          },
+        },
+        defaults: {
+          authorizationUrl: 'https://zoom.us/oauth/authorize',
+          tokenUrl: 'https://zoom.us/oauth/token',
+          scope:
+            'user:read:user meeting:read:meeting meeting:read:list_meetings meeting:read:past_meeting meeting:read:list_past_participants meeting:read:list_registrants cloud_recording:read:list_recording_files cloud_recording:read:list_user_recordings',
+        },
+      },
     ],
   },
 
   actions: {
     whoAmI: {
       isTool: true,
-      description: i18n.translate('core.kibanaConnectorSpecs.zoom.actions.whoAmI.description', {
-        defaultMessage:
-          'Get the profile of the currently authenticated Zoom user, including name, email, role, timezone, and personal meeting URL.',
-      }),
+      description:
+        'Get the profile of the currently authenticated Zoom user, including name, email, role, timezone, and personal meeting URL. Use this first to confirm which account is connected and to obtain the userId for other actions.',
       input: ZoomWhoAmIInputSchema,
       output: ZoomUserProfileSchema,
       handler: async (ctx) => {
@@ -141,16 +155,14 @@ export const Zoom: ConnectorSpec = {
 
     listMeetings: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.zoom.actions.listMeetings.description',
-        {
-          defaultMessage: 'List meetings for a user. Use type=upcoming for future meetings.',
-        }
-      ),
+      description:
+        'List meetings for a user. Use type=upcoming (default) for future meetings, type=live for in-progress meetings, type=scheduled for all scheduled meetings, or type=previous_meetings for past meetings. Returns meeting topics, start times, durations, and join URLs.',
       input: ZoomListMeetingsInputSchema,
-      output: ZoomPaginationOutputSchema.extend({
-        meetings: z.array(ZoomMeetingSummarySchema).describe('Array of meeting summaries'),
-      }),
+      output: lazySchema(() =>
+        ZoomPaginationOutputSchema.extend({
+          meetings: z.array(ZoomMeetingSummarySchema).describe('Array of meeting summaries'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomListMeetingsInput = ZoomListMeetingsInputSchema.parse(input);
         ctx.log.debug(
@@ -179,33 +191,30 @@ export const Zoom: ConnectorSpec = {
 
     getMeetingDetails: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.zoom.actions.getMeetingDetails.description',
-        {
-          defaultMessage:
-            'Get details of a scheduled or recurring meeting, including topic, agenda, start time, duration, timezone, host info, join URL, and settings. Use this to understand what a meeting is about before looking at recordings or participants.',
-        }
-      ),
+      description:
+        'Get details of a scheduled or recurring meeting, including topic, agenda, start time, duration, timezone, host info, join URL, and settings. Use this for upcoming/recurring meetings to understand what a meeting is about before looking at recordings or participants.',
       input: ZoomGetMeetingDetailsInputSchema,
-      output: z.object({
-        uuid: z.string().optional(),
-        id: z.number().optional(),
-        host_email: z.string().optional(),
-        topic: z.string().optional(),
-        type: z
-          .number()
-          .optional()
-          .describe(
-            'Meeting type: 1=instant, 2=scheduled, 3=recurring no fixed time, 8=recurring fixed time'
-          ),
-        status: z.string().optional().describe('Meeting status: waiting or started'),
-        start_time: z.string().optional(),
-        duration: z.number().optional().describe('Scheduled duration in minutes'),
-        timezone: z.string().optional(),
-        agenda: z.string().optional().describe('Meeting agenda/description'),
-        join_url: z.string().optional(),
-        password: z.string().optional().describe('Meeting passcode required to join'),
-      }),
+      output: lazySchema(() =>
+        z.object({
+          uuid: z.string().optional(),
+          id: z.number().optional(),
+          host_email: z.string().optional(),
+          topic: z.string().optional(),
+          type: z
+            .number()
+            .optional()
+            .describe(
+              'Meeting type: 1=instant, 2=scheduled, 3=recurring no fixed time, 8=recurring fixed time'
+            ),
+          status: z.string().optional().describe('Meeting status: waiting or started'),
+          start_time: z.string().optional(),
+          duration: z.number().optional().describe('Scheduled duration in minutes'),
+          timezone: z.string().optional(),
+          agenda: z.string().optional().describe('Meeting agenda/description'),
+          join_url: z.string().optional(),
+          password: z.string().optional().describe('Meeting passcode required to join'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomGetMeetingDetailsInput =
           ZoomGetMeetingDetailsInputSchema.parse(input);
@@ -232,24 +241,21 @@ export const Zoom: ConnectorSpec = {
 
     getPastMeetingDetails: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.zoom.actions.getPastMeetingDetails.description',
-        {
-          defaultMessage:
-            'Get summary information for a meeting that has already ended. Returns total minutes, participant count, start/end times. Only works for past meetings.',
-        }
-      ),
+      description:
+        'Get summary information for a meeting that has already ended. Returns total minutes, participant count, start/end times. Only works for past meetings — use getMeetingDetails for upcoming/scheduled meetings.',
       input: ZoomGetPastMeetingDetailsInputSchema,
-      output: z.object({
-        uuid: z.string().optional(),
-        id: z.number().optional(),
-        topic: z.string().optional(),
-        start_time: z.string().optional(),
-        end_time: z.string().optional(),
-        duration: z.number().optional().describe('Actual meeting duration in minutes'),
-        total_minutes: z.number().optional().describe('Sum of all participant minutes'),
-        participants_count: z.number().optional(),
-      }),
+      output: lazySchema(() =>
+        z.object({
+          uuid: z.string().optional(),
+          id: z.number().optional(),
+          topic: z.string().optional(),
+          start_time: z.string().optional(),
+          end_time: z.string().optional(),
+          duration: z.number().optional().describe('Actual meeting duration in minutes'),
+          total_minutes: z.number().optional().describe('Sum of all participant minutes'),
+          participants_count: z.number().optional(),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomGetPastMeetingDetailsInput =
           ZoomGetPastMeetingDetailsInputSchema.parse(input);
@@ -272,22 +278,19 @@ export const Zoom: ConnectorSpec = {
 
     getMeetingRecordings: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.zoom.actions.getMeetingRecordings.description',
-        {
-          defaultMessage:
-            'Get cloud recordings for a meeting. Response includes recording_files with types: shared_screen_with_speaker_view, audio_only, audio_transcript, chat_file, and more.',
-        }
-      ),
+      description:
+        'Get cloud recording files for a specific meeting. Returns recording_files entries with recording_type (e.g. audio_transcript for VTT transcripts, chat_file for TXT chat logs, shared_screen_with_speaker_view for MP4 video), file_type, file_size, download_url, and status. Use the download_url values with downloadRecordingFile to fetch the actual content.',
       input: ZoomGetMeetingRecordingsInputSchema,
-      output: z.object({
-        topic: z.string().optional(),
-        start_time: z.string().optional(),
-        duration: z.number().optional(),
-        recording_count: z.number().optional(),
-        password: z.string().optional().describe('Passcode to access the recording files'),
-        recording_files: z.array(ZoomRecordingFileSchema),
-      }),
+      output: lazySchema(() =>
+        z.object({
+          topic: z.string().optional(),
+          start_time: z.string().optional(),
+          duration: z.number().optional(),
+          recording_count: z.number().optional(),
+          password: z.string().optional().describe('Passcode to access the recording files'),
+          recording_files: z.array(ZoomRecordingFileSchema),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomGetMeetingRecordingsInput =
           ZoomGetMeetingRecordingsInputSchema.parse(input);
@@ -308,24 +311,21 @@ export const Zoom: ConnectorSpec = {
 
     listUserRecordings: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.zoom.actions.listUserRecordings.description',
-        {
-          defaultMessage:
-            'List cloud recordings for a user within a date range. Returns meetings with their recording_files (including transcripts and chat files).',
-        }
-      ),
+      description:
+        'List cloud recordings for a user within a date range (max 1 month). Returns meetings with their recording_files entries (including audio_transcript for VTT transcripts and chat_file for TXT chat logs). Use the download_url values from recording_files with downloadRecordingFile to fetch the actual content. Use this when you need recordings across multiple meetings; use getMeetingRecordings when you already know the specific meeting ID.',
       input: ZoomListUserRecordingsInputSchema,
-      output: ZoomPaginationOutputSchema.extend({
-        from: z.string().optional(),
-        to: z.string().optional(),
-        meetings: z.array(
-          ZoomMeetingSummarySchema.extend({
-            recording_count: z.number().optional(),
-            recording_files: z.array(ZoomRecordingFileSchema),
-          })
-        ),
-      }),
+      output: lazySchema(() =>
+        ZoomPaginationOutputSchema.extend({
+          from: z.string().optional(),
+          to: z.string().optional(),
+          meetings: z.array(
+            ZoomMeetingSummarySchema.extend({
+              recording_count: z.number().optional(),
+              recording_files: z.array(ZoomRecordingFileSchema),
+            })
+          ),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomListUserRecordingsInput =
           ZoomListUserRecordingsInputSchema.parse(input);
@@ -359,19 +359,16 @@ export const Zoom: ConnectorSpec = {
 
     downloadRecordingFile: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.zoom.actions.downloadRecordingFile.description',
-        {
-          defaultMessage:
-            'Download a recording file by its download URL. Works for transcripts (VTT format), chat logs, and other recording files. Returns the content as text.',
-        }
-      ),
+      description:
+        'Download a Zoom recording file by its download_url. Works for transcripts (recording_type=audio_transcript, VTT format), chat logs (recording_type=chat_file, TXT format), and other recording file types. Obtain the download_url from getMeetingRecordings or listUserRecordings — look for recording_files entries with the desired recording_type. Returns the file content as UTF-8 text, truncated to maxChars if needed. Check the truncated flag in the response.',
       input: ZoomDownloadRecordingFileInputSchema,
-      output: z.object({
-        contentType: z.string().optional().describe('Content-Type header from the response'),
-        text: z.string().describe('File content as UTF-8 text (may be truncated)'),
-        truncated: z.boolean().describe('Whether the content was truncated to maxChars'),
-      }),
+      output: lazySchema(() =>
+        z.object({
+          contentType: z.string().optional().describe('Content-Type header from the response'),
+          text: z.string().describe('File content as UTF-8 text (may be truncated)'),
+          truncated: z.boolean().describe('Whether the content was truncated to maxChars'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomDownloadRecordingFileInput =
           ZoomDownloadRecordingFileInputSchema.parse(input);
@@ -394,17 +391,14 @@ export const Zoom: ConnectorSpec = {
 
     getMeetingParticipants: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.zoom.actions.getMeetingParticipants.description',
-        {
-          defaultMessage:
-            'List participants of a past meeting. Returns participant name, email, join/leave times, and duration.',
-        }
-      ),
+      description:
+        'List participants of a past meeting. Returns participant name, email, join/leave times, and duration. Only works for meetings that have ended.',
       input: ZoomGetMeetingParticipantsInputSchema,
-      output: ZoomPaginationOutputSchema.extend({
-        participants: z.array(ZoomParticipantSchema),
-      }),
+      output: lazySchema(() =>
+        ZoomPaginationOutputSchema.extend({
+          participants: z.array(ZoomParticipantSchema),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomGetMeetingParticipantsInput =
           ZoomGetMeetingParticipantsInputSchema.parse(input);
@@ -431,17 +425,14 @@ export const Zoom: ConnectorSpec = {
 
     getMeetingRegistrants: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.zoom.actions.getMeetingRegistrants.description',
-        {
-          defaultMessage:
-            'List registrants of a meeting. Works for future and past meetings that have registration enabled. Returns registrant name, email, and registration status.',
-        }
-      ),
+      description:
+        'List registrants of a meeting. Works for future and past meetings that have registration enabled. Returns registrant name, email, and registration status.',
       input: ZoomGetMeetingRegistrantsInputSchema,
-      output: ZoomPaginationOutputSchema.extend({
-        registrants: z.array(ZoomRegistrantSchema),
-      }),
+      output: lazySchema(() =>
+        ZoomPaginationOutputSchema.extend({
+          registrants: z.array(ZoomRegistrantSchema),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput: ZoomGetMeetingRegistrantsInput =
           ZoomGetMeetingRegistrantsInputSchema.parse(input);
@@ -467,6 +458,15 @@ export const Zoom: ConnectorSpec = {
       },
     },
   },
+
+  skill: [
+    'Recordings — two strategies:',
+    '- By date range: listUserRecordings(userId, from, to) → find recording_files → downloadRecordingFile(download_url)',
+    '- By meeting: getMeetingRecordings(meetingId) → find recording_files → downloadRecordingFile(download_url)',
+    'In recording_files, look for recording_type="audio_transcript" (VTT) or "chat_file" (TXT) for text-based content.',
+    '',
+    'Prefer narrower sub-resource calls over fetching everything when you only need one aspect of a meeting.',
+  ].join('\n'),
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.zoom.test.description', {

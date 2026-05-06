@@ -20,6 +20,7 @@ const HISTOGRAM_QUERY_ID = 'usersAuthenticationsHistogramQuery';
 export const AuthenticationsQueryTabBody = ({
   endDate,
   filterQuery,
+  identityScopedFilterQuery,
   indexNames,
   skip,
   setQuery,
@@ -29,12 +30,13 @@ export const AuthenticationsQueryTabBody = ({
   userName,
 }: AuthenticationsUserTableProps) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const effectiveFilterQuery = identityScopedFilterQuery ?? filterQuery;
 
   return (
     <>
       <MatrixHistogram
         endDate={endDate}
-        filterQuery={filterQuery}
+        filterQuery={effectiveFilterQuery}
         id={HISTOGRAM_QUERY_ID}
         startDate={startDate}
         {...histogramConfigs}
@@ -43,7 +45,7 @@ export const AuthenticationsQueryTabBody = ({
 
       <AuthenticationsUserTable
         endDate={endDate}
-        filterQuery={filterQuery}
+        filterQuery={effectiveFilterQuery}
         indexNames={indexNames}
         setQuery={setQuery}
         deleteQuery={deleteQuery}

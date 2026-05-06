@@ -5,7 +5,6 @@ disabled:
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/solutions/search/test/serverless/api_integration/configs/config.ts
-  - x-pack/solutions/search/test/serverless/api_integration/configs/config.feature_flags.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config.search_features.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config.feature_flags.ts
@@ -21,6 +20,7 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group4.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group5.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group6.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.reporting.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group7.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group8.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group9.ts
@@ -30,4 +30,10 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group13.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group14.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group15.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group16.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group17.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group18.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group19.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group20.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.feature_flags.ts
   - x-pack/platform/test/agent_builder_api_integration/configs/config.serverless.ts

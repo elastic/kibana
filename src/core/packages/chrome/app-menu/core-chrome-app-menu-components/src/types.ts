@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonColor, EuiButtonProps, EuiHideForProps, IconType } from '@elastic/eui';
-import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
+import type { EuiHideForProps, IconType } from '@elastic/eui';
+import type { SplitButtonWithNotificationProps } from './components/split_button_with_notification';
 
 /**
  * Parameters passed to AppMenuRunAction
@@ -18,6 +18,12 @@ export interface AppMenuRunActionParams {
    * The HTML element that triggered the action. Do not use this to open popovers. Use `items` property to define popover items instead.
    */
   triggerElement: HTMLElement;
+  /**
+   * Returns focus to the originating app menu control (or an internal fallback such as
+   * the overflow button). This is useful when a run action opens and later closes a
+   * modal/flyout/dialog that should restore keyboard focus.
+   */
+  returnFocus: () => void;
   /**
    * Generic context object that can be used to pass additional data to the run action.
    * Consumers can extend this to add custom properties as needed.
@@ -37,15 +43,11 @@ export type AppMenuRunAction = (params?: AppMenuRunActionParams) => void;
 type BaseSplitProps = Pick<
   SplitButtonWithNotificationProps,
   | 'isMainButtonLoading'
-  | 'isMainButtonDisabled'
-  | 'isSecondaryButtonLoading'
   | 'isSecondaryButtonDisabled'
   | 'secondaryButtonAriaLabel'
-  | 'secondaryButtonTitle'
-  | 'secondaryButtonIcon'
   | 'iconType'
   | 'showNotificationIndicator'
-  | 'notifcationIndicatorTooltipContent'
+  | 'notificationIndicatorTooltipContent'
 >;
 
 type AppMenuSecondarySplitButton = BaseSplitProps & {
@@ -128,7 +130,7 @@ type AppMenuLinkItem = AppMenuItemBase & {
   /**
    * The HTML target attribute for the item. Only used if `items` is not provided.
    */
-  target: string;
+  target?: string;
   /**
    * Function to run when the item is clicked. Only used if `items` is not provided.
    */
@@ -216,41 +218,33 @@ export type AppMenuItemType = AppMenuItemCommon & {
    * Order of the item in the menu. Lower numbers appear first.
    */
   order: number;
+  /**
+   * If `true`, the item will be moved to the "More" menu. Only used in top-level items, not in popover items.
+   */
+  overflow?: boolean;
+  /**
+   * Adds a separator line above or below the item when rendered inside a popover menu.
+   * Ignored for top-level, non-popover items.
+   */
+  separator?: 'above' | 'below';
 };
 
 /**
  * Popover item type for use in `items` arrays.
  */
-export type AppMenuPopoverItem = Omit<AppMenuItemType, 'iconType' | 'hidden' | 'popoverWidth'> & {
+export type AppMenuPopoverItem = Omit<
+  AppMenuItemType,
+  'iconType' | 'hidden' | 'popoverWidth' | 'overflow'
+> & {
   /**
    * The icon type for the item.
    */
   iconType?: IconType;
   /**
-   * Adds a separator line above or below the item in the popover menu.
+   * Optional badge text displayed after the label (e.g. "New").
+   * Rendered as an inline EuiBadge next to the item name.
    */
-  separator?: 'above' | 'below';
-};
-
-type AppMenuActionButton = Omit<AppMenuItemCommon, 'order'> & {
-  /**
-   * The color of the button.
-   */
-  color?: EuiButtonColor;
-};
-
-/**
- * Secondary action button type. Can't be a split button.
- */
-export type AppMenuSecondaryActionItem = AppMenuActionButton & {
-  /**
-   * Whether the button should be filled.
-   */
-  isFilled?: boolean;
-  /**
-   * Equal to EUI `minWidth` property.
-   */
-  minWidth?: EuiButtonProps['minWidth'];
+  labelBadgeText?: string;
 };
 
 /**
@@ -260,7 +254,7 @@ export type AppMenuPrimaryActionItem =
   /**
    * The main part of the button should never open a popover.
    */
-  Omit<AppMenuActionButton, 'items'> & {
+  Omit<AppMenuItemCommon, 'order' | 'overflow' | 'separator'> & {
     /**
      * Subset of SplitButtonWithNotificationProps.
      */
@@ -269,18 +263,18 @@ export type AppMenuPrimaryActionItem =
 
 /**
  * Configuration object for the AppMenu component.
+ * The maximum number of items that can be visible at once before overflowing into the "More"
+ * popover is determined by the APP_MENU_ITEM_LIMIT constant - currently 5 but it will
+ * be reduced to 3 in a future release.
  */
 export interface AppMenuConfig {
   /**
    * List of menu items to display in the app menu.
+
    */
   items?: AppMenuItemType[];
   /**
    * Primary action button to display in the app menu.
    */
   primaryActionItem?: AppMenuPrimaryActionItem;
-  /**
-   * Secondary action button to display in the app menu.
-   */
-  secondaryActionItem?: AppMenuSecondaryActionItem;
 }

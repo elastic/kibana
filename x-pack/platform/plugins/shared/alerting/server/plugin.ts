@@ -57,6 +57,7 @@ import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
+import type { RulesClientCreateOptions } from './rules_client_factory';
 import {
   RulesSettingsClientFactory,
   RulesSettingsService,
@@ -114,6 +115,9 @@ import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
 import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
+import { ChangeTrackingService } from './rules_client/lib/change_tracking';
+import { UiamApiKeyProvisioningTask } from './provisioning';
+import { uiamProvisioningEvents } from './provisioning/event_based_telemetry';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -174,14 +178,18 @@ export interface AlertingServerStart {
   getAllTypes: RuleTypeRegistry['getAllTypes'];
   getType: RuleTypeRegistry['get'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
-  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
+  getRulesClientWithRequest(
+    request: KibanaRequest,
+    options?: RulesClientCreateOptions
+  ): Promise<RulesClientApi>;
   /**
    * Creates a RulesClient that is bound to the provided spaceId (namespace) while preserving
    * the original request (and its auth context).
    */
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string
+    spaceId: string,
+    options?: RulesClientCreateOptions
   ): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
@@ -248,6 +256,8 @@ export class AlertingPlugin {
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
+  private changeTrackingService?: ChangeTrackingService;
+  private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -266,6 +276,9 @@ export class AlertingPlugin {
     this.disabledRuleTypes = new Set(this.config.disabledRuleTypes || []);
     this.enabledRuleTypes =
       this.config.enabledRuleTypes != null ? new Set(this.config.enabledRuleTypes) : null;
+    if (this.config.ruleChangeTracking.enabled) {
+      this.changeTrackingService = new ChangeTrackingService(this.logger, this.kibanaVersion);
+    }
   }
 
   public setup(
@@ -413,6 +426,15 @@ export class AlertingPlugin {
       this.config
     );
 
+    uiamProvisioningEvents.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+
+    this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
+      logger: this.logger,
+      isServerless: this.isServerless,
+      analytics: core.analytics,
+    });
+    this.uiamApiKeyProvisioningTask.register({ core, taskManager: plugins.taskManager });
+
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,
       summary: 'Alerting is (probably) ready',
@@ -550,6 +572,16 @@ export class AlertingPlugin {
               ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
           }
 
+          // Rule Change Tracking
+          // There are many alerting rule types but they all belong to a specific solution
+          // (security, stack, observability).
+          if (this.changeTrackingService) {
+            const { scope } = this.config.ruleChangeTracking;
+            if (scope.includes('all') || scope.includes(ruleType.solution)) {
+              this.changeTrackingService.register(ruleType.solution);
+            }
+          }
+
           ruleTypeRegistry.register(ruleType);
         }
       },
@@ -593,6 +625,7 @@ export class AlertingPlugin {
       taskRunnerFactory,
       ruleTypeRegistry,
       rulesClientFactory,
+      changeTrackingService,
       alertingAuthorizationClientFactory,
       rulesSettingsClientFactory,
       security,
@@ -626,6 +659,11 @@ export class AlertingPlugin {
       features: plugins.features,
     });
 
+    changeTrackingService?.initialize({
+      elasticsearchClient: core.elasticsearch.client.asInternalUser,
+      authService: core.security.authc,
+    });
+
     rulesClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
       logger,
@@ -644,6 +682,7 @@ export class AlertingPlugin {
       },
       actions: plugins.actions,
       eventLog: plugins.eventLog,
+      changeTrackingService: this.changeTrackingService,
       kibanaVersion: this.kibanaVersion,
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
@@ -667,22 +706,29 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
     });
 
-    const getRulesClientWithRequest = async (request: KibanaRequest) => {
+    const getRulesClientWithRequest = async (
+      request: KibanaRequest,
+      options?: RulesClientCreateOptions
+    ) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
           `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
-      return rulesClientFactory!.create(request, core.savedObjects);
+      return rulesClientFactory!.create(request, core.savedObjects, options);
     };
 
-    const getRulesClientWithRequestInSpace = async (request: KibanaRequest, spaceId: string) => {
+    const getRulesClientWithRequestInSpace = async (
+      request: KibanaRequest,
+      spaceId: string,
+      options?: RulesClientCreateOptions
+    ) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
           `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
-      return rulesClientFactory!.createWithSpaceId(request, core.savedObjects, spaceId);
+      return rulesClientFactory!.createWithSpaceId(request, core.savedObjects, spaceId, options);
     };
 
     this.getRulesClientWithRequest = getRulesClientWithRequest;
@@ -770,6 +816,10 @@ export class AlertingPlugin {
       () => {}
     ); // it shouldn't reject, but just in case
 
+    this.uiamApiKeyProvisioningTask
+      ?.start({ core, taskManager: plugins.taskManager })
+      .catch(() => {});
+
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
       getType: ruleTypeRegistry!.get.bind(this.ruleTypeRegistry),
@@ -826,6 +876,7 @@ export class AlertingPlugin {
     if (this.licenseState) {
       this.licenseState.clean();
     }
+    this.uiamApiKeyProvisioningTask?.stop();
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }

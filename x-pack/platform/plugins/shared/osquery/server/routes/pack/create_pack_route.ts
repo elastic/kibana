@@ -23,6 +23,7 @@ import type { CreatePackRequestBodySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { StartPlugins } from '../../types';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
@@ -40,6 +41,7 @@ import type { PackQueryInput } from './utils';
 import { createPackRequestBodySchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
 import { escapeFilterValue } from '../utils/generate_copy_name';
+import { createPackResponseSchema } from './response_schemas';
 
 type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 
@@ -64,6 +66,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               CreatePackRequestBodySchema
             >(createPackRequestBodySchema),
           },
+          response: {
+            200: {
+              body: () => createPackResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
@@ -83,12 +90,14 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
+        const [, startPlugins] = await osqueryContext.getStartServices();
         const currentUser = await getUserInfo({
           request,
-          security: osqueryContext.security,
+          security: (startPlugins as StartPlugins).security,
           logger: osqueryContext.logFactory.get('pack'),
         });
         const username = currentUser?.username ?? undefined;
+        const profileUid = currentUser?.profile_uid ?? undefined;
 
         const {
           name,
@@ -155,8 +164,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             enabled,
             created_at: moment().toISOString(),
             created_by: username,
+            created_by_profile_uid: profileUid,
             updated_at: moment().toISOString(),
             updated_by: username,
+            updated_by_profile_uid: profileUid,
             shards: convertShardsToArray(shards),
           },
           {
@@ -209,8 +220,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           enabled: attributes.enabled,
           created_at: attributes.created_at,
           created_by: attributes.created_by,
+          created_by_profile_uid: attributes.created_by_profile_uid,
           updated_at: attributes.updated_at,
           updated_by: attributes.updated_by,
+          updated_by_profile_uid: attributes.updated_by_profile_uid,
           policy_ids: attributes.policy_ids,
           shards: attributes.shards,
           saved_object_id: packSO.id,

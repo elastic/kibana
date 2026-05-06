@@ -15,13 +15,21 @@ import {
   EVALUATIONS_INDEX_PATTERN,
   SCORES_SORT_ORDER,
 } from '@kbn/evals-common';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { registerGetRunDatasetExamplesRoute } from './get_run_dataset_examples';
 
 describe('GET /internal/evals/runs/{runId}/datasets/{datasetId}/examples', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerGetRunDatasetExamplesRoute({ router, logger });
+    registerGetRunDatasetExamplesRoute({
+      router,
+      logger,
+      canEncrypt: false,
+      getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+      getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const { handler } = versionedRouter.getRoute('get', EVALS_RUN_DATASET_EXAMPLES_URL).versions[

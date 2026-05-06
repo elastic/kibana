@@ -16,7 +16,6 @@ import {
 } from '../../../../../common/environment_filter_values';
 import type { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
-import type { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import type { Environment } from '../../../../../common/environment_rt';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -31,7 +30,7 @@ function FullTraceButton({ isLoading, isDisabled }: { isLoading?: boolean; isDis
         defaultMessage: 'View full trace',
       })}
       data-test-subj="apmFullTraceButtonViewFullTraceButton"
-      iconType="apmTrace"
+      iconType="chartWaterfall"
       isLoading={isLoading}
       disabled={isDisabled}
     >
@@ -45,16 +44,12 @@ function FullTraceButton({ isLoading, isDisabled }: { isLoading?: boolean; isDis
 export function MaybeViewTraceLink({
   isLoading,
   transaction,
-  waterfall,
   environment,
-  useUnified = false,
   traceItems = [],
 }: {
   isLoading: boolean;
   transaction?: ITransaction;
-  waterfall: IWaterfall;
   environment: Environment;
-  useUnified?: boolean;
   traceItems?: TraceItem[];
 }) {
   const {
@@ -63,7 +58,6 @@ export function MaybeViewTraceLink({
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer',
     '/dependencies/operation'
   );
 
@@ -80,18 +74,6 @@ export function MaybeViewTraceLink({
     LatencyAggregationType.avg;
 
   const rootTransactionInfo = useMemo(() => {
-    if (!useUnified) {
-      const root = waterfall.rootWaterfallTransaction;
-      if (!root) return undefined;
-      return {
-        id: root.id,
-        name: root.doc.transaction.name,
-        serviceName: root.doc.service.name,
-        traceId: root.doc.trace.id,
-        transactionType: root.doc.transaction.type,
-        serviceEnvironment: root.doc.service.environment,
-      };
-    }
     const traceMap = getTraceParentChildrenMap(traceItems, false);
     const root = traceMap.root?.[0];
     if (!root || root.docType !== 'transaction') return undefined;
@@ -103,7 +85,7 @@ export function MaybeViewTraceLink({
       transactionType: root.type,
       serviceEnvironment: root.serviceEnvironment,
     };
-  }, [useUnified, waterfall.rootWaterfallTransaction, traceItems]);
+  }, [traceItems]);
 
   if (isLoading || !transaction) {
     return <FullTraceButton isLoading={isLoading} />;
@@ -139,30 +121,29 @@ export function MaybeViewTraceLink({
         <FullTraceButton isDisabled />
       </EuiToolTip>
     );
-
-    // the user is viewing a zoomed in version of the trace. Link to the full trace
-  } else {
-    return (
-      <TransactionDetailLink
-        transactionName={rootTransactionInfo.name}
-        href={link('/services/{serviceName}/transactions/view', {
-          path: { serviceName: rootTransactionInfo.serviceName },
-          query: {
-            ...query,
-            latencyAggregationType,
-            traceId: rootTransactionInfo.traceId,
-            transactionId: rootTransactionInfo.id,
-            transactionName: rootTransactionInfo.name,
-            transactionType: rootTransactionInfo.transactionType,
-            comparisonEnabled: defaultComparisonEnabled,
-            offset,
-            environment: nextEnvironment,
-            serviceGroup: '',
-          },
-        })}
-      >
-        <FullTraceButton />
-      </TransactionDetailLink>
-    );
   }
+
+  // the user is viewing a zoomed in version of the trace. Link to the full trace
+  return (
+    <TransactionDetailLink
+      transactionName={rootTransactionInfo.name}
+      href={link('/services/{serviceName}/transactions/view', {
+        path: { serviceName: rootTransactionInfo.serviceName },
+        query: {
+          ...query,
+          latencyAggregationType,
+          traceId: rootTransactionInfo.traceId,
+          transactionId: rootTransactionInfo.id,
+          transactionName: rootTransactionInfo.name,
+          transactionType: rootTransactionInfo.transactionType,
+          comparisonEnabled: defaultComparisonEnabled,
+          offset,
+          environment: nextEnvironment,
+          serviceGroup: '',
+        },
+      })}
+    >
+      <FullTraceButton />
+    </TransactionDetailLink>
+  );
 }

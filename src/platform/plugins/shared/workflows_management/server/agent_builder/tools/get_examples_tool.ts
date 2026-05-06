@@ -9,21 +9,19 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import { getWorkflowExamples, WORKFLOW_EXAMPLE_IDS } from '@kbn/workflows';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { loadWorkflowExampleContent } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
-import type { AgentBuilderPluginSetupContract } from '../../types';
+import { workflowTools } from '../../../common/agent_builder/constants';
+import type { AgentBuilderPluginSetup } from '../../types';
 
-export const GET_EXAMPLES_TOOL_ID = 'platform.workflows.get_examples';
-
-export function registerGetExamplesTool(agentBuilder: AgentBuilderPluginSetupContract): void {
+export function registerGetExamplesTool(agentBuilder: AgentBuilderPluginSetup): void {
   agentBuilder.tools.register({
-    id: GET_EXAMPLES_TOOL_ID,
+    id: workflowTools.getExamples,
     type: ToolType.builtin,
     description: `Search and retrieve example workflow YAML files from the bundled library.
 
 **When to use:** Before generating workflow YAML, to learn correct syntax patterns for triggers, steps, inputs, on-failure handling, etc.
-**When NOT to use:** To find workflows in the user's environment (use list_workflows instead).
+**When NOT to use:** To find workflows in the user's environment (use sml_search instead).
 
 Available categories: security, integrations, examples, utilities, search.
 Supports keyword search across names, descriptions, and tags.`,
@@ -44,15 +42,7 @@ Supports keyword search across names, descriptions, and tags.`,
         .describe('Maximum number of examples to return (default: 3, max: 5)'),
     }),
     tags: ['workflows', 'yaml', 'examples'],
-    availability: {
-      handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
-        return isEnabled
-          ? { status: 'available' }
-          : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };
-      },
-      cacheMode: 'space',
-    },
+    experimental: true,
     handler: async ({ category, search, limit }) => {
       const effectiveLimit = Math.min(limit ?? 3, 5);
       const entries = getWorkflowExamples({ category, search });

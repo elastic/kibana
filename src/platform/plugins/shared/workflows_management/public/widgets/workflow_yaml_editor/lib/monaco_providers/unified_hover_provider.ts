@@ -10,6 +10,7 @@
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { JsonValue } from '@kbn/utility-types';
+import { resolveKibanaStepTypeAlias } from '@kbn/workflows';
 import type {
   BuiltHoverContext,
   HoverContext,
@@ -61,11 +62,72 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     position: monaco.Position,
     cancellationToken: monaco.CancellationToken
   ): Promise<monaco.languages.Hover | null> {
+    if (cancellationToken.isCancellationRequested) {
+      return null;
+    }
+
     const customHover = await this.provideCustomHover(model, position);
     if (customHover) {
       return customHover;
     }
+
+    if (cancellationToken.isCancellationRequested) {
+      return null;
+    }
+
+    const markers = monaco.editor.getModelMarkers({ resource: model.uri });
+    const deprecatedStepMarkerNearby = markers.find(
+      (marker) =>
+        marker.source === 'deprecated-step-validation' &&
+        marker.startLineNumber === position.lineNumber &&
+        ((marker.startColumn <= position.column && marker.endColumn >= position.column) ||
+          Math.abs(marker.startColumn - position.column) <= 3 ||
+          Math.abs(marker.endColumn - position.column) <= 3)
+    );
+
+    if (deprecatedStepMarkerNearby) {
+      return this.provideDeprecatedStepHover(model, position, deprecatedStepMarkerNearby);
+    }
+
     return getInterceptedHover(model, position, cancellationToken);
+  }
+
+  private async provideDeprecatedStepHover(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    _marker: monaco.editor.IMarker
+  ): Promise<monaco.languages.Hover | null> {
+    const yamlDocument = this.getYamlDocument();
+    if (!yamlDocument) {
+      return null;
+    }
+
+    const context = await this.buildHoverContext(model, position, yamlDocument);
+    if (!context || context.kind !== 'connector') {
+      return null;
+    }
+
+    const resolvedConnectorType = resolveKibanaStepTypeAlias(context.connectorType);
+    const handler = getMonacoConnectorHandler(resolvedConnectorType);
+    const stepContext = context.stepContext
+      ? { ...context.stepContext, stepType: resolvedConnectorType }
+      : undefined;
+
+    const richHover = handler
+      ? await handler.generateHoverContent({
+          ...context,
+          connectorType: resolvedConnectorType,
+          stepContext,
+        })
+      : null;
+
+    if (!richHover) {
+      return null;
+    }
+
+    return {
+      contents: [richHover],
+    };
   }
   /**
    * Provide hover information for the current position
@@ -414,6 +476,40 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   }
 
   /**
+   * Ensure foreach step input AND referenced step outputs are loaded.
+   * The foreach expression (e.g. "{{ steps.X.output | entries }}") needs
+   * both the foreach step's input (to know the expression) and the
+   * referenced step's output (to evaluate it).
+   */
+  private async enrichForeachStepInput(context: ExecutionContext): Promise<ExecutionContext> {
+    let enrichedSteps = context.steps;
+    let changed = false;
+
+    const enrich = async (sId: string, stepData: StepExecutionData) => {
+      const fullData = await this.fetchStepDataIfNeeded(stepData, sId);
+      if (fullData && fullData !== stepData) {
+        if (!changed) {
+          enrichedSteps = { ...context.steps };
+          changed = true;
+        }
+        enrichedSteps[sId] = fullData;
+      }
+    };
+
+    for (const [sId, stepData] of Object.entries(context.steps)) {
+      const needsInput =
+        stepData.state && typeof stepData.state.index === 'number' && stepData.input === undefined;
+      const needsOutput = stepData.output === undefined;
+
+      if (needsInput || needsOutput) {
+        await enrich(sId, stepData);
+      }
+    }
+
+    return changed ? { ...context, steps: enrichedSteps } : context;
+  }
+
+  /**
    * Handle hover for template expressions {{ }}
    */
   private async handleTemplateExpressionHover(
@@ -445,6 +541,12 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
             steps: { ...executionContext.steps, [stepId]: enrichedStep },
           };
         }
+      }
+
+      // For foreach.* paths, ensure the foreach step's input is loaded
+      // so findForeachContext can re-evaluate the foreach expression.
+      if (templateInfo.pathSegments[0] === 'foreach') {
+        evalContext = await this.enrichForeachStepInput(evalContext);
       }
 
       // Determine what to evaluate

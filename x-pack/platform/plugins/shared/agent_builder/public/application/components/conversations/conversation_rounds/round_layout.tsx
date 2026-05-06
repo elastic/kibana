@@ -7,10 +7,13 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
@@ -18,6 +21,7 @@ import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useIsAnyConversationStreaming } from '../../../hooks/use_is_any_conversation_streaming';
 import { RoundError } from './round_error/round_error';
 import { ConfirmationPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
@@ -28,6 +32,8 @@ interface RoundLayoutProps {
   rawRound: ConversationRound;
   conversationAttachments?: VersionedAttachment[];
   conversationId?: string;
+  allRounds: ConversationRound[];
+  roundIndex: number;
 }
 
 const labels = {
@@ -36,16 +42,45 @@ const labels = {
   }),
 };
 
+/**
+ * Computes cumulative attachment refs from all rounds up to and including the given index.
+ * Returns the highest version seen for each attachment.
+ */
+const computeCumulativeRefs = (
+  rounds: ConversationRound[],
+  upToIndex: number
+): AttachmentVersionRef[] | undefined => {
+  const highestVersionByAttachment = new Map<string, AttachmentVersionRef>();
+
+  for (let i = 0; i <= upToIndex; i++) {
+    const roundRefs = rounds[i]?.input.attachment_refs;
+    if (roundRefs) {
+      for (const ref of roundRefs) {
+        const existing = highestVersionByAttachment.get(ref.attachment_id);
+        if (!existing || ref.version > existing.version) {
+          highestVersionByAttachment.set(ref.attachment_id, ref);
+        }
+      }
+    }
+  }
+
+  const values = Array.from(highestVersionByAttachment.values());
+  return values.length > 0 ? values : undefined;
+};
+
 export const RoundLayout: React.FC<RoundLayoutProps> = ({
   isCurrentRound,
   scrollContainerHeight,
   rawRound,
   conversationAttachments,
   conversationId,
+  allRounds,
+  roundIndex,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
-  const { steps, response, input, status, pending_prompt: pendingPrompt } = rawRound;
+  const [promptResponses, setPromptResponses] = useState<Record<string, { allow: boolean }>>({});
+  const { steps, response, input, status, pending_prompts: pendingPrompts } = rawRound;
 
   const {
     isResponseLoading,
@@ -54,24 +89,47 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     resumeRound,
     isResuming,
   } = useSendMessage();
+  // Approve / Cancel for HITL must be gated on global streaming state: while ANY other
+  // conversation is streaming, racing two mutations against the same single-stream
+  // backend would corrupt cache state. This becomes a per-conversation check in the
+  // concurrent-streams follow-up PR.
+  const isAnyStreaming = useIsAnyConversationStreaming();
+  const isHitlDisabled = isAnyStreaming && !isResuming;
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
-  // Don't show prompt if we're already resuming (user already clicked confirm/cancel)
-  // This prevents the prompt from reappearing when server data is refetched
+  // Don't show prompts if we're already resuming (user already clicked confirm/cancel)
+  // This prevents prompts from reappearing when server data is refetched
   const isAwaitingPrompt =
     isCurrentRound &&
     status === ConversationRoundStatus.awaitingPrompt &&
-    pendingPrompt &&
+    pendingPrompts &&
+    pendingPrompts.length > 0 &&
     !isResuming;
 
-  const handleConfirm = useCallback(() => {
-    resumeRound({ promptId: pendingPrompt!.id, confirm: true });
-  }, [resumeRound, pendingPrompt]);
+  const cumulativeAttachmentRefs = useMemo(() => {
+    if (!response?.message) return undefined;
+    return computeCumulativeRefs(allRounds, roundIndex);
+  }, [allRounds, roundIndex, response?.message]);
 
-  const handleCancel = useCallback(() => {
-    resumeRound({ promptId: pendingPrompt!.id, confirm: false });
-  }, [resumeRound, pendingPrompt]);
+  const confirmationPrompts = useMemo(
+    () => (pendingPrompts ?? []).filter(isConfirmationPrompt),
+    [pendingPrompts]
+  );
+
+  const handlePromptResponse = useCallback(
+    (promptId: string, allow: boolean) => {
+      setPromptResponses((prev) => {
+        const updated = { ...prev, [promptId]: { allow } };
+        const allAnswered = confirmationPrompts.every((p) => updated[p.id] !== undefined);
+        if (allAnswered) {
+          resumeRound({ prompts: updated });
+        }
+        return updated;
+      });
+    },
+    [confirmationPrompts, resumeRound]
+  );
 
   // Track if this round has ever been in a loading state during this session
   useEffect(() => {
@@ -133,17 +191,21 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         )}
       </EuiFlexItem>
 
-      {/* Confirmation Prompt */}
-      {isAwaitingPrompt && isConfirmationPrompt(pendingPrompt) && (
-        <EuiFlexItem grow={false}>
-          <ConfirmationPrompt
-            prompt={pendingPrompt}
-            onConfirm={handleConfirm}
-            onCancel={handleCancel}
-            isLoading={isResuming}
-          />
-        </EuiFlexItem>
-      )}
+      {/* Confirmation Prompts */}
+      {isAwaitingPrompt &&
+        confirmationPrompts.map((prompt) => (
+          <EuiFlexItem grow={false} key={prompt.id}>
+            <ConfirmationPrompt
+              prompt={prompt}
+              onConfirm={() => handlePromptResponse(prompt.id, true)}
+              onCancel={() => handlePromptResponse(prompt.id, false)}
+              isLoading={isResuming}
+              isDisabled={isHitlDisabled}
+              isAnswered={promptResponses[prompt.id] !== undefined}
+              answeredValue={promptResponses[prompt.id]?.allow}
+            />
+          </EuiFlexItem>
+        ))}
 
       {/* Response Message - hidden when awaiting confirmation */}
       {!isAwaitingPrompt && (
@@ -156,7 +218,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               isLoading={isLoadingCurrentRound}
               isLastRound={isCurrentRound}
               conversationAttachments={conversationAttachments}
-              attachmentRefs={input.attachment_refs}
+              attachmentRefs={cumulativeAttachmentRefs}
               conversationId={conversationId}
             />
           </EuiFlexItem>

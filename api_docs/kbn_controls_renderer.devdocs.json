@@ -38,7 +38,7 @@
           "; }) => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-        "lineNumber": 38,
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -51,7 +51,7 @@
             "label": "{\n  controls: controlState,\n  onControlsChanged,\n  parentApi,\n}",
             "description": [],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-            "lineNumber": 42,
+            "lineNumber": 41,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -73,7 +73,7 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-                "lineNumber": 43,
+                "lineNumber": 42,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -97,7 +97,7 @@
                   ") => void"
                 ],
                 "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-                "lineNumber": 44,
+                "lineNumber": 43,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -119,9 +119,10 @@
                       }
                     ],
                     "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-                    "lineNumber": 44,
+                    "lineNumber": 43,
                     "columnNumber": 23,
                     "deprecated": false,
+                    "docsReferencedTypeName": "ControlsLayout",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -187,7 +188,7 @@
                   "<object>) => void; isCompressed?: (() => boolean) | undefined; }"
                 ],
                 "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-                "lineNumber": 45,
+                "lineNumber": 44,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

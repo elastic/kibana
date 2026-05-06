@@ -14,8 +14,12 @@ import type { MetricsFlyout } from './flyout';
 import { createFlyout } from './flyout';
 import type { ChartActions } from './chart_actions';
 import { createChartActions } from './chart_actions';
+import type { ChartInteractions } from './chart_interactions';
+import { createChartInteractions } from './chart_interactions';
 import type { BreakdownSelector } from './breakdown_selector';
 import { createBreakdownSelector } from './breakdown_selector';
+import type { ShareHelper } from './share_helper';
+import { createShareHelper } from './share_helper';
 
 export class MetricsExperiencePage {
   public readonly container: Locator;
@@ -28,8 +32,11 @@ export class MetricsExperiencePage {
   public readonly searchInput: Locator;
   public readonly emptyState: Locator;
   public readonly chartActions: ChartActions;
+  public readonly chartInteractions: ChartInteractions;
   public readonly breakdownSelector: BreakdownSelector;
+  public readonly share: ShareHelper;
   public readonly fullscreenButton: Locator;
+  public readonly chromeHeader: Locator;
 
   constructor(page: ScoutPage) {
     // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
@@ -40,11 +47,14 @@ export class MetricsExperiencePage {
     this.pagination = createGridPagination(this.container);
     this.flyout = createFlyout(page);
     this.chartActions = createChartActions(page);
+    this.chartInteractions = createChartInteractions(page, (index) => this.getCardByIndex(index));
     this.breakdownSelector = createBreakdownSelector(page);
     this.searchButton = page.testSubj.locator('metricsExperienceToolbarSearch');
     this.searchInput = page.testSubj.locator('metricsExperienceGridToolbarSearch');
     this.emptyState = page.testSubj.locator('metricsExperienceNoData');
+    this.share = createShareHelper(page);
     this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
+    this.chromeHeader = page.testSubj.locator('kbnChromeLayoutHeader');
   }
 
   public getCardByIndex(index: number): Locator {
@@ -83,7 +93,13 @@ export class MetricsExperiencePage {
   }
 
   public async toggleFullscreen(): Promise<void> {
+    // Entering fullscreen triggers `handleEuiFullScreenChanges` which calls
+    // `chrome.setIsVisible(false)` asynchronously. Wait for the chrome header
+    // to actually hide/show before resolving, otherwise subsequent clicks on
+    // the toolbar can be intercepted by the still-sticky chrome header.
+    const isFullscreen = await this.fullscreen.isVisible();
     await this.fullscreenButton.click();
+    await this.chromeHeader.waitFor({ state: isFullscreen ? 'visible' : 'hidden' });
   }
 
   /**

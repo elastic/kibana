@@ -6,14 +6,15 @@
  */
 
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ECS_MAPPINGS_COMPONENT_TEMPLATE } from '../constants';
 import {
   ENTITY_UPDATES,
   ENTITY_BASE_PREFIX,
   ENTITY_SCHEMA_VERSION_V2,
-  ECS_MAPPINGS_COMPONENT_TEMPLATE,
+  MAPPING_VERSION,
   getEntityIndexPattern,
-  getEntitiesAliasPattern,
-} from '../constants';
+  getEntitiesAlias,
+} from '../../../common/domain/entity_index';
 import { getUpdatesComponentTemplateName } from './component_templates';
 import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 
@@ -55,10 +56,10 @@ export const getUpdatesEntityIndexTemplateConfig = (
       data_retention: DATA_RETENTION_PERIOD,
     },
     aliases: {
-      [getEntitiesAliasPattern({ dataset: ENTITY_UPDATES })]: {},
+      [getEntitiesAlias(ENTITY_UPDATES, namespace)]: {},
     },
     mappings: {
-      _meta: { n: '1.6.0' },
+      _meta: { mappingsVersion: MAPPING_VERSION },
       date_detection: false,
       dynamic_templates: [
         {

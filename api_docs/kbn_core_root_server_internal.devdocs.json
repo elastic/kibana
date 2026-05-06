@@ -83,6 +83,7 @@
                 "lineNumber": 36,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RawConfigurationProvider",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -106,6 +107,7 @@
                 "lineNumber": 37,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Env",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -224,6 +226,25 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-root-server-internal",
+            "id": "def-server.Root.getConfigService",
+            "type": "Function",
+            "tags": [],
+            "label": "getConfigService",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ConfigService"
+            ],
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -262,6 +283,7 @@
             "lineNumber": 48,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "ConfigService",
             "trackAdoption": false,
             "isRequired": true
           }

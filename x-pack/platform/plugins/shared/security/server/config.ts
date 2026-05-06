@@ -371,6 +371,50 @@ export const ConfigSchema = schema.object({
       ),
     }),
   }),
+  // OAuth 2.0 Protected Resource Metadata for MCP authorization.
+  // https://datatracker.ietf.org/doc/html/rfc9728
+  mcp: offeringBasedSchema({
+    serverless: schema.maybe(
+      schema.object({
+        oauth2: schema.object({
+          // Fields served at /.well-known/oauth-protected-resource
+          metadata: schema.object({
+            // URLs of the authorization servers that can issue tokens accepted by this resource.
+            authorization_servers: schema.arrayOf(schema.uri({ scheme: ['https', 'http'] }), {
+              minSize: 1,
+            }),
+            // Identifier for this protected resource (typically the Kibana public base URL).
+            resource: schema.uri({ scheme: ['https', 'http'] }),
+            // Methods supported for sending bearer tokens. Defaults to ["header"].
+            bearer_methods_supported: schema.maybe(
+              schema.arrayOf(
+                schema.oneOf([
+                  // When sending the access token in the "Authorization" request header
+                  // header field, the client uses the "Bearer" authentication scheme to transmit the access token.
+                  // https://datatracker.ietf.org/doc/html/rfc6750#section-2.1
+                  schema.literal('header'),
+                  //  When sending the access token in the HTTP request entity-body, the
+                  // client adds the access token to the request-body using the "access_token" parameter.
+                  // https://datatracker.ietf.org/doc/html/rfc6750#section-2.2
+                  schema.literal('body'),
+                  // When sending the access token in the HTTP request URI, the client
+                  // adds the access token to the request URI query component as defined
+                  // by URI specification using the "access_token" parameter.
+                  // https://datatracker.ietf.org/doc/html/rfc6750#section-2.3
+                  schema.literal('query'),
+                ]),
+                { minSize: 1 }
+              )
+            ),
+            // OAuth scopes required to access this resource.
+            scopes_supported: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            // URL to human-readable documentation about this protected resource.
+            resource_documentation: schema.maybe(schema.uri({ scheme: ['https', 'http'] })),
+          }),
+        }),
+      })
+    ),
+  }),
   fipsMode: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
@@ -390,7 +434,7 @@ export function createConfig(
         'restart, please set xpack.security.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
     );
 
-    encryptionKey = crypto.randomBytes(16).toString('hex');
+    encryptionKey = crypto.randomBytes(32).toString('hex');
   }
 
   const hashedEncryptionKey = crypto.createHash('sha3-256').update(encryptionKey).digest('base64');

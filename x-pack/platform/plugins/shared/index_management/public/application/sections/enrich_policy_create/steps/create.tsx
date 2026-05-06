@@ -219,7 +219,7 @@ export const CreateStep = ({ onBack, onSubmit, isLoading }: Props) => {
             minWidth={false}
             color="primary"
             iconSide="left"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             data-test-subj="backButton"
             onClick={onBack}
           >

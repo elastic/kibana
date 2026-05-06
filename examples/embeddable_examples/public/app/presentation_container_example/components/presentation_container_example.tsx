@@ -94,7 +94,7 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
         <EuiFlexItem grow={false}>
           <TopNav
             onSave={componentApi.onSave}
-            resetUnsavedChanges={pageApi.resetUnsavedChanges}
+            onReset={componentApi.onReset}
             hasUnsavedChanges$={pageApi.hasUnsavedChanges$}
           />
         </EuiFlexItem>

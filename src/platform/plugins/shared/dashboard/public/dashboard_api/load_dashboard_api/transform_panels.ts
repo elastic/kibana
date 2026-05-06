@@ -24,7 +24,7 @@ export async function transformPanels(panels: DashboardState['panels'], referenc
   return await asyncMap(panels ?? [], async (panel) => {
     if (isDashboardSection(panel)) {
       const panelsInSection = await asyncMap(panel.panels, async (panelInSection) => {
-        return await transformPanel(panelInSection, filterReferences(panelInSection.uid));
+        return await transformPanel(panelInSection, filterReferences(panelInSection.id));
       });
       return {
         ...panel,
@@ -32,7 +32,7 @@ export async function transformPanels(panels: DashboardState['panels'], referenc
       };
     }
 
-    return await transformPanel(panel, filterReferences(panel.uid));
+    return await transformPanel(panel, filterReferences(panel.id));
   });
 }
 
@@ -59,7 +59,7 @@ async function transformPanel(legacyPanel: DashboardPanel, references?: Referenc
   } catch (transformOutError) {
     // eslint-disable-next-line no-console
     console.warn(
-      `Unable to transform panel state, panelId: ${panel.uid}, error: ${transformOutError}`
+      `Unable to transform panel state, panelId: ${panel.id}, error: ${transformOutError}`
     );
     // do not prevent dashboard render on transform error
     return panel;

@@ -34,7 +34,7 @@ export class QueryColumns {
    * LOAD, not mapped columns are loaded from _source as a keyword field if possible.
    * NULLIFY, not mapped columns are treated as null.
    */
-  private unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL;
+  private unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT;
 
   /**
    * Retrieves from cache the columns for a given query, ignoring case.
@@ -136,7 +136,10 @@ export class QueryColumns {
     }
 
     const fields = await getFieldsFromES(queryToES, this.resourceRetriever);
-    QueryColumns.setCache(queryToES, fields);
+    // Only cache non-empty results to avoid persisting failures from aborted requests
+    if (fields.length > 0) {
+      QueryColumns.setCache(queryToES, fields);
+    }
     return fields;
   };
 

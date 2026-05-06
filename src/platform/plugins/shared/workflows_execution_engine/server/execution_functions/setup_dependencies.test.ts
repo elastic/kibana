@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from './__mock__/context_dependencies';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 import '../workflow_event_logger/mocks';
@@ -46,14 +48,19 @@ describe('setupDependencies', () => {
     error: jest.fn(),
   } as unknown as Logger;
 
-  const mockConfig = {
+  const mockConfig: WorkflowsExecutionEngineConfig = {
+    enabled: true,
+    eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+    maxWorkflowDepth: 10,
     logging: {
       console: true,
     },
     http: {
       allowedHosts: ['*'],
     },
-  } as WorkflowsExecutionEngineConfig;
+    maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
+    collectQueueMetrics: false,
+  };
 
   let mockDependencies: ReturnType<typeof mockContextDependencies>;
   let mockWorkflowExecutionRepository: jest.Mocked<WorkflowExecutionRepository>;
@@ -111,6 +118,7 @@ describe('setupDependencies', () => {
 
     expect(mockAsScoped).toHaveBeenCalledWith(mockFakeRequest);
     expect(result.esClient).toBe(mockAsCurrentUser);
+    expect(result.telemetryClient).toBeInstanceOf(WorkflowExecutionTelemetryClient);
   });
 
   it('should use scoped actions client with fakeRequest', async () => {
@@ -190,6 +198,86 @@ describe('setupDependencies', () => {
       expect(WorkflowGraph.fromWorkflowDefinition).toHaveBeenCalledWith(expect.anything(), {
         timeout: '6h',
       });
+    });
+  });
+
+  it('throws when the workflow execution document is missing', async () => {
+    const mockFakeRequest = { headers: {} } as KibanaRequest;
+    mockWorkflowExecutionRepository.getWorkflowExecutionById = jest.fn().mockResolvedValue(null);
+
+    const mockScopedClient = {
+      search: jest.fn(),
+      index: jest.fn(),
+    } as unknown as ElasticsearchClient;
+    mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+      asCurrentUser: mockScopedClient,
+    });
+
+    await expect(
+      setupDependencies(
+        workflowRunId,
+        spaceId,
+        mockLogger,
+        mockConfig,
+        mockDependencies,
+        mockFakeRequest
+      )
+    ).rejects.toThrow(`Workflow execution with ID ${workflowRunId} not found`);
+
+    expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+      workflowRunId,
+      spaceId
+    );
+  });
+
+  describe('workflowsExtensions', () => {
+    beforeEach(() => {
+      const mockScopedClient = {
+        search: jest.fn(),
+        index: jest.fn(),
+      } as unknown as ElasticsearchClient;
+
+      mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+        asCurrentUser: mockScopedClient,
+      });
+    });
+
+    it('should await workflowsExtensions.isReady before reading the workflow execution', async () => {
+      const mockFakeRequest = { headers: {} } as KibanaRequest;
+
+      let isReadyResolved = false;
+      let resolveIsReady!: () => void;
+      const isReadyPromise = new Promise<void>((resolve) => {
+        resolveIsReady = () => {
+          isReadyResolved = true;
+          resolve();
+        };
+      });
+      (mockDependencies.workflowsExtensions.isReady as jest.Mock).mockReturnValue(isReadyPromise);
+
+      const setupPromise = setupDependencies(
+        workflowRunId,
+        spaceId,
+        mockLogger,
+        mockConfig,
+        mockDependencies,
+        mockFakeRequest
+      );
+
+      // Let any microtasks before the isReady await run
+      await Promise.resolve();
+
+      expect(mockDependencies.workflowsExtensions.isReady).toHaveBeenCalledTimes(1);
+      expect(isReadyResolved).toBe(false);
+      expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+
+      resolveIsReady();
+      await setupPromise;
+
+      expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+        workflowRunId,
+        spaceId
+      );
     });
   });
 });

@@ -17,16 +17,19 @@ export async function updateFieldLimit({
   esClient,
   newFieldLimit,
   dataStream,
+  isSecurityEnabled,
 }: {
   esClient: ElasticsearchClient;
   newFieldLimit: number;
   dataStream: string;
+  isSecurityEnabled: boolean;
 }): Promise<UpdateFieldLimitResponse> {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
   const { lastBackingIndexName, indexTemplate } = await getDataStreamSettings({
     esClient,
     dataStream,
+    isSecurityEnabled,
   });
 
   if (!lastBackingIndexName || !indexTemplate) {

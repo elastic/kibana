@@ -33,6 +33,7 @@
             "lineNumber": 39,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "ActionableBadgeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -242,7 +243,7 @@
           "React.NamedExoticComponent<CloudSetupProps>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_setup.tsx",
-        "lineNumber": 356,
+        "lineNumber": 359,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -262,6 +263,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -297,6 +299,7 @@
             "lineNumber": 24,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -334,6 +337,7 @@
             "lineNumber": 27,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "CVSScoreBadgeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -518,6 +522,7 @@
             "lineNumber": 14,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ECSField",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -558,6 +563,7 @@
             "lineNumber": 17,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "GenericGroupRendererProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -615,6 +621,7 @@
             "lineNumber": 30,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiThemeComputed",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -671,6 +678,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RawBucket",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -741,6 +749,7 @@
             "lineNumber": 43,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "CspVulnerabilityFinding",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -835,6 +844,7 @@
             "lineNumber": 15,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiThemeComputed",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -886,6 +896,7 @@
             "lineNumber": 11,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "VulnSeverity",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -931,6 +942,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "VulnerabilityCounts",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1030,6 +1042,7 @@
             "lineNumber": 46,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "GroupWrapperProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1049,7 +1062,7 @@
         "signature": [
           "<T>({ grouping, pageSize, testSubjects, }: Pick<",
           "GroupWrapperProps",
-          "<T>, \"pageSize\" | \"grouping\" | \"testSubjects\">) => React.JSX.Element"
+          "<T>, \"grouping\" | \"pageSize\" | \"testSubjects\">) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/group_wrapper.tsx",
         "lineNumber": 21,
@@ -1067,12 +1080,13 @@
             "signature": [
               "Pick<",
               "GroupWrapperProps",
-              "<T>, \"pageSize\" | \"grouping\" | \"testSubjects\">"
+              "<T>, \"grouping\" | \"pageSize\" | \"testSubjects\">"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/group_wrapper.tsx",
             "lineNumber": 21,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1110,6 +1124,7 @@
             "lineNumber": 31,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "VulnerabilityCounts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1214,7 +1229,7 @@
             "id": "def-public.MultiValueCellPopover.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  items,\n  field,\n  object,\n  renderItem,\n  firstItemRenderer,\n}",
             "description": [],
             "signature": [
               "MultiValueCellPopoverProps<T, K>"
@@ -1223,6 +1238,7 @@
             "lineNumber": 35,
             "columnNumber": 56,
             "deprecated": false,
+            "docsReferencedTypeName": "MultiValueCellPopoverProps",
             "trackAdoption": false
           }
         ],
@@ -1260,6 +1276,7 @@
             "lineNumber": 14,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "NullGroupProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1299,6 +1316,7 @@
             "lineNumber": 32,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "CspRadioGroupProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1336,6 +1354,7 @@
             "lineNumber": 66,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "SeverityStatusBadgeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1425,6 +1444,123 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.useGetNavigationUrlParams",
+        "type": "Function",
+        "tags": [],
+        "label": "useGetNavigationUrlParams",
+        "description": [],
+        "signature": [
+          "() => (filterParams?: ",
+          {
+            "pluginId": "@kbn/cloud-security-posture",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPosturePluginApi",
+            "section": "def-public.NavFilter",
+            "text": "NavFilter"
+          },
+          ", findingsType?: \"configurations\" | \"vulnerabilities\" | undefined, groupBy?: string[] | undefined) => string"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_get_navigation_url_params.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.useHasMisconfigurations",
+        "type": "Function",
+        "tags": [],
+        "label": "useHasMisconfigurations",
+        "description": [],
+        "signature": [
+          "(options: ",
+          "UseCspOptions",
+          ") => { passedFindings: number; failedFindings: number; hasMisconfigurationFindings: boolean; }"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_has_misconfigurations.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.useHasMisconfigurations.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "UseCspOptions"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_has_misconfigurations.ts",
+            "lineNumber": 11,
+            "columnNumber": 41,
+            "deprecated": false,
+            "docsReferencedTypeName": "UseCspOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.useMisconfigurationFindings",
+        "type": "Function",
+        "tags": [],
+        "label": "useMisconfigurationFindings",
+        "description": [],
+        "signature": [
+          "(options: ",
+          "UseCspOptions",
+          ") => ",
+          "UseQueryResult",
+          "<{ count: { [x: string]: number; }; rows: { rule: Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; name: string; version: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ rule_number?: string | undefined; posture_type?: \"kspm\" | \"cspm\" | undefined; } & { id: string; name: string; version: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }> | undefined; resource: ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-common",
+            "scope": "common",
+            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+            "section": "def-common.CspFindingResource",
+            "text": "CspFindingResource"
+          },
+          " | undefined; \"rule.name\": string | undefined; \"result.evaluation\": \"failed\" | \"passed\" | undefined; entityId: string | undefined; }[]; }, Error>"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_findings.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.useMisconfigurationFindings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "UseCspOptions"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_findings.ts",
+            "lineNumber": 65,
+            "columnNumber": 45,
+            "deprecated": false,
+            "docsReferencedTypeName": "UseCspOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1476,7 +1612,7 @@
         "label": "CloudSetupConfig",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-        "lineNumber": 56,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1489,7 +1625,7 @@
             "label": "policyTemplate",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1502,7 +1638,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1515,7 +1651,7 @@
             "label": "shortName",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1531,7 +1667,7 @@
               "\"aws\" | \"azure\" | \"gcp\""
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1547,7 +1683,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1560,7 +1696,7 @@
             "label": "overviewPath",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1573,7 +1709,7 @@
             "label": "getStartedPath",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1586,7 +1722,7 @@
             "label": "showCloudTemplates",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1606,7 +1742,7 @@
               "; azure: AzureProviderConfig; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1753,7 +1889,7 @@
                 "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              "; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1761,31 +1897,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context, {}>) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1851,7 +1963,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"register\" | \"init\"> & { deserialize: ",
+              ", \"init\" | \"register\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -1990,7 +2102,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; getExportHandler: (options: Omit<",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -1998,7 +2118,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
               "IntlShape",
               ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
               {
@@ -2008,7 +2136,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -2203,6 +2339,7 @@
                 "lineNumber": 120,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2281,6 +2418,7 @@
                 "lineNumber": 115,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2832,6 +2970,7 @@
                 "lineNumber": 142,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3054,6 +3193,7 @@
                 "lineNumber": 147,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3522,7 +3662,22 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.MISCONFIGURATION",
+        "type": "Enum",
+        "tags": [],
+        "label": "MISCONFIGURATION",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_findings.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/cloud-security-posture",
@@ -3745,6 +3900,35 @@
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
         "lineNumber": 65,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.MisconfigurationFindingDetailFields",
+        "type": "Type",
+        "tags": [],
+        "label": "MisconfigurationFindingDetailFields",
+        "description": [
+          "Entity id from `@kbn/entity-store` `euid.getEuidFromObject` when the document has enough identity fields."
+        ],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "@kbn/cloud-security-posture-common",
+            "scope": "common",
+            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+            "section": "def-common.CspFinding",
+            "text": "CspFinding"
+          },
+          ", \"rule\" | \"resource\"> & ",
+          "MisconfigurationFindingTableDetailsFields",
+          " & { entityId?: string | undefined; }"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_findings.ts",
+        "lineNumber": 59,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -12,7 +12,7 @@ import { extractDataStreamName, getMissingDataStreams, getErrorMessage } from '.
 import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../repository';
 import { filterIndicesToRestore, restoreIndices } from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
-import { reindexAllIndices } from './reindex';
+import { getDestinationInfo, reindexAllIndices } from './reindex';
 
 export const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
 
@@ -52,7 +52,16 @@ export async function getMaxTimestampFromData({
 }
 
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
-  const { esClient, log, repository, snapshotName, patterns, concurrency } = config;
+  const {
+    esClient,
+    log,
+    repository,
+    snapshotName,
+    patterns,
+    concurrency,
+    shouldUseInlineScript,
+    beforeReindex,
+  } = config;
 
   const result: LoadResult = {
     success: false,
@@ -105,17 +114,35 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     });
     result.restoredIndices = restoredIndices;
 
-    result.maxTimestamp = await getMaxTimestampFromData({
+    const destinationIndices = [
+      ...new Set(indicesToRestore.map((idx) => getDestinationInfo(idx).destIndex)),
+    ];
+
+    if (beforeReindex) {
+      await beforeReindex({
+        esClient,
+        log,
+        originalIndices: indicesToRestore,
+        restoredIndices,
+        destinationIndices,
+      });
+    }
+
+    const maxTimestamp = await getMaxTimestampFromData({
       esClient,
       log,
       tempIndices: restoredIndices,
     });
+    if (!maxTimestamp) {
+      throw new Error('Failed to derive max timestamp from restored data');
+    }
+    result.maxTimestamp = maxTimestamp;
 
     await createTimestampPipeline({
       esClient,
       log,
       pipelineName,
-      maxTimestamp: result.maxTimestamp!,
+      maxTimestamp,
     });
 
     log.info('Step 4/4: Reindexing with timestamp transformation...');
@@ -126,6 +153,8 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       originalIndices: indicesToRestore,
       concurrency,
       pipelineName,
+      maxTimestamp,
+      shouldUseInlineScript,
     });
     result.reindexedIndices = reindexedIndices;
 

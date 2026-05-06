@@ -13,6 +13,7 @@ import type {
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
+import { registerDashboardAttachmentUiDefinition } from './attachment_types';
 
 export class DashboardAgentPlugin
   implements
@@ -35,22 +36,17 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
-      const dashboardLocator = plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR);
-      const findDashboardsServicePromise = plugins.dashboard.findDashboardsService();
-      this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
-        attachments: plugins.agentBuilder.attachments,
-        dashboardLocator,
-        unifiedSearch: plugins.unifiedSearch,
-        doesSavedDashboardExist: async (dashboardId: string) => {
-          const findDashboardsService = await findDashboardsServicePromise;
-          const result = await findDashboardsService.findById(dashboardId);
-          return result.status === 'success';
-        },
-      });
+    this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
+      agentBuilder: plugins.agentBuilder,
+      chrome: core.chrome,
+      canWriteDashboards: core.application.capabilities.dashboard_v2?.showWriteControls === true,
+      dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
+      unifiedSearch: plugins.unifiedSearch,
+      data: plugins.data,
+      dashboardPlugin: plugins.dashboard,
     });
 
     return {};

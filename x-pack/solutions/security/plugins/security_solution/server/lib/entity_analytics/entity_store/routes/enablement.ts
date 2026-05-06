@@ -52,7 +52,6 @@ export const enableEntityStoreRoute = (
 
         await checkAndInitAssetCriticalityResources(context, logger);
         await checkAndInitPrivilegeMonitoringResources(context, logger);
-
         try {
           const body: InitEntityStoreResponse = await secSol
             .getEntityStoreDataClient()

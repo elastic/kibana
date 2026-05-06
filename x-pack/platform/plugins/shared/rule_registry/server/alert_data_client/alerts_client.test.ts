@@ -69,6 +69,10 @@ describe('AlertsClient', () => {
         Object {
           "_source": undefined,
           "aggs": undefined,
+          "expand_wildcards": Array [
+            "open",
+            "hidden",
+          ],
           "fields": Array [
             "kibana.alert.rule.rule_type_id",
             "kibana.alert.rule.consumer",
@@ -163,6 +167,10 @@ describe('AlertsClient', () => {
         Object {
           "_source": undefined,
           "aggs": undefined,
+          "expand_wildcards": Array [
+            "open",
+            "hidden",
+          ],
           "fields": Array [
             "kibana.alert.rule.rule_type_id",
             "kibana.alert.rule.consumer",

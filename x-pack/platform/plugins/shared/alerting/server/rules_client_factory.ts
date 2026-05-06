@@ -39,6 +39,22 @@ import {
   RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import { type IChangeTrackingService } from './rules_client/lib/change_tracking';
+import {
+  UIAM_LOGS_CREDENTIALS_TAGS,
+  UIAM_LOGS_GRANT_TAGS,
+  UIAM_LOGS_INVALIDATE_TAGS,
+} from './constants';
+
+export interface RulesClientCreateOptions {
+  /**
+   * When true, clone the request's API key for each newly created rule.
+   * The cloned key is independent, non-expiring, and managed by alerting
+   * (invalidated on rule delete/update). Only applies to rule creation.
+   */
+  cloneApiKeysOnCreate?: boolean;
+}
+
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -51,6 +67,7 @@ export interface RulesClientFactoryOpts {
   internalSavedObjectsRepository: ISavedObjectsRepository;
   actions: ActionsPluginStartContract;
   eventLog: IEventLogClientService;
+  changeTrackingService?: IChangeTrackingService;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
@@ -80,6 +97,7 @@ export class RulesClientFactory {
   private internalSavedObjectsRepository!: ISavedObjectsRepository;
   private actions!: ActionsPluginStartContract;
   private eventLog!: IEventLogClientService;
+  private changeTrackingService?: IChangeTrackingService;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
@@ -111,6 +129,7 @@ export class RulesClientFactory {
     this.internalSavedObjectsRepository = options.internalSavedObjectsRepository;
     this.actions = options.actions;
     this.eventLog = options.eventLog;
+    this.changeTrackingService = options.changeTrackingService;
     this.kibanaVersion = options.kibanaVersion;
     this.authorization = options.authorization;
     this.eventLogger = options.eventLogger;
@@ -132,13 +151,15 @@ export class RulesClientFactory {
    */
   public async create(
     request: KibanaRequest,
-    savedObjects: SavedObjectsServiceStart
+    savedObjects: SavedObjectsServiceStart,
+    options?: RulesClientCreateOptions
   ): Promise<RulesClient> {
     return await this.createInternal({
       request,
       savedObjects,
       spaceId: this.getSpaceId(request),
       isExplicitSpaceOverride: false,
+      options,
     });
   }
 
@@ -149,13 +170,15 @@ export class RulesClientFactory {
   public async createWithSpaceId(
     request: KibanaRequest,
     savedObjects: SavedObjectsServiceStart,
-    spaceId: string
+    spaceId: string,
+    options?: RulesClientCreateOptions
   ): Promise<RulesClient> {
     return await this.createInternal({
       request,
       savedObjects,
       spaceId,
       isExplicitSpaceOverride: true,
+      options,
     });
   }
 
@@ -173,7 +196,10 @@ export class RulesClientFactory {
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
       this.logger.error(
-        `Failed to create UIAM API key for alerting rule : ${name}: Invalid or missing UIAM credentials`
+        `Failed to create UIAM API key for alerting rule : ${name}: Invalid or missing UIAM credentials`,
+        {
+          tags: UIAM_LOGS_CREDENTIALS_TAGS,
+        }
       );
       return;
     }
@@ -182,14 +208,20 @@ export class RulesClientFactory {
         name: `uiam-${name}`,
       });
       if (!result) {
-        this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`);
+        this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`, {
+          tags: UIAM_LOGS_GRANT_TAGS,
+        });
         return;
       }
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       this.logger.error(
-        `Failed to create UIAM API key for alerting rule : ${name}: ${errorMessage}`
+        `Failed to create UIAM API key for alerting rule : ${name}: ${errorMessage}`,
+        {
+          tags: UIAM_LOGS_GRANT_TAGS,
+          error: { stack_trace: err.stack },
+        }
       );
       return;
     }
@@ -208,7 +240,10 @@ export class RulesClientFactory {
       this.logger.error(
         `Failed to invalidate UIAM API key for alerting rule : ${ruleName}: ${result.error_details
           ?.map((error) => error.reason)
-          .join(', ')}  `
+          .join(', ')}  `,
+        {
+          tags: UIAM_LOGS_INVALIDATE_TAGS,
+        }
       );
     }
   }
@@ -218,11 +253,13 @@ export class RulesClientFactory {
     savedObjects,
     spaceId,
     isExplicitSpaceOverride,
+    options,
   }: {
     request: KibanaRequest;
     savedObjects: SavedObjectsServiceStart;
     spaceId: string;
     isExplicitSpaceOverride: boolean;
+    options?: RulesClientCreateOptions;
   }): Promise<RulesClient> {
     const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
     const factory = this;
@@ -261,6 +298,7 @@ export class RulesClientFactory {
       internalSavedObjectsRepository: this.internalSavedObjectsRepository,
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
+      changeTrackingService: this.changeTrackingService?.asScoped(request),
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
       backfillClient: this.backfillClient,
@@ -371,6 +409,20 @@ export class RulesClientFactory {
           };
         }
         return { apiKeysEnabled: false };
+      },
+      cloneApiKeysOnCreate: options?.cloneApiKeysOnCreate === true,
+      async cloneAPIKey(name: string) {
+        const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
+          name,
+          metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+        });
+        if (!cloneResult) {
+          throw new Error('API key clone returned null (security feature may be disabled)');
+        }
+        return {
+          apiKeysEnabled: true,
+          result: cloneResult,
+        };
       },
       isSystemAction(actionId: string) {
         return actions.isSystemActionConnector(actionId);

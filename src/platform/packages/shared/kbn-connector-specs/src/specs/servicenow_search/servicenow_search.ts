@@ -21,7 +21,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import {
   SearchInputSchema,
@@ -43,7 +43,6 @@ import type {
   GetAttachmentInput,
   DescribeTableInput,
 } from './types';
-
 export const ServicenowSearch: ConnectorSpec = {
   metadata: {
     id: '.servicenow_search',
@@ -52,7 +51,8 @@ export const ServicenowSearch: ConnectorSpec = {
       defaultMessage: 'Search and retrieve records from ServiceNow',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -69,20 +69,37 @@ export const ServicenowSearch: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {},
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_auth.do',
+            },
+            tokenUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_token.do',
+            },
+            scope: { hidden: true },
+          },
+        },
+      },
     ],
   },
 
-  schema: z.object({
-    instanceUrl: z
-      .string()
-      .url()
-      .describe('ServiceNow instance URL (e.g., https://your-instance.service-now.com)')
-      .meta({
-        label: 'Instance URL',
-        widget: 'text',
-        placeholder: 'https://your-instance.service-now.com',
-      }),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      instanceUrl: z
+        .string()
+        .url()
+        .describe('ServiceNow instance URL (e.g., https://your-instance.service-now.com)')
+        .meta({
+          label: 'Instance URL',
+          widget: 'text',
+          placeholder: 'https://your-instance.service-now.com',
+        }),
+    })
+  ),
 
   actions: {
     search: {
@@ -240,11 +257,13 @@ export const ServicenowSearch: ConnectorSpec = {
         'Attachment sys_ids can be found by querying the sys_attachment table: ' +
         'use listRecords with table=sys_attachment and encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>.',
       input: GetAttachmentInputSchema,
-      output: z.object({
-        fileName: z.string().describe('Name of the attachment file'),
-        contentType: z.string().describe('MIME type of the attachment'),
-        base64: z.string().describe('Base64-encoded attachment content'),
-      }),
+      output: lazySchema(() =>
+        z.object({
+          fileName: z.string().describe('Name of the attachment file'),
+          contentType: z.string().describe('MIME type of the attachment'),
+          base64: z.string().describe('Base64-encoded attachment content'),
+        })
+      ),
       handler: async (ctx, input: GetAttachmentInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
 
@@ -289,6 +308,25 @@ export const ServicenowSearch: ConnectorSpec = {
       },
     },
   },
+
+  skill: [
+    'ServiceNow connector — cross-action usage guidance for LLMs.',
+    '',
+    '## Discovery pattern',
+    'When the target table is unknown, start with listTables (optionally filter by query keyword),',
+    'then call describeTable on the chosen table to understand available fields before querying.',
+    '',
+    '## Knowledge articles',
+    'listKnowledgeBases → search (or listRecords) on kb_knowledge table.',
+    'Useful fields: sys_id, number, short_description, text, topic, category, author,',
+    'sys_created_on, sys_updated_on, workflow_state, kb_knowledge_base, kb_category.',
+    'To filter by knowledge base: include kb_knowledge_base=<kb_sys_id> in encodedQuery.',
+    '',
+    '## Attachments',
+    'Attachment sys_ids are not stored on the parent record. Find them first:',
+    '  listRecords(table=sys_attachment, encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>)',
+    'Then call getAttachment with the attachment sys_id to retrieve base64-encoded content.',
+  ].join('\n'),
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.servicenowSearch.test.description', {

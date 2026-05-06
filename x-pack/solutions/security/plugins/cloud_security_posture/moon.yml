@@ -78,6 +78,7 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/react-query'
   - '@kbn/kql'
+  - '@kbn/entity-store'
 tags:
   - plugin
   - prod
@@ -94,26 +95,6 @@ fileGroups:
     - server/**/*.json
     - public/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -6,21 +6,25 @@
  */
 
 import React from 'react';
+import { RIGHT_ALIGNMENT } from '@elastic/eui';
 
 import type { CaseCustomField } from '../../../../common/types/domain';
 import type { CustomFieldEuiTableColumn } from '../types';
 
 export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiTableColumn => ({
   name: label,
-  width: '150px',
+  // Custom number fields are numeric values between -(2^53 - 1) and 2^53 - 1.
+  // Numbers are rendered using the monospace font variant
+  // and can take up to 17 characters with sign.
+  maxWidth: '17ch',
+  minWidth: '4em',
+  className: 'eui-textNumber eui-textNoWrap',
+  align: RIGHT_ALIGNMENT,
   render: (customField: CaseCustomField) => {
     return (
-      <p
-        className="eui-textNumber"
-        data-test-subj={`number-custom-field-column-view-${customField.key}`}
-      >
+      <span data-test-subj={`number-custom-field-column-view-${customField.key}`}>
         {customField.value}
-      </p>
+      </span>
     );
   },
   'data-test-subj': 'number-custom-field-column',

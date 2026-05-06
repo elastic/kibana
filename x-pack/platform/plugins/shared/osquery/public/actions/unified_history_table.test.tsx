@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 import { UnifiedHistoryTable } from './unified_history_table';
 import { useUnifiedHistory } from './use_unified_history';
@@ -28,6 +28,7 @@ const renderWithProviders = (element: React.ReactElement) =>
   render(element, { wrapper: TestProviders });
 
 const mockPush = jest.fn();
+const mockReplace = jest.fn();
 const mockUseKibana = jest.fn();
 
 jest.mock('../common/lib/kibana', () => ({
@@ -38,7 +39,12 @@ jest.mock('../common/lib/kibana', () => ({
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: mockPush }),
+  useHistory: () => ({
+    push: mockPush,
+    replace: mockReplace,
+    location: { search: '', pathname: '/history' },
+  }),
+  useLocation: () => ({ search: '', pathname: '/history' }),
 }));
 
 jest.mock('./use_unified_history');
@@ -79,17 +85,20 @@ const mockHistory = ({
   nextPage,
   isLoading = false,
   isFetching = false,
+  isPlaceholderData = false,
 }: {
   data?: UnifiedHistoryResponse['data'];
   hasMore?: boolean;
   nextPage?: string;
   isLoading?: boolean;
   isFetching?: boolean;
+  isPlaceholderData?: boolean;
 }) => {
   useUnifiedHistoryMock.mockReturnValue({
     data: { data, hasMore, nextPage },
     isLoading,
     isFetching,
+    isPlaceholderData,
     refetch: jest.fn(),
   } as never);
 };
@@ -129,7 +138,7 @@ describe('UnifiedHistoryTable', () => {
 
     const columnHeaders = screen.getAllByRole('columnheader');
     const headerTexts = columnHeaders.map((h) => h.textContent);
-    expect(headerTexts).toContain('Query');
+    expect(headerTexts).toContain('Query or Pack');
     expect(headerTexts).toContain('Source');
     expect(headerTexts).toContain('Results');
     expect(headerTexts).toContain('Agents');
@@ -143,7 +152,7 @@ describe('UnifiedHistoryTable', () => {
 
     renderWithProviders(<UnifiedHistoryTable />);
 
-    expect(screen.getByTestId('history-search-input')).toBeInTheDocument();
+    expect(screen.getByTestId('history-toolbar-search')).toBeInTheDocument();
   });
 
   it('calls useUnifiedHistory with expected parameters', () => {
@@ -218,7 +227,8 @@ describe('UnifiedHistoryTable', () => {
 
     renderWithProviders(<UnifiedHistoryTable />);
 
-    expect(screen.getByText('\u2014')).toBeInTheDocument();
+    const dashes = screen.getAllByText('\u2014');
+    expect(dashes.length).toBeGreaterThanOrEqual(1);
   });
 
   it('source column renders Live for live row', () => {
@@ -237,6 +247,15 @@ describe('UnifiedHistoryTable', () => {
     renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('Rule')).toBeInTheDocument();
+  });
+
+  it('run by column shows Elastic for rule row', () => {
+    const row = createMockRuleRow();
+    mockHistory({ data: [row] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText('Elastic')).toBeInTheDocument();
   });
 
   it('details button has correct href for navigation', () => {
@@ -278,25 +297,21 @@ describe('UnifiedHistoryTable', () => {
     expect(screen.queryAllByLabelText('Run query')).toHaveLength(0);
   });
 
-  it('search submits on Enter key', async () => {
+  it('search submits on Enter key and updates URL', () => {
     mockHistory({ data: [] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
-    const searchInput = screen.getByTestId('history-search-input');
+    const searchInput = screen.getByTestId('history-toolbar-search');
     fireEvent.change(searchInput, { target: { value: 'test-search' } });
-
-    expect(useUnifiedHistoryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ kuery: undefined })
-    );
-
     fireEvent.keyDown(searchInput, { key: 'Enter' });
 
-    await waitFor(() => {
-      expect(useUnifiedHistoryMock).toHaveBeenCalledWith(
-        expect.objectContaining({ kuery: 'test-search' })
-      );
-    });
+    expect(mockReplace).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathname: '/history',
+        search: expect.stringContaining('q=test-search'),
+      })
+    );
   });
 
   it('query column shows SQL for single query', () => {
@@ -368,13 +383,13 @@ describe('UnifiedHistoryTable', () => {
       expect(screen.getByText('20')).toBeInTheDocument();
     });
 
-    it('run by column shows em dash for scheduled row', () => {
+    it('run by column shows Elastic for scheduled row', () => {
       const row = createMockScheduledRow();
       mockHistory({ data: [row] });
 
       renderWithProviders(<UnifiedHistoryTable />);
 
-      expect(screen.getByText('\u2014')).toBeInTheDocument();
+      expect(screen.getByText('Elastic')).toBeInTheDocument();
     });
 
     it('play button is not available for scheduled rows', () => {
@@ -412,6 +427,90 @@ describe('UnifiedHistoryTable', () => {
       expect(screen.getByText('Live')).toBeInTheDocument();
       expect(screen.getByText('Scheduled')).toBeInTheDocument();
       expect(screen.getByText('Rule')).toBeInTheDocument();
+    });
+  });
+
+  describe('column visibility', () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('renders column picker in toolbar', () => {
+      mockHistory({ data: [createMockLiveRow()] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('Columns: 7')).toBeInTheDocument();
+    });
+
+    it('all columns visible by default', () => {
+      mockHistory({ data: [createMockLiveRow()] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      const headers = screen.getAllByRole('columnheader').map((h) => h.textContent);
+      expect(headers).toContain('Query or Pack');
+      expect(headers).toContain('Tags');
+      expect(headers).toContain('Results');
+      expect(headers).toContain('Source');
+      expect(headers).toContain('Agents');
+      expect(headers).toContain('Created at');
+      expect(headers).toContain('Run by');
+      expect(headers).toContain('Actions');
+    });
+
+    it('actions column is always visible even when columns are restricted via localStorage', () => {
+      localStorage.setItem('osquery:historyColumns', JSON.stringify(['query', 'created_at']));
+      mockHistory({ data: [createMockLiveRow()] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      const headers = screen.getAllByRole('columnheader').map((h) => h.textContent);
+      expect(headers).toContain('Actions');
+      expect(headers).toContain('Query or Pack');
+      expect(headers).toContain('Created at');
+      expect(headers).not.toContain('Tags');
+      expect(headers).not.toContain('Source');
+    });
+  });
+
+  describe('sort direction', () => {
+    it('renders sort fields popover in toolbar', () => {
+      mockHistory({ data: [] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('Sort fields')).toBeInTheDocument();
+    });
+
+    it('passes default desc sortDirection to useUnifiedHistory', () => {
+      mockHistory({ data: [] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(useUnifiedHistoryMock).toHaveBeenCalledWith(
+        expect.objectContaining({ sortDirection: 'desc' })
+      );
+    });
+  });
+
+  describe('pagination', () => {
+    it('does not advertise extra pages while showing placeholder (stale) data', () => {
+      const rows = Array.from({ length: 20 }, () => createMockLiveRow());
+      mockHistory({
+        data: rows,
+        hasMore: true,
+        nextPage: 'cursor-abc',
+        isPlaceholderData: true,
+      });
+
+      const { container } = renderWithProviders(<UnifiedHistoryTable />);
+
+      // When data is stale (placeholder), the forward arrow should be disabled
+      // even though the stale response has hasMore: true.
+      const nextButton = container.querySelector('[data-test-subj="pagination-button-next"]');
+      expect(nextButton).toBeTruthy();
+      expect(nextButton).toBeDisabled();
     });
   });
 });

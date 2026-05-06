@@ -30,7 +30,7 @@ export function createAddErrorBudgetPanelAction(
     id: ADD_SLO_ERROR_BUDGET_ACTION_ID,
     grouping: COMMON_OBSERVABILITY_GROUPING,
     order: 6,
-    getIconType: () => 'visLine',
+    getIconType: () => 'chartLine',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },

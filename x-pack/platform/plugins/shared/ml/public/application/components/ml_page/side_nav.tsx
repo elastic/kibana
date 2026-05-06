@@ -11,11 +11,11 @@ import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { useUrlState } from '@kbn/ml-url-state';
-import type { MlLocatorParams } from '../../../../common/types/locator';
-import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlLocator, useMlManagementLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';
-import { ML_PAGES } from '../../../../common/constants/locator';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
@@ -35,11 +35,12 @@ export interface Tab {
 
 export function useSideNavItems(activeRoute: MlRoute | undefined) {
   const mlLocator = useMlLocator();
+  const mlManagementLocator = useMlManagementLocator();
   const navigateToPath = useNavigateToPath();
 
   const mlFeaturesDisabled = !isFullLicense();
   const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
-  const [canUseAiops] = usePermissionCheck(['canUseAiops']);
+  const [canUseAiops, canGetJobs] = usePermissionCheck(['canUseAiops', 'canGetJobs']);
 
   const [globalState] = useUrlState('_g');
 
@@ -67,6 +68,15 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [pageState]
   );
+
+  const navigateToAnomalyDetectionJobsManagement = useCallback(async () => {
+    if (!mlManagementLocator) return;
+
+    await mlManagementLocator.navigate({
+      sectionId: 'ml',
+      appId: 'anomaly_detection',
+    });
+  }, [mlManagementLocator]);
 
   const tabsDefinition: Tab[] = useMemo((): Tab[] => {
     const disableLinks = mlFeaturesDisabled;
@@ -105,6 +115,15 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
               }),
               disabled: disableLinks || !isADEnabled,
               items: [
+                {
+                  id: 'manage_jobs',
+                  name: i18n.translate('xpack.ml.navMenu.anomalyDetection.manageJobsText', {
+                    defaultMessage: 'Manage jobs',
+                  }),
+                  disabled: disableLinks || !isADEnabled || !canGetJobs,
+                  onClick: navigateToAnomalyDetectionJobsManagement,
+                  testSubj: 'mlMainTab manageJobs',
+                },
                 {
                   id: 'anomaly_explorer',
                   name: i18n.translate('xpack.ml.navMenu.anomalyDetection.anomalyExplorerText', {
@@ -194,7 +213,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         ...(CHANGE_POINT_DETECTION_ENABLED
           ? [
               {
-                id: 'changePointDetection',
+                id: 'chartChangePoint',
                 pathId: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT,
                 name: i18n.translate('xpack.ml.navMenu.changePointDetectionLinkText', {
                   defaultMessage: 'Change point detection',
@@ -209,7 +228,14 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
     });
 
     return mlTabs;
-  }, [mlFeaturesDisabled, isADEnabled, isDFAEnabled, canUseAiops]);
+  }, [
+    mlFeaturesDisabled,
+    isADEnabled,
+    isDFAEnabled,
+    canUseAiops,
+    canGetJobs,
+    navigateToAnomalyDetectionJobsManagement,
+  ]);
 
   const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(
     (tab: Tab) => {

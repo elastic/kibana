@@ -16,12 +16,14 @@ import {
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
+  useFetchContext,
 } from '@kbn/presentation-publishing';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { rewriteFiltersForSloSummary } from '../../../../common/rewrite_slo_filters';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import {
@@ -62,7 +64,7 @@ export const getOverviewEmbeddableFactory = ({
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState;
 
-    const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+    const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
     const titleManager = initializeTitleManager(state);
     const overviewMode$ = new BehaviorSubject<OverviewEmbeddableState['overview_mode'] | undefined>(
@@ -81,7 +83,7 @@ export const getOverviewEmbeddableFactory = ({
     const groupSloManager = initializeStateManager<Omit<GroupOverviewCustomState, 'overview_mode'>>(
       state as GroupOverviewCustomState,
       {
-        group_filters: undefined,
+        group_filters: { group_by: 'status' as const },
       }
     );
     const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
@@ -204,6 +206,12 @@ export const getOverviewEmbeddableFactory = ({
           };
         }, []);
 
+        const fetchContext = useFetchContext(api);
+        const dashboardFilters = useMemo(
+          () => rewriteFiltersForSloSummary(fetchContext.filters ?? []),
+          [fetchContext.filters]
+        );
+
         const queryClient = new QueryClient();
         return (
           <EuiThemeProvider darkMode={true}>
@@ -223,6 +231,7 @@ export const getOverviewEmbeddableFactory = ({
                     sloInstanceId={sloInstanceId}
                     overviewMode={overviewMode}
                     groupFilters={groupFilters}
+                    dashboardFilters={dashboardFilters}
                     remoteName={remoteName}
                     reloadSubject={reload$}
                   />

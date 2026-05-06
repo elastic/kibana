@@ -73,7 +73,7 @@ export const buildEsqlFetchSubscribe = ({
       return;
     }
 
-    // We need to reset the default profile state on index pattern changes
+    // We need to mark profile state fields to reset on index pattern changes
     // when loading starts to ensure the correct pre fetch state is available
     // before data fetching is triggered
     if (next.fetchStatus === FetchStatus.LOADING) {
@@ -90,16 +90,11 @@ export const buildEsqlFetchSubscribe = ({
           getIndexPatternFromESQLQuery(appStateQuery.esql) !==
           getIndexPatternFromESQLQuery(prevEsqlData.query);
 
-        // Reset all default profile state when index pattern changes
+        // Mark all profile state fields to reset when the index pattern changes
         if (indexPatternChanged) {
           internalState.dispatch(
-            injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-              resetDefaultProfileState: {
-                columns: true,
-                rowHeight: true,
-                breakdownField: true,
-                hideChart: true,
-              },
+            injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+              fieldsToReset: 'all',
             })
           );
         }
@@ -121,8 +116,12 @@ export const buildEsqlFetchSubscribe = ({
     let nextAllColumns = prevEsqlData.allColumns;
     let nextDefaultColumns = prevEsqlData.defaultColumns;
 
-    if (next.result?.length) {
-      nextAllColumns = Object.keys(next.result[0].raw);
+    const responseColumns =
+      next.esqlQueryColumns?.map((c) => c.name) ??
+      (next.result?.length ? Object.keys(next.result[0].raw) : undefined);
+
+    if (responseColumns !== undefined) {
+      nextAllColumns = responseColumns;
 
       if (
         hasTransformationalCommand(nextQuery.esql) ||
@@ -134,7 +133,9 @@ export const buildEsqlFetchSubscribe = ({
       }
     }
 
-    if (prevEsqlData.initialFetch) {
+    const isInitialFetch = prevEsqlData.initialFetch;
+
+    if (isInitialFetch) {
       prevEsqlData.initialFetch = false;
       prevEsqlData.query = nextQuery.esql;
       prevEsqlData.allColumns = nextAllColumns;
@@ -152,37 +153,46 @@ export const buildEsqlFetchSubscribe = ({
 
     const allColumnsChanged = !isEqual(nextAllColumns, prevEsqlData.allColumns);
 
-    const changeDefaultColumns =
-      indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
-
-    const { viewMode } = getCurrentTab().appState;
-    const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
-
     // If the index pattern hasn't changed, but the available columns have changed
-    // due to transformational commands, reset the associated default profile state
+    // due to transformational commands, mark the associated profile state fields to reset
     if (!indexPatternChanged && allColumnsChanged) {
       internalState.dispatch(
-        injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-          resetDefaultProfileState: {
-            columns: true,
-            rowHeight: false,
-            breakdownField: false,
-            hideChart: false,
-          },
+        // This reset comes from the current fetch, so keep the same resetId.
+        // Otherwise the snapshot taken at fetch start looks stale when cleanup runs.
+        injectCurrentTab(internalStateActions.setProfileStateFieldsToResetWithoutResetId)({
+          fieldsToReset: ['columns'],
         })
       );
     }
 
+    const changeDefaultColumns =
+      indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
+
+    const appStateColumns = getCurrentTab().appState.columns ?? [];
+    const nextSelectedColumns = appStateColumns.filter(
+      (column) => responseColumns?.includes(column) ?? true
+    );
+    const changeSelectedColumns = !isInitialFetch && !isEqual(nextSelectedColumns, appStateColumns);
+
+    const { viewMode } = getCurrentTab().appState;
+    const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
+
     prevEsqlData.allColumns = nextAllColumns;
 
-    if (indexPatternChanged || changeDefaultColumns || changeViewMode) {
+    if (indexPatternChanged || changeDefaultColumns || changeSelectedColumns || changeViewMode) {
       prevEsqlData.query = nextQuery.esql;
       prevEsqlData.defaultColumns = nextDefaultColumns;
 
       // just change URL state if necessary
-      if (changeDefaultColumns || changeViewMode) {
+      if (changeDefaultColumns || changeSelectedColumns || changeViewMode) {
+        const nextColumns = changeDefaultColumns
+          ? nextDefaultColumns
+          : changeSelectedColumns
+          ? nextSelectedColumns
+          : undefined;
+
         const nextState = {
-          ...(changeDefaultColumns && { columns: nextDefaultColumns }),
+          ...(nextColumns && { columns: nextColumns }),
           ...(changeViewMode && { viewMode: undefined }),
         };
 

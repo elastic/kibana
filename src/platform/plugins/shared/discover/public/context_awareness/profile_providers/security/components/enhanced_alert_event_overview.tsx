@@ -8,7 +8,9 @@
  */
 
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { useCallback } from 'react';
 import type { ProfileProviderServices } from '../../profile_provider_services';
+import { useCurrentTabDataStateContainer } from '../../../../application/main/state_management/redux';
 
 /**
  * This component is a placeholder for the new alert/event Overview tab content.
@@ -23,11 +25,17 @@ export interface EnhancedAlertEventOverviewProps extends DocViewRenderProps {
 export const EnhancedAlertEventOverview = ({
   hit,
   providerServices,
+  ...docViewProps
 }: EnhancedAlertEventOverviewProps) => {
+  const dataStateContainer = useCurrentTabDataStateContainer();
   const alertFlyoutOverviewTabFeature = providerServices.discoverShared.features.registry.getById(
     'security-solution-alert-flyout-overview-tab'
   );
 
+  const onAlertUpdated = useCallback(() => {
+    dataStateContainer.refetch$.next(undefined);
+  }, [dataStateContainer]);
+
   const render = alertFlyoutOverviewTabFeature?.render;
-  return render ? render(hit) : null;
+  return render ? render({ hit, ...docViewProps, onAlertUpdated }) : null;
 };

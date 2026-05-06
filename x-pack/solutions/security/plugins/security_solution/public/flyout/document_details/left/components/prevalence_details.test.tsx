@@ -8,10 +8,8 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { DocumentDetailsContext } from '../../shared/context';
-import {
-  PrevalenceDetails,
-  resetColdFrozenTierCalloutDismissedStateForTests,
-} from './prevalence_details';
+import { PrevalenceDetails } from './prevalence_details';
+import { resetColdFrozenTierCalloutDismissedStateForTests } from '../../../../flyout_v2/prevalence/components/prevalence_details_view';
 import {
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID,
@@ -26,10 +24,11 @@ import {
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
-} from './test_ids';
-import { usePrevalence } from '../../shared/hooks/use_prevalence';
+} from '../../../../flyout_v2/prevalence/test_ids';
+import { usePrevalence } from '../../../../flyout_v2/prevalence/hooks/use_prevalence';
 import { TestProviders } from '../../../../common/mock';
 import { licenseService } from '../../../../common/hooks/use_license';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
@@ -38,6 +37,8 @@ import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../common/components/user_privileges');
@@ -50,6 +51,10 @@ jest.mock('../../../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
+        application: {
+          getUrlForApp: (_appId: string, { path }: { path: string }) =>
+            `/app/securitySolutionUI${path}`,
+        },
         telemetry: mockedTelemetry,
         storage: { get: mockStorage },
         uiSettings: {
@@ -58,10 +63,25 @@ jest.mock('../../../../common/lib/kibana', () => {
         serverless: mockServerless,
       },
     }),
+    useDateFormat: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+    useTimeZone: () => 'UTC',
+    useUiSetting: () => false,
   };
 });
 
-jest.mock('../../shared/hooks/use_prevalence');
+jest.mock('../../../../flyout_v2/prevalence/hooks/use_prevalence');
+
+jest.mock('../../../entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: jest.fn().mockReturnValue({
+    entity: null,
+    entityRecord: null,
+    firstSeen: null,
+    lastSeen: null,
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
+}));
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -86,11 +106,13 @@ jest.mock('../../../../common/hooks/use_license', () => {
 const NO_DATA_MESSAGE = 'No prevalence data available.';
 
 const panelContextValue = {
+  ...mockContextValue,
   eventId: 'event id',
   indexName: 'indexName',
-  browserFields: {},
-  dataFormattedForFieldBrowser: [],
   scopeId: 'scopeId',
+  getFieldsData: mockGetFieldsData,
+  dataAsNestedObject: mockDataAsNestedObject,
+  investigationFields: [],
 } as unknown as DocumentDetailsContext;
 
 const UPSELL_MESSAGE = 'Host and user prevalence are only available with a';
@@ -153,7 +175,10 @@ describe('PrevalenceDetails', () => {
     mockUiSettingsGet.mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: true },
+      rulesPrivileges: { rules: { read: true } },
+    });
   });
 
   it('should render the table with all data if license is platinum', () => {
@@ -190,9 +215,11 @@ describe('PrevalenceDetails', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: HostPreviewPanelKey,
       params: {
+        contextID: panelContextValue.scopeId,
         hostName: 'test host',
         scopeId: panelContextValue.scopeId,
         banner: HOST_PREVIEW_BANNER,
+        entityId: undefined,
       },
     });
 
@@ -200,9 +227,11 @@ describe('PrevalenceDetails', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: UserPreviewPanelKey,
       params: {
+        contextID: panelContextValue.scopeId,
         userName: 'test user',
         scopeId: panelContextValue.scopeId,
         banner: USER_PREVIEW_BANNER,
+        entityId: undefined,
       },
     });
   });
@@ -281,7 +310,10 @@ describe('PrevalenceDetails', () => {
   });
 
   it('should render formatted numbers as text if user lacks timeline read privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: false } });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: false },
+      rulesPrivileges: { rules: { read: true } },
+    });
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
       error: false,

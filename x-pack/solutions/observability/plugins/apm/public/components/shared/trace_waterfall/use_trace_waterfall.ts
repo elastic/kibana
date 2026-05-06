@@ -9,10 +9,11 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import type { Error } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
+import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import { WaterfallLegendType, type IWaterfallLegend } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
-import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import type { OnErrorClick } from './trace_waterfall_context';
+import type { ErrorMark } from '../charts/timeline/marker/error_marker';
 
 const FALLBACK_WARNING = i18n.translate(
   'xpack.apm.traceWaterfallItem.warningMessage.fallbackWarning',
@@ -141,8 +142,8 @@ function getWaterfallErrorsMarks({
       error,
       id: error.id,
       verticalLine: false,
-      offset: error.timestamp.us - rootTimestampUs,
-      skew: getClockSkew({ itemTimestamp: error.timestamp.us, itemDuration: 0, parent }),
+      offset: getTimestampUs(error) - rootTimestampUs,
+      skew: getClockSkew({ itemTimestamp: getTimestampUs(error), itemDuration: 0, parent }),
       serviceColor: parent?.color ?? '',
       onClick:
         onErrorClick && docId
@@ -161,11 +162,16 @@ function getWaterfallErrorsMarks({
 }
 
 export function getColorByType(legends: IWaterfallLegend[]) {
-  let count = 0;
-  for (const { type } of legends) {
-    if (type === WaterfallLegendType.ServiceName) count++;
-    if (count > 1) return WaterfallLegendType.ServiceName;
+  let serviceCount = 0;
+  let hasEmptyType = false;
+
+  for (const legend of legends) {
+    if (legend.type === WaterfallLegendType.ServiceName) serviceCount++;
+    if (legend.type === WaterfallLegendType.Type && !legend.value) hasEmptyType = true;
   }
+
+  if (serviceCount > 1 || hasEmptyType) return WaterfallLegendType.ServiceName;
+
   return WaterfallLegendType.Type;
 }
 

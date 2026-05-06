@@ -67,7 +67,7 @@ const AutoRefreshButtonComponent = ({
         <EuiButtonEmpty
           data-test-subj="autoRefreshButton"
           color={'text'}
-          iconType={'timeRefresh'}
+          iconType={'refreshTime'}
           onClick={togglePopover}
           disabled={isDisabled}
           css={css`

@@ -13,7 +13,7 @@ import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-
 import {
   getExecutionState,
   type WorkflowExecutionState,
-} from '@kbn/agent-builder-genai-utils/tools/utils/workflows';
+} from '@kbn/agent-builder-tools-base/workflows';
 import type { WorkflowExecutionResult } from './types';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
@@ -22,7 +22,11 @@ const DEFAULT_COMPLETION_TIMEOUT_SEC = 120;
 const INITIAL_WAIT_MS = 1_000;
 const CHECK_INTERVAL_MS = 2_500;
 
-const finalStatuses = [WorkflowExecutionStatus.COMPLETED, WorkflowExecutionStatus.FAILED];
+const finalStatuses = [
+  WorkflowExecutionStatus.COMPLETED,
+  WorkflowExecutionStatus.FAILED,
+  WorkflowExecutionStatus.WAITING_FOR_INPUT,
+];
 
 export interface ExecuteWorkflowParams {
   workflowId: string;
@@ -32,6 +36,7 @@ export interface ExecuteWorkflowParams {
   workflowApi: WorkflowApi;
   waitForCompletion?: boolean;
   completionTimeoutSec?: number;
+  metadata?: Record<string, unknown>;
 }
 
 export const executeWorkflow = async ({
@@ -42,6 +47,7 @@ export const executeWorkflow = async ({
   workflowApi,
   waitForCompletion = true,
   completionTimeoutSec = DEFAULT_COMPLETION_TIMEOUT_SEC,
+  metadata,
 }: ExecuteWorkflowParams): Promise<WorkflowExecutionResult> => {
   const workflow = await workflowApi.getWorkflow(workflowId, spaceId);
 
@@ -91,7 +97,9 @@ export const executeWorkflow = async ({
         workflowForExecution,
         spaceId,
         workflowParams,
-        request
+        request,
+        undefined,
+        metadata
       );
 
       span?.setAttribute('elastic.workflow.execution_id', executionId);

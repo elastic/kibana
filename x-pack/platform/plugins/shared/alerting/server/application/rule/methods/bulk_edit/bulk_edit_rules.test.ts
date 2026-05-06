@@ -85,6 +85,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: createAPIKeyMock,
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -1524,7 +1525,7 @@ describe('bulkEdit()', () => {
         errors: [
           {
             message:
-              'Error validating bulk edit rules operations - [group]: definition for this key is missing',
+              "Error validating bulk edit rules operations - [group]: Additional properties are not allowed ('group' was unexpected)",
             rule: {
               id: '1',
               name: 'my rule name',
@@ -1574,7 +1575,7 @@ describe('bulkEdit()', () => {
         errors: [
           {
             message:
-              'Error validating bulk edit rules operations - [frequency]: definition for this key is missing',
+              "Error validating bulk edit rules operations - [frequency]: Additional properties are not allowed ('frequency' was unexpected)",
             rule: {
               id: '1',
               name: 'my rule name',
@@ -1622,7 +1623,7 @@ describe('bulkEdit()', () => {
         errors: [
           {
             message:
-              'Error validating bulk edit rules operations - [alertsFilter]: definition for this key is missing',
+              "Error validating bulk edit rules operations - [alertsFilter]: Additional properties are not allowed ('alertsFilter' was unexpected)",
             rule: {
               id: '1',
               name: 'my rule name',

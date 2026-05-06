@@ -1,36 +1,36 @@
 {
-  "sha1": "ac6052bfc470cf0f0467d31052e10920279247b5",
+  "sha1": "e7dab6a2d3227f1613bb3ee3e19f534f77359860",
   "tests": [
     {
-      "id": "01d528d0a32d16a-05a1663c9e84f0e",
-      "title": "Dashboard app should create dashboard with ES|QL, Lens, and Custom visualization panels",
+      "id": "709f30ae5fb788f-58e2a4254283ea3",
+      "title": "Dashboard app should create dashboard with ES|QL, Lens, and Vega panels",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 69,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 49,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-5bc4d2dca5fe437",
-      "title": "Dashboard app should edit existing dashboard and add map and custom visualization panels",
+      "id": "709f30ae5fb788f-7ba6d85f303b46f",
+      "title": "Dashboard app should edit existing dashboard and add map and Vega panels",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 102,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 82,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-9ea798142ce5f12",
+      "id": "709f30ae5fb788f-9ea798142ce5f12",
       "title": "Dashboard app should duplicate an existing dashboard and preserve panels",
       "expectedStatus": "passed",
       "tags": [
@@ -38,13 +38,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 127,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 105,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-fe6fc7c70a3ff03",
+      "id": "709f30ae5fb788f-fe6fc7c70a3ff03",
       "title": "Dashboard app should save a copy of a dashboard from edit mode",
       "expectedStatus": "passed",
       "tags": [
@@ -52,13 +52,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 154,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 132,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-a7c5a51f98d68fc",
+      "id": "709f30ae5fb788f-a7c5a51f98d68fc",
       "title": "Dashboard app should add dashboard and URL link types to a dashboard",
       "expectedStatus": "passed",
       "tags": [
@@ -66,13 +66,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 181,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 159,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-35a51aa188d3e2f",
+      "id": "709f30ae5fb788f-35a51aa188d3e2f",
       "title": "Dashboard app should perform lens panel custom actions - explore in Discover",
       "expectedStatus": "passed",
       "tags": [
@@ -80,13 +80,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 205,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 183,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-bcdad0fceea3733",
+      "id": "709f30ae5fb788f-bcdad0fceea3733",
       "title": "Dashboard app should enter and exit fullscreen mode",
       "expectedStatus": "passed",
       "tags": [
@@ -94,13 +94,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 245,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 223,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-7acd9d3da5a3661",
+      "id": "709f30ae5fb788f-7acd9d3da5a3661",
       "title": "Dashboard app should update dashboard settings",
       "expectedStatus": "passed",
       "tags": [
@@ -108,13 +108,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 262,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 240,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-14cd26637b0157d",
+      "id": "709f30ae5fb788f-14cd26637b0157d",
       "title": "Dashboard app should export dashboard as PDF and download the report",
       "expectedStatus": "passed",
       "tags": [
@@ -122,13 +122,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 319,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 297,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-7a1924f2c5bba9a",
+      "id": "709f30ae5fb788f-7a1924f2c5bba9a",
       "title": "Dashboard app should export dashboard as PNG and download the report",
       "expectedStatus": "passed",
       "tags": [
@@ -136,13 +136,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 356,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 334,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-45f3f311a244eb4",
+      "id": "709f30ae5fb788f-45f3f311a244eb4",
       "title": "Dashboard app should maximize a panel",
       "expectedStatus": "passed",
       "tags": [
@@ -150,13 +150,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 393,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 371,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-ec5bf11a3d3bb38",
+      "id": "709f30ae5fb788f-ec5bf11a3d3bb38",
       "title": "Dashboard app should display created by for a newly created dashboard",
       "expectedStatus": "passed",
       "tags": [
@@ -164,13 +164,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 405,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 384,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-f52ee7d56f99c26",
+      "id": "709f30ae5fb788f-f52ee7d56f99c26",
       "title": "Dashboard app should add panels from library to dashboard",
       "expectedStatus": "passed",
       "tags": [
@@ -178,13 +178,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 436,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 415,
         "column": 7
       }
     },
     {
-      "id": "01d528d0a32d16a-5c728f3f7520ee5",
+      "id": "709f30ae5fb788f-5c728f3f7520ee5",
       "title": "Dashboard app should add a URL drilldown to a lens panel",
       "expectedStatus": "passed",
       "tags": [
@@ -192,8 +192,358 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
-        "line": 468,
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
+        "line": 447,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-130f7b81c105899",
+      "title": "Discover app should display selected time range in date picker and matching docs in table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 56,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-29bcc7e33a9f1e7",
+      "title": "Discover app save query should show toast message and display query name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 71,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-16f42721fa4c1db",
+      "title": "Discover app should refetch when autofresh is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 77,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-d0831360c44d882",
+      "title": "Discover app load query should show query name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 100,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-cd6767713d4c363",
+      "title": "Discover app should show the correct hit count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 108,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-f09b8bfcbc82d39",
+      "title": "Discover app should show correct time range string in chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 112,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-9b04eb217c0f4b1",
+      "title": "Discover app should modify the time range when a bar is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 118,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-50a4ce44a251cec",
+      "title": "Discover app should show correct initial chart interval of Auto",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 137,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-8eb36762f0987a7",
+      "title": "Discover app should show \"no results\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 144,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-a5a6bea0f7a1c50",
+      "title": "Discover app should suggest a new time range is picked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 152,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-db77da154902b01",
+      "title": "Discover app should show matches when time range is expanded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 161,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-2641dc66666744f",
+      "title": "Discover app should hide and show the histogram chart when toggle is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 177,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-09ecd24c8bef3d1",
+      "title": "Discover app should navigate to Lens editor when edit visualization is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 192,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-01ffee8cd673d16",
+      "title": "Discover app drag and drop fields to grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 202,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-9e2ffc341ec632e",
+      "title": "Discover app type a search query and execute a search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 218,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-4ecc04e7f8c88ec",
+      "title": "Discover app click Field Stats button and validate Document Stats is present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 226,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-0be58f0e62a089c",
+      "title": "Discover app navigate to Lens from field statistics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 233,
+        "column": 7
+      }
+    },
+    {
+      "id": "2b7f497564b88f3-b74228ac57188fe",
+      "title": "Discover app download CSV report and validate row length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
+        "line": 243,
+        "column": 7
+      }
+    },
+    {
+      "id": "664833c6c46bf65-24ae324a0388a44",
+      "title": "Visualize app should create and save an aggregation-based visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "664833c6c46bf65-b842741eb4f820a",
+      "title": "Visualize app should create and save a Lens visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
+        "line": 68,
+        "column": 7
+      }
+    },
+    {
+      "id": "664833c6c46bf65-51e3dbd28715165",
+      "title": "Visualize app should create and save a custom visualization (Vega)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
+        "line": 92,
+        "column": 7
+      }
+    },
+    {
+      "id": "664833c6c46bf65-a91e0f277e918dd",
+      "title": "Visualize app should create and save a TSVB visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
+        "line": 112,
+        "column": 7
+      }
+    },
+    {
+      "id": "664833c6c46bf65-0194ca1df8dcb2c",
+      "title": "Visualize app should create a TSVB visualization and save it to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
+        "line": 132,
+        "column": 7
+      }
+    },
+    {
+      "id": "664833c6c46bf65-bb2887401c4e724",
+      "title": "Visualize app should export a visualization as PDF and download the report",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
+        "line": 160,
+        "column": 7
+      }
+    },
+    {
+      "id": "664833c6c46bf65-4846db4fb96fd0b",
+      "title": "Visualize app should save a map visualization to library",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/visualize/visualize.spec.ts",
+        "line": 197,
         "column": 7
       }
     }

@@ -61,6 +61,10 @@ dependsOn:
   - '@kbn/core-chrome-sidebar-context'
   - '@kbn/core-chrome-sidebar'
   - '@kbn/core-chrome-browser-components'
+  - '@kbn/core-chrome-browser-context'
+  - '@kbn/core-chrome-browser-internal-types'
+  - '@kbn/use-observable'
+  - '@kbn/react-kibana-context-env'
 tags:
   - shared-browser
   - package
@@ -73,26 +77,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

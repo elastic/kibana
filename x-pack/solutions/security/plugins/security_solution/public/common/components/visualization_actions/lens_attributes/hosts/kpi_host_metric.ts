@@ -5,52 +5,146 @@
  * 2.0.
  */
 
-import type { LensAttributes } from '../../types';
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
+import type { ExtraOptions, LensAttributes } from '../../types';
 
-export const kpiHostMetricLensAttributes: LensAttributes = {
-  description: '',
-  state: {
-    datasourceStates: {
-      formBased: {
-        layers: {
-          '416b6fad-1923-4f6a-a2df-b223bb287e30': {
-            columnOrder: ['b00c65ea-32be-4163-bfc8-f795b1ef9d06'],
-            columns: {
-              'b00c65ea-32be-4163-bfc8-f795b1ef9d06': {
-                customLabel: true,
-                dataType: 'number',
-                isBucketed: false,
-                label: ' ',
-                operationType: 'unique_count',
-                scale: 'ratio',
-                sourceField: 'host.name',
+import {
+  ENTITY_STORE_V2_HOSTS_KPI_LENS_AD_HOC_ID,
+  getEntityStoreV2HostOnlyFilter,
+} from './entity_store_v2_hosts_kpi_lens_shared';
+
+const layerId = '416b6fad-1923-4f6a-a2df-b223bb287e30';
+const columnHostUnique = 'b00c65ea-32be-4163-bfc8-f795b1ef9d06';
+
+const getLegacyKpiHostMetricLensAttributes = (): LensAttributes => {
+  return {
+    description: '',
+    state: {
+      datasourceStates: {
+        formBased: {
+          layers: {
+            [layerId]: {
+              columnOrder: [columnHostUnique],
+              columns: {
+                [columnHostUnique]: {
+                  customLabel: true,
+                  dataType: 'number',
+                  isBucketed: false,
+                  label: ' ',
+                  operationType: 'unique_count',
+                  scale: 'ratio',
+                  sourceField: 'host.name',
+                },
               },
+              incompleteColumns: {},
             },
-            incompleteColumns: {},
           },
         },
       },
+      filters: [],
+      query: { language: 'kuery', query: '' },
+      visualization: {
+        accessor: columnHostUnique,
+        layerId,
+        layerType: 'data',
+      },
     },
-    filters: [],
-    query: { language: 'kuery', query: '' },
-    visualization: {
-      accessor: 'b00c65ea-32be-4163-bfc8-f795b1ef9d06',
-      layerId: '416b6fad-1923-4f6a-a2df-b223bb287e30',
-      layerType: 'data',
+    title: '[Host] Hosts - metric',
+    visualizationType: 'lnsLegacyMetric',
+    references: [
+      {
+        id: '{dataViewId}',
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: '{dataViewId}',
+        name: `indexpattern-datasource-layer-${layerId}`,
+        type: 'index-pattern',
+      },
+    ],
+  } as LensAttributes;
+};
+
+const getEntityStoreV2KpiHostMetricLensAttributes = (spaceId?: string): LensAttributes => {
+  const indexTitle = getLatestEntitiesIndexName(spaceId ?? 'default');
+
+  return {
+    description: '',
+    state: {
+      adHocDataViews: {
+        [ENTITY_STORE_V2_HOSTS_KPI_LENS_AD_HOC_ID]: {
+          allowHidden: false,
+          allowNoIndex: false,
+          fieldAttrs: {},
+          fieldFormats: {},
+          id: ENTITY_STORE_V2_HOSTS_KPI_LENS_AD_HOC_ID,
+          name: indexTitle,
+          runtimeFieldMap: {},
+          sourceFilters: [],
+          timeFieldName: '@timestamp',
+          title: indexTitle,
+        },
+      },
+      datasourceStates: {
+        formBased: {
+          layers: {
+            [layerId]: {
+              columnOrder: [columnHostUnique],
+              columns: {
+                [columnHostUnique]: {
+                  customLabel: true,
+                  dataType: 'number',
+                  isBucketed: false,
+                  label: ' ',
+                  operationType: 'unique_count',
+                  scale: 'ratio',
+                  sourceField: 'entity.id',
+                },
+              },
+              incompleteColumns: {},
+            },
+          },
+        },
+      },
+      filters: [getEntityStoreV2HostOnlyFilter()],
+      internalReferences: [
+        {
+          id: ENTITY_STORE_V2_HOSTS_KPI_LENS_AD_HOC_ID,
+          name: 'indexpattern-datasource-current-indexpattern',
+          type: 'index-pattern',
+        },
+        {
+          id: ENTITY_STORE_V2_HOSTS_KPI_LENS_AD_HOC_ID,
+          name: `indexpattern-datasource-layer-${layerId}`,
+          type: 'index-pattern',
+        },
+      ],
+      query: { language: 'kuery', query: '' },
+      visualization: {
+        accessor: columnHostUnique,
+        layerId,
+        layerType: 'data',
+      },
     },
-  },
-  title: '[Host] Hosts - metric',
-  visualizationType: 'lnsLegacyMetric',
-  references: [
-    {
-      id: '{dataViewId}',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    },
-    {
-      id: '{dataViewId}',
-      name: 'indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30',
-      type: 'index-pattern',
-    },
-  ],
-} as LensAttributes;
+    title: '[Host] Hosts - metric',
+    visualizationType: 'lnsLegacyMetric',
+    references: [],
+  } as LensAttributes;
+};
+
+/**
+ * Hosts KPI metric Lens attributes. When `entityStoreV2Enabled` is true, uses Entity Store v2
+ * latest index as an ad-hoc data source (same as the hosts KPI area chart).
+ */
+export const buildKpiHostMetricLensAttributes = (
+  extraOptions?: Pick<ExtraOptions, 'entityStoreV2Enabled' | 'spaceId'>
+): LensAttributes => {
+  if (extraOptions?.entityStoreV2Enabled === true) {
+    return getEntityStoreV2KpiHostMetricLensAttributes(extraOptions.spaceId);
+  }
+  return getLegacyKpiHostMetricLensAttributes();
+};
+
+/** Default (sourcerer data view) attributes — used where Entity Store v2 is off or unknown. */
+export const kpiHostMetricLensAttributes: LensAttributes = buildKpiHostMetricLensAttributes();

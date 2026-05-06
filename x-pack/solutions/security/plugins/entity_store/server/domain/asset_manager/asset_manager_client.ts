@@ -17,8 +17,12 @@ import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server'
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityType } from '../../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../../tasks/extract_entity_task';
-import { scheduleHistorySnapshotTasks } from '../../tasks/history_snapshot_task';
-import { installElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
+import {
+  scheduleHistorySnapshotTasks,
+  stopHistorySnapshotTask,
+} from '../../tasks/history_snapshot_task';
+import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
+import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
@@ -27,7 +31,7 @@ import {
   HistorySnapshotState,
   LogExtractionConfig,
 } from '../saved_objects';
-import type { HistorySnapshotBodyParams, LogExtractionBodyParams } from '../../routes/constants';
+import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
 import {
   ENGINE_STATUS,
   ENTITY_STORE_CLUSTER_PRIVILEGES,
@@ -42,12 +46,17 @@ import type {
   GetStatusResult,
 } from '../types';
 import { getExtractEntityTaskId } from '../../tasks/extract_entity_task';
-import { getLatestEntitiesIndexName } from './latest_index';
+import {
+  getEntitiesAlias,
+  ENTITY_LATEST,
+  getLatestEntitiesIndexName,
+} from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
 import { getUpdatesIndexTemplateId } from './updates_index_template';
 import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import type { LogsExtractionClient } from '../logs_extraction';
+import type { CcsLogExtractionStateClient } from '../saved_objects/ccs_log_extraction_state';
 import type { ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { installEuidStoredScripts, deleteEuidStoredScripts } from './euid_stored_scripts';
@@ -66,6 +75,7 @@ interface AssetManagerDependencies {
   taskManager: TaskManagerStartContract;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
+  ccsLogExtractionStateClient: CcsLogExtractionStateClient;
   namespace: string;
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
@@ -80,6 +90,7 @@ export class AssetManagerClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly engineDescriptorClient: EngineDescriptorClient;
   private readonly globalStateClient: EntityStoreGlobalStateClient;
+  private readonly ccsLogExtractionStateClient: CcsLogExtractionStateClient;
   private readonly namespace: string;
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
@@ -93,6 +104,7 @@ export class AssetManagerClient {
     this.taskManager = deps.taskManager;
     this.engineDescriptorClient = deps.engineDescriptorClient;
     this.globalStateClient = deps.globalStateClient;
+    this.ccsLogExtractionStateClient = deps.ccsLogExtractionStateClient;
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
@@ -104,12 +116,18 @@ export class AssetManagerClient {
   public async init(
     request: KibanaRequest,
     entityTypes: EntityType[],
-    logsExtractionParams?: LogExtractionBodyParams,
+    logsExtractionParams?: LogExtractionInstallParams,
     historySnapshotParams?: HistorySnapshotBodyParams
   ) {
     try {
-      const logsExtraction = LogExtractionConfig.parse(logsExtractionParams ?? {});
+      const existingState = await this.globalStateClient.find();
+      const logsExtraction = resolveLogsExtractionOnInstall(
+        existingState?.logsExtraction,
+        logsExtractionParams
+      );
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
+
+      // Phase 1: Install shared ES assets/storage and run independent setup tasks.
       await Promise.all([
         this.globalStateClient.init({ historySnapshot, logsExtraction }),
 
@@ -129,6 +147,15 @@ export class AssetManagerClient {
           taskManager: this.taskManager,
         }),
 
+        installSharedElasticsearchAssets({
+          esClient: this.esClient,
+          logger: this.logger,
+          namespace: this.namespace,
+        }),
+      ]);
+
+      // Phase 2: Initialize engines and start background tasks.
+      await Promise.all([
         ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
 
         scheduleHistorySnapshotTasks({
@@ -137,6 +164,13 @@ export class AssetManagerClient {
           namespace: this.namespace,
           request,
           frequency: historySnapshot.frequency,
+        }),
+
+        scheduleStatusReportTask({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
         }),
 
         installEuidStoredScripts({
@@ -197,15 +231,14 @@ export class AssetManagerClient {
       if (!engines.some((e) => e.type === type)) {
         return false;
       }
-      const definition = getEntityDefinition(type, this.namespace);
       await this.stop(type);
 
       await Promise.all([
         this.engineDescriptorClient.delete(type),
+        this.ccsLogExtractionStateClient.delete(type),
         uninstallElasticsearchAssets({
           esClient: this.esClient,
           logger: this.logger.get(type),
-          definition,
           namespace: this.namespace,
         }),
         deleteEuidStoredScripts({
@@ -217,7 +250,19 @@ export class AssetManagerClient {
       const remainingEngines = await this.engineDescriptorClient.getAll();
       if (remainingEngines.length === 0) {
         this.logger.debug(`Deleting global state because last engine was uninstalled`);
-        await this.globalStateClient.delete();
+        await Promise.all([
+          this.globalStateClient.delete(),
+          stopStatusReportTask({
+            taskManager: this.taskManager,
+            logger: this.logger,
+            namespace: this.namespace,
+          }),
+          stopHistorySnapshotTask({
+            taskManager: this.taskManager,
+            logger: this.logger,
+            namespace: this.namespace,
+          }),
+        ]);
       }
 
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
@@ -306,7 +351,7 @@ export class AssetManagerClient {
     );
 
     const targetIndexPrivileges = {
-      [getLatestEntitiesIndexName(this.namespace)]: ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+      [getEntitiesAlias(ENTITY_LATEST, this.namespace)]: ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
     };
 
     return checkPrivileges({
@@ -326,17 +371,9 @@ export class AssetManagerClient {
       }
 
       this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
-      const definition = getEntityDefinition(type, this.namespace);
-      await Promise.all([
-        this.engineDescriptorClient.init(type),
-        installElasticsearchAssets({
-          esClient: this.esClient,
-          logger: this.logger,
-          definition,
-          namespace: this.namespace,
-        }),
-      ]);
-      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
+      // Engine installation is per-type. Shared indices and data streams are created once
+      // during `init()` before parallel engine initialization begins.
+      await this.engineDescriptorClient.init(type);
       this.logger.debug(`Installed definition: ${type}`);
 
       return true;
@@ -503,4 +540,18 @@ export class AssetManagerClient {
 
     return ENTITY_STORE_STATUS.RUNNING;
   }
+}
+
+function resolveLogsExtractionOnInstall(
+  existing: LogExtractionConfig | undefined,
+  params: LogExtractionInstallParams | undefined
+): LogExtractionConfig {
+  const hasParams = params !== undefined && Object.keys(params).length > 0;
+  if (hasParams) {
+    return LogExtractionConfig.parse(params);
+  }
+  if (existing !== undefined) {
+    return existing;
+  }
+  return LogExtractionConfig.parse({});
 }

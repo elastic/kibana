@@ -10,7 +10,7 @@
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, header, visualize } = getPageObjects(['dashboard', 'header', 'visualize']);
+  const { dashboard, header } = getPageObjects(['dashboard', 'header']);
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -96,21 +96,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Does not show dashboard save modal when on quick save', async function () {
-        await esArchiver.loadIfNeeded(
-          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-        );
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickNewDashboard();
         await dashboard.saveDashboard('test quick save');
 
         await dashboard.switchToEditMode();
         await dashboard.expectExistsQuickSaveOption();
-        await dashboardAddPanel.clickAddCustomVisualization();
-        await visualize.saveVisualizationAndReturn();
-        await dashboard.waitForRenderComplete();
+        await dashboardAddPanel.clickAddCollapsibleSection();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await dashboard.clickQuickSave();
 
         await testSubjects.existOrFail('saveDashboardSuccess');
+        await testSubjects.missingOrFail('savedObjectSaveModal');
       });
 
       it('Stays in edit mode after performing a quick save', async function () {
@@ -132,8 +129,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Does not warn when only the prefix matches', async function () {
-        await dashboard.saveDashboard(dashboardName.split(' ')[0]);
-
+        await dashboard.switchToEditMode();
+        await dashboard.enterDashboardSaveModalApplyUpdatesAndClickSave(`${dashboardName} copy`, {
+          waitDialogIsClosed: false,
+        });
         await dashboard.expectDuplicateTitleWarningDisplayed({ displayed: false });
       });
     });
