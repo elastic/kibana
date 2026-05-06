@@ -52,7 +52,10 @@ End with exactly:
 
 > _"I am waiting for your approval before writing any code or tests. Do you approve this plan as written?"_
 
-Stop there and wait. Do not write code, open files for editing, or call any tool.
+The exact phrase _"Do you approve this plan as written?"_ must be your final sentence.
+Any tool call before the user replies with explicit approval (yes / proceed / approved /
+looks good) is a protocol violation — revert it and re-present the plan. Do not write
+code, open files for editing, or call any tool until that approval arrives.
 If the user identifies a misdiagnosis, revise the plan and ask for approval again.
 
 ### Step 2: Red — write failing test
