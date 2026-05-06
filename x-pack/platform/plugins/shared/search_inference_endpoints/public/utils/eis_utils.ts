@@ -10,7 +10,6 @@ import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { MODEL_DEPRECATED_STATUS } from '../../common/constants';
 import {
   type EisInferenceEndpoint,
   type EisInferenceEndpointMetadata,
@@ -100,8 +99,8 @@ export const getModelStatus = (
   metadata: EisInferenceEndpointMetadata | undefined
 ): EisModelStatus => {
   if (!metadata) return EisModelStatus.Unknown;
-  if (isModelDecommissioned(metadata)) return EisModelStatus.DeprecatedEOL;
-  switch (metadata.heuristics?.status) {
+  if (isModelEndOfLifeReached(metadata)) return EisModelStatus.DeprecatedEOL;
+  switch (metadata.heuristics?.status?.toLowerCase()) {
     case EisModelStatus.GA:
       return EisModelStatus.GA;
     case EisModelStatus.Preview:
@@ -236,13 +235,7 @@ export const filterGroupedModels = (
     .sort((a, b) => a.modelName.localeCompare(b.modelName));
 };
 
-export function isModelDeprecated(metadata: EisInferenceEndpointMetadata | undefined) {
-  if (!metadata) return false;
-  if (metadata?.heuristics?.status?.toLowerCase() === MODEL_DEPRECATED_STATUS) return true;
-  return false;
-}
-
-export function isModelDecommissioned(metadata: EisInferenceEndpointMetadata | undefined) {
+export function isModelEndOfLifeReached(metadata: EisInferenceEndpointMetadata | undefined) {
   const eolDate = getModelEOLDate(metadata);
   if (!eolDate) return false;
   return dateMath.parse('now')?.isSameOrAfter(eolDate) ?? false;
@@ -250,31 +243,12 @@ export function isModelDecommissioned(metadata: EisInferenceEndpointMetadata | u
 
 export function getModelReleaseDate(metadata: EisInferenceEndpointMetadata | undefined) {
   if (!metadata) return undefined;
-  if (!metadata?.heuristics?.release_date) return undefined;
+  if (!metadata.heuristics?.release_date) return undefined;
   return dateMath.parse(metadata.heuristics.release_date);
 }
 
 export function getModelEOLDate(metadata: EisInferenceEndpointMetadata | undefined) {
   if (!metadata) return undefined;
-  if (!metadata?.heuristics?.end_of_life_date) return undefined;
+  if (!metadata.heuristics?.end_of_life_date) return undefined;
   return dateMath.parse(metadata.heuristics.end_of_life_date);
-}
-
-export function modelStatusDisplay(status: EisModelStatus): string {
-  switch (status) {
-    case EisModelStatus.Preview:
-      return i18n.translate('xpack.searchInferenceEndpoints.eisModelStatus.preview', {
-        defaultMessage: 'Preview',
-      });
-    case EisModelStatus.DeprecatedEOL:
-    case EisModelStatus.Deprecated:
-      return i18n.translate('xpack.searchInferenceEndpoints.eisModelStatus.deprecated', {
-        defaultMessage: 'Deprecated',
-      });
-    case EisModelStatus.GA:
-    default:
-      return i18n.translate('xpack.searchInferenceEndpoints.eisModelStatus.ga', {
-        defaultMessage: 'GA',
-      });
-  }
 }

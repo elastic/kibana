@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EisInferenceEndpointMetadata } from '../../common/types';
-import { getModelEOLDate, isModelDecommissioned, isModelDeprecated } from './eis_utils';
+import { EisModelStatus, type EisInferenceEndpointMetadata } from '../../common/types';
+import { getModelEOLDate, getModelStatus, isModelEndOfLifeReached } from './eis_utils';
 
 const makeMetadata = (
   overrides: NonNullable<EisInferenceEndpointMetadata['heuristics']>
@@ -15,39 +15,21 @@ const makeMetadata = (
 });
 
 describe('eis utility functions', function () {
-  describe('isModelDeprecated', function () {
+  describe('isModelEndOfLifeReached', function () {
     it('returns false when metadata is undefined', () => {
-      expect(isModelDeprecated(undefined)).toBe(false);
-    });
-
-    it('returns true when status is deprecated', () => {
-      expect(isModelDeprecated(makeMetadata({ status: 'deprecated' }))).toBe(true);
-    });
-
-    it('returns false when status is ga', () => {
-      expect(isModelDeprecated(makeMetadata({ status: 'ga' }))).toBe(false);
-    });
-
-    it('is case-insensitive for the deprecated status', () => {
-      expect(isModelDeprecated(makeMetadata({ status: 'Deprecated' }))).toBe(true);
-    });
-  });
-
-  describe('isModelDecommissioned', function () {
-    it('returns false when metadata is undefined', () => {
-      expect(isModelDecommissioned(undefined)).toBe(false);
+      expect(isModelEndOfLifeReached(undefined)).toBe(false);
     });
 
     it('returns false when end_of_life_date is absent', () => {
-      expect(isModelDecommissioned(makeMetadata({ status: 'ga' }))).toBe(false);
+      expect(isModelEndOfLifeReached(makeMetadata({ status: 'ga' }))).toBe(false);
     });
 
     it('returns true when end_of_life_date is in the past', () => {
-      expect(isModelDecommissioned(makeMetadata({ end_of_life_date: '2020-01-01' }))).toBe(true);
+      expect(isModelEndOfLifeReached(makeMetadata({ end_of_life_date: '2020-01-01' }))).toBe(true);
     });
 
     it('returns false when end_of_life_date is in the future', () => {
-      expect(isModelDecommissioned(makeMetadata({ end_of_life_date: '2099-01-01' }))).toBe(false);
+      expect(isModelEndOfLifeReached(makeMetadata({ end_of_life_date: '2099-01-01' }))).toBe(false);
     });
   });
 
@@ -64,6 +46,46 @@ describe('eis utility functions', function () {
       const result = getModelEOLDate(makeMetadata({ end_of_life_date: '2026-04-15' }));
       expect(result).toBeDefined();
       expect(result?.format('YYYY-MM-DD')).toBe('2026-04-15');
+    });
+  });
+
+  describe('getModelStatus', function () {
+    it('returns Unknown when metadata is undefined', () => {
+      expect(getModelStatus(undefined)).toBe(EisModelStatus.Unknown);
+    });
+
+    it('returns Unknown when heuristics is absent', () => {
+      expect(getModelStatus({})).toBe(EisModelStatus.Unknown);
+    });
+
+    it('returns Unknown when status is an unrecognized value', () => {
+      expect(getModelStatus(makeMetadata({ status: 'beta' }))).toBe(EisModelStatus.Unknown);
+    });
+
+    it('returns GA when status is ga', () => {
+      expect(getModelStatus(makeMetadata({ status: 'ga' }))).toBe(EisModelStatus.GA);
+    });
+
+    it('returns Preview when status is preview', () => {
+      expect(getModelStatus(makeMetadata({ status: 'preview' }))).toBe(EisModelStatus.Preview);
+    });
+
+    it('returns Deprecated when status is deprecated and EOL date is in the future', () => {
+      expect(
+        getModelStatus(makeMetadata({ status: 'deprecated', end_of_life_date: '2099-01-01' }))
+      ).toBe(EisModelStatus.Deprecated);
+    });
+
+    it('returns DeprecatedEOL when EOL date is in the past regardless of status', () => {
+      expect(
+        getModelStatus(makeMetadata({ status: 'deprecated', end_of_life_date: '2020-01-01' }))
+      ).toBe(EisModelStatus.DeprecatedEOL);
+    });
+
+    it('returns DeprecatedEOL when EOL date is in the past even when status is ga', () => {
+      expect(getModelStatus(makeMetadata({ status: 'ga', end_of_life_date: '2020-01-01' }))).toBe(
+        EisModelStatus.DeprecatedEOL
+      );
     });
   });
 });

@@ -39,12 +39,7 @@ import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
-import {
-  getModelEOLDate,
-  getModelReleaseDate,
-  getModelStatus,
-  modelStatusDisplay,
-} from '../../utils/eis_utils';
+import { getModelEOLDate, getModelReleaseDate, getModelStatus } from '../../utils/eis_utils';
 import { EisModelStatus } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 
@@ -99,7 +94,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           }),
       modelStatus: getModelStatus(endpointModelMetadata),
       modelMetadata: endpointModelMetadata,
-      modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l'),
+      modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l') ?? '--',
       modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('l') ?? '--',
     };
   }, [allEndpoints, modelId]);
@@ -145,32 +140,18 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       }),
       description: modelAuthor,
     },
-    ...(modelReleaseDate
-      ? [
-          {
-            title: i18n.translate(
-              'xpack.searchInferenceEndpoints.modelDetailFlyout.modelReleaseDate',
-              {
-                defaultMessage: 'Release date',
-              }
-            ),
-            description: modelReleaseDate,
-          },
-        ]
-      : []),
-    ...(modelEOLDate
-      ? [
-          {
-            title: i18n.translate(
-              'xpack.searchInferenceEndpoints.modelDetailFlyout.modelReleaseDate',
-              {
-                defaultMessage: 'End-of-life date',
-              }
-            ),
-            description: modelEOLDate,
-          },
-        ]
-      : []),
+    {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelReleaseDate', {
+        defaultMessage: 'Release date',
+      }),
+      description: modelReleaseDate,
+    },
+    {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelEndOfLifeDate', {
+        defaultMessage: 'End-of-life date',
+      }),
+      description: modelEOLDate,
+    },
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
         defaultMessage: 'Documentation',

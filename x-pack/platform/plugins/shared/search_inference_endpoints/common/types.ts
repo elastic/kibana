@@ -115,6 +115,10 @@ export enum EisModelStatus {
   Preview = 'preview',
   GA = 'ga',
   Deprecated = 'deprecated',
+  // The following status are purely for the UI and not directly received from EIS metadata
+  // DeprecatedEOL is status: deprecated and end_of_life_date in the past
   DeprecatedEOL = 'deprecated_eol',
+  // Unknown is used when we either don't have a status value in the metadata
+  // or we haven't updated our parsing for a new value
   Unknown = 'unknown',
 }

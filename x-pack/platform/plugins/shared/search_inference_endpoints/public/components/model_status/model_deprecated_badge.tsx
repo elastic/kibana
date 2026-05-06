@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { getModelEOLDate } from '../../utils/eis_utils';
+import { useFormattedEOLDate } from '../../hooks/use_formatted_eol_date';
 import type { EisInferenceEndpointMetadata } from '../../types';
 
 interface ModelDeprecatedBadgeProps {
@@ -19,19 +19,25 @@ interface ModelDeprecatedBadgeProps {
 }
 
 export const ModelDeprecatedBadge = ({ id, metadata }: ModelDeprecatedBadgeProps) => {
-  const eolDate = useMemo(() => {
-    const modelEOLDate = getModelEOLDate(metadata);
-    if (!modelEOLDate) {
-      // This should not happen, but need to handle just-in-case we have metadata with deprecated status but no EOL date.
-      return i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.missingEOLDate',
+  const eolDate = useFormattedEOLDate(metadata);
+
+  const tooltipContent = eolDate
+    ? i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.content',
         {
-          defaultMessage: 'unknown end-of-life date',
+          defaultMessage:
+            'This model will be deprecated on {eolDate}. We recommend a newer model for optimal results.',
+          values: { eolDate },
+        }
+      )
+    : i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.contentNoDate',
+        {
+          defaultMessage:
+            'This model is deprecated. We recommend a newer model for optimal results.',
         }
       );
-    }
-    return modelEOLDate.format('l');
-  }, [metadata]);
+
   return (
     <EuiToolTip
       title={i18n.translate(
@@ -40,14 +46,7 @@ export const ModelDeprecatedBadge = ({ id, metadata }: ModelDeprecatedBadgeProps
           defaultMessage: 'Deprecation notice',
         }
       )}
-      content={i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.content',
-        {
-          defaultMessage:
-            'This model will be deprecated on {eolDate}. We recommend a newer model for optimal results.',
-          values: { eolDate },
-        }
-      )}
+      content={tooltipContent}
     >
       <EuiBadge
         tabIndex={0}
