@@ -1,0 +1,7 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/security-mitre-attack-common",
+  "owner": "@elastic/security-detection-rule-management",
+  "group": "security",
+  "visibility": "private"
+}
