@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { type ErrorsByTraceId, type UnifiedSpanDocument, type TraceRootSpan } from '@kbn/apm-types';
-import { routeDefinitions, type UnifiedTracesByIdResponse } from '@kbn/apm-api-shared';
+import {
+  routeDefinitions,
+  type UnifiedTracesByIdResponse,
+  type UnifiedTracesByIdSummaryResponse,
+} from '@kbn/apm-api-shared';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -23,7 +26,6 @@ import {
   getRootTransactionByTraceId,
   type TransactionDetailRedirectInfo,
 } from '../transactions/get_transaction_by_trace';
-import type { FocusedTraceItems } from './build_focused_trace_items';
 import { buildFocusedTraceItems, findRootItem } from './build_focused_trace_items';
 import type { TopTracesPrimaryStatsResponse } from './get_top_traces_primary_stats';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
@@ -129,20 +131,10 @@ const unifiedTracesByIdRoute = createApmServerRoute({
 });
 
 const unifiedTracesByIdSummaryRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/unified_traces/{traceId}/summary',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-    }),
-    query: t.intersection([rangeRt, t.partial({ maxTraceItems: toNumberRt, docId: t.string })]),
-  }),
+  endpoint: routeDefinitions.unifiedTracesByIdSummary.endpoint,
+  params: routeDefinitions.unifiedTracesByIdSummary.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    traceItems?: FocusedTraceItems;
-    summary: { services: number; traceEvents: number; errors: number };
-  }> => {
+  handler: async (resources): Promise<UnifiedTracesByIdSummaryResponse> => {
     const [apmEventClient, logsClient] = await Promise.all([
       getApmEventClient(resources),
       createLogsClient(resources),

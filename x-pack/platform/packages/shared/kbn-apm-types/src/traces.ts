@@ -52,6 +52,18 @@ export interface TraceItem {
   docType: TraceItemDocType;
 }
 
+export interface TraceItemChild {
+  traceDoc: TraceItem;
+  children?: TraceItemChild[];
+}
+
+export interface FocusedTraceItems {
+  rootDoc: TraceItem;
+  parentDoc?: TraceItem;
+  focusedTraceDoc: TraceItem;
+  focusedTraceTree: TraceItemChild[];
+}
+
 export interface TraceRootSpan {
   duration: number;
 }

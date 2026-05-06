@@ -7,10 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import * as t from 'io-ts';
-import { toBooleanRt } from '@kbn/io-ts-utils';
-import type { Error as ApmError, TraceItem, Transaction } from '@kbn/apm-types';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import type { Error as ApmError, TraceItem, FocusedTraceItems, Transaction } from '@kbn/apm-types';
 import { defineRoute } from './types';
 import { rangeRt } from '../default_api_types';
+
+export interface UnifiedTracesByIdSummaryResponse {
+  traceItems?: FocusedTraceItems;
+  summary: { services: number; traceEvents: number; errors: number };
+}
+
+export const unifiedTracesByIdSummaryRoute = defineRoute<UnifiedTracesByIdSummaryResponse>()({
+  endpoint: 'GET /internal/apm/unified_traces/{traceId}/summary' as const,
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+    }),
+    query: t.intersection([rangeRt, t.partial({ maxTraceItems: toNumberRt, docId: t.string })]),
+  }),
+});
 
 export interface UnifiedTracesByIdResponse {
   traceItems: TraceItem[];

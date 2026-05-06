@@ -26,7 +26,7 @@ export function defineRoute<TResponse extends Record<string, any>>() {
   }) => config as typeof config & WithResponse<TResponse>;
 }
 
-export type BuildRepository<T extends Record<string, { endpoint: string; params: any }>> = {
+export type BuildRepository<T extends Record<string, { endpoint: string; params?: any }>> = {
   [K in keyof T as T[K]['endpoint']]: ServerRoute<
     T[K]['endpoint'],
     T[K]['params'],
