@@ -40,7 +40,7 @@ const toIsoUtc = (ms: number) => new Date(ms).toISOString();
  * ES|QL query returning every alert event for a rule inside the visible
  * window, oldest first. When `groupHashes` is supplied the result set is
  * scoped to only those series, keeping the wire payload proportional to the
- * number of visible Gantt lanes instead of all series in the rule.
+ * number of visible timeline lanes instead of all series in the rule.
  */
 export const buildRuleEventsEsqlQuery = ({
   ruleId,

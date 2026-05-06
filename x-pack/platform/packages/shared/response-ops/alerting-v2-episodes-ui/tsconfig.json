@@ -8,7 +8,10 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/alerting-v2-schemas",
+    "@kbn/charts-plugin",
     "@kbn/core",
+    "@kbn/core-di",
+    "@kbn/core-di-browser",
     "@kbn/core-application-browser",
     "@kbn/core-application-browser-mocks",
     "@kbn/core-doc-links-browser",

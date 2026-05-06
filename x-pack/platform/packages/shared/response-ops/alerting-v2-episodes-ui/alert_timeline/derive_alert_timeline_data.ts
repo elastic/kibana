@@ -6,63 +6,27 @@
  */
 
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import type { RuleEventRow } from '../queries/alert_series_activity/rule_events_query';
-import type { SeriesGroupingValuesByHash } from '../queries/alert_series_activity/series_grouping_values_query';
-
-export type GanttSortPolicy = 'started_asc' | 'started_desc' | 'longest_open' | 'recently_active';
-
-export const GANTT_TOP_N_DEFAULT = 8;
-
-/** A horizontal colored span inside a lane, between two consecutive events. */
-export interface GanttSegment {
-  episodeId: string;
-  status: AlertEpisodeStatus;
-  /** Inclusive epoch ms of the segment's left edge (the event that opened it). */
-  x0Ms: number;
-  /** Epoch ms of the segment's right edge (the next event, or `lteMs` for the open tail). */
-  x1Ms: number;
-}
-
-/** A point marker inside a lane at a status-change timestamp. */
-export interface GanttTransition {
-  episodeId: string;
-  status: AlertEpisodeStatus;
-  tsMs: number;
-}
-
-export interface GanttSeries {
-  groupHash: string;
-  groupingValues: Record<string, string | null>;
-  segments: GanttSegment[];
-  transitions: GanttTransition[];
-  firstEventMs: number;
-  lastEventMs: number;
-  hasOpenEpisode: boolean;
-  longestOpenDurationMs: number;
-  /** Number of distinct episodes contributing to this series in the visible window. */
-  episodeCount: number;
-}
-
-export interface GanttSummary {
-  episodesStarted: number;
-  recovered: number;
-  stillOpen: number;
-  medianDurationMs: number;
-}
-
-export interface GanttData {
-  rows: GanttSeries[];
-  hiddenRowCount: number;
-  totalRowCount: number;
-  summary: GanttSummary;
-}
+import type {
+  AlertTimelineData,
+  AlertTimelineEventRow,
+  AlertTimelineGroupingValues,
+  AlertTimelineSegment,
+  AlertTimelineSeries,
+  AlertTimelineSortPolicy,
+  AlertTimelineSummary,
+  AlertTimelineTransition,
+} from './types';
 
 const EMPTY_GROUPING_VALUES: Record<string, string | null> = {};
 
 const isOpenStatus = (status: AlertEpisodeStatus): boolean =>
   status !== ALERT_EPISODE_STATUS.INACTIVE;
 
-const compareSeries = (a: GanttSeries, b: GanttSeries, sort: GanttSortPolicy): number => {
+const compareSeries = (
+  a: AlertTimelineSeries,
+  b: AlertTimelineSeries,
+  sort: AlertTimelineSortPolicy
+): number => {
   switch (sort) {
     case 'started_asc':
       return a.firstEventMs - b.firstEventMs;
@@ -83,7 +47,7 @@ interface ParsedEvent {
 }
 
 /**
- * Derive Gantt-chart-ready lanes from raw rule event rows in a single pass.
+ * Derive alert-timeline-ready lanes from raw rule event rows in a single pass.
  * Each lane (series) splits its episodes into one segment per state span:
  * the segment between event N and event N+1 takes event N's status. An open
  * episode (last event is not INACTIVE) emits a tail segment running to
@@ -93,15 +57,15 @@ interface ParsedEvent {
  * by a dedicated ES|QL aggregation) so this function no longer re-iterates
  * every event for episode-level metrics.
  */
-export const deriveGanttData = (
-  eventRows: RuleEventRow[],
-  groupingValuesByHash: SeriesGroupingValuesByHash,
-  sort: GanttSortPolicy,
+export const deriveAlertTimelineData = (
+  eventRows: AlertTimelineEventRow[],
+  groupingValuesByHash: AlertTimelineGroupingValues,
+  sort: AlertTimelineSortPolicy,
   gteMs: number,
   lteMs: number,
-  summary: GanttSummary,
+  summary: AlertTimelineSummary,
   totalSeriesCount: number
-): GanttData => {
+): AlertTimelineData => {
   const eventsBySeries = new Map<string, ParsedEvent[]>();
 
   for (const row of eventRows) {
@@ -121,7 +85,7 @@ export const deriveGanttData = (
     }
   }
 
-  const seriesByHash = new Map<string, GanttSeries>();
+  const seriesByHash = new Map<string, AlertTimelineSeries>();
 
   for (const [groupHash, events] of eventsBySeries) {
     events.sort((a, b) => a.tsMs - b.tsMs);
@@ -133,8 +97,8 @@ export const deriveGanttData = (
       else eventsByEpisode.set(ev.episodeId, [ev]);
     }
 
-    const segments: GanttSegment[] = [];
-    const transitions: GanttTransition[] = [];
+    const segments: AlertTimelineSegment[] = [];
+    const transitions: AlertTimelineTransition[] = [];
     let hasOpenEpisode = false;
     let longestOpenDurationMs = 0;
 
@@ -142,7 +106,7 @@ export const deriveGanttData = (
     // episode. Without this, a rule that re-fires the same status every tick
     // would emit one tiny rect per tick — at full-window zoom they render as
     // a striped band because of sub-pixel anti-aliasing on each edge.
-    const pushSegment = (s: GanttSegment) => {
+    const pushSegment = (s: AlertTimelineSegment) => {
       const last = segments[segments.length - 1];
       if (
         last &&
@@ -198,7 +162,7 @@ export const deriveGanttData = (
     // lookback buffer (so we know the episode's status at gteMs and don't
     // emit a misleading "transition" dot at the left edge), but we don't
     // want to render anything to the left of gteMs.
-    const clippedSegments: GanttSegment[] = [];
+    const clippedSegments: AlertTimelineSegment[] = [];
     for (const s of segments) {
       if (s.x1Ms <= gteMs) continue;
       clippedSegments.push(s.x0Ms < gteMs ? { ...s, x0Ms: gteMs } : s);

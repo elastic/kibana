@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
-  GANTT_STATUS_LEGEND_ORDER,
-  ganttStatusColor,
-  ganttStatusLabel,
-} from './gantt_status_palette';
+  ALERT_TIMELINE_STATUS_LEGEND_ORDER,
+  alertTimelineStatusColor,
+  alertTimelineStatusLabel,
+} from './alert_timeline_status_palette';
 
 const SWATCH_WIDTH_PX = 20;
 const SWATCH_HEIGHT_PX = 8;
@@ -33,13 +33,13 @@ const PillSwatch: React.FC<SwatchProps> = ({ background }) => (
   />
 );
 
-export const GanttLegend: React.FC = () => {
+export const AlertTimelineLegend: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
-  const items = GANTT_STATUS_LEGEND_ORDER.map((status) => ({
+  const items = ALERT_TIMELINE_STATUS_LEGEND_ORDER.map((status) => ({
     key: status,
-    sample: <PillSwatch background={ganttStatusColor(euiTheme, status)} />,
-    label: ganttStatusLabel(status),
+    sample: <PillSwatch background={alertTimelineStatusColor(euiTheme, status)} />,
+    label: alertTimelineStatusLabel(status),
   }));
 
   return (
@@ -47,7 +47,7 @@ export const GanttLegend: React.FC = () => {
       gutterSize="m"
       alignItems="center"
       responsive={false}
-      data-test-subj="ganttLegend"
+      data-test-subj="alertTimelineLegend"
     >
       {items.map(({ key, sample, label }) => (
         <EuiFlexItem grow={false} key={key}>

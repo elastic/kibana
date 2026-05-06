@@ -14,23 +14,23 @@ import {
 
 const APP_STATE_STORAGE_KEY = '_a';
 
-export interface GanttTimeRange {
+export interface AlertTimelineTimeRange {
   from: string;
   to: string;
 }
 
 interface PersistedAppState {
-  ganttTimeRange?: GanttTimeRange;
+  ganttTimeRange?: AlertTimelineTimeRange;
 }
 
 /**
- * Two-way URL state sync for the Alert Activity gantt time range. Hydrates
+ * Two-way URL state sync for the Alert Timeline time range. Hydrates
  * from `_a.ganttTimeRange` on mount and writes back on every change so the
  * page URL is shareable and refresh-stable.
  */
-export const useGanttTimeRangeUrlState = (
-  defaultTimeRange: GanttTimeRange
-): [GanttTimeRange, (next: GanttTimeRange) => void] => {
+export const useAlertTimelineUrlState = (
+  defaultTimeRange: AlertTimelineTimeRange
+): [AlertTimelineTimeRange, (next: AlertTimelineTimeRange) => void] => {
   const history = useHistory();
 
   const stateStorage: IKbnUrlStateStorage = useMemo(
@@ -38,7 +38,7 @@ export const useGanttTimeRangeUrlState = (
     [history]
   );
 
-  const [timeRange, setTimeRange] = useState<GanttTimeRange>(() => {
+  const [timeRange, setTimeRange] = useState<AlertTimelineTimeRange>(() => {
     const persisted = stateStorage.get<PersistedAppState>(APP_STATE_STORAGE_KEY);
     return persisted?.ganttTimeRange ?? defaultTimeRange;
   });

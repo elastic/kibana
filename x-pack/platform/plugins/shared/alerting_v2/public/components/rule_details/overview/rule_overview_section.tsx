@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { EpisodesGanttSection } from './alert_episodes_gantt/episodes_gantt_section';
+import { AlertTimelineSection } from './alert_timeline/alert_timeline_section';
 
 export const RuleOverviewSection: React.FC = () => (
   <div data-test-subj="ruleOverviewSection">
-    <EpisodesGanttSection />
+    <AlertTimelineSection />
   </div>
 );

@@ -9,16 +9,16 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { IBasePath } from '@kbn/core-http-browser';
-import type { GanttSeries } from '../../../../utils/derive_gantt_data';
-import { GanttRow } from './gantt_row';
-import { GanttSeriesLabel } from './gantt_series_label';
-import { GanttTimeAxis } from './gantt_time_axis';
+import type { AlertTimelineSeries } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
+import { AlertTimelineRow } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
+import { AlertTimelineSeriesLabel } from './alert_timeline_series_label';
+import { AlertTimelineTimeAxis } from './alert_timeline_time_axis';
 
 const META_COLUMN_WIDTH_PX = 240;
 const ROW_HEIGHT_PX = 36;
 
-export interface GanttChartProps {
-  rows: GanttSeries[];
+export interface AlertTimelineChartProps {
+  rows: AlertTimelineSeries[];
   gteMs: number;
   lteMs: number;
   ruleId: string;
@@ -27,7 +27,7 @@ export interface GanttChartProps {
   getEpisodeHref?: (episodeId: string) => string;
 }
 
-export const GanttChart: React.FC<GanttChartProps> = ({
+export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
   rows,
   gteMs,
   lteMs,
@@ -44,7 +44,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
       gutterSize="m"
       responsive={false}
       alignItems="stretch"
-      data-test-subj="ganttChart"
+      data-test-subj="alertTimelineChart"
     >
       <EuiFlexItem grow={false} style={{ width: META_COLUMN_WIDTH_PX }}>
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -65,7 +65,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                   align-items: center;
                 `}
               >
-                <GanttSeriesLabel
+                <AlertTimelineSeriesLabel
                   groupHash={row.groupHash}
                   groupingValues={row.groupingValues}
                   episodeCount={row.episodeCount}
@@ -81,9 +81,9 @@ export const GanttChart: React.FC<GanttChartProps> = ({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <GanttTimeAxis gteMs={gteMs} lteMs={lteMs} />
+        <AlertTimelineTimeAxis gteMs={gteMs} lteMs={lteMs} />
         {rows.map((row) => (
-          <GanttRow
+          <AlertTimelineRow
             key={row.groupHash}
             row={row}
             gteMs={gteMs}

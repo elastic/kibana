@@ -14,23 +14,22 @@ import { formatSeriesLabel } from '../../../../utils/format_series_label';
 
 const MAX_LABEL_WIDTH_PX = 220;
 
-export interface GanttSeriesLabelProps {
+export interface AlertTimelineSeriesLabelProps {
   groupHash: string;
   groupingValues: Record<string, string | null>;
   episodeCount: number;
   ruleId: string;
-  /** Visible window the Gantt is rendering. */
   gteMs: number;
   lteMs: number;
   basePath: IBasePath;
 }
 
 /**
- * Two-line meta for a Gantt row: the formatted series label (clickable, deep-
- * links into the episodes list pre-filtered to this `groupHash`) on top, with
- * the episode count for the visible window below in a subdued tone.
+ * Two-line meta for an alert timeline row: the formatted series label
+ * (clickable, deep-links into the episodes list pre-filtered to this
+ * `groupHash`) on top, with the episode count for the visible window below.
  */
-export const GanttSeriesLabel: React.FC<GanttSeriesLabelProps> = ({
+export const AlertTimelineSeriesLabel: React.FC<AlertTimelineSeriesLabelProps> = ({
   groupHash,
   groupingValues,
   episodeCount,
@@ -48,9 +47,6 @@ export const GanttSeriesLabel: React.FC<GanttSeriesLabelProps> = ({
           filters: {
             ruleId,
             groupHash,
-            // Carry the resolved grouping values through the URL so the
-            // destination chip renders `host=web-01` without re-running the
-            // DSL lookup.
             groupingValues,
           },
           timeRange: {
@@ -63,7 +59,7 @@ export const GanttSeriesLabel: React.FC<GanttSeriesLabelProps> = ({
   );
 
   const episodeCountLabel = i18n.translate(
-    'xpack.alertingV2.ruleDetails.gantt.seriesLabel.episodeCount',
+    'xpack.alertingV2.alertTimeline.seriesLabel.episodeCount',
     {
       defaultMessage: '{count, plural, one {# episode} other {# episodes}}',
       values: { count: episodeCount },
@@ -77,15 +73,20 @@ export const GanttSeriesLabel: React.FC<GanttSeriesLabelProps> = ({
           size="xs"
           className="eui-textTruncate"
           style={{ maxWidth: MAX_LABEL_WIDTH_PX }}
-          data-test-subj="ganttSeriesLabel"
+          data-test-subj="alertTimelineSeriesLabel"
         >
-          <EuiLink href={href} target="_blank" rel="noopener" data-test-subj="ganttSeriesLabelLink">
+          <EuiLink
+            href={href}
+            target="_blank"
+            rel="noopener"
+            data-test-subj="alertTimelineSeriesLabelLink"
+          >
             <strong>{label}</strong>
           </EuiLink>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued" data-test-subj="ganttSeriesEpisodeCount">
+        <EuiText size="xs" color="subdued" data-test-subj="alertTimelineSeriesEpisodeCount">
           {episodeCountLabel}
         </EuiText>
       </EuiFlexItem>

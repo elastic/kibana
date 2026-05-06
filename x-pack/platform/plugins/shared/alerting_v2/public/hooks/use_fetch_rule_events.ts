@@ -10,6 +10,10 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import { runEsqlAsyncSearch } from '@kbn/alerting-v2-episodes-ui/utils/run_esql_async_search';
 import { esqlResponseToObjectRows } from '@kbn/alerting-v2-episodes-ui/utils/esql_response_to_rows';
+import {
+  ALERT_TIMELINE_TOP_N_DEFAULT,
+  type AlertTimelineSummary,
+} from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { ruleOverviewQueryKeys } from '../queries/alert_series_activity/query_keys';
 import {
   buildRuleEventsEsqlQuery,
@@ -23,21 +27,20 @@ import {
   buildGanttSummaryQuery,
   parseGanttSummaryRow,
   type GanttSummaryEsqlRow,
-} from '../queries/alert_series_activity/gantt_summary_query';
+} from '../queries/alert_series_activity/alert_timeline_summary_query';
 import { useFetchSeriesGroupingValues } from './use_fetch_series_grouping_values';
 import type { SeriesGroupingValuesByHash } from '../queries/alert_series_activity/series_grouping_values_query';
-import { GANTT_TOP_N_DEFAULT, type GanttSummary } from '../utils/derive_gantt_data';
 
 const EMPTY_EVENTS: RuleEventRow[] = [];
 const EMPTY_GROUPING_VALUES: SeriesGroupingValuesByHash = {};
-const EMPTY_SUMMARY: GanttSummary = {
+const EMPTY_SUMMARY: AlertTimelineSummary = {
   episodesStarted: 0,
   recovered: 0,
   stillOpen: 0,
   medianDurationMs: 0,
 };
 
-/** Hard cap on raw events pulled for the rule overview Gantt chart. */
+/** Hard cap on raw events pulled for the rule overview alert timeline. */
 export const RULE_EVENTS_PAGE_SIZE = 5000;
 
 export interface UseFetchRuleEventsOptions {
@@ -55,7 +58,7 @@ export interface UseFetchRuleEventsOptions {
 }
 
 /**
- * Orchestrates three ES|QL queries to supply the Gantt chart:
+ * Orchestrates three ES|QL queries to supply the alert timeline:
  *
  * 1. **Top-N series** — lightweight STATS to rank all `group_hash` values by
  *    most-recent activity. The caller slices to `topN` hashes and uses the
@@ -75,7 +78,7 @@ export const useFetchRuleEvents = ({
   gteMs,
   lteMs,
   groupingFields = [],
-  topN = GANTT_TOP_N_DEFAULT,
+  topN = ALERT_TIMELINE_TOP_N_DEFAULT,
   pageSize = RULE_EVENTS_PAGE_SIZE,
   data,
 }: UseFetchRuleEventsOptions) => {
@@ -132,7 +135,7 @@ export const useFetchRuleEvents = ({
 
   // --- 3. Summary aggregation query (independent of top-N) ---
   const summaryQuery = useQuery({
-    queryKey: ruleOverviewQueryKeys.ganttSummary(ruleId ?? '', gteMs, lteMs),
+    queryKey: ruleOverviewQueryKeys.timelineSummary(ruleId ?? '', gteMs, lteMs),
     enabled,
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({

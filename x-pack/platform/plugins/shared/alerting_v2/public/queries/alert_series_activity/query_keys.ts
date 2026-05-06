@@ -30,8 +30,8 @@ export const ruleOverviewQueryKeys = {
       pageSize,
       [...groupHashes].sort(),
     ] as const,
-  ganttSummary: (ruleId: string, gteMs: number, lteMs: number) =>
-    [...ruleOverviewQueryKeys.all, 'gantt-summary', ruleId, gteMs, lteMs] as const,
+  timelineSummary: (ruleId: string, gteMs: number, lteMs: number) =>
+    [...ruleOverviewQueryKeys.all, 'timeline-summary', ruleId, gteMs, lteMs] as const,
   seriesGroupingValues: (
     ruleId: string,
     gteMs: number,

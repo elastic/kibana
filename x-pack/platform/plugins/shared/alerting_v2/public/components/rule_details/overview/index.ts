@@ -6,4 +6,4 @@
  */
 
 export { RuleOverviewSection } from './rule_overview_section';
-export { EpisodesGanttSection } from './alert_episodes_gantt/episodes_gantt_section';
+export { AlertTimelineSection } from './alert_timeline/alert_timeline_section';

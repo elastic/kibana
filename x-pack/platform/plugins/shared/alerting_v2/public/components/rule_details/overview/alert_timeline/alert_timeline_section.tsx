@@ -27,21 +27,24 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import {
+  ALERT_TIMELINE_TOP_N_DEFAULT,
+  deriveAlertTimelineData,
+} from '@kbn/alerting-v2-episodes-ui/alert_timeline';
+import { AlertTimelineLegend } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { useRule } from '../../rule_context';
 import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
-import { deriveGanttData, GANTT_TOP_N_DEFAULT } from '../../../../utils/derive_gantt_data';
 import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for_episode';
 import { paths } from '../../../../constants';
-import { GanttChart } from './gantt_chart';
-import { GanttFooter } from './gantt_footer';
-import { GanttLegend } from './gantt_legend';
-import { GanttStatsRow } from './gantt_stats_row';
-import { useGanttTimeRangeUrlState } from './use_gantt_time_range_url_state';
+import { AlertTimelineChart } from './alert_timeline_chart';
+import { AlertTimelineFooter } from './alert_timeline_footer';
+import { AlertTimelineStatsRow } from './alert_timeline_stats_row';
+import { useAlertTimelineUrlState } from './use_alert_timeline_url_state';
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
-const DEFAULT_GANTT_TIME_RANGE = { from: 'now-7d', to: 'now' };
+const DEFAULT_ALERT_TIMELINE_TIME_RANGE = { from: 'now-7d', to: 'now' };
 
 const COMMONLY_USED_RANGES = [
   { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
@@ -61,7 +64,7 @@ const resolveGteLte = (from: string, to: string): { gteMs: number; lteMs: number
   };
 };
 
-export const EpisodesGanttSection: React.FC = () => {
+export const AlertTimelineSection: React.FC = () => {
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const share = useService(PluginStart('share')) as SharePluginStart;
   const application = useService(CoreStart('application'));
@@ -70,8 +73,7 @@ export const EpisodesGanttSection: React.FC = () => {
   const rule = useRule();
   const groupingFields = useMemo(() => rule.grouping?.fields ?? [], [rule.grouping?.fields]);
 
-  const [timeRange, setTimeRange] = useGanttTimeRangeUrlState(DEFAULT_GANTT_TIME_RANGE);
-  // Bumped on Refresh to force re-resolution of relative ranges like `now-7d`.
+  const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ALERT_TIMELINE_TIME_RANGE);
   const [refreshTick, setRefreshTick] = useState(0);
 
   const handleTimeChange = useCallback(
@@ -90,12 +92,9 @@ export const EpisodesGanttSection: React.FC = () => {
   );
 
   // Lookback buffer: fetch a small window of events BEFORE the visible range
-  // so deriveGanttData can tell whether the first in-window event for an
-  // episode is a real transition or a continuation of a status that was
-  // already in effect. Sized off the rule's evaluation interval — 2× the
-  // schedule absorbs missed ticks / scheduling jitter, with a 1-minute floor
-  // for sub-minute schedules and a 1-hour cap so a long-interval rule
-  // doesn't pull in days of pre-window history.
+  // so deriveAlertTimelineData can tell whether the first in-window event for
+  // an episode is a real transition or a continuation of a status that was
+  // already in effect.
   const bufferMs = useMemo(() => {
     const scheduleMs = parseDurationToMs(rule.schedule.every);
     const fallback = 60_000;
@@ -110,13 +109,13 @@ export const EpisodesGanttSection: React.FC = () => {
       gteMs: fetchGteMs,
       lteMs,
       groupingFields,
-      topN: GANTT_TOP_N_DEFAULT,
+      topN: ALERT_TIMELINE_TOP_N_DEFAULT,
       data,
     });
 
-  const ganttData = useMemo(
+  const timelineData = useMemo(
     () =>
-      deriveGanttData(
+      deriveAlertTimelineData(
         events,
         groupingValuesByHash,
         'recently_active',
@@ -170,12 +169,12 @@ export const EpisodesGanttSection: React.FC = () => {
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="ruleEpisodesGanttSection">
+    <EuiPanel hasBorder paddingSize="l" data-test-subj="ruleAlertTimelineSection">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>
-              {i18n.translate('xpack.alertingV2.ruleDetails.gantt.title', {
+              {i18n.translate('xpack.alertingV2.alertTimeline.title', {
                 defaultMessage: 'Alert activity',
               })}
             </h3>
@@ -194,7 +193,7 @@ export const EpisodesGanttSection: React.FC = () => {
                 showUpdateButton="iconOnly"
                 commonlyUsedRanges={COMMONLY_USED_RANGES}
                 width="auto"
-                data-test-subj="ruleEpisodesGanttTimeRange"
+                data-test-subj="alertTimelineDatePicker"
               />
             </EuiFlexItem>
             {discoverHref && (
@@ -204,9 +203,9 @@ export const EpisodesGanttSection: React.FC = () => {
                   iconType="discoverApp"
                   href={discoverHref}
                   target="_blank"
-                  data-test-subj="ruleEpisodesGanttExploreInDiscover"
+                  data-test-subj="alertTimelineExploreInDiscover"
                 >
-                  {i18n.translate('xpack.alertingV2.ruleDetails.gantt.exploreInDiscover', {
+                  {i18n.translate('xpack.alertingV2.alertTimeline.exploreInDiscover', {
                     defaultMessage: 'Explore in Discover',
                   })}
                 </EuiButtonEmpty>
@@ -217,9 +216,9 @@ export const EpisodesGanttSection: React.FC = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-      <GanttStatsRow summary={ganttData.summary} />
+      <AlertTimelineStatsRow summary={timelineData.summary} />
       <EuiSpacer size="m" />
-      <GanttLegend />
+      <AlertTimelineLegend />
       <EuiSpacer size="m" />
 
       {isLoading && (
@@ -229,7 +228,7 @@ export const EpisodesGanttSection: React.FC = () => {
             justify-content: center;
             padding: 24px;
           `}
-          data-test-subj="ruleEpisodesGanttSectionLoading"
+          data-test-subj="alertTimelineSectionLoading"
         >
           <EuiLoadingChart size="l" />
         </div>
@@ -239,17 +238,17 @@ export const EpisodesGanttSection: React.FC = () => {
         <EuiEmptyPrompt
           color="danger"
           iconType="warning"
-          data-test-subj="ruleEpisodesGanttSectionError"
+          data-test-subj="alertTimelineSectionError"
           title={
             <h4>
-              {i18n.translate('xpack.alertingV2.ruleDetails.gantt.errorTitle', {
+              {i18n.translate('xpack.alertingV2.alertTimeline.errorTitle', {
                 defaultMessage: 'Could not load episodes',
               })}
             </h4>
           }
           body={
             <EuiText size="s">
-              {i18n.translate('xpack.alertingV2.ruleDetails.gantt.errorBody', {
+              {i18n.translate('xpack.alertingV2.alertTimeline.errorBody', {
                 defaultMessage:
                   'Try a smaller time range or refresh the page. Check the rule events index is reachable.',
               })}
@@ -258,20 +257,20 @@ export const EpisodesGanttSection: React.FC = () => {
         />
       )}
 
-      {!isLoading && !isError && ganttData.rows.length === 0 && (
+      {!isLoading && !isError && timelineData.rows.length === 0 && (
         <EuiEmptyPrompt
           iconType="bell"
-          data-test-subj="ruleEpisodesGanttSectionEmpty"
+          data-test-subj="alertTimelineSectionEmpty"
           title={
             <h4>
-              {i18n.translate('xpack.alertingV2.ruleDetails.gantt.emptyTitle', {
+              {i18n.translate('xpack.alertingV2.alertTimeline.emptyTitle', {
                 defaultMessage: 'No episodes in this window',
               })}
             </h4>
           }
           body={
             <EuiText size="s">
-              {i18n.translate('xpack.alertingV2.ruleDetails.gantt.emptyBody', {
+              {i18n.translate('xpack.alertingV2.alertTimeline.emptyBody', {
                 defaultMessage: 'Episodes appear here once the rule fires.',
               })}
             </EuiText>
@@ -279,10 +278,10 @@ export const EpisodesGanttSection: React.FC = () => {
         />
       )}
 
-      {!isLoading && !isError && ganttData.rows.length > 0 && (
+      {!isLoading && !isError && timelineData.rows.length > 0 && (
         <>
-          <GanttChart
-            rows={ganttData.rows}
+          <AlertTimelineChart
+            rows={timelineData.rows}
             gteMs={gteMs}
             lteMs={lteMs}
             ruleId={rule.id}
@@ -291,9 +290,9 @@ export const EpisodesGanttSection: React.FC = () => {
             getEpisodeHref={getEpisodeHref}
           />
           <EuiSpacer size="xs" />
-          <GanttFooter
-            visibleRowCount={ganttData.rows.length}
-            totalRowCount={ganttData.totalRowCount}
+          <AlertTimelineFooter
+            visibleRowCount={timelineData.rows.length}
+            totalRowCount={timelineData.totalRowCount}
             viewAllHref={viewAllHref}
           />
         </>

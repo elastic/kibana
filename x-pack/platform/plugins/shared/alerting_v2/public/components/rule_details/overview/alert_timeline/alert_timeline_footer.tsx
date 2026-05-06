@@ -9,13 +9,13 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export interface GanttFooterProps {
+export interface AlertTimelineFooterProps {
   visibleRowCount: number;
   totalRowCount: number;
   viewAllHref: string;
 }
 
-export const GanttFooter: React.FC<GanttFooterProps> = ({
+export const AlertTimelineFooter: React.FC<AlertTimelineFooterProps> = ({
   visibleRowCount,
   totalRowCount,
   viewAllHref,
@@ -25,11 +25,11 @@ export const GanttFooter: React.FC<GanttFooterProps> = ({
     alignItems="center"
     gutterSize="m"
     responsive={false}
-    data-test-subj="ganttFooter"
+    data-test-subj="alertTimelineFooter"
   >
     <EuiFlexItem grow={false}>
       <EuiText size="xs" color="subdued">
-        {i18n.translate('xpack.alertingV2.ruleDetails.gantt.showingCount', {
+        {i18n.translate('xpack.alertingV2.alertTimeline.showingCount', {
           defaultMessage: 'Showing {visible} of {total}',
           values: { visible: visibleRowCount, total: totalRowCount },
         })}
@@ -37,8 +37,8 @@ export const GanttFooter: React.FC<GanttFooterProps> = ({
     </EuiFlexItem>
     {totalRowCount > visibleRowCount && (
       <EuiFlexItem grow={false}>
-        <EuiLink href={viewAllHref} data-test-subj="ganttViewAllEpisodes">
-          {i18n.translate('xpack.alertingV2.ruleDetails.gantt.viewAllEpisodes', {
+        <EuiLink href={viewAllHref} data-test-subj="alertTimelineViewAllEpisodes">
+          {i18n.translate('xpack.alertingV2.alertTimeline.viewAllEpisodes', {
             defaultMessage: 'View all {total} episodes →',
             values: { total: totalRowCount },
           })}

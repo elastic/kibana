@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 
-export const ganttStatusColor = (
+export const alertTimelineStatusColor = (
   euiTheme: EuiThemeComputed,
   status: AlertEpisodeStatus
 ): string => {
@@ -27,32 +27,32 @@ export const ganttStatusColor = (
   }
 };
 
-export const ganttStatusLabel = (status: AlertEpisodeStatus): string => {
+export const alertTimelineStatusLabel = (status: AlertEpisodeStatus): string => {
   switch (status) {
     case ALERT_EPISODE_STATUS.PENDING:
-      return i18n.translate('xpack.alertingV2.ruleDetails.gantt.status.pending', {
+      return i18n.translate('xpack.alertingV2.alertTimeline.status.pending', {
         defaultMessage: 'Pending',
       });
     case ALERT_EPISODE_STATUS.ACTIVE:
-      return i18n.translate('xpack.alertingV2.ruleDetails.gantt.status.active', {
+      return i18n.translate('xpack.alertingV2.alertTimeline.status.active', {
         defaultMessage: 'Active',
       });
     case ALERT_EPISODE_STATUS.RECOVERING:
-      return i18n.translate('xpack.alertingV2.ruleDetails.gantt.status.recovering', {
+      return i18n.translate('xpack.alertingV2.alertTimeline.status.recovering', {
         defaultMessage: 'Recovering',
       });
     case ALERT_EPISODE_STATUS.INACTIVE:
-      return i18n.translate('xpack.alertingV2.ruleDetails.gantt.status.inactive', {
+      return i18n.translate('xpack.alertingV2.alertTimeline.status.inactive', {
         defaultMessage: 'Inactive',
       });
     default:
-      return i18n.translate('xpack.alertingV2.ruleDetails.gantt.status.unknown', {
+      return i18n.translate('xpack.alertingV2.alertTimeline.status.unknown', {
         defaultMessage: 'Unknown',
       });
   }
 };
 
-export const GANTT_STATUS_LEGEND_ORDER: readonly AlertEpisodeStatus[] = [
+export const ALERT_TIMELINE_STATUS_LEGEND_ORDER: readonly AlertEpisodeStatus[] = [
   ALERT_EPISODE_STATUS.PENDING,
   ALERT_EPISODE_STATUS.ACTIVE,
   ALERT_EPISODE_STATUS.RECOVERING,

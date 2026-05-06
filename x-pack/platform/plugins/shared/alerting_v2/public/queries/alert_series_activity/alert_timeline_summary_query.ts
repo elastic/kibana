@@ -7,7 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-episodes-ui/constants';
-import type { GanttSummary } from '../../utils/derive_gantt_data';
+import type { AlertTimelineSummary } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 
 export interface GanttSummaryEsqlRow {
   episodes_started: number;
@@ -50,14 +50,16 @@ export const buildGanttSummaryQuery = ({ ruleId, gteMs, lteMs }: BuildGanttSumma
     .keep('episodes_started', 'recovered', 'still_open', 'median_duration_ms');
 };
 
-const EMPTY_SUMMARY: GanttSummary = {
+const EMPTY_SUMMARY: AlertTimelineSummary = {
   episodesStarted: 0,
   recovered: 0,
   stillOpen: 0,
   medianDurationMs: 0,
 };
 
-export const parseGanttSummaryRow = (row: GanttSummaryEsqlRow | undefined): GanttSummary => {
+export const parseGanttSummaryRow = (
+  row: GanttSummaryEsqlRow | undefined
+): AlertTimelineSummary => {
   if (!row) return EMPTY_SUMMARY;
   return {
     episodesStarted: row.episodes_started ?? 0,

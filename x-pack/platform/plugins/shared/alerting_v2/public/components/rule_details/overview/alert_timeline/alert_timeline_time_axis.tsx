@@ -44,7 +44,6 @@ const STEPS: StepDef[] = [
 ];
 
 const pickStep = (spanMs: number): StepDef => {
-  // Smallest step that still keeps the tick count <= TARGET_TICK_COUNT-ish.
   for (const step of STEPS) {
     if (spanMs / step.ms <= TARGET_TICK_COUNT + 2) return step;
   }
@@ -71,8 +70,6 @@ const buildTicks = (gteMs: number, lteMs: number, locale: string): Tick[] => {
   const span = lteMs - gteMs;
   const step = pickStep(span);
 
-  // Label format: time-only when the whole window fits in one local day, otherwise
-  // include the date so adjacent days stay distinguishable.
   const showDate = step.unit === 'day' || span > DAY_MS;
   const showTime = step.unit !== 'day';
   const formatter = new Intl.DateTimeFormat(locale, {
@@ -85,27 +82,25 @@ const buildTicks = (gteMs: number, lteMs: number, locale: string): Tick[] => {
 
   const ticks: Tick[] = [];
   let cursor = snapForward(gteMs, step);
-  // Cap iterations defensively in case of pathological inputs.
-  let i = 0;
-  while (cursor <= lteMs && i++ < 200) {
+  let idx = 0;
+  while (cursor <= lteMs && idx++ < 200) {
     ticks.push({ ms: cursor, label: formatter.format(new Date(cursor)) });
     cursor += step.ms;
   }
   return ticks;
 };
 
-export interface GanttTimeAxisProps {
+export interface AlertTimelineTimeAxisProps {
   gteMs: number;
   lteMs: number;
 }
 
 /**
- * Top-of-chart date axis. Renders one subdued label per UTC day inside the
+ * Top-of-chart date axis. Renders one subdued label per tick inside the
  * window, positioned by absolute percentage offset against the time domain
- * shared with the bars below — guarantees pixel-aligned ticks without an
- * elastic-charts wrapper.
+ * shared with the bars below.
  */
-export const GanttTimeAxis: React.FC<GanttTimeAxisProps> = ({ gteMs, lteMs }) => {
+export const AlertTimelineTimeAxis: React.FC<AlertTimelineTimeAxisProps> = ({ gteMs, lteMs }) => {
   const { euiTheme } = useEuiTheme();
   const ticks = useMemo(() => buildTicks(gteMs, lteMs, i18n.getLocale()), [gteMs, lteMs]);
   const span = lteMs - gteMs;
@@ -117,13 +112,10 @@ export const GanttTimeAxis: React.FC<GanttTimeAxisProps> = ({ gteMs, lteMs }) =>
         height: ${euiTheme.size.l};
         border-bottom: 1px solid ${euiTheme.colors.lightShade};
       `}
-      data-test-subj="ganttTimeAxis"
+      data-test-subj="alertTimelineTimeAxis"
     >
       {ticks.map((tick) => {
         const pct = ((tick.ms - gteMs) / span) * 100;
-        // Labels are left-anchored at their tick position, so a tick close to
-        // the right edge would overflow the panel. Skip those — the next tick
-        // would have shown the label anyway.
         if (pct > 90) return null;
         return (
           <div

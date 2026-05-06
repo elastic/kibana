@@ -29,9 +29,12 @@ import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { PluginStart } from '@kbn/core-di';
 import { useService } from '@kbn/core-di-browser';
-import type { GanttSegment, GanttSeries } from '../../../../utils/derive_gantt_data';
-import { ganttStatusColor, ganttStatusLabel } from './gantt_status_palette';
-import { formatDuration, formatTimestamp } from './gantt_format';
+import type { AlertTimelineSegment, AlertTimelineSeries } from './types';
+import {
+  alertTimelineStatusColor,
+  alertTimelineStatusLabel,
+} from './alert_timeline_status_palette';
+import { formatDuration, formatTimestamp } from './alert_timeline_format';
 
 // Render order = paint order. Sibling series declared later paint on top,
 // so list lower-priority statuses first and higher-priority ones last —
@@ -62,8 +65,6 @@ interface TransitionDatum {
   y: number;
   episodeId: string;
   status: AlertEpisodeStatus;
-  // Populated when getEpisodeHref is provided so the click handler can
-  // navigate without re-resolving the URL or filtering by series id.
   href?: string;
 }
 
@@ -110,8 +111,8 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({
             border-bottom: 1px solid ${euiTheme.colors.lightShade};
           `}
         >
-          <EuiHealth color={ganttStatusColor(euiTheme, status)} textSize="xs">
-            <strong>{ganttStatusLabel(status)}</strong>
+          <EuiHealth color={alertTimelineStatusColor(euiTheme, status)} textSize="xs">
+            <strong>{alertTimelineStatusLabel(status)}</strong>
           </EuiHealth>
         </div>
         <div
@@ -127,7 +128,7 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({
               margin-top: ${euiTheme.size.xs};
             `}
           >
-            {i18n.translate('xpack.alertingV2.ruleDetails.gantt.tooltip.episodeId', {
+            {i18n.translate('xpack.alertingV2.alertTimeline.tooltip.episodeId', {
               defaultMessage: 'Episode id: {id}',
               values: { id: episodeId },
             })}
@@ -138,8 +139,8 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({
   );
 };
 
-export interface GanttRowProps {
-  row: GanttSeries;
+export interface AlertTimelineRowProps {
+  row: AlertTimelineSeries;
   gteMs: number;
   lteMs: number;
   height: number;
@@ -154,9 +155,9 @@ export interface GanttRowProps {
  * one.
  *
  * The row owns its own chrome (top border, height) so callers just render
- * `<GanttRow ... />` per series with no wrapper.
+ * `<AlertTimelineRow ... />` per series with no wrapper.
  */
-export const GanttRow: React.FC<GanttRowProps> = ({
+export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
   row,
   gteMs,
   lteMs,
@@ -169,14 +170,10 @@ export const GanttRow: React.FC<GanttRowProps> = ({
   const baseTheme = charts.theme.useChartsBaseTheme();
 
   const segmentsByStatus = useMemo(
-    () => groupBy<GanttSegment, AlertEpisodeStatus>(row.segments, (s) => s.status),
+    () => groupBy<AlertTimelineSegment, AlertEpisodeStatus>(row.segments, (s) => s.status),
     [row.segments]
   );
 
-  // Render dots in TIME order, not grouped by status. When two transitions
-  // overlap at the same x (e.g. one episode goes INACTIVE while another
-  // becomes ACTIVE), the later-in-time event paints on top — which matches
-  // intuition: "if ACTIVE happened after INACTIVE, the ACTIVE dot wins".
   const sortedTransitions = useMemo(
     () => [...row.transitions].sort((a, b) => a.tsMs - b.tsMs),
     [row.transitions]
@@ -193,9 +190,6 @@ export const GanttRow: React.FC<GanttRowProps> = ({
     [onSegmentClick]
   );
 
-  // Transition dots open episode details in a new tab. The href is baked
-  // into each TransitionDatum at build time, so the hidden anchor series
-  // (whose datum has no href) is naturally ignored.
   const handleElementClick = useCallback<ElementClickListener>((elements) => {
     const first = elements[0];
     if (!Array.isArray(first)) return;
@@ -212,7 +206,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({
         height: ${height}px;
         border-top: 1px solid ${euiTheme.colors.lightestShade};
       `}
-      data-test-subj="ganttRow"
+      data-test-subj="alertTimelineRow"
     >
       <Chart size={{ height }}>
         <Settings
@@ -227,9 +221,6 @@ export const GanttRow: React.FC<GanttRowProps> = ({
             chartPaddings: { top: 0, right: 0, bottom: 0, left: 0 },
           }}
         />
-        {/* Tooltip for transition dots — series tooltips are driven by the
-            chart-level <Tooltip>, while rect annotations have their own
-            customTooltip below. */}
         <Tooltip
           header="none"
           body={({ items }) => {
@@ -241,7 +232,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({
                 status={datum.status}
                 episodeId={datum.episodeId}
                 primaryLine={i18n.translate(
-                  'xpack.alertingV2.ruleDetails.gantt.tooltip.transitionTime',
+                  'xpack.alertingV2.alertTimeline.tooltip.transitionTime',
                   {
                     defaultMessage: 'Transitioned at {when}',
                     values: { when: formatTimestamp(datum.x) },
@@ -251,18 +242,15 @@ export const GanttRow: React.FC<GanttRowProps> = ({
             );
           }}
         />
-        {/* Hidden left axis with an explicit fixed domain so every row
-            renders rect annotations at the exact same pixel height. Without
-            it elastic-charts auto-fits per-chart and heights drift. */}
         <Axis id="left" position={Position.Left} hide domain={{ min: 0, max: 1, fit: false }} />
         {STATUS_ORDER.map((status) => {
           const segments = segmentsByStatus[status] ?? [];
           if (segments.length === 0) return null;
-          const fill = ganttStatusColor(euiTheme, status);
+          const fill = alertTimelineStatusColor(euiTheme, status);
           return (
             <RectAnnotation
               key={`rect-${status}`}
-              id={`gantt-row-${row.groupHash}-rect-${status}`}
+              id={`alert-timeline-row-${row.groupHash}-rect-${status}`}
               dataValues={
                 segments.map((s) => ({
                   coordinates: { x0: s.x0Ms, x1: s.x1Ms, y0: RECT_Y0, y1: RECT_Y1 },
@@ -284,16 +272,16 @@ export const GanttRow: React.FC<GanttRowProps> = ({
                     euiTheme={euiTheme}
                     status={d.status}
                     episodeId={d.episodeId}
-                    primaryLine={i18n.translate('xpack.alertingV2.ruleDetails.gantt.tooltip.from', {
+                    primaryLine={i18n.translate('xpack.alertingV2.alertTimeline.tooltip.from', {
                       defaultMessage: 'From: {when}',
                       values: { when: formatTimestamp(d.x0Ms) },
                     })}
-                    secondaryLine={i18n.translate('xpack.alertingV2.ruleDetails.gantt.tooltip.to', {
+                    secondaryLine={i18n.translate('xpack.alertingV2.alertTimeline.tooltip.to', {
                       defaultMessage: 'To: {when}',
                       values: { when: formatTimestamp(d.x1Ms) },
                     })}
                     durationLabel={i18n.translate(
-                      'xpack.alertingV2.ruleDetails.gantt.tooltip.duration',
+                      'xpack.alertingV2.alertTimeline.tooltip.duration',
                       {
                         defaultMessage: 'Duration: {duration}',
                         values: { duration: formatDuration(d.x1Ms - d.x0Ms) },
@@ -306,7 +294,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({
           );
         })}
         <LineSeries
-          id={`gantt-row-${row.groupHash}-anchor`}
+          id={`alert-timeline-row-${row.groupHash}-anchor`}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
@@ -322,15 +310,9 @@ export const GanttRow: React.FC<GanttRowProps> = ({
             point: { visible: 'never' },
           }}
         />
-        {/* Single time-sorted LineSeries for every transition. The connecting
-            line is hidden and only the points render — guarantees a
-            fixed-radius dot at every state change even when the time window
-            is wide and rect annotations compress to sub-pixel widths.
-            pointStyleAccessor sets the stroke per dot based on the datum's
-            status, so painting order = time order = later-in-time wins. */}
         {sortedTransitions.length > 0 && (
           <LineSeries
-            id={`gantt-row-${row.groupHash}-dots`}
+            id={`alert-timeline-row-${row.groupHash}-dots`}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
@@ -354,7 +336,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({
             }}
             pointStyleAccessor={(datum) => {
               const d = datum.datum as TransitionDatum;
-              return { stroke: ganttStatusColor(euiTheme, d.status) };
+              return { stroke: alertTimelineStatusColor(euiTheme, d.status) };
             }}
           />
         )}
