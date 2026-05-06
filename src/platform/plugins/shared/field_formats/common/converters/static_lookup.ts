@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { RenderConvertFunction, TextContextTypeConvert } from '../types';
+import type { ReactConvertFunction, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { getHighlightReact } from '../utils';
 
@@ -106,7 +106,7 @@ export class StaticLookupFormat extends FieldFormat {
     return String(result ?? '');
   };
 
-  renderConvert: RenderConvertFunction = (val, options = {}) => {
+  reactConvert: ReactConvertFunction = (val, options = {}) => {
     const { result, isMissingValue } = this.lookup(val);
 
     if (isMissingValue) {

@@ -58,7 +58,7 @@ export type {
   FieldFormatParams,
   FieldFormatMetaParams,
   ReactContextTypeConvert,
-  RenderConvertFunction,
+  ReactConvertFunction,
   ReactContextTypeOptions,
   TextContextTypeConvert,
   TextContextTypeOptions,

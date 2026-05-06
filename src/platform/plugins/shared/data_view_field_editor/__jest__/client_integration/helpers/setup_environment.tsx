@@ -86,7 +86,7 @@ class MockCustomFieldFormat extends FieldFormat {
   static id = 'upper';
   static title = 'UpperCaseString';
 
-  renderConvert = (value: unknown): ReactNode => {
+  reactConvert = (value: unknown): ReactNode => {
     return <span>{value == null ? NULL_LABEL : String(value).toUpperCase()}</span>;
   };
 }

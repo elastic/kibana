@@ -23,7 +23,7 @@ import type {
 import { getHighlightReact } from './utils/highlight';
 import type {
   ReactContextTypeConvert,
-  RenderConvertFunction,
+  ReactConvertFunction,
   TextContextTypeConvert,
 } from './types';
 
@@ -68,13 +68,13 @@ export abstract class FieldFormat {
    *
    * @protected
    */
-  protected renderConvert: RenderConvertFunction | undefined;
+  protected reactConvert: ReactConvertFunction | undefined;
 
   /**
-   * React-based converter. Handles arrays and delegates single values to `renderConvert`
+   * React-based converter. Handles arrays and delegates single values to `reactConvert`
    * (if overridden) or the default text/highlight logic.
    *
-   * Do NOT override this method in subclasses — override `renderConvert` instead so that
+   * Do NOT override this method in subclasses — override `reactConvert` instead so that
    * array handling is always applied correctly.
    *
    * @public
@@ -86,8 +86,8 @@ export abstract class FieldFormat {
       return formatReactArray(val, (v) => this.convertToReact(v, options));
     }
 
-    if (this.renderConvert) {
-      return this.renderConvert(val, options);
+    if (this.reactConvert) {
+      return this.reactConvert(val, options);
     }
 
     const missing = this.checkForMissingValueReact(val);

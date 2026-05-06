@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { asPrettyString, getHighlightReact, shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
-import type { RenderConvertFunction, TextContextTypeConvert } from '../types';
+import type { ReactConvertFunction, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 
 const TRANSFORM_OPTIONS = [
@@ -130,7 +130,7 @@ export class StringFormat extends FieldFormat {
     }
   };
 
-  renderConvert: RenderConvertFunction = (val, { hit, field } = {}) => {
+  reactConvert: ReactConvertFunction = (val, { hit, field } = {}) => {
     const missing = this.checkForMissingValueReact(val);
     if (missing) return missing;
 

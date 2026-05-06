@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   FieldFormatInstanceType,
   IFieldFormat,
-  RenderConvertFunction,
+  ReactConvertFunction,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -170,7 +170,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         return this.getSpecialBucketLabel(val) ?? this.getNestedFormat().convertToText(val);
       };
 
-      renderConvert: RenderConvertFunction = (val, options) => {
+      reactConvert: ReactConvertFunction = (val, options) => {
         return (
           this.getSpecialBucketLabel(val) ?? this.getNestedFormat().convertToReact(val, options)
         );
@@ -211,7 +211,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
           .join(this.getSeparator());
       };
 
-      renderConvert: RenderConvertFunction = (val, options) => {
+      reactConvert: ReactConvertFunction = (val, options) => {
         const otherLabel = this.getSpecialBucketLabel(val);
         if (otherLabel) return otherLabel;
 
