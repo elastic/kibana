@@ -9,7 +9,6 @@ import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -103,13 +102,14 @@ export const ProcessorOutcomePreview = () => {
       <EuiFlexItem grow={false}>
         <PreviewDocumentsGroupBy />
       </EuiFlexItem>
-      <FetchMoreMatchingSamples />
       <EuiSpacer size="m" />
       {isEmpty(previewDocuments) ? (
         <NoPreviewDocumentsEmptyPrompt />
       ) : (
         <OutcomePreviewTable previewDocuments={previewDocuments} />
       )}
+      <EuiSpacer size="m" />
+      <FetchMoreMatchingSamples />
     </>
   );
 };
@@ -319,10 +319,11 @@ const FetchMoreMatchingSamples = () => {
   if (!shouldShow) return null;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
+        <EuiButton
           size="s"
+          color="text"
           onClick={fetchMoreMatchingSamples}
           isLoading={isFetchingMore}
           data-test-subj="streamsAppFetchMoreMatchingSamplesButton"
@@ -330,7 +331,7 @@ const FetchMoreMatchingSamples = () => {
           {i18n.translate('xpack.streams.enrichment.fetchMore.buttonLabel', {
             defaultMessage: 'Load more matching samples',
           })}
-        </EuiButtonEmpty>
+        </EuiButton>
       </EuiFlexItem>
       {fetchMoreError && (
         <EuiFlexItem grow={false}>
