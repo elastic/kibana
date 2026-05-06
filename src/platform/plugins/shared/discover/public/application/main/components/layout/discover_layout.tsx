@@ -293,7 +293,7 @@ export function DiscoverLayout() {
   const canSetBreakdownField = useMemo(
     () =>
       isOfAggregateQueryType(query)
-        ? dataView?.isTimeBased() && !hasTransformationalCommand(query.esql)
+        ? dataView?.timeFieldName && !hasTransformationalCommand(query.esql)
         : true,
     [dataView, query]
   );
