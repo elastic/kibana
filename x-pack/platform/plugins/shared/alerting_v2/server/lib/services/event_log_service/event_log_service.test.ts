@@ -39,6 +39,8 @@ describe('EventLogService', () => {
   });
 
   describe('findActionPolicyExecutionEvents', () => {
+    const START_DATE = '2026-05-04T00:00:00Z';
+
     const buildResult = (
       overrides: Partial<{ data: unknown[]; page: number; per_page: number; total: number }> = {}
     ) => ({
@@ -54,7 +56,11 @@ describe('EventLogService', () => {
       mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
       const request = httpServerMock.createKibanaRequest();
 
-      await eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'default' });
+      await eventLogService.findActionPolicyExecutionEvents({
+        request,
+        spaceId: 'default',
+        startDate: START_DATE,
+      });
 
       expect(mockClientService.getClient).toHaveBeenCalledWith(request);
     });
@@ -64,7 +70,11 @@ describe('EventLogService', () => {
       mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
       const request = httpServerMock.createKibanaRequest();
 
-      await eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'default' });
+      await eventLogService.findActionPolicyExecutionEvents({
+        request,
+        spaceId: 'default',
+        startDate: START_DATE,
+      });
 
       const [type, ids] = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0];
       expect(type).toBe(ACTION_POLICY_SAVED_OBJECT_TYPE);
@@ -76,7 +86,11 @@ describe('EventLogService', () => {
       mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
       const request = httpServerMock.createKibanaRequest();
 
-      await eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'default' });
+      await eventLogService.findActionPolicyExecutionEvents({
+        request,
+        spaceId: 'default',
+        startDate: START_DATE,
+      });
 
       const authFilter = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][2];
       expect(authFilter).toMatchObject({ type: 'function', function: 'and' });
@@ -92,6 +106,7 @@ describe('EventLogService', () => {
       await eventLogService.findActionPolicyExecutionEvents({
         request,
         spaceId: 'default',
+        startDate: START_DATE,
         page: 3,
         perPage: 25,
       });
@@ -111,7 +126,11 @@ describe('EventLogService', () => {
       mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
       const request = httpServerMock.createKibanaRequest();
 
-      await eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'default' });
+      await eventLogService.findActionPolicyExecutionEvents({
+        request,
+        spaceId: 'default',
+        startDate: START_DATE,
+      });
 
       const options = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][4];
       expect(options).toEqual(
@@ -122,7 +141,7 @@ describe('EventLogService', () => {
       );
     });
 
-    it('passes start when startDate is provided and omits it otherwise', async () => {
+    it('passes startDate as the start option to the client', async () => {
       const { eventLogService, mockEventLogClient } = createEventLogService();
       mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
       const request = httpServerMock.createKibanaRequest();
@@ -130,15 +149,11 @@ describe('EventLogService', () => {
       await eventLogService.findActionPolicyExecutionEvents({
         request,
         spaceId: 'default',
-        startDate: '2026-05-04T00:00:00Z',
+        startDate: START_DATE,
       });
-      const withStart = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][4];
-      expect(withStart).toEqual(expect.objectContaining({ start: '2026-05-04T00:00:00Z' }));
 
-      mockEventLogClient.findEventsWithAuthFilter.mockClear();
-      await eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'default' });
-      const withoutStart = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][4];
-      expect(withoutStart).not.toHaveProperty('start');
+      const options = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][4];
+      expect(options).toEqual(expect.objectContaining({ start: START_DATE }));
     });
 
     it('passes the provided spaceId as namespace to the client', async () => {
@@ -146,7 +161,11 @@ describe('EventLogService', () => {
       mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
       const request = httpServerMock.createKibanaRequest();
 
-      await eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'my-space' });
+      await eventLogService.findActionPolicyExecutionEvents({
+        request,
+        spaceId: 'my-space',
+        startDate: START_DATE,
+      });
 
       const namespace = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][3];
       expect(namespace).toBe('my-space');
@@ -166,6 +185,7 @@ describe('EventLogService', () => {
       const result = await eventLogService.findActionPolicyExecutionEvents({
         request,
         spaceId: 'default',
+        startDate: START_DATE,
         page: 2,
         perPage: 25,
       });
@@ -184,7 +204,11 @@ describe('EventLogService', () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(
-        eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'default' })
+        eventLogService.findActionPolicyExecutionEvents({
+          request,
+          spaceId: 'default',
+          startDate: START_DATE,
+        })
       ).rejects.toThrow('boom');
     });
   });

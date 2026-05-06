@@ -33,7 +33,7 @@ const EXECUTION_HISTORY_AUTH_FILTER = fromKueryExpression(
 export interface FindActionPolicyExecutionEventsParams {
   request: KibanaRequest;
   spaceId: string;
-  startDate?: string;
+  startDate: string;
   page?: number;
   perPage?: number;
 }
@@ -95,7 +95,7 @@ export class EventLogService implements EventLogServiceContract {
         page,
         per_page: perPage,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
-        ...(startDate ? { start: startDate } : {}),
+        start: startDate,
       }
     );
 
