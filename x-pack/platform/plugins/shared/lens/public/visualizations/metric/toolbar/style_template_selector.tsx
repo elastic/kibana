@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { MetricStyleTemplateId } from '@kbn/lens-common';
+import type { MetricStyleTemplateId, MetricStyleTemplatePresetId } from '@kbn/lens-common';
 
 const styleTemplateSelectorLabel = i18n.translate('xpack.lens.metric.styleTemplate.selectorLabel', {
   defaultMessage: 'Style template',
@@ -185,7 +185,7 @@ function CustomStyleTemplatePreview({ title }: { title: string }) {
   );
 }
 
-function MetricPreview({ position }: { position: MetricStyleTemplateId }) {
+function MetricPreview({ position }: { position: MetricStyleTemplatePresetId }) {
   const { euiTheme } = useEuiTheme();
 
   const value = (fontSize: string, textAlign: 'left' | 'center' | 'right' = 'left') => (
@@ -231,7 +231,7 @@ function MetricPreview({ position }: { position: MetricStyleTemplateId }) {
     </EuiFlexItem>
   );
 
-  const content: Record<MetricStyleTemplateId, ReactNode> = {
+  const content: Record<MetricStyleTemplatePresetId, ReactNode> = {
     top: (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         {value(euiTheme.size.l)}
@@ -251,13 +251,6 @@ function MetricPreview({ position }: { position: MetricStyleTemplateId }) {
         {title()}
         {secondary('right')}
         {value(euiTheme.size.l, 'right')}
-      </EuiFlexGroup>
-    ),
-    custom: (
-      <EuiFlexGroup direction="column" gutterSize="none" alignItems="center" responsive={false}>
-        {title()}
-        {value(euiTheme.size.l)}
-        {secondary()}
       </EuiFlexGroup>
     ),
   };
