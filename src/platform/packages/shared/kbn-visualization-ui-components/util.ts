@@ -121,26 +121,26 @@ export const annotationReferenceLineSharedSetOfIcons: IconSet<AnnotationReferenc
   ...sharedSetOfIcons,
   {
     value: 'circle',
-    label: i18n.translate('annotationReferenceLine.iconSelect.circleIconLabel', {
+    label: i18n.translate('visualizationUiComponents.iconSelect.circleIconLabel', {
       defaultMessage: 'Circle',
     }),
     icon: IconCircle,
   },
   {
     value: 'pinFilled',
-    label: i18n.translate('annotationReferenceLine.iconSelect.mapPinLabel', {
+    label: i18n.translate('visualizationUiComponents.iconSelect.mapPinLabel', {
       defaultMessage: 'Map Pin',
     }),
   },
   {
     value: 'starFilled',
-    label: i18n.translate('annotationReferenceLine.iconSelect.starFilledLabel', {
+    label: i18n.translate('visualizationUiComponents.iconSelect.starFilledLabel', {
       defaultMessage: 'Star filled',
     }),
   },
   {
     value: 'triangle',
-    label: i18n.translate('annotationReferenceLine.iconSelect.triangleIconLabel', {
+    label: i18n.translate('visualizationUiComponents.iconSelect.triangleIconLabel', {
       defaultMessage: 'Triangle',
     }),
     icon: IconTriangle,
