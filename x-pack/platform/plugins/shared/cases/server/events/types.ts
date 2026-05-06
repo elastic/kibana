@@ -28,17 +28,18 @@ export interface CaseUpdatedEventPayload extends BaseCaseEventPayload {
 }
 
 /**
- * Event: comment added
+ * Event: attachments added
  */
-export interface CommentAddedEventPayload extends BaseCaseEventPayload {
+export interface AttachmentsAddedEventPayload extends BaseCaseEventPayload {
   readonly caseId: string;
-  readonly caseCommentIds: string[];
+  readonly attachmentIds: string[];
+  readonly attachmentType: string;
 }
 
 export interface CasesDomainEventPayloadByType {
   readonly caseCreated: CaseCreatedEventPayload;
   readonly caseUpdated: CaseUpdatedEventPayload;
-  readonly commentAdded: CommentAddedEventPayload;
+  readonly attachmentsAdded: AttachmentsAddedEventPayload;
 }
 
 export type CasesDomainEventType = keyof CasesDomainEventPayloadByType;

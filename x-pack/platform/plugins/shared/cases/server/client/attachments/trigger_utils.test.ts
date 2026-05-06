@@ -7,23 +7,21 @@
 
 import type { Case } from '../../../common/types/domain';
 import { createCasesClientMockArgs } from '../mocks';
-import { emitCommentAddedEvent } from './trigger_utils';
+import { emitAttachmentsAddedEvent } from './trigger_utils';
 
-const makeCase = (id: string, comments: Array<{ id: string }>): Case =>
-  ({ id, comments, owner: 'securitySolution' } as unknown as Case);
+const makeCase = (id: string): Case => ({ id, owner: 'securitySolution' } as unknown as Case);
 
-describe('emitCommentAddedEvent', () => {
-  it('emits commentAdded with the matching comment ids', () => {
+describe('emitAttachmentsAddedEvent', () => {
+  it('emits attachmentsAdded with the attachment ids and type', () => {
     const clientArgs = createCasesClientMockArgs();
-    const comment1 = { id: 'comment-1' };
-    const comment2 = { id: 'comment-2' };
-    const updatedCase = makeCase('case-1', [comment1, comment2]);
+    const updatedCase = makeCase('case-1');
 
-    emitCommentAddedEvent(clientArgs, updatedCase, ['comment-1']);
+    emitAttachmentsAddedEvent(clientArgs, updatedCase, ['attachment-1', 'attachment-2'], 'comment');
 
-    expect(clientArgs.casesEventBus.emitCommentAdded).toHaveBeenCalledWith(clientArgs.request, {
+    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(clientArgs.request, {
       caseId: 'case-1',
-      caseCommentIds: ['comment-1'],
+      attachmentIds: ['attachment-1', 'attachment-2'],
+      attachmentType: 'comment',
       owner: 'securitySolution',
     });
   });
@@ -31,8 +29,10 @@ describe('emitCommentAddedEvent', () => {
   it('does nothing when casesEventBus is absent', () => {
     const clientArgs = createCasesClientMockArgs();
     clientArgs.casesEventBus = undefined as unknown as typeof clientArgs.casesEventBus;
-    const updatedCase = makeCase('case-1', [{ id: 'comment-1' }]);
+    const updatedCase = makeCase('case-1');
 
-    expect(() => emitCommentAddedEvent(clientArgs, updatedCase, ['comment-1'])).not.toThrow();
+    expect(() =>
+      emitAttachmentsAddedEvent(clientArgs, updatedCase, ['attachment-1'], 'comment')
+    ).not.toThrow();
   });
 });

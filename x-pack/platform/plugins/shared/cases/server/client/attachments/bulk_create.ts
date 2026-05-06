@@ -22,7 +22,7 @@ import { Operations } from '../../authorization';
 import type { BulkCreateArgs } from './types';
 import { validateRegisteredAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
-import { emitCommentAddedEvent } from './trigger_utils';
+import { emitAttachmentsAddedEvent } from './trigger_utils';
 
 export const bulkCreate = async (
   args: BulkCreateArgs,
@@ -87,11 +87,15 @@ export const bulkCreate = async (
 
     const updatedCase = await updatedModel.encodeWithComments({ mode });
 
-    emitCommentAddedEvent(
-      clientArgs,
-      updatedCase,
-      attachmentsWithIds.map((a) => a.id)
-    );
+    const idsByType = new Map<string, string[]>();
+    for (const attachment of attachmentsWithIds) {
+      const ids = idsByType.get(attachment.type) ?? [];
+      ids.push(attachment.id);
+      idsByType.set(attachment.type, ids);
+    }
+    for (const [type, ids] of idsByType) {
+      emitAttachmentsAddedEvent(clientArgs, updatedCase, ids, type);
+    }
 
     return updatedCase;
   } catch (error) {

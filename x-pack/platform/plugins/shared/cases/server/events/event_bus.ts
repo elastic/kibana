@@ -13,17 +13,17 @@ import type {
   CasesDomainEventType,
   CaseCreatedEventPayload,
   CaseUpdatedEventPayload,
-  CommentAddedEventPayload,
+  AttachmentsAddedEventPayload,
 } from './types';
 
 export const CASE_CREATED_EVENT = 'caseCreated';
 export const CASE_UPDATED_EVENT = 'caseUpdated';
-export const COMMENT_ADDED_EVENT = 'commentAdded';
+export const ATTACHMENTS_ADDED_EVENT = 'attachmentsAdded';
 
 export type CasesEventName =
   | typeof CASE_CREATED_EVENT
   | typeof CASE_UPDATED_EVENT
-  | typeof COMMENT_ADDED_EVENT;
+  | typeof ATTACHMENTS_ADDED_EVENT;
 
 export type CasesEventBusListener<TType extends CasesDomainEventType = CasesDomainEventType> = (
   event: CasesEventPayload<TType>
@@ -47,8 +47,8 @@ export class CasesEventBus extends EventEmitter {
     this.emit(CASE_UPDATED_EVENT, { type: 'caseUpdated', payload, request });
   }
 
-  emitCommentAdded(request: KibanaRequest, payload: CommentAddedEventPayload): void {
-    this.emit(COMMENT_ADDED_EVENT, { type: 'commentAdded', payload, request });
+  emitAttachmentsAdded(request: KibanaRequest, payload: AttachmentsAddedEventPayload): void {
+    this.emit(ATTACHMENTS_ADDED_EVENT, { type: 'attachmentsAdded', payload, request });
   }
 
   onCaseCreated(listener: CasesEventBusListener<'caseCreated'>): void {
@@ -59,8 +59,8 @@ export class CasesEventBus extends EventEmitter {
     this.on(CASE_UPDATED_EVENT, listener);
   }
 
-  onCommentAdded(listener: CasesEventBusListener<'commentAdded'>): void {
-    this.on(COMMENT_ADDED_EVENT, listener);
+  onAttachmentsAdded(listener: CasesEventBusListener<'attachmentsAdded'>): void {
+    this.on(ATTACHMENTS_ADDED_EVENT, listener);
   }
 
   removeCaseCreatedListener(listener: CasesEventBusListener<'caseCreated'>): void {
@@ -71,7 +71,7 @@ export class CasesEventBus extends EventEmitter {
     this.off(CASE_UPDATED_EVENT, listener);
   }
 
-  removeCommentAddedListener(listener: CasesEventBusListener<'commentAdded'>): void {
-    this.off(COMMENT_ADDED_EVENT, listener);
+  removeAttachmentsAddedListener(listener: CasesEventBusListener<'attachmentsAdded'>): void {
+    this.off(ATTACHMENTS_ADDED_EVENT, listener);
   }
 }

@@ -116,7 +116,7 @@ describe('addComment', () => {
     );
   });
 
-  it('emits commentAdded event after creating a comment', async () => {
+  it('emits attachmentAdded event after creating a comment', async () => {
     if (!clientArgs.unifiedAttachmentTypeRegistry.has(commentAttachmentType.id)) {
       clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
     }
@@ -148,11 +148,12 @@ describe('addComment', () => {
       clientArgs
     );
 
-    expect(clientArgs.casesEventBus.emitCommentAdded).toHaveBeenCalledWith(
+    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(
       clientArgs.request,
       expect.objectContaining({
         caseId,
-        caseCommentIds: expect.any(Array),
+        attachmentIds: expect.any(Array),
+        attachmentType: 'comment',
         owner: SECURITY_SOLUTION_OWNER,
       })
     );

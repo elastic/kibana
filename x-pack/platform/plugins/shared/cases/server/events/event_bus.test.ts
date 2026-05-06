@@ -47,11 +47,12 @@ describe('CasesEventBus', () => {
     const eventBus = new CasesEventBus();
     const listener = jest.fn();
 
-    eventBus.onCommentAdded(listener);
-    eventBus.removeCommentAddedListener(listener);
-    eventBus.emitCommentAdded(request, {
+    eventBus.onAttachmentsAdded(listener);
+    eventBus.removeAttachmentsAddedListener(listener);
+    eventBus.emitAttachmentsAdded(request, {
       caseId: 'case-1',
-      caseCommentIds: [],
+      attachmentIds: ['attachment-1'],
+      attachmentType: 'comment',
       owner: 'securitySolution',
     });
 

@@ -168,7 +168,7 @@ describe('bulkCreate', () => {
     );
   });
 
-  it('emits commentAdded event after bulk creating attachments', async () => {
+  it('emits attachmentAdded event per attachment after bulk creating', async () => {
     if (!clientArgs.unifiedAttachmentTypeRegistry.has(commentAttachmentType.id)) {
       clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
     }
@@ -200,11 +200,13 @@ describe('bulkCreate', () => {
 
     await bulkCreate({ attachments: unifiedAttachments, caseId }, clientArgs);
 
-    expect(clientArgs.casesEventBus.emitCommentAdded).toHaveBeenCalledWith(
+    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledTimes(1);
+    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(
       clientArgs.request,
       expect.objectContaining({
         caseId,
-        caseCommentIds: expect.any(Array),
+        attachmentIds: expect.arrayContaining([expect.any(String), expect.any(String)]),
+        attachmentType: 'comment',
         owner: SECURITY_SOLUTION_OWNER,
       })
     );

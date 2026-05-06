@@ -11,7 +11,7 @@ import type { CasesEventBus } from '../../events/event_bus';
 import {
   CaseCreatedTriggerId,
   CaseUpdatedTriggerId,
-  CommentAddedTriggerId,
+  AttachmentsAddedTriggerId,
 } from '../../../common/workflows/triggers';
 
 /**
@@ -43,7 +43,7 @@ export function registerCasesWorkflowEventBridge(
     void forward(CaseUpdatedTriggerId, event.payload, event.request);
   });
 
-  casesEventBus.onCommentAdded((event) => {
-    void forward(CommentAddedTriggerId, event.payload, event.request);
+  casesEventBus.onAttachmentsAdded((event) => {
+    void forward(AttachmentsAddedTriggerId, event.payload, event.request);
   });
 }

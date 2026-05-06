@@ -498,10 +498,17 @@ export const CASE_UPDATED_TRIGGER_EVENT_SCHEMA_UPDATED_FIELDS_DESCRIPTION = i18n
   }
 );
 
-export const COMMENT_ADDED_TRIGGER_EVENT_SCHEMA_CASE_COMMENT_IDS_DESCRIPTION = i18n.translate(
-  'xpack.cases.workflowTriggers.commentAdded.eventSchema.caseCommentIds',
+export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsAdded.eventSchema.attachmentIds',
   {
-    defaultMessage: 'The IDs of comments that were added.',
+    defaultMessage: 'The IDs of the attachments that were added (all of the same type).',
+  }
+);
+
+export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsAdded.eventSchema.attachmentType',
+  {
+    defaultMessage: 'The type of the attachments that were added (e.g. "user", "alert").',
   }
 );
 

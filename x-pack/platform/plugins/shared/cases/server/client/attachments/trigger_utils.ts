@@ -9,14 +9,16 @@ import type { Case } from '../../../common/types/domain';
 import type { Owner } from '../../../common/constants/types';
 import type { CasesClientArgs } from '..';
 
-export function emitCommentAddedEvent(
+export function emitAttachmentsAddedEvent(
   clientArgs: CasesClientArgs,
   updatedCase: Case,
-  newCommentIds: string[]
+  attachmentIds: string[],
+  attachmentType: string
 ): void {
-  clientArgs.casesEventBus?.emitCommentAdded(clientArgs.request, {
+  clientArgs.casesEventBus?.emitAttachmentsAdded(clientArgs.request, {
     caseId: updatedCase.id,
-    caseCommentIds: newCommentIds,
+    attachmentIds,
+    attachmentType,
     owner: updatedCase.owner as Owner,
   });
 }

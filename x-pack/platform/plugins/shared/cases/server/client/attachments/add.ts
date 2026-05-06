@@ -18,7 +18,7 @@ import { Operations } from '../../authorization';
 import type { AddArgs } from './types';
 import { validateRegisteredAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
-import { emitCommentAddedEvent } from './trigger_utils';
+import { emitAttachmentsAddedEvent } from './trigger_utils';
 /**
  * Create an attachment to a case.
  *
@@ -75,7 +75,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
 
     const updatedCase = await updatedModel.encodeWithComments({ mode });
 
-    emitCommentAddedEvent(clientArgs, updatedCase, [savedObjectID]);
+    emitAttachmentsAddedEvent(clientArgs, updatedCase, [savedObjectID], query.type);
 
     return updatedCase;
   } catch (error) {

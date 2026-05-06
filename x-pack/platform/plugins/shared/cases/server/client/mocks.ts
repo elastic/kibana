@@ -66,13 +66,13 @@ const createCasesEventBusMock = (): CasesEventBus => {
     ...new CasesEventBus(),
     emitCaseCreated: jest.fn(),
     emitCaseUpdated: jest.fn(),
-    emitCommentAdded: jest.fn(),
+    emitAttachmentsAdded: jest.fn(),
     onCaseCreated: jest.fn(),
     onCaseUpdated: jest.fn(),
-    onCommentAdded: jest.fn(),
+    onAttachmentsAdded: jest.fn(),
     removeCaseCreatedListener: jest.fn(),
     removeCaseUpdatedListener: jest.fn(),
-    removeCommentAddedListener: jest.fn(),
+    removeAttachmentsAddedListener: jest.fn(),
   };
 };
 

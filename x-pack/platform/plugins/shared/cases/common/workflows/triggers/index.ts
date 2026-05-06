@@ -12,7 +12,8 @@ import {
   CASE_TRIGGER_EVENT_SCHEMA_CASE_ID_DESCRIPTION,
   CASE_TRIGGER_EVENT_SCHEMA_OWNER_DESCRIPTION,
   CASE_UPDATED_TRIGGER_EVENT_SCHEMA_UPDATED_FIELDS_DESCRIPTION,
-  COMMENT_ADDED_TRIGGER_EVENT_SCHEMA_CASE_COMMENT_IDS_DESCRIPTION,
+  ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION,
+  ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION,
 } from '../translations';
 
 export const CaseCreatedTriggerId = 'cases.caseCreated' as const;
@@ -41,15 +42,18 @@ export const caseUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   eventSchema: caseUpdatedEventSchema,
 };
 
-export const CommentAddedTriggerId = 'cases.commentAdded' as const;
+export const AttachmentsAddedTriggerId = 'cases.attachmentsAdded' as const;
 
-const commentAddedEventSchema = baseCaseEventSchema.extend({
-  caseCommentIds: z
+const attachmentsAddedEventSchema = baseCaseEventSchema.extend({
+  attachmentIds: z
     .array(z.string())
-    .meta({ description: COMMENT_ADDED_TRIGGER_EVENT_SCHEMA_CASE_COMMENT_IDS_DESCRIPTION }),
+    .meta({ description: ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION }),
+  attachmentType: z
+    .string()
+    .meta({ description: ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION }),
 });
 
-export const commentAddedTriggerCommonDefinition: CommonTriggerDefinition = {
-  id: CommentAddedTriggerId,
-  eventSchema: commentAddedEventSchema,
+export const attachmentsAddedTriggerCommonDefinition: CommonTriggerDefinition = {
+  id: AttachmentsAddedTriggerId,
+  eventSchema: attachmentsAddedEventSchema,
 };

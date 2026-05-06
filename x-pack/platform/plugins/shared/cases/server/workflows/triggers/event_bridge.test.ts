@@ -10,7 +10,7 @@ import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks'
 import {
   CaseCreatedTriggerId,
   CaseUpdatedTriggerId,
-  CommentAddedTriggerId,
+  AttachmentsAddedTriggerId,
 } from '../../../common/workflows/triggers';
 import { CasesEventBus } from '../../events/event_bus';
 import { registerCasesWorkflowEventBridge } from './event_bridge';
@@ -37,9 +37,10 @@ describe('registerCasesWorkflowEventBridge', () => {
       owner: 'securitySolution',
       updatedFields: ['status'],
     });
-    eventBus.emitCommentAdded(request, {
+    eventBus.emitAttachmentsAdded(request, {
       caseId: 'case-1',
-      caseCommentIds: [],
+      attachmentIds: ['attachment-1'],
+      attachmentType: 'comment',
       owner: 'securitySolution',
     });
 
@@ -57,9 +58,10 @@ describe('registerCasesWorkflowEventBridge', () => {
       owner: 'securitySolution',
       updatedFields: ['status'],
     });
-    expect(mockClient.emitEvent).toHaveBeenNthCalledWith(3, CommentAddedTriggerId, {
+    expect(mockClient.emitEvent).toHaveBeenNthCalledWith(3, AttachmentsAddedTriggerId, {
       caseId: 'case-1',
-      caseCommentIds: [],
+      attachmentIds: ['attachment-1'],
+      attachmentType: 'comment',
       owner: 'securitySolution',
     });
   });
