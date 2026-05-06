@@ -23,6 +23,7 @@ export type {
   InvalidateAgentKeyResponse,
   CreateAgentKeyResponse,
 } from './src/routes/agent_keys';
+export type { UnifiedTracesByIdResponse } from './src/routes/traces';
 export {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,

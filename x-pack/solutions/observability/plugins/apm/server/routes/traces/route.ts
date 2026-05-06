@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import type { Error } from '@kbn/apm-types';
 import { type ErrorsByTraceId, type UnifiedSpanDocument, type TraceRootSpan } from '@kbn/apm-types';
-import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
+import { routeDefinitions, type UnifiedTracesByIdResponse } from '@kbn/apm-api-shared';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -80,31 +79,10 @@ const tracesRoute = createApmServerRoute({
 });
 
 const unifiedTracesByIdRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/unified_traces/{traceId}',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-    }),
-    query: t.intersection([
-      rangeRt,
-      t.partial({
-        serviceName: t.string,
-        entryTransactionId: t.string,
-        ecsOnly: toBooleanRt,
-      }),
-    ]),
-  }),
+  endpoint: routeDefinitions.unifiedTracesById.endpoint,
+  params: routeDefinitions.unifiedTracesById.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    traceItems: TraceItem[];
-    errors: Error[];
-    agentMarks: Record<string, number>;
-    entryTransaction?: Transaction;
-    traceDocsTotal: number;
-    maxTraceItems: number;
-  }> => {
+  handler: async (resources): Promise<UnifiedTracesByIdResponse> => {
     const [apmEventClient, logsClient] = await Promise.all([
       getApmEventClient(resources),
       createLogsClient(resources),

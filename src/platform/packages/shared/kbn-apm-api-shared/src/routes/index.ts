@@ -16,6 +16,7 @@ import {
   invalidateAgentKeyRoute,
   createAgentKeyRoute,
 } from './agent_keys';
+import { unifiedTracesByIdRoute } from './traces';
 import type { BuildRepository } from './types';
 
 export const routeDefinitions = {
@@ -27,6 +28,7 @@ export const routeDefinitions = {
   agentKeysPrivileges: agentKeysPrivilegesRoute,
   invalidateAgentKey: invalidateAgentKeyRoute,
   createAgentKey: createAgentKeyRoute,
+  unifiedTracesById: unifiedTracesByIdRoute,
 };
 
 export type SharedAPMRouteRepository = BuildRepository<typeof routeDefinitions>;
