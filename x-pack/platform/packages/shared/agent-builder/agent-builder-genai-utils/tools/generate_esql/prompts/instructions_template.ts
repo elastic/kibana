@@ -11,10 +11,6 @@ export interface InstructionsTemplateParams {
    */
   defaultLimit?: number;
   /**
-   * The maximum LIMIT to use when the user asks for "all" results.
-   */
-  maxAllLimit?: number;
-  /**
    * If true, omits the instruction to use named parameters (?_tstart, ?_tend)
    * for time range filtering.
    */
@@ -22,7 +18,6 @@ export interface InstructionsTemplateParams {
 }
 
 const DEFAULT_LIMIT = 100;
-const MAX_ALL_LIMIT = 250;
 
 /**
  * Generates ES|QL query generation instructions with configurable limit values.
@@ -30,11 +25,7 @@ const MAX_ALL_LIMIT = 250;
  * custom row limits for Agent Builder's index search tool.
  */
 export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): string => {
-  const {
-    defaultLimit = DEFAULT_LIMIT,
-    maxAllLimit = MAX_ALL_LIMIT,
-    disableNamedParams = false,
-  } = params;
+  const { defaultLimit = DEFAULT_LIMIT, disableNamedParams = false } = params;
 
   return `<instructions>
 
@@ -54,13 +45,25 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
 
     ## Use a safety LIMIT
 
-    1. **LIMIT is Mandatory:** All multi-row queries **must** end with a \`LIMIT\`. The only exception is for single-row aggregations (e.g., \`STATS\` without a \`GROUP BY\`).
+    Adding a \`LIMIT\` is generally good practice: it keeps result sets bounded and protects the
+    caller from oversized responses. Apply the following defaults, but let the user's natural-language
+    query or any custom instructions override them.
 
-    2. **Applying Limits:**
+    1. **Applying Limits:**
         * **User-Specified:** If the user provides a number ("top 10", "get 50"), use it for the \`LIMIT\`.
-        * **Default:** If no number is given, default to \`LIMIT ${defaultLimit}\` for both raw events and \`GROUP BY\` results. Notify the user when you apply this default (e.g., "I've added a \`LIMIT ${defaultLimit}\` for safety.").
+        * **Default:** If no number is given, default to \`LIMIT ${defaultLimit}\` for both raw events and \`GROUP BY\` results.
 
-    3. **Handling "All Data" Requests:** If a user asks for "all" results, apply a safety \`LIMIT ${maxAllLimit}\` and state that this limit was added to protect the system.
+    2. **Time-series aggregations:** Queries that bucket by time (e.g. \`STATS ... BY BUCKET(@timestamp, ...)\`)
+       should **not** have a \`LIMIT\` by default — a trailing \`LIMIT\` truncates the series and
+       produces a partial time line. The \`?_tstart\`/\`?_tend\` range already bounds the result.
+       Only add a \`LIMIT\` here if the user's query explicitly asks for one.
+
+    3. **Single-row aggregations:** Queries using \`STATS\` without a \`GROUP BY\` return a single row and do not need a \`LIMIT\`.
+
+    4. **Opting out:** If the user's query or the custom instructions explicitly ask for no limit
+       (e.g. "return every row", "don't cap the results", "return all data"), omit \`LIMIT\` entirely.
+       Do the same when the caller's instructions indicate the query will be consumed by a system
+       that handles sizing itself (visualizations, exports, downstream aggregations).
 
     ## Don't use tech preview features unless specified otherwise
 
@@ -76,7 +79,7 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     - Queries must be properly formatted, with a carriage return after each function
 
     Example:
-    \`\`\`
+    \`\`\`esql
     FROM logs-*
     | STATS count = COUNT(*) BY log.level
     | SORT count DESC
@@ -94,7 +97,7 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
 
     NEVER hardcode time ranges into the query itself (absolute or using now() syntax)
 
-    Its also prefered to use  "... BUCKET(@timestamp, 50, ?_tstart, ?_tend)" instead of " ... WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend ... BUCKET(@timestamp, 50)"
+    It is also preferred to use  "... BUCKET(@timestamp, 50, ?_tstart, ?_tend)" instead of " ... WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend ... BUCKET(@timestamp, 50)"
 
     `
     }## Do not invent things to please the user
@@ -102,15 +105,6 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     If what the user is asking for is not technically achievable with ES|QL's capabilities, just inform
     the user. DO NOT invent capabilities not described in the documentation just to provide
     a positive answer to the user.
-
-    When converting queries from one language to ES|QL, make sure that the functions are available
-    and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
-
-    ## Tool Usage Restrictions
-
-    **CRITICAL**: Only use the tools that are explicitly defined in your available tool set. Do not call
-    tools from other contexts or systems.
-
 </instructions>
 `;
 };

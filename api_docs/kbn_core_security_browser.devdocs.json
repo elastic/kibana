@@ -127,6 +127,7 @@
                 "lineNumber": 24,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSecurityDelegateContract",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -158,7 +159,14 @@
             "tags": [],
             "label": "authc",
             "description": [
-              "\nThe {@link CoreAuthenticationService | authentication service}"
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-security-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreSecurityBrowserPluginApi",
+                "section": "def-public.CoreAuthenticationService",
+                "text": "authentication service"
+              }
             ],
             "signature": [
               "CoreAuthenticationService"

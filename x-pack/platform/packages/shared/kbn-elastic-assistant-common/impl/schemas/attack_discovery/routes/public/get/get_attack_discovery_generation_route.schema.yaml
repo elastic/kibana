@@ -60,17 +60,20 @@ paths:
                     $ref: '../../../generation.schema.yaml#/components/schemas/AttackDiscoveryGeneration'
                 required:
                   - data
-              example:
-                data:
-                  - id: "c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f"
-                    title: "Suspicious process execution on host-01"
-                generation:
-                  execution_uuid: "2e13f386-46cf-4d65-9e2b-68609e132ba5"
-                  status: "succeeded"
-                  start: "2025-09-29T06:42:08.962Z"
-                  end: "2025-09-29T06:42:44.810Z"
-                  discoveries: 1
-                  alerts_context_count: 50
+              examples:
+                GetAttackDiscoveryGenerationResponse200Example:
+                  summary: Single Attack Discovery generation with its discoveries and metadata.
+                  value:
+                    data:
+                      - id: "c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f"
+                        title: "Suspicious process execution on host-01"
+                    generation:
+                      execution_uuid: "2e13f386-46cf-4d65-9e2b-68609e132ba5"
+                      status: "succeeded"
+                      start: "2025-09-29T06:42:08.962Z"
+                      end: "2025-09-29T06:42:44.810Z"
+                      discoveries: 1
+                      alerts_context_count: 50
         400:
           description: Bad Request response.
           content:
@@ -94,8 +97,11 @@ paths:
                   - status_code
                   - error
                   - message
-              example:
-                status_code: 400
-                error: "Bad Request"
-                message: "Invalid request parameters."
+              examples:
+                GetAttackDiscoveryGenerationResponse400Example:
+                  summary: Bad Request error returned when the get-generation request is invalid.
+                  value:
+                    status_code: 400
+                    error: "Bad Request"
+                    message: "Invalid request parameters."
 

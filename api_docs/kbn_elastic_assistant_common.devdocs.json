@@ -151,6 +151,7 @@
             "lineNumber": 105,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentReferencesStore",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -190,6 +191,7 @@
             "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -293,6 +295,7 @@
             "lineNumber": 17,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "AttackDiscovery",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -553,6 +556,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -590,6 +594,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -648,6 +653,7 @@
             "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "User",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1039,6 +1045,7 @@
             "lineNumber": 12,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "MaybeRawData",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1486,6 +1493,7 @@
             "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentReferenceId",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1570,6 +1578,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Options",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1654,6 +1663,7 @@
             "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentReferenceId",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1764,6 +1774,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentReferencesStore",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2110,6 +2121,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentReferenceId",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2364,6 +2376,7 @@
             "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AttackDiscoveryApiAlert",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2401,6 +2414,7 @@
             "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AttackDiscoveryAlert",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2438,6 +2452,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AttackDiscoveryApiScheduleCreateProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2475,6 +2490,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AttackDiscoveryScheduleCreateProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2512,6 +2528,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AttackDiscoveryApiSchedule",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2549,6 +2566,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AttackDiscoverySchedule",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2586,6 +2604,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AttackDiscoveryApiScheduleUpdateProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2623,6 +2642,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AttackDiscoveryScheduleUpdateProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2660,6 +2680,7 @@
             "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2697,6 +2718,7 @@
             "lineNumber": 28,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "TransformRawDataParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4455,7 +4477,7 @@
         "label": "AttackDiscoveryApiScheduleGeneralAction",
         "description": [],
         "signature": [
-          "{ action_type_id: string; group: string; id: string; params: { [x: string]: unknown; }; uuid?: string | undefined; alerts_filter?: { [x: string]: unknown; } | undefined; frequency?: { summary: boolean; notify_when: any; throttle: any; } | undefined; }"
+          "{ action_type_id: string; group: string; id: string; params: { [x: string]: unknown; }; uuid?: string | undefined; alerts_filter?: { [x: string]: unknown; } | undefined; frequency?: { summary: boolean; notify_when: any; throttle: string | null; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/schedules_api.gen.ts",
         "lineNumber": 165,
@@ -4746,7 +4768,7 @@
         "label": "AttackDiscoveryScheduleGeneralAction",
         "description": [],
         "signature": [
-          "{ actionTypeId: string; group: string; id: string; params: { [x: string]: unknown; }; uuid?: string | undefined; alertsFilter?: { [x: string]: unknown; } | undefined; frequency?: { summary: boolean; notifyWhen: any; throttle: any; } | undefined; }"
+          "{ actionTypeId: string; group: string; id: string; params: { [x: string]: unknown; }; uuid?: string | undefined; alertsFilter?: { [x: string]: unknown; } | undefined; frequency?: { summary: boolean; notifyWhen: any; throttle: string | null; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/routes/public/schedules/schedules.gen.ts",
         "lineNumber": 163,
@@ -5725,7 +5747,7 @@
         "label": "CreateKnowledgeBaseRequestParams",
         "description": [],
         "signature": [
-          "{ [x: string]: unknown; }"
+          "{ resource?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/index.ts",
         "lineNumber": 150,
@@ -5991,7 +6013,7 @@
         "label": "DefendInsightGetResponse",
         "description": [],
         "signature": [
-          "{ data?: any; }"
+          "{ data?: { id: string; updatedAt: string; lastViewedAt: string; createdAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; status: any; endpointIds: string[]; insightType: any; insights: { group: string; events?: { id: string; endpointId: string; value: string; }[] | undefined; remediation?: { [x: string]: unknown; } | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider: any; defaultSystemPromptId?: string | undefined; model?: string | undefined; }; namespace: string; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; eventsContextCount?: number | undefined; replacements?: { [x: string]: string; } | undefined; failureReason?: string | undefined; } | null | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/defend_insights/get_defend_insight_route.gen.ts",
         "lineNumber": 38,
@@ -10358,7 +10380,7 @@
         "label": "ReadKnowledgeBaseRequestParams",
         "description": [],
         "signature": [
-          "{ [x: string]: unknown; }"
+          "{ resource?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/index.ts",
         "lineNumber": 155,
@@ -16866,7 +16888,11 @@
         "description": [],
         "signature": [
           "ZodObject",
-          "<{ [x: string]: any; }, ",
+          "<{ resource: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>"
         ],
@@ -25247,7 +25273,11 @@
         "description": [],
         "signature": [
           "ZodObject",
-          "<{ [x: string]: any; }, ",
+          "<{ resource: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>"
         ],

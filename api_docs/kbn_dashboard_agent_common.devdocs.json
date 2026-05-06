@@ -67,6 +67,7 @@
             "lineNumber": 70,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "DashboardAttachmentData",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -137,6 +138,7 @@
             "lineNumber": 97,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "DashboardState",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -197,6 +199,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "VersionedAttachment",
             "trackAdoption": false,
             "isRequired": true
           }
