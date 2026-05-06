@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest, ElasticsearchClient, Logger, IUiSettingsClient } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  ElasticsearchClient,
+  Logger,
+  IUiSettingsClient,
+} from '@kbn/core/server';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
@@ -38,7 +43,13 @@ export const loadDefaultConnector = async ({
 
   if (defaultConnectorId && defaultConnectorId !== NO_DEFAULT_CONNECTOR) {
     try {
-      return await getConnectorById({ connectorId: defaultConnectorId, actions, request, esClient, logger });
+      return await getConnectorById({
+        connectorId: defaultConnectorId,
+        actions,
+        request,
+        esClient,
+        logger,
+      });
     } catch {
       // configured default doesn't exist, fall through
     }

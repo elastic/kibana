@@ -48,7 +48,8 @@ describe('loadDefaultConnector', () => {
     actions = actionsMock.createStart();
     request = httpServerMock.createKibanaRequest();
     uiSettingsClient.get.mockImplementation((key: string) => {
-      if (key === 'genAiSettings:defaultAIConnector') return Promise.resolve('NO_DEFAULT_CONNECTOR');
+      if (key === 'genAiSettings:defaultAIConnector')
+        return Promise.resolve('NO_DEFAULT_CONNECTOR');
       if (key === 'genAiSettings:defaultAIConnectorOnly') return Promise.resolve(false);
       return Promise.resolve(undefined);
     });
@@ -61,7 +62,10 @@ describe('loadDefaultConnector', () => {
   });
 
   it('returns the connector matching the uiSettings default connector', async () => {
-    const connector = createConnector({ connectorId: 'bedrock-1', type: InferenceConnectorType.Bedrock });
+    const connector = createConnector({
+      connectorId: 'bedrock-1',
+      type: InferenceConnectorType.Bedrock,
+    });
     uiSettingsClient.get.mockImplementation((key: string) => {
       if (key === 'genAiSettings:defaultAIConnector') return Promise.resolve('bedrock-1');
       if (key === 'genAiSettings:defaultAIConnectorOnly') return Promise.resolve(false);
@@ -69,7 +73,13 @@ describe('loadDefaultConnector', () => {
     });
     getConnectorByIdMock.mockResolvedValue(connector);
 
-    const result = await loadDefaultConnector({ actions, request, esClient, uiSettingsClient, logger });
+    const result = await loadDefaultConnector({
+      actions,
+      request,
+      esClient,
+      uiSettingsClient,
+      logger,
+    });
 
     expect(result).toBe(connector);
     expect(getConnectorByIdMock).toHaveBeenCalledWith(
@@ -91,7 +101,13 @@ describe('loadDefaultConnector', () => {
       .mockRejectedValueOnce(new Error('not found'))
       .mockResolvedValueOnce(kibanaDefault);
 
-    const result = await loadDefaultConnector({ actions, request, esClient, uiSettingsClient, logger });
+    const result = await loadDefaultConnector({
+      actions,
+      request,
+      esClient,
+      uiSettingsClient,
+      logger,
+    });
 
     expect(result).toBe(kibanaDefault);
   });
@@ -103,7 +119,13 @@ describe('loadDefaultConnector', () => {
     });
     getConnectorByIdMock.mockResolvedValue(kibanaDefault);
 
-    const result = await loadDefaultConnector({ actions, request, esClient, uiSettingsClient, logger });
+    const result = await loadDefaultConnector({
+      actions,
+      request,
+      esClient,
+      uiSettingsClient,
+      logger,
+    });
 
     expect(result).toBe(kibanaDefault);
     expect(getConnectorByIdMock).toHaveBeenCalledWith(
@@ -114,26 +136,42 @@ describe('loadDefaultConnector', () => {
   });
 
   it('returns the first connector when the kibana-wide default does not exist', async () => {
-    const firstConnector = createConnector({ connectorId: 'first', type: InferenceConnectorType.Bedrock });
+    const firstConnector = createConnector({
+      connectorId: 'first',
+      type: InferenceConnectorType.Bedrock,
+    });
     getConnectorByIdMock.mockRejectedValue(new Error('not found'));
     getConnectorListMock.mockResolvedValue([
       firstConnector,
       createConnector({ connectorId: 'second', type: InferenceConnectorType.OpenAI }),
     ]);
 
-    const result = await loadDefaultConnector({ actions, request, esClient, uiSettingsClient, logger });
+    const result = await loadDefaultConnector({
+      actions,
+      request,
+      esClient,
+      uiSettingsClient,
+      logger,
+    });
 
     expect(result).toBe(firstConnector);
   });
 
   it('returns undefined when defaultOnly is true and no uiSettings default is configured', async () => {
     uiSettingsClient.get.mockImplementation((key: string) => {
-      if (key === 'genAiSettings:defaultAIConnector') return Promise.resolve('NO_DEFAULT_CONNECTOR');
+      if (key === 'genAiSettings:defaultAIConnector')
+        return Promise.resolve('NO_DEFAULT_CONNECTOR');
       if (key === 'genAiSettings:defaultAIConnectorOnly') return Promise.resolve(true);
       return Promise.resolve(undefined);
     });
 
-    const result = await loadDefaultConnector({ actions, request, esClient, uiSettingsClient, logger });
+    const result = await loadDefaultConnector({
+      actions,
+      request,
+      esClient,
+      uiSettingsClient,
+      logger,
+    });
 
     expect(result).toBeUndefined();
     expect(getConnectorByIdMock).not.toHaveBeenCalled();
@@ -148,13 +186,22 @@ describe('loadDefaultConnector', () => {
     });
     getConnectorByIdMock.mockRejectedValue(new Error('not found'));
 
-    const result = await loadDefaultConnector({ actions, request, esClient, uiSettingsClient, logger });
+    const result = await loadDefaultConnector({
+      actions,
+      request,
+      esClient,
+      uiSettingsClient,
+      logger,
+    });
 
     expect(result).toBeUndefined();
   });
 
   it('returns the uiSettings default even when defaultOnly is true', async () => {
-    const connector = createConnector({ connectorId: 'bedrock-1', type: InferenceConnectorType.Bedrock });
+    const connector = createConnector({
+      connectorId: 'bedrock-1',
+      type: InferenceConnectorType.Bedrock,
+    });
     uiSettingsClient.get.mockImplementation((key: string) => {
       if (key === 'genAiSettings:defaultAIConnector') return Promise.resolve('bedrock-1');
       if (key === 'genAiSettings:defaultAIConnectorOnly') return Promise.resolve(true);
@@ -162,7 +209,13 @@ describe('loadDefaultConnector', () => {
     });
     getConnectorByIdMock.mockResolvedValue(connector);
 
-    const result = await loadDefaultConnector({ actions, request, esClient, uiSettingsClient, logger });
+    const result = await loadDefaultConnector({
+      actions,
+      request,
+      esClient,
+      uiSettingsClient,
+      logger,
+    });
 
     expect(result).toBe(connector);
   });
@@ -171,7 +224,13 @@ describe('loadDefaultConnector', () => {
     getConnectorByIdMock.mockRejectedValue(new Error('not found'));
     getConnectorListMock.mockResolvedValue([]);
 
-    const result = await loadDefaultConnector({ actions, request, esClient, uiSettingsClient, logger });
+    const result = await loadDefaultConnector({
+      actions,
+      request,
+      esClient,
+      uiSettingsClient,
+      logger,
+    });
 
     expect(result).toBeUndefined();
   });
