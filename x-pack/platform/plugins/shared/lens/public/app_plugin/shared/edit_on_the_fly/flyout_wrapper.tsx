@@ -219,6 +219,7 @@ export const FlyoutWrapper = ({
                     onClick={onApply}
                     fill
                     disabled={!isSaveable}
+                    hasAriaDisabled
                     iconType="check"
                     data-test-subj="applyFlyoutButton"
                   >

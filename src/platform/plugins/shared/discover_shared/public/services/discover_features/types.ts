@@ -44,9 +44,17 @@ export interface ObservabilityStreamsFeatureRenderDeps {
   renderCpsWarning?: boolean;
 }
 
+export interface ObservabilityStreamsFeatureRenderByStreamNameDeps {
+  streamName: string;
+  renderCpsWarning?: boolean;
+}
+
 export interface ObservabilityStreamsFeature {
   id: 'streams';
   renderFlyoutStreamField: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
+  renderFlyoutStreamFieldByStreamName: (
+    deps: ObservabilityStreamsFeatureRenderByStreamNameDeps
+  ) => JSX.Element;
   renderFlyoutStreamProcessingLink: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
 }
 
@@ -135,11 +143,29 @@ export interface SecuritySolutionAlertFlyoutFooterFeature {
   renderFooter: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
 }
 
+export interface SecuritySolutionIOCFlyoutOverviewTabFeature {
+  id: 'security-solution-ioc-flyout-overview-tab';
+  render: (props: DocViewRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionIOCFlyoutHeaderFeature {
+  id: 'security-solution-ioc-flyout-header';
+  renderHeader: (props: DocViewRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionIOCFlyoutFooterFeature {
+  id: 'security-solution-ioc-flyout-footer';
+  renderFooter: (props: DocViewRenderProps) => JSX.Element;
+}
+
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
   | SecuritySolutionAlertFlyoutOverviewTabFeature
   | SecuritySolutionAlertFlyoutHeaderTitleFeature
-  | SecuritySolutionAlertFlyoutFooterFeature;
+  | SecuritySolutionAlertFlyoutFooterFeature
+  | SecuritySolutionIOCFlyoutOverviewTabFeature
+  | SecuritySolutionIOCFlyoutHeaderFeature
+  | SecuritySolutionIOCFlyoutFooterFeature;
 
 /** ****************************************************************************************/
 

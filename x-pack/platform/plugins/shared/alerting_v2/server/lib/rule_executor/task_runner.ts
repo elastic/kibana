@@ -6,6 +6,7 @@
  */
 
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { inject, injectable } from 'inversify';
 import { v4 as uuidV4 } from 'uuid';
 
@@ -34,6 +35,10 @@ import {
   RuleExecutionMetricsCollector,
   type RuleExecutionMetricsSnapshot,
 } from './metrics_collector';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 
@@ -56,7 +61,8 @@ export class RuleExecutorTaskRunner {
 
   constructor(
     @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract,
-    @inject(EventLogServiceToken) eventLogService: EventLogServiceContract
+    @inject(EventLogServiceToken) eventLogService: EventLogServiceContract,
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {
     this.eventLogger = new RuleExecutorEventLogger(eventLogService);
   }
@@ -275,6 +281,14 @@ export class RuleExecutorTaskRunner {
       return { state: {} };
     }
 
+    if (result.haltReason === 'rule_deleted') {
+      const params = taskInstance.params as RuleExecutorTaskParams;
+      this.logger.debug({
+        message: `Rule "${params.ruleId}" in the "${params.spaceId}" space no longer exists. Its corresponding task will be removed by Task Manager.`,
+      });
+      throwUnrecoverableError(new Error('Rule no longer exists'));
+    }
+
     return { state: this.getStateForHaltReason(taskInstance, result.haltReason) };
   }
 
@@ -286,7 +300,6 @@ export class RuleExecutorTaskRunner {
     reason?: HaltReason
   ): Record<string, unknown> {
     switch (reason) {
-      case 'rule_deleted':
       case 'rule_disabled':
         return taskInstance.state ?? {};
       default:

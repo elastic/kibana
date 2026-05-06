@@ -21,6 +21,8 @@ import dedent from 'dedent';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { writeFileSync } from 'node:fs';
 import path from 'path';
+import { findPackageForPath } from '@kbn/repo-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { TestTrackLoad } from '../execution/test_track';
 import { TestTrack } from '../execution/test_track';
 
@@ -64,6 +66,7 @@ export function identifyTestLoads(
   scoutCIConfig: ScoutCIConfig,
   testConfigStats: ScoutTestConfigStats,
   testTarget: ScoutTestTarget,
+  moduleIDs: Set<string>,
   log: ToolingLog
 ): ScoutCITestLoad[] {
   const testLoads = testConfigs.all
@@ -73,6 +76,11 @@ export function identifyTestLoads(
         return test.tags.includes(testTarget.playwrightTag);
       })
     )
+    .filter((config) => {
+      if (moduleIDs.size === 0) return true;
+      const resolvedModuleID = findPackageForPath(REPO_ROOT, config.path)?.id;
+      return resolvedModuleID ? moduleIDs.has(resolvedModuleID) : false;
+    })
     .map((config) => {
       let enabled: boolean;
       switch (config.module.type) {
@@ -413,6 +421,7 @@ export const createTestTracks: Command<void> = {
       'targetRuntimeMinutes',
       'minRuntimeMinutes',
       'estimatedLaneSetupMinutes',
+      'moduleFilterPath',
     ],
     boolean: ['showIndividualTrackSummaries', 'showMultiTrackSummary'],
     default: {
@@ -426,9 +435,35 @@ export const createTestTracks: Command<void> = {
     --estimatedLaneSetupMinutes     (optional)  How long a lane setup is expected to take
     --showIndividualTrackSummaries  (optional)  Display individual test track summaries
     --showMultiTrackSummary         (optional)  Display multi-track summary
+    --moduleFilterPath              (optional)  Path to a JSON file of @kbn/ module IDs; only configs belonging to those modules will be distributed
     `,
   },
   run: async ({ flagsReader, log }) => {
+    const moduleIds: Set<string> = new Set();
+    const moduleFilterPath = flagsReader.string('moduleFilterPath');
+
+    if (moduleFilterPath) {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(readFileSync(moduleFilterPath, 'utf-8'));
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        throw createFlagError(
+          `Failed to read '${moduleFilterPath}': ${message}. ` +
+            `Ensure the file exists and is a valid JSON array of @kbn/ module IDs.`
+        );
+      }
+
+      if (!Array.isArray(parsed)) {
+        throw createFlagError(`Expected '${moduleFilterPath}' to contain a JSON array.`);
+      }
+
+      parsed.forEach((id) => moduleIds.add(id));
+      log.info(
+        `Limiting test load selection to the following modules: ${Array.from(moduleIds).join(', ')}`
+      );
+    }
+
     const selectedTestTargets: ScoutTestTarget[] = flagsReader
       .requiredArrayOfStrings('testTarget')
       .map(ScoutTestTarget.fromTag);
@@ -452,7 +487,10 @@ export const createTestTracks: Command<void> = {
     const scoutCIConfig = loadScoutCIConfig();
 
     const testLoadsByTarget = selectedTestTargets.reduce((loadsByTarget, target) => {
-      loadsByTarget.set(target, identifyTestLoads(scoutCIConfig, testConfigStats, target, log));
+      loadsByTarget.set(
+        target,
+        identifyTestLoads(scoutCIConfig, testConfigStats, target, moduleIds, log)
+      );
       return loadsByTarget;
     }, new Map<ScoutTestTarget, ScoutCITestLoad[]>());
 
