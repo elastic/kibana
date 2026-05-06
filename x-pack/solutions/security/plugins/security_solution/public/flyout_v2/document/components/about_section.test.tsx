@@ -12,6 +12,30 @@ import React from 'react';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ABOUT_SECTION_TEST_ID, ABOUT_SECTION_TITLE, AboutSection } from './about_section';
 
+jest.mock('../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      overlays: {
+        openSystemFlyout: jest.fn(),
+      },
+    },
+  }),
+}));
+
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useStore: () => ({}),
+}));
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({ push: jest.fn() }),
+}));
+
+jest.mock('../../shared/hooks/use_default_flyout_properties', () => ({
+  useDefaultDocumentFlyoutProperties: () => ({ size: 'm' }),
+}));
+
 jest.mock('./alert_description', () => ({
   AlertDescription: () => <div>{'AlertDescription'}</div>,
 }));
