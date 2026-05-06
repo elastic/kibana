@@ -90,7 +90,6 @@ mapped_pages:
 | [visDefaultEditor](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_default_editor/README.md) | The default editor is used in most primary visualizations, e.x. Area, Data table, Pie, etc. It acts as a container for a particular visualization and options tabs. Contains the default "Data" tab in public/components/sidebar/data_tab.tsx. The plugin exposes the static DefaultEditorController class to consume. |
 | [visTypeGauge](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/gauge) | WARNING: Missing or empty README. |
 | [visTypeHeatmap](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/heatmap) | WARNING: Missing or empty README. |
-| [visTypeMarkdown](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_type_markdown/README.md) | The markdown visualization that can be used to place text panels on dashboards. |
 | [visTypeMetric](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/metric) | WARNING: Missing or empty README. |
 | [visTypePie](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/pie) | WARNING: Missing or empty README. |
 | [visTypeTable](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/table/README.md) | Contains the data table visualization, that allows presenting data in a simple table format. |
@@ -113,6 +112,7 @@ mapped_pages:
 | [actions](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/actions/README.md) | The Kibana actions plugin provides a framework to create executable actions. You can: |
 | [agentBuilder](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder/README.md) | Home of the Agent Builder framework. |
 | [agentBuilderPlatform](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder_platform/README.md) | Contains the platform-owned agent builder entities |
+| [agentContextLayer](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_context_layer/README.md) | The Agent Context Layer plugin provides a centralized service for indexing, crawling, and searching Kibana assets (visualizations, dashboards, connectors, workflows, etc.) via the Semantic Metadata Layer (SML). |
 | [aiops](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/aiops/README.md) | The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team. |
 | [alerting](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/alerting/README.md) | The Kibana Alerting plugin provides a common place to set up rules. You can: |
 | [alertingVTwo](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/alerting_v2/README.md) | Alerting v2 is an ES\|QL-first, append-only alerting plugin. It owns the rule model, rule execution runtime, alert lifecycle tracking, notification policies, alert actions, and the management UI used to work with all of them. |

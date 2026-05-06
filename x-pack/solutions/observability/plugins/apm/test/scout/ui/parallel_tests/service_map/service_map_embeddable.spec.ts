@@ -46,11 +46,13 @@ test.describe(
       pageObjects,
     }) => {
       await test.step('open a new dashboard', async () => {
-        await pageObjects.dashboard.openNewDashboard();
+        await pageObjects.dashboard.openNewDashboard({ timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('set time range to last 1 hour to ensure test data is visible', async () => {
         await pageObjects.datePicker.setCommonlyUsedTime('Last_1_hour');
+        await expect(page.getByTestId('dateRangePickerControlButton')).toContainText('Last 1 hour');
+        await page.getByTestId('dateRangePickerControlButton').blur();
       });
 
       await test.step('open add panel flyout', async () => {
@@ -58,7 +60,7 @@ test.describe(
       });
 
       await test.step('add Service map panel with filters', async () => {
-        await expect(page.getByRole('heading', { name: 'Add panel' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Add to Dashboard' })).toBeVisible();
         const serviceMapMenuItem = page.getByRole('menuitem', {
           name: 'Service map',
           exact: true,
@@ -73,21 +75,19 @@ test.describe(
         // before interaction (see `euiLoadingSpinner` + `state: 'hidden'`).
         const serviceNameCombo = page.testSubj.locator('apmServiceMapEditorServiceNameComboBox');
         const environmentCombo = page.testSubj.locator('apmServiceMapEditorEnvironmentComboBox');
-        await Promise.all([
-          serviceNameCombo
-            .locator('.euiLoadingSpinner')
-            .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT }),
-          environmentCombo
-            .locator('.euiLoadingSpinner')
-            .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT }),
-        ]);
+        await serviceNameCombo
+          .locator('.euiLoadingSpinner')
+          .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+        await environmentCombo
+          .locator('.euiLoadingSpinner')
+          .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
 
         // Select service name from dropdown
         const serviceNameComboBox = new EuiComboBoxWrapper(
           page,
           'apmServiceMapEditorServiceNameComboBox'
         );
-        await serviceNameComboBox.selectSingleOption(SERVICE_MAP_TEST_SERVICE);
+        await serviceNameComboBox.selectSingleOption(SERVICE_MAP_TEST_SERVICE, { useFill: true });
 
         // Select environment from dropdown (has a default value so manually type and select)
         const environmentInput = page.testSubj
@@ -145,6 +145,9 @@ test.describe(
 
         const popoverTitle = page.testSubj.locator('serviceMapPopoverTitle');
         await expect(popoverTitle).toHaveText(SERVICE_MAP_TEST_SERVICE);
+
+        await page.keyboard.press('Escape');
+        await expect(popoverTitle).toBeHidden();
       });
 
       await test.step('maximize the Service map panel', async () => {
