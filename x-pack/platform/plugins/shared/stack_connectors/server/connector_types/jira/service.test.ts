@@ -426,7 +426,6 @@ describe('Jira service', () => {
             '[Action][Jira]: Unable to create incident. Error: An error has occurred. Reason: Required field',
         })
       );
-      expect(getErrorSource(error)).not.toBe(TaskErrorSource.USER);
     });
 
     test('it should throw if the request is not a JSON', async () => {
@@ -447,9 +446,12 @@ describe('Jira service', () => {
       );
     });
 
-    test('it should throw a user error on 400 response', async () => {
+    test('it should throw a user error on 400 response with field validation errors', async () => {
       const mockError: ResponseError = new Error('Request failed with status code 400');
-      mockError.response = { status: 400, data: { errors: {}, errorMessages: [] } };
+      mockError.response = {
+        status: 400,
+        data: { errors: { summary: "Summary can't exceed 255 characters" }, errorMessages: [] },
+      };
       requestMock.mockRejectedValue(mockError);
 
       const error = await service.createIncident(incident).catch((err) => err);
@@ -584,7 +586,6 @@ describe('Jira service', () => {
             '[Action][Jira]: Unable to update incident with id 1. Error: An error has occurred. Reason: Required field',
         })
       );
-      expect(getErrorSource(error)).not.toBe(TaskErrorSource.USER);
     });
 
     test('it should throw if the request is not a JSON', async () => {
@@ -595,17 +596,6 @@ describe('Jira service', () => {
       await expect(service.updateIncident(incident)).rejects.toThrow(
         '[Action][Jira]: Unable to update incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
-    });
-
-    test('it should throw a user error on 400 response', async () => {
-      const mockError: ResponseError = new Error('Request failed with status code 400');
-      mockError.response = { status: 400, data: { errors: {}, errorMessages: [] } };
-      requestMock.mockRejectedValue(mockError);
-
-      const error = await service.updateIncident(incident).catch((err) => err);
-
-      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
-      expect(error.message).toMatch(/Unable to update incident/);
     });
 
     describe('otherFields', () => {

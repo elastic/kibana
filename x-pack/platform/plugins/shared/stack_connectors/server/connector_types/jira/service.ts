@@ -6,7 +6,6 @@
  */
 
 import axios from 'axios';
-import type { AxiosResponse } from 'axios';
 import { isEmpty } from 'lodash';
 
 import type { Logger } from '@kbn/core/server';
@@ -225,9 +224,8 @@ export const createExternalService = (
       issueType,
     });
 
-    let res: AxiosResponse<{ id: string }>;
     try {
-      res = await request({
+      const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}`,
         logger,
@@ -243,6 +241,15 @@ export const createExternalService = (
         res,
         requiredAttributesToBeInTheResponse: ['id'],
       });
+
+      const updatedIncident = await getIncident(res.data.id);
+
+      return {
+        title: updatedIncident.key,
+        id: updatedIncident.id,
+        pushedDate: new Date(updatedIncident.created).toISOString(),
+        url: getIncidentViewURL(updatedIncident.key),
+      };
     } catch (error) {
       error.message = getErrorMessage(
         CONNECTOR_NAME,
@@ -251,21 +258,15 @@ export const createExternalService = (
         )}`
       );
 
-      if (error?.response?.status === 400) {
+      if (
+        error?.response?.status === 400 &&
+        error.response?.data?.errors?.summary === "Summary can't exceed 255 characters"
+      ) {
         throw createTaskRunError(error, TaskErrorSource.USER);
       }
 
       throw error;
     }
-
-    const updatedIncident = await getIncident(res.data.id);
-
-    return {
-      title: updatedIncident.key,
-      id: updatedIncident.id,
-      pushedDate: new Date(updatedIncident.created).toISOString(),
-      url: getIncidentViewURL(updatedIncident.key),
-    };
   };
 
   const updateIncident = async ({
@@ -293,6 +294,15 @@ export const createExternalService = (
       throwIfResponseIsNotValid({
         res,
       });
+
+      const updatedIncident = await getIncident(incidentId as string);
+
+      return {
+        title: updatedIncident.key,
+        id: updatedIncident.id,
+        pushedDate: new Date(updatedIncident.updated).toISOString(),
+        url: getIncidentViewURL(updatedIncident.key),
+      };
     } catch (error) {
       error.message = getErrorMessage(
         CONNECTOR_NAME,
@@ -301,21 +311,8 @@ export const createExternalService = (
         }. Reason: ${createErrorMessage(error.response?.data)}`
       );
 
-      if (error?.response?.status === 400) {
-        throw createTaskRunError(error, TaskErrorSource.USER);
-      }
-
       throw error;
     }
-
-    const updatedIncident = await getIncident(incidentId as string);
-
-    return {
-      title: updatedIncident.key,
-      id: updatedIncident.id,
-      pushedDate: new Date(updatedIncident.updated).toISOString(),
-      url: getIncidentViewURL(updatedIncident.key),
-    };
   };
 
   const createComment = async ({

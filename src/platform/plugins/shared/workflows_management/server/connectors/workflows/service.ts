@@ -12,7 +12,6 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { AlertRuleTriggerSchema } from '@kbn/workflows';
 import type { TriggerType } from '@kbn/workflows';
 import type {
   ExternalService,
@@ -76,9 +75,8 @@ export const createExternalService = (
         status: 'executed',
       };
     } catch (error) {
-      const errorMessage = typeof error?.message === 'string' ? error.message : String(error);
-      logger.error(`Error running workflow ${workflowId}: ${errorMessage}`);
-      if (typeof error?.message === 'string' && error.message.startsWith('Workflow is disabled:')) {
+      logger.error(`Error running workflow ${workflowId}: ${error?.message}`);
+      if (error?.message?.startsWith('Workflow is disabled:')) {
         throw createTaskRunError(
           createServiceError(error, `Unable to run workflow ${workflowId}`),
           TaskErrorSource.USER
@@ -108,7 +106,7 @@ export const createExternalService = (
         workflowId,
         spaceId,
         inputs,
-        triggeredBy ?? AlertRuleTriggerSchema.shape.type.value,
+        triggeredBy ?? 'alert',
         request
       );
 
@@ -120,9 +118,8 @@ export const createExternalService = (
 
       return workflowRunId;
     } catch (error) {
-      const errorMessage = typeof error?.message === 'string' ? error.message : String(error);
-      logger.error(`Error scheduling workflow ${workflowId}: ${errorMessage}`);
-      if (typeof error?.message === 'string' && error.message.startsWith('Workflow is disabled:')) {
+      logger.error(`Error scheduling workflow ${workflowId}: ${error?.message}`);
+      if (error?.message?.startsWith('Workflow is disabled:')) {
         throw createTaskRunError(
           createServiceError(error, `Unable to schedule workflow ${workflowId}`),
           TaskErrorSource.USER
