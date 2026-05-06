@@ -13,6 +13,20 @@ import { expect } from '@kbn/scout/ui';
 import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
 
 const getExpected = (config: ScoutTestConfig) => {
+  if (config.serverless && config.projectType === 'es') {
+    return {
+      groups: [
+        'visualizationsGroup',
+        'controlsGroup',
+        'annotation-and-navigationGroup',
+        'mlGroup',
+        'logs-aiopsGroup',
+        'legacyGroup',
+      ],
+      count: 27,
+    };
+  }
+
   return {
     groups: [
       'visualizationsGroup',
@@ -73,7 +87,7 @@ spaceTest.describe(
 
       await spaceTest.step('verify panel groups', async () => {
         const groups = await pageObjects.dashboard.getAddPanelFlyoutGroups();
-        expect(groups).toEqual(expectedGroups);
+        expect(groups).toStrictEqual(expectedGroups);
       });
 
       await spaceTest.step('verify total panel count', async () => {
