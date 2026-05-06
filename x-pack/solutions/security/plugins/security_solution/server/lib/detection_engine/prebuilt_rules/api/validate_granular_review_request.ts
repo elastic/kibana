@@ -15,12 +15,10 @@ import {
 interface GranularReviewRequestBody {
   filter?: GranularRulesFilter;
   search?: { term: string; mode?: string };
-  aggregations?: { counts?: readonly string[] };
+  aggregations?: { counts?: string[] };
 }
 
-export const validateGranularReviewRequestBody = (
-  body: GranularReviewRequestBody
-): string[] => {
+export const validateGranularReviewRequestBody = (body: GranularReviewRequestBody): string[] => {
   const errors: string[] = [];
 
   if (body.search != null && body.search.term.length > MAX_SEARCH_RULES_SEARCH_TERM_LENGTH) {
