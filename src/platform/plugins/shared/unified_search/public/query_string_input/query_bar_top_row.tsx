@@ -43,6 +43,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiIconTip,
+  EuiSplitButton,
   useEuiTheme,
   type EuiTimeZoneDisplayProps,
 } from '@elastic/eui';
@@ -53,7 +54,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SplitButton } from '@kbn/split-button';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
@@ -74,8 +74,6 @@ import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
 
 /** Feature flag key for the new DateRangePicker. Falls back to `true` (new picker). */
 const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
-
-const BUTTON_MIN_WIDTH = 108;
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -827,7 +825,6 @@ export const QueryBarTopRow = React.memo(
               onChange={onDateRangeChange}
               onInputChange={onDateRangeInputChange}
               isInvalid={isDateRangeInvalid}
-              isLoading={props.isLoading}
               disabled={props.isDisabled || noTimeFieldNameDisabled}
               width="auto"
               compressed
@@ -864,25 +861,27 @@ export const QueryBarTopRow = React.memo(
 
       if (props.useBackgroundSearchButton) {
         return (
-          <SplitButton
-            aria-label={buttonLabelCancel}
-            color="text"
-            data-test-subj="queryCancelButton"
-            iconType="cross"
-            isMainButtonLoading={isCancelling}
-            isDisabled={isCancelling}
-            isSecondaryButtonDisabled={!canSendToBackground}
-            isSecondaryButtonLoading={isSendingToBackground}
-            onClick={onClickCancelButton}
-            onSecondaryButtonClick={onClickSendToBackground}
-            secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-            secondaryButtonIcon="backgroundTask"
-            secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-            size="s"
-            minWidth={BUTTON_MIN_WIDTH}
-          >
-            {buttonLabelCancel}
-          </SplitButton>
+          <EuiSplitButton color="text" size="s">
+            <EuiSplitButton.ActionPrimary
+              aria-label={buttonLabelCancel}
+              iconType="cross"
+              isLoading={isCancelling}
+              isDisabled={isCancelling}
+              onClick={onClickCancelButton}
+              data-test-subj="queryCancelButton"
+            >
+              {buttonLabelCancel}
+            </EuiSplitButton.ActionPrimary>
+            <EuiSplitButton.ActionSecondary
+              isLoading={isSendingToBackground}
+              isDisabled={!canSendToBackground}
+              onClick={onClickSendToBackground}
+              title={strings.getSendToBackgroundLabel()}
+              aria-label={strings.getSendToBackgroundLabel()}
+              iconType="backgroundTask"
+              data-test-subj="queryCancelButton-secondary-button"
+            />
+          </EuiSplitButton>
         );
       }
 
@@ -956,25 +955,27 @@ export const QueryBarTopRow = React.memo(
       } = getSubmitButtonProps();
 
       const updateButton = props.useBackgroundSearchButton ? (
-        <SplitButton
-          aria-label={buttonAriaLabel}
-          color={buttonColor}
-          data-test-subj="querySubmitButton"
-          iconType={buttonIcon}
-          isDisabled={isDateRangeInvalid || props.isDisabled}
-          isLoading={props.isLoading}
-          isSecondaryButtonDisabled={!canSendToBackground}
-          isSecondaryButtonLoading={isSendingToBackground}
-          onClick={onClickSubmitButton}
-          onSecondaryButtonClick={onClickSendToBackground}
-          secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-          secondaryButtonIcon="backgroundTask"
-          secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-          size="s"
-          minWidth={BUTTON_MIN_WIDTH}
-        >
-          {buttonText}
-        </SplitButton>
+        <EuiSplitButton color={buttonColor} size="s">
+          <EuiSplitButton.ActionPrimary
+            iconType={buttonIcon}
+            isLoading={props.isLoading}
+            isDisabled={isDateRangeInvalid || props.isDisabled}
+            onClick={onClickSubmitButton}
+            aria-label={buttonAriaLabel}
+            data-test-subj="querySubmitButton"
+          >
+            {buttonText}
+          </EuiSplitButton.ActionPrimary>
+          <EuiSplitButton.ActionSecondary
+            iconType="backgroundTask"
+            isLoading={isSendingToBackground}
+            isDisabled={!canSendToBackground}
+            onClick={onClickSendToBackground}
+            title={strings.getSendToBackgroundLabel()}
+            aria-label={strings.getSendToBackgroundLabel()}
+            data-test-subj="querySubmitButton-secondary-button"
+          />
+        </EuiSplitButton>
       ) : (
         <EuiSuperUpdateButton
           iconType={buttonIcon}
@@ -1254,10 +1255,12 @@ export const QueryBarTopRow = React.memo(
                 {/* Optional wrapper for the ES|QL controls elements */}
                 {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
                   <EuiFlexItem
-                    grow={false}
+                    grow={true}
                     css={css`
+                      min-width: 0;
                       @media (max-width: ${euiTheme.breakpoint.xl}px) {
                         order: 1;
+                        flex-basis: 100%;
                       }
                     `}
                   >
