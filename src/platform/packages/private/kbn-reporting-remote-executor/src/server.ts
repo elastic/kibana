@@ -13,6 +13,8 @@ import type { TaskRunMetrics, TaskRunResult } from '@kbn/reporting-common/types'
 import { PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { PNG_JOB_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
+import type { ResolvedScreenshot } from './chromium_render';
+import { chromiumRenderPdf, chromiumRenderPng } from './chromium_render';
 import { REPORTING_REMOTE_EXECUTE_METADATA_SEPARATOR } from './protocol';
 
 interface ReportingRemoteExecuteHttpRequest {
@@ -22,10 +24,6 @@ interface ReportingRemoteExecuteHttpRequest {
   readonly forwardHeaders: Record<string, string>;
 }
 
-/*
- * Minimal valid PDF / PNG payloads for integration testing only.
- * Replace with real Chromium rendering that honors forwardHeaders + resolvedScreenshots.
- */
 const MINIMAL_TEST_PDF = Buffer.from(
   [
     '%PDF-1.4',
@@ -80,6 +78,50 @@ async function readJsonBody(req: http.IncomingMessage): Promise<ReportingRemoteE
   }
 }
 
+function getLayoutDimensions(
+  payload: unknown
+): { width?: number; height?: number } | undefined {
+  if (!payload || typeof payload !== 'object') {
+    return undefined;
+  }
+  const layout = (payload as Record<string, unknown>).layout;
+  if (!layout || typeof layout !== 'object') {
+    return undefined;
+  }
+  const dimensions = (layout as Record<string, unknown>).dimensions;
+  if (!dimensions || typeof dimensions !== 'object') {
+    return undefined;
+  }
+  return dimensions as { width?: number; height?: number };
+}
+
+function getResolvedScreenshots(payload: unknown): ResolvedScreenshot[] | undefined {
+  if (!payload || typeof payload !== 'object') {
+    return undefined;
+  }
+  const raw = (payload as Record<string, unknown>).resolvedScreenshots;
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return undefined;
+  }
+
+  const out: ResolvedScreenshot[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') {
+      continue;
+    }
+    const redirectUrl = (item as Record<string, unknown>).redirectUrl;
+    if (typeof redirectUrl !== 'string' || redirectUrl.length === 0) {
+      continue;
+    }
+    out.push({
+      redirectUrl,
+      locatorParams: (item as Record<string, unknown>).locatorParams,
+    });
+  }
+
+  return out.length ? out : undefined;
+}
+
 function stubExport(jobtype: string): { bytes: Buffer; metadata: TaskRunResult } {
   let metrics: TaskRunMetrics;
 
@@ -117,6 +159,76 @@ function stubExport(jobtype: string): { bytes: Buffer; metadata: TaskRunResult }
   );
 }
 
+function navigationTimeoutMs(): number {
+  const raw = process.env.REPORTING_REMOTE_EXECUTOR_NAV_TIMEOUT_MS;
+  if (!raw) {
+    return 180_000;
+  }
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 180_000;
+}
+
+async function produceExport(
+  body: ReportingRemoteExecuteHttpRequest
+): Promise<{ bytes: Buffer; metadata: TaskRunResult }> {
+  const renderMode = process.env.REPORTING_REMOTE_EXECUTOR_RENDER ?? 'stub';
+
+  if (renderMode === 'chromium') {
+    const resolvedScreenshots = getResolvedScreenshots(body.executionPayload);
+    if (!resolvedScreenshots) {
+      throw Object.assign(
+        new Error(
+          'Chromium rendering requires executionPayload.resolvedScreenshots (forwarded from Kibana).'
+        ),
+        { statusCode: 400 }
+      );
+    }
+
+    const layoutDimensions = getLayoutDimensions(body.executionPayload);
+    const timeoutMs = navigationTimeoutMs();
+    const forwardHeaders = body.forwardHeaders ?? {};
+
+    if (body.jobtype === PDF_JOB_TYPE_V2) {
+      const { buffer, pages } = await chromiumRenderPdf({
+        forwardHeaders,
+        resolvedScreenshots,
+        layoutDimensions,
+        navigationTimeoutMs: timeoutMs,
+      });
+      return {
+        bytes: buffer,
+        metadata: {
+          content_type: 'application/pdf',
+          metrics: { pdf: { pages } },
+        },
+      };
+    }
+
+    if (body.jobtype === PNG_JOB_TYPE_V2) {
+      const { buffer } = await chromiumRenderPng({
+        forwardHeaders,
+        resolvedScreenshots,
+        layoutDimensions,
+        navigationTimeoutMs: timeoutMs,
+      });
+      return {
+        bytes: buffer,
+        metadata: {
+          content_type: 'image/png',
+          metrics: { png: {} },
+        },
+      };
+    }
+
+    throw Object.assign(
+      new Error(`Chromium rendering is not implemented for job type "${body.jobtype}"`),
+      { statusCode: 400 }
+    );
+  }
+
+  return stubExport(body.jobtype);
+}
+
 export interface ReportingRemoteExecutorListenOpts {
   readonly port: number;
   readonly host?: string;
@@ -141,12 +253,13 @@ export async function startReportingRemoteExecutorServer(
           `${JSON.stringify({
             jobId: body.jobId,
             jobtype: body.jobtype,
+            render: process.env.REPORTING_REMOTE_EXECUTOR_RENDER ?? 'stub',
             forwardHeaderKeys: Object.keys(body.forwardHeaders ?? {}),
           })}\n`
         );
       }
 
-      const { bytes, metadata } = stubExport(body.jobtype);
+      const { bytes, metadata } = await produceExport(body);
       const prefix = Buffer.from(
         `${JSON.stringify(metadata)}${REPORTING_REMOTE_EXECUTE_METADATA_SEPARATOR}`,
         'utf8'
