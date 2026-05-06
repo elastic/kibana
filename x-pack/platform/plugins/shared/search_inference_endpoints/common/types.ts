@@ -115,6 +115,6 @@ export enum EisModelStatus {
   Preview = 'preview',
   GA = 'ga',
   Deprecated = 'deprecated',
-  Decommissioned = 'decommissioned',
+  DeprecatedEOL = 'deprecated_eol',
   Unknown = 'unknown',
 }

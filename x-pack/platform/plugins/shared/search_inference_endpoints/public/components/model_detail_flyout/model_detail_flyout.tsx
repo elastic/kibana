@@ -29,6 +29,7 @@ import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { docLinks } from '../../../common/doc_links';
 import {
+  isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
 } from '../../../common/type_guards';
@@ -37,6 +38,13 @@ import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
+import {
+  getModelEOLDate,
+  getModelReleaseDate,
+  getModelStatus,
+  modelStatusDisplay,
+} from '../../utils/eis_utils';
+import { EisModelStatus } from '../../types';
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
@@ -64,24 +72,27 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     usageTracker.load([EventType.EIS_MODEL_VIEWED, `${EventType.EIS_MODEL_VIEWED}_${modelId}`]);
   }, [usageTracker, modelId]);
 
-  const { endpoints, displayName, modelAuthor } = useMemo(() => {
-    const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
+  const { endpoints, displayName, modelAuthor, modelStatus, modelReleaseDate, modelEOLDate } =
+    useMemo(() => {
+      const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
 
-    const endpointWithName = filtered.find((ep) => isInferenceEndpointWithDisplayNameMetadata(ep));
-    const endpointWithCreator = filtered.find((ep) =>
-      isInferenceEndpointWithDisplayCreatorMetadata(ep)
-    );
+      const endpointWithName = filtered.find(isInferenceEndpointWithDisplayNameMetadata);
+      const endpointWithCreator = filtered.find(isInferenceEndpointWithDisplayCreatorMetadata);
+      const modelMetadata = filtered.find(isInferenceEndpointWithMetadata)?.metadata;
 
-    return {
-      endpoints: filtered,
-      displayName: endpointWithName ? endpointWithName.metadata.display.name : modelId,
-      modelAuthor: endpointWithCreator
-        ? endpointWithCreator.metadata.display.model_creator
-        : i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.unknownAuthor', {
-            defaultMessage: 'Unknown',
-          }),
-    };
-  }, [allEndpoints, modelId]);
+      return {
+        endpoints: filtered,
+        displayName: endpointWithName ? endpointWithName.metadata.display.name : modelId,
+        modelAuthor: endpointWithCreator
+          ? endpointWithCreator.metadata.display.model_creator
+          : i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.unknownAuthor', {
+              defaultMessage: 'Unknown',
+            }),
+        modelStatus: getModelStatus(modelMetadata),
+        modelReleaseDate: getModelReleaseDate(modelMetadata)?.format('l'),
+        modelEOLDate: getModelEOLDate(modelMetadata)?.format('l'),
+      };
+    }, [allEndpoints, modelId]);
 
   const { taskTypeOptions, uniqueTaskTypes } = useMemo(() => {
     const taskTypes = [...new Set(endpoints.map((e) => e.task_type))];
@@ -124,6 +135,38 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       }),
       description: modelAuthor,
     },
+    {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelStatusLabel', {
+        defaultMessage: 'Model status',
+      }),
+      description: modelStatusDisplay(modelStatus),
+    },
+    ...(modelReleaseDate
+      ? [
+          {
+            title: i18n.translate(
+              'xpack.searchInferenceEndpoints.modelDetailFlyout.modelReleaseDate',
+              {
+                defaultMessage: 'Release date',
+              }
+            ),
+            description: modelReleaseDate,
+          },
+        ]
+      : []),
+    ...(modelEOLDate
+      ? [
+          {
+            title: i18n.translate(
+              'xpack.searchInferenceEndpoints.modelDetailFlyout.modelReleaseDate',
+              {
+                defaultMessage: 'End-of-life date',
+              }
+            ),
+            description: modelEOLDate,
+          },
+        ]
+      : []),
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
         defaultMessage: 'Documentation',
@@ -193,6 +236,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                   iconType="plusInCircle"
                   color="text"
                   onClick={handleOpenAddModal}
+                  disabled={modelStatus === EisModelStatus.DeprecatedEOL}
                   data-test-subj="modelDetailFlyoutAddEndpointButton"
                 >
                   {i18n.translate(

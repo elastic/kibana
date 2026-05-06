@@ -10,38 +10,40 @@ import React, { useMemo } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { getModelEOLDate, type GroupedModel } from '../../utils/eis_utils';
+import { getModelEOLDate } from '../../utils/eis_utils';
+import type { EisInferenceEndpointMetadata } from '../../types';
 
-interface ModelDecommissionedBadgeProps {
-  model: GroupedModel;
+interface ModelEOLBadgeProps {
+  id: string;
+  metadata: EisInferenceEndpointMetadata | undefined;
 }
 
-export const ModelDecommissionedBadge = ({ model }: ModelDecommissionedBadgeProps) => {
+export const ModelEOLBadge = ({ id, metadata }: ModelEOLBadgeProps) => {
   const eolDate = useMemo(() => {
-    const modelEOLDate = getModelEOLDate(model.modelMetadata);
+    const modelEOLDate = getModelEOLDate(metadata);
     if (!modelEOLDate) {
       // This should not happen, but need to handle just-in-case we have metadata with deprecated status but no EOL date.
       return i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.decommissionedBadge.missingEOLDate',
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.missingEOLDate',
         {
           defaultMessage: 'unknown end-of-life date',
         }
       );
     }
     return modelEOLDate.format('l');
-  }, [model]);
+  }, [metadata]);
   return (
     <EuiToolTip
       title={i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.decommissionedBadge.tooltip.title',
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.title',
         {
-          defaultMessage: 'Deprecated model',
+          defaultMessage: 'End of life notice',
         }
       )}
       content={i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.decommissionedBadge.tooltip.content',
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.content',
         {
-          defaultMessage: 'This model was deprecated on {eolDate}.',
+          defaultMessage: "This model's end of life date is {eolDate}. It is no longer available.",
           values: { eolDate },
         }
       )}
@@ -51,10 +53,10 @@ export const ModelDecommissionedBadge = ({ model }: ModelDecommissionedBadgeProp
         iconSide="left"
         iconType="warning"
         color="error"
-        data-test-subj={`decommissionedBadge-${model.modelName}`}
+        data-test-subj={`modelEolBadge-${id}`}
       >
-        {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.decommissionedBadge.content', {
-          defaultMessage: 'Deprecated',
+        {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.content', {
+          defaultMessage: 'End of life',
         })}
       </EuiBadge>
     </EuiToolTip>

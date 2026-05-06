@@ -22,8 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { GroupedModel } from '../../utils/eis_utils';
 import { getProviderKeyForCreator, TASK_TYPE_DISPLAY_NAME } from '../../utils/eis_utils';
-import { ModelEOLBadge } from './model_eol_badge';
-import { ModelDecommissionedBadge } from './model_decommissioned_badge';
+import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { EisModelStatus } from '../../types';
 
 interface ModelCardProps {
@@ -44,7 +43,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
       data-test-subj={`eisModelCard-${modelName}`}
       hasBorder
       onClick={onClick}
-      color={model.modelStatus === EisModelStatus.Decommissioned ? 'subdued' : undefined}
+      color={model.modelStatus === EisModelStatus.DeprecatedEOL ? 'subdued' : undefined}
     >
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
@@ -70,10 +69,11 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
         <EuiSpacer size="m" />
         <EuiFlexItem grow={false}>
           <EuiBadgeGroup>
-            {model.modelStatus === EisModelStatus.Deprecated && <ModelEOLBadge model={model} />}
-            {model.modelStatus === EisModelStatus.Decommissioned && (
-              <ModelDecommissionedBadge model={model} />
-            )}
+            <ModelStatusBadge
+              id={model.modelName}
+              metadata={model.modelMetadata}
+              status={model.modelStatus}
+            />
             {categories.map((cat) => (
               <EuiBadge key={cat} color="hollow">
                 {cat}

@@ -10,36 +10,38 @@ import React, { useMemo } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { getModelEOLDate, type GroupedModel } from '../../utils/eis_utils';
+import { getModelEOLDate } from '../../utils/eis_utils';
+import type { EisInferenceEndpointMetadata } from '../../types';
 
-interface ModelEOLBadgeProps {
-  model: GroupedModel;
+interface ModelDeprecatedBadgeProps {
+  id: string;
+  metadata: EisInferenceEndpointMetadata | undefined;
 }
 
-export const ModelEOLBadge = ({ model }: ModelEOLBadgeProps) => {
+export const ModelDeprecatedBadge = ({ id, metadata }: ModelDeprecatedBadgeProps) => {
   const eolDate = useMemo(() => {
-    const modelEOLDate = getModelEOLDate(model.modelMetadata);
+    const modelEOLDate = getModelEOLDate(metadata);
     if (!modelEOLDate) {
       // This should not happen, but need to handle just-in-case we have metadata with deprecated status but no EOL date.
       return i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecationBadge.missingEOLDate',
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.missingEOLDate',
         {
           defaultMessage: 'unknown end-of-life date',
         }
       );
     }
     return modelEOLDate.format('l');
-  }, [model]);
+  }, [metadata]);
   return (
     <EuiToolTip
       title={i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecationBadge.tooltip.title',
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.title',
         {
           defaultMessage: 'Deprecation notice',
         }
       )}
       content={i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecationBadge.tooltip.content',
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.content',
         {
           defaultMessage:
             'This model will be deprecated on {eolDate}. We recommend a newer model for optimal results.',
@@ -52,10 +54,10 @@ export const ModelEOLBadge = ({ model }: ModelEOLBadgeProps) => {
         iconSide="left"
         iconType="warning"
         color="warning"
-        data-test-subj={`modelEolBadge-${model.modelName}`}
+        data-test-subj={`modelDeprecatedBadge-${id}`}
       >
-        {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.deprecationBadge.content', {
-          defaultMessage: 'EOL',
+        {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.content', {
+          defaultMessage: 'Deprecated',
         })}
       </EuiBadge>
     </EuiToolTip>

@@ -55,8 +55,28 @@ describe('ModelCard', () => {
     expect(getByText('some_future_type', { exact: false })).toBeInTheDocument();
   });
 
-  describe('EOL badge', () => {
-    it('renders the EOL badge when model status is Deprecated and metadata has an EOL date', () => {
+  describe('Preview badge', () => {
+    it('renders the preview badge when model status is Preview', () => {
+      const model: GroupedModel = {
+        ...baseModel,
+        modelStatus: EisModelStatus.Preview,
+      };
+      const { getByTestId, queryByTestId } = render(
+        <ModelCard model={model} onClick={jest.fn()} />
+      );
+      expect(getByTestId('modelPreviewBadge-my-model')).toBeInTheDocument();
+      expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
+      expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
+    });
+
+    it('does not render the preview badge when model status is GA', () => {
+      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={jest.fn()} />);
+      expect(queryByTestId('modelPreviewBadge-my-model')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Deprecated badge', () => {
+    it('renders the deprecated badge when model status is Deprecated and metadata has an EOL date', () => {
       const model: GroupedModel = {
         ...baseModel,
         modelStatus: EisModelStatus.Deprecated,
@@ -70,14 +90,53 @@ describe('ModelCard', () => {
       const { getByTestId, queryByTestId } = render(
         <ModelCard model={model} onClick={jest.fn()} />
       );
-      expect(getByTestId('modelEolBadge-my-model')).toBeInTheDocument();
-      expect(queryByTestId('decommissionedBadge-my-model')).not.toBeInTheDocument();
+      expect(getByTestId('modelDeprecatedBadge-my-model')).toBeInTheDocument();
+      expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
     });
 
-    it('renders the EOL badge when model status is Deprecated and metadata has no EOL date', () => {
+    it('renders the deprecated badge when model status is Deprecated and metadata has no EOL date', () => {
       const model: GroupedModel = {
         ...baseModel,
         modelStatus: EisModelStatus.Deprecated,
+        modelMetadata: {
+          heuristics: {
+            status: 'deprecated',
+          },
+        },
+      };
+      const { getByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
+      expect(getByTestId('modelDeprecatedBadge-my-model')).toBeInTheDocument();
+    });
+
+    it('does not render the deprecated badge when model status is GA', () => {
+      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={jest.fn()} />);
+      expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('EOL badge', () => {
+    it('renders the EOL badge when model status is DeprecatedEOL and metadata has an EOL date', () => {
+      const model: GroupedModel = {
+        ...baseModel,
+        modelStatus: EisModelStatus.DeprecatedEOL,
+        modelMetadata: {
+          heuristics: {
+            status: 'deprecated',
+            end_of_life_date: '2025-06-01',
+          },
+        },
+      };
+      const { getByTestId, queryByTestId } = render(
+        <ModelCard model={model} onClick={jest.fn()} />
+      );
+      expect(getByTestId('modelEolBadge-my-model')).toBeInTheDocument();
+      expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
+    });
+
+    it('renders the EOL badge when model status is DeprecatedEOL and metadata has no EOL date', () => {
+      const model: GroupedModel = {
+        ...baseModel,
+        modelStatus: EisModelStatus.DeprecatedEOL,
         modelMetadata: {
           heuristics: {
             status: 'deprecated',
@@ -91,45 +150,6 @@ describe('ModelCard', () => {
     it('does not render the EOL badge when model status is GA', () => {
       const { queryByTestId } = render(<ModelCard model={baseModel} onClick={jest.fn()} />);
       expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('Decommissioned badge', () => {
-    it('renders the decommissioned badge when model status is Decommissioned and metadata has an EOL date', () => {
-      const model: GroupedModel = {
-        ...baseModel,
-        modelStatus: EisModelStatus.Decommissioned,
-        modelMetadata: {
-          heuristics: {
-            status: 'deprecated',
-            end_of_life_date: '2025-06-01',
-          },
-        },
-      };
-      const { getByTestId, queryByTestId } = render(
-        <ModelCard model={model} onClick={jest.fn()} />
-      );
-      expect(getByTestId('decommissionedBadge-my-model')).toBeInTheDocument();
-      expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
-    });
-
-    it('renders the decommissioned badge when model status is Decommissioned and metadata has no EOL date', () => {
-      const model: GroupedModel = {
-        ...baseModel,
-        modelStatus: EisModelStatus.Decommissioned,
-        modelMetadata: {
-          heuristics: {
-            status: 'deprecated',
-          },
-        },
-      };
-      const { getByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
-      expect(getByTestId('decommissionedBadge-my-model')).toBeInTheDocument();
-    });
-
-    it('does not render the decommissioned badge when model status is GA', () => {
-      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={jest.fn()} />);
-      expect(queryByTestId('decommissionedBadge-my-model')).not.toBeInTheDocument();
     });
   });
 });

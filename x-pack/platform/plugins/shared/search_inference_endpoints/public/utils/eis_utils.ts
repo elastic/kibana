@@ -100,7 +100,7 @@ export const getModelStatus = (
   metadata: EisInferenceEndpointMetadata | undefined
 ): EisModelStatus => {
   if (!metadata) return EisModelStatus.Unknown;
-  if (isModelDecommissioned(metadata)) return EisModelStatus.Decommissioned;
+  if (isModelDecommissioned(metadata)) return EisModelStatus.DeprecatedEOL;
   switch (metadata.heuristics?.status) {
     case EisModelStatus.GA:
       return EisModelStatus.GA;
@@ -248,8 +248,33 @@ export function isModelDecommissioned(metadata: EisInferenceEndpointMetadata | u
   return dateMath.parse('now')?.isSameOrAfter(eolDate) ?? false;
 }
 
+export function getModelReleaseDate(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!metadata) return undefined;
+  if (!metadata?.heuristics?.release_date) return undefined;
+  return dateMath.parse(metadata.heuristics.release_date);
+}
+
 export function getModelEOLDate(metadata: EisInferenceEndpointMetadata | undefined) {
   if (!metadata) return undefined;
   if (!metadata?.heuristics?.end_of_life_date) return undefined;
   return dateMath.parse(metadata.heuristics.end_of_life_date);
+}
+
+export function modelStatusDisplay(status: EisModelStatus): string {
+  switch (status) {
+    case EisModelStatus.Preview:
+      return i18n.translate('xpack.searchInferenceEndpoints.eisModelStatus.preview', {
+        defaultMessage: 'Preview',
+      });
+    case EisModelStatus.DeprecatedEOL:
+    case EisModelStatus.Deprecated:
+      return i18n.translate('xpack.searchInferenceEndpoints.eisModelStatus.deprecated', {
+        defaultMessage: 'Deprecated',
+      });
+    case EisModelStatus.GA:
+    default:
+      return i18n.translate('xpack.searchInferenceEndpoints.eisModelStatus.ga', {
+        defaultMessage: 'GA',
+      });
+  }
 }
