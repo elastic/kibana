@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import {
   resolveExtendedFieldFilters,
   buildExtendedFieldRuntimeMappings,
   buildExtendedFieldFilterClauses,
   parseDateFilterToRange,
+  tokenizeSearchForLabels,
+  resolveFieldLabelSearch,
+  buildFieldLabelRuntimeMappings,
+  buildFieldLabelExistsClauses,
 } from './extended_field_search_utils';
 
 describe('resolveExtendedFieldFilters', () => {
@@ -1361,5 +1366,287 @@ describe('buildExtendedFieldFilterClauses', () => {
         },
       },
     ]);
+  });
+});
+
+describe('tokenizeSearchForLabels', () => {
+  it('splits bare words into exact tokens', () => {
+    expect(tokenizeSearchForLabels('priority region')).toEqual([
+      { text: 'priority', exact: true },
+      { text: 'region', exact: true },
+    ]);
+  });
+
+  it('extracts quoted phrases as substring tokens', () => {
+    expect(tokenizeSearchForLabels('"Start date"')).toEqual([{ text: 'start date', exact: false }]);
+  });
+
+  it('handles mixed quoted and bare tokens (quoted extracted first)', () => {
+    expect(tokenizeSearchForLabels('priority "Start date" region')).toEqual([
+      { text: 'start date', exact: false },
+      { text: 'priority', exact: true },
+      { text: 'region', exact: true },
+    ]);
+  });
+
+  it('lowercases all tokens', () => {
+    expect(tokenizeSearchForLabels('Priority "Effort Level"')).toEqual([
+      { text: 'effort level', exact: false },
+      { text: 'priority', exact: true },
+    ]);
+  });
+
+  it('returns empty array for empty string', () => {
+    expect(tokenizeSearchForLabels('')).toEqual([]);
+  });
+
+  it('returns empty array for whitespace-only string', () => {
+    expect(tokenizeSearchForLabels('   ')).toEqual([]);
+  });
+
+  it('ignores empty quoted strings', () => {
+    expect(tokenizeSearchForLabels('"" priority')).toEqual([{ text: 'priority', exact: true }]);
+  });
+
+  it('trims whitespace inside quoted strings', () => {
+    expect(tokenizeSearchForLabels('"  Start date  "')).toEqual([
+      { text: 'start date', exact: false },
+    ]);
+  });
+});
+
+describe('resolveFieldLabelSearch', () => {
+  const templates = [
+    {
+      templateId: 'tmpl-a',
+      templateVersion: 1,
+      fieldNames: [
+        { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
+        { name: 'region', label: 'Region', type: 'keyword', control: 'SELECT_BASIC' },
+        {
+          name: 'start_date',
+          label: 'Start date operation',
+          type: 'date',
+          control: 'DATE_PICKER',
+        },
+        {
+          name: 'end_date',
+          label: 'End date',
+          type: 'date',
+          control: 'DATE_PICKER',
+        },
+      ],
+    },
+    {
+      templateId: 'tmpl-b',
+      templateVersion: 1,
+      fieldNames: [
+        {
+          name: 'start_security',
+          label: 'Start date security',
+          type: 'date',
+          control: 'DATE_PICKER',
+        },
+      ],
+    },
+  ];
+
+  it('resolves bare word to matching full label', () => {
+    const result = resolveFieldLabelSearch([{ text: 'priority', exact: true }], templates);
+
+    expect(result).toEqual([
+      {
+        storageKey: 'priority_as_keyword',
+        esType: 'keyword',
+        control: 'SELECT_BASIC',
+        templateVersions: [{ id: 'tmpl-a', version: 1 }],
+      },
+    ]);
+  });
+
+  it('exact token does not substring-match partial labels', () => {
+    const result = resolveFieldLabelSearch([{ text: 'start', exact: true }], templates);
+
+    expect(result).toEqual([]);
+  });
+
+  it('substring token matches partial labels', () => {
+    const result = resolveFieldLabelSearch([{ text: 'start', exact: false }], templates);
+
+    expect(result).toHaveLength(2);
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ storageKey: 'start_date_as_date' }),
+        expect.objectContaining({ storageKey: 'start_security_as_date' }),
+      ])
+    );
+  });
+
+  it('matches quoted substring token against labels containing the text', () => {
+    const result = resolveFieldLabelSearch([{ text: 'start date', exact: false }], templates);
+
+    expect(result).toHaveLength(2);
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ storageKey: 'start_date_as_date' }),
+        expect.objectContaining({ storageKey: 'start_security_as_date' }),
+      ])
+    );
+  });
+
+  it('does not match quoted substring that does not appear in any label', () => {
+    const result = resolveFieldLabelSearch(
+      [{ text: 'nonexistent field', exact: false }],
+      templates
+    );
+
+    expect(result).toEqual([]);
+  });
+
+  it('quoted "start date" matches "Start date operation" and "Start date security" but not "End date"', () => {
+    const result = resolveFieldLabelSearch([{ text: 'start date', exact: false }], templates);
+
+    const storageKeys = result.map((r) => r.storageKey);
+    expect(storageKeys).toContain('start_date_as_date');
+    expect(storageKeys).toContain('start_security_as_date');
+    expect(storageKeys).not.toContain('end_date_as_date');
+  });
+
+  it('deduplicates storage keys across multiple tokens', () => {
+    const result = resolveFieldLabelSearch(
+      [
+        { text: 'priority', exact: true },
+        { text: 'priority', exact: true },
+      ],
+      templates
+    );
+
+    expect(result).toHaveLength(1);
+  });
+
+  it('returns empty for empty tokens', () => {
+    expect(resolveFieldLabelSearch([], templates)).toEqual([]);
+  });
+
+  it('returns empty for empty templates', () => {
+    expect(resolveFieldLabelSearch([{ text: 'priority', exact: true }], [])).toEqual([]);
+  });
+
+  it('is case-insensitive for label matching', () => {
+    const result = resolveFieldLabelSearch([{ text: 'PRIORITY', exact: true }], templates);
+
+    expect(result).toEqual([expect.objectContaining({ storageKey: 'priority_as_keyword' })]);
+  });
+});
+
+describe('buildFieldLabelRuntimeMappings', () => {
+  it('builds runtime mappings for resolved label filters', () => {
+    const mappings = buildFieldLabelRuntimeMappings([
+      {
+        storageKey: 'priority_as_keyword',
+        esType: 'keyword',
+        control: 'SELECT_BASIC',
+        templateVersions: [{ id: 'tmpl-a', version: 1 }],
+      },
+    ]);
+
+    expect(mappings).toHaveProperty('ef_priority_as_keyword');
+    expect(mappings.ef_priority_as_keyword.type).toBe('keyword');
+  });
+
+  it('builds DATE_PICKER runtime field as keyword type', () => {
+    const mappings = buildFieldLabelRuntimeMappings([
+      {
+        storageKey: 'start_date_as_date',
+        esType: 'date',
+        control: 'DATE_PICKER',
+        templateVersions: [{ id: 'tmpl-a', version: 1 }],
+      },
+    ]);
+
+    expect(mappings.ef_start_date_as_date.type).toBe('keyword');
+  });
+});
+
+describe('buildFieldLabelExistsClauses', () => {
+  it('builds exists + template-scoped clause for a single label filter', () => {
+    const clauses = buildFieldLabelExistsClauses([
+      {
+        storageKey: 'priority_as_keyword',
+        esType: 'keyword',
+        control: 'SELECT_BASIC',
+        templateVersions: [{ id: 'tmpl-a', version: 1 }],
+      },
+    ]);
+
+    expect(clauses).toEqual([
+      {
+        bool: {
+          filter: [
+            { exists: { field: 'ef_priority_as_keyword' } },
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'cases.template.id': 'tmpl-a' } },
+                        { term: { 'cases.template.version': 1 } },
+                      ],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    ]);
+  });
+
+  it('builds multiple clauses for multiple label filters', () => {
+    const clauses = buildFieldLabelExistsClauses([
+      {
+        storageKey: 'priority_as_keyword',
+        esType: 'keyword',
+        control: 'SELECT_BASIC',
+        templateVersions: [{ id: 'tmpl-a', version: 1 }],
+      },
+      {
+        storageKey: 'region_as_keyword',
+        esType: 'keyword',
+        control: 'SELECT_BASIC',
+        templateVersions: [{ id: 'tmpl-a', version: 1 }],
+      },
+    ]);
+
+    expect(clauses).toHaveLength(2);
+    expect(clauses[0]).toHaveProperty('bool.filter.0.exists.field', 'ef_priority_as_keyword');
+    expect(clauses[1]).toHaveProperty('bool.filter.0.exists.field', 'ef_region_as_keyword');
+  });
+
+  it('includes multiple template versions in OR logic', () => {
+    const clauses = buildFieldLabelExistsClauses([
+      {
+        storageKey: 'priority_as_keyword',
+        esType: 'keyword',
+        control: 'SELECT_BASIC',
+        templateVersions: [
+          { id: 'tmpl-a', version: 1 },
+          { id: 'tmpl-a', version: 2 },
+        ],
+      },
+    ]);
+
+    const filterArray = clauses[0]?.bool?.filter as estypes.QueryDslQueryContainer[];
+    const shouldClauses = filterArray[1]?.bool?.should as
+      | estypes.QueryDslQueryContainer[]
+      | undefined;
+    expect(shouldClauses).toHaveLength(2);
+  });
+
+  it('returns empty array for empty input', () => {
+    expect(buildFieldLabelExistsClauses([])).toEqual([]);
   });
 });

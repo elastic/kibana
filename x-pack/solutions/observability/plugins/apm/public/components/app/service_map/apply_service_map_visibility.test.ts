@@ -6,7 +6,7 @@
  */
 
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import type { ServiceHealthStatus } from '../../../../common/service_health_status';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
 import {
   applyServiceMapVisibility,
@@ -19,7 +19,7 @@ const mkService = (
     alertsCount: number;
     alertsByStatus: Partial<Record<string, number>>;
     sloStatus: 'healthy' | 'noSLOs';
-    health: ServiceHealthStatus;
+    anomalyScore: number;
   }> = {}
 ): ServiceMapNode => ({
   id,
@@ -32,8 +32,12 @@ const mkService = (
     ...(overrides.alertsCount !== undefined ? { alertsCount: overrides.alertsCount } : {}),
     ...(overrides.alertsByStatus !== undefined ? { alertsByStatus: overrides.alertsByStatus } : {}),
     ...(overrides.sloStatus !== undefined ? { sloStatus: overrides.sloStatus } : {}),
-    ...(overrides.health !== undefined
-      ? { serviceAnomalyStats: { healthStatus: overrides.health } }
+    ...(overrides.anomalyScore !== undefined
+      ? {
+          serviceAnomalyStats: {
+            anomalyScore: overrides.anomalyScore,
+          },
+        }
       : {}),
   },
 });
@@ -138,6 +142,33 @@ describe('applyServiceMapVisibility', () => {
     const byIdH = Object.fromEntries(onlyHealthy.map((n) => [n.id, n.hidden]));
     expect(byIdH.a).toBe(true);
     expect(byIdH.b).toBe(false);
+  });
+
+  it('filters services by ML anomaly severity band (OR across selected severities)', () => {
+    const nodes: ServiceMapNode[] = [
+      mkService('crit', { anomalyScore: 90 }),
+      mkService('major', { anomalyScore: 55 }),
+      mkService('noMl', {}),
+    ];
+    const edges: ServiceMapEdge[] = [];
+
+    const { nodes: onlyCritical } = applyServiceMapVisibility(nodes, edges, {
+      ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+      anomalySeverityFilter: [ML_ANOMALY_SEVERITY.CRITICAL],
+    });
+    const hiddenCrit = Object.fromEntries(onlyCritical.map((n) => [n.id, n.hidden]));
+    expect(hiddenCrit.crit).toBe(false);
+    expect(hiddenCrit.major).toBe(true);
+    expect(hiddenCrit.noMl).toBe(true);
+
+    const { nodes: criticalOrMajor } = applyServiceMapVisibility(nodes, edges, {
+      ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+      anomalySeverityFilter: [ML_ANOMALY_SEVERITY.CRITICAL, ML_ANOMALY_SEVERITY.MAJOR],
+    });
+    const hiddenBoth = Object.fromEntries(criticalOrMajor.map((n) => [n.id, n.hidden]));
+    expect(hiddenBoth.crit).toBe(false);
+    expect(hiddenBoth.major).toBe(false);
+    expect(hiddenBoth.noMl).toBe(true);
   });
 
   it('pulls a multi-hop dependency chain into view in one pass', () => {
