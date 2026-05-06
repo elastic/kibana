@@ -15,6 +15,7 @@ import {
   type DataStreamApiService,
   type InsightsApiService,
   type RulesApiService,
+  type RuleEventsApiService,
 } from '../../common/services';
 import { getRuleEventsApiService } from '../../common/services/rule_events_api_service';
 import type { SourceIndexApiService } from '../../common/services/source_index_api_service';
@@ -22,7 +23,7 @@ import { getSourceIndexApiService } from '../../common/services/source_index_api
 
 export interface AlertingApiServices {
   rules: RulesApiService;
-  ruleEvents: DataStreamApiService;
+  ruleEvents: RuleEventsApiService;
   alertActions: DataStreamApiService;
   insights: InsightsApiService;
   sourceIndex: SourceIndexApiService;
