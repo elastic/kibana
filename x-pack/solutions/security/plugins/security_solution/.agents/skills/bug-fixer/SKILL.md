@@ -33,13 +33,13 @@ bug, tell the user and stop.
 
 ## Knowledge Base
 
-Read `.agents/skills/bug-fixer/KNOWLEDGE.md` before starting. Apply relevant learnings.
+Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/KNOWLEDGE.md` before starting. Apply relevant learnings.
 
 ## Workflow
 
 ### Phase A: Reproduce
 
-Read and follow `.agents/skills/bug-reproduce/SKILL.md` in full.
+Read and follow `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-reproduce/SKILL.md` in full.
 
 When complete, `bug-reproduce` will have written two files to the Kibana repo root:
 - `analysis.json` — classification, affected paths, reproduction steps, server args
@@ -60,5 +60,5 @@ as `pending` and return to Phase A.
 
 ### Phase B: Fix
 
-Read and follow `.agents/skills/bug-fix/SKILL.md` in full, with `analysis.json` and
+Read and follow `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix/SKILL.md` in full, with `analysis.json` and
 `reproduction-report.md` available as context.
