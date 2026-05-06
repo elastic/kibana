@@ -336,21 +336,48 @@ if (doc['task.runAt'].size()!=0) {
       [2, 1, 0],
     ];
 
-    test('works correctly with same dates, different priorities', () => {
-      const date = new Date();
-      const baseTasks: ConcreteTaskInstance[] = [];
+    describe('claimSort', () => {
+      test('task instance priority takes precedence over task definition priority', () => {
+        const date = new Date();
+        // normalPriorityTask demoted to Low via per-task priority
+        const overridden = buildTaskInstance({
+          taskType: 'normalPriorityTask',
+          runAt: date,
+          priority: TaskPriority.Low,
+        });
+        // lowPriorityTask promoted to Normal via per-task priority
+        const promoted = buildTaskInstance({
+          taskType: 'lowPriorityTask',
+          runAt: date,
+          priority: TaskPriority.Normal,
+        });
 
-      // push in reverse order
-      baseTasks.push(buildTaskInstance({ taskType: 'lowPriorityTask', runAt: date }));
-      baseTasks.push(buildTaskInstance({ taskType: 'noPriorityTask', runAt: date }));
-      baseTasks.push(buildTaskInstance({ taskType: 'normalPriorityTask', runAt: date }));
+        const sorted = claimSort(definitions, [overridden, promoted]);
+        expect(sorted[0]).toBe(promoted);
+        expect(sorted[1]).toBe(overridden);
+      });
 
-      for (const perm of permutations) {
-        const tasks = [baseTasks[perm[0]], baseTasks[perm[1]], baseTasks[perm[2]]];
-        const sorted = claimSort(definitions, tasks);
-        // all we know is low should be last
-        expect(sorted[2]).toBe(baseTasks[0]);
-      }
+      test('uses task definition priority when there is no task instance priority set', () => {
+        const date = new Date();
+        const normal = buildTaskInstance({ taskType: 'normalPriorityTask', runAt: date });
+        const low = buildTaskInstance({ taskType: 'lowPriorityTask', runAt: date });
+
+        const sorted = claimSort(definitions, [low, normal]);
+        expect(sorted[0]).toBe(normal);
+        expect(sorted[1]).toBe(low);
+      });
+
+      test('uses "normal" priority when there is no task instance or definition priority set', () => {
+        const date = new Date();
+        // noPriorityTask has no definition priority → defaults to Normal,
+        // which sorts above an explicit Low.
+        const noPriority = buildTaskInstance({ taskType: 'noPriorityTask', runAt: date });
+        const low = buildTaskInstance({ taskType: 'lowPriorityTask', runAt: date });
+
+        const sorted = claimSort(definitions, [low, noPriority]);
+        expect(sorted[0]).toBe(noPriority);
+        expect(sorted[1]).toBe(low);
+      });
     });
 
     test('works correctly with same priorities, different dates', () => {
@@ -409,12 +436,13 @@ interface BuildTaskOpts {
   taskType: string;
   runAt: Date;
   retryAt?: Date;
+  priority?: TaskPriority;
 }
 
 let id = 1;
 
 function buildTaskInstance(opts: BuildTaskOpts): ConcreteTaskInstance {
-  const { taskType, runAt, retryAt } = opts;
+  const { taskType, runAt, retryAt, priority } = opts;
   return {
     taskType,
     id: `${id++}`,
@@ -427,5 +455,6 @@ function buildTaskInstance(opts: BuildTaskOpts): ConcreteTaskInstance {
     state: {},
     params: {},
     ownerId: null,
+    ...(priority !== undefined ? { priority } : {}),
   };
 }

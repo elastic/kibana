@@ -167,19 +167,19 @@ export function claimSort(
   definitions: TaskTypeDictionary,
   tasks: ConcreteTaskInstance[]
 ): ConcreteTaskInstance[] {
+  // get the task definition priority
   const priorityMap: Record<string, TaskPriority> = {};
   tasks.forEach((task) => {
     const taskType = task.taskType;
-    const priority = getPriority(definitions, taskType);
-    priorityMap[taskType] = priority;
+    priorityMap[taskType] = definitions.get(taskType)?.priority ?? TaskPriority.Normal;
   });
 
   return tasks.slice().sort(compare);
 
   function compare(a: ConcreteTaskInstance, b: ConcreteTaskInstance) {
-    // sort by priority, descending
-    const priorityA = priorityMap[a.taskType] ?? TaskPriority.Normal;
-    const priorityB = priorityMap[b.taskType] ?? TaskPriority.Normal;
+    // sort by priority, descending — task instance priority overrides task definition priority, and defaults to Normal
+    const priorityA = a.priority ?? priorityMap[a.taskType] ?? TaskPriority.Normal;
+    const priorityB = b.priority ?? priorityMap[b.taskType] ?? TaskPriority.Normal;
 
     if (priorityA > priorityB) return -1;
     if (priorityA < priorityB) return 1;
@@ -193,10 +193,6 @@ export function claimSort(
 
     return 0;
   }
-}
-
-function getPriority(definitions: TaskTypeDictionary, taskType: string): TaskPriority {
-  return definitions.get(taskType)?.priority ?? TaskPriority.Normal;
 }
 
 export interface UpdateFieldsAndMarkAsFailedOpts {
