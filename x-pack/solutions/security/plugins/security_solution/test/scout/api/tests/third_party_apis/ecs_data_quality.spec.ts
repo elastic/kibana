@@ -80,29 +80,32 @@ apiTest.describe(
       }
     );
 
-    apiTest('results have required fields for SIEM Readiness Quality tab', async ({ apiClient }) => {
-      // First try to get any existing results
-      const response = await apiClient.get(`${THIRD_PARTY_ROUTES.ECS_DATA_QUALITY_LATEST}/*`, {
-        headers: defaultHeaders,
-        responseType: 'json',
-      });
-
-      expect(response.statusCode).toBe(200);
-
-      // If there are results, verify their structure
-      if (response.body.length > 0) {
-        response.body.forEach((result: DataQualityResult) => {
-          // indexName is required - used to identify which index was checked
-          expect(result.indexName).toBeDefined();
-          expect(typeof result.indexName).toBe('string');
-
-          // incompatibleFieldCount is critical - used to determine if index has issues
-          expect(result.incompatibleFieldCount).toBeDefined();
-          expect(typeof result.incompatibleFieldCount).toBe('number');
-          expect(result.incompatibleFieldCount).toBeGreaterThanOrEqual(0);
+    apiTest(
+      'results have required fields for SIEM Readiness Quality tab',
+      async ({ apiClient }) => {
+        // First try to get any existing results
+        const response = await apiClient.get(`${THIRD_PARTY_ROUTES.ECS_DATA_QUALITY_LATEST}/*`, {
+          headers: defaultHeaders,
+          responseType: 'json',
         });
+
+        expect(response.statusCode).toBe(200);
+
+        // If there are results, verify their structure
+        if (response.body.length > 0) {
+          response.body.forEach((result: DataQualityResult) => {
+            // indexName is required - used to identify which index was checked
+            expect(result.indexName).toBeDefined();
+            expect(typeof result.indexName).toBe('string');
+
+            // incompatibleFieldCount is critical - used to determine if index has issues
+            expect(result.incompatibleFieldCount).toBeDefined();
+            expect(typeof result.incompatibleFieldCount).toBe('number');
+            expect(result.incompatibleFieldCount).toBeGreaterThanOrEqual(0);
+          });
+        }
       }
-    });
+    );
 
     apiTest('results with field counts have numeric values', async ({ apiClient }) => {
       const response = await apiClient.get(`${THIRD_PARTY_ROUTES.ECS_DATA_QUALITY_LATEST}/*`, {
