@@ -38,7 +38,7 @@ type RecommendedAction = LatestSignificantEventData['raw']['recommended_action']
 
 export interface OtherPromotedEventsProps {
   events: LatestSignificantEventData[];
-  onRemediate?: (eventTitle: string) => void;
+  onRemediate?: (eventTitle: string, eventId: string) => void;
 }
 
 interface OtherPromotedEventRow {
@@ -255,7 +255,7 @@ interface OtherPromotedEventFlyoutProps {
   event: LatestSignificantEventData;
   flyoutHeadingId: string;
   onClose: () => void;
-  onRemediate?: (eventTitle: string) => void;
+  onRemediate?: (eventTitle: string, eventId: string) => void;
 }
 
 function OtherPromotedEventFlyout({
@@ -266,10 +266,10 @@ function OtherPromotedEventFlyout({
 }: OtherPromotedEventFlyoutProps) {
   const handleRemediate = useCallback(() => {
     if (onRemediate) {
-      onRemediate(event.mainEventTitle);
+      onRemediate(event.mainEventTitle, event.raw.event_id);
       onClose();
     }
-  }, [onRemediate, onClose, event.mainEventTitle]);
+  }, [onRemediate, onClose, event.mainEventTitle, event.raw.event_id]);
 
   return (
     <EuiFlyout

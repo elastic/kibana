@@ -60,7 +60,7 @@ const formatDetectedAt = (timestamp: string): string => {
 
 export interface LowerPriorityEventsProps {
   events: EventDocument[];
-  onRemediate?: (eventTitle: string) => void;
+  onRemediate?: (eventTitle: string, eventId: string) => void;
 }
 
 export function LowerPriorityEvents({ events, onRemediate }: LowerPriorityEventsProps) {
@@ -304,7 +304,7 @@ interface EventDetailFlyoutProps {
   event: EventDocument;
   flyoutHeadingId: string;
   onClose: () => void;
-  onRemediate?: (eventTitle: string) => void;
+  onRemediate?: (eventTitle: string, eventId: string) => void;
 }
 
 function EventDetailFlyout({
@@ -318,9 +318,9 @@ function EventDetailFlyout({
 
   const handleRemediate = useCallback(() => {
     if (onRemediate) {
-      onRemediate(event.title);
+      onRemediate(event.title, event.event_id);
     }
-  }, [onRemediate, event.title]);
+  }, [onRemediate, event.title, event.event_id]);
 
   return (
     <EuiFlyout

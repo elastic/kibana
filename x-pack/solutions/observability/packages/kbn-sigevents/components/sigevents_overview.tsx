@@ -60,7 +60,7 @@ export interface SigeventsOverviewProps {
   lowerPriorityEvents?: EventDocument[];
   lastUpdatedLabel?: React.ReactNode;
   onRemediate?: () => void;
-  onRemediateEvent?: (eventTitle: string) => void;
+  onRemediateEvent?: (eventTitle: string, eventId: string) => void;
   onViewDetails?: () => void;
 }
 

@@ -133,20 +133,6 @@ export function SigeventsOverviewPage() {
     setIsDetailFlyoutOpen(true);
   }, [openFlyoutFocus]);
 
-  useEffect(() => {
-    if (eventData?.raw.event_id) {
-      setAttachments([
-        {
-          type: OBSERVABILITY_SIGNIFICANT_EVENT_ATTACHMENT_TYPE_ID,
-          data: {
-            index: SIGEVENTS_INDEX,
-            eventId: eventData?.raw.event_id,
-          },
-        },
-      ]);
-    }
-  }, [eventData?.raw.event_id]);
-
   const buildRemediationPrompt = useCallback((eventTitle: string) => {
     return i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
       defaultMessage:
@@ -203,16 +189,36 @@ export function SigeventsOverviewPage() {
 
   const handleRemediate = useCallback(() => {
     const eventTitle = eventData?.mainEventTitle ?? 'the significant event';
+    if (eventData?.raw.event_id) {
+      setAttachments([
+        {
+          type: OBSERVABILITY_SIGNIFICANT_EVENT_ATTACHMENT_TYPE_ID,
+          data: {
+            index: SIGEVENTS_INDEX,
+            eventId: eventData.raw.event_id,
+          },
+        },
+      ]);
+    }
     setRemediationPrompt(buildRemediationPrompt(eventTitle));
     setConversationKey((prev) => prev + 1);
-  }, [eventData?.mainEventTitle, buildRemediationPrompt]);
+  }, [eventData?.mainEventTitle, eventData?.raw.event_id, buildRemediationPrompt]);
 
   const handleFlyoutRemediate = useCallback(() => {
     handleRemediate();
   }, [handleRemediate]);
 
   const handleRemediateEvent = useCallback(
-    (eventTitle: string) => {
+    (eventTitle: string, eventId: string) => {
+      setAttachments([
+        {
+          type: OBSERVABILITY_SIGNIFICANT_EVENT_ATTACHMENT_TYPE_ID,
+          data: {
+            index: SIGEVENTS_INDEX,
+            eventId,
+          },
+        },
+      ]);
       setRemediationPrompt(buildRemediationPrompt(eventTitle));
       setConversationKey((prev) => prev + 1);
     },
