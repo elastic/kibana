@@ -54,6 +54,10 @@ Before proceeding to Phase B, verify:
 
 If any of these are false, return to Phase A. A fix without confirmed reproduction is a guess — do not proceed to Phase B until all three conditions are met.
 
+`user_acknowledged` must only be `yes` if the user replied in the conversation after seeing
+the reproduction report. If the agent wrote that field without a real user reply, treat it
+as `pending` and return to Phase A.
+
 ### Phase B: Fix
 
 Read and follow `.agents/skills/bug-fix/SKILL.md` in full, with `analysis.json` and
