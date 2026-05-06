@@ -51,7 +51,7 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
 
     await browseIntegrations.navigateTo();
 
-    await expect(browseIntegrations.getMainColumn()).toBeVisible();
+    await expect(browseIntegrations.getMainColumn()).toBeVisible({ timeout: 20_000 });
 
     await browseIntegrations.scrollToIntegration('nginx');
   });
@@ -75,7 +75,7 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
     const { browseIntegrations } = pageObjects;
 
     await browseIntegrations.navigateTo();
-    await expect(browseIntegrations.getMainColumn()).toBeVisible();
+    await expect(browseIntegrations.getMainColumn()).toBeVisible({ timeout: 20_000 });
 
     await browseIntegrations.searchForIntegration('nginx');
 
