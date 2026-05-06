@@ -24,10 +24,14 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
     if (config.isCloud) {
       return;
     }
+
+    await apiServices.fleet.internal.setup();
+
     await apiServices.core.settings({
       'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: true },
     });
   });
+
   test.afterAll(async ({ apiServices, config }) => {
     if (config.isCloud) {
       return;
