@@ -7,6 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
+import {
+  CaseSeverity as BundledCaseSeveritySchema,
+  CaseStatus as BundledCaseStatusSchema,
+  Settings,
+} from '../../../bundled-types.gen';
 import { CASE_EXTENDED_FIELDS } from '../../../constants';
 import { ExternalServiceSchema } from '../external_service/v1';
 import { CaseAssigneesSchema, UserSchema } from '../user/v1';
@@ -21,31 +26,19 @@ export { CaseStatuses, CaseSeverity };
 /**
  * Status
  */
-export const CaseStatusSchema = z.union([
-  z.literal(CaseStatuses.open),
-  z.literal(CaseStatuses['in-progress']),
-  z.literal(CaseStatuses.closed),
-]);
+export const CaseStatusSchema = BundledCaseStatusSchema;
 
 export const caseStatuses = Object.values(CaseStatuses);
 
 /**
  * Severity
  */
-export const CaseSeveritySchema = z.union([
-  z.literal(CaseSeverity.LOW),
-  z.literal(CaseSeverity.MEDIUM),
-  z.literal(CaseSeverity.HIGH),
-  z.literal(CaseSeverity.CRITICAL),
-]);
+export const CaseSeveritySchema = BundledCaseSeveritySchema;
 
 /**
  * Case
  */
-export const CaseSettingsSchema = z.object({
-  syncAlerts: z.boolean(),
-  extractObservables: z.boolean().optional(),
-});
+export const CaseSettingsSchema = Settings;
 
 export const CaseTemplateSchema = z.object({
   id: z.string(),
