@@ -41,6 +41,9 @@ If `screenshots` or `video_urls` are present, review them — use the Read tool 
 - Expected behavior
 - Feature flags — if the classification hints at experimental features but none are listed,
   tell the user: reproduction will fail without them and the ticket needs updating
+- **Deployment type** — if the ticket is for a serverless environment, stop immediately
+  and tell the user: this skill only supports stateful (ECH) environments. Serverless
+  reproduction requires a different setup not covered here.
 
 If anything is missing, tell the user what's needed and wait for an updated ticket.
 A poorly specified ticket produces a misdiagnosed fix — it's faster to fix the ticket now.
