@@ -77,6 +77,7 @@ export function PriorAssistantSpaceAdminRevert({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              flush="left"
               onClick={onRevert}
               data-test-subj="agentBuilderAnnouncementRevertButton"
             >

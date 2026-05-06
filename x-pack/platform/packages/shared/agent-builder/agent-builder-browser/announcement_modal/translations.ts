@@ -69,7 +69,7 @@ export const NOTE_HISTORY_UNTOUCHED = i18n.translate(
 export const NOTE_REVERT_IN_SETTINGS = i18n.translate(
   'xpack.agentBuilder.announcementModal.noteRevertInSettings',
   {
-    defaultMessage: 'Revert back to AI Assistant anytime in GenAI Settings',
+    defaultMessage: 'Revert all users in this space to AI Assistant anytime in GenAI Settings',
   }
 );
 
