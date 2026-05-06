@@ -118,7 +118,7 @@ export class CustomIconsPanel extends Component<Props, State> {
         <EuiTextAlign textAlign="center">
           <EuiButtonEmpty
             size="xs"
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={() => this._handleNewIcon()}
             data-test-subj="mapsCustomIconPanel-add"
           >

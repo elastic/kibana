@@ -127,9 +127,10 @@ async function distributeScoutTestsOnLanes() {
     lanesGroupStepDependencies.push('build_scout_tests');
   }
 
-  for (const { key } of steps) {
-    bk.setMetadata(`cancel_on_gate_failure:${key}`, 'true');
-  }
+  bk.setMetadata(
+    'cancel_on_gate_failure_batch:scout_lanes',
+    JSON.stringify(steps.map(({ key }) => key))
+  );
 
   // Write the test lane load IDs to disk in preparation of uploading as an artifact
   fs.writeFileSync(testLaneLoadsFilePath, JSON.stringify(loadIDsByStepKey));

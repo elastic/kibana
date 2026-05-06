@@ -21,14 +21,14 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../shared/components/test_ids';
-import { usePaginatedAlerts } from '../../../flyout/document_details/left/hooks/use_paginated_alerts';
+import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../document/hooks/use_fetch_related_alerts_by_ancestry');
-jest.mock('../../../flyout/document_details/left/hooks/use_paginated_alerts');
+jest.mock('../hooks/use_paginated_alerts');
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../data_view_manager/hooks/use_security_default_patterns');
 jest.mock('../../../common/hooks/is_in_security_app');
@@ -50,7 +50,7 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID
 );
 
-const renderRelatedAlertsByAncestry = (hidePreviewLink = false) =>
+const renderRelatedAlertsByAncestry = () =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={mockContextValue}>
@@ -58,7 +58,7 @@ const renderRelatedAlertsByAncestry = (hidePreviewLink = false) =>
           documentId={documentId}
           scopeId={scopeId}
           onShowAlert={mockOnShowAlert}
-          hidePreviewLink={hidePreviewLink}
+          useLegacyExpandableFlyout={false}
         />
       </DocumentDetailsContext.Provider>
     </TestProviders>
@@ -116,36 +116,6 @@ describe('<RelatedAlertsByAncestry />', () => {
       getByTestId(`${CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}InvestigateInTimeline`)
     ).toBeInTheDocument();
     expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should not render rule preview links when hidePreviewLink is true', () => {
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      data: ['1'],
-      dataCount: 1,
-    });
-    (usePaginatedAlerts as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      data: [
-        {
-          _id: '1',
-          _index: 'index',
-          fields: {
-            '@timestamp': ['2022-01-01'],
-            'kibana.alert.rule.name': ['Rule1'],
-            'kibana.alert.reason': ['Reason1'],
-            'kibana.alert.severity': ['Severity1'],
-          },
-        },
-      ],
-    });
-
-    const { queryByTestId } = renderRelatedAlertsByAncestry(true);
-    expect(
-      queryByTestId(`${CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}RulePreview`)
-    ).not.toBeInTheDocument();
   });
 
   it('should render null if error', () => {

@@ -172,6 +172,26 @@ actions:
             examples:
               disableLegacyURLRequestExample1:
                 $ref: "../examples/disable_legacy_url_request1.yaml"
+      responses:
+        204:
+          description: 'Indicates a successful call.'
+  - target: "$.paths['/api/spaces/_get_shareable_references']['post']"
+    description: "Add examples to get shareable references API"
+    update:
+      requestBody:
+        content:
+          application/json:
+            examples:
+              getShareableReferencesRequestExample1:
+                $ref: "../examples/get_shareable_references_request1.yaml"
+      responses:
+        200:
+          description: 'Indicates a successful call.'
+          content:
+            application/json:
+              examples:
+                getShareableReferencesResponseExample1:
+                  $ref: "../examples/get_shareable_references_response1.yaml"
   - target: "$.paths['/api/spaces/_update_objects_spaces']['post']"
     description: "Add example to update saved object spaces API"
     update:

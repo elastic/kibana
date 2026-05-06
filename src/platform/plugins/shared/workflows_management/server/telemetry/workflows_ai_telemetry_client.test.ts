@@ -103,7 +103,7 @@ describe('WorkflowsAiTelemetryClient', () => {
 
     it('reports creation flag correctly', () => {
       client.reportEditResult({
-        toolId: 'workflows.workflow_replace_yaml',
+        toolId: 'workflows.workflow_set_yaml',
         editSuccess: true,
         isCreation: true,
         validation: { valid: true },

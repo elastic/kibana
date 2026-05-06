@@ -17,6 +17,7 @@ import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { StreamOverview } from '../../../stream_detail_overview';
 import { Wrapper } from './wrapper';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
+import { PendingRootDataStreamCallout } from './pending_root_data_stream_callout';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { WiredAdvancedView } from './advanced_view/wired_advanced_view';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
@@ -66,7 +67,7 @@ export function WiredStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const {
-    features: { attachments, overviewPage },
+    features: { overviewPage },
   } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
@@ -109,7 +110,10 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  if (!definition.data_stream_exists) {
+  const isNewRootStream =
+    isRoot(definition.stream.name) && definition.stream.name !== LOGS_ROOT_STREAM_NAME;
+
+  if (!definition.data_stream_exists && !isNewRootStream) {
     return (
       <>
         <StreamsAppPageTemplate.Header
@@ -130,6 +134,31 @@ export function WiredStreamDetailManagement({
             canDelete={
               !isRoot(definition.stream.name) || definition.stream.name === LOGS_ROOT_STREAM_NAME
             }
+            refreshDefinition={refreshDefinition}
+          />
+        </StreamsAppPageTemplate.Body>
+      </>
+    );
+  }
+
+  if (!definition.data_stream_exists && isNewRootStream) {
+    return (
+      <>
+        <StreamsAppPageTemplate.Header
+          bottomBorder="extended"
+          pageTitle={
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {key}
+              <EuiBadgeGroup gutterSize="s">
+                <WiredStreamBadge />
+              </EuiBadgeGroup>
+            </EuiFlexGroup>
+          }
+        />
+        <StreamsAppPageTemplate.Body>
+          <PendingRootDataStreamCallout
+            streamName={definition.stream.name}
+            canManage={definition.privileges.manage}
             refreshDefinition={refreshDefinition}
           />
         </StreamsAppPageTemplate.Body>
@@ -203,16 +232,12 @@ export function WiredStreamDetailManagement({
         </EuiToolTip>
       ),
     },
-    ...(attachments.enabled
-      ? {
-          attachments: {
-            content: <StreamDetailAttachments definition={definition} />,
-            label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
-              defaultMessage: 'Attachments',
-            }),
-          },
-        }
-      : {}),
+    attachments: {
+      content: <StreamDetailAttachments definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
+        defaultMessage: 'Attachments',
+      }),
+    },
     ...otherTabs,
     ...(definition.privileges.manage
       ? {

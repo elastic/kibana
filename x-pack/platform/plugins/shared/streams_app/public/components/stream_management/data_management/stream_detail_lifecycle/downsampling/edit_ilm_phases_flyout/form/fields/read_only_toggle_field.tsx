@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import {
   EuiCheckbox,
   EuiFlexGroup,
@@ -15,63 +14,64 @@ import {
   EuiIconTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { IlmPhasesFlyoutFormInternal } from '../types';
+import { useController, useFormContext, type FieldPath } from 'react-hook-form';
+import type { IlmPhasesFlyoutFormInternal, ReadonlyAllowedPhase } from '../types';
 
 export interface ReadOnlyToggleFieldProps {
-  form: FormHook<IlmPolicyPhases, IlmPhasesFlyoutFormInternal>;
-  phaseName: PhaseName | undefined;
+  phaseName: ReadonlyAllowedPhase;
   dataTestSubj: string;
-  allowedPhases: ReadonlyArray<PhaseName>;
 }
 
-export const ReadOnlyToggleField = ({
-  form,
-  phaseName,
-  dataTestSubj,
-  allowedPhases,
-}: ReadOnlyToggleFieldProps) => {
+export const ReadOnlyToggleField = ({ phaseName, dataTestSubj }: ReadOnlyToggleFieldProps) => {
   const checkboxId = useGeneratedHtmlId({
     prefix: `${dataTestSubj}ReadOnlyCheckbox-${phaseName}`,
   });
 
-  if (!phaseName) return null;
-  const readonlyAllowed = allowedPhases.includes(phaseName);
-  if (!readonlyAllowed) return null;
+  return (
+    <ReadOnlyToggleControl
+      checkboxId={checkboxId}
+      path={`_meta.${phaseName}.readonlyEnabled`}
+      dataTestSubj={dataTestSubj}
+    />
+  );
+};
 
-  const path = `_meta.${phaseName}.readonlyEnabled`;
+const ReadOnlyToggleControl = ({
+  checkboxId,
+  path,
+  dataTestSubj,
+}: {
+  checkboxId: string;
+  path: FieldPath<IlmPhasesFlyoutFormInternal>;
+  dataTestSubj: string;
+}) => {
+  const { control } = useFormContext<IlmPhasesFlyoutFormInternal>();
+  const { field } = useController({ control, name: path });
+  const readonlyValue = Boolean(field.value);
 
   return (
-    <UseField form={form} path={path}>
-      {(field) => {
-        const readonlyValue = Boolean(field.value);
-        return (
-          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiCheckbox
-                id={checkboxId}
-                checked={readonlyValue}
-                label={i18n.translate('xpack.streams.editIlmPhasesFlyout.readOnlyLabel', {
-                  defaultMessage: 'Enable read-only access',
-                })}
-                data-test-subj={`${dataTestSubj}ReadOnlyCheckbox`}
-                onChange={(e) => {
-                  field.onChange(e);
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={i18n.translate('xpack.streams.editIlmPhasesFlyout.readOnlyHelp', {
-                  defaultMessage:
-                    'Enable to make the index read only. Disable to allow writing to the index.',
-                })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      }}
-    </UseField>
+    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiCheckbox
+          id={checkboxId}
+          checked={readonlyValue}
+          label={i18n.translate('xpack.streams.editIlmPhasesFlyout.readOnlyLabel', {
+            defaultMessage: 'Enable read-only access',
+          })}
+          data-test-subj={`${dataTestSubj}ReadOnlyCheckbox`}
+          onChange={(e) => {
+            field.onChange(e.target.checked);
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip
+          content={i18n.translate('xpack.streams.editIlmPhasesFlyout.readOnlyHelp', {
+            defaultMessage:
+              'Enable to make the index read only. Disable to allow writing to the index.',
+          })}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

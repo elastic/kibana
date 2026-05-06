@@ -67,6 +67,7 @@
             "lineNumber": 21,
             "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "AiButtonProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -160,6 +161,7 @@
             "lineNumber": 26,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "AiButtonDefaultProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -249,6 +251,7 @@
             "lineNumber": 26,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "AiButtonEmptyProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -354,6 +357,7 @@
             "lineNumber": 26,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "AiButtonIconProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -407,6 +411,7 @@
             "lineNumber": 35,
             "columnNumber": 24,
             "deprecated": false,
+            "docsReferencedTypeName": "AiIconProps",
             "trackAdoption": false,
             "isRequired": true
           }

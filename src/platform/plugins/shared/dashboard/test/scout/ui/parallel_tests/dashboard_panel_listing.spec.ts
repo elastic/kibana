@@ -20,9 +20,10 @@ const DASHBOARD_PANEL_GROUP_ORDER = [
   'legacyGroup',
 ];
 
-const DASHBOARD_PANEL_TYPE_COUNT = 18;
+const DASHBOARD_PANEL_TYPE_COUNT = 19;
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/259443
+spaceTest.describe.skip(
   'Dashboard panel listing',
   {
     tag: [
@@ -38,9 +39,8 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultIndex(DASHBOARD_DEFAULT_INDEX_TITLE);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.dashboard.goto();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

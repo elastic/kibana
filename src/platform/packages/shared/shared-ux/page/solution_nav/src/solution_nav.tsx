@@ -19,9 +19,7 @@ import type {
   EuiSideNavProps,
 } from '@elastic/eui';
 import {
-  EuiCollapsibleNavGroup,
   EuiFlyout,
-  EuiPanel,
   EuiSideNav,
   EuiSpacer,
   EuiTitle,
@@ -31,9 +29,7 @@ import {
   useEuiTheme,
   useEuiThemeCSSVariables,
   EuiPageSidebar,
-  useEuiMinBreakpoint,
   euiCanAnimate,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -84,10 +80,6 @@ export type SolutionNavProps = Omit<EuiSideNavProps<{}>, 'children' | 'items' | 
    * Hidden when the nav is collapsed.
    */
   footer?: React.ReactNode;
-  /**
-   * Whether the nav has pinned bottom items.
-   */
-  hasPinnedBottomNavItems?: boolean;
 };
 
 const FLYOUT_SIZE = 248;
@@ -119,7 +111,6 @@ export const SolutionNav: FC<SolutionNavProps> = ({
   onCollapse,
   canBeCollapsed = true,
   footer,
-  hasPinnedBottomNavItems = false,
   ...rest
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -208,7 +199,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     if (isLargerBreakpoint) {
       return isOpenOnDesktop ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
     }
-    if (isMediumBreakpoint) {
+    if (isMediumBreakpoint || isSmallerBreakpoint) {
       return isSideNavOpenOnMobile || !canBeCollapsed ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
     }
     return '0';
@@ -217,6 +208,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     isOpenOnDesktop,
     isSideNavOpenOnMobile,
     canBeCollapsed,
+    isSmallerBreakpoint,
     isMediumBreakpoint,
     isLargerBreakpoint,
   ]);
@@ -233,12 +225,9 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     solutionNav: css`
       display: flex;
       flex-direction: column;
-
-      ${useEuiMinBreakpoint('m')} {
-        width: ${FLYOUT_SIZE_CSS};
-        padding: ${euiTheme.size.l};
-        height: 100%;
-      }
+      width: ${FLYOUT_SIZE_CSS};
+      padding: ${euiTheme.size.l};
+      height: 100%;
     `,
     solutionNavHidden: css`
       pointer-events: none;
@@ -263,16 +252,6 @@ export const SolutionNav: FC<SolutionNavProps> = ({
 
   const footerContent = footer && (
     <div css={styles.solutionNavFooter} data-test-subj="solutionNavFooter">
-      <EuiHorizontalRule
-        margin="m"
-        css={
-          hasPinnedBottomNavItems
-            ? css`
-                margin-block-start: ${euiTheme.size.xs};
-              `
-            : undefined
-        }
-      />
       {footer}
     </div>
   );
@@ -283,25 +262,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
 
   return (
     <>
-      {isSmallerBreakpoint && (
-        // @ts-expect-error Mismatch in collapsible vs unconllapsible props
-        <EuiCollapsibleNavGroup
-          className={sideNavClasses}
-          css={[styles.solutionNav, isHidden && styles.solutionNavHidden]}
-          paddingSize="none"
-          background="none"
-          title={titleText}
-          titleElement="span"
-          isCollapsible={canBeCollapsed}
-          initialIsOpen={false}
-        >
-          <EuiPanel color="transparent" paddingSize="s">
-            {solutionNavContent}
-            {footerContent}
-          </EuiPanel>
-        </EuiCollapsibleNavGroup>
-      )}
-      {isMediumBreakpoint && (
+      {(isSmallerBreakpoint || isMediumBreakpoint) && (
         <>
           {(isSideNavOpenOnMobile || !canBeCollapsed) && (
             <EuiFlyout
@@ -311,6 +272,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
               side="left"
               size={FLYOUT_SIZE}
               closeButtonPosition={closeFlyoutButtonPosition}
+              aria-labelledby={headingID}
               css={css`
                 // Put the page background color in the flyout version too
                 background-color: ${euiTheme.colors.backgroundBasePlain};

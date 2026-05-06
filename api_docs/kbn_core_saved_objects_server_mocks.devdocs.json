@@ -192,7 +192,7 @@
                 "id": "def-server.savedObjectsServiceMock.createMigrationContext.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  migrationVersion = '8.0.0',\n  convertToMultiNamespaceTypeVersion,\n  isSingleNamespaceType = false,\n}",
                 "description": [],
                 "signature": [
                   "{ migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; }"

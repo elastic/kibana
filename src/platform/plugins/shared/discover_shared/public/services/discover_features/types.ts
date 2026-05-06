@@ -44,9 +44,17 @@ export interface ObservabilityStreamsFeatureRenderDeps {
   renderCpsWarning?: boolean;
 }
 
+export interface ObservabilityStreamsFeatureRenderByStreamNameDeps {
+  streamName: string;
+  renderCpsWarning?: boolean;
+}
+
 export interface ObservabilityStreamsFeature {
   id: 'streams';
   renderFlyoutStreamField: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
+  renderFlyoutStreamFieldByStreamName: (
+    deps: ObservabilityStreamsFeatureRenderByStreamNameDeps
+  ) => JSX.Element;
   renderFlyoutStreamProcessingLink: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
 }
 
@@ -132,7 +140,7 @@ export interface SecuritySolutionAlertFlyoutHeaderTitleFeature {
 
 export interface SecuritySolutionAlertFlyoutFooterFeature {
   id: 'security-solution-alert-flyout-footer';
-  renderFooter: (hit: DataTableRecord) => JSX.Element;
+  renderFooter: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
 }
 
 export type SecuritySolutionFeature =

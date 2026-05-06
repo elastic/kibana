@@ -10,8 +10,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const PROFILES_API = '/internal/anonymization/profiles';
 const API_VERSION = '1';
-const GLOBAL_PROFILE_TARGET_TYPE = 'index';
-const GLOBAL_PROFILE_TARGET_ID = '__kbn_global_anonymization_profile__';
 
 const defaultProfile = {
   name: 'Test Anonymization Profile',
@@ -32,284 +30,55 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
-  const spaces = getService('spaces');
 
   describe('anonymization profiles', function () {
-    let createdProfileId: string;
+    // The anonymization feature is disabled (ANONYMIZATION_FEATURE_ACTIVE = false).
+    // All profile endpoints return 404. RBAC is still enforced (403 for missing privileges).
 
-    describe('CRUD lifecycle', () => {
-      it('creates a profile', async () => {
-        const { body, status } = await supertest
+    describe('feature disabled — profile endpoints return 404', () => {
+      it('POST profile returns 404', async () => {
+        const { status } = await supertest
           .post(PROFILES_API)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', API_VERSION)
           .send(defaultProfile);
 
-        expect(status).to.be(200);
-        expect(body.id).to.be.a('string');
-        expect(body.name).to.be(defaultProfile.name);
-        expect(body.targetType).to.be(defaultProfile.targetType);
-        expect(body.targetId).to.be(defaultProfile.targetId);
-        expect(body.rules.fieldRules).to.have.length(4);
-
-        createdProfileId = body.id;
+        expect(status).to.be(404);
       });
 
-      it('gets a profile by ID', async () => {
-        const { body, status } = await supertest
-          .get(`${PROFILES_API}/${createdProfileId}`)
-          .set('elastic-api-version', API_VERSION);
-
-        expect(status).to.be(200);
-        expect(body.id).to.be(createdProfileId);
-        expect(body.name).to.be(defaultProfile.name);
-      });
-
-      it('finds profiles', async () => {
-        const { body, status } = await supertest
-          .get(`${PROFILES_API}/_find`)
-          .set('elastic-api-version', API_VERSION);
-
-        expect(status).to.be(200);
-        expect(body.data).to.be.an('array');
-        expect(body.total).to.be.greaterThan(0);
-
-        const found = body.data.find((p: { id: string }) => p.id === createdProfileId);
-        expect(found).to.be.ok();
-      });
-
-      it('updates a profile', async () => {
-        const { body, status } = await supertest
-          .put(`${PROFILES_API}/${createdProfileId}`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', API_VERSION)
-          .send({
-            name: 'Updated Profile Name',
-            description: 'Updated description',
-          });
-
-        expect(status).to.be(200);
-        expect(body.name).to.be('Updated Profile Name');
-        expect(body.description).to.be('Updated description');
-      });
-
-      it('deletes a profile', async () => {
+      it('GET profile by ID returns 404', async () => {
         const { status } = await supertest
-          .delete(`${PROFILES_API}/${createdProfileId}`)
-          .set('kbn-xsrf', 'true')
+          .get(`${PROFILES_API}/any-id`)
           .set('elastic-api-version', API_VERSION);
 
-        expect(status).to.be(200);
-
-        // Verify it's gone
-        const { status: getStatus } = await supertest
-          .get(`${PROFILES_API}/${createdProfileId}`)
-          .set('elastic-api-version', API_VERSION);
-
-        expect(getStatus).to.be(404);
-      });
-    });
-
-    describe('uniqueness enforcement', () => {
-      let profileId: string;
-
-      before(async () => {
-        const { body } = await supertest
-          .post(PROFILES_API)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', API_VERSION)
-          .send({
-            ...defaultProfile,
-            targetId: 'unique-test-data-view',
-          });
-        profileId = body.id;
+        expect(status).to.be(404);
       });
 
-      after(async () => {
-        await supertest
-          .delete(`${PROFILES_API}/${profileId}`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', API_VERSION);
-      });
-
-      it('returns 409 when creating a duplicate target in the same space', async () => {
+      it('GET _find returns 404', async () => {
         const { status } = await supertest
-          .post(PROFILES_API)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', API_VERSION)
-          .send({
-            ...defaultProfile,
-            targetId: 'unique-test-data-view',
-          });
-
-        expect(status).to.be(409);
-      });
-    });
-
-    describe('field rule validation', () => {
-      it('returns 400 when anonymized=true but entityClass is missing', async () => {
-        const { status, body } = await supertest
-          .post(PROFILES_API)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', API_VERSION)
-          .send({
-            ...defaultProfile,
-            targetId: 'validation-test-data-view',
-            rules: {
-              fieldRules: [{ field: 'host.name', allowed: true, anonymized: true }],
-            },
-          });
-
-        expect(status).to.be(400);
-        expect(body.message).to.contain('entityClass');
-      });
-    });
-
-    describe('global profile behavior', () => {
-      it('lazily creates or self-heals the global profile on _find', async () => {
-        const { body, status } = await supertest
           .get(`${PROFILES_API}/_find`)
           .set('elastic-api-version', API_VERSION);
 
-        expect(status).to.be(200);
-        const globalProfile = body.data.find(
-          (profile: { targetType: string; targetId: string }) =>
-            profile.targetType === GLOBAL_PROFILE_TARGET_TYPE &&
-            profile.targetId === GLOBAL_PROFILE_TARGET_ID
-        );
-
-        expect(globalProfile).to.be.ok();
-        expect(globalProfile.rules.fieldRules).to.eql([]);
+        expect(status).to.be(404);
       });
 
-      it('recreates global profile immediately on _find after deletion', async () => {
-        const findResponse = await supertest
-          .get(`${PROFILES_API}/_find`)
-          .set('elastic-api-version', API_VERSION);
-
-        expect(findResponse.status).to.be(200);
-        const globalProfile = findResponse.body.data.find(
-          (profile: { id: string; targetType: string; targetId: string }) =>
-            profile.targetType === GLOBAL_PROFILE_TARGET_TYPE &&
-            profile.targetId === GLOBAL_PROFILE_TARGET_ID
-        );
-        expect(globalProfile).to.be.ok();
-
-        const deleteResponse = await supertest
-          .delete(`${PROFILES_API}/${globalProfile.id}`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', API_VERSION);
-        expect(deleteResponse.status).to.be(200);
-
-        const healResponse = await supertest
-          .get(`${PROFILES_API}/_find`)
-          .set('elastic-api-version', API_VERSION);
-        expect(healResponse.status).to.be(200);
-
-        const healedGlobalProfile = healResponse.body.data.find(
-          (profile: { targetType: string; targetId: string }) =>
-            profile.targetType === GLOBAL_PROFILE_TARGET_TYPE &&
-            profile.targetId === GLOBAL_PROFILE_TARGET_ID
-        );
-        expect(healedGlobalProfile).to.be.ok();
-      });
-
-      it('rejects non-empty fieldRules on create for global profile', async () => {
-        const { body, status } = await supertest
-          .post(PROFILES_API)
+      it('PUT profile returns 404', async () => {
+        const { status } = await supertest
+          .put(`${PROFILES_API}/any-id`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', API_VERSION)
-          .send({
-            name: 'Invalid global profile',
-            targetType: GLOBAL_PROFILE_TARGET_TYPE,
-            targetId: GLOBAL_PROFILE_TARGET_ID,
-            rules: {
-              fieldRules: [{ field: 'host.name', allowed: true, anonymized: false }],
-            },
-          });
+          .send({ name: 'Updated' });
 
-        expect(status).to.be(400);
-        expect(body.message).to.contain('Global anonymization profile cannot contain fieldRules');
-      });
-    });
-
-    describe('space isolation', () => {
-      it('returns 404 when getting a profile from a different space', async () => {
-        const spaceId = `anon-space-${Date.now()}`;
-        await spaces.create({ id: spaceId, name: spaceId });
-
-        try {
-          // Create a profile in the custom space
-          const { body: created, status: createStatus } = await supertest
-            .post(`/s/${spaceId}${PROFILES_API}`)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', API_VERSION)
-            .send({
-              ...defaultProfile,
-              targetId: `space-isolation-${Date.now()}`,
-            });
-          expect(createStatus).to.be(200);
-
-          // Verify profile is visible inside its own space
-          const { status: sameSpaceStatus } = await supertest
-            .get(`/s/${spaceId}${PROFILES_API}/${created.id}`)
-            .set('elastic-api-version', API_VERSION);
-          expect(sameSpaceStatus).to.be(200);
-
-          // Verify profile is NOT visible from default space
-          const { status: defaultSpaceStatus } = await supertest
-            .get(`${PROFILES_API}/${created.id}`)
-            .set('elastic-api-version', API_VERSION);
-          expect(defaultSpaceStatus).to.be(404);
-
-          await supertest
-            .delete(`/s/${spaceId}${PROFILES_API}/${created.id}`)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', API_VERSION);
-        } finally {
-          await spaces.delete(spaceId);
-        }
+        expect(status).to.be(404);
       });
 
-      it('self-heals global profile in a newly created space on _find', async () => {
-        const spaceId = `anon-global-space-${Date.now()}`;
-        await spaces.create({ id: spaceId, name: spaceId });
-
-        try {
-          const { body, status } = await supertest
-            .get(`/s/${spaceId}${PROFILES_API}/_find`)
-            .set('elastic-api-version', API_VERSION);
-
-          expect(status).to.be(200);
-          const globalProfile = body.data.find(
-            (profile: { targetType: string; targetId: string }) =>
-              profile.targetType === GLOBAL_PROFILE_TARGET_TYPE &&
-              profile.targetId === GLOBAL_PROFILE_TARGET_ID
-          );
-          expect(globalProfile).to.be.ok();
-        } finally {
-          await spaces.delete(spaceId);
-        }
-      });
-    });
-
-    describe('alerts data view profile lazy initialization behavior', () => {
-      it('does not create the alerts profile from profile listing before alerts target runtime usage', async () => {
-        const { body, status } = await supertest
-          .get(
-            `${PROFILES_API}/_find?target_type=data_view&target_id=${encodeURIComponent(
-              'security-solution-alert-default'
-            )}`
-          )
+      it('DELETE profile returns 404', async () => {
+        const { status } = await supertest
+          .delete(`${PROFILES_API}/any-id`)
+          .set('kbn-xsrf', 'true')
           .set('elastic-api-version', API_VERSION);
 
-        expect(status).to.be(200);
-        expect(body.total).to.be(0);
-        expect(
-          body.data.some(
-            (p: { targetId: string }) => p.targetId === 'security-solution-alert-default'
-          )
-        ).to.be(false);
+        expect(status).to.be(404);
       });
     });
 

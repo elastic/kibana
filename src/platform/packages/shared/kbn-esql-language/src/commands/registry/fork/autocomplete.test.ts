@@ -29,8 +29,7 @@ import {
   ESQL_STRING_TYPES,
   ESQL_NUMBER_TYPES,
 } from '../../definitions/types';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '@elastic/esql';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 
 const allEvalFnsForWhere = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
@@ -146,7 +145,7 @@ describe('FORK Autocomplete', () => {
     });
 
     test('suggests pipe and new branch after complete branch', async () => {
-      await forkExpectSuggestions('FROM a | FORK (LIMIT 100) ', ['($0)']);
+      await forkExpectSuggestions('FROM a | FORK (LIMIT 100) ', ['($0)', '| ']);
       await forkExpectSuggestions('FROM a | FORK (LIMIT 100) (SORT keywordField ASC) ', [
         '($0)',
         '| ',
@@ -428,11 +427,8 @@ describe('FORK Autocomplete', () => {
 
       it('suggests pipe after complete subcommands', async () => {
         const assertSuggestsPipe = async (query: string) => {
-          const correctedQuery = correctQuerySyntax(query);
-          const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
           const cursorPosition = query.length;
-          const { command } = findAstPosition(root, cursorPosition);
+          const { command } = findAutocompleteAstPosition(query, cursorPosition);
           if (!command) {
             throw new Error('Command not found in the parsed query');
           }

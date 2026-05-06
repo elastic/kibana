@@ -31,6 +31,49 @@ export function resolveConnectorId(connectorId: string): string {
     : getConnectorIdAsUuid(connectorId);
 }
 
+/**
+ * Inference connectors may return 400 (not 409) when the backing inference endpoint
+ * was created by another parallel worker — treat as success and reuse.
+ */
+function isAlreadyExistsConnectorError(error: unknown): boolean {
+  if (!isAxiosError(error)) {
+    return false;
+  }
+  if (error.status === 409) {
+    return true;
+  }
+  if (error.status !== 400) {
+    return false;
+  }
+  const data = error.response?.data;
+  const message =
+    typeof data === 'object' && data !== null && 'message' in data
+      ? String((data as { message: unknown }).message)
+      : '';
+  return /already exists/i.test(message);
+}
+
+export async function deleteConnectorById({
+  fetch,
+  connectorId,
+  log,
+}: {
+  fetch: HttpHandler;
+  connectorId: string;
+  log: ToolingLog;
+}) {
+  log.info(`Deleting connector: ${connectorId}`);
+  await fetch({
+    path: `/api/actions/connector/${connectorId}`,
+    method: 'DELETE',
+  }).catch((error) => {
+    if (isAxiosError(error) && error.status === 404) {
+      return;
+    }
+    throw error;
+  });
+}
+
 export async function createConnectorFixture({
   predefinedConnector,
   fetch,
@@ -89,38 +132,26 @@ export async function createConnectorFixture({
     id: connectorIdAsUuid,
   };
 
-  async function deleteConnector() {
+  log.info(`Creating connector: ${predefinedConnector.id} as ${connectorIdAsUuid}`);
+
+  try {
     await fetch({
-      path: `/api/actions/connector/${connectorIdAsUuid}`,
-      method: 'DELETE',
-    }).catch((error) => {
-      if (isAxiosError(error) && error.status === 404) {
-        return;
-      }
-      throw error;
+      path: `/api/actions/connector/${connectorWithUuid.id}`,
+      method: 'POST',
+      body: JSON.stringify({
+        config: connectorWithUuid.config,
+        connector_type_id: connectorWithUuid.actionTypeId,
+        name: connectorWithUuid.name,
+        secrets: connectorWithUuid.secrets,
+      }),
     });
+  } catch (error) {
+    if (isAlreadyExistsConnectorError(error)) {
+      log.info(`Connector or inference endpoint already exists, reusing: ${connectorIdAsUuid}`);
+    } else {
+      throw error;
+    }
   }
 
-  log.info(`Deleting existing connector: ${predefinedConnector.id} as ${connectorIdAsUuid}`);
-
-  await deleteConnector();
-
-  log.info(`Creating connector`);
-
-  await fetch({
-    path: `/api/actions/connector/${connectorWithUuid.id}`,
-    method: 'POST',
-    body: JSON.stringify({
-      config: connectorWithUuid.config,
-      connector_type_id: connectorWithUuid.actionTypeId,
-      name: connectorWithUuid.name,
-      secrets: connectorWithUuid.secrets,
-    }),
-  });
-
   await use(connectorWithUuid);
-
-  // teardown
-  log.info(`Deleting connector: ${predefinedConnector.id} as ${connectorIdAsUuid}`);
-  await deleteConnector();
 }

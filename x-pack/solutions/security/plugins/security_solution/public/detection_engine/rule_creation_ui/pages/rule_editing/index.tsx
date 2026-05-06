@@ -82,21 +82,30 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderRuleCreation } from '../rule_creation/hooks/use_agent_builder_rule_creation';
+import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
-  const { application, triggersActionsUi, cps } = useKibana().services;
+  const { application, triggersActionsUi, cps, telemetry, aiRuleCreation } = useKibana().services;
   const { navigateToApp } = application;
   useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  const {
+    rules: { edit: canEditRules, read: canReadRules },
+    investigationGuide: { edit: canEditInvestigationGuides },
+    customHighlightedFields: { edit: canEditCustomHighlightedFields },
+  } = useUserPrivileges().rulesPrivileges;
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const hasRulePermissionsForEditPage =
+    canEditRules ||
+    (canReadRules && canEditInvestigationGuides) ||
+    (canReadRules && canEditCustomHighlightedFields);
 
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
-  const canEditRule = isRulesCustomizationEnabled || !rule.immutable;
+  const isRuleEditable = isRulesCustomizationEnabled || !rule.immutable;
 
   const prebuiltCustomizationUpsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage(
     'prebuilt_rule_customization_description'
@@ -104,9 +113,15 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
 
-  const [activeStep, setActiveStep] = useState<RuleStep>(
-    canEditRule ? RuleStep.defineRule : RuleStep.ruleActions
-  );
+  const getStartingActiveStep = () => {
+    if (isRuleEditable) {
+      return canEditRules ? RuleStep.defineRule : RuleStep.aboutRule;
+    } else {
+      return RuleStep.ruleActions;
+    }
+  };
+
+  const [activeStep, setActiveStep] = useState<RuleStep>(getStartingActiveStep());
   const { mutateAsync: updateRule, isLoading } = useUpdateRule();
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
@@ -145,7 +160,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     actionsStepDefault: ruleActionsData,
   });
 
-  useAgentBuilderRuleCreation({
+  const { isAiRuleUpdateRef } = useAgentBuilderRuleCreation({
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
@@ -214,7 +229,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   });
 
   const customizationDisabledTooltip =
-    !canEditRule && !isRulesCustomizationEnabled
+    !isRuleEditable && !isRulesCustomizationEnabled
       ? prebuiltCustomizationUpsellingMessage
       : undefined;
 
@@ -224,7 +239,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-define-tab',
         id: RuleStep.defineRule,
         name: ruleI18n.DEFINITION,
-        disabled: !canEditRule,
+        disabled: !isRuleEditable || !canEditRules,
         tooltip: customizationDisabledTooltip,
         content: (
           <div
@@ -264,7 +279,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-about-tab',
         id: RuleStep.aboutRule,
         name: ruleI18n.ABOUT,
-        disabled: !canEditRule,
+        disabled: !isRuleEditable,
         tooltip: customizationDisabledTooltip,
         content: (
           <div
@@ -298,7 +313,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-schedule-tab',
         id: RuleStep.scheduleRule,
         name: ruleI18n.SCHEDULE,
-        disabled: !canEditRule,
+        disabled: !isRuleEditable || !canEditRules,
         tooltip: customizationDisabledTooltip,
         content: (
           <div
@@ -354,7 +369,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       },
     ],
     [
-      canEditRule,
+      isRuleEditable,
+      canEditRules,
       customizationDisabledTooltip,
       activeStep,
       loading,
@@ -392,17 +408,37 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     const localDefineStepData: DefineStepRule = defineFieldsTransform({
       ...defineStepData,
     });
+    const formattedRule = formatRule<RuleUpdateProps>(
+      localDefineStepData,
+      aboutStepData,
+      scheduleStepData,
+      actionsStepData,
+      triggersActionsUi.actionTypeRegistry,
+      rule?.exceptions_list
+    );
+
+    if (rule?.meta) {
+      formattedRule.meta = { ...rule.meta, ...formattedRule.meta };
+    }
+
     const updatedRule = await updateRule({
-      ...formatRule<RuleUpdateProps>(
-        localDefineStepData,
-        aboutStepData,
-        scheduleStepData,
-        actionsStepData,
-        triggersActionsUi.actionTypeRegistry,
-        rule?.exceptions_list
-      ),
+      ...formattedRule,
       ...(ruleId ? { id: ruleId } : {}),
     });
+
+    const aiSession = aiRuleCreation.getSession();
+    const isAiEdited = isAiRuleUpdateRef.current;
+    telemetry.reportEvent(RuleCreationEventTypes.RuleEdited, {
+      creationSource: isAiEdited ? 'ai' : 'manual',
+      sessionId: aiSession?.sessionId ?? '',
+      ruleType: updatedRule.type,
+      enabled: updatedRule.enabled,
+      numberOfAiEdits: aiSession?.applyCount ?? 0,
+      durationSinceSessionStartMs: aiSession ? Date.now() - aiSession.startTimestamp : 0,
+    });
+    if (isAiEdited) {
+      aiRuleCreation.clearSession();
+    }
 
     addSuccess(i18n.SUCCESSFULLY_SAVED_RULE(updatedRule?.name ?? ''));
     navigateToApp(APP_UI_ID, {
@@ -412,21 +448,24 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   }, [
     aboutStepData,
     actionsStepData,
+    aiRuleCreation,
     defineStepData,
     defineFieldsTransform,
     addSuccess,
+    isAiRuleUpdateRef,
     navigateToApp,
-    rule?.exceptions_list,
+    rule,
     ruleId,
     scheduleStepData,
     startTransaction,
+    telemetry,
     triggersActionsUi.actionTypeRegistry,
     updateRule,
   ]);
 
   const onSubmit = useCallback(async () => {
     const actionsStepFormValid = await actionsStepForm.validate();
-    if (!canEditRule) {
+    if (!isRuleEditable) {
       // Since users cannot edit Define, About and Schedule tabs of the rule, we skip validation of those to avoid
       // user confusion of seeing that those tabs have error and not being able to see or do anything about that.
       if (actionsStepFormValid) {
@@ -470,7 +509,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     await saveChanges();
   }, [
     actionsStepForm,
-    canEditRule,
+    isRuleEditable,
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
@@ -571,7 +610,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       path: getDetectionEngineUrl(),
     });
     return null;
-  } else if (!canEditRules) {
+  } else if (!hasRulePermissionsForEditPage) {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId ?? ''),

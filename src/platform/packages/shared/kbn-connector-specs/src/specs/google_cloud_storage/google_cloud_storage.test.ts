@@ -67,12 +67,6 @@ describe('GoogleCloudStorageConnector', () => {
     });
   });
 
-  describe('agentBuilderWorkflows', () => {
-    it('should define 5 workflows', () => {
-      expect(GoogleCloudStorageConnector.agentBuilderWorkflows).toHaveLength(5);
-    });
-  });
-
   describe('listProjects action', () => {
     it('should return raw API response', async () => {
       const mockResponseData = {

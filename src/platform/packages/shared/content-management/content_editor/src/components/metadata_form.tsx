@@ -21,7 +21,7 @@ import {
 
 import { ContentEditorFlyoutWarningsCallOut } from './editor_flyout_warnings';
 import type { Field, MetadataFormState } from './use_metadata_form';
-import type { SavedObjectsReference, Services } from '../services';
+import type { Services } from '../services';
 
 interface Props {
   form: MetadataFormState & {
@@ -29,7 +29,6 @@ interface Props {
   };
   isReadonly: boolean;
   readonlyReason: string;
-  tagsReferences: SavedObjectsReference[];
   TagList?: Services['TagList'];
   TagSelector?: Services['TagSelector'];
 }
@@ -38,7 +37,6 @@ const isFormFieldValid = (field: Field) => !Boolean(field.errors?.length);
 
 export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
   form,
-  tagsReferences,
   TagList,
   TagSelector,
   isReadonly,
@@ -114,7 +112,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
         />
       </EuiFormRow>
 
-      {TagList && isReadonly && tagsReferences.length > 0 && (
+      {TagList && isReadonly && tags.value.length > 0 && (
         <>
           <EuiSpacer />
           <EuiFormRow
@@ -124,7 +122,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
             fullWidth
             isDisabled={isReadonly}
           >
-            <TagList references={tagsReferences} />
+            <TagList tagIds={tags.value} />
           </EuiFormRow>
         </>
       )}

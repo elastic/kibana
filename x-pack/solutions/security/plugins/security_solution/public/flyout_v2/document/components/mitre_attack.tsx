@@ -52,17 +52,20 @@ export const MitreAttack: FC<MitreAttackProps> = ({ hit }) => {
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <>
       <EuiSpacer size="m" />
-      <EuiFlexItem data-test-subj={MITRE_ATTACK_TITLE_TEST_ID}>
-        <EuiTitle size="xxs">
-          <h5>{threatDetails[0].title}</h5>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem data-test-subj={MITRE_ATTACK_DETAILS_TEST_ID}>
-        {threatDetails[0].description}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiSpacer size="m" />
+        <EuiFlexItem data-test-subj={MITRE_ATTACK_TITLE_TEST_ID}>
+          <EuiTitle size="xxs">
+            <h5>{threatDetails[0].title}</h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj={MITRE_ATTACK_DETAILS_TEST_ID}>
+          {threatDetails[0].description}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
 

@@ -9,13 +9,19 @@ import type { ReactNode } from 'react';
 import React from 'react';
 
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
-import { EuiFormRow, EuiFieldText, EuiButtonGroup, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiFieldText,
+  EuiButtonGroup,
+  EuiHorizontalRule,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { hasIcon } from '@kbn/visualization-ui-components';
+import { hasIcon, IconSelect } from '@kbn/visualization-ui-components';
 import type {
   MetricVisualizationState,
-  TitleFontWeight,
   PrimaryMetricFontSize,
   IconPosition,
   Alignment,
@@ -28,7 +34,7 @@ import {
   LENS_METRIC_STATE_DEFAULTS,
 } from '@kbn/lens-common';
 
-type TitleFontWeightString = Extract<TitleFontWeight, string>;
+import { metricIconsSet } from '../../../shared_components/icon_set';
 
 /** Get default layout config based on primary metric position */
 const getDefaultLayoutConfig = (
@@ -63,16 +69,16 @@ export function MetricAppearanceSettings({
 }) {
   const hasSecondaryMetric = !!state.secondaryMetricAccessor;
   const hasMetricIcon = hasIcon(state.icon);
-  const titleWeightValue: TitleFontWeightString =
-    state.titleWeight === 'normal' || state.titleWeight === 'bold'
-      ? state.titleWeight
-      : (LENS_METRIC_STATE_DEFAULTS.titleWeight as TitleFontWeightString);
 
   const disabledStates = {
-    subtitle: !!state.breakdownByAccessor,
+    subtitle:
+      !!state.breakdownByAccessor &&
+      i18n.translate('xpack.lens.metric.appearancePopover.subtitle.tooltip', {
+        defaultMessage: 'Not supported with break down by',
+      }),
     secondaryAlign: !hasSecondaryMetric,
     iconAlign: !hasMetricIcon,
-  };
+  } satisfies Record<string, boolean | string>;
 
   return (
     <>
@@ -157,20 +163,6 @@ export function MetricAppearanceSettings({
           isIconOnly
           dataTestSubj="lens-metric-appearance-title-and-subtitle-alignment-btn"
         />
-        <AppearanceOption
-          label={i18n.translate('xpack.lens.metric.appearancePopover.fontWeight', {
-            defaultMessage: 'Font weight',
-          })}
-          value={titleWeightValue}
-          options={fontWeightOptions}
-          onChange={(id) => {
-            setState({
-              ...state,
-              titleWeight: id,
-            });
-          }}
-          dataTestSubj="lens-metric-appearance-title-and-subtitle-font-weight-btn"
-        />
       </AppearanceOptionGroup>
       <EuiHorizontalRule margin="m" />
       <AppearanceOptionGroup
@@ -201,6 +193,56 @@ export function MetricAppearanceSettings({
           defaultMessage: 'Other',
         })}
       >
+        {/* Duplicate setting from dimension editor */}
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.metric.icon', {
+            defaultMessage: 'Icon decoration',
+          })}
+        >
+          <IconSelect
+            customIconSet={metricIconsSet}
+            value={state?.icon}
+            onChange={(newIcon) => {
+              if (state.icon === newIcon) return;
+
+              // If no icon selected, remove icon and iconAlign properties from the state
+              if (newIcon === 'empty') {
+                const { icon, iconAlign, ...restState } = state;
+                setState({ ...restState });
+                return;
+              }
+
+              // If both icon and iconAlign are set, only update icon
+              if (state.icon && state.iconAlign) {
+                setState({
+                  ...state,
+                  icon: newIcon,
+                });
+                return;
+              }
+
+              // If icon is set but iconAlign is missing, set legacy align
+              // same check as in x-pack/platform/plugins/shared/lens/public/visualizations/metric/to_expression.ts
+              if (state.icon && !state.iconAlign) {
+                setState({
+                  ...state,
+                  icon: newIcon,
+                  iconAlign: LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign,
+                });
+                return;
+              }
+
+              // If icon is missing, always set iconAlign to the default
+              setState({
+                ...state,
+                icon: newIcon,
+                iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
+              });
+            }}
+          />
+        </EuiFormRow>
         <AppearanceOption
           label={i18n.translate('xpack.lens.metric.appearancePopover.iconPosition', {
             defaultMessage: 'Icon position',
@@ -237,7 +279,7 @@ function SubtitleOption({
 }: {
   value?: string;
   onChange: (subtitle: string) => void;
-  isDisabled: boolean;
+  isDisabled: boolean | string;
 }) {
   const { inputValue, handleInputChange } = useDebouncedValue<string>(
     { onChange, value },
@@ -251,14 +293,17 @@ function SubtitleOption({
       })}
       fullWidth
       display="columnCompressed"
-      isDisabled={isDisabled}
+      isDisabled={!!isDisabled}
     >
-      <EuiFieldText
-        compressed
-        data-test-subj="lens-metric-appearance-subtitle-field"
-        value={inputValue}
-        onChange={({ target: { value: newValue } }) => handleInputChange(newValue)}
-      />
+      <EuiToolTip display="block" content={isDisabled}>
+        <EuiFieldText
+          compressed
+          disabled={!!isDisabled}
+          data-test-subj="lens-metric-appearance-subtitle-field"
+          value={inputValue}
+          onChange={({ target: { value: newValue } }) => handleInputChange(newValue)}
+        />
+      </EuiToolTip>
     </EuiFormRow>
   );
 }
@@ -313,21 +358,21 @@ const alignmentOptions: Array<EuiButtonGroupOptionProps & { id: Alignment }> = [
     label: i18n.translate('xpack.lens.shared.left', {
       defaultMessage: 'Left',
     }),
-    iconType: 'editorAlignLeft',
+    iconType: 'textAlignLeft',
   },
   {
     id: 'center',
     label: i18n.translate('xpack.lens.shared.center', {
       defaultMessage: 'Center',
     }),
-    iconType: 'editorAlignCenter',
+    iconType: 'textAlignCenter',
   },
   {
     id: 'right',
     label: i18n.translate('xpack.lens.shared.right', {
       defaultMessage: 'Right',
     }),
-    iconType: 'editorAlignRight',
+    iconType: 'textAlignRight',
   },
 ];
 
@@ -342,21 +387,6 @@ const iconPositionOptions: Array<EuiButtonGroupOptionProps & { id: IconPosition 
     id: 'right',
     label: i18n.translate('xpack.lens.shared.right', {
       defaultMessage: 'Right',
-    }),
-  },
-];
-
-const fontWeightOptions: Array<EuiButtonGroupOptionProps & { id: TitleFontWeightString }> = [
-  {
-    id: 'normal',
-    label: i18n.translate('xpack.lens.metric.appearancePopover.regular', {
-      defaultMessage: 'Regular',
-    }),
-  },
-  {
-    id: 'bold',
-    label: i18n.translate('xpack.lens.metric.appearancePopover.bold', {
-      defaultMessage: 'Bold',
     }),
   },
 ];
@@ -385,6 +415,12 @@ const primaryMetricPositionOptions: Array<
     id: 'top',
     label: i18n.translate('xpack.lens.metric.appearancePopover.top', {
       defaultMessage: 'Top',
+    }),
+  },
+  {
+    id: 'middle',
+    label: i18n.translate('xpack.lens.metric.appearancePopover.middle', {
+      defaultMessage: 'Middle',
     }),
   },
   {

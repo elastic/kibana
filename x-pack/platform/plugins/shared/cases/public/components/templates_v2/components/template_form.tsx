@@ -18,6 +18,8 @@ import { TemplateYamlEditorBase } from './template_yaml_editor';
 import { TemplateYamlValidationAccordion } from './template_yaml_validation_accordion';
 import { useValidationAccordionPositioning } from '../hooks/use_validation_accordion_positioning';
 import { useFieldNameValidation } from '../hooks/use_field_name_validation';
+import { useUserPickerValidation } from '../hooks/use_user_picker_validation';
+import { useKibana } from '../../../common/lib/kibana';
 
 export interface YamlEditorFormValues {
   definition: string;
@@ -47,7 +49,8 @@ const styles = {
     }),
   validationContainer: css({
     position: 'fixed',
-    bottom: '60px',
+    bottom: '57px',
+    marginLeft: '-24px',
     pointerEvents: 'none',
     display: 'flex',
     flexDirection: 'column-reverse',
@@ -64,6 +67,7 @@ export const TemplateYamlEditor = ({
   isSaved = false,
 }: TemplateYamlEditorProps) => {
   const euiTheme = useEuiTheme();
+  const { security } = useKibana().services;
 
   const {
     containerRef,
@@ -80,6 +84,7 @@ export const TemplateYamlEditor = ({
   } = useValidationAccordionPositioning();
 
   useFieldNameValidation(editorRef.current, value);
+  useUserPickerValidation(editorRef.current, value, security);
 
   const schemas = useMemo(() => {
     const jsonSchema = getTemplateDefinitionJsonSchema();

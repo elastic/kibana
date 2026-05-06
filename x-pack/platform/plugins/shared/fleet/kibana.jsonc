@@ -40,7 +40,6 @@
       "discover",
       "ingestPipelines",
       "automaticImport",
-      "automaticImportVTwo",
       "alerting",
       "sloShared",
       "reporting"

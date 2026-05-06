@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyTimestamp, NonEmptyString, User } from '../common_attributes.gen';
 import { Replacements, ApiConfig } from '../conversations/common_attributes.gen';
@@ -23,295 +23,311 @@ import { AnonymizationFieldResponse } from '../anonymization_fields/bulk_crud_an
 /**
  * An attack discovery generated from one or more alerts
  */
+export const AttackDiscovery = lazySchema(() =>
+  z.object({
+    /**
+     * The alert IDs that the attack discovery is based on
+     */
+    alertIds: z.array(z.string()),
+    /**
+     * UUID of attack discovery
+     */
+    id: z.string().optional(),
+    /**
+     * Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
+     */
+    detailsMarkdown: z.string(),
+    /**
+     * A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
+     */
+    entitySummaryMarkdown: z.string().optional(),
+    /**
+     * An array of MITRE ATT&CK tactic for the attack discovery
+     */
+    mitreAttackTactics: z.array(z.string()).optional(),
+    /**
+     * A markdown summary of attack discovery, using the same syntax
+     */
+    summaryMarkdown: z.string(),
+    /**
+     * A title for the attack discovery, in plain text
+     */
+    title: z.string(),
+    /**
+     * The time the attack discovery was generated
+     */
+    timestamp: NonEmptyTimestamp.optional(),
+  })
+);
 export type AttackDiscovery = z.infer<typeof AttackDiscovery>;
-export const AttackDiscovery = z.object({
-  /**
-   * The alert IDs that the attack discovery is based on
-   */
-  alertIds: z.array(z.string()),
-  /**
-   * UUID of attack discovery
-   */
-  id: z.string().optional(),
-  /**
-   * Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
-   */
-  detailsMarkdown: z.string(),
-  /**
-   * A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
-   */
-  entitySummaryMarkdown: z.string().optional(),
-  /**
-   * An array of MITRE ATT&CK tactic for the attack discovery
-   */
-  mitreAttackTactics: z.array(z.string()).optional(),
-  /**
-   * A markdown summary of attack discovery, using the same syntax
-   */
-  summaryMarkdown: z.string(),
-  /**
-   * A title for the attack discovery, in plain text
-   */
-  title: z.string(),
-  /**
-   * The time the attack discovery was generated
-   */
-  timestamp: NonEmptyTimestamp.optional(),
-});
 
 /**
  * Array of attack discoveries
  */
+export const AttackDiscoveries = lazySchema(() => z.array(AttackDiscovery));
 export type AttackDiscoveries = z.infer<typeof AttackDiscoveries>;
-export const AttackDiscoveries = z.array(AttackDiscovery);
 
 /**
  * The status of the attack discovery.
  */
+export const AttackDiscoveryStatus = lazySchema(() =>
+  z.enum(['running', 'succeeded', 'failed', 'canceled'])
+);
 export type AttackDiscoveryStatus = z.infer<typeof AttackDiscoveryStatus>;
-export const AttackDiscoveryStatus = z.enum(['running', 'succeeded', 'failed', 'canceled']);
 export type AttackDiscoveryStatusEnum = typeof AttackDiscoveryStatus.enum;
 export const AttackDiscoveryStatusEnum = AttackDiscoveryStatus.enum;
 
 /**
  * Run durations for the attack discovery
  */
+export const GenerationInterval = lazySchema(() =>
+  z.object({
+    /**
+     * The time the attack discovery was generated
+     */
+    date: z.string(),
+    /**
+     * The duration of the attack discovery generation
+     */
+    durationMs: z.number().int(),
+  })
+);
 export type GenerationInterval = z.infer<typeof GenerationInterval>;
-export const GenerationInterval = z.object({
-  /**
-   * The time the attack discovery was generated
-   */
-  date: z.string(),
-  /**
-   * The duration of the attack discovery generation
-   */
-  durationMs: z.number().int(),
-});
 
 /**
  * Attack discovery stats
  */
+export const AttackDiscoveryStat = lazySchema(() =>
+  z.object({
+    /**
+     * Whether the user has viewed the results of the attack discovery run
+     */
+    hasViewed: z.boolean(),
+    /**
+     * The number of attack discoveries for the connector
+     */
+    count: z.number().int(),
+    /**
+     * The connector ID for the attack discovery
+     */
+    connectorId: z.string(),
+    /**
+     * The status of the attack discovery.
+     */
+    status: AttackDiscoveryStatus,
+  })
+);
 export type AttackDiscoveryStat = z.infer<typeof AttackDiscoveryStat>;
-export const AttackDiscoveryStat = z.object({
-  /**
-   * Whether the user has viewed the results of the attack discovery run
-   */
-  hasViewed: z.boolean(),
-  /**
-   * The number of attack discoveries for the connector
-   */
-  count: z.number().int(),
-  /**
-   * The connector ID for the attack discovery
-   */
-  connectorId: z.string(),
-  /**
-   * The status of the attack discovery.
-   */
-  status: AttackDiscoveryStatus,
-});
 
 /**
  * Stats on existing attack discovery documents
  */
+export const AttackDiscoveryStats = lazySchema(() =>
+  z.object({
+    /**
+     * The number of attack discoveries that have not yet been viewed
+     */
+    newDiscoveriesCount: z.number().int(),
+    /**
+     * The number of connectors with new results that have not yet been viewed
+     */
+    newConnectorResultsCount: z.number().int(),
+    /**
+     * Attack discovery stats per connector
+     */
+    statsPerConnector: z.array(AttackDiscoveryStat),
+  })
+);
 export type AttackDiscoveryStats = z.infer<typeof AttackDiscoveryStats>;
-export const AttackDiscoveryStats = z.object({
-  /**
-   * The number of attack discoveries that have not yet been viewed
-   */
-  newDiscoveriesCount: z.number().int(),
-  /**
-   * The number of connectors with new results that have not yet been viewed
-   */
-  newConnectorResultsCount: z.number().int(),
-  /**
-   * Attack discovery stats per connector
-   */
-  statsPerConnector: z.array(AttackDiscoveryStat),
-});
 
+export const AttackDiscoveryResponse = lazySchema(() =>
+  z.object({
+    id: NonEmptyString,
+    timestamp: NonEmptyString.optional(),
+    /**
+     * The last time attack discovery was updated.
+     */
+    updatedAt: z.string(),
+    /**
+     * The last time attack discovery was viewed in the browser.
+     */
+    lastViewedAt: z.string(),
+    /**
+     * The number of alerts in the context.
+     */
+    alertsContextCount: z.number().int().optional(),
+    /**
+     * The time attack discovery was created.
+     */
+    createdAt: z.string(),
+    replacements: Replacements.optional(),
+    users: z.array(User),
+    /**
+     * The status of the attack discovery.
+     */
+    status: AttackDiscoveryStatus,
+    /**
+     * The attack discoveries.
+     */
+    attackDiscoveries: AttackDiscoveries,
+    /**
+     * LLM API configuration.
+     */
+    apiConfig: ApiConfig,
+    /**
+     * Kibana space
+     */
+    namespace: z.string(),
+    /**
+     * The backing index required for update requests.
+     */
+    backingIndex: z.string(),
+    /**
+     * The most 5 recent generation intervals
+     */
+    generationIntervals: z.array(GenerationInterval),
+    /**
+     * The average generation interval in milliseconds
+     */
+    averageIntervalMs: z.number().int(),
+    /**
+     * The reason for a status of failed.
+     */
+    failureReason: z.string().optional(),
+  })
+);
 export type AttackDiscoveryResponse = z.infer<typeof AttackDiscoveryResponse>;
-export const AttackDiscoveryResponse = z.object({
-  id: NonEmptyString,
-  timestamp: NonEmptyString.optional(),
-  /**
-   * The last time attack discovery was updated.
-   */
-  updatedAt: z.string(),
-  /**
-   * The last time attack discovery was viewed in the browser.
-   */
-  lastViewedAt: z.string(),
-  /**
-   * The number of alerts in the context.
-   */
-  alertsContextCount: z.number().int().optional(),
-  /**
-   * The time attack discovery was created.
-   */
-  createdAt: z.string(),
-  replacements: Replacements.optional(),
-  users: z.array(User),
-  /**
-   * The status of the attack discovery.
-   */
-  status: AttackDiscoveryStatus,
-  /**
-   * The attack discoveries.
-   */
-  attackDiscoveries: AttackDiscoveries,
-  /**
-   * LLM API configuration.
-   */
-  apiConfig: ApiConfig,
-  /**
-   * Kibana space
-   */
-  namespace: z.string(),
-  /**
-   * The backing index required for update requests.
-   */
-  backingIndex: z.string(),
-  /**
-   * The most 5 recent generation intervals
-   */
-  generationIntervals: z.array(GenerationInterval),
-  /**
-   * The average generation interval in milliseconds
-   */
-  averageIntervalMs: z.number().int(),
-  /**
-   * The reason for a status of failed.
-   */
-  failureReason: z.string().optional(),
-});
 
+export const CreateAttackDiscoveryAlertsParams = lazySchema(() =>
+  z.object({
+    /**
+     * The number of alerts provided as context to the LLM
+     */
+    alertsContextCount: z.number().int(),
+    /**
+     * The anonymized alerts that were used to generate the attack discovery
+     */
+    anonymizedAlerts: z.array(
+      z.object({
+        id: z.string().optional(),
+        metadata: z.object({}),
+        pageContent: z.string(),
+      })
+    ),
+    /**
+     * LLM API configuration
+     */
+    apiConfig: ApiConfig,
+    /**
+     * The generated Attack discoveries
+     */
+    attackDiscoveries: AttackDiscoveries,
+    /**
+     * The name of the connector that generated the attack discovery
+     */
+    connectorName: z.string(),
+    /**
+     * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
+     */
+    enableFieldRendering: z.boolean(),
+    /**
+     * The generation ID of the run that created the attack discovery
+     */
+    generationUuid: z.string(),
+    /**
+     * Replacements enable anonymization of data sent to the LLM. When Attack discoveries are added to an assistant conversation, replacements must be provided at the same time.
+     */
+    replacements: Replacements.optional(),
+    /**
+     * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
+     */
+    withReplacements: z.boolean(),
+  })
+);
 export type CreateAttackDiscoveryAlertsParams = z.infer<typeof CreateAttackDiscoveryAlertsParams>;
-export const CreateAttackDiscoveryAlertsParams = z.object({
-  /**
-   * The number of alerts provided as context to the LLM
-   */
-  alertsContextCount: z.number().int(),
-  /**
-   * The anonymized alerts that were used to generate the attack discovery
-   */
-  anonymizedAlerts: z.array(
-    z.object({
-      id: z.string().optional(),
-      metadata: z.object({}),
-      pageContent: z.string(),
-    })
-  ),
-  /**
-   * LLM API configuration
-   */
-  apiConfig: ApiConfig,
-  /**
-   * The generated Attack discoveries
-   */
-  attackDiscoveries: AttackDiscoveries,
-  /**
-   * The name of the connector that generated the attack discovery
-   */
-  connectorName: z.string(),
-  /**
-   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
-   */
-  enableFieldRendering: z.boolean(),
-  /**
-   * The generation ID of the run that created the attack discovery
-   */
-  generationUuid: z.string(),
-  /**
-   * Replacements enable anonymization of data sent to the LLM. When Attack discoveries are added to an assistant conversation, replacements must be provided at the same time.
-   */
-  replacements: Replacements.optional(),
-  /**
-   * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
-   */
-  withReplacements: z.boolean(),
-});
 
+export const FindAttackDiscoveryAlertsParams = lazySchema(() =>
+  z.object({
+    /**
+     * filter by alert IDs within Attack discovery
+     */
+    alertIds: z.array(z.string()).optional(),
+    /**
+     * filter by connector names
+     */
+    connectorNames: z.array(z.string()).optional(),
+    /**
+     * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
+     */
+    enableFieldRendering: z.boolean(),
+    /**
+     * filter by end date (relative or absolute)
+     */
+    end: z.string().optional(),
+    /**
+     * filter by execution UUID
+     */
+    executionUuid: z.string().optional(),
+    /**
+     * whether to include attack alert IDs in the response
+     */
+    includeUniqueAlertIds: z.boolean().optional(),
+    /**
+     * filter by Attack discovery IDs
+     */
+    ids: z.array(z.string()).optional(),
+    page: z.number().int().min(1).optional().default(1),
+    perPage: z.number().int().min(0).optional().default(10),
+    /**
+     * filter by search query
+     */
+    search: z.string().optional(),
+    /**
+     * `undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries.
+     */
+    shared: z.boolean().optional(),
+    /**
+     * Whether to return scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.
+     */
+    scheduled: z.boolean().optional(),
+    sortField: z.string().optional().default('@timestamp'),
+    sortOrder: z.string().optional(),
+    /**
+     * filter by start date (relative or absolute)
+     */
+    start: z.string().optional(),
+    /**
+     * filter by kibana.alert.workflow.status
+     */
+    status: z.array(z.string()).optional(),
+    /**
+     * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
+     */
+    withReplacements: z.boolean(),
+  })
+);
 export type FindAttackDiscoveryAlertsParams = z.infer<typeof FindAttackDiscoveryAlertsParams>;
-export const FindAttackDiscoveryAlertsParams = z.object({
-  /**
-   * filter by alert IDs within Attack discovery
-   */
-  alertIds: z.array(z.string()).optional(),
-  /**
-   * filter by connector names
-   */
-  connectorNames: z.array(z.string()).optional(),
-  /**
-   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
-   */
-  enableFieldRendering: z.boolean(),
-  /**
-   * filter by end date (relative or absolute)
-   */
-  end: z.string().optional(),
-  /**
-   * filter by execution UUID
-   */
-  executionUuid: z.string().optional(),
-  /**
-   * whether to include attack alert IDs in the response
-   */
-  includeUniqueAlertIds: z.boolean().optional(),
-  /**
-   * filter by Attack discovery IDs
-   */
-  ids: z.array(z.string()).optional(),
-  page: z.number().int().min(1).optional().default(1),
-  perPage: z.number().int().min(0).optional().default(10),
-  /**
-   * filter by search query
-   */
-  search: z.string().optional(),
-  /**
-   * `undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries.
-   */
-  shared: z.boolean().optional(),
-  /**
-   * Whether to return scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.
-   */
-  scheduled: z.boolean().optional(),
-  sortField: z.string().optional().default('@timestamp'),
-  sortOrder: z.string().optional(),
-  /**
-   * filter by start date (relative or absolute)
-   */
-  start: z.string().optional(),
-  /**
-   * filter by kibana.alert.workflow.status
-   */
-  status: z.array(z.string()).optional(),
-  /**
-   * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
-   */
-  withReplacements: z.boolean(),
-});
 
-export type AttackDiscoveryGenerationConfig = z.infer<typeof AttackDiscoveryGenerationConfig>;
-export const AttackDiscoveryGenerationConfig = z.object({
-  /**
+export const AttackDiscoveryGenerationConfig = lazySchema(() =>
+  z.object({
+    /**
       * The (space specific) index pattern that contains the alerts to use as
 context for the attack discovery.
 Example: .alerts-security.alerts-default
 
       */
-  alertsIndexPattern: z.string(),
-  /**
-   * The list of fields, and whether or not they are anonymized, allowed to be sent to LLMs. Consider using the output of the `/api/security_ai_assistant/anonymization_fields/_find` API (for a specific Kibana space) to provide this value.
-   */
-  anonymizationFields: z.array(AnonymizationFieldResponse),
-  /**
-   * LLM API configuration.
-   */
-  apiConfig: ApiConfig,
-  connectorName: z.string().optional(),
-  end: z.string().optional(),
-  /**
+    alertsIndexPattern: z.string(),
+    /**
+     * The list of fields, and whether or not they are anonymized, allowed to be sent to LLMs. Consider using the output of the `/api/security_ai_assistant/anonymization_fields/_find` API (for a specific Kibana space) to provide this value.
+     */
+    anonymizationFields: z.array(AnonymizationFieldResponse),
+    /**
+     * LLM API configuration.
+     */
+    apiConfig: ApiConfig,
+    connectorName: z.string().optional(),
+    end: z.string().optional(),
+    /**
       * An Elasticsearch-style query DSL object used to filter alerts. For example:
 ```json {
   "filter": {
@@ -337,12 +353,14 @@ Example: .alerts-security.alerts-default
   }
 } ```
       */
-  filter: z.object({}).catchall(z.unknown()).optional(),
-  langSmithProject: z.string().optional(),
-  langSmithApiKey: z.string().optional(),
-  model: z.string().optional(),
-  replacements: Replacements.optional(),
-  size: z.number(),
-  start: z.string().optional(),
-  subAction: z.enum(['invokeAI', 'invokeStream']),
-});
+    filter: z.object({}).catchall(z.unknown()).optional(),
+    langSmithProject: z.string().optional(),
+    langSmithApiKey: z.string().optional(),
+    model: z.string().optional(),
+    replacements: Replacements.optional(),
+    size: z.number(),
+    start: z.string().optional(),
+    subAction: z.enum(['invokeAI', 'invokeStream']),
+  })
+);
+export type AttackDiscoveryGenerationConfig = z.infer<typeof AttackDiscoveryGenerationConfig>;

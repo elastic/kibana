@@ -101,37 +101,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be(false);
       });
 
-      it('useFilters should pass filter pills and query', async () => {
-        /**
-         * dashboard links002 has a saved filter and query bar.
-         * The link to dashboard links001 only has useFilters enabled
-         * so the link should pass the filters and query to dashboard links001
-         * but should not override the date range.
-         */
-        await dashboard.loadSavedDashboard('links 002');
-        await dashboard.waitForRenderComplete();
-        await testSubjects.clickWhenNotDisabled('dashboardLink--links 001');
-        await header.waitUntilLoadingHasFinished();
-        expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
-          '0930f310-5bc2-11ee-9a85-7b86504227bc'
-        );
-        await dashboard.waitForRenderComplete();
-        // Should pass the filters
-        expect(await filterBar.getFilterCount()).to.equal(2);
-        const filterLabels = await filterBar.getFiltersLabel();
-        expect(
-          filterLabels.includes('This filter should only pass from links002 to links001')
-        ).to.equal(true);
-        expect(
-          filterLabels.includes('This filter should not pass from links001 to links002')
-        ).to.equal(true);
+      describe('useFilters', function () {
+        // FIPS mode with trial license triggers a different dashboard save flow causing
+        // clickDiscardChanges() to time out waiting for dashboardQuickSaveMenuItem-secondary-button
+        this.tags('skipFIPS');
 
-        // Should not pass the date range
-        const time = await timePicker.getTimeConfig();
-        expect(time.start).to.be('Oct 31, 2018 @ 00:00:00.000');
-        expect(time.end).to.be('Nov 1, 2018 @ 00:00:00.000');
+        it('useFilters should pass filter pills and query', async () => {
+          /**
+           * dashboard links002 has a saved filter and query bar.
+           * The link to dashboard links001 only has useFilters enabled
+           * so the link should pass the filters and query to dashboard links001
+           * but should not override the date range.
+           */
+          await dashboard.loadSavedDashboard('links 002');
+          await dashboard.waitForRenderComplete();
+          await testSubjects.clickWhenNotDisabled('dashboardLink--links 001');
+          await header.waitUntilLoadingHasFinished();
+          expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
+            '0930f310-5bc2-11ee-9a85-7b86504227bc'
+          );
+          await dashboard.waitForRenderComplete();
+          // Should pass the filters
+          expect(await filterBar.getFilterCount()).to.equal(2);
+          const filterLabels = await filterBar.getFiltersLabel();
+          expect(
+            filterLabels.includes('This filter should only pass from links002 to links001')
+          ).to.equal(true);
+          expect(
+            filterLabels.includes('This filter should not pass from links001 to links002')
+          ).to.equal(true);
 
-        await dashboard.clickDiscardChanges();
+          // Should not pass the date range
+          const time = await timePicker.getTimeConfig();
+          expect(time.start).to.be('Oct 31, 2018 @ 00:00:00.000');
+          expect(time.end).to.be('Nov 1, 2018 @ 00:00:00.000');
+
+          await dashboard.clickDiscardChanges();
+        });
       });
 
       it('useTimeRange should pass date range', async () => {

@@ -114,7 +114,7 @@ describe('useGetEndpointScriptsList hook', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             kuery:
-              '((name:*\\\\test*\\\\search\\\\* OR updatedBy:*\\\\test*\\\\search\\\\* OR fileHash:*\\\\test*\\\\search\\\\*) OR (name:*\\"another\\"*\\"search\\"*\\"term\\",*\\\\backspace* OR updatedBy:*\\"another\\"*\\"search\\"*\\"term\\",*\\\\backspace* OR fileHash:*\\"another\\"*\\"search\\"*\\"term\\",*\\\\backspace*) OR (name:*\\*\\"quoted-hyphen-wildcard\\"\\** OR updatedBy:*\\*\\"quoted-hyphen-wildcard\\"\\** OR fileHash:*\\*\\"quoted-hyphen-wildcard\\"\\**))',
+              '((name:*\\\\test*\\\\search\\\\* OR description:*\\\\test*\\\\search\\\\* OR createdBy:*\\\\test*\\\\search\\\\* OR updatedBy:*\\\\test*\\\\search\\\\* OR fileName:*\\\\test*\\\\search\\\\* OR fileHash:*\\\\test*\\\\search\\\\*) OR (name:*\\"another\\"*\\"search\\"*\\"term\\",*\\\\backspace* OR description:*\\"another\\"*\\"search\\"*\\"term\\",*\\\\backspace* OR createdBy:*\\"another\\"*\\"search\\"*\\"term\\",*\\\\backspace* OR updatedBy:*\\"another\\"*\\"search\\"*\\"term\\",*\\\\backspace* OR fileName:*\\"another\\"*\\"search\\"*\\"term\\",*\\\\backspace* OR fileHash:*\\"another\\"*\\"search\\"*\\"term\\",*\\\\backspace*) OR (name:*\\*\\"quoted-hyphen-wildcard\\"\\** OR description:*\\*\\"quoted-hyphen-wildcard\\"\\** OR createdBy:*\\*\\"quoted-hyphen-wildcard\\"\\** OR updatedBy:*\\*\\"quoted-hyphen-wildcard\\"\\** OR fileName:*\\*\\"quoted-hyphen-wildcard\\"\\** OR fileHash:*\\*\\"quoted-hyphen-wildcard\\"\\**))',
           }),
         })
       );
@@ -130,7 +130,8 @@ describe('useGetEndpointScriptsList hook', () => {
       expect(apiMocks.responseProvider.getScriptsList).toHaveBeenCalledWith(
         expect.objectContaining({
           query: expect.objectContaining({
-            kuery: '(name:*test*search* OR updatedBy:*test*search* OR fileHash:*test*search*)',
+            kuery:
+              '(name:*test*search* OR description:*test*search* OR createdBy:*test*search* OR updatedBy:*test*search* OR fileName:*test*search* OR fileHash:*test*search*)',
           }),
         })
       );
@@ -147,7 +148,7 @@ describe('useGetEndpointScriptsList hook', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             kuery:
-              '((name:*test*search* OR updatedBy:*test*search* OR fileHash:*test*search*) OR (name:*another*search*term* OR updatedBy:*another*search*term* OR fileHash:*another*search*term*))',
+              '((name:*test*search* OR description:*test*search* OR createdBy:*test*search* OR updatedBy:*test*search* OR fileName:*test*search* OR fileHash:*test*search*) OR (name:*another*search*term* OR description:*another*search*term* OR createdBy:*another*search*term* OR updatedBy:*another*search*term* OR fileName:*another*search*term* OR fileHash:*another*search*term*))',
           }),
         })
       );
@@ -167,7 +168,7 @@ describe('useGetEndpointScriptsList hook', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             kuery:
-              'platform:"windows" AND fileType:"script" AND tags:"dataCollection" AND (name:*test*search* OR updatedBy:*test*search* OR fileHash:*test*search*)',
+              'platform:"windows" AND fileType:"script" AND tags:"dataCollection" AND (name:*test*search* OR description:*test*search* OR createdBy:*test*search* OR updatedBy:*test*search* OR fileName:*test*search* OR fileHash:*test*search*)',
           }),
         })
       );
@@ -187,7 +188,7 @@ describe('useGetEndpointScriptsList hook', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             kuery:
-              '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement") AND ((name:*test*search* OR updatedBy:*test*search* OR fileHash:*test*search*) OR (name:*another*search*term* OR updatedBy:*another*search*term* OR fileHash:*another*search*term*))',
+              '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement") AND ((name:*test*search* OR description:*test*search* OR createdBy:*test*search* OR updatedBy:*test*search* OR fileName:*test*search* OR fileHash:*test*search*) OR (name:*another*search*term* OR description:*another*search*term* OR createdBy:*another*search*term* OR updatedBy:*another*search*term* OR fileName:*another*search*term* OR fileHash:*another*search*term*))',
           }),
         })
       );
@@ -207,7 +208,7 @@ describe('useGetEndpointScriptsList hook', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             kuery:
-              '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement") AND ((name:*\\\\test*\\\\search\\\\* OR updatedBy:*\\\\test*\\\\search\\\\* OR fileHash:*\\\\test*\\\\search\\\\*) OR (name:*\\"another\\"*\\"search\\"*\\"term\\"*\\\\backspace* OR updatedBy:*\\"another\\"*\\"search\\"*\\"term\\"*\\\\backspace* OR fileHash:*\\"another\\"*\\"search\\"*\\"term\\"*\\\\backspace*))',
+              '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement") AND ((name:*\\\\test*\\\\search\\\\* OR description:*\\\\test*\\\\search\\\\* OR createdBy:*\\\\test*\\\\search\\\\* OR updatedBy:*\\\\test*\\\\search\\\\* OR fileName:*\\\\test*\\\\search\\\\* OR fileHash:*\\\\test*\\\\search\\\\*) OR (name:*\\"another\\"*\\"search\\"*\\"term\\"*\\\\backspace* OR description:*\\"another\\"*\\"search\\"*\\"term\\"*\\\\backspace* OR createdBy:*\\"another\\"*\\"search\\"*\\"term\\"*\\\\backspace* OR updatedBy:*\\"another\\"*\\"search\\"*\\"term\\"*\\\\backspace* OR fileName:*\\"another\\"*\\"search\\"*\\"term\\"*\\\\backspace* OR fileHash:*\\"another\\"*\\"search\\"*\\"term\\"*\\\\backspace*))',
           }),
         })
       );

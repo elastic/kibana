@@ -10,7 +10,7 @@
 import { v4 } from 'uuid';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
+import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import type { EditResult, StepDefinition } from './yaml_edit_utils';
 import {
@@ -26,20 +26,9 @@ import {
   WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
   workflowTools,
 } from '../../../common/agent_builder/constants';
-import { parseYamlToJSONWithoutValidation } from '../../../common/lib/yaml';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { WorkflowsAiTelemetryClient } from '../../telemetry/workflows_ai_telemetry_client';
-import type { AgentBuilderPluginSetupContract } from '../../types';
-
-const workflowEditAvailability = {
-  handler: async ({ uiSettings }: { uiSettings: { get: <T>(id: string) => Promise<T> } }) => {
-    const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
-    return isEnabled
-      ? ({ status: 'available' } as const)
-      : ({ status: 'unavailable', reason: 'AI workflow authoring is disabled' } as const);
-  },
-  cacheMode: 'space' as const,
-};
+import type { AgentBuilderPluginSetup } from '../../types';
 
 const baseWorkflowEditSchema = z.object({
   attachmentId: z
@@ -51,7 +40,9 @@ const baseWorkflowEditSchema = z.object({
   description: z.string().optional().describe('Human-readable description of what the change does'),
 });
 
-const stepDefinitionSchema = z.object({
+const ENABLE_EXTENDED_STEP_PROPERTIES = true;
+
+export const stepDefinitionSchema = z.object({
   name: z.string(),
   type: z.string(),
   'connector-id': z.string().optional(),
@@ -60,6 +51,16 @@ const stepDefinitionSchema = z.object({
   with: z.record(z.string(), z.unknown()).optional(),
   output: z.record(z.string(), z.unknown()).optional(),
   steps: z.array(z.record(z.string(), z.unknown())).optional(),
+  ...(ENABLE_EXTENDED_STEP_PROPERTIES
+    ? {
+        'on-failure': z.unknown().optional(),
+        timeout: z.string().optional(),
+        description: z.string().optional(),
+        do: z.array(z.record(z.string(), z.unknown())).optional(),
+        else: z.array(z.record(z.string(), z.unknown())).optional(),
+        condition: z.string().optional(),
+      }
+    : {}),
 });
 
 const findWorkflowYamlAttachment = (
@@ -245,7 +246,7 @@ const handleEditResult = async (
 };
 
 export function registerWorkflowEditTools(
-  agentBuilder: AgentBuilderPluginSetupContract,
+  agentBuilder: AgentBuilderPluginSetup,
   api: WorkflowsManagementApi,
   aiTelemetryClient: WorkflowsAiTelemetryClient
 ): void {
@@ -265,7 +266,7 @@ export function registerWorkflowEditTools(
         ),
     }),
     tags: ['workflows', 'yaml', 'edit'],
-    availability: workflowEditAvailability,
+    experimental: true,
     handler: async (
       { attachmentId: targetAttachmentId, step, insertAfterStep: afterStep, description },
       context
@@ -300,7 +301,7 @@ export function registerWorkflowEditTools(
       updatedStep: stepDefinitionSchema as z.ZodType<StepDefinition>,
     }),
     tags: ['workflows', 'yaml', 'edit'],
-    availability: workflowEditAvailability,
+    experimental: true,
     handler: async (
       { attachmentId: targetAttachmentId, stepName, updatedStep, description },
       context
@@ -336,7 +337,7 @@ export function registerWorkflowEditTools(
       value: z.unknown().describe('The new value for the property'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
-    availability: workflowEditAvailability,
+    experimental: true,
     handler: async (
       { attachmentId: targetAttachmentId, stepName, property, value, description },
       context
@@ -373,7 +374,7 @@ export function registerWorkflowEditTools(
       value: z.unknown().describe('The new value for the property'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
-    availability: workflowEditAvailability,
+    experimental: true,
     handler: async (
       { attachmentId: targetAttachmentId, property, value, description },
       context
@@ -407,7 +408,7 @@ export function registerWorkflowEditTools(
       stepName: z.string().describe('The name of the step to delete'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
-    availability: workflowEditAvailability,
+    experimental: true,
     handler: async ({ attachmentId: targetAttachmentId, stepName, description }, context) => {
       const attachment = findWorkflowYamlAttachment(context, targetAttachmentId);
       if (!attachment) return noAttachmentError();
@@ -429,15 +430,15 @@ export function registerWorkflowEditTools(
   });
 
   agentBuilder.tools.register({
-    id: workflowTools.replaceYaml,
+    id: workflowTools.setYaml,
     type: ToolType.builtin,
-    description: `Replace the entire workflow YAML content, or create a new workflow from scratch when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists yet. For large-scale changes or when multiple properties and steps need to change at once. When an attachment exists, returns diffAttachmentId, attachmentId, and attachmentVersion — render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>. When creating new, returns an attachmentId — render it with <render_attachment id="{attachmentId}"/>.`,
+    description: `Set the complete workflow YAML content. Creates a new workflow when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists, or replaces the entire YAML of an existing workflow. Use this for both creation and large-scale edits. Do NOT use attachments.add to create workflow attachments — this tool handles creation automatically. When an attachment exists, returns diffAttachmentId, attachmentId, and attachmentVersion — render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>. When creating new, returns an attachmentId — render it with <render_attachment id="{attachmentId}"/>.`,
     schema: z.object({
       ...baseWorkflowEditSchema.shape,
       yaml: z.string().describe('The complete new workflow YAML content'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
-    availability: workflowEditAvailability,
+    experimental: true,
     handler: async ({ attachmentId: targetAttachmentId, yaml, description }, context) => {
       const attachment = findWorkflowYamlAttachment(context, targetAttachmentId);
       const proposalId = v4();
@@ -458,7 +459,7 @@ export function registerWorkflowEditTools(
         const validation = await runCompactValidation(yaml, api, context);
 
         aiTelemetryClient.reportEditResult({
-          toolId: workflowTools.replaceYaml,
+          toolId: workflowTools.setYaml,
           conversationId: extractConversationId(context),
           editSuccess: true,
           isCreation: true,
@@ -474,7 +475,7 @@ export function registerWorkflowEditTools(
                 created: true,
                 proposalId,
                 attachmentId: newAttachment.id,
-                toolId: workflowTools.replaceYaml,
+                toolId: workflowTools.setYaml,
                 description: description ?? 'New workflow created',
                 ...(validation ? { validation } : {}),
               },
@@ -492,13 +493,13 @@ export function registerWorkflowEditTools(
         description,
         attachment.workflowId,
         attachment.name,
-        workflowTools.replaceYaml
+        workflowTools.setYaml
       );
 
       const validation = await runCompactValidation(yaml, api, context);
 
       aiTelemetryClient.reportEditResult({
-        toolId: workflowTools.replaceYaml,
+        toolId: workflowTools.setYaml,
         conversationId: extractConversationId(context),
         editSuccess: true,
         isCreation: false,
@@ -515,7 +516,7 @@ export function registerWorkflowEditTools(
               diffAttachmentId,
               attachmentId: attachment.attachmentId,
               attachmentVersion,
-              toolId: workflowTools.replaceYaml,
+              toolId: workflowTools.setYaml,
               description: description ?? 'Full YAML replacement proposed',
               ...(validation ? { validation } : {}),
             },

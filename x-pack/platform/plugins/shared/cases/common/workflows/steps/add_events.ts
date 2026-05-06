@@ -39,7 +39,7 @@ export const addEventsStepCommonDefinition: CommonStepDefinition<
   AddEventsStepOutputSchema
 > = {
   id: AddEventsStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.ADD_EVENTS_STEP_LABEL,
   description: i18n.ADD_EVENTS_STEP_DESCRIPTION,
   documentation: {

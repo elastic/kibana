@@ -9,7 +9,12 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { updateCasesStepCommonDefinition } from '../../../common/workflows/steps/update_cases';
 import type { CasesClient } from '../../client';
-import { getCasesClientFromStepsContext, getErrorMessage, pushCase } from './utils';
+import {
+  getCasesClientFromStepsContext,
+  getErrorMessage,
+  pushCase,
+  safeParseCaseForWorkflowOutput,
+} from './utils';
 import { UPDATE_CASES_FAILED_MESSAGE } from './translations';
 import { prepareCasePatch } from './update_case_helpers';
 
@@ -30,14 +35,14 @@ export const updateCasesStepDefinition = (
   createServerStepDefinition({
     ...updateCasesStepCommonDefinition,
     handler: async (context) => {
-      const input = updateCasesStepCommonDefinition.inputSchema.parse(context.input);
-      const caseIds = input.cases.map(({ case_id: caseId }) => caseId);
+      const { cases } = context.input;
+      const caseIds = cases.map(({ case_id: caseId }) => caseId);
 
       try {
         const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
 
         const normalizedCasePatches = await Promise.all(
-          input.cases.map(async (caseInput) => {
+          cases.map(async (caseInput) => {
             try {
               return await prepareCasePatch(casesClient, {
                 caseId: caseInput.case_id,
@@ -77,7 +82,10 @@ export const updateCasesStepDefinition = (
           }
         }
 
-        const output = updateCasesStepCommonDefinition.outputSchema.parse({ cases: updatedCases });
+        const output = safeParseCaseForWorkflowOutput(
+          updateCasesStepCommonDefinition.outputSchema,
+          { cases: updatedCases }
+        );
         return { output };
       } catch (error) {
         if (error instanceof Error && error.message.includes('could not be updated')) {

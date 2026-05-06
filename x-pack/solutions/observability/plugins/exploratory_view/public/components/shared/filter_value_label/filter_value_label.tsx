@@ -14,6 +14,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityAppServices } from '../../../application/types';
 
+const FilterItemI18n = injectI18n(FilterItem);
+
 export function buildFilterLabel({
   field,
   value,
@@ -73,8 +75,6 @@ export function FilterValueLabel({
   removeFilter,
   allowExclusion = true,
 }: FilterValueLabelProps) {
-  const FilterItemI18n = injectI18n(FilterItem);
-
   const filter = buildFilterLabel({ field, value, label, dataView, negate });
 
   const {

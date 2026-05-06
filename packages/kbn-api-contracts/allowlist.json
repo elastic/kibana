@@ -4,10 +4,38 @@
   "entries": [
     {
       "path": "/api/fleet/outputs",
-      "method": "post",
-      "reason": "POST request body uses NewOutputSchema with meta IDs, changing inline anyOf members to $ref components. Data shape is identical. Approved: https://github.com/elastic/kibana/pull/258986#discussion_r2978192160",
+      "method": "get",
+      "reason": "Nullable shipper/ssl fields now use allOf+$ref with nullable:true (OAS 3.0 canonical form) instead of inline objects. Kafka connection_type/username/password became optional to match runtime behavior. Coordinated with provider team.",
       "approvedBy": "@elastic/terraform-provider",
-      "prUrl": "https://github.com/elastic/kibana/pull/258986"
+      "prUrl": "https://github.com/elastic/kibana/pull/260842"
+    },
+    {
+      "path": "/api/fleet/outputs",
+      "method": "post",
+      "reason": "Nullable shipper/ssl fields now use allOf+$ref with nullable:true (OAS 3.0 canonical form) instead of inline objects. Kafka connection_type/username/password became optional to match runtime behavior. Coordinated with provider team.",
+      "approvedBy": "@elastic/terraform-provider",
+      "prUrl": "https://github.com/elastic/kibana/pull/260842"
+    },
+    {
+      "path": "/api/fleet/outputs/{outputId}",
+      "method": "get",
+      "reason": "Nullable shipper/ssl fields now use allOf+$ref with nullable:true (OAS 3.0 canonical form) instead of inline objects. Kafka connection_type/username/password became optional to match runtime behavior. Coordinated with provider team.",
+      "approvedBy": "@elastic/terraform-provider",
+      "prUrl": "https://github.com/elastic/kibana/pull/260842"
+    },
+    {
+      "path": "/api/fleet/outputs/{outputId}",
+      "method": "put",
+      "reason": "Nullable shipper/ssl fields now use allOf+$ref with nullable:true (OAS 3.0 canonical form) instead of inline objects. Kafka connection_type/username/password became optional to match runtime behavior. Coordinated with provider team.",
+      "approvedBy": "@elastic/terraform-provider",
+      "prUrl": "https://github.com/elastic/kibana/pull/260842"
+    },
+    {
+      "path": "/api/fleet/outputs/{outputId}",
+      "method": "put",
+      "reason": "PUT request body uses UpdateOutputSchema with meta IDs, changing inline anyOf members to $ref components. Data shape is identical; adds otel_exporter_config_yaml field.",
+      "approvedBy": "elastic/fleet",
+      "prUrl": "https://github.com/elastic/kibana/pull/259308"
     },
     {
       "path": "/api/fleet/agent_policies",
@@ -56,6 +84,90 @@
       "method": "put",
       "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",
       "approvedBy": "elastic/fleet"
+    },
+    {
+      "path": "/api/spaces/space",
+      "method": "get",
+      "reason": "Replace schema.conditional with schema.maybe(schema.boolean()) for include_authorized_purposes query param. Runtime behavior is identical — the custom validate function still rejects include_authorized_purposes=true when purpose is set. The OAS type widens from conditional literal(false)/boolean to always boolean. TF provider codegen simplifies from union type to plain *bool, but the endpoint is unused in provider code.",
+      "approvedBy": "@elastic/kibana-security",
+      "prUrl": "https://github.com/elastic/kibana/pull/260831"
+    },
+    {
+      "path": "/api/actions/connector/{id}",
+      "method": "get",
+      "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property config/additionalProperties/ became nullable for status 200. No runtime behavior change.",
+      "approvedBy": "@elastic/response-ops",
+      "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/actions/connector/{id}",
+      "method": "put",
+      "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property config/additionalProperties/ became nullable for status 200. No runtime behavior change.",
+      "approvedBy": "@elastic/response-ops",
+      "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/alerting/rule/{id}",
+      "method": "get",
+      "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property params/additionalProperties/ became nullable for status 200. No runtime behavior change.",
+      "approvedBy": "@elastic/response-ops",
+      "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/alerting/rule/{id}",
+      "method": "put",
+      "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property params/additionalProperties/ became nullable for status 200. No runtime behavior change.",
+      "approvedBy": "@elastic/response-ops",
+      "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/fleet/fleet_server_hosts",
+      "method": "get",
+      "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property attributes became nullable for status 400. No runtime behavior change.",
+      "approvedBy": "@elastic/fleet",
+      "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/fleet/fleet_server_hosts",
+      "method": "post",
+      "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property attributes became nullable for status 400. No runtime behavior change.",
+      "approvedBy": "@elastic/fleet",
+      "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/fleet/fleet_server_hosts/{itemId}",
+      "method": "delete",
+      "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property attributes became nullable for status 400. No runtime behavior change.",
+      "approvedBy": "@elastic/fleet",
+      "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/fleet/fleet_server_hosts/{itemId}",
+      "method": "get",
+      "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property attributes became nullable for status 400. No runtime behavior change.",
+      "approvedBy": "@elastic/fleet",
+      "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/fleet/fleet_server_hosts/{itemId}",
+      "method": "put",
+      "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property attributes became nullable for status 400. No runtime behavior change.",
+      "approvedBy": "@elastic/fleet",
+      "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/fleet/outputs/{outputId}",
+      "method": "delete",
+      "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property attributes became nullable for status 404. No runtime behavior change.",
+      "approvedBy": "@elastic/fleet",
+      "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/fleet/package_policies/{packagePolicyId}",
+      "method": "delete",
+      "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property attributes became nullable for status 400. No runtime behavior change.",
+      "approvedBy": "@elastic/fleet",
+      "prUrl": "https://github.com/elastic/kibana/pull/264235"
     }
   ]
 }

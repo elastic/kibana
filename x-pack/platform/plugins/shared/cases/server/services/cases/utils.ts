@@ -8,6 +8,14 @@ import type { estypes } from '@elastic/elasticsearch';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { FindOptions } from '../../common/types';
 import { DEFAULT_PER_PAGE } from '../../routes/api';
+import type {
+  ResolvedExtendedFieldFilter,
+  ResolvedFieldLabelFilter,
+} from './extended_field_search_utils';
+import {
+  buildExtendedFieldFilterClauses,
+  buildFieldLabelExistsClauses,
+} from './extended_field_search_utils';
 
 export const DEFAULT_CASE_SEARCH_FIELDS = [
   `${CASE_SAVED_OBJECT}.title`,
@@ -79,23 +87,31 @@ export const constructSearchQuery = ({
   search,
   searchFields,
   caseIds,
+  extendedFieldFilters,
+  fieldLabelFilters,
 }: {
   search?: string;
   searchFields?: string[];
   caseIds: string[];
+  extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
+  fieldLabelFilters?: ResolvedFieldLabelFilter[];
 }): estypes.QueryDslQueryContainer | undefined => {
   const caseSearchFields = searchFields?.filter((field) =>
     DEFAULT_CASE_SEARCH_FIELDS.includes(field)
   );
   const nestedFields = searchFields?.filter((field) => DEFAULT_CASE_NESTED_FIELDS.includes(field));
 
-  if (!search && !caseIds.length) {
+  const hasExtendedFieldFilters = extendedFieldFilters && extendedFieldFilters.length > 0;
+  const hasFieldLabelFilters = fieldLabelFilters && fieldLabelFilters.length > 0;
+
+  if (!search && !caseIds.length && !hasExtendedFieldFilters && !hasFieldLabelFilters) {
     return undefined;
   }
+
   const shouldClauses: estypes.QueryDslQueryContainer[] = [];
+  const filterClauses: estypes.QueryDslQueryContainer[] = [];
 
   if (search) {
-    // support search by case ID
     shouldClauses.push({
       term: {
         [`_id`]: `${CASE_SAVED_OBJECT}:${search}`,
@@ -134,6 +150,38 @@ export const constructSearchQuery = ({
         [`_id`]: caseIds.map((id) => `${CASE_SAVED_OBJECT}:${id}`),
       },
     });
+  }
+
+  if (hasFieldLabelFilters) {
+    shouldClauses.push(...buildFieldLabelExistsClauses(fieldLabelFilters));
+  }
+
+  if (hasExtendedFieldFilters) {
+    filterClauses.push(...buildExtendedFieldFilterClauses(extendedFieldFilters));
+  }
+
+  if (shouldClauses.length > 0 && filterClauses.length > 0) {
+    return {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: shouldClauses,
+              minimum_should_match: 1,
+            },
+          },
+          ...filterClauses,
+        ],
+      },
+    };
+  }
+
+  if (filterClauses.length > 0) {
+    return {
+      bool: {
+        filter: filterClauses,
+      },
+    };
   }
 
   return {

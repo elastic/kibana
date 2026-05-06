@@ -9,7 +9,7 @@ import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { DocumentDetailsContext } from '../../shared/context';
 import { PrevalenceDetails } from './prevalence_details';
-import { resetColdFrozenTierCalloutDismissedStateForTests } from '../../../../flyout_v2/prevalence/prevalence';
+import { resetColdFrozenTierCalloutDismissedStateForTests } from '../../../../flyout_v2/prevalence/components/prevalence_details_view';
 import {
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID,
@@ -51,6 +51,10 @@ jest.mock('../../../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
+        application: {
+          getUrlForApp: (_appId: string, { path }: { path: string }) =>
+            `/app/securitySolutionUI${path}`,
+        },
         telemetry: mockedTelemetry,
         storage: { get: mockStorage },
         uiSettings: {
@@ -59,6 +63,8 @@ jest.mock('../../../../common/lib/kibana', () => {
         serverless: mockServerless,
       },
     }),
+    useDateFormat: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+    useTimeZone: () => 'UTC',
     useUiSetting: () => false,
   };
 });

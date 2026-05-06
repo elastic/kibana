@@ -370,6 +370,7 @@
                 "lineNumber": 22,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "FlyoutPanelProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -422,6 +423,7 @@
                 "lineNumber": 26,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "FlyoutPanelProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -474,6 +476,7 @@
                 "lineNumber": 30,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "FlyoutPanelProps",
                 "trackAdoption": false,
                 "isRequired": true
               }

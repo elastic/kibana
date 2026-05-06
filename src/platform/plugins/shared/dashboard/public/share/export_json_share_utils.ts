@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_API_PATH, DASHBOARD_API_VERSION } from '../../common/constants';
+import { DASHBOARD_API_PATH } from '../../common/constants';
 
 const DEFAULT_FILENAME_BASE = 'export';
 
@@ -41,11 +41,5 @@ export function buildExportJsonFilename(filenameBase: string, fileExtension: str
  * The console will open with the HTTP verb + kbn: path, followed by a JSON body.
  */
 export function buildCreateDashboardRequestForConsole(jsonBody: string): string {
-  // TODO remove these conditionals once the dashboard endpoints are public
-  // adds the `apiVersion` query parameter to the dashboard API path for internal requests
-  const dashboardApiPath =
-    DASHBOARD_API_VERSION === '1'
-      ? `${DASHBOARD_API_PATH}?apiVersion=${DASHBOARD_API_VERSION}`
-      : DASHBOARD_API_PATH;
-  return `POST kbn:${dashboardApiPath}\n${jsonBody}`;
+  return `POST kbn:${DASHBOARD_API_PATH}\n${jsonBody}`;
 }

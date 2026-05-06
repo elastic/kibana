@@ -11,15 +11,14 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip, EuiModal } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
-import type { FeedbackFormData } from '../types';
+import type { FeedbackFormData, FeedbackRegistryEntry } from '../types';
 
 const LazyFeedbackContainer = lazy(() =>
   import('./feedback_container').then((m) => ({ default: m.FeedbackContainer }))
 );
 
 interface Props {
-  getQuestions: (appId: string) => FeedbackRegistryEntry[];
+  getQuestions: (appId: string) => Promise<FeedbackRegistryEntry[]>;
   getAppDetails: () => { title: string; id: string; url: string };
   getCurrentUserEmail: () => Promise<string | undefined>;
   sendFeedback: (data: FeedbackFormData) => Promise<void>;

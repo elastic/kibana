@@ -6,16 +6,25 @@
  */
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamQuery } from '@kbn/streams-schema';
-import { streamQuerySchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
+import {
+  bulkStreamQueryInputSchema,
+  upsertStreamQueryRequestSchema,
+  deriveQueryType,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { QueryNotFoundError } from '../../../lib/streams/errors/query_not_found_error';
+import {
+  upsertStreamQueryRequest,
+  bulkStreamQueriesRequest,
+  listStreamQueriesResponse,
+} from '../../../oas_examples';
 import {
   EsqlQueryValidationError,
   validateEsqlQueryForStreamOrThrow,
 } from '../../../lib/sig_events/validate_esql_query';
 import { createServerRoute } from '../../create_server_route';
-import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
+import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 export interface ListQueriesResponse {
   queries: StreamQuery[];
@@ -42,10 +51,24 @@ const listQueriesRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'List of queries linked to the stream.',
+          content: {
+            'application/json': {
+              examples: {
+                listQueries: { value: listStreamQueriesResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
   }),
   security: {
@@ -53,15 +76,18 @@ const listQueriesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
-    const { queryClient, streamsClient, licensing } = await getScopedClients({ request });
-    await assertEnterpriseLicense(licensing);
+  async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {
+    const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
     const {
       path: { name: streamName },
     } = params;
 
+    const queryClient = await getQueryClient();
     const { [streamName]: queryLinks } = await queryClient.getStreamToQueryLinksMap([streamName]);
 
     return {
@@ -80,6 +106,22 @@ const upsertQueryRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              upsertQuery: { value: upsertStreamQueryRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The query was added or updated successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -88,18 +130,20 @@ const upsertQueryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
-      queryId: z.string(),
+      name: z.string().describe('The name of the stream.'),
+      queryId: z.string().describe('The identifier of the query.'),
     }),
     body: upsertStreamQueryRequestSchema,
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
-    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients, server }): Promise<UpsertQueryResponse> => {
+    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
     const {
       path: { name: streamName, queryId },
       body,
     } = params;
-    await assertEnterpriseLicense(licensing);
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const definition = await streamsClient.getStream(streamName);
 
@@ -108,8 +152,10 @@ const upsertQueryRoute = createServerRoute({
       stream: definition,
     });
 
+    const queryClient = await getQueryClient();
     await queryClient.upsert(definition, {
       id: queryId,
+      type: deriveQueryType(body.esql.query),
       title: body.title,
       description: body.description,
       esql: body.esql,
@@ -133,6 +179,13 @@ const deleteQueryRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'The query was removed successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -141,15 +194,21 @@ const deleteQueryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
-      queryId: z.string(),
+      name: z.string().describe('The name of the stream.'),
+      queryId: z.string().describe('The identifier of the query to remove.'),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, logger }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, queryClient, licensing } = await getScopedClients({
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    logger,
+    server,
+  }): Promise<DeleteQueryResponse> => {
+    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
-    await assertEnterpriseLicense(licensing);
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { queryId, name: streamName },
@@ -157,6 +216,7 @@ const deleteQueryRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(streamName);
 
+    const queryClient = await getQueryClient();
     const queryLink = await queryClient.bulkGetByIds(streamName, [queryId]);
     if (queryLink.length === 0) {
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
@@ -182,6 +242,22 @@ const bulkQueriesRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              bulkQueries: { value: bulkStreamQueriesRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Bulk operation completed successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -190,13 +266,13 @@ const bulkQueriesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
     body: z.object({
       operations: z.array(
         z.union([
           z.object({
-            index: streamQuerySchema,
+            index: bulkStreamQueryInputSchema,
           }),
           z.object({
             delete: z.object({ id: z.string() }),
@@ -210,9 +286,12 @@ const bulkQueriesRoute = createServerRoute({
     request,
     getScopedClients,
     logger,
+    server,
   }): Promise<BulkUpdateAssetsResponse> => {
-    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
-    await assertEnterpriseLicense(licensing);
+    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { name: streamName },
@@ -221,18 +300,35 @@ const bulkQueriesRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(streamName);
 
+    // Validation is all-or-nothing: if any index operation fails validation,
+    // the entire batch is rejected. Operations that pass validation are
+    // collected in typedOperations and applied atomically via queryClient.bulk.
     const validationErrors: Array<{ id: string; message: string }> = [];
+    const typedOperations: Array<{ index?: StreamQuery; delete?: { id: string } }> = [];
+
     for (const operation of operations) {
       if ('index' in operation && operation.index) {
+        const { id, title, description, esql, severity_score, evidence } = operation.index;
         try {
-          validateEsqlQueryForStreamOrThrow({
-            esqlQuery: operation.index.esql.query,
-            stream: definition,
-          });
+          validateEsqlQueryForStreamOrThrow({ esqlQuery: esql.query, stream: definition });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          validationErrors.push({ id: operation.index.id, message });
+          validationErrors.push({ id, message });
+          continue;
         }
+        typedOperations.push({
+          index: {
+            id,
+            title,
+            description,
+            esql,
+            severity_score,
+            evidence,
+            type: deriveQueryType(esql.query),
+          },
+        });
+      } else if ('delete' in operation) {
+        typedOperations.push(operation);
       }
     }
 
@@ -242,7 +338,8 @@ const bulkQueriesRoute = createServerRoute({
       });
     }
 
-    await queryClient.bulk(definition, operations);
+    const queryClient = await getQueryClient();
+    await queryClient.bulk(definition, typedOperations);
 
     logger
       .get('significant_events')

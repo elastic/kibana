@@ -11,6 +11,7 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { UserPanelHeader } from './header';
 import { managedUserDetails, mockManagedUserData } from './mocks';
+import { RiskSeverity } from '../../../../common/search_strategy';
 
 const defaultLastSeen = {
   date: '2023-02-23T20:03:17.489Z',
@@ -112,16 +113,6 @@ describe('UserPanelHeader', () => {
     expect(queryByTestId('user-panel-header-managed-badge')).not.toBeInTheDocument();
   });
 
-  it('renders entity id when provided', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <UserPanelHeader {...mockProps} entityId="user-entity-store-id" />
-      </TestProviders>
-    );
-
-    expect(getByTestId('user-panel-header-entity-id')).toHaveTextContent('user-entity-store-id');
-  });
-
   it('renders skeleton when loading', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
@@ -132,5 +123,65 @@ describe('UserPanelHeader', () => {
     expect(getByTestId('user-panel-header-lastSeen-loading')).toBeInTheDocument();
     expect(getByTestId('user-panel-header-observed-badge-loading')).toBeInTheDocument();
     expect(queryByTestId('user-panel-header-observed-badge')).not.toBeInTheDocument();
+  });
+
+  it('renders entity store badge when isEntityInStore is true', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <UserPanelHeader {...mockProps} isEntityInStore />
+      </TestProviders>
+    );
+
+    expect(getByTestId('user-panel-header-observed-badge')).toHaveTextContent('Entity Store');
+  });
+
+  it('renders observed badge text when isEntityInStore is false', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <UserPanelHeader {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('user-panel-header-observed-badge')).toHaveTextContent('Observed');
+  });
+
+  it('renders risk level badge when isEntityInStore and riskLevel are provided', () => {
+    const { getByText } = render(
+      <TestProviders>
+        <UserPanelHeader {...mockProps} isEntityInStore riskLevel={RiskSeverity.High} />
+      </TestProviders>
+    );
+
+    expect(getByText('Risk: High')).toBeInTheDocument();
+  });
+
+  it('does not render risk level badge when isEntityInStore is false', () => {
+    const { queryByText } = render(
+      <TestProviders>
+        <UserPanelHeader {...mockProps} riskLevel={RiskSeverity.High} />
+      </TestProviders>
+    );
+
+    expect(queryByText('Risk: High')).not.toBeInTheDocument();
+  });
+
+  it('renders the user name as a link to the details page when isEntityInStore is false', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <UserPanelHeader {...mockProps} isEntityInStore={false} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('flyoutTitleLinkIcon')).toBeInTheDocument();
+  });
+
+  it('renders the user name without a link when isEntityInStore is true', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <UserPanelHeader {...mockProps} isEntityInStore />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('flyoutTitleLinkIcon')).not.toBeInTheDocument();
   });
 });

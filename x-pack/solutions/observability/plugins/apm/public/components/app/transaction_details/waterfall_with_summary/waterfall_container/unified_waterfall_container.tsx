@@ -14,7 +14,7 @@ import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import { TraceWaterfall } from '../../../../shared/trace_waterfall';
 import { useErrorClickHandler } from '../../../../shared/trace_waterfall/use_error_click_handler';
 import { useGetServiceBadgeHrefFromRouter } from '../../../../shared/trace_waterfall/use_get_service_badge_href_from_router';
-import { UnifiedWaterfallFlyout } from './waterfall/unified_waterfall_flyout';
+import { UnifiedWaterfallFlyout } from './unified_waterfall_flyout';
 
 interface Props {
   traceItems: TraceItem[];
@@ -75,28 +75,30 @@ export function UnifiedWaterfallContainer({
   };
 
   return (
-    <TraceWaterfall
-      traceItems={traceItems}
-      errors={errors}
-      onClick={handleNodeClick}
-      onErrorClick={handleErrorClick}
-      getServiceBadgeHref={getServiceBadgeHref}
-      serviceName={serviceName}
-      showLegend
-      showCriticalPathControl
-      agentMarks={agentMarks}
-      showCriticalPath={showCriticalPath}
-      onShowCriticalPathChange={onShowCriticalPathChange}
-      entryTransactionId={entryTransactionId}
-      traceDocsTotal={traceDocsTotal}
-      maxTraceItems={maxTraceItems}
-      discoverHref={discoverHref}
-    >
-      <UnifiedWaterfallFlyout
-        waterfallItemId={waterfallItemId}
+    <div data-test-subj="waterfallContainer">
+      <TraceWaterfall
         traceItems={traceItems}
-        toggleFlyout={toggleFlyout}
-      />
-    </TraceWaterfall>
+        errors={errors}
+        onClick={handleNodeClick}
+        onErrorClick={handleErrorClick}
+        getServiceBadgeHref={getServiceBadgeHref}
+        serviceName={serviceName}
+        showLegend
+        showCriticalPathControl
+        agentMarks={agentMarks}
+        showCriticalPath={showCriticalPath}
+        onShowCriticalPathChange={onShowCriticalPathChange}
+        entryTransactionId={entryTransactionId}
+        traceDocsTotal={traceDocsTotal}
+        maxTraceItems={maxTraceItems}
+        discoverHref={discoverHref}
+      >
+        <UnifiedWaterfallFlyout
+          waterfallItemId={waterfallItemId}
+          traceItems={traceItems}
+          toggleFlyout={toggleFlyout}
+        />
+      </TraceWaterfall>
+    </div>
   );
 }

@@ -19,18 +19,12 @@ export type {
   AppMenuRunActionParams,
   AppMenuConfig,
   AppMenuItemType,
-  AppMenuSecondaryActionItem,
   AppMenuPrimaryActionItem,
   AppMenuPopoverItem,
   AppMenuSplitButtonProps,
 } from './types';
 
-export {
-  APP_MENU_ITEM_LIMIT,
-  APP_MENU_NOTIFICATION_INDICATOR_LEFT,
-  APP_MENU_NOTIFICATION_INDICATOR_TOP,
-  DEFAULT_POPOVER_WIDTH,
-} from './constants';
+export { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
 
 export {
   getDisplayedItemsAllowedAmount,

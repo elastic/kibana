@@ -9,14 +9,14 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import {
-  selectTabSavedSearch,
+  selectTabSavedSearchByValueAttributes,
+  useCurrentTabSelector,
   useInternalStateGetState,
   useRuntimeStateManager,
 } from '../../state_management/redux';
@@ -35,6 +35,8 @@ const BUTTON_LABEL = i18n.translate('discover.saveDiscoverTable.buttonLabel', {
 
 export function SaveDiscoverTableButton() {
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const currentTabId = useCurrentTabSelector((tab) => tab.id);
+  const controlGroupState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
   const getState = useInternalStateGetState();
   const services = useDiscoverServices();
   const runtimeStateManager = useRuntimeStateManager();
@@ -45,25 +47,23 @@ export function SaveDiscoverTableButton() {
       newTitle,
       newDescription,
     }: OnSaveProps & { dashboardId: string | null }) => {
-      const internalState = getState();
-      const tabId = internalState.tabs.unsafeCurrentId;
-      const savedSearch = await selectTabSavedSearch({
-        tabId,
+      const byValueState = await selectTabSavedSearchByValueAttributes({
+        tabId: currentTabId,
         getState,
         runtimeStateManager,
         services,
       });
 
-      const { searchSourceJSON, references } = savedSearch.searchSource.serialize();
-      const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
-
       services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
-        state: { ...attributes, title: newTitle, description: newDescription, references },
+        state: {
+          byValueState: { ...byValueState, title: newTitle, description: newDescription },
+          controlGroupState,
+        },
         app: 'dashboards',
         path: dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create',
       });
     },
-    [getState, services, runtimeStateManager]
+    [currentTabId, getState, runtimeStateManager, services, controlGroupState]
   );
 
   return (

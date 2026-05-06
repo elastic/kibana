@@ -27,6 +27,7 @@ import type {
   RequestHandlerContext,
 } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
@@ -70,6 +71,7 @@ export class DashboardPlugin
   implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
   private readonly logger: Logger;
+  private apiUsageCounter?: UsageCounter;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -101,6 +103,8 @@ export class DashboardPlugin
     }
 
     if (plugins.usageCollection) {
+      this.apiUsageCounter = plugins.usageCollection.createUsageCounter('dashboard_api');
+
       // Registers routes for tracking and fetching dashboard views
       registerContentInsights(
         {
@@ -125,7 +129,7 @@ export class DashboardPlugin
 
     core.uiSettings.register(getUISettings());
 
-    registerRoutes(core.http);
+    registerRoutes(core.http, this.apiUsageCounter);
 
     void registerAccessControl({
       http: core.http,
