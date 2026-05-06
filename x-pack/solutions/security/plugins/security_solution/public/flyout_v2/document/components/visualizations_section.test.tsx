@@ -26,7 +26,7 @@ import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useIsAnalyzerEnabled } from '../../../detections/hooks/use_is_analyzer_enabled';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { alertFlyoutHistoryKey } from '../constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
 
 jest.mock('../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -175,7 +175,7 @@ describe('VisualizationsSection', () => {
     expect(openSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        historyKey: alertFlyoutHistoryKey,
+        historyKey: documentFlyoutHistoryKey,
         session: 'start',
       })
     );
