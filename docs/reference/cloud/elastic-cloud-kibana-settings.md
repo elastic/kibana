@@ -464,11 +464,14 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 `csp.object_src` {applies_to}`stack: ga 9.3`
 :   Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/object-src).
 
+`csp.form_action` {applies_to}`stack: ga 9.3`
+:   Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action). Rules may not contain `nonce-*` or `none` and will not override the defaults. **Default: [`'self'`]**
+
 `csp.report_uri`
 :   Add sources for the [Content Security Policy `report-uri` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri).
 
 `csp.report_only.form_action`
-:   Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action) in reporting mode.
+:   Deprecated. Use `csp.form_action` instead. Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action) in reporting mode.
 
 $$$csp-strict$$$ `csp.strict`
 :   Blocks Kibana access to any browser that does not enforce even rudimentary CSP rules. In practice, this disables support for older, less safe browsers like Internet Explorer. **Default: `true`** To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md)].
