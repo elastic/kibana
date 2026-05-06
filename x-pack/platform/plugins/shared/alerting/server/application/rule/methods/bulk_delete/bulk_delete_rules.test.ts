@@ -864,6 +864,8 @@ describe('bulkDelete', () => {
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [
           {
+            // setGlobalDate pins Date.now() to mockedDateString.
+            timestamp: '2019-02-12T21:01:22.479Z',
             objectId: enabledRuleForBulkOpsWithActions1.id,
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
@@ -873,6 +875,7 @@ describe('bulkDelete', () => {
             },
           },
           {
+            timestamp: '2019-02-12T21:01:22.479Z',
             objectId: enabledRuleForBulkOpsWithActions2.id,
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
@@ -884,6 +887,29 @@ describe('bulkDelete', () => {
         ],
         expect.any(Object)
       );
+    });
+
+    test('stamps every change with the time captured immediately before the bulkDelete', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
+      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+
+      try {
+        await trackingClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+        expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+        const [changes] = changeTrackingService.logBulk.mock.calls[0];
+        // All rules share the same operation timestamp.
+        expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
+          '2030-06-01T08:00:00.000Z',
+          '2030-06-01T08:00:00.000Z',
+        ]);
+      } finally {
+        dateNowSpy.mockRestore();
+      }
     });
 
     test('only logs successfully deleted rules when bulk delete has partial failures', async () => {

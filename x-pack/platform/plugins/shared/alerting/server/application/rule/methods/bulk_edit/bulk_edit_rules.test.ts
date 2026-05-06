@@ -3506,6 +3506,8 @@ describe('bulkEdit()', () => {
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [
           {
+            // setGlobalDate pins Date.now() to mockedDateString.
+            timestamp: '2019-02-12T21:01:22.479Z',
             objectId: '1',
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
@@ -3517,6 +3519,42 @@ describe('bulkEdit()', () => {
         ],
         expect.any(Object)
       );
+    });
+
+    test('stamps every change with the time captured immediately before the bulkCreate', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          { ...existingDecryptedRule, id: '1' },
+          { ...existingDecryptedRule, id: '2' },
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1'), updatedRuleSO('2')],
+      });
+
+      const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
+      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+
+      try {
+        await trackingClient.bulkEdit({
+          filter: '',
+          operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+        });
+
+        expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+        const [changes] = changeTrackingService.logBulk.mock.calls[0];
+        // All rules share the same operation timestamp.
+        expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
+          '2030-06-01T08:00:00.000Z',
+          '2030-06-01T08:00:00.000Z',
+        ]);
+      } finally {
+        dateNowSpy.mockRestore();
+      }
     });
 
     test('skips rules whose saved object update failed (partial bulk failures)', async () => {

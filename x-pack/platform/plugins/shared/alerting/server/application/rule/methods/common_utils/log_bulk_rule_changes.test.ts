@@ -14,6 +14,10 @@ import type { IScopedChangeTrackingService } from '../../../../rules_client/lib/
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { logBulkRuleChanges } from './log_bulk_rule_changes';
 
+// A fixed reference timestamp used across the tests so assertions are deterministic.
+const REFERENCE_TIMESTAMP_MS = Date.UTC(2026, 0, 15, 12, 30, 45, 678);
+const REFERENCE_TIMESTAMP_ISO = new Date(REFERENCE_TIMESTAMP_MS).toISOString();
+
 describe('logBulkRuleChanges', () => {
   let changeTrackingService: jest.Mocked<IScopedChangeTrackingService>;
 
@@ -29,18 +33,21 @@ describe('logBulkRuleChanges', () => {
       context,
       ruleSOs,
       action: RuleChangeTrackingAction.ruleDelete,
+      timestamp: REFERENCE_TIMESTAMP_MS,
     });
 
     expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
     const [changes, opts] = changeTrackingService.logBulk.mock.calls[0];
     expect(changes).toEqual([
       {
+        timestamp: REFERENCE_TIMESTAMP_ISO,
         objectId: 'rule-1',
         objectType: RULE_SAVED_OBJECT_TYPE,
         module: 'stack',
         snapshot: { attributes: expect.objectContaining({ name: 'rule rule-1' }), references: [] },
       },
       {
+        timestamp: REFERENCE_TIMESTAMP_ISO,
         objectId: 'rule-2',
         objectType: RULE_SAVED_OBJECT_TYPE,
         module: 'stack',
@@ -66,6 +73,7 @@ describe('logBulkRuleChanges', () => {
       context,
       ruleSOs,
       action: RuleChangeTrackingAction.ruleDisable,
+      timestamp: REFERENCE_TIMESTAMP_MS,
     });
 
     expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
@@ -90,6 +98,7 @@ describe('logBulkRuleChanges', () => {
       context,
       ruleSOs,
       action: RuleChangeTrackingAction.ruleEnable,
+      timestamp: REFERENCE_TIMESTAMP_MS,
     });
 
     expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
@@ -111,6 +120,7 @@ describe('logBulkRuleChanges', () => {
       context,
       ruleSOs,
       action: RuleChangeTrackingAction.ruleUpdate,
+      timestamp: REFERENCE_TIMESTAMP_MS,
     });
 
     const [changes] = changeTrackingService.logBulk.mock.calls[0];
@@ -128,6 +138,7 @@ describe('logBulkRuleChanges', () => {
       context,
       ruleSOs,
       action: RuleChangeTrackingAction.ruleDisable,
+      timestamp: REFERENCE_TIMESTAMP_MS,
     });
 
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
@@ -144,6 +155,7 @@ describe('logBulkRuleChanges', () => {
       context,
       ruleSOs,
       action: RuleChangeTrackingAction.ruleDelete,
+      timestamp: REFERENCE_TIMESTAMP_MS,
     });
 
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
@@ -156,6 +168,7 @@ describe('logBulkRuleChanges', () => {
       context,
       ruleSOs: [],
       action: RuleChangeTrackingAction.ruleEnable,
+      timestamp: REFERENCE_TIMESTAMP_MS,
     });
 
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
@@ -168,6 +181,7 @@ describe('logBulkRuleChanges', () => {
       context,
       ruleSOs: [buildRuleSO('rule-1')],
       action: RuleChangeTrackingAction.ruleEnable,
+      timestamp: REFERENCE_TIMESTAMP_MS,
     });
 
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
@@ -182,6 +196,7 @@ describe('logBulkRuleChanges', () => {
       context,
       ruleSOs: [ruleSOWithoutRefs as SavedObject<RawRule>],
       action: RuleChangeTrackingAction.ruleUpdate,
+      timestamp: REFERENCE_TIMESTAMP_MS,
     });
 
     const [changes] = changeTrackingService.logBulk.mock.calls[0];
@@ -205,6 +220,7 @@ describe('logBulkRuleChanges', () => {
         context,
         ruleSOs: [buildRuleSO('rule-1')],
         action: RuleChangeTrackingAction.ruleDelete,
+        timestamp: REFERENCE_TIMESTAMP_MS,
       })
     ).resolves.toBeUndefined();
 
@@ -221,6 +237,7 @@ describe('logBulkRuleChanges', () => {
         context,
         ruleSOs: [buildRuleSO('rule-1')],
         action: RuleChangeTrackingAction.ruleEnable,
+        timestamp: REFERENCE_TIMESTAMP_MS,
       })
     ).resolves.toBeUndefined();
 
@@ -229,6 +246,71 @@ describe('logBulkRuleChanges', () => {
         `Unable to log bulk rule changes for action "${RuleChangeTrackingAction.ruleEnable}"`
       )
     );
+  });
+
+  describe('timestamp', () => {
+    it('records the caller-supplied timestamp on every emitted change as ISO-8601', async () => {
+      const context = buildContext({ changeTrackingService });
+      const ruleSOs = [buildRuleSO('rule-1'), buildRuleSO('rule-2')];
+
+      await logBulkRuleChanges({
+        context,
+        ruleSOs,
+        action: RuleChangeTrackingAction.ruleUpdate,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      });
+
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes.map((c) => c.timestamp)).toEqual([
+        REFERENCE_TIMESTAMP_ISO,
+        REFERENCE_TIMESTAMP_ISO,
+      ]);
+    });
+
+    it.each<{ label: string; input: number | string | Date; expected: string }>([
+      {
+        label: 'epoch milliseconds (number)',
+        input: REFERENCE_TIMESTAMP_MS,
+        expected: REFERENCE_TIMESTAMP_ISO,
+      },
+      {
+        label: 'ISO-8601 string',
+        input: REFERENCE_TIMESTAMP_ISO,
+        expected: REFERENCE_TIMESTAMP_ISO,
+      },
+      {
+        label: 'Date instance',
+        input: new Date(REFERENCE_TIMESTAMP_MS),
+        expected: REFERENCE_TIMESTAMP_ISO,
+      },
+    ])('normalizes a $label timestamp to ISO-8601', async ({ input, expected }) => {
+      const context = buildContext({ changeTrackingService });
+
+      await logBulkRuleChanges({
+        context,
+        ruleSOs: [buildRuleSO('rule-1')],
+        action: RuleChangeTrackingAction.ruleUpdate,
+        timestamp: input,
+      });
+
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes[0].timestamp).toBe(expected);
+    });
+
+    it('uses the same timestamp for every change in a multi-rule call (single operation snapshot)', async () => {
+      const context = buildContext({ changeTrackingService });
+
+      await logBulkRuleChanges({
+        context,
+        ruleSOs: [buildRuleSO('rule-1'), buildRuleSO('rule-2'), buildRuleSO('rule-3')],
+        action: RuleChangeTrackingAction.ruleDelete,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      });
+
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      const distinctTimestamps = new Set(changes.map((c) => c.timestamp));
+      expect(distinctTimestamps).toEqual(new Set([REFERENCE_TIMESTAMP_ISO]));
+    });
   });
 });
 

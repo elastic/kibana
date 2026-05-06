@@ -257,6 +257,7 @@ export async function createRule<Params extends RuleParams = never>(
     context,
     ruleSOs: [createdRuleSavedObject],
     action: RuleChangeTrackingAction.ruleCreate,
+    timestamp: createTime,
   });
 
   // Convert ES RawRule back to domain rule object

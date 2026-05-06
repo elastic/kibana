@@ -241,6 +241,7 @@ const bulkDeleteWithOCC = async (
     );
   }
 
+  const deletionTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
     () =>
@@ -284,6 +285,7 @@ const bulkDeleteWithOCC = async (
     context,
     ruleSOs: rules,
     action: RuleChangeTrackingAction.ruleDelete,
+    timestamp: deletionTimestamp,
   });
 
   return {

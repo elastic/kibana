@@ -23,7 +23,7 @@ import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup } from '../../../../rules_client/tests/lib';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
@@ -91,6 +91,8 @@ describe('validate unsnooze params', () => {
     );
   });
 });
+
+setGlobalDate();
 
 describe('unsnoozeRule change tracking', () => {
   const taskManager = taskManagerMock.createStart();
@@ -237,6 +239,8 @@ describe('unsnoozeRule change tracking', () => {
     expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
       [
         {
+          // setGlobalDate pins Date.now() to mockedDateString.
+          timestamp: '2019-02-12T21:01:22.479Z',
           objectId: 'rule-1',
           objectType: RULE_SAVED_OBJECT_TYPE,
           module: 'stack',
@@ -248,6 +252,24 @@ describe('unsnoozeRule change tracking', () => {
       ],
       expect.any(Object)
     );
+  });
+
+  test('stamps the change with the time captured immediately before the SO update', async () => {
+    const changeTrackingService = createChangeTrackingService();
+    const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+
+    const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
+    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+
+    try {
+      await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes[0].timestamp).toBe('2030-06-01T08:00:00.000Z');
+    } finally {
+      dateNowSpy.mockRestore();
+    }
   });
 
   test('logs the change only after the OCC retry succeeds', async () => {

@@ -17,13 +17,21 @@ interface LogBulkRuleChanges {
    * Rule saved objects after applying the changes
    */
   ruleSOs: Array<SavedObject<RawRule>>;
+  /**
+   * Action performed on rule, e.g. rule_create or rule_update
+   */
   action: string;
+  /**
+   * Original timestamp of the change
+   */
+  timestamp: string | number | Date;
 }
 
 export async function logBulkRuleChanges({
   context: { changeTrackingService, ruleTypeRegistry, logger, spaceId },
   ruleSOs,
   action,
+  timestamp,
 }: LogBulkRuleChanges): Promise<void> {
   if (!changeTrackingService) {
     return;
@@ -43,6 +51,7 @@ export async function logBulkRuleChanges({
     }
 
     changes.push({
+      timestamp: new Date(timestamp).toISOString(),
       objectId: ruleSO.id,
       objectType: RULE_SAVED_OBJECT_TYPE,
       module: ruleType.solution,

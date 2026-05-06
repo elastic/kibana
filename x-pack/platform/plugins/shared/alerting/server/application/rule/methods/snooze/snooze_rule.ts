@@ -108,6 +108,7 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
   const username = await context.getUserName();
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
 
+  const snoozeRuleTimestamp = Date.now();
   const updatedRuleRaw = await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsUpdateOptions: { version },
@@ -123,6 +124,7 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
     context,
     ruleSOs: [updatedRuleRaw] as Array<SavedObject<RawRule>>,
     action: RuleChangeTrackingAction.ruleSnooze,
+    timestamp: snoozeRuleTimestamp,
   });
 
   const ruleDomain = transformRuleAttributesToRuleDomain<Params>(

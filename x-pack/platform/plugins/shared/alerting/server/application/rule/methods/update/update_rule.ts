@@ -367,6 +367,8 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   const { id, version } = originalRuleSavedObject;
 
   try {
+    const updateRuleTimestamp = Date.now();
+
     updatedRuleSavedObject = await createRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       ruleAttributes: updatedRuleAttributes,
@@ -382,6 +384,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       context,
       ruleSOs: [updatedRuleSavedObject],
       action: RuleChangeTrackingAction.ruleUpdate,
+      timestamp: updateRuleTimestamp,
     });
   } catch (e) {
     const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updatedRuleAttributes;

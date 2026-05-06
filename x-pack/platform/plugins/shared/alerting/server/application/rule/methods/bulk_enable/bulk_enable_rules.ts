@@ -350,6 +350,7 @@ const bulkEnableRulesWithOCC = async (
     );
   }
 
+  const bulkEnableTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -369,6 +370,7 @@ const bulkEnableRulesWithOCC = async (
     context,
     ruleSOs: result.saved_objects,
     action: RuleChangeTrackingAction.ruleEnable,
+    timestamp: bulkEnableTimestamp,
   });
 
   // Get a map of all rules that failed to enable so we do not clear their flapping

@@ -232,7 +232,7 @@ const bulkDisableRulesWithOCC = async (
   // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
   // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
   // bulk_disable, bulk_enable, etc. to fix this cast
-
+  const bulkDisableTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -247,6 +247,7 @@ const bulkDisableRulesWithOCC = async (
     context,
     ruleSOs: result.saved_objects,
     action: RuleChangeTrackingAction.ruleDisable,
+    timestamp: bulkDisableTimestamp,
   });
 
   const taskIdsToDisable: string[] = [];
