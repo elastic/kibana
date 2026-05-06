@@ -27,7 +27,7 @@ export const ExternalInferenceHeader: React.FC<ExternalInferenceHeaderProps> = (
         'xpack.searchInferenceEndpoints.allInferenceEndpoints.description',
         {
           defaultMessage:
-            'Inference endpoints streamline the deployment and management of machine learning models in Elasticsearch. Set up and manage NLP tasks using unique endpoints, to build AI-powered search.',
+            'Inference endpoints streamline the deployment and management of machine\nlearning models in Elasticsearch. Set up and manage NLP tasks using unique\nendpoints to build AI-powered search.',
         }
       )}
       bottomBorder={true}
