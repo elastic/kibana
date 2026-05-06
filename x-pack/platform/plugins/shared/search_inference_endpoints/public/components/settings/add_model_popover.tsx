@@ -90,6 +90,9 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.searchInferenceEndpoints.settings.addModel.ariaLabel', {
+        defaultMessage: 'Model selection',
+      })}
       button={
         <EuiButtonEmpty
           iconType="plusInCircle"
