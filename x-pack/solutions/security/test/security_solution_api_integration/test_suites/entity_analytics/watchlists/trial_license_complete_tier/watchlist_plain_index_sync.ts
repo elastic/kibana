@@ -24,7 +24,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     let watchlistId: string;
 
+    const cleanAllWatchlistState = async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({ types: ['watchlist-entity-source'] });
+    };
+
     before(async () => {
+      await cleanAllWatchlistState();
       await entityStore.install(['user']);
     });
 
@@ -40,8 +46,8 @@ export default ({ getService }: FtrProviderContext) => {
 
     afterEach(async () => {
       await utils.deleteSourceIndex();
-      await utils.deleteWatchlistIndex(watchlistName);
-      await kibanaServer.savedObjects.cleanStandardList();
+      await utils.deleteWatchlistDocs(watchlistId);
+      await cleanAllWatchlistState();
     });
 
     it('should sync users from a source index into the watchlist entity index', async () => {
@@ -50,14 +56,14 @@ export default ({ getService }: FtrProviderContext) => {
       for (const name of usernames) {
         await entityStore.createEntity('user', {
           user: { name },
-          entity: { id: userEuid(name) },
+          entity: { id: userEuid(name), type: 'user' },
         });
       }
 
       await utils.addUsersToSourceIndex(usernames);
       await utils.syncWatchlist(watchlistId);
 
-      const entities = await utils.queryWatchlistIndex(watchlistName);
+      const entities = await utils.queryWatchlistIndex(watchlistId);
       expect(entities).toHaveLength(3);
 
       const euids = entities.map((e) => (e.entity as { id: string }).id);
@@ -82,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
       for (const name of uniqueUsernames) {
         await entityStore.createEntity('user', {
           user: { name },
-          entity: { id: userEuid(name) },
+          entity: { id: userEuid(name), type: 'user' },
         });
       }
 
@@ -90,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
       await utils.addUsersToSourceIndex([...uniqueUsernames, ...repeatedUsers]);
       await utils.syncWatchlist(watchlistId);
 
-      const entities = await utils.queryWatchlistIndex(watchlistName);
+      const entities = await utils.queryWatchlistIndex(watchlistId);
       expect(entities).toHaveLength(uniqueUsernames.length);
 
       const euids = entities.map((e) => (e.entity as { id: string }).id);
@@ -108,11 +114,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       await entityStore.createEntity('user', {
         user: { name: 'recent-user' },
-        entity: { id: userEuid('recent-user') },
+        entity: { id: userEuid('recent-user'), type: 'user' },
       });
       await entityStore.createEntity('user', {
         user: { name: 'old-user' },
-        entity: { id: userEuid('old-user') },
+        entity: { id: userEuid('old-user'), type: 'user' },
       });
 
       await utils.addUsersToSourceIndex(['recent-user'], new Date().toISOString());
@@ -123,31 +129,31 @@ export default ({ getService }: FtrProviderContext) => {
 
       await utils.syncWatchlist(shortResult.watchlistId);
 
-      const entities = await utils.queryWatchlistIndex(shortLookbackName);
+      const entities = await utils.queryWatchlistIndex(shortResult.watchlistId);
       const euids = entities.map((e) => (e.entity as { id: string }).id);
 
       expect(euids).toContain(userEuid('recent-user'));
       expect(euids).not.toContain(userEuid('old-user'));
 
-      await utils.deleteWatchlistIndex(shortLookbackName);
+      await utils.deleteWatchlistDocs(shortResult.watchlistId);
     });
 
     it('should not update timestamps when re-syncing the same user', async () => {
       await entityStore.createEntity('user', {
         user: { name: 'user1' },
-        entity: { id: userEuid('user1') },
+        entity: { id: userEuid('user1'), type: 'user' },
       });
 
       await utils.addUsersToSourceIndex(['user1']);
       await utils.syncWatchlist(watchlistId);
 
-      const entitiesAfterFirstSync = await utils.queryWatchlistIndex(watchlistName);
+      const entitiesAfterFirstSync = await utils.queryWatchlistIndex(watchlistId);
       const user1AfterFirstSync = utils.findEntity(entitiesAfterFirstSync, userEuid('user1'));
       log.info(`User 1 after first sync: ${JSON.stringify(user1AfterFirstSync)}`);
 
       await utils.syncWatchlist(watchlistId);
 
-      const entitiesAfterSecondSync = await utils.queryWatchlistIndex(watchlistName);
+      const entitiesAfterSecondSync = await utils.queryWatchlistIndex(watchlistId);
       const user1AfterSecondSync = utils.findEntity(entitiesAfterSecondSync, userEuid('user1'));
       log.info(`User 1 after second sync: ${JSON.stringify(user1AfterSecondSync)}`);
 
@@ -160,17 +166,17 @@ export default ({ getService }: FtrProviderContext) => {
     it('should resolve all entity store entities sharing a correlation value', async () => {
       await entityStore.createEntity('user', {
         user: { name: 'jdoe', email: ['jdoe@corp.com'] },
-        entity: { id: 'user:jdoe@corp.com@unknown' },
+        entity: { id: 'user:jdoe@corp.com@unknown', type: 'user' },
       });
       await entityStore.createEntity('user', {
         user: { name: 'jdoe' },
-        entity: { id: userEuid('jdoe') },
+        entity: { id: userEuid('jdoe'), type: 'user' },
       });
 
       await utils.addUsersToSourceIndex(['jdoe']);
       await utils.syncWatchlist(watchlistId);
 
-      const entities = await utils.queryWatchlistIndex(watchlistName);
+      const entities = await utils.queryWatchlistIndex(watchlistId);
       const euids = entities.map((e) => (e.entity as { id: string }).id);
 
       expect(euids).toContain('user:jdoe@corp.com@unknown');

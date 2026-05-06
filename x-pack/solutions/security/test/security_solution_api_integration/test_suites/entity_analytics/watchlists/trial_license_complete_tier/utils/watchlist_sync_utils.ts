@@ -61,7 +61,7 @@ export const WatchlistSyncUtils = (
       body: {
         name: watchlistName,
         description: `Test watchlist for ${watchlistName}`,
-        riskModifier: 10,
+        riskModifier: 1,
       },
     });
 
@@ -71,7 +71,7 @@ export const WatchlistSyncUtils = (
       params: { watchlist_id: watchlist.id },
       body: {
         type: 'index',
-        name: `Source for ${sourceIndexName}`,
+        name: `Source for ${watchlistName}`,
         indexPattern: sourceIndexName,
         identifierField: 'user.name',
         enabled: true,
@@ -93,13 +93,13 @@ export const WatchlistSyncUtils = (
     return response;
   };
 
-  const queryWatchlistIndex = async (watchlistName: string, namespace: string = 'default') => {
-    const indexName = `.entity_analytics.watchlists.${watchlistName}-${namespace}`;
+  const queryWatchlistIndex = async (watchlistId: string, namespace: string = 'default') => {
+    const indexName = `.entity_analytics.watchlists.${namespace}`;
 
     const response = await es.search({
       index: indexName,
       size: 1000,
-      query: { match_all: {} },
+      query: { term: { 'watchlist.id': watchlistId } },
     });
 
     return response.hits.hits.map((hit) => hit._source as Record<string, unknown>);
@@ -114,11 +114,16 @@ export const WatchlistSyncUtils = (
       return entity?.id === euid;
     });
 
-  const deleteWatchlistIndex = async (watchlistName: string, namespace: string = 'default') => {
-    const indexName = `.entity_analytics.watchlists.${watchlistName}-${namespace}`;
-    await es.indices.delete({ index: indexName }, { ignore: [404] }).catch((err) => {
-      log.error(`Error deleting watchlist index ${indexName}: ${err}`);
-    });
+  const deleteWatchlistDocs = async (watchlistId: string, namespace: string = 'default') => {
+    const indexName = `.entity_analytics.watchlists.${namespace}`;
+    await es
+      .deleteByQuery(
+        { index: indexName, query: { term: { 'watchlist.id': watchlistId } }, refresh: true },
+        { ignore: [404] }
+      )
+      .catch((err) => {
+        log.error(`Error deleting watchlist docs for ${watchlistId}: ${err}`);
+      });
   };
 
   return {
@@ -129,6 +134,6 @@ export const WatchlistSyncUtils = (
     syncWatchlist,
     queryWatchlistIndex,
     findEntity,
-    deleteWatchlistIndex,
+    deleteWatchlistDocs,
   };
 };
