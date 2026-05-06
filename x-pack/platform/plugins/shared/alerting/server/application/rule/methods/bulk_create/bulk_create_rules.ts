@@ -39,6 +39,7 @@ import {
   apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
 } from '../../../../rules_client/common';
+import { API_KEY_GENERATE_CONCURRENCY } from '../../../../rules_client/common/constants';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { tryToEnableTasks } from '../bulk_enable/bulk_enable_rules';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -62,12 +63,6 @@ import type {
   BulkCreateRulesParams,
   BulkCreateRulesResult,
 } from './types';
-
-/**
- * Bound the per-rule prepare phase to avoid overwhelming downstream services
- * (security plugin API key minting, action validation).
- */
-const PREPARE_CONCURRENCY = 10;
 
 const getBulkCreateAsDisabledMessage = (message: string): string =>
   i18n.translate('xpack.alerting.rulesClient.bulkCreate.ruleCreatedDisabledErrorMessage', {
@@ -171,7 +166,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
       if (prepared) preparedRules.set(id, prepared);
       else if (error) errors.push(error);
     },
-    { concurrency: PREPARE_CONCURRENCY }
+    { concurrency: API_KEY_GENERATE_CONCURRENCY }
   );
 
   // Phase 2: validate schedule-limits, enabled subset only.
