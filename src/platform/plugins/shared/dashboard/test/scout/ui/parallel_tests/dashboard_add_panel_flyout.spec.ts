@@ -33,7 +33,7 @@ const getExpected = (config: ScoutTestConfig) => {
  * This test exists to ensures additions to menu
  * notify our team and can be reviewed by design.
  */
-spaceTest.describe.only(
+spaceTest.describe(
   'Dashboard add panel flyout',
   {
     tag: [
