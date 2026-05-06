@@ -9,14 +9,14 @@ import { esql } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-episodes-ui/constants';
 import type { AlertTimelineSummary } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 
-export interface GanttSummaryEsqlRow {
+export interface AlertTimelineSummaryEsqlRow {
   episodes_started: number;
   recovered: number;
   still_open: number;
   median_duration_ms: number | null;
 }
 
-export interface BuildGanttSummaryQueryOptions {
+export interface BuildAlertTimelineSummaryQueryOptions {
   ruleId: string;
   gteMs: number;
   lteMs: number;
@@ -30,9 +30,13 @@ const toIsoUtc = (ms: number) => new Date(ms).toISOString();
  * `episodes_started`, `recovered`, `still_open`, and `median_duration_ms`.
  *
  * This replaces the client-side summary re-aggregation that previously
- * iterated every raw event a second time inside `deriveGanttData`.
+ * iterated every raw event a second time inside `deriveAlertTimelineData`.
  */
-export const buildGanttSummaryQuery = ({ ruleId, gteMs, lteMs }: BuildGanttSummaryQueryOptions) => {
+export const buildAlertTimelineSummaryQuery = ({
+  ruleId,
+  gteMs,
+  lteMs,
+}: BuildAlertTimelineSummaryQueryOptions) => {
   const fromIso = toIsoUtc(gteMs);
   const toIso = toIsoUtc(lteMs);
 
@@ -57,8 +61,8 @@ const EMPTY_SUMMARY: AlertTimelineSummary = {
   medianDurationMs: 0,
 };
 
-export const parseGanttSummaryRow = (
-  row: GanttSummaryEsqlRow | undefined
+export const parseAlertTimelineSummaryRow = (
+  row: AlertTimelineSummaryEsqlRow | undefined
 ): AlertTimelineSummary => {
   if (!row) return EMPTY_SUMMARY;
   return {

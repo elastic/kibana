@@ -89,7 +89,7 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
             gteMs={gteMs}
             lteMs={lteMs}
             height={ROW_HEIGHT_PX}
-            onSegmentClick={onEpisodeClick}
+            onEpisodeClick={onEpisodeClick}
             getEpisodeHref={getEpisodeHref}
           />
         ))}

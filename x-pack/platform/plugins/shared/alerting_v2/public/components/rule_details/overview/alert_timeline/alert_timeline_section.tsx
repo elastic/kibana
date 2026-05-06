@@ -106,8 +106,9 @@ export const AlertTimelineSection: React.FC = () => {
   const { events, groupingValuesByHash, summary, totalSeriesCount, isLoading, isError } =
     useFetchRuleEvents({
       ruleId: rule.id,
-      gteMs: fetchGteMs,
+      gteMs,
       lteMs,
+      eventGteMs: fetchGteMs,
       groupingFields,
       topN: ALERT_TIMELINE_TOP_N_DEFAULT,
       data,
@@ -289,12 +290,8 @@ export const AlertTimelineSection: React.FC = () => {
             onEpisodeClick={onEpisodeClick}
             getEpisodeHref={getEpisodeHref}
           />
-          <EuiSpacer size="xs" />
-          <AlertTimelineFooter
-            visibleRowCount={timelineData.rows.length}
-            totalRowCount={timelineData.totalRowCount}
-            viewAllHref={viewAllHref}
-          />
+          <EuiSpacer size="m" />
+          <AlertTimelineFooter viewAllHref={viewAllHref} />
         </>
       )}
     </EuiPanel>

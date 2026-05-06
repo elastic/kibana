@@ -28,7 +28,7 @@ export interface AlertTimelineStatsRowProps {
 
 export const AlertTimelineStatsRow: React.FC<AlertTimelineStatsRowProps> = ({ summary }) => {
   const { euiTheme } = useEuiTheme();
-  const recoveredColor = alertTimelineStatusColor(euiTheme, ALERT_EPISODE_STATUS.RECOVERING);
+  const recoveredColor = alertTimelineStatusColor(euiTheme, ALERT_EPISODE_STATUS.INACTIVE);
   const stillOpenColor = alertTimelineStatusColor(euiTheme, ALERT_EPISODE_STATUS.ACTIVE);
 
   return (

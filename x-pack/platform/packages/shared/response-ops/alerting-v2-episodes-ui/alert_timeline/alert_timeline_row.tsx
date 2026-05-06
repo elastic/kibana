@@ -47,6 +47,10 @@ const STATUS_ORDER: readonly AlertEpisodeStatus[] = [
   ALERT_EPISODE_STATUS.ACTIVE,
 ];
 
+const STATUS_PRIORITY: Record<string, number> = Object.fromEntries(
+  STATUS_ORDER.map((s, i) => [s, i])
+);
+
 // Rect annotations span a centered horizontal band, not the full row height,
 // so the bar reads as a thick line rather than a row-filling block.
 const RECT_Y0 = 0.4;
@@ -144,7 +148,7 @@ export interface AlertTimelineRowProps {
   gteMs: number;
   lteMs: number;
   height: number;
-  onSegmentClick?: (episodeId: string) => void;
+  onEpisodeClick?: (episodeId: string) => void;
   getEpisodeHref?: (episodeId: string) => string;
 }
 
@@ -162,7 +166,7 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
   gteMs,
   lteMs,
   height,
-  onSegmentClick,
+  onEpisodeClick,
   getEpisodeHref,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -181,24 +185,44 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
 
   const handleAnnotationClick = useCallback(
     (annotations: { rects: Array<{ datum: RectAnnotationDatum }> }) => {
-      const datum = annotations.rects[0]?.datum;
-      const details = datum?.details as SegmentDetails | undefined;
-      if (details?.episodeId && onSegmentClick) {
-        onSegmentClick(details.episodeId);
-      }
+      const candidates = annotations.rects
+        .map((r) => r.datum?.details as SegmentDetails | undefined)
+        .filter((d): d is SegmentDetails => d?.kind === 'segment');
+
+      if (candidates.length === 0 || !onEpisodeClick) return;
+
+      // Match paint order: highest-priority status wins (visually on top).
+      // Among equal priority, prefer the most recently started segment.
+      candidates.sort((a, b) => {
+        const p = (STATUS_PRIORITY[b.status] ?? 0) - (STATUS_PRIORITY[a.status] ?? 0);
+        return p !== 0 ? p : b.x0Ms - a.x0Ms;
+      });
+
+      onEpisodeClick(candidates[0].episodeId);
     },
-    [onSegmentClick]
+    [onEpisodeClick]
   );
 
-  const handleElementClick = useCallback<ElementClickListener>((elements) => {
-    const first = elements[0];
-    if (!Array.isArray(first)) return;
-    const [geometry] = first as XYChartElementEvent;
-    const datum = geometry?.datum as TransitionDatum | undefined;
-    if (datum?.href) {
-      window.open(datum.href, '_blank', 'noopener,noreferrer');
-    }
-  }, []);
+  const handleElementClick = useCallback<ElementClickListener>(
+    (elements) => {
+      if (!onEpisodeClick) return;
+
+      const candidates = elements
+        .filter((el): el is XYChartElementEvent => Array.isArray(el))
+        .map(([geometry]) => geometry?.datum as TransitionDatum | undefined)
+        .filter((d): d is TransitionDatum => d != null && d.episodeId != null);
+
+      if (candidates.length === 0) return;
+
+      candidates.sort((a, b) => {
+        const p = (STATUS_PRIORITY[b.status] ?? 0) - (STATUS_PRIORITY[a.status] ?? 0);
+        return p !== 0 ? p : b.x - a.x;
+      });
+
+      onEpisodeClick(candidates[0].episodeId);
+    },
+    [onEpisodeClick]
+  );
 
   return (
     <div
@@ -214,8 +238,8 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
           baseTheme={baseTheme}
           locale={i18n.getLocale()}
           xDomain={{ min: gteMs, max: lteMs }}
-          onAnnotationClick={onSegmentClick ? handleAnnotationClick : undefined}
-          onElementClick={getEpisodeHref ? handleElementClick : undefined}
+          onAnnotationClick={onEpisodeClick ? handleAnnotationClick : undefined}
+          onElementClick={onEpisodeClick ? handleElementClick : undefined}
           theme={{
             chartMargins: { top: 0, right: 0, bottom: 0, left: 0 },
             chartPaddings: { top: 0, right: 0, bottom: 0, left: 0 },

@@ -24,9 +24,9 @@ import {
   type TopNSeriesRow,
 } from '../queries/alert_series_activity/top_n_series_query';
 import {
-  buildGanttSummaryQuery,
-  parseGanttSummaryRow,
-  type GanttSummaryEsqlRow,
+  buildAlertTimelineSummaryQuery,
+  parseAlertTimelineSummaryRow,
+  type AlertTimelineSummaryEsqlRow,
 } from '../queries/alert_series_activity/alert_timeline_summary_query';
 import { useFetchSeriesGroupingValues } from './use_fetch_series_grouping_values';
 import type { SeriesGroupingValuesByHash } from '../queries/alert_series_activity/series_grouping_values_query';
@@ -45,10 +45,16 @@ export const RULE_EVENTS_PAGE_SIZE = 5000;
 
 export interface UseFetchRuleEventsOptions {
   ruleId: string | undefined;
-  /** Visible window start (epoch ms). */
+  /** Visible window start (epoch ms). Used for top-N, summary, and labels. */
   gteMs: number;
   /** Visible window end (epoch ms). */
   lteMs: number;
+  /**
+   * Optional lookback start (epoch ms) used **only** for the raw events query
+   * so the chart can determine the status at the left edge of the visible
+   * window. When omitted, falls back to `gteMs`.
+   */
+  eventGteMs?: number;
   /** Rule's `grouping.fields`. Empty when the rule isn't grouped. */
   groupingFields?: readonly string[];
   /** Maximum number of series (lanes) to fetch events for. */
@@ -65,23 +71,29 @@ export interface UseFetchRuleEventsOptions {
  *    result length as `totalSeriesCount`.
  * 2. **Filtered events** — raw alert events scoped to only the top-N series,
  *    keeping the wire payload proportional to `topN * events_per_series`.
+ *    Uses `eventGteMs` (lookback window) when provided so the chart can
+ *    determine status at the visible left edge.
  * 3. **Summary aggregation** — episode-level stats (started, recovered,
  *    still open, median duration) across ALL series, replacing the
  *    redundant client-side re-aggregation that previously lived inside
- *    `deriveGanttData`.
+ *    `deriveAlertTimelineData`.
  *
- * Queries 2 and 3 run in parallel once 1 completes. The grouping-values
- * DSL query also gates on 1.
+ * Queries 1, 3, and 4 (grouping values) use the visible `gteMs`/`lteMs`
+ * so that stats, series ranking, and labels are not skewed by the lookback
+ * buffer. Only query 2 uses `eventGteMs`.
  */
 export const useFetchRuleEvents = ({
   ruleId,
   gteMs,
   lteMs,
+  eventGteMs,
   groupingFields = [],
   topN = ALERT_TIMELINE_TOP_N_DEFAULT,
   pageSize = RULE_EVENTS_PAGE_SIZE,
   data,
 }: UseFetchRuleEventsOptions) => {
+  const rawEventsGteMs = eventGteMs ?? gteMs;
+
   const enabled =
     Boolean(ruleId) && Number.isFinite(gteMs) && Number.isFinite(lteMs) && lteMs > gteMs;
 
@@ -113,7 +125,13 @@ export const useFetchRuleEvents = ({
   const eventsEnabled = enabled && topNSeriesQuery.isSuccess && topNHashes.length > 0;
 
   const eventsQuery = useQuery({
-    queryKey: ruleOverviewQueryKeys.ruleEvents(ruleId ?? '', gteMs, lteMs, pageSize, topNHashes),
+    queryKey: ruleOverviewQueryKeys.ruleEvents(
+      ruleId ?? '',
+      rawEventsGteMs,
+      lteMs,
+      pageSize,
+      topNHashes
+    ),
     enabled: eventsEnabled,
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
@@ -121,7 +139,7 @@ export const useFetchRuleEvents = ({
         params: {
           query: buildRuleEventsEsqlQuery({
             ruleId: ruleId!,
-            gteMs,
+            gteMs: rawEventsGteMs,
             lteMs,
             pageSize,
             groupHashes: topNHashes,
@@ -141,14 +159,14 @@ export const useFetchRuleEvents = ({
       runEsqlAsyncSearch({
         data,
         params: {
-          query: buildGanttSummaryQuery({ ruleId: ruleId!, gteMs, lteMs }).print('basic'),
+          query: buildAlertTimelineSummaryQuery({ ruleId: ruleId!, gteMs, lteMs }).print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
       }),
     select: (raw) => {
-      const rows = esqlResponseToObjectRows<GanttSummaryEsqlRow>(raw);
-      return parseGanttSummaryRow(rows[0]);
+      const rows = esqlResponseToObjectRows<AlertTimelineSummaryEsqlRow>(raw);
+      return parseAlertTimelineSummaryRow(rows[0]);
     },
   });
 

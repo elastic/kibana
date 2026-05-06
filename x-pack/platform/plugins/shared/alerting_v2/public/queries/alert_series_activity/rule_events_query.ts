@@ -37,10 +37,15 @@ export interface BuildRuleEventsEsqlQueryOptions {
 const toIsoUtc = (ms: number) => new Date(ms).toISOString();
 
 /**
- * ES|QL query returning every alert event for a rule inside the visible
- * window, oldest first. When `groupHashes` is supplied the result set is
- * scoped to only those series, keeping the wire payload proportional to the
- * number of visible timeline lanes instead of all series in the rule.
+ * ES|QL query returning alert events for a rule inside the given window,
+ * newest first. When the LIMIT is reached, the most recent events survive
+ * and the oldest are dropped — ensuring the right edge of the chart (the
+ * current state) is always accurate. The consumer sorts per-episode
+ * chronologically client-side.
+ *
+ * When `groupHashes` is supplied the result set is scoped to only those
+ * series, keeping the wire payload proportional to the number of visible
+ * timeline lanes instead of all series in the rule.
  */
 export const buildRuleEventsEsqlQuery = ({
   ruleId,
@@ -63,7 +68,7 @@ export const buildRuleEventsEsqlQuery = ({
   }
 
   return query
-    .sort([TIME_FIELD, 'ASC'])
+    .sort([TIME_FIELD, 'DESC'])
     .limit(pageSize)
     .keep(...RULE_EVENT_FIELDS);
 };
