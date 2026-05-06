@@ -581,7 +581,7 @@ export const useIlmLifecycleSummary = ({
   return {
     phases,
     loading: isIlm && ilmLoading,
-    policyMissing: isIlm ? (ilmStatsValue?.policy_missing ?? false) : false,
+    policyMissing: isIlm ? ilmStatsValue?.policy_missing ?? false : false,
     onRemovePhase: isIlm ? handleRemovePhase : undefined,
     onRemoveDownsampleStep: isIlm ? handleRemoveIlmDownsampleStep : undefined,
     onEditPhase: isIlm ? (phaseName) => openEditFlyout({ phaseName }) : undefined,

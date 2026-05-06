@@ -111,7 +111,10 @@ const lifecycleStatsRoute = createServerRoute({
       scopedClusterClient.asCurrentUser.indices.stats({ index: dataStream.name }),
     ]);
 
-    return { phases: ilmPhases({ policy, indicesIlmDetails, indicesStats }), policy_missing: false };
+    return {
+      phases: ilmPhases({ policy, indicesIlmDetails, indicesStats }),
+      policy_missing: false,
+    };
   },
 });
 

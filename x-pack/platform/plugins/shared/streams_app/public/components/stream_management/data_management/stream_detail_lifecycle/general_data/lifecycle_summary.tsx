@@ -143,8 +143,7 @@ const IlmLifecycleSummary = ({
               defaultMessage:
                 'The ILM policy "{policyName}" referenced by this data stream does not exist. Assign a valid ILM policy to restore lifecycle management.',
               values: {
-                policyName: (definition.effective_lifecycle as IngestStreamLifecycleILM).ilm
-                  .policy,
+                policyName: (definition.effective_lifecycle as IngestStreamLifecycleILM).ilm.policy,
               },
             })}
           </EuiCallOut>
