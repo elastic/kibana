@@ -29,8 +29,13 @@ export type VisualizationAttempt =
       failure: VisualizationFailure;
     };
 
+export type InlineVisualizationOperationType =
+  | 'add_section'
+  | 'create_visualization_panels'
+  | 'edit_visualization_panels';
+
 interface ResolveVisualizationConfigParams {
-  operationType: 'add_section' | 'create_visualization_panels' | 'edit_visualization_panels';
+  operationType: InlineVisualizationOperationType;
   identifier: string;
   nlQuery: string;
   index?: string;

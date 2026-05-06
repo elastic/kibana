@@ -16,6 +16,7 @@ import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { ResolveVisualizationConfig, VisualizationAttempt } from './inline_visualization';
 import { executeDashboardOperations, type DashboardOperation } from './operations';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 
 const createMockLogger = (): Logger =>
   ({
@@ -159,7 +160,7 @@ describe('executeDashboardOperations', () => {
         const failures = attachmentIds
           .filter((attachmentId) => attachmentId.startsWith('missing-viz'))
           .map((missingAttachmentId) => ({
-            type: 'attachment_panels',
+            type: DASHBOARD_OPERATION_FAILURE_TYPES.attachmentPanels,
             identifier: missingAttachmentId,
             error: 'Attachment not found',
           }));
