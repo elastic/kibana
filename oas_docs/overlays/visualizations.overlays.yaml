@@ -323,7 +323,7 @@ actions:
                       updated_at: "2026-04-13T10:20:00.000Z"
                       version: Wzc5LDFd
       x-codeSamples:
-        - lang: cURL
+        - lang: cURL_metric
           label: Create a metric visualization - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/visualizations" \
@@ -345,7 +345,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: Console_metric
           label: Create a metric visualization - Console
           source: |
             POST kbn:/api/visualizations
@@ -364,7 +364,7 @@ actions:
                 }
               ]
             }
-        - lang: cURL
+        - lang: cURL_xy
           label: Create an XY line chart - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/visualizations" \
@@ -394,7 +394,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: Console_xy
           label: Create an XY line chart - Console
           source: |
             POST kbn:/api/visualizations
@@ -421,7 +421,7 @@ actions:
                 }
               ]
             }
-        - lang: cURL
+        - lang: cURL_pie
           label: Create a pie/donut chart - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/visualizations" \
@@ -452,7 +452,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: Console_pie
           label: Create a pie/donut chart - Console
           source: |
             POST kbn:/api/visualizations
@@ -480,7 +480,7 @@ actions:
                 }
               ]
             }
-        - lang: cURL
+        - lang: cURL_table
           label: Create a data table - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/visualizations" \
@@ -510,7 +510,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: Console_table
           label: Create a data table - Console
           source: |
             POST kbn:/api/visualizations
@@ -537,7 +537,7 @@ actions:
                 }
               ]
             }
-        - lang: cURL
+        - lang: cURL_library
           label: Create a visualization using a library data view - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/visualizations" \
@@ -558,7 +558,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: Console_library
           label: Create a visualization using a library data view - Console
           source: |
             POST kbn:/api/visualizations
