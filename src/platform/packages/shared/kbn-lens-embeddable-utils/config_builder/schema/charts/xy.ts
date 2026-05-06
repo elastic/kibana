@@ -984,6 +984,7 @@ const annotationByRefLayerSchema = schema.object(
   {
     meta: {
       id: 'xyAnnotationByRefLayer',
+      title: 'Annotation Layer (By Reference)',
       description: 'Reference to a library annotation group',
     },
   }
