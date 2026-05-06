@@ -51,6 +51,7 @@ export const usePackQueryLastResults = ({
             terms: {
               field: 'osquery_meta.schedule_execution_count',
               size: 1,
+              // order by sub-agg max_ingested to get the most recent execution bucket
               order: { max_ingested: 'desc' },
             },
             aggs: {

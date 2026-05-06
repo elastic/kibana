@@ -134,6 +134,73 @@ describe('usePackQueryLastResults', () => {
     });
   });
 
+  describe('actionId path', () => {
+    it('returns lastResultTime, uniqueAgentsCount, and docCount from hits and aggs', async () => {
+      const queryClient = createQueryClient();
+
+      mockSearchSource.fetch$
+        .mockReturnValueOnce(
+          of({
+            rawResponse: {
+              hits: {
+                hits: [
+                  {
+                    fields: {
+                      'event.ingested': ['2023-11-14T22:13:20.000Z'],
+                    },
+                  },
+                ],
+              },
+            },
+          })
+        )
+        .mockReturnValueOnce(
+          of({
+            rawResponse: {
+              hits: { total: 42 },
+              aggregations: {
+                unique_agents: { value: 3 },
+              },
+            },
+          })
+        );
+
+      const { result } = renderHook(
+        () => usePackQueryLastResults({ actionId: 'action-uuid-1234', interval: 3600 }),
+        { wrapper: createWrapper(queryClient) }
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(result.current.data).toEqual({
+        lastResultTime: ['2023-11-14T22:13:20.000Z'],
+        uniqueAgentsCount: 3,
+        docCount: 42,
+      });
+    });
+
+    it('returns null when no hits are found', async () => {
+      const queryClient = createQueryClient();
+
+      mockSearchSource.fetch$.mockReturnValue(
+        of({
+          rawResponse: {
+            hits: { hits: [] },
+          },
+        })
+      );
+
+      const { result } = renderHook(
+        () => usePackQueryLastResults({ actionId: 'action-uuid-no-results', interval: 3600 }),
+        { wrapper: createWrapper(queryClient) }
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(result.current.data).toBeNull();
+    });
+  });
+
   describe('enabled condition', () => {
     it('does not fetch when neither actionId nor scheduleId is set', () => {
       const queryClient = createQueryClient();
