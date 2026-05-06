@@ -16,16 +16,32 @@ Evaluate the criteria as written. Decide each criterion against the literal scop
 
 In particular, when a criterion asserts that a *call* was made (for example: "tool is called with X", "queries Y", "invokes Z"), the criterion is about the call itself. **PASS** when the call was made as described, regardless of whether the call returned data, returned an empty result, or surfaced a "not found" error. Do not require successful resolution, non-empty results, or downstream behavior unless the criterion text explicitly says so.
 
-### Worked example — call vs. resolution
+When a criterion is **disjunctive** (uses "or" / "OR" between alternatives, e.g. "do X **or** clearly state Y is unavailable"), satisfying **either** branch is sufficient. **PASS** when any one branch is met. Do not require both branches, and do not treat the unfulfilled branch as a "partial failure". Treat conjunctive criteria ("X **and** Y") the opposite way: both parts must hold to PASS.
 
-*Criterion:* `Tool security.get_entity is called with entityId 'foo' and interval '90d'`
-*Output:* The tool was invoked with `entityId='foo'` and `interval='90d'`. The call returned `"No entity found for id: foo"`.
-*Decision:* **PASS** — the criterion only asserts that the call was made with those arguments. The empty / not-found return does not violate it.
+### Worked example A — call vs. resolution
+
+*Criterion:* `Tool fs.read_file is called with path 'config/app.yml'`
+*Output:* The tool was invoked with `path='config/app.yml'`. The call returned `"ENOENT: no such file or directory"`.
+*Decision:* **PASS** — the criterion only asserts that the call was made with those arguments. The error / not-found return does not violate it.
 
 ```json
 {
   "criteria": [
-    { "id": "tool-call-foo", "result": "PASS" }
+    { "id": "tool-call-config", "result": "PASS" }
+  ]
+}
+```
+
+### Worked example B — disjunctive criterion
+
+*Criterion:* `Summarise the user's recent login activity, or clearly state that no login data is available.`
+*Output:* "I could not find any login records for that user."
+*Decision:* **PASS** — the criterion is disjunctive; the second branch ("clearly state no data is available") is satisfied. The unfulfilled first branch is not a partial failure.
+
+```json
+{
+  "criteria": [
+    { "id": "login-summary-or-none", "result": "PASS" }
   ]
 }
 ```
