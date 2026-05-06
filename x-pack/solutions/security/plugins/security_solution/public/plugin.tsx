@@ -44,7 +44,17 @@ import type {
 } from './types';
 import { ASSISTANT_MANAGEMENT_TITLE, SOLUTION_NAME } from './common/translations';
 
-import { APP_ICON_SOLUTION, APP_ID, APP_PATH, APP_UI_ID } from '../common/constants';
+import {
+  APP_ICON_SOLUTION,
+  APP_ID,
+  APP_PATH,
+  APP_UI_ID,
+  DASHBOARDS_PATH,
+  EXPLORE_PATH,
+  HOSTS_PATH,
+  NETWORK_PATH,
+  USERS_PATH,
+} from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
 import {
@@ -82,6 +92,19 @@ import {
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
+
+/**
+ * Builds a CPS access resolver that returns EDITABLE for any route whose path segment matches
+ * one of the provided route prefixes, and DISABLED for all other routes.
+ */
+export const createCpsAccessResolver =
+  (editableRoutes: string[]) =>
+  (location: string): ProjectRoutingAccess => {
+    const pattern = new RegExp(
+      `security/(${editableRoutes.map((p) => p.replace(/^\//, '')).join('|')})`
+    );
+    return pattern.test(location) ? ProjectRoutingAccess.EDITABLE : ProjectRoutingAccess.DISABLED;
+  };
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -328,12 +351,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    // Enable CPS picker only for individual dashboard views (not the listing page).
-    // TODO: Remove this restriction once CPS is enabled across all Security Solution pages.
-    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, (location: string) =>
-      /security\/dashboards\/[^?]+/.test(location)
-        ? ProjectRoutingAccess.EDITABLE
-        : ProjectRoutingAccess.DISABLED
+    plugins.cps?.cpsManager?.registerAppAccess(
+      APP_UI_ID,
+      createCpsAccessResolver([HOSTS_PATH, USERS_PATH, NETWORK_PATH, EXPLORE_PATH, DASHBOARDS_PATH])
     );
 
     return this.contract.getStartContract(core);
