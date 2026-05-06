@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
-import { rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
@@ -37,17 +37,26 @@ export async function getServiceAnomalies({
   start,
   end,
   searchQuery,
+  exactServiceName,
 }: {
   mlClient?: MlClient;
   environment: string;
   start: number;
   end: number;
+  /** Substring search (inventory, etc.); uses a case-insensitive wildcard on the ML partition field. */
   searchQuery?: string;
+  /** When set, matches that service only via a `term` filter (avoids wildcard fan-out for short names). Ignores `searchQuery` for the service-name clause. */
+  exactServiceName?: string;
 }) {
   return withApmSpan('get_service_anomalies', async () => {
     if (!mlClient) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
     }
+
+    const serviceNameFilter =
+      exactServiceName !== undefined && exactServiceName !== ''
+        ? termQuery(ML_SERVICE_NAME_FIELD, exactServiceName)
+        : wildcardQuery(ML_SERVICE_NAME_FIELD, searchQuery);
 
     const params = {
       size: 0,
@@ -64,7 +73,7 @@ export async function getServiceAnomalies({
                 by_field_value: defaultTransactionTypes,
               },
             },
-            ...wildcardQuery(ML_SERVICE_NAME_FIELD, searchQuery),
+            ...serviceNameFilter,
           ] as estypes.QueryDslQueryContainer[],
         },
       },
