@@ -26,6 +26,8 @@
       "@kbn/agent-builder-genai-utils/*": ["x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/*"],
       "@kbn/agent-builder-platform-plugin": ["x-pack/platform/plugins/shared/agent_builder_platform"],
       "@kbn/agent-builder-platform-plugin/*": ["x-pack/platform/plugins/shared/agent_builder_platform/*"],
+      "@kbn/agent-builder-workflows-plugin": ["x-pack/platform/plugins/shared/agent_builder_workflows"],
+      "@kbn/agent-builder-workflows-plugin/*": ["x-pack/platform/plugins/shared/agent_builder_workflows/*"],
       "@kbn/agent-builder-plugin": ["x-pack/platform/plugins/shared/agent_builder"],
       "@kbn/agent-builder-plugin/*": ["x-pack/platform/plugins/shared/agent_builder/*"],
       "@kbn/agent-builder-server": ["x-pack/platform/packages/shared/agent-builder/agent-builder-server"],
