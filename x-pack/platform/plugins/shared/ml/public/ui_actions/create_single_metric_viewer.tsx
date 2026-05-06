@@ -18,6 +18,7 @@ import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
 import type { SingleMetricViewerEmbeddableApi } from '../embeddables/types';
 import type { MlCoreSetup } from '../plugin';
 import { EmbeddableSingleMetricViewerUserInput } from '../embeddables/single_metric_viewer/single_metric_viewer_setup_flyout';
+import { isMlAvailable } from '../../common/license/ml_license';
 
 export type CreateSingleMetricViewerPanelActionContext = EmbeddableApiContext & {
   embeddable: SingleMetricViewerEmbeddableApi;
@@ -56,6 +57,7 @@ export function createAddSingleMetricViewerPanelAction(
           'View anomaly detection results for a single metric on a focused date range.',
       }),
     async isCompatible(context: EmbeddableApiContext) {
+      if (!(await isMlAvailable(getStartServices))) return false;
       return Boolean(await parentApiIsCompatible(context.embeddable));
     },
     async execute(context) {
