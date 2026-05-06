@@ -107,6 +107,24 @@ describe('usePackQueryLastResults', () => {
         docCount: 150,
         executionCount: 42,
       });
+
+      // Locks down the single-round-trip property: one `per_execution` terms agg
+      // over `osquery_meta.schedule_execution_count` with sub-aggs for max
+      // `event.ingested` and `agent.id` cardinality, ordered by max_ingested desc.
+      expect(mockSearchSource.setField).toHaveBeenCalledWith('aggs', {
+        per_execution: {
+          terms: {
+            field: 'osquery_meta.schedule_execution_count',
+            size: 1,
+            shard_size: 100,
+            order: { max_ingested: 'desc' },
+          },
+          aggs: {
+            max_ingested: { max: { field: 'event.ingested' } },
+            unique_agents: { cardinality: { field: 'agent.id' } },
+          },
+        },
+      });
     });
 
     it('returns null when buckets are empty', async () => {
