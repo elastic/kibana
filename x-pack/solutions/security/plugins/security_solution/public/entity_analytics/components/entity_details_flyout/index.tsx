@@ -29,7 +29,6 @@ export const getRiskInputTab = <T extends EntityType>({
   entityName,
   scopeId,
   entityId,
-  subTab,
 }: RiskInputsTabProps<T>) => ({
   id: EntityDetailsLeftPanelTab.RISK_INPUTS,
   'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
@@ -45,7 +44,6 @@ export const getRiskInputTab = <T extends EntityType>({
       entityName={entityName}
       scopeId={scopeId}
       entityId={entityId}
-      subTab={subTab}
     />
   ),
 });

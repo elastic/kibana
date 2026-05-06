@@ -61,8 +61,7 @@ export const UserDetailsPanel = ({
     hasNonClosedAlerts,
     identityFields,
     entityId,
-    entityStoreEntityId,
-    path?.subTab
+    entityStoreEntityId
   );
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(

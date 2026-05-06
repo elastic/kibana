@@ -13,6 +13,10 @@ import { EXPAND_ALERT_TEST_ID, RiskInputsTab } from './risk_inputs_tab';
 import { alertInputDataMock } from '../../mocks';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
+import {
+  EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
+} from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 const mockUseRiskContributingAlerts = jest.fn().mockReturnValue({ loading: false, data: [] });
 const mockGetEuidFromObject = jest.fn().mockReturnValue('user:entity-1');
@@ -55,6 +59,12 @@ const mockUseResolutionGroup = jest.fn().mockReturnValue({ data: undefined });
 
 jest.mock('../../../entity_resolution/hooks/use_resolution_group', () => ({
   useResolutionGroup: (entityId: string) => mockUseResolutionGroup(entityId),
+}));
+
+const mockUseStableExpandableFlyoutState = jest.fn().mockReturnValue({});
+
+jest.mock('../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state', () => ({
+  useStableExpandableFlyoutState: () => mockUseStableExpandableFlyoutState(),
 }));
 
 const riskScore = {
@@ -107,6 +117,7 @@ describe('RiskInputsTab', () => {
     mockGetEuidFromObject.mockReturnValue('user:entity-1');
     mockUseResolutionGroup.mockReturnValue({ data: undefined });
     mockUseGetWatchlists.mockReturnValue({ data: [] });
+    mockUseStableExpandableFlyoutState.mockReturnValue({});
     mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
       params?.skip
         ? {
@@ -598,7 +609,17 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('entity-1');
   });
 
-  it('initializes to resolution view when subTab prop is "resolution"', () => {
+  it('initializes to resolution view when flyout state subTab is "resolution"', () => {
+    mockUseStableExpandableFlyoutState.mockReturnValue({
+      left: {
+        params: {
+          path: {
+            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+            subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
+          },
+        },
+      },
+    });
     mockUseResolutionGroup.mockReturnValue({
       data: {
         target: {
@@ -625,7 +646,6 @@ describe('RiskInputsTab', () => {
           entityName="elastic"
           scopeId="scopeId"
           entityId="user:elastic"
-          subTab="resolution"
         />
       </TestProviders>
     );
@@ -795,6 +815,16 @@ describe('RiskInputsTab', () => {
   });
 
   it('user tab selection overrides initial subTab from URL', () => {
+    mockUseStableExpandableFlyoutState.mockReturnValue({
+      left: {
+        params: {
+          path: {
+            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+            subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
+          },
+        },
+      },
+    });
     mockUseResolutionGroup.mockReturnValue({
       data: {
         target: {
@@ -821,7 +851,6 @@ describe('RiskInputsTab', () => {
           entityName="elastic"
           scopeId="scopeId"
           entityId="user:elastic"
-          subTab="resolution"
         />
       </TestProviders>
     );
