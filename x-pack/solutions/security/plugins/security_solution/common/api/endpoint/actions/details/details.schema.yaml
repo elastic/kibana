@@ -14,9 +14,9 @@ paths:
         - name: action_id
           in: path
           required: true
+          description: The ID of the response action to retrieve.
           schema:
             type: string
-            description: The ID of the action to retrieve.
             example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
       responses:
         '200':
@@ -25,6 +25,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ActionDetailsResponse'
+              examples:
+                actionDetails:
+                  summary: Details of an isolate response action
+                  value:
+                    data:
+                      id: '233db9ea-6733-4849-9226-5a7039c7161d'
+                      command: 'isolate'
+                      agentType: 'endpoint'
+                      agents:
+                        - 'ed518850-681a-4d60-bb98-e22640cae2a8'
+                      startedAt: '2022-08-08T15:23:37.359Z'
+                      isCompleted: true
+                      completedAt: '2022-08-08T10:41:57.352Z'
+                      wasSuccessful: true
+                      isExpired: false
+                      createdBy: 'elastic'
 
 
 components:

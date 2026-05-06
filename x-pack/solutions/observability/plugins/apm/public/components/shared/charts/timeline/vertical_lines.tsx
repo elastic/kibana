@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import type { Mark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks';
 import type { PlotValues } from './plot_utils';
+import type { Mark } from './marker';
 
 interface VerticalLinesProps {
   marks?: Mark[];
