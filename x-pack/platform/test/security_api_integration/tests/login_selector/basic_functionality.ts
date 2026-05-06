@@ -449,7 +449,9 @@ export default function ({ getService }: FtrProviderContext) {
           saml1HandshakeResponse.body.location.startsWith(`https://elastic.co/sso/saml`)
         ).to.be(true);
 
-        const saml1HandshakeCookie = findSessionCookie(saml1HandshakeResponse.headers['set-cookie']);
+        const saml1HandshakeCookie = findSessionCookie(
+          saml1HandshakeResponse.headers['set-cookie']
+        );
 
         // And now try to login with `saml2`.
         const unauthenticatedResponse = await supertest
@@ -549,7 +551,9 @@ export default function ({ getService }: FtrProviderContext) {
           saml1HandshakeResponse.body.location.startsWith(`https://elastic.co/sso/saml`)
         ).to.be(true);
 
-        const saml1HandshakeCookie = findSessionCookie(saml1HandshakeResponse.headers['set-cookie']);
+        const saml1HandshakeCookie = findSessionCookie(
+          saml1HandshakeResponse.headers['set-cookie']
+        );
 
         // And now try to login with `saml2`.
         const saml2HandshakeResponse = await supertest
@@ -568,7 +572,9 @@ export default function ({ getService }: FtrProviderContext) {
           saml2HandshakeResponse.body.location.startsWith(`https://elastic.co/sso/saml`)
         ).to.be(true);
 
-        const saml2HandshakeCookie = findSessionCookie(saml2HandshakeResponse.headers['set-cookie']);
+        const saml2HandshakeCookie = findSessionCookie(
+          saml2HandshakeResponse.headers['set-cookie']
+        );
         const samlRequestId = await getSAMLRequestId(saml2HandshakeResponse.body.location);
 
         const saml2AuthenticationResponse = await supertest
