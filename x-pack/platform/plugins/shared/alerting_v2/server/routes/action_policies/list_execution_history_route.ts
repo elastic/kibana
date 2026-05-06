@@ -8,10 +8,15 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core/server';
 import { Request } from '@kbn/core-di-server';
 import { PluginStart } from '@kbn/core-di';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { injectable, inject } from 'inversify';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import {
+  listPolicyExecutionHistoryQuerySchema,
+  listPolicyExecutionHistoryResponseSchema,
+  POLICY_EXECUTION_HISTORY_MAX_PER_PAGE,
+} from '@kbn/alerting-v2-schemas';
 import { ActionPolicyClient } from '../../lib/action_policy_client/action_policy_client';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -23,34 +28,11 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
-import {
-  collectIdsFromEvents,
-  denormalizeEvent,
-  policyExecutionHistoryItemSchema,
-  type NameMaps,
-} from './utils/denormalize_event';
+import { collectIdsFromEvents, denormalizeEvent, type NameMaps } from './utils/denormalize_event';
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_PER_PAGE = 100;
-const MAX_PER_PAGE = DEFAULT_PER_PAGE;
+const DEFAULT_PER_PAGE = POLICY_EXECUTION_HISTORY_MAX_PER_PAGE;
 const TIME_WINDOW_HOURS = 24;
-
-const listExecutionHistoryQuerySchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('Page number (1-indexed).'),
-  perPage: z.coerce
-    .number()
-    .min(1)
-    .max(MAX_PER_PAGE)
-    .optional()
-    .describe('Number of events per page.'),
-});
-
-const listExecutionHistoryResponseSchema = z.object({
-  items: z.array(policyExecutionHistoryItemSchema),
-  page: z.number(),
-  perPage: z.number(),
-  totalEvents: z.number(),
-});
 
 @injectable()
 export class ListExecutionHistoryRoute extends BaseAlertingRoute {
@@ -70,11 +52,11 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
   } as const;
   static validate = {
     request: {
-      query: buildRouteValidationWithZod(listExecutionHistoryQuerySchema),
+      query: buildRouteValidationWithZod(listPolicyExecutionHistoryQuerySchema),
     },
     response: {
       200: {
-        body: () => listExecutionHistoryResponseSchema,
+        body: () => listPolicyExecutionHistoryResponseSchema,
         description: 'Indicates a successful call.',
       },
     },
@@ -87,7 +69,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
     @inject(Request)
     private readonly request: KibanaRequest<
       unknown,
-      z.infer<typeof listExecutionHistoryQuerySchema>,
+      z.infer<typeof listPolicyExecutionHistoryQuerySchema>,
       unknown
     >,
     @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract,

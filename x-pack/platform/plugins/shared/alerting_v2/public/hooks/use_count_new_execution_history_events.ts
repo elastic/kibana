@@ -7,10 +7,8 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
-import {
-  ExecutionHistoryApi,
-  type CountNewExecutionHistoryEventsResponse,
-} from '../services/execution_history_api';
+import type { CountPolicyExecutionEventsResponse } from '@kbn/alerting-v2-schemas';
+import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { executionHistoryKeys } from './query_key_factory';
 
 const POLL_INTERVAL_MS = 10_000;
@@ -26,7 +24,7 @@ export const useCountNewExecutionHistoryEvents = ({
 }: UseCountNewExecutionHistoryEventsParams) => {
   const executionHistoryApi = useService(ExecutionHistoryApi);
 
-  return useQuery<CountNewExecutionHistoryEventsResponse, Error>({
+  return useQuery<CountPolicyExecutionEventsResponse, Error>({
     queryKey: executionHistoryKeys.countSince(since),
     queryFn: () => executionHistoryApi.countNewSince(since),
     refetchOnWindowFocus: true,

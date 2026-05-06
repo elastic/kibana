@@ -5,31 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { PolicyExecutionHistoryItem, PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { ACTION_POLICY_EVENT_ACTIONS } from '../../../lib/dispatcher/steps/constants';
 
-const namedRefSchema = z.object({
-  id: z.string(),
-  name: z.string().nullable().optional(),
-});
-
-export const policyExecutionHistoryItemSchema = z.object({
-  '@timestamp': z.string(),
-  policy: namedRefSchema,
-  rule: namedRefSchema,
-  outcome: z.enum([ACTION_POLICY_EVENT_ACTIONS.DISPATCHED, ACTION_POLICY_EVENT_ACTIONS.THROTTLED]),
-  episode_count: z.number(),
-  action_group_count: z.number(),
-  workflows: z.array(namedRefSchema),
-});
-
-export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;
-
-export type PolicyOutcome =
-  | typeof ACTION_POLICY_EVENT_ACTIONS.DISPATCHED
-  | typeof ACTION_POLICY_EVENT_ACTIONS.THROTTLED;
+export type { PolicyExecutionHistoryItem };
 
 export interface NameMaps {
   policyNames: Map<string, string>;
@@ -39,7 +20,7 @@ export interface NameMaps {
 
 export const isString = (v: unknown): v is string => typeof v === 'string';
 
-export const isPolicyOutcome = (action: unknown): action is PolicyOutcome =>
+export const isPolicyOutcome = (action: unknown): action is PolicyExecutionOutcome =>
   action === ACTION_POLICY_EVENT_ACTIONS.DISPATCHED ||
   action === ACTION_POLICY_EVENT_ACTIONS.THROTTLED;
 

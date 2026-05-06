@@ -7,8 +7,12 @@
 
 import type { KibanaRequest, RouteSecurity } from '@kbn/core/server';
 import { Request } from '@kbn/core-di-server';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { injectable, inject } from 'inversify';
+import {
+  countPolicyExecutionEventsQuerySchema,
+  countPolicyExecutionEventsResponseSchema,
+} from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { EventLogServiceToken } from '../../lib/services/event_log_service/tokens';
 import type { EventLogServiceContract } from '../../lib/services/event_log_service/event_log_service';
@@ -16,14 +20,6 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
-
-const countNewExecutionHistoryEventsQuerySchema = z.object({
-  since: z.string().describe('ISO timestamp; count events with @timestamp greater than this.'),
-});
-
-const countNewExecutionHistoryEventsResponseSchema = z.object({
-  count: z.number(),
-});
 
 @injectable()
 export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
@@ -43,11 +39,11 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
   } as const;
   static validate = {
     request: {
-      query: buildRouteValidationWithZod(countNewExecutionHistoryEventsQuerySchema),
+      query: buildRouteValidationWithZod(countPolicyExecutionEventsQuerySchema),
     },
     response: {
       200: {
-        body: () => countNewExecutionHistoryEventsResponseSchema,
+        body: () => countPolicyExecutionEventsResponseSchema,
         description: 'Indicates a successful call.',
       },
     },
@@ -60,7 +56,7 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
     @inject(Request)
     private readonly request: KibanaRequest<
       unknown,
-      z.infer<typeof countNewExecutionHistoryEventsQuerySchema>,
+      z.infer<typeof countPolicyExecutionEventsQuerySchema>,
       unknown
     >,
     @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract
