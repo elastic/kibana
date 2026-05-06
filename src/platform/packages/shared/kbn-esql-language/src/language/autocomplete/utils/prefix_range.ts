@@ -10,11 +10,19 @@
 import { Parser } from '@elastic/esql';
 import type { ICommandContext, ISuggestionItem } from '../../../commands/registry/types';
 import { getOverlapRange } from '../../../commands/definitions/utils/shared';
+import {
+  containsWhitespace,
+  findFirstNonWhitespaceIndex,
+  isOnlyWhitespace,
+  startsWithWordChar,
+} from '../../../commands/definitions/utils/regex';
 
-const NON_WHITESPACE_REGEX = /\S/;
-const ONLY_WHITESPACE_REGEX = /^\s+$/;
-const STARTS_WITH_WORD_CHAR = /^\w/;
-const CONTAINS_WHITESPACE_REGEX = /\s/;
+interface SuggestionRangeToReplace {
+  start: number;
+  end: number;
+}
+
+const ENDS_WITH_WHITESPACE_REGEX = /\s$/;
 
 interface LexerToken {
   text: string;
@@ -28,6 +36,51 @@ export interface PrefixResult {
   prefix: string;
   range: { start: number; end: number };
   classification: PrefixClassification;
+}
+
+export enum ReplacementRangeStrategyKind {
+  /** Replace the active prefix inside a scoped fragment. */
+  SCOPED_PREFIX = 'scoped_prefix',
+  /** Replace the whole scoped fragment. */
+  WHOLE_SCOPE = 'whole_scope',
+  /** Replace a quoted literal's value, keeping the quotes. */
+  QUOTED_VALUE = 'quoted_value',
+  /** Replace trailing whitespace before the cursor. */
+  TRAILING_WHITESPACE = 'trailing_whitespace',
+  /** Replace the entire root query. */
+  ROOT_QUERY = 'root_query',
+}
+
+export type ReplacementRangeStrategy =
+  | {
+      kind:
+        | ReplacementRangeStrategyKind.SCOPED_PREFIX
+        | ReplacementRangeStrategyKind.WHOLE_SCOPE
+        | ReplacementRangeStrategyKind.QUOTED_VALUE;
+      scopeText: string;
+      startOffset?: number;
+    }
+  | {
+      kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE;
+    }
+  | {
+      kind: ReplacementRangeStrategyKind.ROOT_QUERY;
+    };
+
+interface ScopedReplacementRangeOptions {
+  /** Where the scoped fragment starts in the full query (defaults to 0). */
+  startOffset?: number;
+  /** Replace the whole scope instead of the active prefix. */
+  replaceWholeScope?: boolean;
+}
+
+export interface AttachReplacementRangesOptions {
+  /** Command context used to look up existing columns and resolve column-match rules. */
+  commandContext?: ICommandContext;
+  /** Full query text — required when a suggestion declares a `ROOT_QUERY` strategy. */
+  fullText?: string;
+  /** Cursor offset into `fullText` — required alongside `fullText` for `ROOT_QUERY`. */
+  offset?: number;
 }
 
 /**
@@ -53,7 +106,7 @@ export function computePrefixRange(query: string): PrefixResult {
   }
 
   // Structural delimiters like ( ) , . = are not valid prefixes — cursor is in an empty position
-  if (!STARTS_WITH_WORD_CHAR.test(lastToken.text[0])) {
+  if (!startsWithWordChar(lastToken.text[0])) {
     return getPrefixResultAfterDelimiter(query, tokens);
   }
 
@@ -64,48 +117,32 @@ export function computePrefixRange(query: string): PrefixResult {
 // Replacement Range Resolver
 // =============================================
 
-/** Adds a replacement range for root-level query suggestions. */
-export function attachRootQueryReplacementRanges(
-  suggestions: ISuggestionItem[],
-  fullText: string,
-  offset: number
-): ISuggestionItem[] {
-  const start = computePrefixRange(fullText.substring(0, offset)).range.start;
-  const end = fullText.length;
-
-  // If there is nothing after the cursor, do not replace anything.
-  if (start === offset && end === offset) {
-    return suggestions;
-  }
-
-  const rangeToReplace = { start, end: end + 1 };
-
-  return suggestions.map((suggestion) => ({
-    ...suggestion,
-    rangeToReplace,
-  }));
-}
-
-/** Attaches replacement ranges, resolves preserveTypedPrefix and requiresExistingColumnMatch. */
+/** Attaches replacement ranges, preserveTypedPrefix and requiresExistingColumnMatch. */
 export function attachReplacementRanges(
   innerText: string,
   suggestions: ISuggestionItem[],
-  context?: ICommandContext
+  options: AttachReplacementRangesOptions = {}
 ): ISuggestionItem[] {
   if (suggestions.length === 0) {
     return suggestions;
   }
 
+  const { commandContext, fullText, offset } = options;
   const prefixResult = computePrefixRange(innerText);
   const { prefix, range } = prefixResult;
-  const hasExistingColumnMatch = Boolean(prefix && context?.columns.has(prefix));
+  const hasExistingColumnMatch = Boolean(prefix && commandContext?.columns.has(prefix));
   const prefixMatchesExistingColumn =
     hasExistingColumnMatch &&
     suggestions.some((suggestion) => suggestion.requiresExistingColumnMatch);
 
   return suggestions.flatMap((suggestion) => {
-    const { requiresExistingColumnMatch, preserveTypedPrefix, rangeToReplace, filterText } =
-      suggestion;
+    const {
+      requiresExistingColumnMatch,
+      preserveTypedPrefix,
+      rangeToReplace,
+      replacementRangeStrategy,
+      filterText,
+    } = suggestion;
 
     if (requiresExistingColumnMatch && !hasExistingColumnMatch) {
       return [];
@@ -115,7 +152,7 @@ export function attachReplacementRanges(
       return [];
     }
 
-    const resolvedSuggestion =
+    const suggestionWithPreservedPrefix =
       preserveTypedPrefix && prefix
         ? {
             ...suggestion,
@@ -124,15 +161,35 @@ export function attachReplacementRanges(
           }
         : suggestion;
 
+    const resolvedSuggestion = suggestionWithPreservedPrefix;
+
     if (rangeToReplace) {
       return [resolvedSuggestion];
+    }
+
+    if (replacementRangeStrategy) {
+      const resolvedRangeToReplace = resolveReplacementRange(replacementRangeStrategy, innerText, {
+        fullText,
+        offset,
+      });
+
+      if (!resolvedRangeToReplace) {
+        return [resolvedSuggestion];
+      }
+
+      return [
+        {
+          ...resolvedSuggestion,
+          rangeToReplace: resolvedRangeToReplace,
+        },
+      ];
     }
 
     // getOverlapRange is only needed for suggestions whose internal whitespace is
     // part of the typed sequence, such as "IS NOT NULL" after "IS NO|". Using
     // trimEnd() keeps trailing formatting whitespace from routing otherwise-normal
     // suggestions through the overlap path.
-    const overlapRange = CONTAINS_WHITESPACE_REGEX.test(suggestion.text.trimEnd())
+    const overlapRange = containsWhitespace(suggestion.text.trimEnd())
       ? getOverlapRange(innerText, suggestion.text)
       : undefined;
     const effectiveRange = overlapRange ?? { start: range.start, end: range.end };
@@ -144,6 +201,97 @@ export function attachReplacementRanges(
       },
     ];
   });
+}
+
+/** Computes a replacement range for a scoped fragment. */
+function computeScopedReplacementRange(
+  scopeText: string,
+  options: ScopedReplacementRangeOptions = {}
+): SuggestionRangeToReplace {
+  const { startOffset = 0, replaceWholeScope = false } = options;
+  const localRange = replaceWholeScope
+    ? { start: 0, end: scopeText.length }
+    : computePrefixRange(scopeText).range;
+
+  return {
+    start: startOffset + localRange.start,
+    end: startOffset + localRange.end,
+  };
+}
+
+/** Computes a replacement range for quoted map values. */
+function computeQuotedValueReplacementRange(
+  scopeText: string,
+  options: ScopedReplacementRangeOptions = {}
+): SuggestionRangeToReplace {
+  const prefixResult = computePrefixRange(scopeText);
+  const range = computeScopedReplacementRange(scopeText, options);
+  const needsClosingQuoteReplacement = prefixResult.prefix.startsWith('"');
+
+  return {
+    start: range.start,
+    end: range.end + (needsClosingQuoteReplacement ? 1 : 0),
+  };
+}
+
+/** Replaces a trailing whitespace character before inserting punctuation. */
+function computeTrailingWhitespaceReplacementRange(innerText: string): SuggestionRangeToReplace {
+  const endsWithWhitespace = ENDS_WITH_WHITESPACE_REGEX.test(innerText);
+
+  return {
+    start: endsWithWhitespace ? innerText.length - 1 : innerText.length,
+    end: innerText.length,
+  };
+}
+
+/** Replaces an existing root query when accepting a root-level suggestion. */
+function computeRootQueryReplacementRange(
+  fullText: string,
+  offset: number
+): SuggestionRangeToReplace | undefined {
+  const start = computePrefixRange(fullText.substring(0, offset)).range.start;
+  const end = fullText.length;
+
+  // Nothing after the cursor, nothing to replace.
+  if (start === offset && end === offset) {
+    return;
+  }
+
+  return { start, end };
+}
+
+/** Resolves a declarative replacement strategy into an offset range. */
+function resolveReplacementRange(
+  strategy: ReplacementRangeStrategy,
+  innerText: string,
+  cursor: { fullText?: string; offset?: number } = {}
+): SuggestionRangeToReplace | undefined {
+  switch (strategy.kind) {
+    case ReplacementRangeStrategyKind.TRAILING_WHITESPACE:
+      return computeTrailingWhitespaceReplacementRange(innerText);
+
+    case ReplacementRangeStrategyKind.SCOPED_PREFIX:
+      return computeScopedReplacementRange(strategy.scopeText, {
+        startOffset: strategy.startOffset,
+      });
+
+    case ReplacementRangeStrategyKind.WHOLE_SCOPE:
+      return computeScopedReplacementRange(strategy.scopeText, {
+        startOffset: strategy.startOffset,
+        replaceWholeScope: true,
+      });
+
+    case ReplacementRangeStrategyKind.QUOTED_VALUE:
+      return computeQuotedValueReplacementRange(strategy.scopeText, {
+        startOffset: strategy.startOffset,
+      });
+
+    case ReplacementRangeStrategyKind.ROOT_QUERY:
+      if (cursor.fullText === undefined || cursor.offset === undefined) {
+        return;
+      }
+      return computeRootQueryReplacementRange(cursor.fullText, cursor.offset);
+  }
 }
 
 // =============================================
@@ -180,7 +328,7 @@ function getTrailingNonWhitespaceRange(
   startOffset: number
 ): { start: number; end: number } {
   const trailingText = query.substring(startOffset);
-  const nonWhitespaceOffset = trailingText.search(NON_WHITESPACE_REGEX);
+  const nonWhitespaceOffset = findFirstNonWhitespaceIndex(trailingText);
   const rangeStart = nonWhitespaceOffset >= 0 ? startOffset + nonWhitespaceOffset : query.length;
 
   return {
@@ -208,7 +356,7 @@ function getPrefixResultFromUnparsedTrailingText(
 ): PrefixResult {
   const textAfterLastToken = query.substring(lastTokenEnd);
 
-  if (ONLY_WHITESPACE_REGEX.test(textAfterLastToken)) {
+  if (isOnlyWhitespace(textAfterLastToken)) {
     return createEmptyPrefixResult(query, 'token-based');
   }
 
@@ -275,7 +423,7 @@ function getTrailingDotFieldPrefix(query: string, tokens: LexerToken[]) {
 
   if (
     previousToken.stop + 1 !== dotToken.start ||
-    (!STARTS_WITH_WORD_CHAR.test(previousToken.text[0]) && !previousToken.text.startsWith('`'))
+    (!startsWithWordChar(previousToken.text[0]) && !previousToken.text.startsWith('`'))
   ) {
     return;
   }

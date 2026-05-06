@@ -1476,6 +1476,10 @@
       }
     }
   },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
+  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
@@ -1738,6 +1742,10 @@
         "properties": {}
       },
       "pending_upgrade_review": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "previous_dependency_versions": {
         "dynamic": false,
         "properties": {}
       },
@@ -3939,6 +3947,65 @@
       }
     }
   },
+  "security:endpoint-scripts-library": {
+    "dynamic": false,
+    "properties": {
+      "created_at": {
+        "type": "date"
+      },
+      "created_by": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "keyword"
+      },
+      "example": {
+        "type": "keyword"
+      },
+      "file_hash_sha256": {
+        "type": "keyword"
+      },
+      "file_id": {
+        "type": "keyword"
+      },
+      "file_name": {
+        "type": "keyword"
+      },
+      "file_size": {
+        "type": "long"
+      },
+      "file_type": {
+        "type": "keyword"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "instructions": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "path_to_executable": {
+        "type": "keyword"
+      },
+      "platform": {
+        "type": "keyword"
+      },
+      "requires_input": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
+      },
+      "updated_by": {
+        "type": "keyword"
+      }
+    }
+  },
   "security:reference-data": {
     "dynamic": false,
     "properties": {
@@ -4893,6 +4960,22 @@
     "dynamic": false,
     "properties": {
       "domainId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user-storage": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user-storage-global": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
         "type": "keyword"
       }
     }

@@ -11,7 +11,7 @@
 
 import { readFileSync } from 'fs';
 import Path from 'path';
-import { parseWorkflowYamlToJSON } from './lib/yaml';
+import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
 import { getWorkflowZodSchema } from './schema';
 
 describe('schema', () => {

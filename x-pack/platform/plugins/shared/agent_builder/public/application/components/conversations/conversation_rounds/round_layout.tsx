@@ -21,6 +21,7 @@ import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useIsAnyConversationStreaming } from '../../../hooks/use_is_any_conversation_streaming';
 import { RoundError } from './round_error/round_error';
 import { ConfirmationPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
@@ -88,6 +89,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     resumeRound,
     isResuming,
   } = useSendMessage();
+  // Approve / Cancel for HITL must be gated on global streaming state: while ANY other
+  // conversation is streaming, racing two mutations against the same single-stream
+  // backend would corrupt cache state. This becomes a per-conversation check in the
+  // concurrent-streams follow-up PR.
+  const isAnyStreaming = useIsAnyConversationStreaming();
+  const isHitlDisabled = isAnyStreaming && !isResuming;
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
@@ -193,6 +200,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               onConfirm={() => handlePromptResponse(prompt.id, true)}
               onCancel={() => handlePromptResponse(prompt.id, false)}
               isLoading={isResuming}
+              isDisabled={isHitlDisabled}
               isAnswered={promptResponses[prompt.id] !== undefined}
               answeredValue={promptResponses[prompt.id]?.allow}
             />

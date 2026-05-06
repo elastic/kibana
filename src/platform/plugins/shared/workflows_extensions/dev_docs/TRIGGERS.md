@@ -116,32 +116,24 @@ Reference: `examples/workflows_extensions_example/public/triggers/custom_trigger
 When you have an HTTP request, use the request-scoped client so space and request are taken from the current context:
 
 1. Add `workflowsExtensions` to your plugin's `requiredPlugins` in `kibana.jsonc`.
-2. Type your route handler context to include `workflows: WorkflowsRouteHandlerContext` (from `@kbn/workflows-extensions/server`).
+2. Type your route handler context to include `workflows: WorkflowsApiRequestHandlerContext` (from `@kbn/workflows/server`).
 3. In the route handler:
 
 ```typescript
-const client = (await context.workflows).getWorkflowsClient();
-await client.emitEvent(MY_TRIGGER_ID, {
-  message: request.body.message,
-  source: 'my-api',
-  category: 'alerts',
-});
+const workflows = await context.workflows;
+await workflows.emitEvent(MY_TRIGGER_ID, { message: request.body.message, source: 'my-api', category: 'alerts' });
 ```
 
-Reference: `examples/workflows_extensions_example/server/request_context.ts` and `server/routes/emit_event.ts`.
+Reference: `examples/workflows_extensions_example/server/plugin.ts` and `server/routes/emit_event.ts`.
 
 **Option B — Direct (when you have request and space)**
 
-When emitting from background code (e.g. a job) where you have a `KibanaRequest` and `spaceId`, use the start contract:
+1. Add `workflowsExtensions` to your plugin's `requiredPlugins` in `kibana.jsonc`.
+2. When emitting from background code (e.g. a job) where you have a `KibanaRequest`, you can get the workflows client from the start contract of the `workflowsExtension` plugin, to emit an event:
 
 ```typescript
-// In code that has access to workflowsExtensions start (e.g. another plugin):
-await workflowsExtensions.emitEvent({
-  triggerId: MY_TRIGGER_ID,
-  spaceId: targetSpaceId,
-  payload: { message: 'Event from job', source: 'background', category: 'audit' },
-  request: myKibanaRequest, // e.g. system request for background execution
-});
+const workflowsClient = await plugins.workflowsExtensions.getClient(request);
+await workflowsClient.emitEvent(MY_TRIGGER_ID, { message: 'Event from job', source: 'background', category: 'audit' });
 ```
 
 Payload is validated against the trigger's `eventSchema`; if validation fails, `emitEvent` throws. A trigger event handler must be registered (e.g. by `workflows_management`) for workflows to run.
@@ -206,7 +198,9 @@ To prevent infinite loops and unbounded workflow executions:
 
 - **Configuration**: Set the maximum chain depth in `kibana.yml` with **`workflowsExecutionEngine.eventDriven.maxChainDepth`**. Default is **`10`**; minimum is **`1`**. See the [workflows execution engine README](../../workflows_execution_engine/README.md#configuration) and [config](../../workflows_execution_engine/server/config.ts).
 
-- **Same request is required for depth tracking**: Emitters must pass the **same request** from the current code path when calling `emitEvent`. The platform attaches depth and source workflow id to that request when a workflow runs; if you use a different request (e.g. a new or unrelated one), the platform cannot infer chain context and cannot enforce the depth limit. **Always use the request you use for attribution/space** so the guardrail works correctly.
+- **Same request is required for depth tracking**: Emitters must pass the **same request** from the current code path when calling `emitEvent`. The platform attaches event-chain context (depth, source execution id, and visited workflow ids when present) to that request when a workflow runs; if you use a different request (e.g. a new or unrelated one), the platform cannot infer chain context and cannot enforce the depth limit. **Always use the request you use for attribution/space** so the guardrail works correctly.
+
+- **Per-trigger `on.workflowEvents` (YAML)**: For registered (custom) triggers, workflows may set `triggers[].on.workflowEvents` to **`ignore`**, **`avoid-loop`**, or **`allow-all`**. Omitted defaults to **`avoid-loop`**: the workflow runs on workflow-attributed emits unless the event-chain **cycle** guard blocks it; **`ignore`** skips scheduling when the emit is workflow-attributed; **`allow-all`** opts out of the cycle guard (depth cap still applies).
 
 #### Event-chain depth (loop) demo
 

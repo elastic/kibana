@@ -479,6 +479,7 @@
     "timestampField",
     "type"
   ],
+  "entity-store-ccs-state": [],
   "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
@@ -512,6 +513,7 @@
     "name",
     "package_assets",
     "pending_upgrade_review",
+    "previous_dependency_versions",
     "previous_version",
     "verification_key_id",
     "verification_status",
@@ -1196,6 +1198,26 @@
     "updated",
     "version"
   ],
+  "security:endpoint-scripts-library": [
+    "created_at",
+    "created_by",
+    "description",
+    "example",
+    "file_hash_sha256",
+    "file_id",
+    "file_name",
+    "file_size",
+    "file_type",
+    "id",
+    "instructions",
+    "name",
+    "path_to_executable",
+    "platform",
+    "requires_input",
+    "tags",
+    "updated_at",
+    "updated_by"
+  ],
   "security:reference-data": [
     "id",
     "owner",
@@ -1475,6 +1497,12 @@
   ],
   "usage-counters": [
     "domainId"
+  ],
+  "user-storage": [
+    "userId"
+  ],
+  "user-storage-global": [
+    "userId"
   ],
   "user_connector_token": [
     "connectorId",

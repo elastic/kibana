@@ -22,7 +22,7 @@
     "@kbn/test",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-http-common",
-    "@kbn/ml-plugin",
+    "@kbn/ml-common-types",
+    "@kbn/entity-store",
   ]
 }
-
