@@ -1,0 +1,156 @@
+---
+name: bug-fix
+description: >
+  Implements a TDD fix for a reproduced Kibana Security Solution bug and opens a draft PR.
+  Dispatched by the bug-fixer orchestrator after reproduction is confirmed — not triggered
+  directly by users.
+---
+
+# Bug Fix
+
+Implements a verified fix for a reproduced Security Solution bug.
+
+## Starting context
+
+Read these files before doing anything else:
+- `analysis.json` — classification, affected paths, server args, similar issues, related PRs
+- `reproduction-report.md` — browser diagnostics, data path trace, root cause hypothesis
+
+If either file is missing, do not proceed. Tell the user the orchestrator must complete
+Phase A (bug-reproduce) first.
+
+## Phase 4: Fix (TDD)
+
+Don't write any code until the user has explicitly approved the fix plan. Presenting the
+plan first is what allows engineers to catch misdiagnoses before implementation rather
+than during code review.
+
+### Step 1: Root cause analysis and fix plan
+
+Cross-reference `affected_paths` with diagnostics from `reproduction-report.md`:
+- Network failures → route handler
+- Console errors → component
+- Stale data → mutation hook
+- Missing API calls → UI code path
+
+Dispatch these as subagents — PR diffs and source files are large:
+1. **Review prior fixes** — re-read `similar_issues` and `related_prs` from `analysis.json`.
+   What pattern did each fix follow? What did it miss?
+2. **Map full impact scope** — where else is this broken path used? Sibling components,
+   other routes, other spaces/roles?
+3. **Search codebase conventions** — `rg` for existing patterns, hardcoded namespaces,
+   plugin boundaries, lifecycle phases (SELF-CHECK #3 questions 1–4)
+4. **Find all call sites** — every invocation of the broken hook/utility/action
+   (SELF-CHECK #3 questions 5–6)
+5. **Find existing tests** — copy patterns, determine test layer
+
+Read `.agents/skills/bug-fixer/references/fix-workflow.md` and answer all six
+SELF-CHECK #3 questions using the gathered evidence.
+
+Present the Root Cause Analysis and Fix Plan using the template in `fix-workflow.md`.
+End with exactly:
+
+> _"I am waiting for your approval before writing any code or tests. Do you approve this plan as written?"_
+
+Stop there and wait. Do not write code, open files for editing, or call any tool.
+If the user identifies a misdiagnosis, revise the plan and ask for approval again.
+
+### Step 2: Red — write failing test
+
+Re-read the user's last message. Did they explicitly approve ("yes", "proceed", "approved",
+"looks good")? Ambiguous or missing responses are not approval — present the plan again
+and wait. Don't interpret silence or a question as approval.
+
+For Scout tests, read before writing:
+1. `.agents/skills/scout-create-scaffold/SKILL.md`
+2. `.agents/skills/scout-best-practices-reviewer/SKILL.md`
+3. `x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md`
+
+Run the test and expect it to fail:
+```bash
+node scripts/jest <path/to/test.ts> --no-coverage 2>&1
+echo "Exit code: $?"
+# Non-zero = red confirmed ✓  |  Zero = test already passes — rewrite it
+```
+
+For Scout API/UI tests: `node scripts/scout run-tests --config <config-path>`
+
+### Step 3: Green — implement fix
+
+Keep fixes simple — prefer the smallest change that resolves the bug. More than 2–3 files
+or architectural changes means stop and ask the user before continuing.
+
+1. Consult prior fixes or `.agents/skills/bug-fixer/references/classification-guide.md`
+2. Match surrounding codebase patterns
+3. Verify:
+   ```bash
+   node scripts/jest <path/to/test.ts> --no-coverage
+   node scripts/jest --testPathPattern='<area-pattern>' --no-coverage
+   ```
+4. Iterate until `fix_verified`
+
+## Phase 5: Verify
+
+Restart services for a clean environment — stale reproduction state produces false positives:
+
+1. Stop and restart (same commands as Phase 1, same `server_args`)
+2. Re-create test data from scratch (same steps as Phase 2)
+3. Browser reproduction — bug should not reproduce
+4. `browser_console_messages` + `browser_network_requests` — Phase 3 errors gone, no new errors
+5. **Lifecycle edge case** — if the fix involves startup or boot-time seeding, create a new
+   space/resource *after* services are running and verify it works
+6. Run tests:
+   ```bash
+   node scripts/jest <path/to/test.ts> --no-coverage
+   node scripts/jest --testPathPattern='<area-pattern>' --no-coverage
+   ```
+
+| Condition | Verdict |
+|-----------|---------|
+| All pass + no browser repro | **Fix verified** |
+| Tests pass + browser still repros | **Fix incomplete** |
+| Tests fail | **Fix broke something** |
+| Related tests fail | **Regression** |
+
+## Phase 6: Open PR
+
+Only proceed if Phase 5 verdict is **Fix verified**.
+
+End your message with exactly:
+
+> _"Fix verified. Would you like me to open a draft PR?"_
+
+Stop there. Re-read the user's next message — if they didn't explicitly say yes, skip to Output.
+
+If confirmed:
+```bash
+git checkout -b fix/<issue-number>
+git add -A
+git commit -m "Fix #<number> — <short description>"
+git push -u origin HEAD
+gh pr create --draft --title "Fix #<number> — <short description>" --body "<Bug Fix Summary>"
+```
+
+Present the PR URL to the user.
+
+## Output
+
+```
+## Bug Fix Summary
+- **Issue**: #<number> — <title>
+- **Classification**: <pattern> (confidence: <level>)
+- **Reproduction**: reproduced
+- **Test file**: <path>
+- **Fix applied**: <description>
+- **Verification**: fix_verified
+- **PR**: <url> (draft) or "not requested"
+```
+
+## Knowledge Update
+
+After Phase 5 (or Phase 6), read `.agents/skills/bug-fixer/references/fix-workflow.md`
+(Session Learnings Template) and present a structured summary to the user. Also read
+`.agents/skills/bug-fixer/references/knowledge-update.md` for the entry format.
+Wait for user confirmation before writing to any file.
+
+If something goes wrong, read `.agents/skills/bug-fixer/references/troubleshooting.md`.
