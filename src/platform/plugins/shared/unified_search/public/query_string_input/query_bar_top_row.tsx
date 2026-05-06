@@ -1224,7 +1224,7 @@ export const QueryBarTopRow = React.memo(
                 {/* Optional wrapper for the ES|QL controls elements */}
                 {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
                   <EuiFlexItem
-                    grow={false}
+                    grow={true}
                     css={css`
                       margin-right: auto;
                     `}
