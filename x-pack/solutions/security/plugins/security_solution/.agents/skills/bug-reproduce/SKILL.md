@@ -12,6 +12,17 @@ Investigate and reproduce a Security Solution bug. Produces `analysis.json` and
 
 ## Phase 0: Analyze
 
+Start the Scout server in the background immediately — it takes 5+ minutes to boot and
+can warm up while analysis runs:
+
+```bash
+node scripts/scout.js start-server --arch stateful --domain classic &
+```
+
+Feature flags won't be known until the ticket is parsed. If `server_args` turn out to be
+non-empty, Phase 1 will stop and restart with the config set — one restart costs far less
+than waiting for the server after analysis finishes.
+
 If `analysis.json` already exists at the repo root from a prior session, skip the fetch
 and parse steps — but you still must execute Phases 1, 2, and 3 in full. A prior analysis
 does not substitute for a live reproduction. The environment must be started fresh and the
@@ -55,27 +66,32 @@ A poorly specified ticket produces a misdiagnosed fix — it's faster to fix the
 
 If `possibly_fixed` is `true`, let the user know and get confirmation before continuing.
 
-Dispatch these as subagents — PR diffs and issue threads are large, and keeping them out
-of the main conversation saves significant context:
+Dispatch these as subagents — PR diffs, issue threads, and source files are large, and
+running them in parallel uses the server boot time productively:
 - Read each `similar_issue` (`gh issue view <number> --repo elastic/kibana`)
 - Review each `related_pr` diff (`gh pr diff <number> --repo elastic/kibana`)
 - Search closed issues: `gh search issues "<key symptom>" --repo elastic/kibana --state closed --limit 5`
+- Read `affected_paths` from `analysis.json` and study the relevant source code
+- Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/classification-guide.md`
+- Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/KNOWLEDGE.md`
 
 Summarize findings before moving on.
 
 ## Phase 1: Start Services
 
-Start the Scout server yourself — don't ask the user. Use `server_args` from `analysis.json`.
+The server has been booting since Phase 0. Check `server_args` from `analysis.json`:
 
-Scout runs on port 5620 and sets up the `cloud-basic` auth provider needed for browser
-reproduction. Don't use the plain dev server — `auth_provider_hint=cloud-basic` won't
-work without Scout's server setup.
-
+**No feature flags** — just wait for ready:
 ```bash
-# No feature flags
-node scripts/scout.js start-server --arch stateful --domain classic &
+until curl -s -u elastic:changeme http://localhost:5620/api/status \
+  | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do
+  echo "Waiting for Kibana..."; sleep 10
+done
+```
 
-# With feature flags (from analysis.json server_args) — write a Scout config file first
+**With feature flags** — stop and restart with the config set:
+```bash
+pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'
 mkdir -p config_sets/bug_fixer
 cat > config_sets/bug_fixer/kibana.yml << 'EOF'
 xpack.securitySolution.enableExperimental:
@@ -83,8 +99,6 @@ xpack.securitySolution.enableExperimental:
 feature_flags.overrides.some.flag: true
 EOF
 node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet bug_fixer &
-
-# Wait for ready (poll every 10s)
 until curl -s -u elastic:changeme http://localhost:5620/api/status \
   | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do
   echo "Waiting for Kibana..."; sleep 10
@@ -94,11 +108,9 @@ done
 The `config_sets/bug_fixer/kibana.yml` file is session-specific — write it from
 `server_args` in `analysis.json` each time rather than editing any persistent config file.
 
-While services start, dispatch these as subagents to use the boot time:
-- Read `affected_paths` from `analysis.json`
-- Review related PR diffs: `gh pr diff <NUMBER> --repo elastic/kibana`
-- Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/classification-guide.md`
-- Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/KNOWLEDGE.md`
+Scout runs on port 5620 and sets up the `cloud-basic` auth provider needed for browser
+reproduction. Don't use the plain dev server — `auth_provider_hint=cloud-basic` won't
+work without Scout's server setup.
 
 Stop services: `pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'`
 
