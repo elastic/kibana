@@ -1,6 +1,7 @@
 ---
 name: kbn-ui-package
 description: This skill should be used when the user asks to "create a kbn-ui package", "onboard a component to kbn-ui", "package a Kibana component for external distribution", "add a package to kbn-ui", "set up packaging for a Kibana component", or any mention of distributing a Kibana UI component to Cloud UI or external consumers. Guides the full interactive process: gathers inputs, moves source files, scaffolds the packaging layer, and updates all Kibana imports.
+disable-model-invocation: true
 ---
 
 # kbn-ui Package Onboarding
@@ -330,14 +331,13 @@ yarn kbn bootstrap
 # Regenerate moon.yml for the new package (auto-derived from kibana.jsonc + package.json)
 node scripts/regenerate_moon_projects.js --update --filter {packageName}
 
-# Type-check workspace package
+# Type-check workspace package + unit tests (or run both at once with: node scripts/check.js)
 node scripts/type_check --project src/platform/kbn-ui/{folderName}/tsconfig.json
-
-# Type-check packaging scaffold
-node_modules/.bin/tsc --project src/platform/kbn-ui/{folderName}/packaging/tsconfig.json --noEmit
-
-# Unit tests
 node scripts/jest --testPathPattern="src/platform/kbn-ui/{folderName}"
+
+# Type-check packaging scaffold — standalone tsconfig outside Kibana's project graph;
+# not covered by scripts/check.js and must always be run explicitly
+node_modules/.bin/tsc --project src/platform/kbn-ui/{folderName}/packaging/tsconfig.json --noEmit
 
 # Full distribution build
 bash src/platform/kbn-ui/{folderName}/packaging/scripts/build.sh
