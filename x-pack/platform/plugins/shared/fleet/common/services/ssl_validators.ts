@@ -15,4 +15,10 @@ export function validateSslCertPath(value: string): string | undefined {
       defaultMessage: 'SSL certificate path cannot contain whitespace',
     });
   }
+  // Must contain at least one path separator, or start with an env-var sigil ($, %)
+  if (!value.includes('/') && !value.includes('\\') && !/^[$%]/.test(value)) {
+    return i18n.translate('xpack.fleet.sslValidation.pathFormatError', {
+      defaultMessage: 'SSL certificate path must be a valid file path (e.g. /path/to/cert.pem)',
+    });
+  }
 }

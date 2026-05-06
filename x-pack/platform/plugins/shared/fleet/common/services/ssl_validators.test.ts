@@ -33,6 +33,14 @@ describe('validateSslCertPath', () => {
       expect(validateSslCertPath('\\\\server\\share\\cert.pem')).toBeUndefined();
     });
 
+    it('env-var prefixed path ($)', () => {
+      expect(validateSslCertPath('$CERTS_DIR/ca.pem')).toBeUndefined();
+    });
+
+    it('env-var prefixed path (%)', () => {
+      expect(validateSslCertPath('%CERTS_DIR%\\ca.pem')).toBeUndefined();
+    });
+
     it('PEM certificate content', () => {
       expect(
         validateSslCertPath(
@@ -87,6 +95,18 @@ describe('validateSslCertPath', () => {
 
     it('path with tab character', () => {
       expect(validateSslCertPath('/path/to\tcert.pem')).toBeDefined();
+    });
+
+    it('bare dashes (---)', () => {
+      expect(validateSslCertPath('---')).toBeDefined();
+    });
+
+    it('plain word without path separator', () => {
+      expect(validateSslCertPath('cert.pem')).toBeDefined();
+    });
+
+    it('hyphen-only string', () => {
+      expect(validateSslCertPath('-')).toBeDefined();
     });
   });
 });
