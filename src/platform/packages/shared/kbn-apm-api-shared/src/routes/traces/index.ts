@@ -13,6 +13,9 @@ import { unifiedTracesRootSpanRoute } from './unified_traces_root_span';
 import { rootTransactionByTraceIdRoute } from './root_transaction_by_trace_id';
 import { transactionByNameRoute } from './transaction_by_name';
 import { transactionByIdRoute } from './transaction_by_id';
+import { transactionFromTraceByIdRoute } from './transaction_from_trace_by_id';
+import { spanFromTraceByIdRoute } from './span_from_trace_by_id';
+import { unifiedTraceSpanRoute } from './unified_trace_span';
 
 export const tracesRouteDefinitions = {
   unifiedTracesById: unifiedTracesByIdRoute,
@@ -22,6 +25,9 @@ export const tracesRouteDefinitions = {
   rootTransactionByTraceId: rootTransactionByTraceIdRoute,
   transactionByName: transactionByNameRoute,
   transactionById: transactionByIdRoute,
+  transactionFromTraceById: transactionFromTraceByIdRoute,
+  spanFromTraceById: spanFromTraceByIdRoute,
+  unifiedTraceSpan: unifiedTraceSpanRoute,
 };
 
 export type { UnifiedTracesByIdResponse } from './unified_traces_by_id';
@@ -30,3 +36,6 @@ export type { UnifiedTracesRootSpanResponse } from './unified_traces_root_span';
 export type { RootTransactionByTraceIdResponse } from './root_transaction_by_trace_id';
 export type { TransactionByNameResponse } from './transaction_by_name';
 export type { TransactionByIdResponse } from './transaction_by_id';
+export type { TransactionFromTraceByIdResponse } from './transaction_from_trace_by_id';
+export type { SpanFromTraceByIdResponse } from './span_from_trace_by_id';
+export type { UnifiedTraceSpanResponse } from './unified_trace_span';

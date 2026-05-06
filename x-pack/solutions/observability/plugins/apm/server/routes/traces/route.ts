@@ -5,21 +5,31 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { type ErrorsByTraceId, type UnifiedSpanDocument } from '@kbn/apm-types';
 import {
   routeDefinitions,
+  type RootTransactionByTraceIdResponse,
+  type SpanFromTraceByIdResponse,
+  type TransactionByIdResponse,
+  type TransactionByNameResponse,
+  type TransactionFromTraceByIdResponse,
   type UnifiedTracesByIdResponse,
   type UnifiedTracesByIdSummaryResponse,
+  type UnifiedTraceSpanResponse,
   type UnifiedTracesRootSpanResponse,
-  type RootTransactionByTraceIdResponse,
-  type TransactionByNameResponse,
-  type TransactionByIdResponse,
 } from '@kbn/apm-api-shared';
-import type { Span } from '../../../typings/es_schemas/ui/span';
-import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
+import { type ErrorsByTraceId } from '@kbn/apm-types';
+import * as t from 'io-ts';
+import {
+  DURATION,
+  SPAN_DURATION,
+  SPAN_ID,
+  TRANSACTION_DURATION,
+} from '../../../common/es_fields/apm';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { createLogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
@@ -31,18 +41,9 @@ import { buildFocusedTraceItems, findRootItem } from './build_focused_trace_item
 import type { TopTracesPrimaryStatsResponse } from './get_top_traces_primary_stats';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
 import { getTraceSummaryCount } from './get_trace_summary_count';
-import { getUnifiedTraceItems } from './get_unified_trace_items';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
-import { createLogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
+import { getUnifiedTraceItems } from './get_unified_trace_items';
 import { getUnifiedTraceSpan } from './get_unified_trace_span';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import {
-  TRANSACTION_DURATION,
-  SPAN_DURATION,
-  DURATION,
-  SPAN_ID,
-} from '../../../common/es_fields/apm';
-import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -316,16 +317,10 @@ const transactionByNameRoute = createApmServerRoute({
 });
 
 const transactionFromTraceByIdRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-      transactionId: t.string,
-    }),
-    query: rangeRt,
-  }),
+  endpoint: routeDefinitions.traces.transactionFromTraceById.endpoint,
+  params: routeDefinitions.traces.transactionFromTraceById.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<Transaction | undefined> => {
+  handler: async (resources): Promise<TransactionFromTraceByIdResponse | undefined> => {
     const { params } = resources;
     const {
       path: { transactionId, traceId },
@@ -344,24 +339,10 @@ const transactionFromTraceByIdRoute = createApmServerRoute({
 });
 
 const spanFromTraceByIdRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/{traceId}/spans/{spanId}',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-      spanId: t.string,
-    }),
-    query: t.intersection([
-      rangeRt,
-      t.union([t.partial({ parentTransactionId: t.string }), t.undefined]),
-    ]),
-  }),
+  endpoint: routeDefinitions.traces.spanFromTraceById.endpoint,
+  params: routeDefinitions.traces.spanFromTraceById.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    span?: Span;
-    parentTransaction?: Transaction;
-  }> => {
+  handler: async (resources): Promise<SpanFromTraceByIdResponse> => {
     const { params } = resources;
     const {
       path: { spanId, traceId },
@@ -381,16 +362,10 @@ const spanFromTraceByIdRoute = createApmServerRoute({
 });
 
 const unifiedTraceSpanRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/unified_traces/{traceId}/spans/{spanId}',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-      spanId: t.string,
-    }),
-    query: rangeRt,
-  }),
+  endpoint: routeDefinitions.traces.unifiedTraceSpan.endpoint,
+  params: routeDefinitions.traces.unifiedTraceSpan.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<UnifiedSpanDocument | undefined> => {
+  handler: async (resources): Promise<UnifiedTraceSpanResponse | undefined> => {
     const {
       params: {
         path: { traceId, spanId },

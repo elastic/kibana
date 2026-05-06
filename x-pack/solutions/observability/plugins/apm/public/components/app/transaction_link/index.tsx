@@ -47,7 +47,8 @@ export function TransactionLink() {
         });
       }
     },
-    [transactionId, start, end]
+    [transactionId, start, end],
+    { useCallApmApiV2: true }
   );
   if (transactionId && status === FETCH_STATUS.SUCCESS) {
     if (data.transaction) {
