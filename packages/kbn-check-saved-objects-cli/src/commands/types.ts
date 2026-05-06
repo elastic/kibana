@@ -13,7 +13,7 @@ import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { Root } from '@kbn/core-root-server-internal';
 import type {
-  EncryptedSavedObjectsPluginStart,
+  EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectTypeRegistration,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { MigrationSnapshot } from '../types';
@@ -31,7 +31,7 @@ export interface TaskContext {
   esServer?: TestElasticsearchUtils;
   kibanaServer?: Root;
   registeredTypes?: SavedObjectsType<any>[];
-  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   from?: MigrationSnapshot;
   serverlessFrom?: MigrationSnapshot;
   to?: MigrationSnapshot;
