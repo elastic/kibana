@@ -35,14 +35,16 @@ export const monitorManagementSkill = defineSkillType({
   name: 'monitor-management',
   basePath: 'skills/observability',
   description:
-    'Compose, modify, and discover Elastic Synthetics HTTP monitors. Use when the user asks to create, edit, enable/disable, or look up uptime/availability monitors. v1 supports HTTP-only monitors with origin: ui; TCP, ICMP, and Browser monitors are out of scope.',
+    'Compose, modify, and discover Elastic Synthetics HTTP monitors. Use when the user asks to create, edit, enable/disable, or look up uptime/availability monitors against any URL, with any schedule, and from any location (Elastic-managed region or private location, regardless of the specific id or label the user mentions). v1 supports HTTP-only monitors with origin: ui; TCP, ICMP, and Browser monitors are out of scope.',
   content: `## When to Use This Skill
 
 Use this skill when:
-- A user asks to **create** a Synthetics HTTP monitor for a URL ("monitor https://example.com every 5 minutes from us_central").
+- A user asks to **create** a Synthetics HTTP monitor for any URL, optionally with a schedule and one or more locations. The location can be named anything — a public Elastic-managed region id (e.g. \`us_central\`, \`us_east_qa\`, \`japan\`), a region label ("US Central", "Frankfurt"), or a private-location name the user has set up. The skill is responsible for resolving the user's location wording into a real id; do not skip this skill just because the location name is unfamiliar.
 - A user asks to **modify** an existing monitor's name, schedule, locations, tags, or enabled state.
 - A user asks to **find** existing monitors by name, URL, or tag.
 - A user asks to enable / disable / pause an existing monitor.
+
+Phrasings like "create an HTTP monitor for https://X every N minutes from <anything>", "add a synthetic check for X", "monitor X", "watch X every 5m from <anything>" all trigger this skill. The presence of an HTTP/HTTPS URL plus an availability verb is enough — the location name does not need to match a specific known id.
 
 Do **not** use this skill when:
 - The user asks about a non-HTTP monitor type (Browser, TCP, ICMP). v1 supports HTTP only — politely say so and offer to help once the corresponding monitor type is added.
