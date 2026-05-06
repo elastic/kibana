@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/user-storage-test-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "userStorageTest",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "user_storage_test"
+    ]
+  }
+}

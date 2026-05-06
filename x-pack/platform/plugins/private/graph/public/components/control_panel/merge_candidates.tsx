@@ -53,7 +53,7 @@ export const MergeCandidates = ({
   return (
     <div css={gphSidebarPanelStyles}>
       <div css={gphSidebarHeaderStyles}>
-        <EuiIcon type="link" />{' '}
+        <EuiIcon type="link" aria-hidden={true} />{' '}
         {i18n.translate('xpack.graph.sidebar.linkSummaryTitle', {
           defaultMessage: 'Link summary',
         })}
