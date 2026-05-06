@@ -10,6 +10,8 @@ import { BehaviorSubject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-types';
 import { distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import type { MlCoreSetup } from '../../public/plugin';
 import { PLUGIN_ID } from '../constants/app';
 
 export const MINIMUM_LICENSE = 'basic';
@@ -140,4 +142,21 @@ export function isMinimumLicense(license: ILicense) {
 
 export function isMlEnabled(license: ILicense) {
   return license.getFeature(PLUGIN_ID).isEnabled;
+}
+
+export async function isMlAvailable(getStartServices: MlCoreSetup['getStartServices']) {
+  const [coreStart, pluginStart] = await getStartServices();
+  const license = await pluginStart.licensing.getLicense();
+  return (
+    isFullLicense(license) &&
+    isMlEnabled(license) &&
+    (coreStart.application.capabilities.ml as MlCapabilities).canGetMlInfo
+  );
+}
+
+export async function ensureMlAvailable(getStartServices: MlCoreSetup['getStartServices']) {
+  const isAvailable = await isMlAvailable(getStartServices);
+  if (!isAvailable) {
+    throw new Error('ML is not available');
+  }
 }
