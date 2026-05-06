@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/announcement",
+  "id": "@kbn/announcement-banner",
   "owner": ["@elastic/appex-sharedux", "@elastic/eui-team"],
   "group": "platform",
   "visibility": "shared"

@@ -12,8 +12,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiText } from '@elastic/eui';
 
-import { Announcement } from './announcement';
-import type { AnnouncementProps } from './types';
+import { AnnouncementBanner } from './announcement_banner';
+import type { AnnouncementBannerProps } from './types';
 import illustrationUrl from './assets/illustration.svg';
 
 const Illustration = () => <img src={illustrationUrl} alt="" width="100%" height="100%" />;
@@ -23,13 +23,13 @@ const Illustration = () => <img src={illustrationUrl} alt="" width="100%" height
  * Controls panel can toggle the optional slots without exposing their inner
  * shape.
  */
-type StoryArgs = Omit<AnnouncementProps, 'media' | 'actionProps'> & {
+type StoryArgs = Omit<AnnouncementBannerProps, 'media' | 'actionProps'> & {
   media: boolean;
   primaryAction: boolean;
   secondaryAction: boolean;
 };
 
-const buildAnnouncementProps = (args: StoryArgs): AnnouncementProps => {
+const buildAnnouncementProps = (args: StoryArgs): AnnouncementBannerProps => {
   const { media, primaryAction, secondaryAction, ...rest } = args;
   return {
     ...rest,
@@ -46,8 +46,8 @@ const buildAnnouncementProps = (args: StoryArgs): AnnouncementProps => {
 };
 
 const meta: Meta<StoryArgs> = {
-  title: 'Display/Announcement',
-  component: Announcement,
+  title: 'Display/AnnouncementBanner',
+  component: AnnouncementBanner,
   args: {
     title: 'Announcement title',
     text: 'Envision a realm where your dreams manifest like a breathtaking mural. Each stroke of the brush symbolizes a hope yearning to be fulfilled, creating a tapestry of aspirations that come to life.',
@@ -65,7 +65,7 @@ const meta: Meta<StoryArgs> = {
     onDismiss: { table: { disable: true } },
     children: { table: { disable: true } },
   },
-  render: (args) => <Announcement {...buildAnnouncementProps(args)} />,
+  render: (args) => <AnnouncementBanner {...buildAnnouncementProps(args)} />,
 };
 
 export default meta;
@@ -79,7 +79,7 @@ const ContainerSizesRender = (args: StoryArgs) => (
       <div key={width}>
         <div style={{ fontSize: 12, marginBottom: 4 }}>{width}px</div>
         <div style={{ width }}>
-          <Announcement {...buildAnnouncementProps(args)} />
+          <AnnouncementBanner {...buildAnnouncementProps(args)} />
         </div>
       </div>
     ))}

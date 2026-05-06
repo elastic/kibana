@@ -11,19 +11,19 @@ import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
-import { Announcement } from './announcement';
+import { AnnouncementBanner } from './announcement_banner';
 
 describe('Announcement', () => {
   it('renders the title', () => {
-    const { getByTestId } = renderWithEuiTheme(<Announcement title="Hello" />);
-    expect(getByTestId('announcement-title')).toHaveTextContent('Hello');
+    const { getByTestId } = renderWithEuiTheme(<AnnouncementBanner title="Hello" />);
+    expect(getByTestId('announcementBanner-title')).toHaveTextContent('Hello');
   });
 
   it('renders text and children', () => {
     const { getByText } = renderWithEuiTheme(
-      <Announcement title="Title" text="Body copy">
+      <AnnouncementBanner title="Title" text="Body copy">
         <span>Extra</span>
-      </Announcement>
+      </AnnouncementBanner>
     );
     expect(getByText('Body copy')).toBeInTheDocument();
     expect(getByText('Extra')).toBeInTheDocument();
@@ -31,24 +31,24 @@ describe('Announcement', () => {
 
   it('renders the media slot', () => {
     const { getByTestId } = renderWithEuiTheme(
-      <Announcement title="Title" media={<img alt="ill" data-test-subj="illustration" />} />
+      <AnnouncementBanner title="Title" media={<img alt="ill" data-test-subj="illustration" />} />
     );
-    expect(getByTestId('announcement-media')).toBeInTheDocument();
+    expect(getByTestId('announcementBanner-media')).toBeInTheDocument();
     expect(getByTestId('illustration')).toBeInTheDocument();
   });
 
   it('does not render the dismiss button when onDismiss is omitted', () => {
-    const { queryByTestId } = renderWithEuiTheme(<Announcement title="Title" />);
-    expect(queryByTestId('announcement-dismiss')).toBeNull();
+    const { queryByTestId } = renderWithEuiTheme(<AnnouncementBanner title="Title" />);
+    expect(queryByTestId('announcementBanner-dismiss')).toBeNull();
   });
 
   it('fires onDismiss when the dismiss button is clicked', () => {
     const onDismiss = jest.fn();
     const { getByTestId } = renderWithEuiTheme(
-      <Announcement title="Title" onDismiss={onDismiss} />
+      <AnnouncementBanner title="Title" onDismiss={onDismiss} />
     );
 
-    fireEvent.click(getByTestId('announcement-dismiss'));
+    fireEvent.click(getByTestId('announcementBanner-dismiss'));
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 
@@ -56,7 +56,7 @@ describe('Announcement', () => {
     const primary = jest.fn();
     const secondary = jest.fn();
     const { getByTestId } = renderWithEuiTheme(
-      <Announcement
+      <AnnouncementBanner
         title="Title"
         actionProps={{
           primary: { children: 'Yes', onClick: primary },
@@ -65,28 +65,28 @@ describe('Announcement', () => {
       />
     );
 
-    fireEvent.click(getByTestId('announcement-primaryAction'));
-    fireEvent.click(getByTestId('announcement-secondaryAction'));
+    fireEvent.click(getByTestId('announcementBanner-primaryAction'));
+    fireEvent.click(getByTestId('announcementBanner-secondaryAction'));
 
     expect(primary).toHaveBeenCalledTimes(1);
     expect(secondary).toHaveBeenCalledTimes(1);
   });
 
   it('renders the title as an h2 by default', () => {
-    const { getByTestId } = renderWithEuiTheme(<Announcement title="Heading" />);
-    expect(getByTestId('announcement-title').tagName).toBe('H2');
+    const { getByTestId } = renderWithEuiTheme(<AnnouncementBanner title="Heading" />);
+    expect(getByTestId('announcementBanner-title').tagName).toBe('H2');
   });
 
   it('renders the title with the requested heading element', () => {
     const { getByTestId } = renderWithEuiTheme(
-      <Announcement title="Heading" headingElement="h4" />
+      <AnnouncementBanner title="Heading" headingElement="h4" />
     );
-    expect(getByTestId('announcement-title').tagName).toBe('H4');
+    expect(getByTestId('announcementBanner-title').tagName).toBe('H4');
   });
 
   it('spreads dismissButtonProps onto the dismiss button', () => {
     const { getByTestId } = renderWithEuiTheme(
-      <Announcement
+      <AnnouncementBanner
         title="Title"
         onDismiss={() => {}}
         dismissButtonProps={{ 'aria-label': 'Close', 'data-test-subj': 'custom-dismiss' }}
@@ -98,7 +98,7 @@ describe('Announcement', () => {
 
   it('respects a custom data-test-subj', () => {
     const { getByTestId } = renderWithEuiTheme(
-      <Announcement data-test-subj="hero" title="Title" />
+      <AnnouncementBanner data-test-subj="hero" title="Title" />
     );
     expect(getByTestId('hero')).toBeInTheDocument();
     expect(getByTestId('hero-title')).toBeInTheDocument();

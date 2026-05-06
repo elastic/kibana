@@ -22,7 +22,7 @@ type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K>
  * Props for the primary action button. Rendered as an `EuiButton`.
  * `color`, `size` and `fill` are controlled by the component.
  */
-export type AnnouncementActionPrimaryProps = DistributiveOmit<
+export type AnnouncementBannerActionPrimaryProps = DistributiveOmit<
   ComponentProps<typeof EuiButton>,
   'color' | 'size' | 'fill'
 >;
@@ -31,7 +31,7 @@ export type AnnouncementActionPrimaryProps = DistributiveOmit<
  * Props for the secondary action button. Rendered as an `EuiButtonEmpty`.
  * `color`, `size` and `flush` are controlled by the component.
  */
-export type AnnouncementActionSecondaryProps = DistributiveOmit<
+export type AnnouncementBannerActionSecondaryProps = DistributiveOmit<
   ComponentProps<typeof EuiButtonEmpty>,
   'color' | 'size' | 'flush'
 >;
@@ -41,17 +41,17 @@ export type AnnouncementActionSecondaryProps = DistributiveOmit<
  * the component (use the `onDismiss` callback prop instead). Every other prop
  * is optional — the component supplies sensible defaults.
  */
-export type AnnouncementDismissButtonProps = Partial<
+export type AnnouncementBannerDismissButtonProps = Partial<
   DistributiveOmit<ComponentProps<typeof EuiButtonIcon>, 'onClick'>
 >;
 
 /** Visual size of the announcement. */
-export type AnnouncementSize = 's' | 'm' | 'l';
+export type AnnouncementBannerSize = 's' | 'm' | 'l';
 
 /** HTML element used to render the title. */
-export type AnnouncementHeadingElement = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+export type AnnouncementBannerHeadingElement = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
-export interface AnnouncementProps {
+export interface AnnouncementBannerProps {
   /** Test subject selector applied to the outermost element. */
   'data-test-subj'?: string;
   /** Emotion CSS styles added to the outermost container element. */
@@ -64,20 +64,20 @@ export interface AnnouncementProps {
    * HTML element used to render the title.
    * @default 'h2'
    */
-  headingElement?: AnnouncementHeadingElement;
+  headingElement?: AnnouncementBannerHeadingElement;
   /** Supporting copy rendered below the title. */
   text?: ReactNode;
   /**
    * Visual size variant.
    * @default 'm'
    */
-  size?: AnnouncementSize;
+  size?: AnnouncementBannerSize;
   /** Action buttons rendered at the bottom. */
   actionProps?: {
     /** Primary call-to-action, rendered as a filled `EuiButton`. */
-    primary?: AnnouncementActionPrimaryProps;
+    primary?: AnnouncementBannerActionPrimaryProps;
     /** Secondary action, rendered as an `EuiButtonEmpty`. */
-    secondary?: AnnouncementActionSecondaryProps;
+    secondary?: AnnouncementBannerActionSecondaryProps;
   };
   /** Optional illustration. Wrapped in a square (1:1) container. */
   media?: ReactNode;
@@ -87,7 +87,7 @@ export interface AnnouncementProps {
    */
   onDismiss?: () => void;
   /** Extra props spread onto the dismiss `EuiButtonIcon`. */
-  dismissButtonProps?: AnnouncementDismissButtonProps;
+  dismissButtonProps?: AnnouncementBannerDismissButtonProps;
   /** Extra content rendered directly below `text`. */
   children?: ReactNode;
 }

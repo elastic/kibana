@@ -10,7 +10,7 @@
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
-const CONTAINER_NAME = 'kbn-announcement';
+const CONTAINER_NAME = 'kbn-announcement-banner';
 
 /** Below this width the layout collapses to a single column. */
 const CQC_SUPER_NARROW = '(max-width: 580px)';
@@ -26,9 +26,9 @@ interface UseAnnouncementStylesArgs {
 }
 
 /**
- * Returns Emotion styles for the announcement component.
+ * Returns Emotion styles for the announcement banner component.
  */
-export const useAnnouncementStyles = ({ hasDismiss }: UseAnnouncementStylesArgs) => {
+export const useAnnouncementBannerStyles = ({ hasDismiss }: UseAnnouncementStylesArgs) => {
   const { euiTheme } = useEuiTheme();
 
   const rootInlineEndSpacing = hasDismiss ? `calc(${euiTheme.size.base} * 3)` : euiTheme.size.base;
@@ -70,19 +70,19 @@ export const useAnnouncementStyles = ({ hasDismiss }: UseAnnouncementStylesArgs)
   `;
 
   const media = css`
-    --kbn-announcementMediaSize: ${`calc(${euiTheme.size.base} * 5)`};
+    --kbn-announcementBannerMediaSize: ${`calc(${euiTheme.size.base} * 5)`};
 
     flex-shrink: 0;
-    inline-size: var(--kbn-announcementMediaSize);
-    block-size: var(--kbn-announcementMediaSize);
+    inline-size: var(--kbn-announcementBannerMediaSize);
+    block-size: var(--kbn-announcementBannerMediaSize);
     aspect-ratio: 1 / 1;
 
     [data-size='l'] & {
-      --kbn-announcementMediaSize: ${`calc(${euiTheme.size.base} * 7.5)`};
+      --kbn-announcementBannerMediaSize: ${`calc(${euiTheme.size.base} * 7.5)`};
     }
 
     [data-size='s'] & {
-      --kbn-announcementMediaSize: ${`calc(${euiTheme.size.base} * 2)`};
+      --kbn-announcementBannerMediaSize: ${`calc(${euiTheme.size.base} * 2)`};
     }
   `;
 
@@ -160,11 +160,11 @@ export const useAnnouncementStyles = ({ hasDismiss }: UseAnnouncementStylesArgs)
 
   const dismiss = css`
     /* it seems it might change depending on 'size' and cqc */
-    --kbn-announcementDismissButtonPosition: ${euiTheme.size.s};
+    --kbn-announcementBannerDismissButtonPosition: ${euiTheme.size.s};
 
     position: absolute;
-    inset-block-start: var(--kbn-announcementDismissButtonPosition);
-    inset-inline-end: var(--kbn-announcementDismissButtonPosition);
+    inset-block-start: var(--kbn-announcementBannerDismissButtonPosition);
+    inset-inline-end: var(--kbn-announcementBannerDismissButtonPosition);
   `;
 
   return { root, container, media, body, content, title, text, actions, dismiss };

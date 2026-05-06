@@ -11,8 +11,8 @@ import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { AnnouncementProps } from './types';
-import { useAnnouncementStyles } from './announcement.styles';
+import type { AnnouncementBannerProps } from './types';
+import { useAnnouncementBannerStyles } from './announcement_banner.styles';
 
 const dismissAriaLabel = i18n.translate('sharedUXPackages.announcement.dismissAriaLabel', {
   defaultMessage: 'Dismiss announcement',
@@ -33,7 +33,7 @@ const dismissAriaLabel = i18n.translate('sharedUXPackages.announcement.dismissAr
  * @default size 'm'
  * @default headingElement 'h2'
  */
-export const Announcement = ({
+export const AnnouncementBanner = ({
   title,
   headingElement = 'h2',
   text,
@@ -45,9 +45,9 @@ export const Announcement = ({
   children,
   className,
   css: cssStyles,
-  'data-test-subj': dataTestSubj = 'announcement',
-}: AnnouncementProps) => {
-  const styles = useAnnouncementStyles({ hasDismiss: Boolean(onDismiss) });
+  'data-test-subj': dataTestSubj = 'announcementBanner',
+}: AnnouncementBannerProps) => {
+  const styles = useAnnouncementBannerStyles({ hasDismiss: Boolean(onDismiss) });
 
   const Heading = headingElement;
   const headingSize = size === 's' ? 'xxs' : size === 'm' ? 'xs' : 's';

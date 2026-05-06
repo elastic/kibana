@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/display/kbn-announcement'],
-};
+export { AnnouncementBanner } from './announcement_banner';
+export type {
+  AnnouncementBannerProps,
+  AnnouncementBannerSize,
+  AnnouncementBannerHeadingElement,
+  AnnouncementBannerActionPrimaryProps,
+  AnnouncementBannerActionSecondaryProps,
+  AnnouncementBannerDismissButtonProps,
+} from './types';

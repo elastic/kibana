@@ -4779,7 +4779,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/announcement@link:src/platform/packages/shared/shared-ux/display/kbn-announcement":
+"@kbn/announcement-banner@link:src/platform/packages/shared/shared-ux/display/kbn-announcement-banner":
   version "0.0.0"
   uid ""
 
