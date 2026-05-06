@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   ContentListProvider,
+  contentListQueryClient,
   type FindItemsResult,
   type FindItemsParams,
 } from '@kbn/content-list-provider';
@@ -55,6 +56,11 @@ const createWrapper =
 describe('ContentListTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    await contentListQueryClient.cancelQueries();
+    contentListQueryClient.clear();
   });
 
   describe('rendering', () => {
@@ -177,32 +183,207 @@ describe('ContentListTable', () => {
     });
   });
 
-  describe('empty state', () => {
-    it('renders default empty state when no items', async () => {
-      const Wrapper = createWrapper({ findItems: createFindItems([]) });
-      render(
+  describe('hasNoItems — returns null', () => {
+    it('returns null when the provider has no items and no query is active', async () => {
+      const findItems = createFindItems([]);
+      const Wrapper = createWrapper({ findItems });
+      const { container } = render(
         <Wrapper>
-          <ContentListTable title="Dashboards" />
+          <ContentListTable title="Dashboards" data-test-subj="my-table" />
         </Wrapper>
       );
 
-      expect(await screen.findByTestId('content-list-table-empty-state')).toBeInTheDocument();
-      expect(screen.getByText('No dashboards found')).toBeInTheDocument();
+      // Wait until the query has resolved (findItems called) and the component
+      // has had a chance to re-render into the null/empty state.
+      await waitFor(() => expect(findItems).toHaveBeenCalled());
+      await waitFor(() => expect(container.firstChild).toBeNull());
+
+      // The table returns null when hasNoItems — no EuiBasicTable rendered.
+      expect(screen.queryByTestId('my-table')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('hasNoResults — renders EuiBasicTable with default empty row', () => {
+    it("renders the table with EUI's built-in empty row when a search yields no results", async () => {
+      const emptyFindItems = createFindItems([]);
+      const Wrapper = ({ children }: { children: React.ReactNode }) => (
+        <ContentListProvider
+          id="no-results-test"
+          labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+          dataSource={{ findItems: emptyFindItems }}
+          features={{ search: { initialSearch: 'zzz_no_match' } }}
+        >
+          {children}
+        </ContentListProvider>
+      );
+
+      render(
+        <Wrapper>
+          <ContentListTable title="Dashboards" data-test-subj="results-table" />
+        </Wrapper>
+      );
+
+      // The table must be present (hasNoResults renders an empty table, not null).
+      expect(await screen.findByTestId('results-table')).toBeInTheDocument();
+      // EuiBasicTable's built-in empty row is rendered when items is empty and
+      // no custom `noItemsMessage` is provided.
+      expect(await screen.findByText('No items found')).toBeInTheDocument();
     });
 
-    it('renders custom empty state when provided', async () => {
-      const Wrapper = createWrapper({ findItems: createFindItems([]) });
+    it('renders a custom noItemsMessage prop when provided', async () => {
+      const emptyFindItems = createFindItems([]);
+      const Wrapper = ({ children }: { children: React.ReactNode }) => (
+        <ContentListProvider
+          id="custom-no-results-test"
+          labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+          dataSource={{ findItems: emptyFindItems }}
+          features={{ search: { initialSearch: 'custom_search' } }}
+        >
+          {children}
+        </ContentListProvider>
+      );
+
       render(
         <Wrapper>
           <ContentListTable
             title="Dashboards"
-            emptyState={<div data-test-subj="custom-empty">Custom empty</div>}
+            noItemsMessage={<div data-test-subj="custom-no-items">Custom no items</div>}
           />
         </Wrapper>
       );
 
-      expect(await screen.findByTestId('custom-empty')).toBeInTheDocument();
-      expect(screen.getByText('Custom empty')).toBeInTheDocument();
+      expect(await screen.findByTestId('custom-no-items')).toBeInTheDocument();
+    });
+  });
+
+  describe('isLoading — renders skeleton during initial load', () => {
+    /**
+     * `findItems` that never resolves, keeping `isLoading === true` for the
+     * entire test. Uses a unique provider `id` to avoid React Query cache
+     * pollution from previous tests (which all use `id="test-list"`).
+     */
+    const makeLoadingWrapper =
+      (providerId: string, initialPageSize = 20) =>
+      ({ children }: { children: React.ReactNode }) =>
+        (
+          <ContentListProvider
+            id={providerId}
+            labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+            features={{ pagination: { initialPageSize } }}
+            dataSource={{
+              findItems: jest.fn(
+                () => new Promise<{ items: typeof mockItems; total: number }>(() => {})
+              ),
+            }}
+          >
+            {children}
+          </ContentListProvider>
+        );
+
+    it('renders the skeleton (not the real table) while the initial query is in flight', async () => {
+      const LoadingWrapper = makeLoadingWrapper('skeleton-smoke-test');
+
+      render(
+        <LoadingWrapper>
+          <ContentListTable title="Dashboards" data-test-subj="loading-table" />
+        </LoadingWrapper>
+      );
+
+      await new Promise((r) => setTimeout(r, 20));
+
+      // The real EuiBasicTable must not be visible during loading.
+      expect(screen.queryByTestId('loading-table')).toBeNull();
+      // The skeleton should be visible instead.
+      expect(screen.getByTestId('content-list-table-skeleton')).toBeInTheDocument();
+    });
+
+    it('renders one body row per configured page size', async () => {
+      const LoadingWrapper = makeLoadingWrapper('skeleton-rows-test', 10);
+
+      render(
+        <LoadingWrapper>
+          <ContentListTable title="Dashboards" />
+        </LoadingWrapper>
+      );
+
+      await new Promise((r) => setTimeout(r, 20));
+      expect(screen.getAllByTestId('content-list-table-skeleton-row')).toHaveLength(10);
+    });
+
+    it('caps skeleton rows at the common page-size maximum', async () => {
+      const LoadingWrapper = makeLoadingWrapper('skeleton-capped-rows-test', 100);
+
+      render(
+        <LoadingWrapper>
+          <ContentListTable title="Dashboards" />
+        </LoadingWrapper>
+      );
+
+      await new Promise((r) => setTimeout(r, 20));
+      expect(screen.getAllByTestId('content-list-table-skeleton-row')).toHaveLength(20);
+    });
+
+    it('passes tableLayout through to the skeleton table', async () => {
+      const LoadingWrapper = makeLoadingWrapper('skeleton-fixed-layout-test');
+
+      render(
+        <LoadingWrapper>
+          <ContentListTable title="Dashboards" tableLayout="fixed" />
+        </LoadingWrapper>
+      );
+
+      await new Promise((r) => setTimeout(r, 20));
+      expect(screen.getByTestId('content-list-table-skeleton')).toHaveStyle({
+        tableLayout: 'fixed',
+      });
+    });
+
+    it('renders one skeleton cell per resolved column', async () => {
+      const LoadingWrapper = makeLoadingWrapper('skeleton-cols-test');
+
+      render(
+        <LoadingWrapper>
+          {/* Default columns when no item.onEdit/onDelete/onInspect: Name + UpdatedAt (Actions is omitted). */}
+          <ContentListTable title="Dashboards" />
+        </LoadingWrapper>
+      );
+
+      await new Promise((r) => setTimeout(r, 20));
+      const rows = screen.getAllByTestId('content-list-table-skeleton-row');
+      rows.forEach((row) => {
+        // 2 data columns (Name, UpdatedAt) + 1 checkbox column = 3 cells per row.
+        expect(row.querySelectorAll('td')).toHaveLength(3);
+      });
+    });
+
+    it('skips the checkbox column when selection is disabled', async () => {
+      const LoadingWrapper = ({ children }: { children: React.ReactNode }) => (
+        <ContentListProvider
+          id="skeleton-no-selection-test"
+          labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+          features={{ selection: false }}
+          dataSource={{
+            findItems: jest.fn(
+              () => new Promise<{ items: typeof mockItems; total: number }>(() => {})
+            ),
+          }}
+        >
+          {children}
+        </ContentListProvider>
+      );
+
+      render(
+        <LoadingWrapper>
+          <ContentListTable title="Dashboards" />
+        </LoadingWrapper>
+      );
+
+      await new Promise((r) => setTimeout(r, 20));
+      const rows = screen.getAllByTestId('content-list-table-skeleton-row');
+      rows.forEach((row) => {
+        // Without selection: 2 data columns only (Name, UpdatedAt; Actions omitted when no handlers).
+        expect(row.querySelectorAll('td')).toHaveLength(2);
+      });
     });
   });
 
@@ -221,16 +402,18 @@ describe('ContentListTable', () => {
       expect(screen.queryByText('Dashboard Three')).not.toBeInTheDocument();
     });
 
-    it('shows empty state when filter eliminates all items', async () => {
+    it('renders EuiBasicTable (not null) when the filter eliminates all items but hasNoItems is false', async () => {
+      // The provider has items, so hasNoItems is false. The client-side filter
+      // eliminates everything — the table still renders (empty) not returns null.
       const Wrapper = createWrapper();
       const filter = () => false;
       render(
         <Wrapper>
-          <ContentListTable title="Dashboards" filter={filter} />
+          <ContentListTable title="Dashboards" data-test-subj="filtered-table" filter={filter} />
         </Wrapper>
       );
 
-      expect(await screen.findByTestId('content-list-table-empty-state')).toBeInTheDocument();
+      expect(await screen.findByTestId('filtered-table')).toBeInTheDocument();
     });
   });
 
