@@ -12,9 +12,6 @@
  * 2.0".
  */
 
-import type { Type } from '@kbn/config-schema';
-import type { ObjectType } from '@kbn/config-schema';
-
 export interface FormFieldDescriptor {
   path: string;
   type:
@@ -40,10 +37,6 @@ export interface FormFieldDescriptor {
 interface WalkOptions {
   pathPrefix?: string;
   excludePaths?: string[];
-}
-
-function isObjectType(t: Type<unknown>): t is ObjectType {
-  return typeof (t as ObjectType).getPropSchemas === 'function';
 }
 
 function extractMeta(desc: Record<string, unknown>): {
@@ -232,30 +225,26 @@ function walkDescription(
   };
 }
 
-export function walkSchema(
-  schemaType: Type<unknown>,
+/**
+ * Walk a pre-computed Joi schema description (from server endpoint)
+ * and produce FormFieldDescriptor[].
+ */
+export function walkSchemaDescription(
+  description: Record<string, unknown>,
   options?: WalkOptions
 ): FormFieldDescriptor[] {
   const prefix = options?.pathPrefix ?? '';
   const excludePaths = new Set(options?.excludePaths ?? []);
 
-  if (!isObjectType(schemaType)) {
-    const desc = schemaType.getSchema().describe() as Record<string, unknown>;
-    const result = walkDescription(desc, prefix || 'root', prefix, excludePaths);
-    return result ? [result] : [];
-  }
+  const keys = description.keys as Record<string, Record<string, unknown>> | undefined;
+  if (!keys) return [];
 
-  const props = schemaType.getPropSchemas();
   const results: FormFieldDescriptor[] = [];
-
-  for (const [key, childType] of Object.entries(props)) {
+  for (const [key, childDesc] of Object.entries(keys)) {
     const path = prefix ? `${prefix}.${key}` : key;
     if (excludePaths.has(path)) continue;
-
-    const desc = (childType as Type<unknown>).getSchema().describe() as Record<string, unknown>;
-    const result = walkDescription(desc, key, path, excludePaths);
+    const result = walkDescription(childDesc, key, path, excludePaths);
     if (result) results.push(result);
   }
-
   return results;
 }

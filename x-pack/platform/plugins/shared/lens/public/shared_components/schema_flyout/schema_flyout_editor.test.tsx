@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   SchemaFlyoutEditor,
   getByPath,
@@ -16,14 +16,21 @@ import {
 } from './schema_flyout_editor';
 import type { FormFieldDescriptor } from './schema_walker';
 
-// Mock the viz_schema_map module
-jest.mock('./viz_schema_map', () => ({
-  getSchemaForVisualization: jest.fn(),
+// Mock useKibana to provide http service
+const mockHttpGet = jest.fn();
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      http: {
+        get: mockHttpGet,
+      },
+    },
+  }),
 }));
 
 // Mock the schema_walker module
 jest.mock('./schema_walker', () => ({
-  walkSchema: jest.fn(),
+  walkSchemaDescription: jest.fn(),
 }));
 
 // Mock the fields module
@@ -33,8 +40,7 @@ jest.mock('./fields', () => ({
   ),
 }));
 
-const { getSchemaForVisualization } = jest.requireMock('./viz_schema_map');
-const { walkSchema } = jest.requireMock('./schema_walker');
+const { walkSchemaDescription } = jest.requireMock('./schema_walker');
 
 describe('getByPath', () => {
   it('returns nested value', () => {
@@ -119,63 +125,74 @@ describe('SchemaFlyoutEditor', () => {
     jest.clearAllMocks();
   });
 
-  it('renders nothing when visualization has no schema mapping', () => {
-    getSchemaForVisualization.mockReturnValue(undefined);
+  it('renders nothing when fetch returns no data for visualization', async () => {
+    mockHttpGet.mockResolvedValue({});
+    walkSchemaDescription.mockReturnValue([]);
 
     const { container } = render(
       <SchemaFlyoutEditor visualizationId="unknownViz" state={{}} setState={setState} />
     );
 
+    await waitFor(() => {
+      expect(mockHttpGet).toHaveBeenCalledWith('/internal/lens/schema_descriptions');
+    });
+
     expect(container.innerHTML).toBe('');
   });
 
-  it('renders nothing when there are no visible fields', () => {
-    getSchemaForVisualization.mockReturnValue({
-      schema: {},
-      excludeSections: [],
+  it('renders nothing when there are no visible fields', async () => {
+    mockHttpGet.mockResolvedValue({
+      lnsDatatable: {
+        description: { type: 'object', keys: {} },
+        excludeSections: [],
+      },
     });
-    walkSchema.mockReturnValue([]);
+    walkSchemaDescription.mockReturnValue([]);
 
     const { container } = render(
       <SchemaFlyoutEditor visualizationId="lnsDatatable" state={{}} setState={setState} />
     );
 
+    await waitFor(() => {
+      expect(mockHttpGet).toHaveBeenCalled();
+    });
+
     expect(container.innerHTML).toBe('');
   });
 
-  it('renders form fields for a mapped visualization', () => {
+  it('renders form fields for a mapped visualization', async () => {
     const mockFields: FormFieldDescriptor[] = [
       { path: 'styling', type: 'section', label: 'Styling', children: [] },
       { path: 'row_numbers', type: 'toggle', label: 'Row numbers' },
     ];
 
-    getSchemaForVisualization.mockReturnValue({
-      schema: {},
-      excludeSections: ['type'],
+    mockHttpGet.mockResolvedValue({
+      lnsDatatable: {
+        description: { type: 'object', keys: { styling: {}, row_numbers: {} } },
+        excludeSections: ['type'],
+      },
     });
-    walkSchema.mockReturnValue(mockFields);
+    walkSchemaDescription.mockReturnValue(mockFields);
 
     render(<SchemaFlyoutEditor visualizationId="lnsDatatable" state={{}} setState={setState} />);
 
-    expect(screen.getByTestId('field-styling')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('field-styling')).toBeInTheDocument();
+    });
     expect(screen.getByTestId('field-row_numbers')).toBeInTheDocument();
   });
 
-  it('filters fields by includeSections when specified', () => {
-    const mockFields: FormFieldDescriptor[] = [
-      { path: 'styling', type: 'section', label: 'Styling' },
-      { path: 'other', type: 'section', label: 'Other' },
-    ];
+  it('renders nothing when fetch fails', async () => {
+    mockHttpGet.mockRejectedValue(new Error('Network error'));
 
-    getSchemaForVisualization.mockReturnValue({
-      schema: {},
-      includeSections: ['styling'],
+    const { container } = render(
+      <SchemaFlyoutEditor visualizationId="lnsDatatable" state={{}} setState={setState} />
+    );
+
+    await waitFor(() => {
+      expect(mockHttpGet).toHaveBeenCalled();
     });
-    walkSchema.mockReturnValue(mockFields);
 
-    render(<SchemaFlyoutEditor visualizationId="lnsDatatable" state={{}} setState={setState} />);
-
-    expect(screen.getByTestId('field-styling')).toBeInTheDocument();
-    expect(screen.queryByTestId('field-other')).not.toBeInTheDocument();
+    expect(container.innerHTML).toBe('');
   });
 });

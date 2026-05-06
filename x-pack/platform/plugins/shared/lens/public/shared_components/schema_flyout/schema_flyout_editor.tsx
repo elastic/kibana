@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { walkSchema } from './schema_walker';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { walkSchemaDescription } from './schema_walker';
 import type { FormFieldDescriptor } from './schema_walker';
 import { SchemaFormField } from './fields';
-import { getSchemaForVisualization } from './viz_schema_map';
 
 interface SchemaFlyoutEditorProps {
   visualizationId: string;
   state: unknown;
   setState: (newState: unknown) => void;
+}
+
+interface VizSchemaData {
+  description: Record<string, unknown>;
+  excludeSections: string[];
 }
 
 /** Get a nested value by dot-delimited path */
@@ -105,31 +110,38 @@ export const SchemaFlyoutEditor: React.FC<SchemaFlyoutEditorProps> = ({
   state,
   setState,
 }) => {
-  const schemaMapping = useMemo(
-    () => getSchemaForVisualization(visualizationId),
-    [visualizationId]
-  );
+  const { services } = useKibana();
+  const [schemaDescriptions, setSchemaDescriptions] = useState<Record<
+    string,
+    VizSchemaData
+  > | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    services.http
+      ?.get<Record<string, VizSchemaData>>('/internal/lens/schema_descriptions')
+      .then((data) => {
+        if (!cancelled) setSchemaDescriptions(data);
+      })
+      .catch(() => {}); // silently fail — falls back to no flyout
+    return () => {
+      cancelled = true;
+    };
+  }, [services.http]);
+
+  const vizData = schemaDescriptions?.[visualizationId];
 
   const fieldDescriptors = useMemo(() => {
-    if (!schemaMapping) return [];
-    return walkSchema(schemaMapping.schema, {
-      excludePaths: schemaMapping.excludeSections ?? [],
+    if (!vizData) return [];
+    return walkSchemaDescription(vizData.description, {
+      excludePaths: vizData.excludeSections,
     });
-  }, [schemaMapping]);
-
-  const visibleFields = useMemo(() => {
-    if (!schemaMapping?.includeSections) return fieldDescriptors;
-    return fieldDescriptors.filter((f) =>
-      schemaMapping.includeSections!.some(
-        (section) => f.path === section || f.path.startsWith(`${section}.`)
-      )
-    );
-  }, [fieldDescriptors, schemaMapping]);
+  }, [vizData]);
 
   const defaultValues = useMemo(
-    () => extractSettingsFromState(state, visibleFields),
+    () => extractSettingsFromState(state, fieldDescriptors),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [visibleFields]
+    [fieldDescriptors]
   );
 
   const methods = useForm({ defaultValues });
@@ -148,14 +160,14 @@ export const SchemaFlyoutEditor: React.FC<SchemaFlyoutEditorProps> = ({
     return () => subscription.unsubscribe();
   }, [methods]);
 
-  if (!schemaMapping || visibleFields.length === 0) {
+  if (!vizData || fieldDescriptors.length === 0) {
     return null;
   }
 
   return (
     <FormProvider {...methods}>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {visibleFields.map((descriptor) => (
+        {fieldDescriptors.map((descriptor) => (
           <EuiFlexItem key={descriptor.path} grow={false}>
             <SchemaFormField descriptor={descriptor} control={methods.control} />
           </EuiFlexItem>

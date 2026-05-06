@@ -7,9 +7,13 @@
 
 import type { RegisterAPIRoutesArgs } from '../../types';
 import { registerLensInternalVisualizationsAPIRoutes } from './visualizations';
+import { registerSchemaDescriptionsRoute } from './schema_descriptions';
 
 export function registerLensInternalAPIRoutes(args: RegisterAPIRoutesArgs) {
   registerLensInternalVisualizationsAPIRoutes(args);
+
+  const router = args.http.createRouter();
+  registerSchemaDescriptionsRoute(router);
 }
 
 export * from './schema';
