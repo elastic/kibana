@@ -12,7 +12,6 @@ import type {
   StreamsPluginSetup,
   StreamsPluginStart,
 } from './plugin';
-import { config } from './plugin';
 import type { StreamsRouteRepository } from './routes';
 import { config } from './config';
 
