@@ -90,7 +90,6 @@ mapped_pages:
 | [visDefaultEditor](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_default_editor/README.md) | The default editor is used in most primary visualizations, e.x. Area, Data table, Pie, etc. It acts as a container for a particular visualization and options tabs. Contains the default "Data" tab in public/components/sidebar/data_tab.tsx. The plugin exposes the static DefaultEditorController class to consume. |
 | [visTypeGauge](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/gauge) | WARNING: Missing or empty README. |
 | [visTypeHeatmap](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/heatmap) | WARNING: Missing or empty README. |
-| [visTypeMarkdown](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_type_markdown/README.md) | The markdown visualization that can be used to place text panels on dashboards. |
 | [visTypeMetric](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/metric) | WARNING: Missing or empty README. |
 | [visTypePie](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/pie) | WARNING: Missing or empty README. |
 | [visTypeTable](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/table/README.md) | Contains the data table visualization, that allows presenting data in a simple table format. |
