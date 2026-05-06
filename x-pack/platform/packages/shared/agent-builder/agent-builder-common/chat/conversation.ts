@@ -215,7 +215,10 @@ export interface TodosStepData {
   carried_over?: boolean;
 }
 
-export type TodosStep = ConversationRoundStepMixin<ConversationRoundStepType.updateTodos, TodosStepData>;
+export type TodosStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.updateTodos,
+  TodosStepData
+>;
 
 export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
   return step.type === ConversationRoundStepType.updateTodos;

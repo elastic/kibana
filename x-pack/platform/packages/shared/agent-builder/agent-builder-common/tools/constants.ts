@@ -82,9 +82,7 @@ export const isFilestoreTool = (toolName: string) =>
 const isInternalToolName = (toolName: string) => Object.values(internalTools).includes(toolName);
 
 export const isInternalTool = (toolName: string) =>
-  isAttachmentTool(toolName) ||
-  isFilestoreTool(toolName) ||
-  isInternalToolName(toolName);
+  isAttachmentTool(toolName) || isFilestoreTool(toolName) || isInternalToolName(toolName);
 
 export const isExcludedFromFilestore = (toolName: string) => isInternalTool(toolName);
 
