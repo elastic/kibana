@@ -243,7 +243,7 @@ groups:
 
           For `http` and `proto`, these map to Node.js `https.Agent` TLS options. For `grpc`, they map to `@grpc/grpc-js` `credentials.createSsl` channel credentials.
 
-          On self-managed deployments, prefer file paths readable by the Kibana process (for example under `/etc/kibana/certs/`). Ensure private keys are not world-readable. TLS material is never written to Kibana logs on success or failure.
+          Prefer file paths readable by the Kibana process (for example under `/etc/kibana/certs/`). Ensure private keys are not world-readable. TLS material is never written to Kibana logs on success or failure.
 
           ::::{note}
           Serverless: confirm your target offering allows custom OTLP TLS configuration; constraints may apply.
