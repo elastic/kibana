@@ -124,6 +124,7 @@ export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
+export const ALERTS_V2_PATH = '/alerts_v2' as const;
 export const ATTACK_DISCOVERY_PATH = '/attack_discovery' as const;
 export const ASSET_INVENTORY_PATH = '/asset_inventory' as const;
 export const SIEM_READINESS_PATH = '/siem_readiness' as const;
