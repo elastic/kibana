@@ -24,14 +24,6 @@ export interface BuildAlertTimelineSummaryQueryOptions {
 
 const toIsoUtc = (ms: number) => new Date(ms).toISOString();
 
-/**
- * ES|QL aggregation that computes episode-level summary stats across ALL
- * series for the rule in the given time window. Returns a single row with
- * `episodes_started`, `recovered`, `still_open`, and `median_duration_ms`.
- *
- * This replaces the client-side summary re-aggregation that previously
- * iterated every raw event a second time inside `deriveAlertTimelineData`.
- */
 export const buildAlertTimelineSummaryQuery = ({
   ruleId,
   gteMs,

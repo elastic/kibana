@@ -22,12 +22,6 @@ const toIsoUtc = (ms: number) => new Date(ms).toISOString();
 
 const MAX_SERIES_LIMIT = 10_000;
 
-/**
- * Lightweight ES|QL aggregation that returns one row per unique `group_hash`
- * for a rule, sorted by most-recent activity (descending). The caller slices
- * the first `topN` rows and uses their hashes to scope the heavier events
- * query, while `result.length` gives the total series count.
- */
 export const buildTopNSeriesQuery = ({ ruleId, gteMs, lteMs }: BuildTopNSeriesQueryOptions) => {
   const fromIso = toIsoUtc(gteMs);
   const toIso = toIsoUtc(lteMs);

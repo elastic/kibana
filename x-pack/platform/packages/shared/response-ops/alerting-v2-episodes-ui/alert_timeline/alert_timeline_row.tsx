@@ -34,10 +34,7 @@ import {
 } from './alert_timeline_status_palette';
 import { formatDuration, formatTimestamp } from './alert_timeline_format';
 
-// Render order = paint order. Sibling series declared later paint on top,
-// so list lower-priority statuses first and higher-priority ones last —
-// when dots collide at the same x, ACTIVE wins over RECOVERING wins over
-// PENDING wins over INACTIVE.
+// Paint order: later entries paint on top.
 const STATUS_ORDER: readonly AlertEpisodeStatus[] = [
   ALERT_EPISODE_STATUS.INACTIVE,
   ALERT_EPISODE_STATUS.PENDING,
@@ -49,8 +46,6 @@ const STATUS_PRIORITY: Record<string, number> = Object.fromEntries(
   STATUS_ORDER.map((s, i) => [s, i])
 );
 
-// Rect annotations span a centered horizontal band, not the full row height,
-// so the bar reads as a thick line rather than a row-filling block.
 const RECT_Y0 = 0.4;
 const RECT_Y1 = 0.6;
 
@@ -151,15 +146,6 @@ export interface AlertTimelineRowProps {
   getEpisodeHref?: (episodeId: string) => string;
 }
 
-/**
- * One series rendered as a thin elastic-charts row: rect annotations color
- * each state segment between consecutive events. A hidden line series
- * anchors the chart's domain since rect annotations alone don't establish
- * one.
- *
- * The row owns its own chrome (top border, height) so callers just render
- * `<AlertTimelineRow ... />` per series with no wrapper.
- */
 export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
   row,
   gteMs,
@@ -189,8 +175,6 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
 
       if (candidates.length === 0 || !onEpisodeClick) return;
 
-      // Match paint order: highest-priority status wins (visually on top).
-      // Among equal priority, prefer the most recently started segment.
       candidates.sort((a, b) => {
         const p = (STATUS_PRIORITY[b.status] ?? 0) - (STATUS_PRIORITY[a.status] ?? 0);
         return p !== 0 ? p : b.x0Ms - a.x0Ms;

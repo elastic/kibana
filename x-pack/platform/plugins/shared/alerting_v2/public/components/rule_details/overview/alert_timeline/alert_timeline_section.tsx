@@ -91,10 +91,6 @@ export const AlertTimelineSection: React.FC = () => {
     [timeRange.from, timeRange.to, refreshTick]
   );
 
-  // Lookback buffer: fetch a small window of events BEFORE the visible range
-  // so deriveAlertTimelineData can tell whether the first in-window event for
-  // an episode is a real transition or a continuation of a status that was
-  // already in effect.
   const bufferMs = useMemo(() => {
     const scheduleMs = parseDurationToMs(rule.schedule.every);
     const fallback = 60_000;
