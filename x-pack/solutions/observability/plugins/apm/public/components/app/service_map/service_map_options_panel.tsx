@@ -30,8 +30,7 @@ import {
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
 import { css } from '@emotion/react';
-import type { ServiceHealthStatus } from '../../../../common/service_health_status';
-import { ServiceHealthStatus as HealthStatus } from '../../../../common/service_health_status';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { SloStatus } from '../../../../common/service_inventory';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import type { ConnectionFilter } from './apply_service_map_visibility';
@@ -109,28 +108,40 @@ const SLO_STATUS_OPTIONS: { value: SloStatus; label: string }[] = [
   },
 ];
 
-const ANOMALY_STATUS_OPTIONS: { value: ServiceHealthStatus; label: string }[] = [
+const ANOMALY_SEVERITY_OPTIONS: { value: ML_ANOMALY_SEVERITY; label: string }[] = [
   {
-    value: HealthStatus.healthy,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalyHealthy', {
-      defaultMessage: 'Healthy',
-    }),
-  },
-  {
-    value: HealthStatus.warning,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalyWarning', {
-      defaultMessage: 'Warning',
-    }),
-  },
-  {
-    value: HealthStatus.critical,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalyCritical', {
+    value: ML_ANOMALY_SEVERITY.CRITICAL,
+    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityCritical', {
       defaultMessage: 'Critical',
     }),
   },
   {
-    value: HealthStatus.unknown,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalyUnknown', {
+    value: ML_ANOMALY_SEVERITY.MAJOR,
+    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityMajor', {
+      defaultMessage: 'Major',
+    }),
+  },
+  {
+    value: ML_ANOMALY_SEVERITY.MINOR,
+    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityMinor', {
+      defaultMessage: 'Minor',
+    }),
+  },
+  {
+    value: ML_ANOMALY_SEVERITY.WARNING,
+    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityWarning', {
+      defaultMessage: 'Warning',
+    }),
+  },
+  {
+    value: ML_ANOMALY_SEVERITY.LOW,
+    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityLow', {
+      defaultMessage: 'Low',
+    }),
+  },
+  {
+    value: ML_ANOMALY_SEVERITY.UNKNOWN,
+    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityUnknown', {
       defaultMessage: 'Unknown',
     }),
   },
@@ -145,8 +156,8 @@ export interface ServiceMapOptionsPanelProps {
   onAlertStatusFilterChange: (next: AlertStatus[]) => void;
   sloStatusFilter: SloStatus[];
   onSloStatusFilterChange: (next: SloStatus[]) => void;
-  anomalyStatusFilter: ServiceHealthStatus[];
-  onAnomalyStatusFilterChange: (next: ServiceHealthStatus[]) => void;
+  anomalySeverityFilter: ML_ANOMALY_SEVERITY[];
+  onAnomalySeverityFilterChange: (next: ML_ANOMALY_SEVERITY[]) => void;
   mapOrientation: ServiceMapOrientation;
   onMapOrientationChange: (next: ServiceMapOrientation) => void;
   isExpanded: boolean;
@@ -162,8 +173,8 @@ export function ServiceMapOptionsPanel({
   onAlertStatusFilterChange,
   sloStatusFilter,
   onSloStatusFilterChange,
-  anomalyStatusFilter,
-  onAnomalyStatusFilterChange,
+  anomalySeverityFilter,
+  onAnomalySeverityFilterChange,
   mapOrientation,
   onMapOrientationChange,
   isExpanded,
@@ -174,7 +185,7 @@ export function ServiceMapOptionsPanel({
   const connectionCounts = filterOptionCounts.connection;
   const alertCounts = filterOptionCounts.alerts;
   const sloStatusCounts = filterOptionCounts.slo;
-  const anomalyStatusCounts = filterOptionCounts.anomaly;
+  const anomalySeverityCounts = filterOptionCounts.anomaly;
 
   const connectionFilterComboBoxOptions = useMemo(
     () =>
@@ -238,10 +249,10 @@ export function ServiceMapOptionsPanel({
     [sloStatusCounts]
   );
 
-  const anomalyStatusComboBoxOptions = useMemo(
+  const anomalyFilterComboBoxOptions = useMemo(
     () =>
-      ANOMALY_STATUS_OPTIONS.map((opt) => {
-        const count = anomalyStatusCounts[opt.value] ?? 0;
+      ANOMALY_SEVERITY_OPTIONS.map((opt) => {
+        const count = anomalySeverityCounts[opt.value] ?? 0;
         return {
           label: opt.label,
           value: opt.value,
@@ -253,7 +264,7 @@ export function ServiceMapOptionsPanel({
           disabled: count === 0,
         };
       }),
-    [anomalyStatusCounts]
+    [anomalySeverityCounts]
   );
 
   /** Width constraint for the floating panel; height follows content. */
@@ -460,25 +471,25 @@ export function ServiceMapOptionsPanel({
       <EuiSpacer size="m" />
 
       <EuiComboBox
-        placeholder={i18n.translate('xpack.apm.serviceMap.controls.anomalyStatusFilter', {
-          defaultMessage: 'Anomaly Status',
+        placeholder={i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityFilter', {
+          defaultMessage: 'Anomaly severity',
         })}
-        options={anomalyStatusComboBoxOptions}
-        selectedOptions={anomalyStatusFilter.map((value) => {
-          const opt = anomalyStatusComboBoxOptions.find((o) => o.value === value);
+        options={anomalyFilterComboBoxOptions}
+        selectedOptions={anomalySeverityFilter.map((value) => {
+          const opt = anomalyFilterComboBoxOptions.find((o) => o.value === value);
           return { label: opt?.label ?? value, value };
         })}
         onChange={(selected) => {
-          onAnomalyStatusFilterChange(
-            selected.map((s) => (s.value ?? s.label) as ServiceHealthStatus)
+          onAnomalySeverityFilterChange(
+            selected.map((s) => (s.value ?? s.label) as ML_ANOMALY_SEVERITY)
           );
         }}
         fullWidth
         compressed
         isClearable={true}
-        data-test-subj="serviceMapAnomalyStatusFilter"
-        aria-label={i18n.translate('xpack.apm.serviceMap.controls.anomalyStatusAriaLabel', {
-          defaultMessage: 'Filter by anomaly status',
+        data-test-subj="serviceMapAnomalySeverityFilter"
+        aria-label={i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityAriaLabel', {
+          defaultMessage: 'Filter by anomaly severity',
         })}
       />
 

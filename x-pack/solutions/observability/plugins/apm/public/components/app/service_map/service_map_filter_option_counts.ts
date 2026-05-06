@@ -12,7 +12,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
-import { ServiceHealthStatus } from '../../../../common/service_health_status';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { SloStatus } from '../../../../common/service_inventory';
 import type {
   ServiceMapNode,
@@ -21,6 +21,7 @@ import type {
 } from '../../../../common/service_map';
 import { isServiceNodeData } from '../../../../common/service_map';
 import {
+  getMlSeverityForServiceMapNode,
   getNormalizedSloStatusForMapFilters,
   getServiceNodeAlertCountForStatus,
   getNodeConnectionCount,
@@ -69,22 +70,22 @@ function getSloStatusCounts(serviceNodes: ServiceMapNode[]): Record<SloStatus, n
   return counts;
 }
 
-/** Count services by anomaly/health status (serviceAnomalyStats?.healthStatus ?? 'unknown'). */
-function getAnomalyStatusCounts(
+/** Count services by ML anomaly severity band (from anomaly score), same as inventory / map coloring. */
+function getAnomalySeverityCounts(
   serviceNodes: ServiceMapNode[]
-): Record<ServiceHealthStatus, number> {
-  const counts: Record<ServiceHealthStatus, number> = {
-    healthy: 0,
-    warning: 0,
-    critical: 0,
-    unknown: 0,
+): Record<ML_ANOMALY_SEVERITY, number> {
+  const counts: Record<ML_ANOMALY_SEVERITY, number> = {
+    [ML_ANOMALY_SEVERITY.CRITICAL]: 0,
+    [ML_ANOMALY_SEVERITY.MAJOR]: 0,
+    [ML_ANOMALY_SEVERITY.MINOR]: 0,
+    [ML_ANOMALY_SEVERITY.WARNING]: 0,
+    [ML_ANOMALY_SEVERITY.LOW]: 0,
+    [ML_ANOMALY_SEVERITY.UNKNOWN]: 0,
   };
   for (const node of serviceNodes) {
     if (node.type !== 'service' || !isServiceNodeData(node.data)) continue;
-    const status =
-      (node.data as ServiceNodeData).serviceAnomalyStats?.healthStatus ??
-      ServiceHealthStatus.unknown;
-    if (status in counts) counts[status]++;
+    const severity = getMlSeverityForServiceMapNode(node.data as ServiceNodeData);
+    counts[severity]++;
   }
   return counts;
 }
@@ -97,7 +98,7 @@ export interface ConnectionCounts {
 export interface ServiceMapFilterOptionCounts {
   alerts: Record<AlertStatus, number>;
   slo: Record<SloStatus, number>;
-  anomaly: Record<ServiceHealthStatus, number>;
+  anomaly: Record<ML_ANOMALY_SEVERITY, number>;
   connection: ConnectionCounts;
   totalServiceNodes: number;
 }
@@ -131,7 +132,7 @@ export function computeServiceMapFilterOptionCounts(
   return {
     alerts: getAlertStatusServiceCounts(serviceNodes),
     slo: getSloStatusCounts(serviceNodes),
-    anomaly: getAnomalyStatusCounts(serviceNodes),
+    anomaly: getAnomalySeverityCounts(serviceNodes),
     connection: getConnectionCounts(nodes, edges),
     totalServiceNodes: serviceNodes.length,
   };
