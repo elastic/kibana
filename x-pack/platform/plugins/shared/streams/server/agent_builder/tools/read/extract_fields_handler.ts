@@ -411,6 +411,7 @@ export const runExtractFieldsFlow = async (
         }),
         hints: [
           `Seed parsing was discovered automatically using ${winning.type} heuristics on field "${fieldName}".`,
+          ...buildKeyValueHints(parsedDocuments),
         ],
         samples_info: samplesInfo,
       },
@@ -444,4 +445,70 @@ const isExtractionStepOnField = (step: unknown, fieldName: string): boolean => {
   if (typeof step !== 'object' || step === null) return false;
   const obj = step as { action?: unknown; from?: unknown };
   return (obj.action === 'grok' || obj.action === 'dissect') && obj.from === fieldName;
+};
+
+/**
+ * Minimum number of non-null sample values required to consider a key=value
+ * pattern genuine. Avoids false positives on fields with very few populated
+ * values.
+ */
+const KV_MIN_SAMPLES = 5;
+
+/**
+ * Fields that are known system/identity fields — skip them even if they
+ * happen to contain `=`.
+ */
+const KV_FIELD_BLOCKLIST = new Set(['@timestamp', 'stream.name', 'body.text', 'message']);
+
+/**
+ * Scans parsed documents for fields where every non-null value follows a
+ * consistent `key=value` pattern (e.g. `user=u-1234`). Returns hint strings
+ * that the agent surfaces to the user — the user decides whether stripping
+ * the prefix is appropriate. No automatic rewriting happens; this keeps
+ * destructive value changes under human control.
+ */
+const buildKeyValueHints = (parsedDocuments: FlattenRecord[]): string[] => {
+  const fieldValues = new Map<string, string[]>();
+
+  for (const doc of parsedDocuments) {
+    if (!doc) continue;
+    for (const [fieldName, value] of Object.entries(doc)) {
+      if (KV_FIELD_BLOCKLIST.has(fieldName)) continue;
+      if (typeof value !== 'string') continue;
+      if (!fieldValues.has(fieldName)) {
+        fieldValues.set(fieldName, []);
+      }
+      const arr = fieldValues.get(fieldName)!;
+      if (arr.length < 200) {
+        arr.push(value);
+      }
+    }
+  }
+
+  const hints: string[] = [];
+
+  for (const [fieldName, values] of fieldValues) {
+    if (values.length < KV_MIN_SAMPLES) continue;
+
+    const valuesWithEq = values.filter((v) => v.includes('='));
+    if (valuesWithEq.length !== values.length) continue;
+
+    const firstEqIdx = valuesWithEq[0].indexOf('=');
+    if (firstEqIdx <= 0) continue;
+
+    const prefix = valuesWithEq[0].substring(0, firstEqIdx);
+
+    const allMatch = values.every(
+      (v) => v.startsWith(prefix + '=') && v.length > prefix.length + 1
+    );
+
+    if (!allMatch) continue;
+
+    hints.push(
+      `Field "${fieldName}" has values like "${values[0]}" — all share a "${prefix}=" prefix. ` +
+        `If only the part after "=" is meaningful, ask the user whether to add a dissect step that strips it.`
+    );
+  }
+
+  return hints;
 };
