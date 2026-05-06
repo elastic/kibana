@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook, waitFor } from '@testing-library/react';
+
 import { buildMockDashboardApi } from '../../../mocks';
-import { getMenuItemGroups } from './get_menu_item_groups';
+import { useMenuItemGroups } from './use_menu_item_groups';
+import { Subject } from 'rxjs';
 
 const mockGetTriggerCompatibleActions = jest.fn();
 const mockGetAction = jest.fn();
@@ -25,7 +28,7 @@ jest.mock('../../../services/kibana_services', () => {
   };
 });
 
-describe('getMenuItemGroups', () => {
+describe('useMenuItemGroups', () => {
   test('gets sorted groups from visTypes, visTypeAliases, and add panel actions', async () => {
     mockGetTriggerCompatibleActions.mockResolvedValueOnce([
       {
@@ -70,17 +73,22 @@ describe('getMenuItemGroups', () => {
       openOverlay: () => {},
       clearOverlays: () => {},
     };
-    const { groups } = await getMenuItemGroups(api);
-    expect(groups.length).toBe(2);
-
-    expect(groups[0].title).toBe('Visualizations');
-    expect(groups[0].items.length).toBe(1);
-    expect(groups[1].title).toBe('My group');
-    expect(groups[1].items.length).toBe(1);
+    const { result } = renderHook(() => useMenuItemGroups({ dashboardApi: api }));
+    await waitFor(() => {
+      return !result.current.loading;
+    });
+    const groups = result.current.groups;
+    expect(groups).toBeDefined();
+    expect(groups!.length).toBe(2);
+    expect(groups![0].title).toBe('Visualizations');
+    expect(groups![0].items.length).toBe(1);
+    expect(groups![1].title).toBe('My group');
+    expect(groups![1].items.length).toBe(1);
     expect(mockGetAction).not.toBeCalled();
   });
 
-  test('shows actions that are compatible but disabled', async () => {
+  test('updates disabled state when `disabledStateChangesSubject` fires', async () => {
+    const disabledStateSubject = new Subject<void>();
     mockGetTriggerCompatibleActions.mockResolvedValueOnce([
       {
         id: 'createSomeControl',
@@ -97,7 +105,8 @@ describe('getMenuItemGroups', () => {
         getIconType: (): string => 'controls',
         execute: () => {},
         isCompatible: async (): Promise<boolean> => true,
-        isDisabled: () => true,
+        isDisabled: jest.fn().mockReturnValueOnce(true).mockReturnValueOnce(false),
+        getDisabledStateChangesSubject: () => disabledStateSubject,
       },
     ]);
 
@@ -109,9 +118,23 @@ describe('getMenuItemGroups', () => {
       openOverlay: () => {},
       clearOverlays: () => {},
     };
-    const { groups } = await getMenuItemGroups(api);
-    expect(groups.length).toBe(1);
-    expect(groups[0].items.length).toBe(1);
-    expect(groups[0].items[0].isDisabled).toBe(true);
+    const { result, rerender } = renderHook(() => useMenuItemGroups({ dashboardApi: api }));
+    await waitFor(() => {
+      return !result.current.loading;
+    });
+    const renderedGroups = result.current.groups;
+    expect(renderedGroups).toBeDefined();
+    expect(renderedGroups!.length).toBe(1);
+    expect(renderedGroups![0].items.length).toBe(1);
+    expect(renderedGroups![0].items[0].isDisabled).toBe(true);
+
+    act(() => disabledStateSubject.next());
+
+    rerender(() => useMenuItemGroups({ dashboardApi: api }));
+    const rerenderedGroups = result.current.groups;
+    expect(rerenderedGroups).toBeDefined();
+    expect(rerenderedGroups!.length).toBe(1);
+    expect(rerenderedGroups![0].items.length).toBe(1);
+    expect(rerenderedGroups![0].items[0].isDisabled).toBe(false);
   });
 });

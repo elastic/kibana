@@ -34,7 +34,7 @@ import useAsync from 'react-use/lib/useAsync';
 
 import type { DashboardApi } from '../../../../dashboard_api/types';
 import { embeddableService } from '../../../../services/kibana_services';
-import { useMenuItemGroups } from '../get_menu_item_groups';
+import { useMenuItemGroups } from '../use_menu_item_groups';
 import type { MenuItem, MenuItemGroup } from '../types';
 import { FeaturedItems } from './featured_menu_items';
 import { Groups } from './groups';
