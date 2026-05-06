@@ -126,8 +126,10 @@ export const TruncatedBadgeList = memo(
         css={{ width: '100%' }}
       >
         {visible.map((value) => (
-          <EuiFlexItem grow={false} key={value} css={{ minWidth: 0, overflow: 'hidden' }}>
-            <EuiText size={textSize}>{value}</EuiText>
+          <EuiFlexItem grow={false} key={value} css={{ minWidth: 0 }}>
+            <EuiText size={textSize} className="eui-textTruncate">
+              {value}
+            </EuiText>
           </EuiFlexItem>
         ))}
         {hidden.length > 0 && (
