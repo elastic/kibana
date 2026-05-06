@@ -6,17 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { defineRoute } from './types';
 
-export {
-  createCallApmApiV2,
-  type APMClientV2,
-  type AutoAbortedAPMClientV2,
-  type APIReturnType,
-} from './src/create_call_apm_api';
-export { routeDefinitions } from './src/routes';
-export type { FooResponse } from './src/routes/foo';
-export type { HasDataResponse } from './src/routes/historical_data';
-export {
-  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
-  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-} from './src/cps_feature_flag';
+export interface HasDataResponse {
+  hasData: boolean;
+}
+
+export const hasDataRoute = defineRoute<HasDataResponse>()({
+  endpoint: 'GET /internal/apm/has_data' as const,
+});

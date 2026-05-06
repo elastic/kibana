@@ -8,11 +8,13 @@
  */
 import { fooRoute } from './foo';
 import { barRoute } from './bar';
+import { hasDataRoute } from './historical_data';
 import type { BuildRepository } from './types';
 
 export const routeDefinitions = {
   foo: fooRoute,
   bar: barRoute,
+  hasData: hasDataRoute,
 };
 
 export type SharedAPMRouteRepository = BuildRepository<typeof routeDefinitions>;

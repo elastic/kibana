@@ -20,9 +20,9 @@ export type ExtractResponse<T> = T extends WithResponse<infer R extends Record<s
   : Record<string, never>;
 
 export function defineRoute<TResponse extends Record<string, any>>() {
-  return <TEndpoint extends string, TParams extends RouteParamsRT>(config: {
+  return <TEndpoint extends string, TParams extends RouteParamsRT | undefined = undefined>(config: {
     endpoint: TEndpoint;
-    params: TParams;
+    params?: TParams;
   }) => config as typeof config & WithResponse<TResponse>;
 }
 
