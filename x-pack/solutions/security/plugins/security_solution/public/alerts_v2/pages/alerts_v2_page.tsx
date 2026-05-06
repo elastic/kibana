@@ -10,6 +10,7 @@ import type { EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFieldSearch,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -34,26 +35,32 @@ import type { RowControlColumn, DataTableRecord } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
-import type {
-  AlertEpisode,
-  EpisodesFilterState,
-  EpisodesSortState,
-} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import {
+  useFetchSecurityEpisodes,
+  type SecurityAlertEpisode,
+  type SecurityEpisodesFilterState,
+  type SecurityEpisodesSortState,
+  type WorkflowStatus,
+} from '../hooks/use_fetch_security_episodes';
+import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/tag_filter';
+import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/assignee_filter';
+import { WorkflowStatusFilter } from '../components/workflow_status_filter';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { EpisodeRuleCell } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
-import { getEpisodesFromDocIds } from '@kbn/alerting-v2-episodes-ui/utils/bulk_selection';
 import { useKibana } from '../../common/lib/kibana';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { EpisodeAssigneeCell } from '../components/episode_assignee_cell';
+import { TakeActionDropdown } from '../components/take_action_dropdown';
+import { createWorkflowActions } from '../actions/workflow_actions';
 import * as i18n from '../translations';
 import { AlertsV2DetailsPanelKey } from '../constants';
 
 const PAGE_SIZE = 1000;
 
-const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
+const DEFAULT_SORT: SecurityEpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
 
 const TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
@@ -70,7 +77,7 @@ const CUSTOM_GRID_COLUMNS: CustomGridColumnsConfiguration = {
     ...column,
     displayAsText: i18n.COLUMN_ASSIGNEES,
   }),
-  last_ack_action: ({ column }) => ({
+  workflow_status: ({ column }) => ({
     ...column,
     displayAsText: i18n.COLUMN_STATUS,
   }),
@@ -106,34 +113,49 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
   }
 `;
 
-const alertEpisodeToDataTableRecord = (row: AlertEpisode): DataTableRecord => ({
+const alertEpisodeToDataTableRecord = (row: SecurityAlertEpisode): DataTableRecord => ({
   id: row['episode.id'],
   raw: {},
   flattened: Object.fromEntries(Object.entries(row)),
 });
 
-const dataTableRecordToEpisode = (record: DataTableRecord): AlertEpisode =>
-  record.flattened as unknown as AlertEpisode;
+const dataTableRecordToEpisode = (record: DataTableRecord): SecurityAlertEpisode =>
+  record.flattened as unknown as SecurityAlertEpisode;
+
+const getEpisodesFromDocIds = (
+  selectedDocIds: string[],
+  episodes: SecurityAlertEpisode[]
+): SecurityAlertEpisode[] => {
+  const selected = new Set(selectedDocIds);
+  return episodes.filter((ep) => selected.has(ep['episode.id']));
+};
 
 export const AlertsV2Page = () => {
   const services = useKibana().services;
+  const spaceId = useSpaceId();
   const queryClient = useQueryClient();
   const { euiTheme } = useEuiTheme();
   const { openFlyout } = useExpandableFlyoutApi();
 
-  const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-24h', to: 'now' });
+  const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-6h', to: 'now' });
   const [searchQuery, setSearchQuery] = useState('');
-  const filterState = useMemo<EpisodesFilterState>(
+  const [selectedWorkflowStatus, setSelectedWorkflowStatus] = useState<WorkflowStatus | undefined>();
+  const [selectedTags, setSelectedTags] = useState<string[] | undefined>();
+  const [selectedAssigneeUid, setSelectedAssigneeUid] = useState<string | undefined>();
+  const filterState = useMemo<SecurityEpisodesFilterState>(
     () => ({
       queryString: searchQuery || null,
+      workflowStatus: selectedWorkflowStatus,
+      tags: selectedTags,
+      assigneeUid: selectedAssigneeUid,
     }),
-    [searchQuery]
+    [searchQuery, selectedWorkflowStatus, selectedTags, selectedAssigneeUid]
   );
-  const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
+  const [sortState, setSortState] = useState<SecurityEpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
     '@timestamp',
     'rule.id',
-    'last_ack_action',
+    'workflow_status',
     'tags',
     'assignees',
   ]);
@@ -144,7 +166,8 @@ export const AlertsV2Page = () => {
     dataView,
     isLoading,
     refetch,
-  } = useFetchAlertingEpisodesQuery({
+  } = useFetchSecurityEpisodes({
+    spaceId,
     pageSize: PAGE_SIZE,
     services,
     filterState,
@@ -183,6 +206,14 @@ export const AlertsV2Page = () => {
 
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
 
+  const assigneeUids = useMemo(() => {
+    const uids = new Set<string>();
+    for (const ep of episodesData ?? []) {
+      if (ep.last_assignee_uid) uids.add(ep.last_assignee_uid);
+    }
+    return [...uids];
+  }, [episodesData]);
+
   const handleOpenFlyout = useCallback(
     (episodeId: string) => {
       openFlyout({
@@ -209,8 +240,21 @@ export const AlertsV2Page = () => {
         queryClient,
         getEpisodeDetailsHref: () => '',
         getDiscoverHref: () => undefined,
-      }),
+      }      ).filter(
+        (a) =>
+          a.id !== 'ALERTING_V2_RESOLVE_EPISODE' &&
+          a.id !== 'ALERTING_V2_UNRESOLVE_EPISODE' &&
+          a.id !== 'ALERTING_V2_VIEW_EPISODE_DETAILS' &&
+          a.id !== 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER' &&
+          a.id !== 'ALERTING_V2_ACK_EPISODE' &&
+          a.id !== 'ALERTING_V2_UNACK_EPISODE'
+      ),
     [services, queryClient]
+  );
+
+  const securityActions = useMemo(
+    () => createWorkflowActions({ http: services.http, notifications: services.notifications }),
+    [services.http, services.notifications]
   );
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
@@ -227,31 +271,36 @@ export const AlertsV2Page = () => {
           />
         ),
       },
-      ...episodeActions.map(
-        (action) =>
-          ({
-            id: action.id,
-            render: (Control, { record }) => {
-              const episodes = [dataTableRecordToEpisode(record)];
-              if (!action.isCompatible({ episodes })) return <></>;
-              return (
+      {
+        id: 'alertsV2-actions',
+        width: 38,
+        render: (Control, { record }) => {
+          const episode = dataTableRecordToEpisode(record);
+          return (
+            <TakeActionDropdown
+              episodeActions={episodeActions}
+              securityActions={securityActions}
+              episode={episode as any}
+              onActionSuccess={refetch}
+              renderCustomButton={(onClick: () => void) => (
                 <Control
-                  iconType={action.iconType}
-                  label={action.displayName}
-                  onClick={() => action.execute({ episodes, onSuccess: refetch })}
-                  tooltipContent={action.displayName}
+                  iconType="boxesHorizontal"
+                  label={i18n.TAKE_ACTION}
+                  onClick={onClick}
+                  tooltipContent={i18n.TAKE_ACTION}
                 />
-              );
-            },
-          } as RowControlColumn)
-      ),
+              )}
+            />
+          );
+        },
+      } as RowControlColumn,
     ],
-    [episodeActions, refetch, handleOpenFlyout]
+    [securityActions, episodeActions, refetch, handleOpenFlyout]
   );
 
   const customBulkActions: CustomBulkActions = useMemo(
-    () =>
-      episodeActions.map((action) => ({
+    () => [
+      ...securityActions.map((action) => ({
         key: action.id,
         label: action.displayName,
         icon: action.iconType,
@@ -265,7 +314,22 @@ export const AlertsV2Page = () => {
             onSuccess: refetch,
           }),
       })),
-    [episodeActions, episodesData, refetch]
+      ...episodeActions.map((action) => ({
+        key: action.id,
+        label: action.displayName,
+        icon: action.iconType,
+        isAvailable: ({ selectedDocIds }: { selectedDocIds: string[] }) =>
+          action.isCompatible({
+            episodes: getEpisodesFromDocIds(selectedDocIds, episodesData ?? []) as any,
+          }),
+        onClick: ({ selectedDocIds }: { selectedDocIds: string[] }) =>
+          action.execute({
+            episodes: getEpisodesFromDocIds(selectedDocIds, episodesData ?? []) as any,
+            onSuccess: refetch,
+          }),
+      })),
+    ],
+    [securityActions, episodeActions, episodesData, refetch]
   );
 
   const onTimeChange = useCallback(({ start, end }: { start: string; end: string }) => {
@@ -282,13 +346,17 @@ export const AlertsV2Page = () => {
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
-      last_ack_action: ({ row }) => {
-        const value = row.flattened.last_ack_action as string | undefined | null;
-        if (!value || value === 'unack') return <></>;
-        if (value === 'ack') {
-          return <EuiBadge color="warning">{i18n.STATUS_ACKNOWLEDGED}</EuiBadge>;
+      workflow_status: ({ row }) => {
+        const value = (row.flattened.workflow_status as string) ?? 'open';
+        switch (value) {
+          case 'acknowledged':
+            return <EuiBadge color="warning">{i18n.STATUS_ACKNOWLEDGED}</EuiBadge>;
+          case 'closed':
+            return <EuiBadge color="default">{i18n.STATUS_CLOSED}</EuiBadge>;
+          case 'open':
+          default:
+            return <EuiBadge color="primary">{i18n.STATUS_OPEN}</EuiBadge>;
         }
-        return <></>;
       },
       tags: ({ row }) => {
         const raw = row.flattened.last_tags;
@@ -345,6 +413,27 @@ export const AlertsV2Page = () => {
                   aria-label={i18n.SEARCH_PLACEHOLDER}
                   fullWidth
                 />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFilterGroup compressed>
+                  <WorkflowStatusFilter
+                    selectedStatus={selectedWorkflowStatus}
+                    onStatusChange={setSelectedWorkflowStatus}
+                  />
+                  <AlertEpisodesTagFilter
+                    selectedTags={selectedTags}
+                    onTagsChange={setSelectedTags}
+                    services={services}
+                    timeRange={timeRange}
+                    data-test-subj="alertsV2-tagFilter"
+                  />
+                  <AlertEpisodesAssigneeFilter
+                    selectedAssigneeUid={selectedAssigneeUid}
+                    onAssigneeChange={setSelectedAssigneeUid}
+                    assigneeUids={assigneeUids}
+                    data-test-subj="alertsV2-assigneeFilter"
+                  />
+                </EuiFilterGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSuperDatePicker

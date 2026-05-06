@@ -50,10 +50,18 @@ export const COLUMN_STATUS = i18n.translate('xpack.securitySolution.alertsV2.col
   defaultMessage: 'Status',
 });
 
+export const STATUS_OPEN = i18n.translate('xpack.securitySolution.alertsV2.status.open', {
+  defaultMessage: 'Open',
+});
+
 export const STATUS_ACKNOWLEDGED = i18n.translate(
   'xpack.securitySolution.alertsV2.status.acknowledged',
   { defaultMessage: 'Acknowledged' }
 );
+
+export const STATUS_CLOSED = i18n.translate('xpack.securitySolution.alertsV2.status.closed', {
+  defaultMessage: 'Closed',
+});
 
 export const FLYOUT_TITLE = i18n.translate('xpack.securitySolution.alertsV2.flyout.title', {
   defaultMessage: 'Alert details',
@@ -168,13 +176,13 @@ export const FLYOUT_TAB_JSON = i18n.translate('xpack.securitySolution.alertsV2.f
   defaultMessage: 'JSON',
 });
 
-export const FLYOUT_TAB_CHANGELOG = i18n.translate(
-  'xpack.securitySolution.alertsV2.flyout.tabChangelog',
-  { defaultMessage: 'Changelog' }
+export const FLYOUT_TAB_EVENTS_LOG = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.tabEventsLog',
+  { defaultMessage: 'Events log' }
 );
 
-export const FLYOUT_CHANGELOG_EMPTY = i18n.translate(
-  'xpack.securitySolution.alertsV2.flyout.changelogEmpty',
+export const FLYOUT_EVENTS_LOG_EMPTY = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.eventsLogEmpty',
   { defaultMessage: 'No actions have been recorded for this episode yet.' }
 );
 
@@ -236,4 +244,9 @@ export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
 export const ACTION_NOT_IMPLEMENTED = i18n.translate(
   'xpack.securitySolution.alertsV2.flyout.action.notImplemented',
   { defaultMessage: 'Not yet available for Alerts v2' }
+);
+
+export const FLYOUT_RAW_EVENT = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.rawEvent',
+  { defaultMessage: 'Show full event' }
 );

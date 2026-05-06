@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiBasicTable,
   EuiCodeBlock,
@@ -35,6 +36,7 @@ import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/u
 import { useFetchEpisodeEventDataQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
+import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import {
   useFetchEpisodeChangelog,
   type EpisodeChangelogEntry,
@@ -58,6 +60,8 @@ import { FlyoutHeader } from '../../flyout/shared/components/flyout_header';
 import { FlyoutBody } from '../../flyout/shared/components/flyout_body';
 import { useKibana } from '../../common/lib/kibana';
 import { TakeActionDropdown } from '../components/take_action_dropdown';
+import { EpisodeAssigneeCell } from '../components/episode_assignee_cell';
+import { createWorkflowActions } from '../actions/workflow_actions';
 import * as i18n from '../translations';
 
 export interface AlertsV2DetailsPanelParams {
@@ -132,11 +136,13 @@ const CopyableId: React.FC<{ value: string }> = ({ value }) => (
   </EuiCopy>
 );
 
-type FlyoutTab = 'overview' | 'json' | 'changelog';
+type FlyoutTab = 'overview' | 'json' | 'events_log';
 
 const ACTION_TYPE_LABELS: Record<string, string> = {
   ack: 'Acknowledged',
   unack: 'Unacknowledged',
+  closed: 'Closed',
+  open: 'Opened',
   snooze: 'Snoozed',
   unsnooze: 'Unsnoozed',
   deactivate: 'Deactivated',
@@ -148,6 +154,8 @@ const ACTION_TYPE_LABELS: Record<string, string> = {
 const ACTION_TYPE_ICONS: Record<string, string> = {
   ack: 'check',
   unack: 'cross',
+  closed: 'lock',
+  open: 'lockOpen',
   snooze: 'bellSlash',
   unsnooze: 'bell',
   deactivate: 'minusInCircle',
@@ -156,7 +164,7 @@ const ACTION_TYPE_ICONS: Record<string, string> = {
   assign: 'user',
 };
 
-const formatChangelogTimestamp = (ts: string): string =>
+const formatEventsLogTimestamp = (ts: string): string =>
   new Date(ts).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'medium' });
 
 const resolveUsername = (
@@ -168,11 +176,11 @@ const resolveUsername = (
   return profile?.user?.full_name ?? profile?.user?.username ?? uid;
 };
 
-const getChangelogDescription = (
+const getEventsLogDescription = (
   entry: EpisodeChangelogEntry,
   profilesMap: Map<string, UserProfileWithAvatar>
-): string => {
-  const parts: string[] = [];
+): React.ReactNode => {
+  const parts: React.ReactNode[] = [];
   if (entry.reason) {
     parts.push(entry.reason);
   }
@@ -183,18 +191,30 @@ const getChangelogDescription = (
   }
   if (entry.action_type === 'tag' && entry.tags) {
     const tagList = Array.isArray(entry.tags) ? entry.tags : [entry.tags];
-    parts.push(`Tags: ${tagList.join(', ')}`);
+    parts.push(<AlertEpisodeTags tags={tagList} />);
   }
   if (entry.action_type === 'assign') {
     const assigneeName = resolveUsername(entry.assignee_uid, profilesMap);
-    parts.push(entry.assignee_uid ? `Assigned to ${assigneeName}` : 'Assignee removed');
+    parts.push(
+      entry.assignee_uid ? (
+        <>Assigned to <strong>{assigneeName}</strong></>
+      ) : (
+        'Assignee removed'
+      )
+    );
   }
-  if (entry.episode_id) {
-    parts.push('(episode-level)');
-  } else {
-    parts.push('(series-level)');
-  }
-  return parts.join(' \u2022 ');
+  if (parts.length === 0) return null;
+  if (parts.length === 1) return parts[0];
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
+      {parts.map((part, idx) => (
+        <EuiFlexItem grow={false} key={idx}>
+          {idx > 0 && <>&nbsp;&bull;&nbsp;</>}
+          {part}
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
 };
 
 export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ params }) => {
@@ -232,38 +252,38 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
     expressions: services.expressions,
   });
 
-  const { data: changelogEntries = [], isLoading: isLoadingChangelog } =
+  const { data: eventsLogEntries = [], isLoading: isLoadingEventsLog } =
     useFetchEpisodeChangelog({
       episodeId,
       groupHash,
       data: services.data,
     });
 
-  const changelogUids = useMemo(() => {
+  const eventsLogUids = useMemo(() => {
     const uids = new Set<string>();
-    for (const entry of changelogEntries) {
+    for (const entry of eventsLogEntries) {
       if (entry.actor) uids.add(entry.actor);
       if (entry.assignee_uid) uids.add(entry.assignee_uid);
     }
     return [...uids];
-  }, [changelogEntries]);
+  }, [eventsLogEntries]);
 
-  const { data: changelogProfiles } = useBulkGetProfiles({
+  const { data: eventsLogProfiles } = useBulkGetProfiles({
     userProfile: services.userProfile,
-    uids: changelogUids,
+    uids: eventsLogUids,
     toasts: services.notifications.toasts,
     errorTitle: 'Failed to load user profiles',
   });
 
-  const changelogProfilesMap = useMemo(() => {
+  const eventsLogProfilesMap = useMemo(() => {
     const map = new Map<string, UserProfileWithAvatar>();
-    if (changelogProfiles) {
-      for (const profile of changelogProfiles) {
+    if (eventsLogProfiles) {
+      for (const profile of eventsLogProfiles) {
         map.set(profile.uid, profile as UserProfileWithAvatar);
       }
     }
     return map;
-  }, [changelogProfiles]);
+  }, [eventsLogProfiles]);
 
   const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
@@ -296,6 +316,11 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
     [services, queryClient]
   );
 
+  const securityActions = useMemo(
+    () => createWorkflowActions({ http: services.http, notifications: services.notifications }),
+    [services.http, services.notifications]
+  );
+
   const handleActionSuccess = useMemo(
     () => () => {
       refetchEvents();
@@ -304,6 +329,13 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
     },
     [refetchEvents, refetchEpisodeActions, refetchGroupActions]
   );
+
+  const derivedWorkflowStatus = useMemo(() => {
+    const lastAction = episodeAction?.lastAckAction;
+    if (lastAction === 'ack') return 'acknowledged' as const;
+    if (lastAction === 'closed') return 'closed' as const;
+    return 'open' as const;
+  }, [episodeAction]);
 
   const syntheticEpisode = useMemo(() => {
     if (!episodeId || !lastStatus) return undefined;
@@ -316,6 +348,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
       first_timestamp: eventRows[0]?.['@timestamp'] ?? '',
       last_timestamp: eventRows[eventRows.length - 1]?.['@timestamp'] ?? '',
       duration: durationMs ?? 0,
+      workflow_status: derivedWorkflowStatus,
       last_ack_action: (episodeAction?.lastAckAction as 'ack' | 'unack' | undefined) ?? undefined,
       last_assignee_uid: episodeAction?.lastAssigneeUid ?? undefined,
       last_snooze_action:
@@ -326,39 +359,68 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
     };
   }, [episodeId, lastStatus, ruleId, groupHash, eventRows, durationMs, episodeAction, groupAction]);
 
-  const fullJson = useMemo(
+  const latestEventRow = eventRows.length > 0 ? eventRows[eventRows.length - 1] : null;
+
+  const ruleEventJson = useMemo(
     () =>
       JSON.stringify(
-        {
-          episode: syntheticEpisode ?? null,
-          alert_data: episodeEventData
-            ? {
-                data: episodeEventData.data,
-                data_timestamp: episodeEventData.dataTimestamp,
-                is_stale: episodeEventData.isStale,
-              }
-            : null,
-          actions: {
-            episode: episodeAction ?? null,
-            group: groupAction ?? null,
-          },
-          events: eventRows,
-        },
+        latestEventRow
+          ? {
+              ...latestEventRow,
+              ...(episodeEventData
+                ? {
+                    data: episodeEventData.data,
+                    data_timestamp: episodeEventData.dataTimestamp,
+                    is_stale: episodeEventData.isStale,
+                  }
+                : {}),
+            }
+          : null,
         null,
         2
       ),
-    [syntheticEpisode, episodeEventData, episodeAction, groupAction, eventRows]
+    [latestEventRow, episodeEventData]
   );
+
+  const workflowStatusBadge = useMemo(() => {
+    switch (derivedWorkflowStatus) {
+      case 'acknowledged':
+        return <EuiBadge color="warning">{i18n.STATUS_ACKNOWLEDGED}</EuiBadge>;
+      case 'closed':
+        return <EuiBadge color="default">{i18n.STATUS_CLOSED}</EuiBadge>;
+      case 'open':
+      default:
+        return <EuiBadge color="primary">{i18n.STATUS_OPEN}</EuiBadge>;
+    }
+  }, [derivedWorkflowStatus]);
+
+  const ruleIds = useMemo(() => (ruleId ? [ruleId] : []), [ruleId]);
+  const { rulesCache } = useAlertingRulesCache({ ruleIds, services });
+  const ruleName = ruleId ? rulesCache[ruleId]?.metadata?.name : undefined;
+
+  const assigneeUid = episodeAction?.lastAssigneeUid ?? undefined;
 
   const detailItems = useMemo(
     () => [
       {
-        title: i18n.FLYOUT_EPISODE_ID_LABEL,
-        description: <CopyableId value={episodeId} />,
+        title: i18n.COLUMN_STATUS,
+        description: workflowStatusBadge,
       },
       {
+        title: i18n.FLYOUT_ASSIGNEE_LABEL,
+        description: (
+          <EpisodeAssigneeCell
+            assigneeUid={assigneeUid}
+            userProfile={services.userProfile}
+          />
+        ),
+      },
+      ...(tags.length > 0
+        ? [{ title: i18n.FLYOUT_TAGS_LABEL, description: <AlertEpisodeTags tags={tags} /> }]
+        : []),
+      {
         title: i18n.FLYOUT_RULE_LABEL,
-        description: ruleId ? <CopyableId value={ruleId} /> : '\u2014',
+        description: ruleName ?? (ruleId ? <CopyableId value={ruleId} /> : '\u2014'),
       },
       {
         title: i18n.FLYOUT_TRIGGERED_LABEL,
@@ -370,15 +432,15 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
           : '\u2014',
       },
       {
-        title: i18n.FLYOUT_DURATION_LABEL,
-        description: formatDuration(durationMs),
+        title: i18n.FLYOUT_EPISODE_ID_LABEL,
+        description: <CopyableId value={episodeId} />,
       },
       {
         title: i18n.FLYOUT_GROUP_HASH_LABEL,
         description: groupHash ? <CopyableId value={groupHash} /> : '\u2014',
       },
     ],
-    [episodeId, ruleId, triggeredAt, durationMs, groupHash]
+    [episodeId, ruleId, ruleName, triggeredAt, groupHash, workflowStatusBadge, tags, assigneeUid, services.userProfile]
   );
 
   const actionsOverviewItems = useMemo(() => {
@@ -430,7 +492,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
   const renderOverviewTab = () => (
     <>
       <EuiTitle size="xs">
-        <h3>{i18n.FLYOUT_STATUS_LABEL}</h3>
+        <h3>{i18n.FLYOUT_TITLE}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiDescriptionList compressed type="responsiveColumn" listItems={detailItems} />
@@ -481,12 +543,12 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
 
   const renderJsonTab = () => (
     <EuiCodeBlock language="json" isCopyable overflowHeight={600} paddingSize="m" fontSize="s">
-      {fullJson}
+      {ruleEventJson}
     </EuiCodeBlock>
   );
 
-  const renderChangelogTab = () => {
-    if (isLoadingChangelog) {
+  const renderEventsLogTab = () => {
+    if (isLoadingEventsLog) {
       return (
         <EuiFlexGroup justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -496,21 +558,21 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
       );
     }
 
-    if (changelogEntries.length === 0) {
+    if (eventsLogEntries.length === 0) {
       return (
         <EuiText size="s" color="subdued">
-          {i18n.FLYOUT_CHANGELOG_EMPTY}
+          {i18n.FLYOUT_EVENTS_LOG_EMPTY}
         </EuiText>
       );
     }
 
     return (
-      <EuiCommentList aria-label={i18n.FLYOUT_TAB_CHANGELOG}>
-        {changelogEntries.map((entry, idx) => {
+      <EuiCommentList aria-label={i18n.FLYOUT_TAB_EVENTS_LOG}>
+        {eventsLogEntries.map((entry, idx) => {
           const actorProfile = entry.actor
-            ? changelogProfilesMap.get(entry.actor)
+            ? eventsLogProfilesMap.get(entry.actor)
             : undefined;
-          const username = resolveUsername(entry.actor, changelogProfilesMap);
+          const username = resolveUsername(entry.actor, eventsLogProfilesMap);
           const avatar = actorProfile ? (
             <UserAvatar
               user={actorProfile.user}
@@ -519,17 +581,34 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
             />
           ) : undefined;
 
+          const rawEventJson = JSON.stringify(entry, null, 2);
+          const description = getEventsLogDescription(entry, eventsLogProfilesMap);
+
           return (
             <EuiComment
               key={`${entry['@timestamp']}-${entry.action_type}-${idx}`}
               username={username}
-              timestamp={formatChangelogTimestamp(entry['@timestamp'])}
+              timestamp={formatEventsLogTimestamp(entry['@timestamp'])}
               event={ACTION_TYPE_LABELS[entry.action_type] ?? entry.action_type}
               timelineAvatar={avatar ?? ACTION_TYPE_ICONS[entry.action_type] ?? 'dot'}
             >
-              <EuiText size="s">
-                {getChangelogDescription(entry, changelogProfilesMap)}
-              </EuiText>
+              {description && <EuiText size="s">{description}</EuiText>}
+              <EuiSpacer size="s" />
+              <EuiAccordion
+                id={`raw-event-${idx}`}
+                buttonContent={i18n.FLYOUT_RAW_EVENT}
+                paddingSize="s"
+              >
+                <EuiCodeBlock
+                  language="json"
+                  isCopyable
+                  overflowHeight={300}
+                  paddingSize="s"
+                  fontSize="s"
+                >
+                  {rawEventJson}
+                </EuiCodeBlock>
+              </EuiAccordion>
             </EuiComment>
           );
         })}
@@ -543,12 +622,6 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
         <EuiTitle size="s">
           <h2>{i18n.FLYOUT_TITLE}</h2>
         </EuiTitle>
-        {tags.length > 0 && (
-          <>
-            <EuiSpacer size="s" />
-            <AlertEpisodeTags tags={tags} />
-          </>
-        )}
         <EuiSpacer size="m" />
         <EuiTabs size="s" bottomBorder={false}>
           <EuiTab
@@ -561,14 +634,14 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
             {i18n.FLYOUT_TAB_JSON}
           </EuiTab>
           <EuiTab
-            isSelected={selectedTab === 'changelog'}
-            onClick={() => onTabClick('changelog')}
+            isSelected={selectedTab === 'events_log'}
+            onClick={() => onTabClick('events_log')}
           >
-            {i18n.FLYOUT_TAB_CHANGELOG}
-            {changelogEntries.length > 0 && (
+            {i18n.FLYOUT_TAB_EVENTS_LOG}
+            {eventsLogEntries.length > 0 && (
               <>
                 {' '}
-                <EuiBadge color="hollow">{changelogEntries.length}</EuiBadge>
+                <EuiBadge color="hollow">{eventsLogEntries.length}</EuiBadge>
               </>
             )}
           </EuiTab>
@@ -578,7 +651,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
       <FlyoutBody>
         {selectedTab === 'overview' && renderOverviewTab()}
         {selectedTab === 'json' && renderJsonTab()}
-        {selectedTab === 'changelog' && renderChangelogTab()}
+        {selectedTab === 'events_log' && renderEventsLogTab()}
       </FlyoutBody>
 
       {syntheticEpisode && (
@@ -588,7 +661,8 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
               <EuiFlexItem grow={false}>
                 <TakeActionDropdown
                   episodeActions={episodeActions}
-                  episode={syntheticEpisode}
+                  securityActions={securityActions}
+                  episode={syntheticEpisode as any}
                   onActionSuccess={handleActionSuccess}
                 />
               </EuiFlexItem>

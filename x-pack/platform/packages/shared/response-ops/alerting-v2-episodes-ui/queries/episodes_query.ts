@@ -85,7 +85,8 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
   query
     .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
-    .pipe`WHERE @timestamp == last_timestamp`;
+    .pipe`WHERE @timestamp == last_timestamp`
+    .pipe`EVAL @timestamp = first_timestamp`;
 };
 
 const addGroupHashActionStats = (query: ComposerQuery) => {

@@ -14,7 +14,8 @@ import {
   type EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { SecurityAlertEpisode } from '../hooks/use_fetch_security_episodes';
+import type { SecurityEpisodeAction } from '../actions/workflow_actions';
 import * as i18n from '../translations';
 
 interface NotImplementedAction {
@@ -25,12 +26,14 @@ interface NotImplementedAction {
 const HIDDEN_V2_ACTION_IDS = new Set([
   'ALERTING_V2_VIEW_EPISODE_DETAILS',
   'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
+  'ALERTING_V2_RESOLVE_EPISODE',
+  'ALERTING_V2_UNRESOLVE_EPISODE',
+  'ALERTING_V2_ACK_EPISODE',
+  'ALERTING_V2_UNACK_EPISODE',
 ]);
 
 const NOT_IMPLEMENTED_ACTIONS: NotImplementedAction[] = [
   { label: i18n.ACTION_ADD_TO_CASE, icon: 'folderOpen' },
-  { label: i18n.ACTION_MARK_AS_OPEN, icon: 'securitySignal' },
-  { label: i18n.ACTION_MARK_AS_CLOSED, icon: 'securitySignalResolved' },
   { label: i18n.ACTION_ADD_EXCEPTION, icon: 'minusInCircle' },
   { label: i18n.ACTION_RUN_WORKFLOW, icon: 'playFilled' },
   { label: i18n.ACTION_ISOLATE_HOST, icon: 'lock' },
@@ -42,32 +45,51 @@ const NOT_IMPLEMENTED_ACTIONS: NotImplementedAction[] = [
 
 interface TakeActionDropdownProps {
   episodeActions: EpisodeAction[];
-  episode: AlertEpisode;
+  securityActions: SecurityEpisodeAction[];
+  episode: SecurityAlertEpisode;
   onActionSuccess: () => void;
+  renderCustomButton?: (onClick: () => void) => React.ReactNode;
 }
 
 export const TakeActionDropdown: React.FC<TakeActionDropdownProps> = ({
   episodeActions,
+  securityActions,
   episode,
   onActionSuccess,
+  renderCustomButton,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+
+  const securityItems: EuiContextMenuPanelItemDescriptor[] = useMemo(
+    () =>
+      securityActions
+        .filter((action) => action.isCompatible({ episodes: [episode] }))
+        .map((action) => ({
+          name: action.displayName,
+          icon: action.iconType,
+          onClick: () => {
+            closePopover();
+            action.execute({ episodes: [episode], onSuccess: onActionSuccess });
+          },
+        })),
+    [securityActions, episode, closePopover, onActionSuccess]
+  );
 
   const v2Items: EuiContextMenuPanelItemDescriptor[] = useMemo(
     () =>
       episodeActions
         .filter((action) => !HIDDEN_V2_ACTION_IDS.has(action.id))
         .map((action) => {
-          const compatible = action.isCompatible({ episodes: [episode] });
+          const compatible = action.isCompatible({ episodes: [episode as any] });
           return {
             name: action.displayName,
             icon: action.iconType,
             disabled: !compatible,
             onClick: () => {
               closePopover();
-              action.execute({ episodes: [episode], onSuccess: onActionSuccess });
+              action.execute({ episodes: [episode as any], onSuccess: onActionSuccess });
             },
           };
         }),
@@ -94,13 +116,13 @@ export const TakeActionDropdown: React.FC<TakeActionDropdownProps> = ({
     () => [
       {
         id: 0,
-        items: [...notImplementedItems, ...v2Items],
+        items: [...securityItems, ...v2Items, ...notImplementedItems],
       },
     ],
-    [v2Items, notImplementedItems]
+    [securityItems, v2Items, notImplementedItems]
   );
 
-  const button = useMemo(
+  const defaultButton = useMemo(
     () => (
       <EuiButton
         fill
@@ -114,6 +136,8 @@ export const TakeActionDropdown: React.FC<TakeActionDropdownProps> = ({
     ),
     [togglePopover]
   );
+
+  const button = renderCustomButton ? renderCustomButton(togglePopover) : defaultButton;
 
   return (
     <EuiPopover
