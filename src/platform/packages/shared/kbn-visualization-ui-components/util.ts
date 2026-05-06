@@ -121,28 +121,40 @@ export const annotationReferenceLineSharedSetOfIcons: IconSet<AnnotationReferenc
   ...sharedSetOfIcons,
   {
     value: 'circle',
-    label: i18n.translate('visualizationUiComponents.iconSelect.circleIconLabel', {
-      defaultMessage: 'Circle',
-    }),
+    label: i18n.translate(
+      'visualizationUiComponents.annotationReferenceLine.iconSelect.circleIconLabel',
+      {
+        defaultMessage: 'Circle',
+      }
+    ),
     icon: IconCircle,
   },
   {
     value: 'pinFilled',
-    label: i18n.translate('visualizationUiComponents.iconSelect.mapPinLabel', {
-      defaultMessage: 'Map Pin',
-    }),
+    label: i18n.translate(
+      'visualizationUiComponents.annotationReferenceLine.iconSelect.mapPinLabel',
+      {
+        defaultMessage: 'Map Pin',
+      }
+    ),
   },
   {
     value: 'starFilled',
-    label: i18n.translate('visualizationUiComponents.iconSelect.starFilledLabel', {
-      defaultMessage: 'Star filled',
-    }),
+    label: i18n.translate(
+      'visualizationUiComponents.annotationReferenceLine.iconSelect.starFilledLabel',
+      {
+        defaultMessage: 'Star filled',
+      }
+    ),
   },
   {
     value: 'triangle',
-    label: i18n.translate('visualizationUiComponents.iconSelect.triangleIconLabel', {
-      defaultMessage: 'Triangle',
-    }),
+    label: i18n.translate(
+      'visualizationUiComponents.annotationReferenceLine.iconSelect.triangleIconLabel',
+      {
+        defaultMessage: 'Triangle',
+      }
+    ),
     icon: IconTriangle,
     shouldRotate: true,
   },
