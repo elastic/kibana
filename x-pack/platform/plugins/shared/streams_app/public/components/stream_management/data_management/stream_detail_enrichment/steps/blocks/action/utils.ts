@@ -214,7 +214,7 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
       return i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.registeredDomainProcessorDescription',
         {
-          defaultMessage: 'Extracts the domain components from "{expression}"',
+          defaultMessage: 'Extracts domain parts from "{expression}"',
           values: {
             expression: step.expression,
           },

@@ -15,7 +15,7 @@ apiTest.describe(
   'Cross-compatibility - Registered Domain Processor',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest('should extract domain components from a FQDN', async ({ testBed, esql }) => {
+    apiTest('should extract domain parts from a FQDN', async ({ testBed, esql }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
@@ -88,7 +88,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'should extract domain components from a FQDN with a missing component',
+      'should extract domain parts from a FQDN with a missing part',
       async ({ testBed, esql }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
@@ -105,16 +105,13 @@ apiTest.describe(
         const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
-        await testBed.ingest('ingest-registered-domain-missing-component', docs, processors);
+        await testBed.ingest('ingest-registered-domain-missing-part', docs, processors);
         const ingestResult = await testBed.getFlattenedDocsOrdered(
-          'ingest-registered-domain-missing-component'
+          'ingest-registered-domain-missing-part'
         );
 
-        await testBed.ingest('esql-registered-domain-missing-component', docs);
-        const esqlResult = await esql.queryOnIndex(
-          'esql-registered-domain-missing-component',
-          query
-        );
+        await testBed.ingest('esql-registered-domain-missing-part', docs);
+        const esqlResult = await esql.queryOnIndex('esql-registered-domain-missing-part', query);
 
         expect(ingestResult).toHaveLength(1);
         expect(ingestResult[0]['rd.subdomain']).toBeUndefined();
