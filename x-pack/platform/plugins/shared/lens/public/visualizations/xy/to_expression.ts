@@ -51,7 +51,7 @@ import type {
   ValidXYDataLayerConfig,
   XYLayerConfig,
 } from './types';
-import { getColumnToLabelMap, hasBarSeries, isHorizontalChart } from './state_helpers';
+import { getColumnToLabelMap } from './state_helpers';
 import { getDefaultPalette } from './default_palette';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
@@ -74,11 +74,6 @@ import { getColorMappingDefaults } from '../../utils';
 type XYLayerConfigWithSimpleView = XYLayerConfig & { simpleView?: boolean };
 type XYAnnotationLayerConfigWithSimpleView = XYAnnotationLayerConfig & { simpleView?: boolean };
 type State = Omit<XYVisualizationState, 'layers'> & { layers: XYLayerConfigWithSimpleView[] };
-
-/**
- * Pixel width for X-axis (dimension) tick label truncation on horizontal bar charts
- */
-export const DEFAULT_HORIZONTAL_BAR_X_AXIS_TRUNCATE_PX = 25; // just for testing, should be higher
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI | undefined,
@@ -340,10 +335,6 @@ export const buildXYExpression = (
         hasNumericHistogramDimension(datasourceLayers[layer.layerId], layer.xAccessor)
       )
         ? [axisExtentConfigToExpression(state.xExtent ?? { mode: 'dataBounds', niceValues: true })]
-        : undefined,
-    truncate:
-      isHorizontalChart(state.layers) && hasBarSeries(state.layers)
-        ? DEFAULT_HORIZONTAL_BAR_X_AXIS_TRUNCATE_PX
         : undefined,
   });
 

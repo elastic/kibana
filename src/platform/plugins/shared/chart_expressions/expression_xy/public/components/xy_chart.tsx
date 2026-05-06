@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import type {
   ElementClickListener,
@@ -16,7 +16,6 @@ import type {
   LegendPositionConfig,
   DisplayValueStyle,
   RecursivePartial,
-  AxisStyle,
   XYChartElementEvent,
   XYChartSeriesIdentifier,
   SettingsProps,
@@ -311,6 +310,27 @@ export function XYChart({
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
 
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [chartContainerWidth, setChartContainerWidth] = useState(0);
+
+  useLayoutEffect(() => {
+    const element = chartContainerRef.current;
+    if (!element) {
+      return undefined;
+    }
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (typeof width === 'number') {
+        setChartContainerWidth(width);
+      }
+    });
+    observer.observe(element);
+    setChartContainerWidth(element.getBoundingClientRect().width);
+    return () => {
+      observer.disconnect();
+    };
+  }, [dataLayers.length]);
+
   const isTimeViz = isTimeChart(dataLayers);
 
   useEffect(() => {
@@ -484,41 +504,6 @@ export function XYChart({
   const linesPaddings = !shouldHideDetails
     ? getLinesCausedPaddings(visualConfigs, yAxesMap, shouldRotate)
     : {};
-
-  const getTickLabelTruncationStyle = (
-    width: Truncate['width'] | undefined,
-    position: Truncate['position'] = 'end'
-  ): Truncate | undefined => (width !== undefined ? { width, position } : undefined);
-
-  const getYAxesStyle = (axis: AxisConfiguration) => {
-    const tickVisible = axis.showLabels;
-    const position = getOriginalAxisPosition(axis.position, shouldRotate);
-    const style = {
-      tickLabel: {
-        fill: axis.labelColor,
-        visible: tickVisible,
-        rotation: axis.labelsOrientation,
-        padding:
-          linesPaddings[position] != null
-            ? {
-                inner: linesPaddings[position],
-              }
-            : undefined,
-        truncation: getTickLabelTruncationStyle(axis.truncate),
-      },
-      axisTitle: {
-        visible: axis.showTitle,
-        // if labels are not visible add the padding to the title
-        padding:
-          !tickVisible && linesPaddings[position] != null
-            ? {
-                inner: linesPaddings[position],
-              }
-            : undefined,
-      },
-    };
-    return style;
-  };
 
   const getYAxisDomain = (axis: GroupsConfiguration[number]) => {
     const extent: AxisExtentConfigResult = axis.extent || {
@@ -708,11 +693,65 @@ export function XYChart({
     visible: xAxisConfig?.showGridLines,
     strokeWidth: 1,
   };
-  const xAxisStyle: RecursivePartial<AxisStyle> = isHorizontalTimeAxis
-    ? {
+
+  const getYAxesStyle = (axis: AxisConfiguration) => {
+    const tickVisible = axis.showLabels;
+    const position = getOriginalAxisPosition(axis.position, shouldRotate);
+    const style = {
+      tickLabel: {
+        fill: axis.labelColor,
+        visible: tickVisible,
+        rotation: axis.labelsOrientation,
+        padding:
+          linesPaddings[position] != null
+            ? {
+                inner: linesPaddings[position],
+              }
+            : undefined,
+        truncation: axis.truncate ? { width: axis.truncate, position: 'end' as const } : undefined,
+      },
+      axisTitle: {
+        visible: axis.showTitle,
+        // if labels are not visible add the padding to the title
+        padding:
+          !tickVisible && linesPaddings[position] != null
+            ? {
+                inner: linesPaddings[position],
+              }
+            : undefined,
+      },
+    };
+    return style;
+  };
+
+  const getXAxisStyle = () => {
+    const DEFAULT_HORIZONTAL_BAR_X_AXIS_TICK_TRUNCATE_MIN_PX = 200;
+    const DEFAULT_HORIZONTAL_BAR_X_AXIS_TICK_TRUNCATE_WIDTH_RELATIVE = 0.3;
+
+    let truncateStyle: Truncate | undefined =
+      xAxisConfig?.truncate !== undefined
+        ? { width: xAxisConfig.truncate, position: 'end' }
+        : undefined;
+
+    if (truncateStyle === undefined && isHorizontalChart(dataLayers) && hasBars) {
+      const chartWidth =
+        Number.isFinite(chartContainerWidth) && chartContainerWidth > 0 ? chartContainerWidth : 0;
+
+      const value = Math.floor(
+        Math.max(
+          DEFAULT_HORIZONTAL_BAR_X_AXIS_TICK_TRUNCATE_MIN_PX,
+          DEFAULT_HORIZONTAL_BAR_X_AXIS_TICK_TRUNCATE_WIDTH_RELATIVE * chartWidth
+        )
+      );
+      truncateStyle = { width: value, position: 'middle' as const };
+    }
+
+    if (isHorizontalTimeAxis) {
+      return {
         tickLabel: {
           visible: Boolean(xAxisConfig?.showLabels),
           fill: xAxisConfig?.labelColor,
+          truncation: truncateStyle,
         },
         tickLine: {
           visible: Boolean(xAxisConfig?.showLabels),
@@ -720,23 +759,27 @@ export function XYChart({
         axisTitle: {
           visible: xAxisConfig?.showTitle,
         },
-      }
-    : {
-        tickLabel: {
-          visible: xAxisConfig?.showLabels,
-          rotation: xAxisConfig?.labelsOrientation,
-          padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
-          fill: xAxisConfig?.labelColor,
-          truncation: getTickLabelTruncationStyle(xAxisConfig?.truncate, 'middle'),
-        },
-        axisTitle: {
-          visible: xAxisConfig?.showTitle,
-          padding:
-            !xAxisConfig?.showLabels && linesPaddings.bottom != null
-              ? { inner: linesPaddings.bottom }
-              : undefined,
-        },
       };
+    }
+
+    return {
+      tickLabel: {
+        visible: xAxisConfig?.showLabels,
+        rotation: xAxisConfig?.labelsOrientation,
+        padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
+        fill: xAxisConfig?.labelColor,
+        truncation: truncateStyle,
+      },
+      axisTitle: {
+        visible: xAxisConfig?.showTitle,
+        padding:
+          !xAxisConfig?.showLabels && linesPaddings.bottom != null
+            ? { inner: linesPaddings.bottom }
+            : undefined,
+      },
+    };
+  };
+
   const isSplitChart = splitColumnAccessor || splitRowAccessor;
   const splitTable = isSplitChart ? dataLayers[0].table : undefined;
   const splitColumnId =
@@ -774,7 +817,7 @@ export function XYChart({
   return (
     <>
       <GlobalXYChartStyles />
-      <div css={chartContainerStyle}>
+      <div ref={chartContainerRef} css={chartContainerStyle}>
         {showLegend !== undefined && uiState && (
           <LegendToggle
             onClick={toggleLegend}
@@ -956,7 +999,7 @@ export function XYChart({
               hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
               tickFormat={(d) => safeXAccessorLabelRenderer(d) || ''}
               maximumFractionDigits={xTickDecimals}
-              style={xAxisStyle}
+              style={getXAxisStyle()}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
               {...getOverridesFor(overrides, 'axisX')}
