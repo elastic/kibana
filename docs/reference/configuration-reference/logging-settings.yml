@@ -245,8 +245,8 @@ groups:
 
           Prefer file paths readable by the Kibana process (for example under `/etc/kibana/certs/`). Ensure private keys are not world-readable. TLS material is never written to Kibana logs on success or failure.
 
-          ::::{note}
-          Serverless: confirm your target offering allows custom OTLP TLS configuration; constraints may apply.
+          ::::{warning}
+          The passphrase and the certificates (if provided as inline PEM strings) are stored in plain text in `kibana.yml`. Use a secrets management solution or environment variable substitution to avoid exposing credentials.
           ::::
         datatype: object
         applies_to:
