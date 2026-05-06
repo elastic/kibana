@@ -46,15 +46,15 @@ export const createPrebuiltRuleAssetsClient = (
   savedObjectsClient: SavedObjectsClientContract
 ): IPrebuiltRuleAssetsClient => {
   return {
-    fetchLatestAssets: (options) => {
+    fetchLatestAssets: (options?: FetchLatestAssetsOptions) => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestAssets', async () => {
         return fetchLatestAssets(savedObjectsClient, options);
       });
     },
 
-    fetchLatestVersions: ({ ruleIds, filter, sort } = {}): Promise<BasicRuleInfo[]> => {
+    fetchLatestVersions: ({ ruleIds, sort, filter } = {}): Promise<BasicRuleInfo[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
-        return fetchLatestVersions(savedObjectsClient, { ruleIds, filter, sort });
+        return fetchLatestVersions(savedObjectsClient, { ruleIds, sort, filter });
       });
     },
 

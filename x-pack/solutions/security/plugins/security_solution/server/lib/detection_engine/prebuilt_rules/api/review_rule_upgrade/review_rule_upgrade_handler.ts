@@ -111,7 +111,6 @@ export const reviewRuleUpgradeHandler = async (
 
     return response.ok({ body });
   } catch (err) {
-    logger.error(`reviewRuleUpgradeHandler: Caught error`, err);
     const error = transformError(err);
     return siemResponse.error({
       body: error.message,

@@ -16,7 +16,10 @@ import type {
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
 import { internalRuleToAPIResponse } from '../../../rule_management/logic/detection_rules_client/converters/internal_rule_to_api_response';
-import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
+import {
+  convertRulesFilterToKQL,
+  KQL_FILTER_IMMUTABLE_RULES,
+} from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   FindRulesSortField,
   PrebuiltRulesFilter,
@@ -33,10 +36,6 @@ interface FetchAllInstalledRulesArgs {
 }
 
 interface FetchAllInstalledRuleVersionsArgs {
-  filter?: PrebuiltRulesFilter;
-  // Additional raw KQL string AND-ed with the structured `filter` above. Used by callers
-  // that already have a precomputed KQL clause (e.g. the upgrade-review endpoint forwarding
-  // a user-supplied filter) so the saved-objects fetch can be narrowed at the source.
   kqlFilter?: string;
   sortField?: FindRulesSortField;
   sortOrder?: SortOrder;
@@ -151,20 +150,12 @@ export const createPrebuiltRuleObjectsClient = (
         }
       );
     },
-    fetchInstalledRuleVersions: ({ filter, kqlFilter, sortField, sortOrder } = {}) => {
+    fetchInstalledRuleVersions: ({ kqlFilter, sortField, sortOrder } = {}) => {
       return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRuleVersions', async () => {
-        const structuredKQL = convertRulesFilterToKQL({
-          showElasticRules: true,
-          filter: filter?.name,
-          tags: filter?.tags,
-          customizationStatus: filter?.customization_status,
-        });
         const combinedKQL =
           kqlFilter && kqlFilter.length > 0
-            ? structuredKQL
-              ? `(${structuredKQL}) AND (${kqlFilter})`
-              : kqlFilter
-            : structuredKQL;
+            ? `${KQL_FILTER_IMMUTABLE_RULES} AND (${kqlFilter})`
+            : KQL_FILTER_IMMUTABLE_RULES;
 
         const rulesData = await findRules({
           rulesClient,

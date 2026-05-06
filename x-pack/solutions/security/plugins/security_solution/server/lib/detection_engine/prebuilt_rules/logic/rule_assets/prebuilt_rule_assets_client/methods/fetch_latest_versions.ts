@@ -32,6 +32,8 @@ import {
  * @param savedObjectsClient - Saved Objects client
  * @param queryParameters - Optional arguments object
  * @param queryParameters.ruleIds - Optional array of rule IDs to query for
+ * @param queryParameters.filter - Optional filter configuration
+ * @param queryParameters.sort - Optional sort configuration
  * @returns A promise that resolves to an array of BasicRuleInfo objects (rule_id, version, type).
  */
 export async function fetchLatestVersions(
