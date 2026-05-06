@@ -37,7 +37,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'cases.attachmentsAdded',
-    schemaHash: 'e1d2dc5b465290cb4244976882e258c600c416ae496e1096312515dd174e6336',
+    schemaHash: '5e6774f0b725314c3032b45c2305bc869b2953749eefd2e0809be63e8d72bd71',
   },
   {
     id: 'workflows.failed',
