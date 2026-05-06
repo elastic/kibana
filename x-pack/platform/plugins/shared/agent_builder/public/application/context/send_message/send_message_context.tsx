@@ -5,103 +5,208 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+/**
+ * Lifted streaming state.
+ *
+ * `SendMessageProvider` is mounted ONCE above the routes/sidebar (in `mount.tsx` for the
+ * routed app, in `embeddable_conversations_provider.tsx` for the embeddable). All streaming
+ * state lives here so the sidebar can observe it.
+ *
+ * State:
+ *   - `activeStream`: which conversation is currently streaming, the stream type
+ *     (send / regenerate / resume), and the latest agent-reasoning text. Set
+ *     synchronously when each mutation kicks off; cleared in the mutation's `finally`.
+ *   - `byConversationId`: per-conversation pending message, error, and errorSteps.
+ *     Persists across stream end so a user can hit Retry after a failure.
+ */
+
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import produce from 'immer';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { useSendMessageMutation } from './use_send_message_mutation';
+import type { SendMessageVars } from './use_send_message_mutation';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
-import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
+import type { ResumeRoundVars } from './use_resume_round_mutation';
+import type { ActiveStream, StreamRecord } from './types';
 
-interface SendMessageState {
-  sendMessage: ({ message }: { message: string }) => void;
-  isResponseLoading: boolean;
-  pendingMessage: string | undefined;
-  error: unknown;
-  errorSteps: ConversationRoundStep[];
-  agentReasoning: string | null;
-  retry: () => void;
-  canCancel: boolean;
-  cancel: () => void;
-  cleanConversation: () => void;
-  removeError: () => void;
-  resumeRound: (opts: { prompts: Record<string, { allow: boolean }> }) => void;
-  isResuming: boolean;
-  regenerate: () => void;
-  isRegenerating: boolean;
-  connectorSelection: {
-    selectedConnector: string | undefined;
-    selectConnector: (connectorId: string) => void;
-    defaultConnectorId?: string;
-    defaultConnectorOnly: boolean;
-  };
+export interface SendMessageContextValue {
+  activeStream: ActiveStream | undefined;
+  byConversationId: Record<string, StreamRecord>;
+  mutateSendMessage: (vars: SendMessageVars) => void;
+  mutateResumeRound: (vars: ResumeRoundVars) => void;
+  cancelActiveStream: () => void;
+  removeError: (conversationId: string) => void;
+  removeAllErrors: () => void;
 }
 
-const SendMessageContext = createContext<SendMessageState | null>(null);
+const SendMessageContext = createContext<SendMessageContextValue | null>(null);
+
+const emptyRecord: StreamRecord = { errorSteps: [] };
 
 export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
-  const connectorSelection = useConnectorSelection();
+  const [activeStream, setActiveStream] = useState<ActiveStream | undefined>(undefined);
+  const [byConversationId, setByConversationId] = useState<Record<string, StreamRecord>>({});
 
-  const {
-    sendMessage,
-    isResponseLoading,
-    pendingMessage,
-    error,
-    errorSteps,
-    agentReasoning: sendAgentReasoning,
-    retry,
-    canCancel,
-    cancel,
-    cleanConversation,
-    removeError,
-    regenerate,
-    isRegenerating,
-  } = useSendMessageMutation({ connectorId: connectorSelection.selectedConnector });
+  const updateActiveReasoning = useCallback((reasoning: string) => {
+    setActiveStream((prev) => (prev ? { ...prev, agentReasoning: reasoning } : prev));
+  }, []);
 
-  const {
-    resumeRound,
-    isResuming,
-    agentReasoning: resumeAgentReasoning,
-  } = useResumeRoundMutation({
-    connectorId: connectorSelection.selectedConnector,
+  const setPendingMessage = useCallback((conversationId: string, message: string) => {
+    setByConversationId(
+      produce((draft) => {
+        if (!draft[conversationId]) draft[conversationId] = { errorSteps: [] };
+        draft[conversationId].pendingMessage = message;
+      })
+    );
+  }, []);
+
+  const clearPendingMessage = useCallback((conversationId: string) => {
+    setByConversationId(
+      produce((draft) => {
+        if (draft[conversationId]) {
+          delete draft[conversationId].pendingMessage;
+        }
+      })
+    );
+  }, []);
+
+  const setError = useCallback(
+    (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => {
+      setByConversationId(
+        produce((draft) => {
+          if (!draft[conversationId]) draft[conversationId] = { errorSteps: [] };
+          draft[conversationId].error = error;
+          draft[conversationId].errorSteps = errorSteps;
+        })
+      );
+    },
+    []
+  );
+
+  const removeError = useCallback((conversationId: string) => {
+    setByConversationId(
+      produce((draft) => {
+        const record = draft[conversationId];
+        if (record) {
+          delete record.error;
+          record.errorSteps = [];
+        }
+      })
+    );
+  }, []);
+
+  const removeAllErrors = useCallback(() => {
+    setByConversationId(
+      produce((draft) => {
+        for (const id of Object.keys(draft)) {
+          delete draft[id].error;
+          draft[id].errorSteps = [];
+        }
+      })
+    );
+  }, []);
+
+  const clearActiveStream = useCallback(() => {
+    setActiveStream(undefined);
+  }, []);
+
+  const sendMutation = useSendMessageMutation({
+    updateActiveReasoning,
+    setPendingMessage,
+    clearPendingMessage,
+    setError,
+    clearError: removeError,
+    clearActiveStream,
   });
 
-  // Combine agentReasoning from mutations - use the one that's currently active
-  const agentReasoning = isResuming ? resumeAgentReasoning : sendAgentReasoning;
+  const resumeMutation = useResumeRoundMutation({
+    updateActiveReasoning,
+    setError,
+    clearActiveStream,
+  });
 
-  return (
-    <SendMessageContext.Provider
-      value={{
-        sendMessage,
-        isResponseLoading: isResponseLoading || isResuming || isRegenerating,
-        pendingMessage,
-        error,
-        errorSteps,
-        agentReasoning,
-        retry,
-        canCancel,
-        cancel,
-        cleanConversation,
-        removeError,
-        resumeRound,
-        isResuming,
-        regenerate,
-        isRegenerating,
-        connectorSelection: {
-          selectedConnector: connectorSelection.selectedConnector,
-          selectConnector: connectorSelection.selectConnector,
-          defaultConnectorId: connectorSelection.defaultConnectorId,
-          defaultConnectorOnly: connectorSelection.defaultConnectorOnly,
-        },
-      }}
-    >
-      {children}
-    </SendMessageContext.Provider>
+  // Pull stable references out of the mutation result objects. The result object itself is
+  // a NEW reference each render (React Query rebuilds it), so anything that depends on the
+  // whole object would re-evaluate every render. The individual fields below are stable.
+  const sendMutate = sendMutation.mutate;
+  const sendCancel = sendMutation.cancel;
+  const resumeMutate = resumeMutation.mutate;
+  const resumeCancel = resumeMutation.cancel;
+
+  const cancelActiveStream = useCallback(() => {
+    sendCancel();
+    resumeCancel();
+  }, [sendCancel, resumeCancel]);
+
+  // Wrappers around `mutate` that set `activeStream` SYNCHRONOUSLY before queueing the
+  // mutation. Without this, callers like `useSubmitMessage` (which call `mutate` and then
+  // immediately navigate to `/conversations/<uuid>`) would render the new URL with
+  // `activeStream` still undefined — the `useConversation` gate would open, fire a GET
+  // for the not-yet-persisted conversation, and 404. The mutation's `mutationFn` runs
+  // asynchronously, so setting `activeStream` from inside `mutationFn` is too late.
+  const mutateSendMessage = useCallback(
+    (vars: SendMessageVars) => {
+      setActiveStream({
+        conversationId: vars.conversationId,
+        type: vars.action === 'regenerate' ? 'regenerate' : 'send',
+        agentReasoning: null,
+      });
+      sendMutate(vars);
+    },
+    [sendMutate]
   );
+  const mutateResumeRound = useCallback(
+    (vars: ResumeRoundVars) => {
+      setActiveStream({
+        conversationId: vars.conversationId,
+        type: 'resume',
+        agentReasoning: null,
+      });
+      resumeMutate(vars);
+    },
+    [resumeMutate]
+  );
+
+  const value = useMemo<SendMessageContextValue>(
+    () => ({
+      activeStream,
+      byConversationId,
+      mutateSendMessage,
+      mutateResumeRound,
+      cancelActiveStream,
+      removeError,
+      removeAllErrors,
+    }),
+    [
+      activeStream,
+      byConversationId,
+      mutateSendMessage,
+      mutateResumeRound,
+      cancelActiveStream,
+      removeError,
+      removeAllErrors,
+    ]
+  );
+
+  return <SendMessageContext.Provider value={value}>{children}</SendMessageContext.Provider>;
 };
 
-export const useSendMessage = () => {
+export const useSendMessageContext = () => {
   const context = useContext(SendMessageContext);
   if (!context) {
-    throw new Error('useSendMessage must be used within a SendMessageProvider');
+    throw new Error('useSendMessageContext must be used within a SendMessageProvider');
   }
   return context;
 };
+
+export const useStreamRecord = (conversationId: string | undefined): StreamRecord => {
+  const { byConversationId } = useSendMessageContext();
+  if (!conversationId) return emptyRecord;
+  return byConversationId[conversationId] ?? emptyRecord;
+};
+
+// Re-exported so consumers can keep importing `useSendMessage` from this file. The actual
+// implementation lives in `./use_send_message` to avoid a circular import with
+// `use_conversation.ts` (the per-conversation scoped hook reads from `useConversation()`,
+// while `useConversation()` reads from `useSendMessageContext` here).
+export { useSendMessage } from './use_send_message';
