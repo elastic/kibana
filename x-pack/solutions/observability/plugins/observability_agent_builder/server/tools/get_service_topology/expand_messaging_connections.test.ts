@@ -116,9 +116,7 @@ describe('expandMessagingConnections', () => {
     mockGetTraceIds.mockResolvedValue(['trace-1']);
 
     const result = await callExpand({
-      dataRegistry: createMockDataRegistry([
-        [makeSpan('checkout', 'kafka/orders', 'messaging')],
-      ]),
+      dataRegistry: createMockDataRegistry([[makeSpan('checkout', 'kafka/orders', 'messaging')]]),
       existingConnections: [
         makeExternalConnection('checkout', 'kafka/orders', 'messaging', 'kafka'),
       ],

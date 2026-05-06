@@ -58,9 +58,7 @@ export async function expandMessagingConnections({
 
   const perDepResults = await Promise.all(
     capped.map(async (depName) => {
-      logger.debug(
-        `Expanding messaging dependency "${depName}" to find other connected services`
-      );
+      logger.debug(`Expanding messaging dependency "${depName}" to find other connected services`);
 
       const depTraceIds = await getTraceIdsFromExitSpansTargetingDependency({
         apmEventClient,
