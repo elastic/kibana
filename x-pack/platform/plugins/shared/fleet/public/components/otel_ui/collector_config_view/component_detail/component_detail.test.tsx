@@ -137,7 +137,7 @@ describe('OTelComponentDetail', () => {
     expect(result.getByText(/localhost:9200/)).toBeInTheDocument();
   });
 
-  it('renders three tabs: Health, Config, Metrics', () => {
+  it('renders three tabs: Health, Metrics, Config', () => {
     const result = testRenderer.render(
       <OTelComponentDetail
         componentId="otlp"
