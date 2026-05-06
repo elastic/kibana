@@ -24,8 +24,7 @@ export const CloudLinks = () => {
   } = useKibana();
   const { euiTheme } = useEuiTheme();
 
-  const [billingUrl, setBillingUrl] = useState<string | undefined>();
-
+  const [billingUrl, setBillingUrl] = useState<string>('');
   useEffect(() => {
     cloud
       ?.getPrivilegedUrls()
@@ -38,18 +37,15 @@ export const CloudLinks = () => {
   }, [cloud]);
 
   const cloudLinks = useMemo(() => {
-    if (!cloud?.isCloudEnabled) return [];
-
-    const { baseUrl, organizationUrl } = cloud.getUrls();
     const links: CloudLink[] = [];
 
-    if (baseUrl) {
+    if (cloud?.baseUrl) {
       links.push({
         id: 'elasticCloud',
         label: i18n.translate('xpack.searchHomepage.cloudLinks.elasticCloud', {
           defaultMessage: 'Elastic Cloud',
         }),
-        href: baseUrl,
+        href: cloud.baseUrl,
       });
     }
 
@@ -63,13 +59,13 @@ export const CloudLinks = () => {
       });
     }
 
-    if (organizationUrl) {
+    if (cloud?.organizationUrl) {
       links.push({
         id: 'organization',
         label: i18n.translate('xpack.searchHomepage.cloudLinks.organization', {
           defaultMessage: 'Organization',
         }),
-        href: organizationUrl,
+        href: cloud.organizationUrl,
       });
     }
 

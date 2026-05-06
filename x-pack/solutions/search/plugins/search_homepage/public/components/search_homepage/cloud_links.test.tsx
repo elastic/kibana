@@ -17,10 +17,7 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const createCloudMock = (overrides: Record<string, unknown> = {}) => ({
   isCloudEnabled: true,
   baseUrl: 'https://cloud.elastic.co',
-  getUrls: jest.fn().mockReturnValue({
-    baseUrl: 'https://cloud.elastic.co',
-    organizationUrl: 'https://cloud.elastic.co/account/members',
-  }),
+  organizationUrl: 'https://cloud.elastic.co/account/members',
   getPrivilegedUrls: jest.fn().mockResolvedValue({
     billingUrl: 'https://cloud.elastic.co/billing',
   }),
@@ -42,13 +39,13 @@ describe('CloudLinks', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders nothing when cloud is not enabled', () => {
+  it('renders nothing when cloud is not enabled', async () => {
     setCloudMock(createCloudMock({ isCloudEnabled: false }));
     const { container } = render(<CloudLinks />);
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders nothing when baseUrl is missing', () => {
+  it('renders nothing when baseUrl is missing', async () => {
     setCloudMock(createCloudMock({ baseUrl: undefined }));
     const { container } = render(<CloudLinks />);
     expect(container).toBeEmptyDOMElement();
@@ -67,7 +64,7 @@ describe('CloudLinks', () => {
     });
   });
 
-  it('uses URLs from cloud.getUrls() and cloud.getPrivilegedUrls()', async () => {
+  it('uses URLs directly from cloud object and getPrivilegedUrls', async () => {
     setCloudMock(createCloudMock());
     const { getByTestId } = render(<CloudLinks />);
 
@@ -92,34 +89,45 @@ describe('CloudLinks', () => {
     });
   });
 
-  it('does not render usage link when user lacks billing access', () => {
-    setCloudMock(
-      createCloudMock({
-        getPrivilegedUrls: jest.fn().mockResolvedValue({}),
-      })
-    );
+  it('does not render usage link when user lacks billing access', async () => {
+    const mock = createCloudMock({
+      getPrivilegedUrls: jest.fn().mockResolvedValue({}),
+    });
+    setCloudMock(mock);
     const { queryByTestId } = render(<CloudLinks />);
+
+    await waitFor(() => {
+      expect(mock.getPrivilegedUrls).toHaveBeenCalled();
+    });
 
     expect(queryByTestId('searchHomepageCloudLink-usage')).not.toBeInTheDocument();
   });
 
-  it('does not render usage link when getPrivilegedUrls rejects', () => {
-    setCloudMock(
-      createCloudMock({
-        getPrivilegedUrls: jest.fn().mockRejectedValue(new Error('forbidden')),
-      })
-    );
+  it('does not render usage link when getPrivilegedUrls rejects', async () => {
+    const mock = createCloudMock({
+      getPrivilegedUrls: jest.fn().mockRejectedValue(new Error('forbidden')),
+    });
+    setCloudMock(mock);
     const { queryByTestId } = render(<CloudLinks />);
+
+    await waitFor(() => {
+      expect(mock.getPrivilegedUrls).toHaveBeenCalled();
+    });
 
     expect(queryByTestId('searchHomepageCloudLink-usage')).not.toBeInTheDocument();
   });
 
-  it('opens links in a new tab', () => {
+  it('opens links in a new tab', async () => {
     setCloudMock(createCloudMock());
     const { getByTestId } = render(<CloudLinks />);
+
+    await waitFor(() => {
+      expect(getByTestId('searchHomepageCloudLink-usage')).toBeInTheDocument();
+    });
 
     expect(getByTestId('searchHomepageCloudLink-home')).toHaveAttribute('target', '_blank');
     expect(getByTestId('searchHomepageCloudLink-elasticCloud')).toHaveAttribute('target', '_blank');
     expect(getByTestId('searchHomepageCloudLink-organization')).toHaveAttribute('target', '_blank');
+    expect(getByTestId('searchHomepageCloudLink-usage')).toHaveAttribute('target', '_blank');
   });
 });
