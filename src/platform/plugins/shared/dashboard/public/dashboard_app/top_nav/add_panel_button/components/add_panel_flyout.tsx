@@ -48,6 +48,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredGroups, setFilteredGroups] = useState<MenuItemGroup[]>([]);
+
   useEffect(() => {
     if (!searchTerm) {
       return setFilteredGroups(groups ?? []);
