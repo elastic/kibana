@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { EuiThemeComputed } from '@elastic/eui-theme-common';
+
 import type { ComponentHealth } from '../../../../common/types';
 
 export type ComponentHealthStatus = 'healthy' | 'unhealthy' | 'unknown';
@@ -52,4 +54,19 @@ export const HEALTH_STATUS_COLORS: Record<ComponentHealthStatus, string> = {
   healthy: 'success',
   unhealthy: 'warning',
   unknown: 'subdued',
+};
+
+export const getHealthStatusColor = (
+  status: ComponentHealthStatus,
+  euiTheme: EuiThemeComputed<{}>
+): string => {
+  switch (status) {
+    case 'healthy':
+      return euiTheme.colors.backgroundFilledSuccess;
+    case 'unhealthy':
+      return euiTheme.colors.backgroundFilledWarning;
+    case 'unknown':
+    default:
+      return euiTheme.colors.lightShade;
+  }
 };

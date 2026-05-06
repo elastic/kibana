@@ -22,6 +22,7 @@ export type OTelComponentType = 'receiver' | 'processor' | 'connector' | 'export
 export interface OTelGraphNodeData {
   label: string;
   componentType: OTelComponentType;
+  pipelineId?: string;
   healthStatus?: ComponentHealthStatus;
   [key: string]: unknown;
 }

@@ -16,6 +16,7 @@ export interface OTelPipelineGroupNodeData {
   label: string;
   isSelected?: boolean;
   healthStatus?: ComponentHealthStatus;
+  healthCounts?: { healthy: number; total: number };
   [key: string]: unknown;
 }
 
@@ -183,6 +184,7 @@ const buildGroupedGraph = (
             data: {
               label: componentId,
               componentType: getComponentType(componentId, role, config),
+              pipelineId,
             },
           });
         }

@@ -6,14 +6,17 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiDescriptionList, EuiToolTip } from '@elastic/eui';
+import { EuiCode, EuiDescriptionList, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
 
-import type { Agent } from '../../../../../common/types';
+import type { Agent, OTelCollectorConfig } from '../../../../../common/types';
+
+import { AgentHealth } from '../../../../applications/fleet/sections/agents/components/agent_health';
 
 interface CollectorDetailInfoProps {
   agent: Agent;
+  config: OTelCollectorConfig;
 }
 
 const FormattedTimestampOrDash: React.FC<{ value?: string }> = ({ value }) => {
@@ -40,14 +43,25 @@ const FormattedTimestampOrDash: React.FC<{ value?: string }> = ({ value }) => {
   );
 };
 
-export const CollectorDetailInfo: React.FC<CollectorDetailInfoProps> = ({ agent }) => {
+export const CollectorDetailInfo: React.FC<CollectorDetailInfoProps> = ({ agent, config }) => {
   const host = agent.local_metadata?.host;
   const identifying = agent.identifying_attributes;
   const nonIdentifying = agent.non_identifying_attributes;
+  const pipelineCount = Object.keys(config?.service?.pipelines ?? {}).length;
 
   const listItems = useMemo(
     () =>
       [
+        {
+          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.instanceId', {
+            defaultMessage: 'Instance ID',
+          }),
+          description: identifying?.['service.instance.id'] ? (
+            <EuiCode>{identifying['service.instance.id']}</EuiCode>
+          ) : (
+            '-'
+          ),
+        },
         {
           title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.displayName', {
             defaultMessage: 'Display name',
@@ -55,10 +69,16 @@ export const CollectorDetailInfo: React.FC<CollectorDetailInfoProps> = ({ agent 
           description: nonIdentifying?.['elastic.display.name'] ?? '-',
         },
         {
-          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.status', {
-            defaultMessage: 'Status',
+          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.agentId', {
+            defaultMessage: 'Agent ID',
           }),
-          description: agent.status ?? '-',
+          description: agent.id,
+        },
+        {
+          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.agentStatus', {
+            defaultMessage: 'Agent status',
+          }),
+          description: <AgentHealth agent={agent} fromDetails={true} />,
         },
         {
           title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.lastActivity', {
@@ -67,10 +87,10 @@ export const CollectorDetailInfo: React.FC<CollectorDetailInfoProps> = ({ agent 
           description: <FormattedTimestampOrDash value={agent.last_checkin} />,
         },
         {
-          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.agentId', {
-            defaultMessage: 'Agent ID',
+          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.lastCheckinMessage', {
+            defaultMessage: 'Last checkin message',
           }),
-          description: agent.id,
+          description: agent.last_checkin_message ?? '-',
         },
         {
           title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.serviceName', {
@@ -94,6 +114,12 @@ export const CollectorDetailInfo: React.FC<CollectorDetailInfoProps> = ({ agent 
             '-',
         },
         {
+          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.hostId', {
+            defaultMessage: 'Host ID',
+          }),
+          description: (typeof host === 'object' ? host?.id : undefined) ?? '-',
+        },
+        {
           title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.hostArch', {
             defaultMessage: 'Host architecture',
           }),
@@ -106,16 +132,37 @@ export const CollectorDetailInfo: React.FC<CollectorDetailInfoProps> = ({ agent 
           description: nonIdentifying?.['os.type'] ?? '-',
         },
         {
+          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.platform', {
+            defaultMessage: 'Platform',
+          }),
+          description:
+            typeof agent.local_metadata?.os?.platform === 'string'
+              ? agent.local_metadata.os.platform
+              : '-',
+        },
+        {
           title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.collectorGroup', {
             defaultMessage: 'Collector group',
           }),
           description: nonIdentifying?.['elastic.collector.group'] ?? '-',
         },
         {
+          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.pipelines', {
+            defaultMessage: 'Pipelines',
+          }),
+          description: String(pipelineCount),
+        },
+        {
           title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.enrolled', {
             defaultMessage: 'Enrolled',
           }),
           description: <FormattedTimestampOrDash value={agent.enrolled_at} />,
+        },
+        {
+          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.tags', {
+            defaultMessage: 'Tags',
+          }),
+          description: (agent.tags ?? []).length > 0 ? agent.tags!.join(', ') : '-',
         },
         {
           title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.capabilities', {
@@ -127,13 +174,15 @@ export const CollectorDetailInfo: React.FC<CollectorDetailInfoProps> = ({ agent 
         ...item,
         description: String(item.description) === '' ? '-' : item.description,
       })),
-    [agent, host, identifying, nonIdentifying]
+    [agent, host, identifying, nonIdentifying, pipelineCount]
   );
 
   return (
     <EuiDescriptionList
       compressed
       type="column"
+      rowGutterSize="m"
+      columnGutterSize="m"
       data-test-subj="collectorDetailInfo"
       listItems={listItems}
     />

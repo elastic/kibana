@@ -43,7 +43,7 @@ const DETAIL_TABS: Array<{ id: DetailTabId; name: string }> = [
   {
     id: 'yaml',
     name: i18n.translate('xpack.fleet.collectorDetailTabs.yaml', {
-      defaultMessage: 'Configuration',
+      defaultMessage: 'Config',
     }),
   },
 ];
@@ -51,6 +51,7 @@ const DETAIL_TABS: Array<{ id: DetailTabId; name: string }> = [
 interface ComponentSelection {
   componentId: string;
   componentType: OTelComponentType;
+  pipelineId?: string;
 }
 
 interface CollectorDetailTabsProps {
@@ -69,14 +70,18 @@ export const CollectorDetailTabs: React.FC<CollectorDetailTabsProps> = ({
   const [selectedTabId, setSelectedTabId] = useState<DetailTabId>('health');
   const [selectedComponent, setSelectedComponent] = useState<ComponentSelection | null>(null);
 
-  const handleComponentClick = (componentId: string, componentType: OTelComponentType) => {
+  const handleComponentClick = (
+    componentId: string,
+    componentType: OTelComponentType,
+    pipelineId?: string
+  ) => {
     if (
       selectedComponent?.componentId === componentId &&
       selectedComponent?.componentType === componentType
     ) {
       setSelectedComponent(null);
     } else {
-      setSelectedComponent({ componentId, componentType });
+      setSelectedComponent({ componentId, componentType, pipelineId });
     }
   };
 
@@ -104,7 +109,7 @@ export const CollectorDetailTabs: React.FC<CollectorDetailTabsProps> = ({
         ))}
       </EuiTabs>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m" responsive={false}>
+      <EuiFlexGroup gutterSize="m" responsive={false} alignItems="flexStart">
         <EuiFlexItem>
           {selectedTabId === 'health' && (
             <CollectorDetailHealth
@@ -114,7 +119,7 @@ export const CollectorDetailTabs: React.FC<CollectorDetailTabsProps> = ({
               selectedComponentId={selectedComponent?.componentId}
             />
           )}
-          {selectedTabId === 'info' && <CollectorDetailInfo agent={agent} />}
+          {selectedTabId === 'info' && <CollectorDetailInfo agent={agent} config={config} />}
           {selectedTabId === 'yaml' &&
             (isConfigLoading ? (
               <EuiLoadingSpinner />
@@ -127,6 +132,7 @@ export const CollectorDetailTabs: React.FC<CollectorDetailTabsProps> = ({
             <OTelComponentDetail
               componentId={selectedComponent.componentId}
               componentType={selectedComponent.componentType}
+              pipelineId={selectedComponent.pipelineId}
               config={config}
               health={health}
               onClose={() => setSelectedComponent(null)}

@@ -6,7 +6,15 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiButtonEmpty, EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { dump } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 
@@ -20,6 +28,8 @@ interface YamlViewerProps {
 export const YamlViewer: React.FunctionComponent<YamlViewerProps> = ({ config, agentName }) => {
   const yamlContent = useMemo(() => dump(config, { lineWidth: -1, quotingType: '"' }), [config]);
 
+  const lineCount = useMemo(() => yamlContent.split('\n').filter(Boolean).length, [yamlContent]);
+
   const downloadFile = useCallback(() => {
     const link = document.createElement('a');
     link.href = `data:text/yaml;charset=utf-8,${encodeURIComponent(yamlContent)}`;
@@ -29,7 +39,28 @@ export const YamlViewer: React.FunctionComponent<YamlViewerProps> = ({ config, a
 
   return (
     <div data-test-subj="otelYamlViewer">
-      <EuiFlexGroup justifyContent="flexStart">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>
+                  {i18n.translate('xpack.fleet.otelUi.yamlViewer.title', {
+                    defaultMessage: 'Effective configuration (YAML)',
+                  })}
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">
+                {i18n.translate('xpack.fleet.otelUi.yamlViewer.lineCount', {
+                  defaultMessage: '{lineCount} lines',
+                  values: { lineCount },
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="s"
@@ -45,6 +76,7 @@ export const YamlViewer: React.FunctionComponent<YamlViewerProps> = ({ config, a
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiCodeBlock
+        overflowHeight="60vh"
         language="yaml"
         isCopyable
         fontSize="m"

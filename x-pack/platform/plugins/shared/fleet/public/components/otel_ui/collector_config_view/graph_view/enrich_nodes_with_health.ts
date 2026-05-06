@@ -42,13 +42,34 @@ export const enrichNodesWithHealth = (
   if (!health) return;
   for (const node of nodes) {
     if (node.type === 'component') {
-      const { componentType, label } = node.data as OTelGraphNodeData;
-      const componentHealth = findComponentHealth(health, componentType, label);
+      const { componentType, label, pipelineId } = node.data as OTelGraphNodeData;
+      let componentHealth: ComponentHealth | undefined;
+      if (pipelineId) {
+        const pipelineHealth = findComponentHealth(health, 'pipeline', pipelineId);
+        componentHealth =
+          findComponentHealth(pipelineHealth, componentType, label) ??
+          findComponentHealth(health, componentType, label);
+      } else {
+        componentHealth = findComponentHealth(health, componentType, label);
+      }
       node.data.healthStatus = getComponentHealthStatus(componentHealth);
     } else if (node.type === 'pipelineGroup') {
       const { label } = node.data as OTelPipelineGroupNodeData;
       const pipelineHealth = findComponentHealth(health, 'pipeline', label);
       node.data.healthStatus = getComponentHealthStatus(pipelineHealth);
+    }
+  }
+
+  for (const node of nodes) {
+    if (node.type === 'pipelineGroup') {
+      const children = nodes.filter((n) => n.parentId === node.id && n.type === 'component');
+      if (children.length > 0) {
+        const healthy = children.filter((c) => c.data.healthStatus === 'healthy').length;
+        (node.data as OTelPipelineGroupNodeData).healthCounts = {
+          healthy,
+          total: children.length,
+        };
+      }
     }
   }
 };

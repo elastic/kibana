@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import moment from 'moment';
 import {
   EuiAccordion,
   EuiBadge,
@@ -13,17 +14,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
   EuiToolTip,
-  transparentize,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { ComponentHealth, OTelCollectorConfig } from '../../../../../common/types';
 
@@ -32,15 +33,19 @@ import { COMPONENT_TYPE_LABELS, COMPONENT_TYPE_VIS_COLORS } from '../graph_view/
 import { findComponentHealth } from '../graph_view/enrich_nodes_with_health';
 import {
   getComponentHealthStatus,
+  getHealthStatusColor,
   getHealthStatusLabel,
-  HEALTH_STATUS_COLORS,
   type ComponentHealthStatus,
 } from '../utils';
 
 interface CollectorDetailHealthProps {
   health?: ComponentHealth;
   config?: OTelCollectorConfig;
-  onComponentClick?: (componentId: string, componentType: OTelComponentType) => void;
+  onComponentClick?: (
+    componentId: string,
+    componentType: OTelComponentType,
+    pipelineId?: string
+  ) => void;
   selectedComponentId?: string;
 }
 
@@ -64,6 +69,21 @@ const FormattedTimestamp: React.FC<{ nanos: number }> = ({ nanos }) => {
         <FormattedRelative value={ms} />
       </span>
     </EuiToolTip>
+  );
+};
+
+const FormattedAbsoluteTimestamp: React.FC<{ nanos: number }> = ({ nanos }) => {
+  const ms = nanos / 1_000_000;
+  return (
+    <FormattedDate
+      value={ms}
+      year="numeric"
+      month="numeric"
+      day="numeric"
+      hour="numeric"
+      minute="numeric"
+      second="numeric"
+    />
   );
 };
 
@@ -104,10 +124,12 @@ const ComponentItem: React.FC<{
         if (e.key === 'Enter' || e.key === ' ') onClick?.();
       }}
       style={{
-        display: 'inline-block',
-        background: transparentize(accentColor, 0.9),
-        borderLeft: `3px solid ${accentColor}`,
-        borderRadius: euiTheme.border.radius.small,
+        display: 'block',
+        width: 'fit-content',
+        background: euiTheme.colors.backgroundBasePlain,
+        border: `1px solid ${euiTheme.colors.borderBasePlain}`,
+        borderLeft: `4px solid ${accentColor}`,
+        borderRadius: euiTheme.border.radius.medium,
         padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
         marginBottom: euiTheme.size.xs,
         cursor: 'pointer',
@@ -116,8 +138,8 @@ const ComponentItem: React.FC<{
       }}
       data-test-subj={`collectorHealthComponent-${type}:${id}`}
     >
-      <EuiHealth color={HEALTH_STATUS_COLORS[status]}>
-        <EuiText size="xs" style={{ fontWeight: isSelected ? 600 : 400 }}>
+      <EuiHealth color={getHealthStatusColor(status, euiTheme)}>
+        <EuiText size="s" style={{ fontWeight: isSelected ? 600 : 400 }}>
           {id}
         </EuiText>
       </EuiHealth>
@@ -134,9 +156,14 @@ const PipelineAccordion: React.FC<{
   pipelineId: string;
   groups: PipelineComponentGroup[];
   health?: ComponentHealth;
-  onComponentClick?: (componentId: string, componentType: OTelComponentType) => void;
+  onComponentClick?: (
+    componentId: string,
+    componentType: OTelComponentType,
+    pipelineId?: string
+  ) => void;
   selectedComponentId?: string;
 }> = ({ pipelineId, groups, health, onComponentClick, selectedComponentId }) => {
+  const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: `pipeline-${pipelineId}` });
 
   const totalComponents = groups.reduce((sum, g) => sum + g.components.length, 0);
@@ -144,6 +171,7 @@ const PipelineAccordion: React.FC<{
     (sum, g) => sum + g.components.filter((c) => c.status === 'healthy').length,
     0
   );
+  const unhealthyCount = totalComponents - healthyCount;
 
   const pipelineHealth = findComponentHealth(health, 'pipeline', pipelineId);
   const pipelineStatus = getComponentHealthStatus(pipelineHealth);
@@ -153,13 +181,21 @@ const PipelineAccordion: React.FC<{
       id={accordionId}
       onToggle={(isOpen) => {
         if (isOpen && onComponentClick) {
-          onComponentClick(pipelineId, 'pipeline');
+          onComponentClick(pipelineId, 'pipeline', pipelineId);
         }
       }}
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiHealth color={HEALTH_STATUS_COLORS[pipelineStatus]}>
+            <EuiHealth
+              color={
+                healthyCount === totalComponents
+                  ? euiTheme.colors.backgroundFilledSuccess
+                  : healthyCount === 0
+                  ? euiTheme.colors.backgroundFilledDanger
+                  : euiTheme.colors.backgroundFilledWarning
+              }
+            >
               <strong>{pipelineId}</strong>
             </EuiHealth>
           </EuiFlexItem>
@@ -172,39 +208,129 @@ const PipelineAccordion: React.FC<{
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color={healthyCount === totalComponents ? 'success' : 'warning'}>
-              {i18n.translate('xpack.fleet.collectorDetail.health.healthyCount', {
-                defaultMessage: '{count} healthy',
-                values: { count: healthyCount },
-              })}
-            </EuiBadge>
+            {healthyCount === totalComponents ? (
+              <EuiBadge color="success">
+                {i18n.translate('xpack.fleet.collectorDetail.health.allHealthy', {
+                  defaultMessage: '{count} healthy',
+                  values: { count: healthyCount },
+                })}
+              </EuiBadge>
+            ) : healthyCount === 0 ? (
+              <EuiBadge color="danger">
+                {i18n.translate('xpack.fleet.collectorDetail.health.allUnhealthy', {
+                  defaultMessage: '{count} unhealthy',
+                  values: { count: unhealthyCount },
+                })}
+              </EuiBadge>
+            ) : (
+              <EuiBadge color="warning">
+                {i18n.translate('xpack.fleet.collectorDetail.health.mixedHealth', {
+                  defaultMessage: '{healthyCount} healthy, {unhealthyCount} unhealthy',
+                  values: { healthyCount, unhealthyCount },
+                })}
+              </EuiBadge>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       }
       paddingSize="m"
       data-test-subj={`collectorHealthPipeline-${pipelineId}`}
     >
-      {groups.map((group) => (
-        <React.Fragment key={group.type}>
-          <EuiTitle size="xxxs">
-            <h5>{COMPONENT_TYPE_LABELS[group.type]}s</h5>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          {group.components.map((comp) => (
-            <ComponentItem
-              key={`${group.type}:${comp.id}`}
-              id={comp.id}
-              type={group.type}
-              status={comp.status}
-              lastError={comp.health?.last_error}
-              isSelected={selectedComponentId === comp.id}
-              onClick={onComponentClick ? () => onComponentClick(comp.id, group.type) : undefined}
-            />
-          ))}
-          <EuiSpacer size="s" />
-        </React.Fragment>
-      ))}
+      <div style={{ marginLeft: 16 }}>
+        {groups.map((group, index) => (
+          <React.Fragment key={group.type}>
+            {index > 0 && <EuiHorizontalRule margin="s" />}
+            <EuiTitle size="xxs">
+              <h5>{COMPONENT_TYPE_LABELS[group.type]}s</h5>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            {group.components.map((comp) => (
+              <ComponentItem
+                key={`${group.type}:${comp.id}`}
+                id={comp.id}
+                type={group.type}
+                status={comp.status}
+                lastError={comp.health?.last_error}
+                isSelected={selectedComponentId === comp.id}
+                onClick={
+                  onComponentClick
+                    ? () => onComponentClick(comp.id, group.type, pipelineId)
+                    : undefined
+                }
+              />
+            ))}
+          </React.Fragment>
+        ))}
+      </div>
     </EuiAccordion>
+  );
+};
+
+const ComponentHealthSectionHeader: React.FC<{
+  pipelineGroups: Array<{ pipelineId: string; groups: PipelineComponentGroup[] }>;
+  health: ComponentHealth;
+}> = ({ pipelineGroups, health }) => {
+  const totalComponents = pipelineGroups.reduce(
+    (sum, pg) => sum + pg.groups.reduce((s, g) => s + g.components.length, 0),
+    0
+  );
+  const totalHealthy = pipelineGroups.reduce(
+    (sum, pg) =>
+      sum +
+      pg.groups.reduce((s, g) => s + g.components.filter((c) => c.status === 'healthy').length, 0),
+    0
+  );
+  const totalUnhealthy = totalComponents - totalHealthy;
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs">
+          <h4>
+            {i18n.translate('xpack.fleet.collectorDetail.health.componentHealthTitle', {
+              defaultMessage: 'Component health',
+            })}
+          </h4>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {totalHealthy === totalComponents ? (
+          <EuiBadge color="success">
+            {i18n.translate('xpack.fleet.collectorDetail.health.totalAllHealthy', {
+              defaultMessage: '{count} healthy',
+              values: { count: totalHealthy },
+            })}
+          </EuiBadge>
+        ) : totalHealthy === 0 ? (
+          <EuiBadge color="danger">
+            {i18n.translate('xpack.fleet.collectorDetail.health.totalAllUnhealthy', {
+              defaultMessage: '{count} unhealthy',
+              values: { count: totalUnhealthy },
+            })}
+          </EuiBadge>
+        ) : (
+          <EuiBadge color="warning">
+            {i18n.translate('xpack.fleet.collectorDetail.health.totalMixedHealth', {
+              defaultMessage: '{healthyCount} healthy, {unhealthyCount} unhealthy',
+              values: { healthyCount: totalHealthy, unhealthyCount: totalUnhealthy },
+            })}
+          </EuiBadge>
+        )}
+      </EuiFlexItem>
+      {health.status_time_unix_nano && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.fleet.collectorDetail.health.componentHealthUpdated"
+              defaultMessage="Updated {timestamp}"
+              values={{
+                timestamp: <FormattedAbsoluteTimestamp nanos={health.status_time_unix_nano} />,
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
 
@@ -219,6 +345,7 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
     if (!pipelines) return [];
 
     return Object.entries(pipelines).map(([pipelineId, pipeline]) => {
+      const pipelineHealth = findComponentHealth(health, 'pipeline', pipelineId);
       const groups: PipelineComponentGroup[] = [];
 
       for (const type of COMPONENT_TYPE_ORDER) {
@@ -235,7 +362,9 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
           groups.push({
             type,
             components: componentIds.map((id) => {
-              const componentHealth = findComponentHealth(health, type, id);
+              const componentHealth =
+                findComponentHealth(pipelineHealth, type, id) ??
+                findComponentHealth(health, type, id);
               return {
                 id,
                 health: componentHealth,
@@ -249,6 +378,8 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
       return { pipelineId, groups };
     });
   }, [config, health]);
+
+  const { euiTheme } = useEuiTheme();
 
   if (!health) {
     return (
@@ -271,26 +402,41 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
         listItems={[
           {
             title: i18n.translate('xpack.fleet.otelUi.collectorDetail.health.statusLabel', {
-              defaultMessage: 'Status',
+              defaultMessage: 'Health status',
             }),
             description: (
-              <EuiBadge color={HEALTH_STATUS_COLORS[overallStatus]}>
+              <EuiHealth color={getHealthStatusColor(overallStatus, euiTheme)}>
                 {getHealthStatusLabel(overallStatus)}
-              </EuiBadge>
+              </EuiHealth>
             ),
           },
           {
-            title: i18n.translate('xpack.fleet.otelUi.collectorDetail.health.reportedStatusLabel', {
-              defaultMessage: 'Reported status',
+            title: i18n.translate('xpack.fleet.otelUi.collectorDetail.health.startTimeLabel', {
+              defaultMessage: 'Start time',
             }),
-            description: health.status || '-',
+            description: health.start_time_unix_nano ? (
+              <FormattedAbsoluteTimestamp nanos={health.start_time_unix_nano} />
+            ) : (
+              '-'
+            ),
           },
           {
-            title: i18n.translate('xpack.fleet.otelUi.collectorDetail.health.lastUpdatedLabel', {
-              defaultMessage: 'Last updated',
+            title: i18n.translate('xpack.fleet.otelUi.collectorDetail.health.uptimeLabel', {
+              defaultMessage: 'Uptime',
             }),
+            description: health.start_time_unix_nano
+              ? moment.duration(Date.now() - health.start_time_unix_nano / 1_000_000).humanize()
+              : '-',
+          },
+          {
+            title: i18n.translate(
+              'xpack.fleet.otelUi.collectorDetail.health.lastHealthUpdateLabel',
+              {
+                defaultMessage: 'Last health update',
+              }
+            ),
             description: health.status_time_unix_nano ? (
-              <FormattedTimestamp nanos={health.status_time_unix_nano} />
+              <FormattedAbsoluteTimestamp nanos={health.status_time_unix_nano} />
             ) : (
               '-'
             ),
@@ -312,18 +458,8 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
       {pipelineGroups.length > 0 && (
         <>
           <EuiSpacer size="m" />
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <h4>
-                  {i18n.translate('xpack.fleet.collectorDetail.health.componentHealthTitle', {
-                    defaultMessage: 'Component Health',
-                  })}
-                </h4>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
+          <ComponentHealthSectionHeader pipelineGroups={pipelineGroups} health={health} />
+          <EuiSpacer size="m" />
           <EuiFlexGroup direction="column" gutterSize="s">
             {pipelineGroups.map(({ pipelineId, groups }) => (
               <EuiFlexItem key={pipelineId} grow={false}>

@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiIcon,
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
@@ -21,8 +20,6 @@ import {
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-
-import otelIcon from '../../../../../assets/opentelemetry.svg';
 
 import type { OutputsForAgentPolicy } from '../../../../../../server/types';
 
@@ -149,17 +146,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             {isCollector && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="hollow">
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type={otelIcon} size="s" aria-hidden={true} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <FormattedMessage
-                        id="xpack.fleet.agentDetails.collectorBadge"
-                        defaultMessage="Collector (OpAMP)"
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.collectorBadge"
+                    defaultMessage="Collector (OpAMP)"
+                  />
                 </EuiBadge>
               </EuiFlexItem>
             )}
