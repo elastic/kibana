@@ -150,6 +150,32 @@ describe('AddModelPopover', () => {
     expect(screen.getByText('OpenAI GPT-4o')).toBeInTheDocument();
   });
 
+  it('when taskType is set, only lists connectors compatible with that task type', () => {
+    const withEmbedding = [
+      ...mockConnectors,
+      createConnector({
+        connectorId: 'ep-embed',
+        name: 'Embedding model',
+        type: InferenceConnectorType.Inference,
+        config: { taskType: 'text_embedding', service: 'openai' },
+        isInferenceEndpoint: true,
+      }),
+    ];
+    mockUseConnectors.mockReturnValue({ data: withEmbedding });
+
+    render(
+      <Wrapper>
+        <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} taskType="text_embedding" />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('add-model-button'));
+
+    expect(screen.getByText('Embedding model')).toBeInTheDocument();
+    expect(screen.queryByText('OpenAI GPT-4o')).not.toBeInTheDocument();
+    expect(screen.queryByText('My OpenAI Connector')).not.toBeInTheDocument();
+  });
+
   it('calls onAdd with the selected connector ID', () => {
     render(
       <Wrapper>

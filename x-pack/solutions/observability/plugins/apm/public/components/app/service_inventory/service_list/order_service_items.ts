@@ -18,7 +18,6 @@ const SLO_STATUS_ORDER: SloStatus[] = ['healthy', 'noData', 'degrading', 'violat
 const SLO_STATUS_MULTIPLIER = 10000;
 
 const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
-  [ServiceInventoryFieldName.HealthStatus]: (item) => (item.healthStatus ? 1 : -1),
   [ServiceInventoryFieldName.AnomalyScore]: (item) => item.anomalyScore ?? -1,
   [ServiceInventoryFieldName.ServiceName]: (item) => item.serviceName.toLowerCase(),
   [ServiceInventoryFieldName.Environments]: (item) =>
