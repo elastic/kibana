@@ -171,13 +171,8 @@ const unifiedTracesByIdSummaryRoute = createApmServerRoute({
 });
 
 const unifiedTracesByIdErrorsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/unified_traces/{traceId}/errors',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-    }),
-    query: t.intersection([rangeRt, t.partial({ docId: t.string })]),
-  }),
+  endpoint: routeDefinitions.unifiedTracesByIdErrors.endpoint,
+  params: routeDefinitions.unifiedTracesByIdErrors.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorsByTraceId> => {
     const [apmEventClient, logsClient] = await Promise.all([

@@ -8,7 +8,13 @@
  */
 import * as t from 'io-ts';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import type { Error as ApmError, TraceItem, FocusedTraceItems, Transaction } from '@kbn/apm-types';
+import type {
+  Error as ApmError,
+  ErrorsByTraceId,
+  TraceItem,
+  FocusedTraceItems,
+  Transaction,
+} from '@kbn/apm-types';
 import { defineRoute } from './types';
 import { rangeRt } from '../default_api_types';
 
@@ -35,6 +41,16 @@ export interface UnifiedTracesByIdResponse {
   traceDocsTotal: number;
   maxTraceItems: number;
 }
+
+export const unifiedTracesByIdErrorsRoute = defineRoute<ErrorsByTraceId>()({
+  endpoint: 'GET /internal/apm/unified_traces/{traceId}/errors' as const,
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+    }),
+    query: t.intersection([rangeRt, t.partial({ docId: t.string })]),
+  }),
+});
 
 export const unifiedTracesByIdRoute = defineRoute<UnifiedTracesByIdResponse>()({
   endpoint: 'GET /internal/apm/unified_traces/{traceId}' as const,
