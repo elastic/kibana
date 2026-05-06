@@ -6,13 +6,14 @@
  */
 
 // Pre-composed flyouts (lazy loaded) - recommended for most use cases
-export { DynamicRuleFormFlyout, StandaloneRuleFormFlyout } from './flyout';
+export { DynamicRuleFormFlyout, StandaloneRuleFormFlyout, ComposeDiscoverFlyout } from './flyout';
 
 // Lazy components (without Suspense wrapper) - for consumers who need full control
 export {
   LazyDynamicRuleFormFlyout,
   LazyStandaloneRuleFormFlyout,
   LazyRuleFormFlyout,
+  LazyComposeDiscoverFlyout,
 } from './flyout';
 
 // Constants
@@ -53,4 +54,5 @@ export type {
   RuleFormFlyoutProps,
   DynamicRuleFormFlyoutProps,
   StandaloneRuleFormFlyoutProps,
+  ComposeDiscoverFlyoutProps,
 } from './flyout';

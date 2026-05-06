@@ -18,15 +18,20 @@ import {
   type Criteria,
 } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
+import { ComposeDiscoverFlyout } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { paths } from '../../constants';
+
 import { RulesListTableContainer } from './rules_list_table_container';
 import type { RulesListTableSortField } from './rules_list_table';
 import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_popover';
@@ -48,9 +53,20 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 ) as Partial<Record<string, FindRulesSortField>>;
 
 export const RulesListPage = () => {
-  const { basePath } = useService(CoreStart('http'));
-
+  const http = useService(CoreStart('http'));
+  const notifications = useService(CoreStart('notifications'));
+  const application = useService(CoreStart('application'));
+  const data = useService(PluginStart('data')) as DataPublicPluginStart;
+  const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
+  const lens = useService(PluginStart('lens')) as LensPublicStart;
   useBreadcrumbs('rules_list');
+
+  const [flyoutOpen, setFlyoutOpen] = useState(false);
+  const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
+  const ruleFormServices = useMemo(
+    () => ({ http, data, dataViews, notifications, application, lens }),
+    [http, data, dataViews, notifications, application, lens]
+  );
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -76,7 +92,7 @@ export const RulesListPage = () => {
     setPage(1);
   }, [debouncedSearch, filter]);
 
-  const { data, isLoading, isError, error } = useFetchRules({
+  const { data: rulesData, isLoading, isError, error } = useFetchRules({
     page,
     perPage,
     filter,
@@ -123,7 +139,7 @@ export const RulesListPage = () => {
           <EuiButton
             key="create-rule"
             fill
-            href={basePath.prepend(paths.ruleCreate)}
+            onClick={() => setFlyoutOpen(true)}
             data-test-subj="createRuleButton"
           >
             <FormattedMessage
@@ -181,8 +197,8 @@ export const RulesListPage = () => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <RulesListTableContainer
-            items={data?.items ?? []}
-            totalItemCount={data?.total ?? 0}
+            items={rulesData?.items ?? []}
+            totalItemCount={rulesData?.total ?? 0}
             page={page}
             perPage={perPage}
             search={debouncedSearch}
@@ -195,6 +211,13 @@ export const RulesListPage = () => {
           />
         </>
       ) : null}
+      {flyoutOpen && (
+        <ComposeDiscoverFlyout
+          historyKey={historyKey}
+          onClose={() => setFlyoutOpen(false)}
+          services={ruleFormServices}
+        />
+      )}
     </div>
   );
 };

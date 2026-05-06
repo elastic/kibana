@@ -10,6 +10,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import type { RuleFormFlyoutProps } from './rule_form_flyout';
 import type { DynamicRuleFormFlyoutProps } from './dynamic_rule_form_flyout';
 import type { StandaloneRuleFormFlyoutProps } from './standalone_rule_form_flyout';
+import type { ComposeDiscoverFlyoutProps } from './compose_discover';
 
 // Lazy load flyout components
 const LazyRuleFormFlyout = React.lazy(() =>
@@ -30,8 +31,19 @@ const LazyStandaloneRuleFormFlyout = React.lazy(() =>
   }))
 );
 
+const LazyComposeDiscoverFlyout = React.lazy(() =>
+  import('./compose_discover').then((module) => ({
+    default: module.ComposeDiscoverFlyout,
+  }))
+);
+
 // Export lazy components directly for consumers who need full control over Suspense
-export { LazyDynamicRuleFormFlyout, LazyStandaloneRuleFormFlyout, LazyRuleFormFlyout };
+export {
+  LazyDynamicRuleFormFlyout,
+  LazyStandaloneRuleFormFlyout,
+  LazyRuleFormFlyout,
+  LazyComposeDiscoverFlyout,
+};
 
 /** Base flyout wrapper - use with DynamicRuleForm or StandaloneRuleForm as children */
 export const RuleFormFlyout = (props: RuleFormFlyoutProps) => (
@@ -54,8 +66,16 @@ export const StandaloneRuleFormFlyout = (props: StandaloneRuleFormFlyoutProps) =
   </Suspense>
 );
 
+/** Compose Discover flyout — two-layer flyout with compact rule form + Discover child */
+export const ComposeDiscoverFlyout = (props: ComposeDiscoverFlyoutProps) => (
+  <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+    <LazyComposeDiscoverFlyout {...props} />
+  </Suspense>
+);
+
 // Export types
 export type { RuleFormFlyoutProps } from './rule_form_flyout';
 export type { DynamicRuleFormFlyoutProps } from './dynamic_rule_form_flyout';
 export type { StandaloneRuleFormFlyoutProps } from './standalone_rule_form_flyout';
+export type { ComposeDiscoverFlyoutProps } from './compose_discover';
 export type * from '../form/types';
