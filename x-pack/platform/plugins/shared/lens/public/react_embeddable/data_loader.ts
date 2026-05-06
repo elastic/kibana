@@ -201,6 +201,8 @@ export function loadEmbeddableData(
       }
     };
 
+    // _data (expression result) is unused — Lens only needs the inspector adapters.
+    // The signature OnDataCallback is used for consistency with the expressions plugin.
     const onDataCallback: OnDataCallback = (_data, adapters) => {
       internalApi.updateVisualizationContext({
         activeData: hasTablesAdapter(adapters) ? adapters.tables?.tables : undefined,
