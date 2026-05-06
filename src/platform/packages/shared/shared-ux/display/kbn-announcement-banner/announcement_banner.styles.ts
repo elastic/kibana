@@ -12,9 +12,11 @@ import type { UseEuiTheme } from '@elastic/eui';
 
 const CONTAINER_NAME = 'kbn-announcement-banner';
 
+/** Narrowest possible layout */
+const CQC_MAX_NARROW = '(max-width: 360px)';
 /** Below this width the layout collapses to a single column. */
 const CQC_SUPER_NARROW = '(max-width: 540px)';
-
+const CQC_NARROW = '(min-width: 541px)';
 /** At and above this width actions move beside the body and primary appears last. */
 const CQC_WIDE = '(min-width: 1000px)';
 
@@ -26,9 +28,7 @@ export const announcementBannerStyles = {
     container-type: inline-size;
     container-name: ${CONTAINER_NAME};
     position: relative;
-    padding-block: ${euiTheme.size.base};
-    padding-inline-start: ${euiTheme.size.base};
-    padding-inline-end: ${euiTheme.size.base};
+
     border: ${euiTheme.border.thin};
     border-radius: ${euiTheme.border.radius.medium};
   `,
@@ -37,14 +37,21 @@ export const announcementBannerStyles = {
     flex-direction: row;
     align-items: flex-start;
     gap: ${euiTheme.size.base};
+    padding-inline-start: ${euiTheme.size.base};
+    padding-inline-end: ${euiTheme.size.base};
+
+    [data-size='m'] & {
+      padding-block: ${euiTheme.size.base};
+    }
+
+    [data-size='s'] & {
+      padding-block: ${euiTheme.size.m};
+    }
 
     @container ${CONTAINER_NAME} ${CQC_SUPER_NARROW} {
       flex-direction: column;
       align-items: stretch;
-
-      [data-size='s'] & {
-        gap: ${euiTheme.size.m};
-      }
+      gap: ${euiTheme.size.m};
     }
   `,
   media: ({ euiTheme }: UseEuiTheme) => css`
@@ -130,6 +137,13 @@ export const announcementBannerStyles = {
     align-items: center;
     gap: ${euiTheme.size.s};
 
+    @container ${CONTAINER_NAME} ${CQC_MAX_NARROW} {
+      /* use full width actions */
+      > * {
+        inline-size: 100%;
+      }
+    }
+
     @container ${CONTAINER_NAME} ${CQC_WIDE} {
       /* Reverses source order so primary appears last (rightmost). */
       flex-direction: row-reverse;
@@ -138,7 +152,9 @@ export const announcementBannerStyles = {
     }
   `,
   hasDismiss: ({ euiTheme }: UseEuiTheme) => css`
-    padding-inline-end: calc(${euiTheme.size.base} * 3);
+    @container ${CONTAINER_NAME} ${CQC_NARROW} {
+      padding-inline-end: calc(${euiTheme.size.s} * 5);
+    }
   `,
   dismiss: ({ euiTheme }: UseEuiTheme) => css`
     position: absolute;

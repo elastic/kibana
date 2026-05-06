@@ -64,12 +64,8 @@ export const AnnouncementBanner = ({
   const hasActions = Boolean(primaryActionProps);
 
   const backgroundColorStyles = useEuiBackgroundColorCSS()[color];
-  const rootCssStyles = [
-    styles.root,
-    backgroundColorStyles,
-    onDismiss && styles.hasDismiss,
-    cssStyles,
-  ];
+  const rootCssStyles = [styles.root, backgroundColorStyles, cssStyles];
+  const containerCssStyles = [styles.container, onDismiss && styles.hasDismiss];
 
   return (
     <div
@@ -79,7 +75,7 @@ export const AnnouncementBanner = ({
       data-size={size}
       data-color={color}
     >
-      <div css={styles.container}>
+      <div css={containerCssStyles}>
         {media ? (
           <div css={styles.media} data-test-subj={`${dataTestSubj}-media`}>
             {media}
