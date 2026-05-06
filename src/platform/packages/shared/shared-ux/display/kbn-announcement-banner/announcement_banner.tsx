@@ -8,20 +8,20 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiTitle, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiTitle,
+  EuiText,
+  EuiLiveAnnouncer,
+  useEuiBackgroundColorCSS,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import type { AnnouncementBannerProps } from './types';
-import { useAnnouncementBannerStyles } from './announcement_banner.styles';
-
-const dismissAriaLabel = i18n.translate('sharedUXPackages.announcement.dismissAriaLabel', {
-  defaultMessage: 'Dismiss announcement',
-});
-
-/*
-  TODO
-  - [ ] extra accessibility SR announcement?
-*/
+import { announcementBannerStyles } from './announcement_banner.styles';
 
 /**
  * A banner-style announcement with optional media, actions and dismiss button.
@@ -29,15 +29,13 @@ const dismissAriaLabel = i18n.translate('sharedUXPackages.announcement.dismissAr
  * Layout adapts to the host container via container queries (super narrow,
  * narrow, wide) — there is no `width` prop. The visual scale is controlled by
  * the `size` prop.
- *
- * @default size 'm'
- * @default headingElement 'h2'
  */
 export const AnnouncementBanner = ({
   title,
   headingElement = 'h2',
   text,
   size = 'm',
+  color = 'highlighted',
   actionProps,
   media,
   onDismiss,
@@ -45,24 +43,41 @@ export const AnnouncementBanner = ({
   children,
   className,
   css: cssStyles,
+  announceOnMount = false,
   'data-test-subj': dataTestSubj = 'announcementBanner',
 }: AnnouncementBannerProps) => {
-  const styles = useAnnouncementBannerStyles({ hasDismiss: Boolean(onDismiss) });
+  const styles = useMemoCss(announcementBannerStyles);
+
+  const dismissAriaLabel = i18n.translate('sharedUXPackages.announcementBanner.dismissAriaLabel', {
+    defaultMessage: 'Dismiss "{title}" announcement',
+    values: {
+      title,
+    },
+  });
 
   const Heading = headingElement;
   const headingSize = size === 's' ? 'xxs' : size === 'm' ? 'xs' : 's';
 
-  const primary = actionProps?.primary;
-  const secondary = actionProps?.secondary;
-  const hasActions = Boolean(primary || secondary);
-  const actionsSize = size === 'l' ? 'm' : 's';
+  const primaryActionProps = actionProps?.primary;
+  const secondaryActionProps = actionProps?.secondary;
+  // a standalone secondary action is not supported
+  const hasActions = Boolean(primaryActionProps);
+
+  const backgroundColorStyles = useEuiBackgroundColorCSS()[color];
+  const rootCssStyles = [
+    styles.root,
+    backgroundColorStyles,
+    onDismiss && styles.hasDismiss,
+    cssStyles,
+  ];
 
   return (
     <div
       className={className}
-      css={cssStyles ? [styles.root, cssStyles] : styles.root}
+      css={rootCssStyles}
       data-test-subj={dataTestSubj}
       data-size={size}
+      data-color={color}
     >
       <div css={styles.container}>
         {media ? (
@@ -78,8 +93,28 @@ export const AnnouncementBanner = ({
                 {title}
               </Heading>
             </EuiTitle>
+
+            {/* make the dismiss button discoverable early for screen readers,
+            but ensure the title is rendered before to provide a meaningful context */}
+            {onDismiss ? (
+              <EuiButtonIcon
+                iconType="cross"
+                color="text"
+                aria-label={dismissAriaLabel}
+                data-test-subj={`${dataTestSubj}-dismiss`}
+                {...dismissButtonProps}
+                css={styles.dismiss}
+                onClick={onDismiss}
+              />
+            ) : null}
+
             {text ? (
-              <EuiText css={styles.text} size="s" data-test-subj={`${dataTestSubj}-text`}>
+              <EuiText
+                css={styles.text}
+                size="s"
+                color="subdued"
+                data-test-subj={`${dataTestSubj}-text`}
+              >
                 {text}
               </EuiText>
             ) : null}
@@ -88,20 +123,20 @@ export const AnnouncementBanner = ({
 
           {hasActions ? (
             <div css={styles.actions} data-test-subj={`${dataTestSubj}-actions`}>
-              {primary ? (
+              {primaryActionProps ? (
                 <EuiButton
                   data-test-subj={`${dataTestSubj}-primaryAction`}
-                  {...primary}
+                  {...primaryActionProps}
                   color="primary"
-                  size={actionsSize}
+                  size="s"
                 />
               ) : null}
-              {secondary ? (
+              {secondaryActionProps ? (
                 <EuiButtonEmpty
                   data-test-subj={`${dataTestSubj}-secondaryAction`}
-                  {...secondary}
+                  {...secondaryActionProps}
                   color="primary"
-                  size={actionsSize}
+                  size="s"
                 />
               ) : null}
             </div>
@@ -109,17 +144,15 @@ export const AnnouncementBanner = ({
         </div>
       </div>
 
-      {onDismiss ? (
-        <EuiButtonIcon
-          iconType="cross"
-          color="text"
-          aria-label={dismissAriaLabel}
-          data-test-subj={`${dataTestSubj}-dismiss`}
-          {...dismissButtonProps}
-          css={styles.dismiss}
-          onClick={onDismiss}
-        />
-      ) : null}
+      {announceOnMount && (
+        <EuiLiveAnnouncer>
+          {title && title}
+          {title && text && ',\u00A0'}
+          {text && text}
+          {(title || text) && children && ',\u00A0'}
+          {children && children}
+        </EuiLiveAnnouncer>
+      )}
     </div>
   );
 };

@@ -46,7 +46,7 @@ export type AnnouncementBannerDismissButtonProps = Partial<
 >;
 
 /** Visual size of the announcement. */
-export type AnnouncementBannerSize = 's' | 'm' | 'l';
+export type AnnouncementBannerSize = 's' | 'm';
 
 /** HTML element used to render the title. */
 export type AnnouncementBannerHeadingElement = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
@@ -67,11 +67,18 @@ export interface AnnouncementBannerProps {
   headingElement?: AnnouncementBannerHeadingElement;
   /** Supporting copy rendered below the title. */
   text?: ReactNode;
+  /** Extra content rendered directly below `text`. */
+  children?: ReactNode;
   /**
    * Visual size variant.
    * @default 'm'
    */
   size?: AnnouncementBannerSize;
+  /**
+   * Defines the announcement background color.
+   * @default 'highlighted'
+   */
+  color?: 'highlighted' | 'plain';
   /** Action buttons rendered at the bottom. */
   actionProps?: {
     /** Primary call-to-action, rendered as a filled `EuiButton`. */
@@ -88,6 +95,12 @@ export interface AnnouncementBannerProps {
   onDismiss?: () => void;
   /** Extra props spread onto the dismiss `EuiButtonIcon`. */
   dismissButtonProps?: AnnouncementBannerDismissButtonProps;
-  /** Extra content rendered directly below `text`. */
-  children?: ReactNode;
+  /**
+   * When set to `true`, the content is announced by screen readers on mount.
+   * Use only when the announcement is immediately relevant, e.g. as feedback to user actions.
+   * Avoid using on initial page load as it may create noise for assistive technology users.
+   *
+   * @default false
+   */
+  announceOnMount?: boolean;
 }

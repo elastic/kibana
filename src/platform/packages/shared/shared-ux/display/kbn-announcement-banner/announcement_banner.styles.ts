@@ -8,56 +8,35 @@
  */
 
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 
 const CONTAINER_NAME = 'kbn-announcement-banner';
 
 /** Below this width the layout collapses to a single column. */
-const CQC_SUPER_NARROW = '(max-width: 580px)';
+const CQC_SUPER_NARROW = '(max-width: 540px)';
 
 /** At and above this width actions move beside the body and primary appears last. */
-const CQC_WIDE = '(min-width: 1400px)';
+const CQC_WIDE = '(min-width: 1000px)';
 
 /** Maximum reading width for `text` and `children` slots. */
 const TEXT_MAX_WIDTH = 1200;
 
-interface UseAnnouncementStylesArgs {
-  hasDismiss: boolean;
-}
-
-/**
- * Returns Emotion styles for the announcement banner component.
- */
-export const useAnnouncementBannerStyles = ({ hasDismiss }: UseAnnouncementStylesArgs) => {
-  const { euiTheme } = useEuiTheme();
-
-  const rootInlineEndSpacing = hasDismiss ? `calc(${euiTheme.size.base} * 3)` : euiTheme.size.base;
-
-  const root = css`
+export const announcementBannerStyles = {
+  root: ({ euiTheme }: UseEuiTheme) => css`
     container-type: inline-size;
     container-name: ${CONTAINER_NAME};
     position: relative;
     padding-block: ${euiTheme.size.base};
     padding-inline-start: ${euiTheme.size.base};
-    padding-inline-end: ${rootInlineEndSpacing};
-    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    padding-inline-end: ${euiTheme.size.base};
     border: ${euiTheme.border.thin};
     border-radius: ${euiTheme.border.radius.medium};
-  `;
-
-  const container = css`
+  `,
+  container: ({ euiTheme }: UseEuiTheme) => css`
     display: flex;
     flex-direction: row;
     align-items: flex-start;
     gap: ${euiTheme.size.base};
-
-    @container ${CONTAINER_NAME} ${CQC_WIDE} {
-      gap: calc(${euiTheme.size.base} * 1.5);
-
-      [data-size='s'] & {
-        gap: ${euiTheme.size.base};
-      }
-    }
 
     @container ${CONTAINER_NAME} ${CQC_SUPER_NARROW} {
       flex-direction: column;
@@ -67,9 +46,8 @@ export const useAnnouncementBannerStyles = ({ hasDismiss }: UseAnnouncementStyle
         gap: ${euiTheme.size.m};
       }
     }
-  `;
-
-  const media = css`
+  `,
+  media: ({ euiTheme }: UseEuiTheme) => css`
     --kbn-announcementBannerMediaSize: ${`calc(${euiTheme.size.base} * 5)`};
 
     flex-shrink: 0;
@@ -84,32 +62,41 @@ export const useAnnouncementBannerStyles = ({ hasDismiss }: UseAnnouncementStyle
     [data-size='s'] & {
       --kbn-announcementBannerMediaSize: ${`calc(${euiTheme.size.base} * 2)`};
     }
-  `;
 
-  const body = css`
+    img,
+    svg {
+      block-size: 100%;
+      inline-size: 100%;
+    }
+  `,
+  body: ({ euiTheme }: UseEuiTheme) => css`
     flex: 1 1 auto;
     min-inline-size: 0;
     display: flex;
     flex-direction: column;
+    align-self: center;
     gap: ${euiTheme.size.m};
 
     [data-size='s'] & {
       gap: ${euiTheme.size.s};
     }
 
+    @container ${CONTAINER_NAME} ${CQC_SUPER_NARROW} {
+      align-self: flex-start;
+    }
+
     @container ${CONTAINER_NAME} ${CQC_WIDE} {
       flex-direction: row;
       align-items: center;
-      justify-content: space-between;
-      gap: ${euiTheme.size.l};
       /* stretch to match the media's height so align-items has space to work */
       align-self: stretch;
+      justify-content: space-between;
+      gap: ${euiTheme.size.l};
     }
-  `;
-
+  `,
   // At size `s` the content slot becomes a block container so the title and
   // text flow inline. Other sizes keep the flex column with a fixed gap.
-  const content = css`
+  content: ({ euiTheme }: UseEuiTheme) => css`
     flex: 1 1 auto;
     min-inline-size: 0;
     max-inline-size: ${TEXT_MAX_WIDTH}px;
@@ -120,30 +107,23 @@ export const useAnnouncementBannerStyles = ({ hasDismiss }: UseAnnouncementStyle
     [data-size='s'] & {
       display: block;
 
-      > * + * {
+      > * + *:not(.euiButtonIcon) {
         margin-block-start: ${euiTheme.size.s};
       }
     }
-  `;
-
-  const title = css`
+  `,
+  title: css`
     [data-size='s'] & {
       display: inline;
-
-      &::after {
-        content: '.';
-      }
     }
-  `;
-
-  const text = css`
+  `,
+  text: ({ euiTheme }: UseEuiTheme) => css`
     [data-size='s'] & {
       display: inline;
       margin-inline-start: ${euiTheme.size.s};
     }
-  `;
-
-  const actions = css`
+  `,
+  actions: ({ euiTheme }: UseEuiTheme) => css`
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -156,16 +136,14 @@ export const useAnnouncementBannerStyles = ({ hasDismiss }: UseAnnouncementStyle
       flex-shrink: 0;
       align-self: flex-end;
     }
-  `;
-
-  const dismiss = css`
-    /* it seems it might change depending on 'size' and cqc */
-    --kbn-announcementBannerDismissButtonPosition: ${euiTheme.size.s};
-
+  `,
+  hasDismiss: ({ euiTheme }: UseEuiTheme) => css`
+    padding-inline-end: calc(${euiTheme.size.base} * 3);
+  `,
+  dismiss: ({ euiTheme }: UseEuiTheme) => css`
     position: absolute;
-    inset-block-start: var(--kbn-announcementBannerDismissButtonPosition);
-    inset-inline-end: var(--kbn-announcementBannerDismissButtonPosition);
-  `;
-
-  return { root, container, media, body, content, title, text, actions, dismiss };
+    inset-block-start: ${euiTheme.size.s};
+    inset-inline-end: ${euiTheme.size.s};
+    color: ${euiTheme.colors.textSubdued};
+  `,
 };

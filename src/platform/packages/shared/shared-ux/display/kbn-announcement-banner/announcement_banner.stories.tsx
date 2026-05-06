@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiText } from '@elastic/eui';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 
 import { AnnouncementBanner } from './announcement_banner';
 import type { AnnouncementBannerProps } from './types';
@@ -46,16 +47,18 @@ const IllustrationSmall = () => (
  * Controls panel can toggle the optional slots without exposing their inner
  * shape.
  */
-type StoryArgs = Omit<AnnouncementBannerProps, 'media' | 'actionProps'> & {
+type StoryArgs = Omit<AnnouncementBannerProps, 'media' | 'actionProps' | 'onDismiss'> & {
   media: boolean;
   primaryAction: boolean;
   secondaryAction: boolean;
+  onDismiss: boolean;
 };
 
 const buildAnnouncementProps = (args: StoryArgs): AnnouncementBannerProps => {
-  const { media, primaryAction, secondaryAction, ...rest } = args;
+  const { media, primaryAction, secondaryAction, onDismiss, size, ...rest } = args;
   return {
     ...rest,
+    size,
     media: media ? size === 's' ? <IllustrationSmall /> : <IllustrationMedium /> : undefined,
     actionProps: {
       primary: primaryAction
@@ -65,6 +68,7 @@ const buildAnnouncementProps = (args: StoryArgs): AnnouncementBannerProps => {
         ? { children: 'Secondary action', onClick: action('secondary onClick') }
         : undefined,
     },
+    onDismiss: onDismiss ? action('onDismiss') : undefined,
   };
 };
 
@@ -75,17 +79,20 @@ const meta: Meta<StoryArgs> = {
     title: 'Announcement title',
     text: 'Envision a realm where your dreams manifest like a breathtaking mural. Each stroke of the brush symbolizes a hope yearning to be fulfilled, creating a tapestry of aspirations that come to life.',
     size: 'm',
+    color: 'highlighted',
     media: true,
     primaryAction: true,
     secondaryAction: true,
-    onDismiss: action('onDismiss'),
+    onDismiss: true,
+    announceOnMount: false,
   },
   argTypes: {
-    size: { control: { type: 'inline-radio' }, options: ['s', 'm', 'l'] },
+    size: { control: { type: 'inline-radio' }, options: ['s', 'm'] },
+    color: { control: { type: 'inline-radio' }, options: ['highlighted', 'plain'] },
     media: { control: { type: 'boolean' } },
     primaryAction: { control: { type: 'boolean' } },
     secondaryAction: { control: { type: 'boolean' } },
-    onDismiss: { table: { disable: true } },
+    onDismiss: { control: { type: 'boolean' } },
     children: { table: { disable: true } },
   },
   render: (args) => <AnnouncementBanner {...buildAnnouncementProps(args)} />,
