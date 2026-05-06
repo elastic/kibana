@@ -80,17 +80,18 @@ apiTest.describe(
       }
     );
 
-    apiTest('results have required fields for SIEM Readiness Quality tab', async ({ apiClient }) => {
-      // First try to get any existing results
-      const response = await apiClient.get(`${THIRD_PARTY_ROUTES.ECS_DATA_QUALITY_LATEST}/*`, {
-        headers: defaultHeaders,
-        responseType: 'json',
-      });
+    apiTest(
+      'results have required fields for SIEM Readiness Quality tab',
+      async ({ apiClient }) => {
+        // First try to get any existing results
+        const response = await apiClient.get(`${THIRD_PARTY_ROUTES.ECS_DATA_QUALITY_LATEST}/*`, {
+          headers: defaultHeaders,
+          responseType: 'json',
+        });
 
-      expect(response.statusCode).toBe(200);
+        expect(response.statusCode).toBe(200);
 
-      // If there are results, verify their structure
-      if (response.body.length > 0) {
+        // Verify structure of each result (forEach on empty array is a no-op)
         response.body.forEach((result: DataQualityResult) => {
           // indexName is required - used to identify which index was checked
           expect(result.indexName).toBeDefined();
@@ -102,7 +103,7 @@ apiTest.describe(
           expect(result.incompatibleFieldCount).toBeGreaterThanOrEqual(0);
         });
       }
-    });
+    );
 
     apiTest('results with field counts have numeric values', async ({ apiClient }) => {
       const response = await apiClient.get(`${THIRD_PARTY_ROUTES.ECS_DATA_QUALITY_LATEST}/*`, {
@@ -112,28 +113,37 @@ apiTest.describe(
 
       expect(response.statusCode).toBe(200);
 
-      // If there are results with field counts, verify they're numbers
-      response.body.forEach((result: DataQualityResult) => {
-        // These fields are used to show statistics in SIEM Readiness
-        if (result.ecsFieldCount !== undefined) {
-          expect(typeof result.ecsFieldCount).toBe('number');
-          expect(result.ecsFieldCount).toBeGreaterThanOrEqual(0);
-        }
+      // Filter results with each field type and verify they're numbers
+      const withEcsFieldCount = response.body.filter(
+        (result: DataQualityResult) => result.ecsFieldCount !== undefined
+      );
+      withEcsFieldCount.forEach((result: DataQualityResult) => {
+        expect(typeof result.ecsFieldCount).toBe('number');
+        expect(result.ecsFieldCount).toBeGreaterThanOrEqual(0);
+      });
 
-        if (result.customFieldCount !== undefined) {
-          expect(typeof result.customFieldCount).toBe('number');
-          expect(result.customFieldCount).toBeGreaterThanOrEqual(0);
-        }
+      const withCustomFieldCount = response.body.filter(
+        (result: DataQualityResult) => result.customFieldCount !== undefined
+      );
+      withCustomFieldCount.forEach((result: DataQualityResult) => {
+        expect(typeof result.customFieldCount).toBe('number');
+        expect(result.customFieldCount).toBeGreaterThanOrEqual(0);
+      });
 
-        if (result.totalFieldCount !== undefined) {
-          expect(typeof result.totalFieldCount).toBe('number');
-          expect(result.totalFieldCount).toBeGreaterThanOrEqual(0);
-        }
+      const withTotalFieldCount = response.body.filter(
+        (result: DataQualityResult) => result.totalFieldCount !== undefined
+      );
+      withTotalFieldCount.forEach((result: DataQualityResult) => {
+        expect(typeof result.totalFieldCount).toBe('number');
+        expect(result.totalFieldCount).toBeGreaterThanOrEqual(0);
+      });
 
-        if (result.docsCount !== undefined) {
-          expect(typeof result.docsCount).toBe('number');
-          expect(result.docsCount).toBeGreaterThanOrEqual(0);
-        }
+      const withDocsCount = response.body.filter(
+        (result: DataQualityResult) => result.docsCount !== undefined
+      );
+      withDocsCount.forEach((result: DataQualityResult) => {
+        expect(typeof result.docsCount).toBe('number');
+        expect(result.docsCount).toBeGreaterThanOrEqual(0);
       });
     });
 
@@ -147,19 +157,19 @@ apiTest.describe(
 
         expect(response.statusCode).toBe(200);
 
-        // Find results that have incompatible field details
-        const resultsWithIncompatible = response.body.filter(
-          (result: DataQualityResult) =>
-            result.incompatibleFieldMappingItems !== undefined &&
-            result.incompatibleFieldMappingItems.length > 0
-        );
+        // Find results that have incompatible field details and flatten to items
+        const allIncompatibleItems = response.body
+          .filter(
+            (result: DataQualityResult) =>
+              result.incompatibleFieldMappingItems !== undefined &&
+              result.incompatibleFieldMappingItems.length > 0
+          )
+          .flatMap((result: DataQualityResult) => result.incompatibleFieldMappingItems ?? []);
 
-        resultsWithIncompatible.forEach((result: DataQualityResult) => {
-          result.incompatibleFieldMappingItems!.forEach((item: IncompatibleFieldItem) => {
-            // fieldName is required for displaying which field has issues
-            expect(item.fieldName).toBeDefined();
-            expect(typeof item.fieldName).toBe('string');
-          });
+        allIncompatibleItems.forEach((item: IncompatibleFieldItem) => {
+          // fieldName is required for displaying which field has issues
+          expect(item.fieldName).toBeDefined();
+          expect(typeof item.fieldName).toBe('string');
         });
       }
     );
@@ -172,11 +182,12 @@ apiTest.describe(
 
       expect(response.statusCode).toBe(200);
 
-      // If there are results with errors, verify error is string or null
-      response.body.forEach((result: DataQualityResult) => {
-        if (result.error !== undefined) {
-          expect(result.error === null || typeof result.error === 'string').toBe(true);
-        }
+      // Filter results with error field and verify it's string or null
+      const withError = response.body.filter(
+        (result: DataQualityResult) => result.error !== undefined
+      );
+      withError.forEach((result: DataQualityResult) => {
+        expect(result.error === null || typeof result.error === 'string').toBe(true);
       });
     });
   }

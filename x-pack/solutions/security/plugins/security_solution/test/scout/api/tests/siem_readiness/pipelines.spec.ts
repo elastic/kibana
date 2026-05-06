@@ -98,11 +98,12 @@ apiTest.describe('SIEM Readiness - Pipelines API', { tag: SIEM_READINESS_TAGS },
 
     const body = response.body as PipelinesResponse;
 
+    // Filter to pipelines with stats available, then assert
+    const pipelinesWithStats = body.filter((pipeline: PipelineStats) => pipeline.statsAvailable);
+
     // failedDocsCount should never exceed docsCount
-    body.forEach((pipeline: PipelineStats) => {
-      if (pipeline.statsAvailable) {
-        expect(pipeline.failedDocsCount).toBeLessThanOrEqual(pipeline.docsCount);
-      }
+    pipelinesWithStats.forEach((pipeline: PipelineStats) => {
+      expect(pipeline.failedDocsCount).toBeLessThanOrEqual(pipeline.docsCount);
     });
   });
 

@@ -78,13 +78,18 @@ apiTest.describe('SIEM Readiness - Retention API', { tag: SIEM_READINESS_TAGS },
 
       // retentionType can be 'ilm', 'dsl', or null
       expect('retentionType' in item).toBe(true);
-      if (item.retentionType !== null) {
-        expect(['ilm', 'dsl']).toContain(item.retentionType);
-      }
 
       // status is required and must be one of the expected values
       expect(item.status).toBeDefined();
       expect(['healthy', 'non-compliant']).toContain(item.status);
+    });
+
+    // Items with non-null retentionType must be 'ilm' or 'dsl'
+    const itemsWithRetentionType = body.items.filter(
+      (item: RetentionInfo) => item.retentionType !== null
+    );
+    itemsWithRetentionType.forEach((item: RetentionInfo) => {
+      expect(['ilm', 'dsl']).toContain(item.retentionType);
     });
   });
 
@@ -100,11 +105,15 @@ apiTest.describe('SIEM Readiness - Retention API', { tag: SIEM_READINESS_TAGS },
 
     body.items.forEach((item: RetentionInfo) => {
       expect('retentionDays' in item).toBe(true);
+    });
 
-      if (item.retentionDays !== null) {
-        expect(typeof item.retentionDays).toBe('number');
-        expect(item.retentionDays).toBeGreaterThanOrEqual(0);
-      }
+    // Items with non-null retentionDays must be numeric and non-negative
+    const itemsWithRetentionDays = body.items.filter(
+      (item: RetentionInfo) => item.retentionDays !== null
+    );
+    itemsWithRetentionDays.forEach((item: RetentionInfo) => {
+      expect(typeof item.retentionDays).toBe('number');
+      expect(item.retentionDays).toBeGreaterThanOrEqual(0);
     });
   });
 
@@ -120,10 +129,14 @@ apiTest.describe('SIEM Readiness - Retention API', { tag: SIEM_READINESS_TAGS },
 
     body.items.forEach((item: RetentionInfo) => {
       expect('retentionPeriod' in item).toBe(true);
+    });
 
-      if (item.retentionPeriod !== null) {
-        expect(typeof item.retentionPeriod).toBe('string');
-      }
+    // Items with non-null retentionPeriod must be strings
+    const itemsWithRetentionPeriod = body.items.filter(
+      (item: RetentionInfo) => item.retentionPeriod !== null
+    );
+    itemsWithRetentionPeriod.forEach((item: RetentionInfo) => {
+      expect(typeof item.retentionPeriod).toBe('string');
     });
   });
 
@@ -140,14 +153,18 @@ apiTest.describe('SIEM Readiness - Retention API', { tag: SIEM_READINESS_TAGS },
     // Items with status 'healthy' should have either:
     // - No retention (null retentionDays means infinite)
     // - Retention >= 365 days (FedRAMP compliance threshold)
-    body.items.forEach((item: RetentionInfo) => {
-      if (item.status === 'healthy' && item.retentionDays !== null) {
-        expect(item.retentionDays).toBeGreaterThanOrEqual(365);
-      }
+    const healthyWithDays = body.items.filter(
+      (item: RetentionInfo) => item.status === 'healthy' && item.retentionDays !== null
+    );
+    healthyWithDays.forEach((item: RetentionInfo) => {
+      expect(item.retentionDays).toBeGreaterThanOrEqual(365);
+    });
 
-      if (item.status === 'non-compliant' && item.retentionDays !== null) {
-        expect(item.retentionDays).toBeLessThan(365);
-      }
+    const nonCompliantWithDays = body.items.filter(
+      (item: RetentionInfo) => item.status === 'non-compliant' && item.retentionDays !== null
+    );
+    nonCompliantWithDays.forEach((item: RetentionInfo) => {
+      expect(item.retentionDays).toBeLessThan(365);
     });
   });
 });
