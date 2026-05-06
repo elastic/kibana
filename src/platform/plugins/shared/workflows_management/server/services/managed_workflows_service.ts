@@ -24,10 +24,10 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { parseYamlToJSONWithoutValidation, updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '../../common';
 import { computeDefinitionHash, getTriggerTypesFromDefinition } from '../api/lib/workflow_prepare';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
-const DEFAULT_MANAGED_WORKFLOW_SPACE_ID = 'default';
 const MANAGED_WORKFLOW_SYSTEM_USER = 'system';
 
 interface ManagedWorkflowsServiceDeps {
@@ -54,13 +54,10 @@ export class ManagedWorkflowsService {
     this.registeredPluginIds.add(pluginId);
   }
 
-  public async reconcileManagedWorkflowOrphans(
-    pluginIds: string[],
-    options?: { spaceId?: string }
-  ): Promise<void> {
+  public async reconcileManagedWorkflowOrphans(pluginIds: string[]): Promise<void> {
     this.registeredPluginIds.clear();
     pluginIds.filter(Boolean).forEach((pluginId) => this.registeredPluginIds.add(pluginId));
-    await this.cleanupOrphanManagedWorkflows(options);
+    await this.cleanupOrphanManagedWorkflows();
   }
 
   public async reconcileAutoManagedWorkflowUpdates(): Promise<void> {
@@ -101,7 +98,7 @@ export class ManagedWorkflowsService {
     this.assertPluginRegistration(definition, registeredPluginId);
 
     const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
-    const spaceId = options?.spaceId ?? DEFAULT_MANAGED_WORKFLOW_SPACE_ID;
+    const spaceId = options?.spaceId ?? GLOBAL_WORKFLOW_SPACE_ID;
     const now = new Date().toISOString();
     const definitionHash = this.computeManagedDefinitionHash(definition);
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
@@ -169,7 +166,7 @@ export class ManagedWorkflowsService {
     this.assertPluginRegistration(definition, registeredPluginId);
 
     const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
-    const spaceId = options?.spaceId ?? DEFAULT_MANAGED_WORKFLOW_SPACE_ID;
+    const spaceId = options?.spaceId ?? GLOBAL_WORKFLOW_SPACE_ID;
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
       workflowDocumentId,
       spaceId,
@@ -197,10 +194,13 @@ export class ManagedWorkflowsService {
     this.assertPluginRegistration(definition, registeredPluginId);
 
     const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
-    const spaceId = options?.spaceId ?? DEFAULT_MANAGED_WORKFLOW_SPACE_ID;
+    const spaceId = options?.spaceId ?? GLOBAL_WORKFLOW_SPACE_ID;
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
       workflowDocumentId,
-      spaceId
+      spaceId,
+      {
+        includeGlobal: true,
+      }
     );
     if (!existing || !existing.managed) {
       throw new Error(`Managed workflow '${id}' as '${workflowDocumentId}' not found`);
@@ -390,36 +390,39 @@ export class ManagedWorkflowsService {
     return JSON.stringify(existing ?? null) === JSON.stringify(next ?? null);
   }
 
-  private async cleanupOrphanManagedWorkflows(options?: { spaceId?: string }): Promise<void> {
-    const spaceId = options?.spaceId ?? DEFAULT_MANAGED_WORKFLOW_SPACE_ID;
+  private async cleanupOrphanManagedWorkflows(): Promise<void> {
     const registeredDefinitions = getManagedWorkflowDefinitions().filter((definition) =>
       this.registeredPluginIds.has(definition.pluginId)
     );
     const activeDefinitionIds = new Set(registeredDefinitions.map((definition) => definition.id));
     const activePluginIds = new Set(registeredDefinitions.map((definition) => definition.pluginId));
 
-    const existingManagedDocs = await this.deps.crudService.getManagedWorkflowDocuments(spaceId, {
+    const existingManagedDocs = await this.deps.crudService.getManagedWorkflowDocumentsAllSpaces({
       includeDeleted: true,
     });
 
-    const orphanIds = existingManagedDocs
-      .filter(({ source }) => {
-        const owner = source.managedBy ?? undefined;
-        const definitionId = source.originSystemWorkflowId ?? undefined;
-        if (!owner || !definitionId) {
-          return true;
-        }
-        if (!activePluginIds.has(owner)) {
-          return true;
-        }
-        return !activeDefinitionIds.has(definitionId);
-      })
-      .map(({ id }) => id);
+    const orphanIdsBySpace = new Map<string, string[]>();
+    for (const { id, source } of existingManagedDocs) {
+      const owner = source.managedBy ?? undefined;
+      const definitionId = source.originSystemWorkflowId ?? undefined;
+      const isOrphan =
+        !owner ||
+        !definitionId ||
+        !activePluginIds.has(owner) ||
+        !activeDefinitionIds.has(definitionId);
 
-    if (orphanIds.length === 0) {
-      return;
+      if (isOrphan) {
+        const workflowSpaceId = source.spaceId ?? GLOBAL_WORKFLOW_SPACE_ID;
+        const orphanIds = orphanIdsBySpace.get(workflowSpaceId) ?? [];
+        orphanIds.push(id);
+        orphanIdsBySpace.set(workflowSpaceId, orphanIds);
+      }
     }
 
-    await this.deps.crudService.deleteWorkflows(orphanIds, spaceId, { force: true });
+    for (const [spaceId, orphanIds] of orphanIdsBySpace) {
+      if (orphanIds.length > 0) {
+        await this.deps.crudService.deleteWorkflows(orphanIds, spaceId, { force: true });
+      }
+    }
   }
 }

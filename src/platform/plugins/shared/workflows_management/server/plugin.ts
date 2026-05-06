@@ -47,6 +47,7 @@ import type {
   WorkflowsServerPluginStartDeps,
 } from './types';
 import { registerUISettings } from './ui_settings';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '../common';
 import { stepSchemas } from '../common/step_schemas';
 
 const WORKFLOWS_MANAGEMENT_PLUGIN_ID = 'workflowsManagement';
@@ -229,6 +230,7 @@ export class WorkflowsPlugin
         ENTITY_MONITOR_WORKFLOW_ID,
         {
           isStartupReconcile: true,
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
           values: {
             entityId: 'default',
           },

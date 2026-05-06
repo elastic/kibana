@@ -432,12 +432,9 @@ export class WorkflowsService {
     return this.managedWorkflowsService.registerManagedWorkflowPlugin(pluginId, options);
   }
 
-  public async reconcileManagedWorkflowOrphans(
-    pluginIds: string[],
-    options?: { spaceId?: string }
-  ): Promise<void> {
+  public async reconcileManagedWorkflowOrphans(pluginIds: string[]): Promise<void> {
     await this.ensureInitialized();
-    return this.managedWorkflowsService.reconcileManagedWorkflowOrphans(pluginIds, options);
+    return this.managedWorkflowsService.reconcileManagedWorkflowOrphans(pluginIds);
   }
 
   public async reconcileAutoManagedWorkflowUpdates(): Promise<void> {

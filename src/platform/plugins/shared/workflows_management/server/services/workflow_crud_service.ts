@@ -16,6 +16,7 @@ import type {
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
 } from '@kbn/workflows';
+import { buildWorkflowSpaceFilter } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
@@ -34,7 +35,6 @@ import {
   prepareWorkflowDocument,
   workflowYamlDeclaresTopLevelEnabled,
 } from '../api/lib/workflow_prepare';
-import { workflowSpaceFilter } from '../api/lib/workflow_query_filters';
 import type { DeleteWorkflowsResponse } from '../api/workflows_management_api';
 import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
 import {
@@ -67,10 +67,11 @@ export class WorkflowCrudService {
   async getWorkflowDocumentSource(
     id: string,
     spaceId: string,
-    options?: { includeDeleted?: boolean }
+    options?: { includeDeleted?: boolean; includeGlobal?: boolean }
   ): Promise<WorkflowProperties | null> {
-    const { must, must_not } = workflowSpaceFilter(spaceId, {
+    const { must, must_not } = buildWorkflowSpaceFilter(spaceId, {
       includeDeleted: options?.includeDeleted ?? false,
+      includeGlobal: options?.includeGlobal ?? false,
     });
     must.push({ ids: { values: [id] } });
     const searchResponse = await this.deps.workflowStorage.getClient().search({
@@ -95,7 +96,7 @@ export class WorkflowCrudService {
     spaceId: string,
     options?: { includeDeleted?: boolean }
   ): Promise<Array<{ id: string; source: WorkflowProperties }>> {
-    const { must, must_not } = workflowSpaceFilter(spaceId, {
+    const { must, must_not } = buildWorkflowSpaceFilter(spaceId, {
       includeDeleted: options?.includeDeleted ?? false,
     });
     must.push({ term: { managed: true } });
@@ -146,7 +147,10 @@ export class WorkflowCrudService {
     options?: { includeDeleted?: boolean }
   ): Promise<WorkflowDetailDto | null> {
     try {
-      const source = await this.getWorkflowDocumentSource(id, spaceId, options);
+      const source = await this.getWorkflowDocumentSource(id, spaceId, {
+        includeDeleted: options?.includeDeleted ?? false,
+        includeGlobal: true,
+      });
       if (!source) {
         return null;
       }
@@ -162,14 +166,15 @@ export class WorkflowCrudService {
   async getWorkflowsByIds(
     ids: string[],
     spaceId: string,
-    options?: { includeDeleted?: boolean }
+    options?: { includeDeleted?: boolean; includeGlobal?: boolean }
   ): Promise<WorkflowDetailDto[]> {
     if (ids.length === 0) {
       return [];
     }
 
-    const { must, must_not } = workflowSpaceFilter(spaceId, {
+    const { must, must_not } = buildWorkflowSpaceFilter(spaceId, {
       includeDeleted: options?.includeDeleted ?? false,
+      includeGlobal: options?.includeGlobal ?? true,
     });
     must.push({ ids: { values: ids } });
 
@@ -188,14 +193,15 @@ export class WorkflowCrudService {
     ids: string[],
     spaceId: string,
     source?: string[],
-    options?: { includeDeleted?: boolean }
+    options?: { includeDeleted?: boolean; includeGlobal?: boolean }
   ): Promise<WorkflowPartialDetailDto[]> {
     if (ids.length === 0) {
       return [];
     }
 
-    const { must, must_not } = workflowSpaceFilter(spaceId, {
+    const { must, must_not } = buildWorkflowSpaceFilter(spaceId, {
       includeDeleted: options?.includeDeleted ?? false,
+      includeGlobal: options?.includeGlobal ?? true,
     });
     must.push({ ids: { values: ids } });
 
@@ -263,16 +269,12 @@ export class WorkflowCrudService {
       );
     }
 
-<<<<<<< HEAD
-    await this.indexWorkflowDocument(id, workflowData);
-=======
     id = await this.createWorkflowDocument({
       initialId: id,
       baseId,
       isUserSupplied: Boolean(workflow.id),
       document: workflowData,
     });
->>>>>>> c743a2f1d6cece659b7547272c747c9914f21620
 
     await scheduleWorkflowTriggers({
       workflowId: id,
@@ -563,7 +565,7 @@ export class WorkflowCrudService {
   }
 
   private async getEsWorkflowForScheduler(id: string, spaceId: string): Promise<EsWorkflow | null> {
-    const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
+    const { must } = buildWorkflowSpaceFilter(spaceId, { includeDeleted: true });
     must.push({ ids: { values: [id] } });
     const response = await this.deps.workflowStorage.getClient().search({
       query: { bool: { must } },

@@ -446,7 +446,9 @@ export class WorkflowsExecutionEnginePlugin
               const workflowRepository = new WorkflowRepository({ esClient, logger });
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
-              const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
+              const workflow = await workflowRepository.getWorkflow(workflowId, spaceId, {
+                includeGlobal: true,
+              });
               if (!workflow) {
                 logger.error(`Workflow ${workflowId} not found`);
                 return;
@@ -627,7 +629,9 @@ export class WorkflowsExecutionEnginePlugin
       if (workflow.isTestRun) {
         return;
       }
-      const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId);
+      const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId, {
+        includeGlobal: true,
+      });
       if (!stillEnabled) {
         throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
       }
@@ -927,7 +931,9 @@ export class WorkflowsExecutionEnginePlugin
       const enabledMap =
         enabledRefs.length === 0
           ? new Map<string, boolean>()
-          : await workflowRepository.areWorkflowsEnabled(enabledRefs);
+          : await workflowRepository.areWorkflowsEnabled(enabledRefs, {
+              includeGlobal: true,
+            });
 
       interface PreparedItem {
         idx: number;

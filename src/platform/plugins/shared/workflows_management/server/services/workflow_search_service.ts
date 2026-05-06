@@ -16,6 +16,7 @@ import type {
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
+import { buildWorkflowSpaceFilter } from '@kbn/workflows/server';
 import type { WorkflowListItemDto } from '@kbn/workflows/types/v1';
 
 import type { WorkflowSearchDeps } from './types';
@@ -26,7 +27,6 @@ import { transformStorageDocumentToWorkflowDto } from '../api/lib/workflow_dto_t
 import {
   buildConditionalTermsFilters,
   buildWorkflowTextSearchClause,
-  workflowSpaceFilter,
 } from '../api/lib/workflow_query_filters';
 import type { GetWorkflowsParams } from '../api/workflows_management_api';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -46,7 +46,7 @@ export class WorkflowSearchService {
     const keepAlive = '1m';
     const indexPattern = `${workflowIndexName}-*`;
     const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
-    const { must, must_not } = workflowSpaceFilter(spaceId);
+    const { must, must_not } = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
     must.push({ term: { enabled: true } }, { term: { triggerTypes: triggerId } });
     const query = { bool: { must, must_not } };
     const _source = [
@@ -116,7 +116,7 @@ export class WorkflowSearchService {
     const { size = 100, page = 1, enabled, createdBy, tags, query } = params;
     const from = (page - 1) * size;
 
-    const { must, must_not } = workflowSpaceFilter(spaceId);
+    const { must, must_not } = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
 
     must.push(
       ...buildConditionalTermsFilters([
@@ -181,7 +181,7 @@ export class WorkflowSearchService {
       size: 0,
       track_total_hits: true,
       query: {
-        bool: workflowSpaceFilter(spaceId),
+        bool: buildWorkflowSpaceFilter(spaceId, { includeGlobal: true }),
       },
       aggs: {
         enabled_count: {
@@ -225,7 +225,7 @@ export class WorkflowSearchService {
       size: 0,
       track_total_hits: true,
       query: {
-        bool: workflowSpaceFilter(spaceId),
+        bool: buildWorkflowSpaceFilter(spaceId, { includeGlobal: true }),
       },
       aggs,
     });

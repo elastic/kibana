@@ -9,8 +9,7 @@
 
 import type { ManagedWorkflowDefinition } from './types';
 
-export const WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID =
-  'system-workflows-management-health-check';
+export const WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID = 'system-workflow-health-check';
 
 export const WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW: ManagedWorkflowDefinition = {
   id: WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,

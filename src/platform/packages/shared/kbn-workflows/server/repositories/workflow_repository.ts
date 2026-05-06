@@ -10,7 +10,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
-import { WORKFLOW_INDEX_NAME } from '../constants';
+import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
+import { buildWorkflowSpaceFilter } from '../lib/workflow_space_filter';
 export interface WorkflowRepositoryOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -31,16 +32,21 @@ export class WorkflowRepository {
   /**
    * Get a workflow by ID and space ID
    */
-  async getWorkflow(workflowId: string, spaceId: string): Promise<EsWorkflow | null> {
+  async getWorkflow(
+    workflowId: string,
+    spaceId: string,
+    options?: { includeGlobal?: boolean }
+  ): Promise<EsWorkflow | null> {
     try {
+      const { must, must_not } = buildWorkflowSpaceFilter(spaceId, {
+        includeGlobal: options?.includeGlobal ?? false,
+      });
       const response = await this.options.esClient.search({
         index: this.options.indexName,
         query: {
           bool: {
-            must: [{ ids: { values: [workflowId] } }, { term: { spaceId } }],
-            must_not: {
-              exists: { field: 'deleted_at' },
-            },
+            must: [{ ids: { values: [workflowId] } }, ...must],
+            must_not,
           },
         },
         size: 1,
@@ -85,8 +91,12 @@ export class WorkflowRepository {
   /**
    * Check if a workflow is enabled by ID and space ID
    */
-  async isWorkflowEnabled(workflowId: string, spaceId: string): Promise<boolean> {
-    const map = await this.areWorkflowsEnabled([{ workflowId, spaceId }]);
+  async isWorkflowEnabled(
+    workflowId: string,
+    spaceId: string,
+    options?: { includeGlobal?: boolean }
+  ): Promise<boolean> {
+    const map = await this.areWorkflowsEnabled([{ workflowId, spaceId }], options);
     return map.get(`${spaceId}:${workflowId}`) ?? false;
   }
 
@@ -95,11 +105,16 @@ export class WorkflowRepository {
    * non-soft-deleted workflows. Runs a single `_search` fetching only the
    * `enabled` field across all requested ids.
    *
+   * When `options.includeGlobal` is `true`, a workflow stored in the global
+   * space (`*`) is considered visible for each requested space and contributes
+   * to that `${spaceId}:${workflowId}` result.
+   *
    * The returned map is keyed by `${spaceId}:${workflowId}`. Missing docs and
    * soft-deleted docs (`deleted_at` present) resolve to `false`.
    */
   async areWorkflowsEnabled(
-    refs: Array<{ workflowId: string; spaceId: string }>
+    refs: Array<{ workflowId: string; spaceId: string }>,
+    options?: { includeGlobal?: boolean }
   ): Promise<Map<string, boolean>> {
     const result = new Map<string, boolean>();
     if (refs.length === 0) {
@@ -121,11 +136,18 @@ export class WorkflowRepository {
       }
     }
 
-    const should = Array.from(bySpace.entries()).map(([spaceId, ids]) => ({
-      bool: {
-        must: [{ ids: { values: Array.from(ids) } }, { term: { spaceId } }],
-      },
-    }));
+    const should = Array.from(bySpace.entries()).map(([spaceId, ids]) => {
+      const { must, must_not } = buildWorkflowSpaceFilter(spaceId, {
+        includeDeleted: true,
+        includeGlobal: options?.includeGlobal ?? false,
+      });
+      return {
+        bool: {
+          must: [{ ids: { values: Array.from(ids) } }, ...must],
+          must_not,
+        },
+      };
+    });
 
     try {
       const response = await this.options.esClient.search({
@@ -137,16 +159,30 @@ export class WorkflowRepository {
           bool: {
             should,
             minimum_should_match: 1,
-            must_not: { exists: { field: 'deleted_at' } },
+            must_not: [{ exists: { field: 'deleted_at' } }],
           },
         },
       });
 
+      const requestedSpacesByWorkflowId = refs.reduce<Map<string, Set<string>>>((acc, ref) => {
+        const existing = acc.get(ref.workflowId) ?? new Set<string>();
+        existing.add(ref.spaceId);
+        acc.set(ref.workflowId, existing);
+        return acc;
+      }, new Map<string, Set<string>>());
+
       for (const hit of response.hits.hits) {
         const source = hit._source as { enabled?: boolean; spaceId?: string } | undefined;
         if (source) {
-          const key = `${source.spaceId}:${hit._id}`;
-          result.set(key, source.enabled ?? false);
+          if (source.spaceId === GLOBAL_WORKFLOW_SPACE_ID && options?.includeGlobal) {
+            const requestedSpaces = requestedSpacesByWorkflowId.get(hit._id ?? '');
+            requestedSpaces?.forEach((requestedSpaceId) => {
+              result.set(`${requestedSpaceId}:${hit._id}`, source.enabled ?? false);
+            });
+          } else {
+            const key = `${source.spaceId}:${hit._id}`;
+            result.set(key, source.enabled ?? false);
+          }
         }
       }
     } catch (error) {
