@@ -2,11 +2,11 @@
 
 | Problem | Solution |
 |---------|----------|
-| ES fails to start | Check `node scripts/es snapshot` output; ensure no other ES instance is running on port 9200 |
-| Kibana fails to start | Check console output; ensure `yarn kbn bootstrap` completed and port 5601 is free |
-| Kibana slow to start | Can take 5+ min on first run; poll `/api/status` rather than assuming a fixed wait time |
+| Scout server fails to start | Check `node scripts/scout.js start-server` output; ensure port 5620 is free and `yarn kbn bootstrap` completed |
+| Scout server slow to start | Can take 5+ min on first run; poll `http://localhost:5620/api/status` rather than assuming a fixed wait time |
 | ES returns 401 | Default credentials are `elastic` / `changeme` |
-| Config not taking effect | Pass config via `--xpack.*` CLI args, not `kibana.dev.yml` — CLI args are session-scoped |
+| Feature flags not taking effect | Verify `config_sets/bug_fixer/kibana.yml` was written before starting the server; restart with `--serverConfigSet bug_fixer` |
+| `auth_provider_hint=cloud-basic` redirect fails | Only works with Scout server (port 5620) — not the plain dev server |
 | `red_rejected` — test passes | Test must assert correct behavior that is currently broken |
 | Jest test not found | Verify path is correct and relative to repo root |
 | `gh api` errors | `gh auth status` and `gh auth refresh` |
