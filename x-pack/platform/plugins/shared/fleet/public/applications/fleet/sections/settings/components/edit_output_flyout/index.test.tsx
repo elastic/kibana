@@ -229,7 +229,7 @@ describe('EditOutputFlyout', () => {
       topic: 'topic',
       auth_type: 'ssl',
       version: '1.0.0',
-      ssl: { certificate: 'cert', key: 'key', verification_mode: 'full' },
+      ssl: { certificate: '/cert', key: '/key', verification_mode: 'full' },
       compression: 'none',
     });
 
@@ -241,8 +241,8 @@ describe('EditOutputFlyout', () => {
       expect(mockSendPutOutput).toHaveBeenCalledWith(
         'outputK',
         expect.objectContaining({
-          secrets: { ssl: { key: 'key' } },
-          ssl: { certificate: 'cert', key: '', verification_mode: 'full' },
+          secrets: { ssl: { key: '/key' } },
+          ssl: { certificate: '/cert', key: '', verification_mode: 'full' },
         })
       );
     });

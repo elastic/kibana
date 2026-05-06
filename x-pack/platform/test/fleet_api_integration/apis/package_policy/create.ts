@@ -813,9 +813,9 @@ export default function (providerContext: FtrProviderContext) {
           type: 'logstash',
           hosts: ['test.fr:443'],
           ssl: {
-            certificate: 'CERTIFICATE',
-            key: 'KEY',
-            certificate_authorities: ['CA1', 'CA2'],
+            certificate: '/CERTIFICATE',
+            key: '/KEY',
+            certificate_authorities: ['/CA1', '/CA2'],
           },
         })
         .expect(200);
