@@ -221,7 +221,11 @@ describe('Legacy Alerts Client', () => {
       maintenanceWindowsService,
     });
 
-    const snoozeConfig = { instanceId: '1', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' };
+    const snoozeConfig = {
+      instanceId: '1',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
     await alertsClient.initializeExecution({
       ...defaultExecutionOpts,
       snoozedInstances: [snoozeConfig],
@@ -243,7 +247,11 @@ describe('Legacy Alerts Client', () => {
       maintenanceWindowsService,
     });
 
-    const snoozeConfig = { instanceId: 'r1', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' };
+    const snoozeConfig = {
+      instanceId: 'r1',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
     await alertsClient.initializeExecution({
       ...defaultExecutionOpts,
       activeAlertsFromState: {},
@@ -269,7 +277,9 @@ describe('Legacy Alerts Client', () => {
 
     await alertsClient.initializeExecution({
       ...defaultExecutionOpts,
-      snoozedInstances: [{ instanceId: 'no-match', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' }],
+      snoozedInstances: [
+        { instanceId: 'no-match', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' },
+      ],
     });
 
     expect(setSnoozeConfigSpy).not.toHaveBeenCalled();

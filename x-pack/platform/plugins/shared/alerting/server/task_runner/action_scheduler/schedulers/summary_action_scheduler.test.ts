@@ -283,7 +283,11 @@ describe('Summary Action Scheduler', () => {
       const scheduler = new SummaryActionScheduler({
         ...getSchedulerContext(),
         snoozedInstances: [
-          { instanceId: 'alert-snoozed-1', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' },
+          {
+            instanceId: 'alert-snoozed-1',
+            snoozedAt: '2024-01-01T00:00:00.000Z',
+            snoozedBy: 'user',
+          },
         ],
       });
       await scheduler.getActionsToSchedule({ activeAlerts: alerts, throttledSummaryActions });
