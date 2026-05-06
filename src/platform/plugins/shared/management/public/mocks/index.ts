@@ -45,6 +45,7 @@ const createSetupContract = (): ManagementSetup => ({
 
 const createStartContract = (): ManagementStart => ({
   setupCardsNavigation: jest.fn(),
+  registerLandingQuickActionOverlay: jest.fn(),
 });
 
 export const managementPluginMock = {

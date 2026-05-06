@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { BuildFlavor } from '@kbn/config';
 import type {
@@ -20,6 +22,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import { API_KEYS_CREATE_LANDING_OVERLAY_ID } from '@kbn/management-plugin/public';
 import type {
   AuthenticationServiceSetup,
   AuthenticationServiceStart,
@@ -40,6 +43,7 @@ import { buildSecurityApi, buildUserProfileApi } from './build_delegate_api';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
+import { ManagementLandingApiKeyFlyout } from './management/api_keys/management_landing_api_key_flyout';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
@@ -217,6 +221,16 @@ export class SecurityPlugin
       this.managementService.start({
         capabilities: application.capabilities,
       });
+
+      management.registerLandingQuickActionOverlay(
+        API_KEYS_CREATE_LANDING_OVERLAY_ID,
+        ({ onClose }) =>
+          React.createElement(ManagementLandingApiKeyFlyout, {
+            onClose,
+            core,
+            authc: this.authc as AuthenticationServiceStart,
+          })
+      );
     }
 
     if (share) {

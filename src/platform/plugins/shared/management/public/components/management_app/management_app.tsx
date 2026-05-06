@@ -31,6 +31,7 @@ import type {
   NavigationCardsSubject,
   AppDependencies,
   AutoOpsStatusHook,
+  LandingQuickActionOverlayRenderer,
 } from '../../types';
 
 interface ManagementAppProps {
@@ -50,6 +51,7 @@ export interface ManagementAppDependencies {
   cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
   chromeStyle$: Observable<ChromeStyle>;
   getAutoOpsStatusHook: () => AutoOpsStatusHook;
+  getLandingQuickActionOverlay: (id: string) => LandingQuickActionOverlayRenderer | undefined;
 }
 
 export const ManagementApp = ({ dependencies, history, appBasePath }: ManagementAppProps) => {
@@ -120,6 +122,7 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
     cloud: dependencies.cloud,
     isAirGapped: dependencies.isAirGapped,
     getAutoOpsStatusHook: dependencies.getAutoOpsStatusHook,
+    getLandingQuickActionOverlay: dependencies.getLandingQuickActionOverlay,
   };
 
   return (

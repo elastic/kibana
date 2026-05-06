@@ -19,6 +19,7 @@ import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { ManagementAppLocatorParams } from '../common/locator';
 import { ManagementAppLocatorDefinition } from '../common/locator';
 import { capabilitiesProvider } from './capabilities_provider';
+import { registerEnvironmentHealthRoute } from './routes/environment_health';
 
 interface ManagementSetupDependencies {
   share: SharePluginSetup;
@@ -43,6 +44,9 @@ export class ManagementServerPlugin
     const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
 
     core.capabilities.registerProvider(capabilitiesProvider);
+
+    const router = core.http.createRouter();
+    registerEnvironmentHealthRoute(router);
 
     return {
       locator,

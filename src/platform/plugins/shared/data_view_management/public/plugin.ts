@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type {
   CoreSetup,
+  CoreStart,
   Plugin,
   PluginInitializerContext,
   IUiSettingsClient,
@@ -23,13 +25,15 @@ import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import { DATA_VIEWS_CREATE_LANDING_OVERLAY_ID } from '@kbn/management-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { IPM_APP_ID, NEW_APP_PATH } from './constants';
+import { DataViewLandingEditorOpener } from './data_view_landing_editor_opener';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -44,6 +48,7 @@ export interface IndexPatternManagementStartDependencies {
   dataViewEditor: DataViewEditorStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
+  management: ManagementStart;
   share?: SharePluginStart;
   spaces?: SpacesPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -106,7 +111,19 @@ export class IndexPatternManagementPlugin
     return {};
   }
 
-  public start() {
+  public start(
+    _core: CoreStart,
+    { dataViewEditor, management }: IndexPatternManagementStartDependencies
+  ): IndexPatternManagementStart {
+    management.registerLandingQuickActionOverlay(
+      DATA_VIEWS_CREATE_LANDING_OVERLAY_ID,
+      ({ onClose }) =>
+        React.createElement(DataViewLandingEditorOpener, {
+          onClose,
+          openEditor: dataViewEditor.openEditor,
+        })
+    );
+
     return {};
   }
 

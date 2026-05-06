@@ -15,10 +15,16 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
+import React from 'react';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
-import type { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
+import type {
+  ManagementAppMountParams,
+  ManagementSetup,
+  ManagementStart,
+} from '@kbn/management-plugin/public';
+import { CONNECTORS_LANDING_OVERLAY_ID } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
@@ -52,6 +58,8 @@ import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
+import { KibanaContextProvider } from './common/lib/kibana';
+import type { TriggersAndActionsUiServices } from './application/rules_app';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -194,6 +202,7 @@ interface PluginsStart {
   contentManagement?: ContentManagementPublicStart;
   share: SharePluginStart;
   cps?: CPSPluginStart;
+  management: ManagementStart;
 }
 
 export class Plugin
@@ -521,6 +530,24 @@ export class Plugin
       ON_OPEN_PANEL_MENU,
       ALERT_RULE_TRIGGER,
       createAlertRuleAction
+    );
+
+    const landingKibanaServices = { ...core } as unknown as TriggersAndActionsUiServices;
+
+    plugins.management.registerLandingQuickActionOverlay(
+      CONNECTORS_LANDING_OVERLAY_ID,
+      ({ onClose }) =>
+        React.createElement(
+          KibanaContextProvider,
+          { services: landingKibanaServices },
+          getAddConnectorFlyoutLazy({
+            actionTypeRegistry: this.actionTypeRegistry,
+            connectorServices: this.connectorServices!,
+            isServerless: !!plugins.serverless,
+            onClose,
+            onConnectorCreated: () => {},
+          })
+        )
     );
 
     return {

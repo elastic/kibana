@@ -13,6 +13,12 @@ import { MemoryRouter } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
 
+import type { EnvironmentHealthResponse } from '../../../common/environment_health';
+import {
+  MANAGEMENT_LANDING_DEFAULT_CLUSTER_DISPLAY_NAME,
+  MANAGEMENT_LANDING_ENVIRONMENT_HEALTH_API_PATH,
+} from '../../../common/environment_health';
+import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { AppContextProvider } from '../management_app/management_context';
 import { ManagementLandingPage } from './landing';
 import type { AppDependencies } from '../../types';
@@ -40,8 +46,23 @@ const sectionsMock = [
   },
 ] as AppDependencies['sections'];
 
+const mockEnvironmentHealthResponse = (): EnvironmentHealthResponse => ({
+  clusterName: MANAGEMENT_LANDING_DEFAULT_CLUSTER_DISPLAY_NAME,
+  healthStatus: 'green',
+  indicesCount: 12,
+  dataStreamsCount: 3,
+  attentionReasons: [],
+});
+
 const renderLandingPage = async (overrides: Partial<AppDependencies> = {}) => {
-  const coreStart = coreMock.createStart();
+  const coreStart = overrides.coreStart ?? coreMock.createStart();
+  jest.mocked(coreStart.http.get).mockImplementation((pathOrOptions: string | HttpFetchOptionsWithPath) => {
+    const path = typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;
+    if (path === MANAGEMENT_LANDING_ENVIRONMENT_HEALTH_API_PATH) {
+      return Promise.resolve(mockEnvironmentHealthResponse());
+    }
+    return Promise.resolve({});
+  });
   const contextDependencies: AppDependencies = {
     appBasePath: 'http://localhost:9001',
     kibanaVersion: '8.10.0',
@@ -69,11 +90,11 @@ const renderLandingPage = async (overrides: Partial<AppDependencies> = {}) => {
     await jest.runAllTimersAsync();
   });
 
-  // Component is rendered when either cards-navigation-page, managementHome (classic) or managementHomeSolution (project) is present
+  // Component is rendered when either cards-navigation-page, managementLandingHeader (classic) or managementHomeSolution (project) is present
   const cardsNav = screen.queryByTestId('cards-navigation-page');
-  const managementHome = screen.queryByTestId('managementHome');
+  const managementLandingHeader = screen.queryByTestId('managementLandingHeader');
   const managementHomeSolution = screen.queryByTestId('managementHomeSolution');
-  expect(cardsNav || managementHome || managementHomeSolution).toBeTruthy();
+  expect(cardsNav || managementLandingHeader || managementHomeSolution).toBeTruthy();
 
   return result;
 };
@@ -89,18 +110,83 @@ describe('Landing Page', () => {
       await renderLandingPage({ cardsNavigationConfig: { enabled: false } });
 
       expect(screen.queryByTestId('cards-navigation-page')).not.toBeInTheDocument();
-      expect(screen.getByTestId('managementHome')).toBeInTheDocument();
+      expect(screen.getByTestId('managementLandingHeader')).toBeInTheDocument();
+    });
+  });
+
+  describe('Classic header environment', () => {
+    test('Shows cluster title, status badge, and stats in page header when cards navigation is disabled', async () => {
+      const coreStart = coreMock.createStart();
+      await renderLandingPage({ cardsNavigationConfig: { enabled: false }, coreStart });
+      expect(
+        screen.getByRole('heading', {
+          level: 1,
+          name: new RegExp(MANAGEMENT_LANDING_DEFAULT_CLUSTER_DISPLAY_NAME),
+        })
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('managementEnvHealthClusterStatus')).toHaveTextContent('green');
+      expect(screen.getByTestId('managementEnvHealthIndices')).toHaveTextContent('12');
+      expect(coreStart.chrome.docTitle.change).toHaveBeenLastCalledWith(
+        MANAGEMENT_LANDING_DEFAULT_CLUSTER_DISPLAY_NAME
+      );
+    });
+
+    test('Shows Stack Management in page title when cluster name is unavailable', async () => {
+      const coreStart = coreMock.createStart();
+      coreStart.http.get.mockImplementation((pathOrOptions: string | HttpFetchOptionsWithPath) => {
+        const path = typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;
+        if (path === MANAGEMENT_LANDING_ENVIRONMENT_HEALTH_API_PATH) {
+          return Promise.resolve({
+            ...mockEnvironmentHealthResponse(),
+            clusterName: undefined,
+          });
+        }
+        return Promise.resolve({});
+      });
+      const contextDependencies: AppDependencies = {
+        appBasePath: 'http://localhost:9001',
+        kibanaVersion: '8.10.0',
+        cardsNavigationConfig: { enabled: false },
+        sections: sectionsMock,
+        chromeStyle: 'classic',
+        coreStart,
+        isAirGapped: false,
+        getAutoOpsStatusHook: () => () => ({ isCloudConnectAutoopsEnabled: false, isLoading: false }),
+      };
+      render(
+        <I18nProvider>
+          <MemoryRouter initialEntries={['/management_landing']}>
+            <AppContextProvider value={contextDependencies}>
+              <ManagementLandingPage setBreadcrumbs={jest.fn()} onAppMounted={jest.fn()} />
+            </AppContextProvider>
+          </MemoryRouter>
+        </I18nProvider>
+      );
+      await act(async () => {
+        await jest.runAllTimersAsync();
+      });
+
+      expect(
+        screen.getByRole('heading', { level: 1, name: /stack management/i })
+      ).toBeInTheDocument();
+      expect(coreStart.chrome.docTitle.change).toHaveBeenLastCalledWith('Stack Management');
+    });
+
+    test('Does not load classic header environment widgets when cards navigation is enabled', async () => {
+      await renderLandingPage({ cardsNavigationConfig: { enabled: true } });
+      expect(screen.queryByTestId('managementEnvHealthIndices')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('managementLandingHeader')).not.toBeInTheDocument();
     });
   });
 
   describe('Empty prompt', () => {
-    test('Renders the default empty prompt when chromeStyle is "classic"', async () => {
+    test('Renders landing header when chromeStyle is "classic"', async () => {
       await renderLandingPage({
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
       });
 
-      expect(screen.getByTestId('managementHome')).toBeInTheDocument();
+      expect(screen.getByTestId('managementLandingHeader')).toBeInTheDocument();
     });
 
     test('Renders the solution empty prompt when chromeStyle is "project"', async () => {
@@ -109,7 +195,7 @@ describe('Landing Page', () => {
         cardsNavigationConfig: { enabled: false },
       });
 
-      expect(screen.queryByTestId('managementHome')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('managementLandingHeader')).not.toBeInTheDocument();
       expect(screen.getByTestId('managementHomeSolution')).toBeInTheDocument();
     });
   });

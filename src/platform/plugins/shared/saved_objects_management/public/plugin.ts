@@ -8,9 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import { SAVED_OBJECTS_IMPORT_LANDING_OVERLAY_ID } from '@kbn/management-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -27,6 +29,7 @@ import {
 import type { v1 } from '../common';
 
 import type { SavedObjectManagementTypeInfo } from './types';
+import { ManagementLandingSavedObjectsImportFlyout } from './management_section/management_landing_import_flyout';
 import {
   getAllowedTypes,
   getDefaultTitle,
@@ -64,6 +67,7 @@ export interface StartDependencies {
   dataViews: DataViewsPublicPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   spaces?: SpacesPluginStart;
+  management: ManagementStart;
 }
 
 export class SavedObjectsManagementPlugin
@@ -128,14 +132,29 @@ export class SavedObjectsManagementPlugin
     };
   }
 
-  public start(_core: CoreStart, { spaces: spacesApi }: StartDependencies) {
+  public start(
+    coreStart: CoreStart,
+    { spaces: spacesApi, data, dataViews, management }: StartDependencies
+  ) {
     this.actionServiceStart = this.actionService.start(spacesApi);
     this.columnServiceStart = this.columnService.start(spacesApi);
 
+    management.registerLandingQuickActionOverlay(
+      SAVED_OBJECTS_IMPORT_LANDING_OVERLAY_ID,
+      ({ onClose }) =>
+        React.createElement(ManagementLandingSavedObjectsImportFlyout, {
+          onClose,
+          http: coreStart.http,
+          search: data.search,
+          dataViews,
+          applications: coreStart.application,
+        })
+    );
+
     return {
-      getAllowedTypes: () => getAllowedTypes(_core.http),
+      getAllowedTypes: () => getAllowedTypes(coreStart.http),
       getRelationships: (type: string, id: string, savedObjectTypes: string[], size?: number) =>
-        getRelationships(_core.http, type, id, savedObjectTypes, size),
+        getRelationships(coreStart.http, type, id, savedObjectTypes, size),
       getSavedObjectLabel,
       getDefaultTitle,
       parseQuery,

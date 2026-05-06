@@ -29,6 +29,7 @@ import type {
   NavigationCardsSubject,
   AutoOpsStatusHook,
   AutoOpsStatusResult,
+  LandingQuickActionOverlayRenderer,
 } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -91,6 +92,15 @@ export class ManagementPlugin
   });
 
   private hasAnyEnabledApps = true;
+
+  private readonly landingQuickActionOverlays = new Map<
+    string,
+    LandingQuickActionOverlayRenderer
+  >();
+
+  private getLandingQuickActionOverlayForApp = (
+    id: string
+  ): LandingQuickActionOverlayRenderer | undefined => this.landingQuickActionOverlays.get(id);
 
   private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
   private cardsNavigationConfig$ = new BehaviorSubject<NavigationCardsSubject>({
@@ -179,6 +189,8 @@ export class ManagementPlugin
           cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
           chromeStyle$,
           getAutoOpsStatusHook: managementPlugin.getAutoOpsStatusHook,
+          getLandingQuickActionOverlay: (id: string) =>
+            managementPlugin.getLandingQuickActionOverlayForApp(id),
         });
       },
     });
@@ -214,6 +226,9 @@ export class ManagementPlugin
     return {
       setupCardsNavigation: ({ enabled, hideLinksTo, extendCardNavDefinitions }) =>
         this.cardsNavigationConfig$.next({ enabled, hideLinksTo, extendCardNavDefinitions }),
+      registerLandingQuickActionOverlay: (id, render) => {
+        this.landingQuickActionOverlays.set(id, render);
+      },
     };
   }
 }
