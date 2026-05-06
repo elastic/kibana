@@ -10,12 +10,11 @@ The plan answers _what_ and _why_; this file answers _how_.
 - **REQUIRED SUB-SKILL:** scout-ui-testing (page objects, browser auth, parallel UI patterns).
 - **REQUIRED SUB-SKILL:** scout-api-testing (apiClient/auth, apiServices patterns).
 - **REQUIRED SUB-SKILL:** ftr-testing (understand FTR structure, loadTestFile, and configs).
-- **REQUIRED SUB-SKILL:** scout-best-practices-reviewer (review new Scout tests and migration parity).
 
 ## Important note
 
 - If the suite mostly validates **data correctness**, migrate it to a Scout **API** test (or unit/integration) instead of a Scout UI test.
-- Prefer component/unit tests (RTL/Jest) for isolated UI behaviors rather than Scout functional tests. For a full catalog of what should be downgraded and where the resulting tests live, see [`test-type-downgrades.md`](test-type-downgrades.md).
+- Prefer component/unit tests (RTL/Jest) for isolated UI behaviors rather than Scout functional tests. For a full catalog of what should be downgraded and where the resulting tests live, see [`pick-correct-test-type.md`](pick-correct-test-type.md).
 - Follow steps **1–10** below. Common migration failures: missing UI tags, wrong Scout package imports, relying on ordering/shared state, and ingestion/setup that isn't space/parallel-safe.
 
 ## Guardrails / gotchas (high signal)
@@ -36,7 +35,7 @@ The plan answers _what_ and _why_; this file answers _how_.
 
 ### 1) Decide the test type
 
-For each FTR file the plan marked as **API test**, **UI test**, or **unit test (RTL/Jest)**, follow the plan. The full criteria for downgrades to API or RTL/Jest live in [`test-type-downgrades.md`](test-type-downgrades.md); consult it when:
+For each FTR file the plan marked as **API test**, **UI test**, or **unit test (RTL/Jest)**, follow the plan. The full criteria for downgrades to API or RTL/Jest live in [`pick-correct-test-type.md`](pick-correct-test-type.md); consult it when:
 
 - the plan flags a test as a downgrade, or
 - you discover during execution that the plan's classification is wrong (rare; report back to the user before proceeding).
@@ -166,7 +165,7 @@ If the module uses **Pattern B**, treat the Scout API directory as isolated:
 
 ### 7) Extract component/unit tests where possible
 
-While implementing, look for logic that can be pulled out of e2e into RTL/Jest. Not every FTR `it` block needs a Scout equivalent. The full catalog of extraction candidates and where the resulting tests live is in [`test-type-downgrades.md`](test-type-downgrades.md).
+While implementing, look for logic that can be pulled out of e2e into RTL/Jest. Not every FTR `it` block needs a Scout equivalent. The full catalog of extraction candidates and where the resulting tests live is in [`pick-correct-test-type.md`](pick-correct-test-type.md).
 
 Keep Scout tests for what **requires a real browser and running server**: navigation, cross-page flows, permission-gated UI, and serverless-vs-stateful differences.
 
@@ -189,11 +188,9 @@ Keep Scout tests for what **requires a real browser and running server**: naviga
 - Preserve or update tags for deployment targets when needed; for **solution** modules, prefer **stateful + solution serverless** tags over `tags.deploymentAgnostic` (see **Tags when the FTR suite was "deployment agnostic"** under step 2).
 - Run Scout tests in both stateful and serverless if the plugin supports both.
 
-### 10) Review against Scout best practices
+### 10) Hand off to Step 5
 
-- Read and follow the `scout-best-practices-reviewer` skill on all new/changed Scout spec files.
-- Provide the removed FTR test files as context so the reviewer can verify migration parity.
-- Address `blocker` and `major` findings before finalizing; discuss `minor` and `nit` items as appropriate.
+Once the new specs typecheck and run, control returns to the parent skill. Step 5 (review parity & best practices) is owned by [`SKILL.md`](../SKILL.md), which dispatches to the `scout-best-practices-reviewer` skill with the removed FTR files as parity context.
 
 ## Common patterns
 

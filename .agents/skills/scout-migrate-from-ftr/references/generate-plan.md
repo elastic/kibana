@@ -2,7 +2,7 @@
 
 Detailed step-by-step instructions for the **Plan** step of the parent skill ([`SKILL.md`](../SKILL.md)). Produce a single Markdown file capturing every architectural decision the executor needs.
 
-The plan answers _what_ and _why_; [`migration-execution.md`](migration-execution.md) answers _how_.
+The plan answers _what_ and _why_; [`execute-plan.md`](execute-plan.md) answers _how_.
 
 ## Required sub-skill
 
@@ -19,12 +19,12 @@ Before starting, collect or confirm:
 
 ## Output filename convention
 
-Write the plan to `<source-dir-slug>-migration-plan.md` in the target Scout module root, where `<source-dir-slug>` is the kebab-cased basename of the FTR source directory. Examples:
+Write the plan to `migration-plan-<source-dir-slug>-<YYYY-MM-DD>.md` in the target Scout module root, where `<source-dir-slug>` is the basename of the FTR source directory and the date is the day the plan was generated. Examples:
 
-- FTR source `x-pack/platform/test/functional/apps/dashboard` → `dashboard-migration-plan.md`
-- FTR source `x-pack/solutions/observability/test/api_integration/apm` → `apm-migration-plan.md`
+- FTR source `x-pack/platform/test/functional/apps/painless_lab` → `migration-plan-painless_lab-2026-05-06.md`
+- FTR source `x-pack/solutions/observability/test/api_integration/apm` → `migration-plan-apm-2026-05-06.md`
 
-Using a per-source filename keeps multiple migrations under the same plugin from colliding while still allowing iterations on the same source to overwrite cleanly.
+The shared `migration-plan-` prefix makes plans easy to identify and group; the source-dir slug + date together prevent collisions across multiple migrations under the same plugin while still allowing intentional re-runs on the same source/day to overwrite cleanly.
 
 ## Approach
 
@@ -49,7 +49,7 @@ Also read thoroughly:
 
 ### 2. Triage (what should exist, what should change)
 
-For every test file, decide UI test / API test / unit test (RTL/Jest) / drop / defer using the criteria in [`test-type-downgrades.md`](test-type-downgrades.md). For each decision, write a one-line justification.
+For every test file, decide UI test / API test / unit test (RTL/Jest) / drop / defer using the criteria in [`pick-correct-test-type.md`](pick-correct-test-type.md). For each decision, write a one-line justification.
 
 **File splitting**: when a single FTR file tests multiple roles or unrelated flows, recommend splitting it into separate specs (one role + one flow per file). List the proposed splits.
 
@@ -168,7 +168,7 @@ For each batch:
 
 ### 12. Write the migration plan
 
-Output the plan to `<source-dir-slug>-migration-plan.md` (see **Output filename convention** above) in the target Scout module root. Follow [`output-template.md`](output-template.md) exactly for section structure, table formats, and bullet styles so the executor and any reviewers can parse sections programmatically.
+Output the plan to `migration-plan-<source-dir-slug>-<YYYY-MM-DD>.md` (see **Output filename convention** above) in the target Scout module root. Follow [`plan-template.md`](plan-template.md) exactly for section structure, table formats, and bullet styles so the executor and any reviewers can parse sections programmatically.
 
 ## Guardrails
 
@@ -179,6 +179,6 @@ Output the plan to `<source-dir-slug>-migration-plan.md` (see **Output filename 
 
 ## References
 
-- Plan output structure (every section, table, and bullet format): [`output-template.md`](output-template.md)
-- Test-type downgrade catalog (UI vs API vs RTL/Jest): [`test-type-downgrades.md`](test-type-downgrades.md)
+- Plan output structure (every section, table, and bullet format): [`plan-template.md`](plan-template.md)
+- Test-type downgrade catalog (UI vs API vs RTL/Jest): [`pick-correct-test-type.md`](pick-correct-test-type.md)
 - Cloud-first mindset (rationale for step 9): [`docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset`](../../../../docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset)

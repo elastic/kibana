@@ -2,8 +2,8 @@
 
 Not every FTR test should become a Scout UI test. Many should be downgraded to a Scout **API** test or a **unit/component test (RTL/Jest)**. This file is consumed by:
 
-- [`migration-planning.md`](migration-planning.md) step 2 (triage), to decide each test's target type
-- [`migration-execution.md`](migration-execution.md) steps 1 and 7, when implementing or noticing a misclassification
+- [`generate-plan.md`](generate-plan.md) step 2 (triage), to decide each test's target type
+- [`execute-plan.md`](execute-plan.md) steps 1 and 7, when implementing or noticing a misclassification
 
 ## How to decide
 
@@ -24,6 +24,6 @@ Before writing one, find a similar `*.test.tsx` next to a sibling component in t
 
 ## Who runs the migration
 
-All test-type targets — Scout UI, Scout API, **and RTL/Jest** — are migrated by step 3 (execute) of the parent skill, following [`migration-execution.md`](migration-execution.md). For RTL/Jest extractions, the executor follows the host plugin's existing Jest patterns (see above) rather than the Scout-specific patterns.
+All test-type targets — Scout UI, Scout API, **and RTL/Jest** — are migrated by step 3 (execute) of the parent skill, following [`execute-plan.md`](execute-plan.md). For RTL/Jest extractions, the executor follows the host plugin's existing Jest patterns (see above) rather than the Scout-specific patterns.
 
 If a downgrade requires component refactoring (e.g. extracting a render-only component to make it unit-testable) that goes beyond a straightforward port, the executor surfaces it as a `guided` batch in the plan rather than attempting it autonomously.

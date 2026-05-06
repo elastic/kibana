@@ -7,12 +7,13 @@ description: Single entry point for migrating Kibana Functional Test Runner (FTR
 
 ## Overview
 
-This is the single entry point for FTR-to-Scout migrations. It runs a deliberate four-step workflow:
+This is the single entry point for FTR-to-Scout migrations. It runs a deliberate five-step workflow:
 
 1. **Plan** — analyze the FTR suite end-to-end and write a migration plan document.
 2. **Review gate** — stop. Surface key warnings to the user and wait for explicit approval before writing or moving any test code.
 3. **Execute** — once approved, do the actual conversion.
 4. **Run and iterate** — run the new tests, iterate on failures, and stop only when they pass (or the agent needs human help).
+5. **Review parity & best practices** — apply the `scout-best-practices-reviewer` skill to verify migration parity and Scout best-practice compliance.
 
 The review gate is the point of the workflow. The plan front-loads decisions (UI vs API vs RTL/Jest, parallelism, auth, Cloud portability, batching) so the user can correct course cheaply, before any code is rewritten. Do not skip it.
 
@@ -27,7 +28,7 @@ Before starting, collect or confirm:
 
 ## Step 1 — Plan
 
-Follow [`references/migration-planning.md`](references/migration-planning.md) to produce a migration plan in the target Scout module root. The plan answers _what_ should change and _why_; the executor answers _how_.
+Follow [`references/generate-plan.md`](references/generate-plan.md) to produce a migration plan in the target Scout module root. The plan answers _what_ should change and _why_; the executor answers _how_.
 
 If a plan already exists for this source directory and matches the current FTR contents, skip to step 2.
 
@@ -37,7 +38,7 @@ After writing the plan, **stop**. Do not start touching test files.
 
 Surface the plan to the user with this message (substitute the real path):
 
-> I generated a migration plan at `<path-to-the-plan-file>`. Please review it carefully — it captures the test-type decisions, batching, auth strategy, Cloud portability, and any flagged risks before any code changes. Reply when you're ready to proceed with the migration, or with any corrections to the plan.
+> I generated a migration plan at `<path-to-the-plan-file>`. Please review it carefully — it captures the test-type decisions, batching, auth strategy, Cloud portability, and any flagged risks before any code changes. Reply when you're ready to proceed with the migration, or with any questions or corrections to the plan.
 
 Then surface a short **chat-side summary** of the items the user should not miss, even if they skim the plan file:
 
@@ -52,13 +53,20 @@ If the user pushes back on classifications, batching, or anything else, update t
 
 ## Step 3 — Execute
 
-Once the user approves, follow [`references/migration-execution.md`](references/migration-execution.md) end to end. That file owns the file placement rules, FTR-to-Scout dependency mapping, `loadTestFile` splitting, helper extraction, and typecheck instructions.
+Once the user approves, follow [`references/execute-plan.md`](references/execute-plan.md) end to end. That file owns the file placement rules, FTR-to-Scout dependency mapping, `loadTestFile` splitting, helper extraction, and typecheck instructions.
 
 If during execution you discover the plan was wrong about a specific file's test type (e.g. the planner said "API test" but the suite actually exercises a real user flow), pause and confirm with the user before changing course.
 
 ## Step 4 — Run and iterate
 
-Once execution is complete, run the new Scout tests and fix failures until they pass. Refer to [`docs/extend/scout/run-tests.md`](../../../docs/extend/scout/run-tests.md) for run-tests commands (stateful and serverless) and Cloud usage.
+Once execution is complete, run the new Scout tests and fix failures until they pass. Refer to [`docs/extend/scout/run-tests.md`](../../../docs/extend/scout/run-tests.md) for run-tests commands (local stateful and the local serverless simulation).
+
+For faster feedback during the loop, start the test servers once and reuse them across iterations:
+
+1. Start servers (one-time): `node scripts/scout.js start-server --stateful --serverConfigSet <configSet>` (or `--serverless <project>`).
+2. Run the specs per iteration: `npx playwright test --config <playwright.config.ts> <test-file>`.
+
+Falling back to `node scripts/scout.js run-tests` works but restarts the servers each time, which is much slower for iterative debugging.
 
 Loop:
 
@@ -67,7 +75,11 @@ Loop:
 3. Fix and re-run.
 4. Stop when all tests pass, or when you hit something that needs human judgment (genuinely unstable feature, missing source-code instrumentation, source bug). In that case, surface the blocker concisely and stop the loop.
 
-After the loop is green, follow the `scout-best-practices-reviewer` skill on the new spec files (and provide the removed FTR files as context for parity verification).
+## Step 5 — Review parity & best practices
+
+Once the tests pass, follow the `scout-best-practices-reviewer` skill on the new and changed spec files. Provide the removed FTR test files as context so the reviewer can verify migration parity (every behavior the FTR suite covered is still covered, in the right layer).
+
+Address `blocker` and `major` findings before considering the migration done. Surface `minor` and `nit` items for the user to triage.
 
 ## Guardrails
 
@@ -79,7 +91,7 @@ After the loop is green, follow the `scout-best-practices-reviewer` skill on the
 
 ## References
 
-- Step 1 (planning) workflow, inputs, output filename convention, Cloud portability questions: [`references/migration-planning.md`](references/migration-planning.md)
-- Step 3 (execution) workflow: file placement, FTR-to-Scout mapping, typecheck/run, parity review: [`references/migration-execution.md`](references/migration-execution.md)
-- Test-type downgrade catalog (UI vs API vs RTL/Jest): [`references/test-type-downgrades.md`](references/test-type-downgrades.md)
+- Step 1 (planning) workflow, inputs, output filename convention, Cloud portability questions: [`references/generate-plan.md`](references/generate-plan.md)
+- Step 3 (execution) workflow: file placement, FTR-to-Scout mapping, typecheck/run: [`references/execute-plan.md`](references/execute-plan.md)
+- Test-type downgrade catalog (UI vs API vs RTL/Jest): [`references/pick-correct-test-type.md`](references/pick-correct-test-type.md)
 - Step 4 run commands and iteration patterns: [`docs/extend/scout/run-tests.md`](../../../docs/extend/scout/run-tests.md)
