@@ -46,4 +46,14 @@ describe('AlertEpisodeTags', () => {
     expect(await screen.findByText('c')).toBeInTheDocument();
     expect(await screen.findByText('d')).toBeInTheDocument();
   });
+
+  it('renders when tags is a single string', () => {
+    render(
+      <IntlProvider locale="en">
+        <AlertEpisodeTags tags="alpha" size={2} />
+      </IntlProvider>
+    );
+
+    expect(screen.getByText('alpha')).toBeInTheDocument();
+  });
 });
