@@ -11,22 +11,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 
 export function AlertEpisodeTags({
-  tags,
+  tags = [],
   size = 3,
   oneLine = false,
 }: {
-  tags: string[] | string | undefined;
+  tags?: string[];
   size?: number;
   oneLine?: boolean;
 }) {
-  const normalizedTags = Array.isArray(tags) ? tags : tags ? [tags] : [];
   const [isMoreTagsOpen, setIsMoreTagsOpen] = useState(false);
   const onMoreTagsClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setIsMoreTagsOpen((isPopoverOpen) => !isPopoverOpen);
   };
   const closePopover = () => setIsMoreTagsOpen(false);
-  const moreTags = normalizedTags.length > size && (
+  const moreTags = tags.length > size && (
     <EuiBadge
       key="more"
       iconType="tag"
@@ -37,7 +36,7 @@ export function AlertEpisodeTags({
       <FormattedMessage
         id="xpack.observability.component.tags.moreTags"
         defaultMessage="+{number}"
-        values={{ number: normalizedTags.length - size }}
+        values={{ number: tags.length - size }}
       />
     </EuiBadge>
   );
@@ -50,7 +49,7 @@ export function AlertEpisodeTags({
       alignItems="center"
       direction="row"
     >
-      {normalizedTags.slice(0, size).map((tag) => (
+      {tags.slice(0, size).map((tag) => (
         <EuiBadge key={tag} color="hollow">
           {tag}
         </EuiBadge>
@@ -63,7 +62,7 @@ export function AlertEpisodeTags({
           isOpen={isMoreTagsOpen}
           closePopover={closePopover}
         >
-          {normalizedTags.slice(size).map((tag) => (
+          {tags.slice(size).map((tag) => (
             <EuiBadge key={tag} color="hollow">
               {tag}
             </EuiBadge>

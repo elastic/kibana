@@ -12,7 +12,12 @@ import { queryKeys } from '../query_keys';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
-import { type EpisodesFilterState, type EpisodesSortState } from '../queries/episodes_query';
+import {
+  type AlertEpisode,
+  type EpisodesFilterState,
+  type EpisodesSortState,
+} from '../queries/episodes_query';
+import { normalizeTags } from '../utils/normalize_tags';
 
 export interface UseFetchAlertingEpisodesQueryOptions {
   pageSize: number;
@@ -57,6 +62,11 @@ export const useFetchAlertingEpisodesQuery = ({
         timeRange,
       }),
     keepPreviousData: true,
+    select: (rows): AlertEpisode[] =>
+      rows.map((ep) => ({
+        ...ep,
+        last_tags: normalizeTags(ep.last_tags),
+      })),
   });
 
   return { ...query, dataView };
