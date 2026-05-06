@@ -10,7 +10,7 @@
     "browser": true,
     "server": false,
     "requiredPlugins": ["data", "fieldFormats", "share", "embeddable", "discoverShared"],
-    "optionalPlugins": ["fieldsMetadata", "cps"],
+    "optionalPlugins": ["fieldsMetadata"],
     "requiredBundles": ["kibanaUtils"]
   }
 }

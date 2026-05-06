@@ -14,4 +14,3 @@ export * from './span_icon';
 export * from './timestamp';
 
 export { getSpanIcon } from './span_icon/get_span_icon';
-export { Foo } from './foo';
