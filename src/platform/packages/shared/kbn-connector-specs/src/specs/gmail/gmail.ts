@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
 const DEFAULT_MAX_RESULTS = 10;
@@ -77,22 +77,27 @@ export const GmailConnector: ConnectorSpec = {
       isTool: true,
       description:
         'Search for emails in Gmail. Use a specific query (from:, subject:, is:unread, after:, newer_than:Nd) and limit maxResults (e.g. 10-20) to avoid large responses.',
-      input: z.object({
-        query: z
-          .string()
-          .optional()
-          .describe(
-            'Gmail search query using Gmail search operators. Supported operators: from:user@example.com (sender), to:user@example.com (recipient), subject:keyword (subject line), is:unread / is:read (read status), has:attachment (emails with attachments), after:YYYY/MM/DD / before:YYYY/MM/DD (absolute date range), newer_than:7d / older_than:30d (relative date — d=days, m=months, y=years), label:LABELNAME (by label). Combine operators freely: "from:alice@example.com is:unread newer_than:7d". Prefer narrow queries to avoid large responses.'
-          ),
-        maxResults: z
-          .number()
-          .optional()
-          .default(DEFAULT_MAX_RESULTS)
-          .describe(
-            'Maximum number of message IDs to return (1-100). Prefer 10-20 to keep context small; increase only if user explicitly needs more.'
-          ),
-        pageToken: z.string().optional().describe('Token for pagination from a previous response'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          query: z
+            .string()
+            .optional()
+            .describe(
+              'Gmail search query using Gmail search operators. Supported operators: from:user@example.com (sender), to:user@example.com (recipient), subject:keyword (subject line), is:unread / is:read (read status), has:attachment (emails with attachments), after:YYYY/MM/DD / before:YYYY/MM/DD (absolute date range), newer_than:7d / older_than:30d (relative date — d=days, m=months, y=years), label:LABELNAME (by label). Combine operators freely: "from:alice@example.com is:unread newer_than:7d". Prefer narrow queries to avoid large responses.'
+            ),
+          maxResults: z
+            .number()
+            .optional()
+            .default(DEFAULT_MAX_RESULTS)
+            .describe(
+              'Maximum number of message IDs to return (1-100). Prefer 10-20 to keep context small; increase only if user explicitly needs more.'
+            ),
+          pageToken: z
+            .string()
+            .optional()
+            .describe('Token for pagination from a previous response'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           query?: string;
@@ -121,21 +126,23 @@ export const GmailConnector: ConnectorSpec = {
       isTool: true,
       description:
         'Retrieve one Gmail message by ID. You must call searchMessages or listMessages first to get message IDs, then pass one of those IDs here.',
-      input: z.object({
-        messageId: z
-          .string()
-          .min(1, { message: 'messageId is required to retrieve a Gmail message' })
-          .describe(
-            'Required. The Gmail message ID (e.g. from searchMessages or listMessages). Always pass this when calling getMessage.'
-          ),
-        format: z
-          .enum(['minimal', 'full', 'raw'])
-          .optional()
-          .default('minimal')
-          .describe(
-            'Message format: use "minimal" (headers only) to save context; use "full" only when the user needs the email body content.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          messageId: z
+            .string()
+            .min(1, { message: 'messageId is required to retrieve a Gmail message' })
+            .describe(
+              'Required. The Gmail message ID (e.g. from searchMessages or listMessages). Always pass this when calling getMessage.'
+            ),
+          format: z
+            .enum(['minimal', 'full', 'raw'])
+            .optional()
+            .default('minimal')
+            .describe(
+              'Message format: use "minimal" (headers only) to save context; use "full" only when the user needs the email body content.'
+            ),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { messageId: string; format?: string };
         try {
@@ -156,20 +163,22 @@ export const GmailConnector: ConnectorSpec = {
       isTool: true,
       description:
         'Retrieve one Gmail attachment by message ID and attachment ID. Call getMessage with format "full" first to get attachment IDs from payload.parts[].body.attachmentId (and parts[].filename for the file name).',
-      input: z.object({
-        messageId: z
-          .string()
-          .min(1, { message: 'messageId is required to retrieve an attachment' })
-          .describe(
-            'Required. The Gmail message ID (from getMessage or search/list). Get attachment IDs from getMessage with format "full" — see payload.parts[].body.attachmentId.'
-          ),
-        attachmentId: z
-          .string()
-          .min(1, { message: 'attachmentId is required to retrieve an attachment' })
-          .describe(
-            'Required. The attachment ID from the message. Call getMessage with format "full" and read payload.parts[].body.attachmentId (and parts[].filename for the file name).'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          messageId: z
+            .string()
+            .min(1, { message: 'messageId is required to retrieve an attachment' })
+            .describe(
+              'Required. The Gmail message ID (from getMessage or search/list). Get attachment IDs from getMessage with format "full" — see payload.parts[].body.attachmentId.'
+            ),
+          attachmentId: z
+            .string()
+            .min(1, { message: 'attachmentId is required to retrieve an attachment' })
+            .describe(
+              'Required. The attachment ID from the message. Call getMessage with format "full" and read payload.parts[].body.attachmentId (and parts[].filename for the file name).'
+            ),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { messageId: string; attachmentId: string };
         try {
@@ -187,22 +196,27 @@ export const GmailConnector: ConnectorSpec = {
       isTool: true,
       description:
         'List Gmail message IDs by label (e.g. INBOX, SENT). Prefer searchMessages when the user has a specific query; limit maxResults (e.g. 10-20) to keep context small.',
-      input: z.object({
-        maxResults: z
-          .number()
-          .optional()
-          .default(DEFAULT_MAX_RESULTS)
-          .describe(
-            'Maximum number of message IDs to return (1-100). Prefer 10-20 to keep context small.'
-          ),
-        pageToken: z.string().optional().describe('Token for pagination from a previous response'),
-        labelIds: z
-          .array(z.string())
-          .optional()
-          .describe(
-            'Filter messages by Gmail label IDs (e.g. ["INBOX"], ["SENT"], ["UNREAD"]). Use this to scope to a mailbox folder. Omit to list from all labels. Prefer searchMessages when you need query-based filtering.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          maxResults: z
+            .number()
+            .optional()
+            .default(DEFAULT_MAX_RESULTS)
+            .describe(
+              'Maximum number of message IDs to return (1-100). Prefer 10-20 to keep context small.'
+            ),
+          pageToken: z
+            .string()
+            .optional()
+            .describe('Token for pagination from a previous response'),
+          labelIds: z
+            .array(z.string())
+            .optional()
+            .describe(
+              'Filter messages by Gmail label IDs (e.g. ["INBOX"], ["SENT"], ["UNREAD"]). Use this to scope to a mailbox folder. Omit to list from all labels. Prefer searchMessages when you need query-based filtering.'
+            ),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           maxResults?: number;
