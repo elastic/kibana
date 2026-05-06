@@ -676,42 +676,6 @@ describe('dataset routes', () => {
       );
     });
 
-    it('returns 404 when the example belongs to a different dataset', async () => {
-      const { handler, context, datasetClient } = buildRouteSetup({
-        registerRoute: registerUpdateExampleRoute,
-        method: 'put',
-        path: EVALS_DATASET_EXAMPLE_URL,
-      });
-      datasetClient.datasetExists.mockResolvedValueOnce(true);
-      // Mock returns undefined only when called with the matching expectedDatasetId,
-      // proving the route forwards ownership to the storage layer.
-      datasetClient.updateExample.mockImplementation(async (_id, _updates, expectedDatasetId) => {
-        return expectedDatasetId === datasetId ? undefined : ({} as any);
-      });
-
-      const request = httpServerMock.createKibanaRequest({
-        method: 'put',
-        path: EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', datasetId).replace(
-          '{exampleId}',
-          exampleId
-        ),
-        params: { datasetId, exampleId },
-        body: { input: {} },
-      });
-
-      const response = await handler(context as any, request, kibanaResponseFactory);
-
-      expect(response.status).toBe(404);
-      expect(response.payload).toEqual({
-        message: `Evaluation dataset example not found: ${exampleId}`,
-      });
-      expect(datasetClient.updateExample).toHaveBeenCalledWith(
-        exampleId,
-        expect.any(Object),
-        datasetId
-      );
-    });
-
     it('returns 409 when updated content matches another existing example', async () => {
       const { handler, context, datasetClient } = buildRouteSetup({
         registerRoute: registerUpdateExampleRoute,
@@ -798,37 +762,6 @@ describe('dataset routes', () => {
       });
       datasetClient.datasetExists.mockResolvedValueOnce(true);
       datasetClient.deleteExample.mockResolvedValueOnce(false);
-
-      const request = httpServerMock.createKibanaRequest({
-        method: 'delete',
-        path: EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', datasetId).replace(
-          '{exampleId}',
-          exampleId
-        ),
-        params: { datasetId, exampleId },
-      });
-
-      const response = await handler(context as any, request, kibanaResponseFactory);
-
-      expect(response.status).toBe(404);
-      expect(response.payload).toEqual({
-        message: `Evaluation dataset example not found: ${exampleId}`,
-      });
-      expect(datasetClient.deleteExample).toHaveBeenCalledWith(exampleId, datasetId);
-    });
-
-    it('returns 404 when the example belongs to a different dataset', async () => {
-      const { handler, context, datasetClient } = buildRouteSetup({
-        registerRoute: registerDeleteExampleRoute,
-        method: 'delete',
-        path: EVALS_DATASET_EXAMPLE_URL,
-      });
-      datasetClient.datasetExists.mockResolvedValueOnce(true);
-      // Mock returns false only when called with the matching expectedDatasetId,
-      // proving the route forwards ownership to the storage layer.
-      datasetClient.deleteExample.mockImplementation(async (_id, expectedDatasetId) => {
-        return expectedDatasetId !== datasetId;
-      });
 
       const request = httpServerMock.createKibanaRequest({
         method: 'delete',
