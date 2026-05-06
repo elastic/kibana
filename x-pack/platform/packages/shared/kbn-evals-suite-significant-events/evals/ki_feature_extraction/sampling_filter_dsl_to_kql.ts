@@ -38,7 +38,29 @@ export function samplingFilterDslToKql(filter: QueryDslQueryContainer): string {
     return `${field}: ${quoteKqlValue(extractQueryValue(value))}`;
   }
 
+  if (filter.exists) {
+    const { field } = filter.exists;
+    return `${field}: *`;
+  }
+
   if (filter.bool) {
+    // The translator emits `(A OR B OR ...)` for `should`, which is the exact
+    // equivalent of `minimum_should_match: 1`. Anything higher would silently
+    // weaken the criterion (turning "≥N of these symptoms" into "any one"), so
+    // refuse it loudly. Permanent translator support is tracked in
+    // https://github.com/elastic/streams-program/issues/1313 — until then,
+    // fixtures must pre-expand the clauses (see quarkus_super_heroes.ts
+    // `entity-fights-kafka` for an example).
+    if (
+      typeof filter.bool.minimum_should_match === 'number' &&
+      filter.bool.minimum_should_match > 1
+    ) {
+      throw new Error(
+        `samplingFilterDslToKql: bool.minimum_should_match > 1 is not supported (got ${filter.bool.minimum_should_match}). ` +
+          `Rewrite the fixture using nested pair-based should clauses, or track translator support in https://github.com/elastic/streams-program/issues/1313.`
+      );
+    }
+
     const filterClauses = castArray(filter.bool.filter ?? []).filter(isDslFilter);
     const mustClauses = castArray(filter.bool.must ?? []).filter(isDslFilter);
     const mustNotClauses = castArray(filter.bool.must_not ?? []).filter(isDslFilter);

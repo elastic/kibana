@@ -39,6 +39,20 @@ describe('samplingFilterDslToKql', () => {
     );
   });
 
+  it('translates exists clauses to KQL field-presence checks', () => {
+    expect(
+      samplingFilterDslToKql({ exists: { field: 'resource.attributes.k8s.pod.name' } })
+    ).toBe('resource.attributes.k8s.pod.name: *');
+    expect(
+      samplingFilterDslToKql({
+        bool: {
+          filter: [{ exists: { field: 'service.name' } }],
+          must_not: [{ exists: { field: 'error.message' } }],
+        },
+      })
+    ).toBe('service.name: * AND NOT (error.message: *)');
+  });
+
   it('translates bool clauses with array fields', () => {
     expect(
       samplingFilterDslToKql({
@@ -68,5 +82,20 @@ describe('samplingFilterDslToKql', () => {
     expect(() => samplingFilterDslToKql({ range: { '@timestamp': { gte: 0 } } })).toThrow(
       'samplingFilterDslToKql: unsupported DSL filter shape: {"range":{"@timestamp":{"gte":0}}}'
     );
+  });
+
+  it('throws when bool.minimum_should_match is greater than 1', () => {
+    expect(() =>
+      samplingFilterDslToKql({
+        bool: {
+          should: [
+            { match_phrase: { 'body.text': 'a' } },
+            { match_phrase: { 'body.text': 'b' } },
+            { match_phrase: { 'body.text': 'c' } },
+          ],
+          minimum_should_match: 2,
+        },
+      })
+    ).toThrow(/bool\.minimum_should_match > 1 is not supported \(got 2\)/);
   });
 });
