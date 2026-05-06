@@ -59,7 +59,12 @@ import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { DocumentFlyoutWrapper } from '../../../../../flyout_v2/document/main/document_flyout_wrapper';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
-import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import {
+  defaultToolsFlyoutProperties,
+  useDefaultDocumentFlyoutProperties,
+} from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { AttackDetails } from '../../../../../flyout_v2/attack_details';
+import { NotesDetails } from '../../../../../flyout_v2/notes';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -188,26 +193,59 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
         if (newFlyoutSystemEnabled) {
-          overlays.openSystemFlyout(
-            flyoutProviders({
-              services,
-              store,
-              history,
-              children: (
-                <DocumentFlyoutWrapper
-                  documentId={eventData._id}
-                  indexName={eventData.ecs._index}
-                  renderCellActions={cellActionRenderer}
-                  onAlertUpdated={refetch}
-                />
-              ),
-            }),
-            {
-              ...defaultFlyoutProperties,
-              historyKey: documentFlyoutHistoryKey,
-              session: 'start',
-            }
-          );
+          const isAttackRow = isAttackDiscoveryRow(eventData);
+
+          if (isAttackRow) {
+            const onShowNotes = () => {
+              overlays.openSystemFlyout(
+                flyoutProviders({
+                  services,
+                  store,
+                  history,
+                  children: <NotesDetails hit={eventData} />,
+                }),
+                {
+                  ...defaultToolsFlyoutProperties,
+                  historyKey: documentFlyoutHistoryKey,
+                }
+              );
+            };
+
+            overlays.openSystemFlyout(
+              flyoutProviders({
+                services,
+                store,
+                history,
+                children: <AttackDetails hit={eventData} onShowNotes={onShowNotes} />,
+              }),
+              {
+                ...defaultFlyoutProperties,
+                historyKey: documentFlyoutHistoryKey,
+                session: 'start',
+              }
+            );
+          } else {
+            overlays.openSystemFlyout(
+              flyoutProviders({
+                services,
+                store,
+                history,
+                children: (
+                  <DocumentFlyoutWrapper
+                    documentId={eventData._id}
+                    indexName={eventData.ecs._index}
+                    renderCellActions={cellActionRenderer}
+                    onAlertUpdated={refetch}
+                  />
+                ),
+              }),
+              {
+                ...defaultFlyoutProperties,
+                historyKey: documentFlyoutHistoryKey,
+                session: 'start',
+              }
+            );
+          }
         } else {
           const isAttackRow = isAttackDiscoveryRow(eventData);
           const indexName = eventData.ecs._index ?? '';

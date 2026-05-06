@@ -8,6 +8,11 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import {
+  ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+} from '@kbn/elastic-assistant-common';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { DocumentFlyout } from '.';
 import { TestProviders } from '../../../common/mock';
@@ -36,6 +41,11 @@ jest.mock('./tabs/overview_tab', () => ({
 jest.mock('./footer', () => ({ Footer: () => <div data-test-subj="mock-footer" /> }));
 jest.mock('../../shared/tools/notes', () => ({
   NotesDetails: () => <div data-test-subj="mock-notes-details" />,
+}));
+jest.mock('../attack_details', () => ({
+  AttackDetails: ({ onShowNotes }: { onShowNotes: () => void }) => (
+    <button type="button" data-test-subj="mock-attack-details" onClick={onShowNotes} />
+  ),
 }));
 
 const createAlertHit = (extra: DataTableRecord['flattened'] = {}): DataTableRecord =>
@@ -149,6 +159,86 @@ describe('<DocumentFlyout />', () => {
     );
 
     expect(getByTestId('mock-header')).toHaveAttribute('data-has-on-assignees-updated', 'true');
+  });
+
+  describe('attack-discovery routing', () => {
+    beforeEach(() => {
+      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+    });
+
+    it('renders the v2 attack details panel for attack-discovery scheduled alerts', () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <DocumentFlyout
+            hit={createAlertHit({
+              [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+            })}
+            renderCellActions={jest.fn()}
+            onAlertUpdated={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId('mock-attack-details')).toBeInTheDocument();
+      expect(queryByTestId('mock-header')).not.toBeInTheDocument();
+      expect(queryByTestId('mock-overview-tab')).not.toBeInTheDocument();
+      expect(queryByTestId('mock-footer')).not.toBeInTheDocument();
+    });
+
+    it('renders the v2 attack details panel for attack-discovery ad-hoc alerts', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <DocumentFlyout
+            hit={createAlertHit({
+              [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+            })}
+            renderCellActions={jest.fn()}
+            onAlertUpdated={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId('mock-attack-details')).toBeInTheDocument();
+    });
+
+    it('still renders the standard document flyout for non-attack-discovery alerts', () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <DocumentFlyout
+            hit={createAlertHit({ [ALERT_RULE_TYPE_ID]: 'siem.queryRule' })}
+            renderCellActions={jest.fn()}
+            onAlertUpdated={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId('mock-header')).toBeInTheDocument();
+      expect(queryByTestId('mock-attack-details')).not.toBeInTheDocument();
+    });
+
+    it('threads onShowNotes through to the v2 attack details panel', () => {
+      const openSystemFlyout = jest.fn();
+      startServices.overlays = {
+        ...startServices.overlays,
+        openSystemFlyout,
+      };
+
+      const { getByTestId } = render(
+        <TestProviders startServices={startServices}>
+          <DocumentFlyout
+            hit={createAlertHit({
+              [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+            })}
+            renderCellActions={jest.fn()}
+            onAlertUpdated={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId('mock-attack-details'));
+
+      expect(openSystemFlyout).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('remote document callout', () => {

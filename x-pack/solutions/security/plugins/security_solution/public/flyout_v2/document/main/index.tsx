@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -29,6 +29,8 @@ import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
+import { isAttackDiscoveryHit } from './utils/is_attack_discovery_hit';
+import { AttackDetails } from '../attack_details';
 
 const footerStyles = css`
   @media (max-width: 767px) {
@@ -66,10 +68,8 @@ export const DocumentFlyout = memo(
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
-    const isAlert = useMemo(
-      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
-      [hit]
-    );
+    const isAlert = (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal;
+    const isAttackDiscovery = isAlert && isAttackDiscoveryHit(hit);
     const isSecurityApp = useIsInSecurityApp();
     const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const { hasAlertsRead, loading } = useAlertsPrivileges();
@@ -96,6 +96,10 @@ export const DocumentFlyout = memo(
 
     if (missingAlertsPrivilege) {
       return <FlyoutMissingAlertsPrivilege />;
+    }
+
+    if (isAttackDiscovery) {
+      return <AttackDetails hit={hit} onShowNotes={onShowNotes} />;
     }
 
     return (
