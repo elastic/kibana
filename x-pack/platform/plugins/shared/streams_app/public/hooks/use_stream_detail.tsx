@@ -40,9 +40,9 @@ const StreamDetailContext = React.createContext<StreamDetailContextValue | undef
  *     1. Non-strict passes → schema drift (extra/unknown fields). Schedules a
  *        deferred throw so APM and the global error handler capture it, while
  *        execution continues normally (page stays usable).
- *     2. Non-strict also fails + `throwOnNonStrictFailure` is `true` → data is
+ *     2. Non-strict also fails + `throwOnActualTypeError` is `true` → data is
  *        genuinely the wrong type; throws synchronously.
- *     3. Non-strict also fails + `throwOnNonStrictFailure` is `false` → schedules
+ *     3. Non-strict also fails + `throwOnActualTypeError` is `false` → schedules
  *        a deferred throw with the Zod error details and returns normally.
  *
  * The deferred-throw pattern is required because:
@@ -55,7 +55,7 @@ const handleStrictSchemaFailure = (
   value: unknown,
   nonStrictSchema: { safeParse: (v: unknown) => { success: boolean; error?: unknown } },
   errorMessage: string,
-  throwOnNonStrictFailure = false
+  throwOnActualTypeError = false
 ): void => {
   if (process.env.NODE_ENV !== 'production') {
     throw new Error(errorMessage);
@@ -63,7 +63,7 @@ const handleStrictSchemaFailure = (
 
   const nonStrictResult = nonStrictSchema.safeParse(value);
 
-  if (!nonStrictResult.success && throwOnNonStrictFailure) {
+  if (!nonStrictResult.success && throwOnActualTypeError) {
     throw new Error(errorMessage);
   }
 
@@ -210,7 +210,7 @@ export function useStreamDetailAsIngestStream() {
     !Streams.ClassicStream.GetResponse.is(ctx.definition)
   ) {
     // Both strict (DeepStrict) type guards failed — delegate to shared handler.
-    // throwOnNonStrictFailure=true so we still throw synchronously when the data
+    // throwOnActualTypeError=true so we still throw synchronously when the data
     // is genuinely the wrong stream type (not just schema drift).
     handleStrictSchemaFailure(
       ctx.definition,
