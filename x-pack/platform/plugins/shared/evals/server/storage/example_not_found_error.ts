@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { FileUploadLiteLookUpView } from './file_upload_lite_lookup_view';
+export class ExampleNotFoundError extends Error {
+  constructor(exampleId: string) {
+    super(`Example not found: ${exampleId}`);
+    this.name = 'ExampleNotFoundError';
+  }
+}
