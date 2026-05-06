@@ -5,42 +5,59 @@
  * 2.0.
  */
 
-import { useMutation } from '@kbn/react-query';
-import { useRef, useState, useMemo, useCallback } from 'react';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useCallback, useMemo, useRef } from 'react';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
+import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom } from 'rxjs';
 import { isEqual } from 'lodash';
 import type {
   ConversationAction,
   ConversationRoundStep,
-} from '@kbn/agent-builder-common/chat/conversation';
+  Conversation,
+} from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type {
   Attachment,
+  AttachmentInput,
   ScreenContextAttachmentData,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { queryKeys } from '../../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import type { StartServices } from '../../hooks/use_kibana';
-import { useAgentId, useConversation } from '../../hooks/use_conversation';
-import { useConversationContext } from '../conversation/conversation_context';
-import { useConversationId } from '../conversation/use_conversation_id';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { mutationKeys } from '../../mutation_keys';
-import { usePendingMessageState } from './use_pending_message_state';
-import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
+import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
-
-interface UseSendMessageMutationProps {
-  connectorId?: string;
-}
-
-interface SendMessageParams {
-  message?: string;
-  action?: ConversationAction;
-}
+import { createConversationActions } from '../conversation/use_conversation_actions';
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
+
+export interface SendMessageVars {
+  message?: string;
+  action?: ConversationAction;
+  conversationId: string;
+  agentId: string;
+  connectorId?: string;
+  attachments?: AttachmentInput[];
+  conversationAttachments?: VersionedAttachment[];
+  lastRoundSteps?: ConversationRoundStep[];
+  resetAttachments?: () => void;
+  browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+}
+
+export interface SendMessageMutationBindings {
+  updateActiveReasoning: (reasoning: string) => void;
+  setPendingMessage: (conversationId: string, message: string) => void;
+  clearPendingMessage: (conversationId: string) => void;
+  setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
+  clearError: (conversationId: string) => void;
+  clearActiveStream: () => void;
+}
+
+type UseSendMessageMutationProps = SendMessageMutationBindings;
 
 const buildScreenContextData = async ({
   services,
@@ -98,209 +115,149 @@ const withScreenContextAttachment = async ({
   ];
 };
 
-export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
-  const { chatService } = useAgentBuilderServices();
+/**
+ * Send and regenerate-round mutation. Lives in the lifted SendMessageProvider so streaming
+ * state is visible to the whole app (sidebar included).
+ *
+ * Single-scope `mutationFn` (setup → try → catch → finally) — no `onMutate` / `onSettled`
+ * lifecycle methods, no refs to bridge phases. Each invocation builds its own
+ * `streamActions` instance targeting `vars.conversationId`, so stream events keep writing
+ * to the right cache regardless of where the user has navigated.
+ */
+export const useSendMessageMutation = ({
+  updateActiveReasoning,
+  setPendingMessage,
+  clearPendingMessage,
+  setError,
+  clearError,
+  clearActiveStream,
+}: UseSendMessageMutationProps) => {
+  const { chatService, conversationsService } = useAgentBuilderServices();
   const { services } = useKibana();
-  const { conversationActions, attachments, resetAttachments, browserApiTools } =
-    useConversationContext();
-  const [isResponseLoading, setIsResponseLoading] = useState(false);
-  const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
-  const conversationId = useConversationId();
-  const { conversation } = useConversation();
-  const isMutatingNewConversationRef = useRef(false);
-  const isRegeneratingRef = useRef(false);
-  const agentId = useAgentId();
-  const messageControllerRef = useRef<AbortController | null>(null);
-
-  const [error, setError] = useState<unknown | null>(null);
-  const [errorSteps, setErrorSteps] = useState<ConversationRoundStep[]>([]);
-
-  const removeError = useCallback(() => {
-    setError(null);
-    setErrorSteps((prev) => (prev.length === 0 ? prev : []));
-  }, []);
-
-  const browserApiToolsMetadata = useMemo(() => {
-    if (!browserApiTools) return undefined;
-    return browserApiTools.map(toToolMetadata);
-  }, [browserApiTools]);
+  const queryClient = useQueryClient();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const browserToolExecutor = useMemo(() => {
     return new BrowserToolExecutor(services.notifications?.toasts);
   }, [services.notifications?.toasts]);
 
-  const {
-    pendingMessageState: { pendingMessage },
-    setPendingMessage,
-    removePendingMessage,
-  } = usePendingMessageState({ conversationId });
-  const { subscribeToChatEvents, unsubscribeFromChatEvents } = useSubscribeToChatEvents({
-    setAgentReasoning,
-    setIsResponseLoading,
-    isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
-    browserToolExecutor,
-  });
-
-  const sendMessage = async ({ message, action }: SendMessageParams) => {
-    const signal = messageControllerRef.current?.signal;
-    const isRegenerate = action === 'regenerate';
-    if (!signal) {
-      return Promise.reject(new Error('Abort signal not present'));
-    }
-
-    if (isRegenerate) {
-      if (!conversationId) {
-        return Promise.reject(new Error('Conversation ID is required to resend'));
-      }
-
-      const events$ = chatService.regenerate({
-        signal,
-        conversationId,
-        agentId,
-        connectorId,
-        browserApiTools: browserApiToolsMetadata,
-      });
-
-      return subscribeToChatEvents(events$);
-    }
-
-    // Normal send: requires a message
-    if (!message) {
-      return Promise.reject(new Error('Message is required'));
-    }
-
-    const contextAttachments = await withScreenContextAttachment({
-      services,
-      conversationAttachments: conversation?.attachments,
-    });
-
-    const events$ = chatService.chat({
-      signal,
-      input: message,
-      conversationId,
-      agentId,
-      connectorId,
-      attachments: [...(attachments || []), ...contextAttachments],
-      browserApiTools: browserApiToolsMetadata,
-    });
-
-    return subscribeToChatEvents(events$);
-  };
-
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
-    mutationFn: sendMessage,
-    onMutate: ({ message, action }) => {
-      const isRegenerate = action === 'regenerate';
-      removeError();
-      messageControllerRef.current = new AbortController();
-      isRegeneratingRef.current = isRegenerate;
+    mutationFn: async (vars: SendMessageVars) => {
+      const isRegenerate = vars.action === 'regenerate';
+
+      // Clear any previous error for this conversation before starting the new mutation.
+      // Covers retry, fresh-send-after-error, and regenerate-after-error uniformly —
+      // otherwise `useConversationRounds` would render the stale error round alongside
+      // the new optimistic round.
+      clearError(vars.conversationId);
+
+      // Each conversation owns its streaming lifecycle. The streamActions instance built
+      // here is closure-bound to vars.conversationId for the duration of this mutation —
+      // stream events target that conversation regardless of navigation.
+      const streamActions = createConversationActions({
+        conversationId: vars.conversationId,
+        queryClient,
+        conversationsService,
+      });
+
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
 
       if (isRegenerate) {
-        // Clear the existing response immediately so UI shows empty state
-        // This must happen before setIsResponseLoading triggers the streaming UI
-        conversationActions.clearLastRoundResponse();
-      } else if (message) {
-        const isNewConversation = !conversationId;
-        isMutatingNewConversationRef.current = isNewConversation;
-        setPendingMessage(message);
-        conversationActions.addOptimisticRound({
-          userMessage: message,
-          attachments: attachments ?? [],
-        });
-        if (isNewConversation) {
-          if (!agentId) {
-            throw new Error('Agent id must be defined for a new conversation');
-          }
-          conversationActions.setAgentId(agentId);
-        }
+        // Clear the existing response immediately so UI shows empty state.
+        streamActions.clearLastRoundResponse();
       } else {
-        throw new Error('Message is required');
+        if (!vars.message) {
+          throw new Error('Message is required');
+        }
+        setPendingMessage(vars.conversationId, vars.message);
+        streamActions.addOptimisticRound({
+          userMessage: vars.message,
+          attachments: vars.attachments ?? [],
+          agentId: vars.agentId,
+        });
       }
-      setIsResponseLoading(true);
-    },
-    onSettled: () => {
-      conversationActions.invalidateConversation();
-      messageControllerRef.current = null;
-      setAgentReasoning(null);
-      if (isResponseLoading) {
-        setIsResponseLoading(false);
+
+      let succeeded = false;
+      try {
+        const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
+
+        const events$ = isRegenerate
+          ? chatService.regenerate({
+              signal: controller.signal,
+              conversationId: vars.conversationId,
+              agentId: vars.agentId,
+              connectorId: vars.connectorId,
+              browserApiTools: browserApiToolsMetadata,
+            })
+          : chatService.chat({
+              signal: controller.signal,
+              input: vars.message!,
+              conversationId: vars.conversationId,
+              agentId: vars.agentId,
+              connectorId: vars.connectorId,
+              attachments: [
+                ...(vars.attachments ?? []),
+                ...(await withScreenContextAttachment({
+                  services,
+                  conversationAttachments: vars.conversationAttachments,
+                })),
+              ],
+              browserApiTools: browserApiToolsMetadata,
+            });
+
+        await subscribeToChatEvents({
+          events$,
+          conversationActions: streamActions,
+          browserApiTools: vars.browserApiTools,
+          browserToolExecutor,
+          isAborted: () => controller.signal.aborted,
+          setAgentReasoning: updateActiveReasoning,
+        });
+
+        if (!isRegenerate) {
+          clearPendingMessage(vars.conversationId);
+          vars.resetAttachments?.();
+        }
+        succeeded = true;
+      } catch (err) {
+        setError(vars.conversationId, err, vars.lastRoundSteps ?? []);
+        if (!isRegenerate) {
+          // Remove the optimistic round immediately so the error round and the optimistic
+          // round are not both visible.
+          streamActions.removeOptimisticRound();
+        }
+        throw err;
+      } finally {
+        // Only invalidate on success. On error: refetching a fresh conversation that
+        // never persisted server-side would 404 and replace the in-round error UI with
+        // the "Conversation not found" page. The cache already holds the right state
+        // for `useConversationRounds` to render the synthetic error round.
+        // Also skip when paused on a HITL prompt (cache is canonical there too).
+        const cached = queryClient.getQueryData<Conversation>(
+          queryKeys.conversations.byId(vars.conversationId)
+        );
+        const endedInAwaitingPrompt =
+          cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
+        if (succeeded && !endedInAwaitingPrompt) {
+          streamActions.invalidateConversation();
+        }
+        clearActiveStream();
+        if (abortControllerRef.current === controller) {
+          abortControllerRef.current = null;
+        }
       }
-      isRegeneratingRef.current = false;
-    },
-    onSuccess: () => {
-      if (isRegeneratingRef.current) return;
-      removePendingMessage();
-      resetAttachments?.();
-      if (isMutatingNewConversationRef.current) {
-        conversationActions.removeNewConversationQuery();
-      }
-    },
-    onError: (err) => {
-      setError(err);
-      const steps = conversation?.rounds?.at(-1)?.steps;
-      if (steps) {
-        setErrorSteps(steps);
-      }
-      if (isRegeneratingRef.current) return;
-      // When we error, we should immediately remove the round rather than waiting for a refetch after invalidation
-      // Otherwise, the error round and the optimistic round will be visible together.
-      conversationActions.removeOptimisticRound();
     },
   });
 
-  const canCancel = isLoading;
-  const cancel = () => {
-    if (!canCancel) {
-      return;
-    }
-    removePendingMessage();
-    messageControllerRef.current?.abort();
-  };
+  const cancel = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
 
   return {
-    sendMessage: mutate,
-    isResponseLoading,
-    error,
-    errorSteps,
-    pendingMessage,
-    agentReasoning,
-    retry: () => {
-      if (
-        // Retrying should not be allowed if a response is still being fetched
-        // or if we're not in an error state
-        isResponseLoading ||
-        !error
-      ) {
-        return;
-      }
-
-      if (!pendingMessage) {
-        // Should never happen
-        // If we are in an error state, pending message will be present
-        throw new Error('Pending message is not present');
-      }
-
-      mutate({ message: pendingMessage });
-    },
-    canCancel,
+    mutate,
+    isLoading,
     cancel,
-    cleanConversation: () => {
-      // Cleaning the conversation only happens when we are on "/new" and the user wants to back out of a pending or errored conversation and return to an empty conversation state
-      if (isLoading) {
-        // Conversation round is pending, unsubscribe from chat events and resolve mutation
-        unsubscribeFromChatEvents();
-      } else if (Boolean(error)) {
-        removeError();
-        removePendingMessage();
-      }
-    },
-    /**
-     * Regenerate the last conversation round.
-     * Uses the same mutation flow but with action=regenerate.
-     */
-    regenerate: () => mutate({ action: 'regenerate' }),
-    isRegenerating: isLoading && isRegeneratingRef.current,
-    removeError,
   };
 };

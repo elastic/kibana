@@ -41,6 +41,9 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+          examples:
+            getRuntimeFieldNotFound:
+              $ref: '../components/examples/error_404_response.yaml'
 
 delete:
   summary: Delete a runtime field
@@ -72,6 +75,9 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+          examples:
+            deleteRuntimeFieldNotFound:
+              $ref: '../components/examples/error_404_response.yaml'
 
 post:
   summary: Update a runtime field
@@ -128,3 +134,6 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            updateRuntimeFieldBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'

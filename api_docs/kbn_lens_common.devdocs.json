@@ -6772,7 +6772,7 @@
           "<S>"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-        "lineNumber": 162,
+        "lineNumber": 163,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6785,7 +6785,7 @@
             "label": "isLoading",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-            "lineNumber": 163,
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6801,7 +6801,7 @@
               "S"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-            "lineNumber": 164,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9966,7 +9966,7 @@
         "label": "FormulaPublicApi",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-        "lineNumber": 126,
+        "lineNumber": 127,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10032,7 +10032,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-            "lineNumber": 128,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10050,7 +10050,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-                "lineNumber": 141,
+                "lineNumber": 142,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10064,7 +10064,7 @@
                 "label": "column",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-                "lineNumber": 142,
+                "lineNumber": 143,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10079,7 +10079,7 @@
                       "- String representation of a formula"
                     ],
                     "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-                    "lineNumber": 143,
+                    "lineNumber": 144,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10095,7 +10095,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-                    "lineNumber": 144,
+                    "lineNumber": 145,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10118,7 +10118,7 @@
                       " | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-                    "lineNumber": 145,
+                    "lineNumber": 146,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10134,7 +10134,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-                    "lineNumber": 146,
+                    "lineNumber": 147,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10157,7 +10157,7 @@
                       " | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-                    "lineNumber": 147,
+                    "lineNumber": 148,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10173,7 +10173,7 @@
                       "{ id: string; params?: { decimals: number; compact?: boolean | undefined; } | undefined; } | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-                    "lineNumber": 148,
+                    "lineNumber": 149,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10199,7 +10199,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-                "lineNumber": 156,
+                "lineNumber": 157,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "PersistedIndexPatternLayer",
@@ -10225,7 +10225,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-                "lineNumber": 157,
+                "lineNumber": 158,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "DataView",
@@ -10250,7 +10250,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-                "lineNumber": 158,
+                "lineNumber": 159,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "DateRange",
@@ -12635,7 +12635,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"register\" | \"init\"> & { deserialize: ",
+              ", \"init\" | \"register\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -13918,10 +13918,13 @@
           {
             "parentPluginId": "@kbn/lens-common",
             "id": "def-common.LensCellValueAction.iconType",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "iconType",
             "description": [],
+            "signature": [
+              "string | React.ComponentType"
+            ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "lineNumber": 1353,
             "columnNumber": 3,
@@ -15841,6 +15844,10 @@
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
               },
               {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/partition/suggestions.test.ts"
               },
@@ -15879,10 +15886,6 @@
               {
                 "plugin": "@kbn/lens-embeddable-utils",
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/dynamic_colors.mock.ts"
               }
             ]
           }
@@ -17335,6 +17338,10 @@
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
               },
               {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/lens_attributes/risk_score_summary.ts"
               },
@@ -17377,10 +17384,6 @@
               {
                 "plugin": "@kbn/lens-embeddable-utils",
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/dynamic_colors.mock.ts"
               }
             ]
           },
@@ -20960,6 +20963,22 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.TextBasedLayer.ignoreGlobalFilters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreGlobalFilters",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -21125,7 +21144,7 @@
         "label": "TextBasedPersistedState",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-        "lineNumber": 117,
+        "lineNumber": 118,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -21149,7 +21168,7 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-            "lineNumber": 118,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -21182,7 +21201,7 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-            "lineNumber": 119,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29714,7 +29733,7 @@
           "<unknown>; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-        "lineNumber": 166,
+        "lineNumber": 167,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -36033,7 +36052,7 @@
           "[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/datasources/types.ts",
-        "lineNumber": 122,
+        "lineNumber": 123,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

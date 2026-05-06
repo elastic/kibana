@@ -70,7 +70,7 @@ You can emit events in two ways: **via the request-scoped client** (from a route
 
 ### Emit an event (request context)
 
-From a route handler, use the request-scoped workflows context (your plugin must depend on `workflows_extensions` and type the route context with `workflows: WorkflowsRouteHandlerContext`):
+From a route handler, use the request-scoped workflows context (your plugin must depend on `workflows_extensions` and type your HTTP router with `WorkflowsExtensionsRequestHandlerContext` from `@kbn/workflows-extensions/server`, as in `server/plugin.ts`):
 
 ```ts
 const client = context.workflows.getWorkflowsClient();

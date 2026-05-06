@@ -131,7 +131,6 @@
     "@kbn/scout",
     "@kbn/scout-synthtrace",
     "@kbn/synthtrace-client",
-    "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",
@@ -143,6 +142,7 @@
     "@kbn/as-code-filters-constants",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-http-server-mocks",
+    "@kbn/reporting-public",
   ],
   "exclude": ["target/**/*"]
 }
