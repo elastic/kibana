@@ -60,20 +60,6 @@ interface RuleParametersWithResponseActions {
   }>;
 }
 
-type MaybeArray<T> = T | T[] | null | undefined;
-
-const getFirstValue = <T,>(value: MaybeArray<T>): T | undefined => {
-  if (value == null) {
-    return undefined;
-  }
-
-  return Array.isArray(value) ? value[0] : value;
-};
-
-const getFirstFieldValue = <T,>(hit: DataTableRecord, field: string): T | undefined => {
-  return getFirstValue(getFieldValue(hit, field) as MaybeArray<T>);
-};
-
 export interface UseResponseActionsViewParams {
   /**
    * Alert document used to fetch and display response actions.
@@ -84,18 +70,21 @@ export interface UseResponseActionsViewParams {
 export const useResponseActionsView = ({ hit }: UseResponseActionsViewParams): React.ReactNode => {
   const { canAccessEndpointActionsLogManagement } = useUserPrivileges().endpointPrivileges;
 
-  const alertId = useMemo(() => hit.raw._id ?? getFirstFieldValue<string>(hit, '_id') ?? '', [hit]);
+  const alertId = useMemo(() => hit.raw._id ?? (getFieldValue(hit, '_id') as string) ?? '', [hit]);
   const indexName = useMemo(
-    () => hit.raw._index ?? getFirstFieldValue<string>(hit, '_index') ?? '',
+    () => hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '',
     [hit]
   );
   const responseActions = useMemo(
     () =>
-      getFirstFieldValue<RuleParametersWithResponseActions>(hit, 'kibana.alert.rule.parameters')
+      (getFieldValue(hit, 'kibana.alert.rule.parameters') as RuleParametersWithResponseActions)
         ?.response_actions,
     [hit]
   );
-  const ruleName = useMemo(() => getFirstFieldValue<string>(hit, 'kibana.alert.rule.name'), [hit]);
+  const ruleName = useMemo(
+    () => getFieldValue(hit, 'kibana.alert.rule.name') as string | undefined,
+    [hit]
+  );
   const ecsData = useMemo<Ecs>(
     () => ({
       ...(expandDottedObject(hit.flattened) as Ecs),
