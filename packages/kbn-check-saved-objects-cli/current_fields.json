@@ -1498,6 +1498,12 @@
   "usage-counters": [
     "domainId"
   ],
+  "user-storage": [
+    "userId"
+  ],
+  "user-storage-global": [
+    "userId"
+  ],
   "user_connector_token": [
     "connectorId",
     "credentialType",
