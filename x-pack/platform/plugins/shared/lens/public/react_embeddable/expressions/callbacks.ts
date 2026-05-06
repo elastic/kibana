@@ -10,6 +10,7 @@ import { apiHasDisableTriggers } from '@kbn/presentation-publishing';
 import type { GetStateType, LensInternalApi, LensPublicCallbacks } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import type { LensEmbeddableStartServices } from '../types';
+import type { OnDataCallback } from '../type_guards';
 import { prepareOnRender } from './on_render';
 import { prepareEventHandler } from './on_event';
 import { addLog } from '../logger';
@@ -21,9 +22,7 @@ export function prepareCallbacks(
   getState: GetStateType,
   services: LensEmbeddableStartServices,
   executionContext: KibanaExecutionContext | undefined,
-  onDataUpdate: <TInspectorAdapters extends unknown>(
-    adapters: TInspectorAdapters | undefined
-  ) => void,
+  onDataUpdate: OnDataCallback,
   dispatchRenderComplete: () => void,
   callbacks: LensPublicCallbacks
 ) {
@@ -39,13 +38,10 @@ export function prepareCallbacks(
       executionContext,
       dispatchRenderComplete
     ),
-    onData: <TData, TInspectorAdapters extends unknown>(
-      _data: TData,
-      adapters?: TInspectorAdapters
-    ): void => {
+    onData: ((...args: Parameters<OnDataCallback>) => {
       addLog(`onData$`);
-      onDataUpdate(adapters);
-    },
+      onDataUpdate(...args);
+    }) as OnDataCallback,
     handleEvent: prepareEventHandler(api, getState, callbacks, services, disableTriggers),
   };
 }
