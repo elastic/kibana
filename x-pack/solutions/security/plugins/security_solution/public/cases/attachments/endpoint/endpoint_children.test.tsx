@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import AttachmentContentChildren from './external_reference_children';
+import AttachmentContentChildren from './endpoint_children';
 
 describe('AttachmentContentChildren', () => {
-  const defaultProps = {
+  const defaultMetadata = {
     command: 'isolate',
     comment: 'Test comment',
     targets: [
@@ -23,35 +23,21 @@ describe('AttachmentContentChildren', () => {
   };
 
   it('renders markdown content when comment exists', () => {
-    const props = {
-      externalReferenceMetadata: {
-        ...defaultProps,
-      },
-    };
-    const { getByText } = render(<AttachmentContentChildren {...props} />);
+    const { getByText } = render(<AttachmentContentChildren metadata={defaultMetadata} />);
     expect(getByText('Test comment')).toBeInTheDocument();
   });
 
   it('does not render when comment is empty', () => {
-    const props = {
-      externalReferenceMetadata: {
-        ...defaultProps,
-        comment: '',
-      },
-    };
-    const { container } = render(<AttachmentContentChildren {...props} />);
+    const { container } = render(
+      <AttachmentContentChildren metadata={{ ...defaultMetadata, comment: '' }} />
+    );
     expect(container.firstChild).toBeNull();
   });
 
   it('does not render when comment is only whitespace', () => {
-    const props = {
-      externalReferenceMetadata: {
-        ...defaultProps,
-        comment: '   ',
-      },
-    };
-
-    const { container } = render(<AttachmentContentChildren {...props} />);
+    const { container } = render(
+      <AttachmentContentChildren metadata={{ ...defaultMetadata, comment: '   ' }} />
+    );
     expect(container.firstChild).toBeNull();
   });
 });
