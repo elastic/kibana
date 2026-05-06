@@ -17,6 +17,7 @@ import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
 import { AnomalySwimlaneUserInput } from '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout';
+import { isMlAvailable } from '../../common/license/ml_license';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
@@ -55,6 +56,7 @@ export function createAddSwimlanePanelAction(
         defaultMessage: 'View anomaly detection results in a timeline.',
       }),
     async isCompatible(context: EmbeddableApiContext) {
+      if (!(await isMlAvailable(getStartServices))) return false;
       return Boolean(await parentApiIsCompatible(context.embeddable));
     },
     async execute(context) {
