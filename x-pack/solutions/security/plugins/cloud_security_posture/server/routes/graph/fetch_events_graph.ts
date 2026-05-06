@@ -302,14 +302,11 @@ const buildPinnedEsql = (pinnedIds?: string[]): string => {
 
   const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
 
-  // Final branch uses TO_STRING(null) (not bare null) to give the CASE result an explicit
-  // string type, matching the empty-pinnedIds path above. Bare null in the else branch has
-  // surfaced as an ES|QL planner NPE ("nullExpressions is null") on certain query plans.
   return `| EVAL pinned = CASE(
     _id IN (${pinnedParamsStr}), _id,
     actorEntityId IN (${pinnedParamsStr}), actorEntityId,
     targetEntityId IN (${pinnedParamsStr}), targetEntityId,
-    TO_STRING(null)
+    null
   )`;
 };
 
@@ -547,11 +544,7 @@ ${buildEnrichedEntityFieldsEsql()}
   }
 | EVAL isOriginAlert = ${
     originAlertIds.length > 0
-      ? // COALESCE wraps just the IN so AND sees two guaranteed-non-null booleans.
-        // Wrapping the whole AND-IN expression has surfaced as an ES|QL planner
-        // illegal_state ("PropagateNullable: notNullExpressions is null", ES #141579)
-        // when event.id is null in the input rows.
-        `isOrigin AND COALESCE(event.id in (${originAlertIds
+      ? `COALESCE(isOrigin AND event.id in (${originAlertIds
           .map((_id, idx) => `?og_alrt_id${idx}`)
           .join(', ')}), false)`
       : 'false'
@@ -576,10 +569,8 @@ ${buildEnrichedEntityFieldsEsql()}
     }
   "}")
 | STATS badge = COUNT(*),
-  // Use TO_STRING(null) — bare null in CASE-else has surfaced as ES|QL planner NPE
-  // ("Cannot invoke java.util.Set.isEmpty() because nullExpressions is null") on certain plans.
-  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, _id, TO_STRING(null))),
-  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, _id, TO_STRING(null))),
+  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, _id, null)),
+  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, _id, null)),
   isAlert = MV_MAX(VALUES(isAlert)),
   docs = VALUES(docData),
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
@@ -602,8 +593,7 @@ ${buildEnrichedEntityFieldsEsql()}
   // target attributes
   targetNodeId = CASE(
     // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
-    // Use TO_STRING(null) — bare null branches have surfaced as ES|QL planner NPE on certain plans.
-    COUNT_DISTINCT(targetEntityId) == 0, TO_STRING(null),
+    COUNT_DISTINCT(targetEntityId) == 0, null,
     CASE(
       MV_COUNT(VALUES(targetEntityId)) == 1, TO_STRING(VALUES(targetEntityId)),
       MD5(MV_CONCAT(MV_SORT(VALUES(targetEntityId)), ","))

@@ -249,16 +249,11 @@ describe('GraphGroupedNodePreviewPanel', () => {
         // Use pointerEventsCheck: 0 to skip pointer-events check for popover items
         await userEvent.click(screen.getByText('50 rows'), { pointerEventsCheck: 0 });
 
-        await waitFor(
-          () => {
-            // Should reset to page 1 (index 0)
-            expect(screen.getByLabelText(/Page 1/)).toBeInTheDocument();
-            expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent(
-              'Rows per page: 50'
-            );
-          },
-          { timeout: 5000 }
-        );
+        await waitFor(() => {
+          // Should reset to page 1 (index 0)
+          expect(screen.getByLabelText(/Page 1/)).toBeInTheDocument();
+          expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 50');
+        });
       });
 
       it('should slice items correctly based on new pageSize', async () => {
@@ -275,14 +270,9 @@ describe('GraphGroupedNodePreviewPanel', () => {
         // Use pointerEventsCheck: 0 to skip pointer-events check for popover items
         await userEvent.click(screen.getByText('50 rows'), { pointerEventsCheck: 0 });
 
-        await waitFor(
-          () => {
-            expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent(
-              'Rows per page: 50'
-            );
-          },
-          { timeout: 5000 }
-        );
+        await waitFor(() => {
+          expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 50');
+        });
       });
     });
 
