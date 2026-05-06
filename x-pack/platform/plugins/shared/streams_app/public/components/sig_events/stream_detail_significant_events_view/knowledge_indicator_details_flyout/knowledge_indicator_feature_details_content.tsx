@@ -113,6 +113,34 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature }: Props) {
           ))}
         </InfoPanel>
       </EuiFlexItem>
+      {showDependenciesPanel && (hasDependencies || allKnowledgeIndicators) && (
+        <EuiFlexItem>
+          <InfoPanel title={DEPENDENCIES_LABEL}>
+            {hasDependencies ? (
+              <EuiBasicTable
+                items={dependencyRows}
+                columns={dependencyColumns}
+                rowHeader="direction"
+                tableCaption={DEPENDENCIES_LABEL}
+              />
+            ) : (
+              <EuiText size="s">{NO_DEPENDENCIES_AVAILABLE}</EuiText>
+            )}
+          </InfoPanel>
+        </EuiFlexItem>
+      )}
+      {relatedQueryKIs.length > 0 && (
+        <EuiFlexItem>
+          <InfoPanel title={EVENTS_LABEL}>
+            <EuiBasicTable
+              items={relatedQueryKIs}
+              columns={eventsColumns}
+              rowHeader="query"
+              tableCaption={EVENTS_LABEL}
+            />
+          </InfoPanel>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <InfoPanel title={DESCRIPTION_LABEL}>
           <EuiText>{feature.description || NO_DESCRIPTION_AVAILABLE}</EuiText>
