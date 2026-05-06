@@ -83,6 +83,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 
   const {
     isResponseLoading,
+    isStreaming,
     error,
     retry: retrySendMessage,
     resumeRound,
@@ -90,8 +91,11 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   } = useSendMessage();
   // HITL Approve / Cancel is per-conversation: streamActions are closure-bound to
   // vars.conversationId, so other in-flight conversations cannot corrupt this cache.
-  // Disabled only while THIS conversation is mid-stream (and not yet in the resume call).
-  const isHitlDisabled = isResponseLoading && !isResuming;
+  // Use `isStreaming` (not `isResponseLoading`) so the buttons stay disabled during the
+  // window where the send mutation has emitted `pending_prompt` (round is now
+  // `awaitingPrompt`) but `mutationFn` hasn't reached its `finally` yet — clicking
+  // Approve there would race the still-in-flight send mutation.
+  const isHitlDisabled = isStreaming && !isResuming;
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;

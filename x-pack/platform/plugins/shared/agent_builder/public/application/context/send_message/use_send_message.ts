@@ -169,6 +169,10 @@ export const useSendMessage = () => {
       errorSteps: record.errorSteps,
       agentReasoning: myStream?.agentReasoning ?? null,
       canCancel: isMyStreamActive,
+      // Use this when the question is "is the conversation locked from external action because
+      // a mutation is in flight?" — `isResponseLoading` answers a narrower question (round-level loading
+      // spinner semantics) and goes false during HITL pause.
+      isStreaming: isMyStreamActive,
     }),
     [
       sendMessage,
