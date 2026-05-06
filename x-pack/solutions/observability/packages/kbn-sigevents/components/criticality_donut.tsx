@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 
 export interface CriticalityDonutProps {
   score: number;
-  isCritical: boolean;
   size?: number;
   strokeWidth?: number;
 }
@@ -22,7 +21,6 @@ const DEFAULT_STROKE = 18;
 
 export const CriticalityDonut = ({
   score,
-  isCritical,
   size = DEFAULT_SIZE,
   strokeWidth = DEFAULT_STROKE,
 }: CriticalityDonutProps) => {
@@ -33,7 +31,16 @@ export const CriticalityDonut = ({
     const c = 2 * Math.PI * r;
     const clamped = Math.min(100, Math.max(0, score));
     const offset = c * (1 - clamped / 100);
-    const arc = isCritical ? euiTheme.colors.severity.danger : euiTheme.colors.severity.success;
+
+    let arc: string;
+    if (clamped >= 70) {
+      arc = euiTheme.colors.severity.danger;
+    } else if (clamped >= 40) {
+      arc = euiTheme.colors.severity.warning;
+    } else {
+      arc = euiTheme.colors.severity.success;
+    }
+
     return {
       radius: r,
       circumference: c,
@@ -45,9 +52,9 @@ export const CriticalityDonut = ({
   }, [
     euiTheme.colors.severity.danger,
     euiTheme.colors.severity.success,
+    euiTheme.colors.severity.warning,
     euiTheme.colors.severity.unknown,
     euiTheme.colors.vis.euiColorVisText7,
-    isCritical,
     score,
     size,
     strokeWidth,

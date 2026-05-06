@@ -16,9 +16,6 @@ const meta: Meta<typeof CriticalityDonut> = {
     score: {
       control: { type: 'range', min: 0, max: 100 },
     },
-    isCritical: {
-      control: 'boolean',
-    },
     size: {
       control: { type: 'range', min: 50, max: 200 },
     },
@@ -34,7 +31,6 @@ type Story = StoryObj<typeof CriticalityDonut>;
 export const Critical: Story = {
   args: {
     score: 85,
-    isCritical: true,
     size: 100,
     strokeWidth: 18,
   },
@@ -43,7 +39,6 @@ export const Critical: Story = {
 export const Healthy: Story = {
   args: {
     score: 25,
-    isCritical: false,
     size: 100,
     strokeWidth: 18,
   },
@@ -52,7 +47,6 @@ export const Healthy: Story = {
 export const FullScore: Story = {
   args: {
     score: 100,
-    isCritical: true,
     size: 100,
     strokeWidth: 18,
   },
@@ -61,7 +55,6 @@ export const FullScore: Story = {
 export const ZeroScore: Story = {
   args: {
     score: 0,
-    isCritical: false,
     size: 100,
     strokeWidth: 18,
   },
@@ -70,7 +63,6 @@ export const ZeroScore: Story = {
 export const LargeSize: Story = {
   args: {
     score: 72,
-    isCritical: true,
     size: 150,
     strokeWidth: 24,
   },
@@ -79,7 +71,6 @@ export const LargeSize: Story = {
 export const SmallSize: Story = {
   args: {
     score: 45,
-    isCritical: false,
     size: 60,
     strokeWidth: 10,
   },
@@ -88,10 +79,10 @@ export const SmallSize: Story = {
 export const MultipleDonutsComparison: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-      <CriticalityDonut score={15} isCritical={false} />
-      <CriticalityDonut score={45} isCritical={false} />
-      <CriticalityDonut score={75} isCritical={true} />
-      <CriticalityDonut score={95} isCritical={true} />
+      <CriticalityDonut score={15} />
+      <CriticalityDonut score={45} />
+      <CriticalityDonut score={75} />
+      <CriticalityDonut score={95} />
     </div>
   ),
 };

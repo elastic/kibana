@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import { CriticalityDonut } from './criticality_donut';
 import { DevModePlaceholder } from './dev_mode_placeholder';
 
-const CRITICAL_SCORE_THRESHOLD = 80;
 const CARD_BORDER_RADIUS = '8px';
 const DONUT_SIZE = 75;
 const DONUT_STROKE = 12;
@@ -102,8 +101,6 @@ export function MainSignificantEvent(props: MainSignificantEventProps) {
 
   const { euiTheme } = useEuiTheme();
 
-  const isCritical = blastRadiusScore > CRITICAL_SCORE_THRESHOLD;
-
   const hasPlaceholderData =
     props.blastRadiusScore === undefined ||
     props.title === undefined ||
@@ -154,7 +151,6 @@ export function MainSignificantEvent(props: MainSignificantEventProps) {
             <EuiFlexItem grow={false}>
               <CriticalityDonut
                 score={blastRadiusScore}
-                isCritical={isCritical}
                 size={DONUT_SIZE}
                 strokeWidth={DONUT_STROKE}
               />
