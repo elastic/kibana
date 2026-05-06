@@ -32,17 +32,47 @@ export interface StreamDetailContextValue {
 const StreamDetailContext = React.createContext<StreamDetailContextValue | undefined>(undefined);
 
 /**
- * Surfaces an error message to APM instrumentation and the global error handler
- * without interrupting the current execution flow.
+ * Handles a strict (DeepStrict) Zod schema validation failure for a stream
+ * API response in a production-resilient way.
  *
- * A direct `throw` would abort the current call (breaking the page render), and
- * `console.error` is not captured by our APM instrumentation. Deferring the throw
- * via `setTimeout` lets the current call complete normally while still triggering
- * the global `error` / `unhandledrejection` listeners that APM hooks into.
+ * - In development, throws immediately so schema drift surfaces in tests / local dev.
+ * - In production, runs a non-strict `safeParse` to distinguish two cases:
+ *     1. Non-strict passes → schema drift (extra/unknown fields). Schedules a
+ *        deferred throw so APM and the global error handler capture it, while
+ *        execution continues normally (page stays usable).
+ *     2. Non-strict also fails + `throwOnNonStrictFailure` is `true` → data is
+ *        genuinely the wrong type; throws synchronously.
+ *     3. Non-strict also fails + `throwOnNonStrictFailure` is `false` → schedules
+ *        a deferred throw with the Zod error details and returns normally.
+ *
+ * The deferred-throw pattern is required because:
+ *   • A direct `throw` aborts execution and leaves the page blank.
+ *   • `console.error` is not captured by our APM instrumentation.
+ *   • `setTimeout(() => { throw … }, 0)` lets execution continue normally while
+ *     still triggering the global `error` listener that APM hooks into.
  */
-const reportSchemaDriftToInstrumentation = (message: string) => {
+const handleStrictSchemaFailure = (
+  value: unknown,
+  nonStrictSchema: { safeParse: (v: unknown) => { success: boolean; error?: unknown } },
+  errorMessage: string,
+  throwOnNonStrictFailure = false
+): void => {
+  if (process.env.NODE_ENV !== 'production') {
+    throw new Error(errorMessage);
+  }
+
+  const nonStrictResult = nonStrictSchema.safeParse(value);
+
+  if (!nonStrictResult.success && throwOnNonStrictFailure) {
+    throw new Error(errorMessage);
+  }
+
+  const reason = nonStrictResult.success
+    ? 'The response passed non-strict validation but failed strict (DeepStrict) validation — the API response contains extra or unknown fields.'
+    : String(nonStrictResult.error);
+
   setTimeout(() => {
-    throw new Error(message);
+    throw new Error(`${errorMessage} ${reason}`);
   }, 0);
 };
 
@@ -99,23 +129,11 @@ export function StreamDetailContextProvider({
             return response;
           }
 
-          // Both strict (DeepStrict) type guards failed — this indicates schema drift between
-          // the server response and the client-side zod schema.
-          if (process.env.NODE_ENV !== 'production') {
-            throw new Error('Stream detail only supports Ingest and Query streams.');
-          }
-
-          // In production: surface the validation failure via a deferred throw so it is
-          // captured by APM / error instrumentation (console.error is not instrumented),
-          // then pass the response through as-is to avoid a completely blank page.
-          // Things may partially break downstream, but that is vastly preferable to the
-          // page being completely unusable.
-          const validationResult = Streams.all.GetResponse.right.safeParse(response);
-          const validationMessage = validationResult.success
-            ? 'The response passed non-strict validation but failed strict (DeepStrict) validation — the API response contains extra or unknown fields.'
-            : String(validationResult.error);
-          reportSchemaDriftToInstrumentation(
-            `[Streams] Stream detail schema validation failed for stream "${name}". ${validationMessage}`
+          // Both strict (DeepStrict) type guards failed — delegate to shared handler.
+          handleStrictSchemaFailure(
+            response,
+            Streams.all.GetResponse.right,
+            `[Streams] Stream detail schema validation failed for stream "${name}".`
           );
           return response as Streams.all.GetResponse;
         });
@@ -191,22 +209,14 @@ export function useStreamDetailAsIngestStream() {
     !Streams.WiredStream.GetResponse.is(ctx.definition) &&
     !Streams.ClassicStream.GetResponse.is(ctx.definition)
   ) {
-    if (process.env.NODE_ENV !== 'production') {
-      throw new Error('useStreamDetailAsIngestStream can only be used with IngestStreams');
-    }
-
-    // In production: use the non-strict schema to distinguish schema drift (extra/unknown
-    // fields rejected by DeepStrict) from a genuinely wrong stream type. If the non-strict
-    // check passes, the definition is an ingest stream — just with unexpected extra fields.
-    const nonStrictCheck = Streams.ingest.all.GetResponse.right.safeParse(ctx.definition);
-    if (!nonStrictCheck.success) {
-      throw new Error('useStreamDetailAsIngestStream can only be used with IngestStreams');
-    }
-
-    reportSchemaDriftToInstrumentation(
-      `[Streams] useStreamDetailAsIngestStream: definition for stream "${ctx.definition.stream.name}" failed strict schema validation. ` +
-        `The response passed non-strict validation but failed strict (DeepStrict) validation — ` +
-        `the API response contains extra or unknown fields.`
+    // Both strict (DeepStrict) type guards failed — delegate to shared handler.
+    // throwOnNonStrictFailure=true so we still throw synchronously when the data
+    // is genuinely the wrong stream type (not just schema drift).
+    handleStrictSchemaFailure(
+      ctx.definition,
+      Streams.ingest.all.GetResponse.right,
+      `[Streams] useStreamDetailAsIngestStream: definition for stream "${ctx.definition.stream.name}" failed strict schema validation.`,
+      true
     );
   }
   return ctx as {
