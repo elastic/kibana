@@ -32,6 +32,7 @@ interface FieldsBrowserKibanaServices {
 interface FieldsBrowserProps {
   isOpen: boolean;
   onClose: () => void;
+  onAfterClose?: () => void;
   onSelect: (fieldName: string, change: DataSourceSelectionChange) => void;
   /**
    * Fields passed from autocomplete to render immediately without fetching.
@@ -49,6 +50,7 @@ interface FieldsBrowserProps {
 export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   isOpen,
   onClose,
+  onAfterClose,
   onSelect,
   preloadedFields,
   indexPattern,
@@ -303,6 +305,7 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
       items={filteredOptions}
       isOpen={isOpen}
       onClose={onClose}
+      onAfterClose={onAfterClose}
       onSelect={handleSelectionChange}
       isFilterOpen={isFilterPopoverOpen}
       setIsFilterOpen={setIsFilterPopoverOpen}
