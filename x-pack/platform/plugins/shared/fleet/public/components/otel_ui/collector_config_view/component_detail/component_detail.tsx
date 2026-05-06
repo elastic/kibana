@@ -63,15 +63,15 @@ const COMPONENT_DETAIL_TABS: Array<{ id: ComponentDetailTabId; name: string }> =
     }),
   },
   {
-    id: 'config',
-    name: i18n.translate('xpack.fleet.otelUi.componentDetail.tab.config', {
-      defaultMessage: 'Config',
-    }),
-  },
-  {
     id: 'metrics',
     name: i18n.translate('xpack.fleet.otelUi.componentDetail.tab.metrics', {
       defaultMessage: 'Metrics',
+    }),
+  },
+  {
+    id: 'config',
+    name: i18n.translate('xpack.fleet.otelUi.componentDetail.tab.config', {
+      defaultMessage: 'Config',
     }),
   },
 ];
