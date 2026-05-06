@@ -29,9 +29,7 @@ describe('UrlFormat', () => {
   test('outputs a mailto: link when URL starts with mailto:', () => {
     const url = new UrlFormat({});
 
-    expect(url.convertToText('mailto:test@example.com')).toBe(
-      'mailto:test@example.com'
-    );
+    expect(url.convertToText('mailto:test@example.com')).toBe('mailto:test@example.com');
     expect(url.convertToReact('mailto:test@example.com')).toMatchInlineSnapshot(`
       <a
         href="mailto:test@example.com"
@@ -709,7 +707,7 @@ describe('UrlFormat', () => {
         >
           ,
         </span>
-
+         
         <a
           href="http://kibana.io"
           rel="noopener noreferrer"

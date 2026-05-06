@@ -39,13 +39,8 @@ export type RenderConvertFunction = (
 ) => ReactNode;
 
 /**
- * @deprecated Use {@link RenderConvertFunction} instead.
- */
-export type ReactContextTypeSingleConvert = RenderConvertFunction;
-
-/**
  * Plain text converter options
- * @remark
+ * @remarks
  */
 export interface TextContextTypeOptions {
   skipFormattingInStringifiedJSON?: boolean;
@@ -99,7 +94,7 @@ export type FieldFormatConfig = {
  * should only be used in scenarios where async access to uiSettings is
  * not possible.
  *
- @public
+ * @public
  */
 export type FieldFormatsGetConfigFn<T extends Serializable = Serializable> = (
   key: string,
@@ -109,7 +104,7 @@ export type FieldFormatsGetConfigFn<T extends Serializable = Serializable> = (
 export type IFieldFormat = FieldFormat;
 
 /**
- * @string id type is needed for creating custom converters.
+ * The `string` union member allows creating custom converter IDs beyond the built-in enum.
  */
 export type FieldFormatId = FIELD_FORMAT_IDS | string;
 
