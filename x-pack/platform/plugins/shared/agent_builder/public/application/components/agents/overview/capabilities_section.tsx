@@ -50,7 +50,7 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
     <EuiTitle size="s">
       <h2>{overviewLabels.capabilitiesTitle}</h2>
     </EuiTitle>
-    <EuiSpacer size="l" />
+    <EuiSpacer size="m" />
     <EuiFlexGroup gutterSize="m" alignItems="stretch" wrap>
       <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
         <CapabilityCard

@@ -13,6 +13,7 @@ import { registerGetRunsRoute } from './runs/get_runs';
 import { registerGetRunRoute } from './runs/get_run';
 import { registerGetRunScoresRoute } from './runs/get_run_scores';
 import { registerGetRunDatasetExamplesRoute } from './runs/get_run_dataset_examples';
+import { registerCompareRunsRoute } from './runs/compare_runs';
 import { registerGetExampleScoresRoute } from './examples/get_example_scores';
 import { registerGetTraceRoute } from './traces/get_trace';
 import { registerListDatasetsRoute } from './datasets/list_datasets';
@@ -41,6 +42,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerGetRunRoute(dependencies);
   registerGetRunScoresRoute(dependencies);
   registerGetRunDatasetExamplesRoute(dependencies);
+  registerCompareRunsRoute(dependencies);
   registerGetExampleScoresRoute(dependencies);
   registerGetTraceRoute(dependencies);
   registerGetTracingProjectsRoute(dependencies);

@@ -24,6 +24,10 @@ import { ReqStatus } from '../../notes';
 import { useTimelineConfig } from './hooks/use_timeline_config';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 
+jest.mock('./components/notes_remote_callout', () => ({
+  NotesRemoteCallout: () => null,
+}));
+
 jest.mock('./hooks/use_timeline_config');
 jest.mock('../../common/hooks/is_in_security_app');
 const useIsInSecurityAppMock = useIsInSecurityApp as jest.Mock;

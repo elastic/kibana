@@ -22,13 +22,13 @@ import type {
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
+import { FieldActionsProvider } from '@kbn/unified-doc-viewer';
 import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
 import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import { LogsOverviewHeader } from './logs_overview_header';
-import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { LogsOverviewDegradedFields } from './logs_overview_degraded_fields';
 import { LogsOverviewStacktraceSection } from './logs_overview_stacktrace_section';
@@ -56,6 +56,7 @@ export type LogsOverviewProps = DocViewRenderProps &
     indexes: ObservabilityIndexes;
     showTraceWaterfall?: boolean;
     docViewActions?: DocViewActions;
+    profileId: string;
   };
 
 export interface LogsOverviewApi {
@@ -82,6 +83,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       docViewActions,
       initialState,
       onInitialStateChange,
+      profileId,
     },
     ref
   ) => {
@@ -144,7 +146,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             onRemoveColumn={onRemoveColumn}
             dataView={dataView}
           />
-          <DataSourcesProvider indexes={indexes}>
+          <DataSourcesProvider indexes={indexes} profileId={profileId}>
             <DocViewerExtensionActionsProvider actions={docViewActions}>
               {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
               <div>

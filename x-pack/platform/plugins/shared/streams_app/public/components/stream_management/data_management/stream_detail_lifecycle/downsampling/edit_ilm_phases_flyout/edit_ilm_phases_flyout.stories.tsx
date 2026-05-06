@@ -10,12 +10,12 @@ import { action } from '@storybook/addon-actions';
 import React, { useMemo, useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
+import { PHASE_ORDER } from '@kbn/data-lifecycle-phases';
 import { EditIlmPhasesFlyout } from './edit_ilm_phases_flyout';
 import { IlmPhaseSelect } from '../ilm_phase_select/ilm_phase_select';
-import { ILM_PHASE_ORDER } from './constants';
 
 const getInitialSelectedPhase = (phases: IlmPolicyPhases): PhaseName | undefined =>
-  ILM_PHASE_ORDER.find((p) => Boolean((phases as Record<string, unknown>)[p]));
+  PHASE_ORDER.find((p) => Boolean((phases as Record<string, unknown>)[p]));
 
 const addPhaseOutsideFlyout = (
   prev: IlmPolicyPhases,
@@ -141,8 +141,8 @@ export const Default: Story = {
               onClose={() => {
                 action('onClose')();
               }}
-              onChange={(next, _meta) => {
-                action('onChange')(next);
+              onChange={(next, changeMeta) => {
+                action('onChange')({ next, meta: changeMeta });
               }}
               onSave={(next) => {
                 action('onSave')(next);
@@ -192,8 +192,8 @@ export const PreserveMsUnits: Story = {
               onClose={() => {
                 action('onClose')();
               }}
-              onChange={(next, _meta) => {
-                action('onChange')(next);
+              onChange={(next, changeMeta) => {
+                action('onChange')({ next, meta: changeMeta });
               }}
               onSave={(next) => {
                 action('onSave')(next);
@@ -244,8 +244,8 @@ export const WarmAndDeletePhases: Story = {
               onClose={() => {
                 action('onClose')();
               }}
-              onChange={(next, _meta) => {
-                action('onChange')(next);
+              onChange={(next, changeMeta) => {
+                action('onChange')({ next, meta: changeMeta });
               }}
               onSave={(next) => {
                 action('onSave')(next);
@@ -289,8 +289,8 @@ export const OnlyDeletePhase: Story = {
               onClose={() => {
                 action('onClose')();
               }}
-              onChange={(next, _meta) => {
-                action('onChange')(next);
+              onChange={(next, changeMeta) => {
+                action('onChange')({ next, meta: changeMeta });
               }}
               onSave={(next) => {
                 action('onSave')(next);
@@ -340,8 +340,8 @@ export const NoMetricsStream: Story = {
               onClose={() => {
                 action('onClose')();
               }}
-              onChange={(next, _meta) => {
-                action('onChange')(next);
+              onChange={(next, changeMeta) => {
+                action('onChange')({ next, meta: changeMeta });
               }}
               onSave={(next) => {
                 action('onSave')(next);
@@ -378,7 +378,7 @@ export const PhaseSyncing: Story = {
 
       const enabledPhases = useMemo(() => {
         const present = Object.keys(phases) as PhaseName[];
-        return ILM_PHASE_ORDER.filter((p) => present.includes(p));
+        return PHASE_ORDER.filter((p) => present.includes(p));
       }, [phases]);
 
       const selectPhase = (phase: PhaseName) => {
@@ -440,8 +440,8 @@ export const PhaseSyncing: Story = {
                   action('onClose')();
                   setIsOpen(false);
                 }}
-                onChange={(next, _meta) => {
-                  action('onChange')(next);
+                onChange={(next, changeMeta) => {
+                  action('onChange')({ next, meta: changeMeta });
                   setPhases(next);
                 }}
                 onSave={(next) => {

@@ -153,7 +153,6 @@ function buildTaskDocs(
         from: 0,
         to: 0,
         steps: ['features_identification', 'queries_generation'],
-        saveQueries: true,
       },
       {
         featuresTaskResult: { status: 'completed', features },

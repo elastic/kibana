@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   PackName,
@@ -25,74 +25,73 @@ import {
   ObjectQueries,
 } from '../model/schema/common_attributes.gen';
 
+export const CreatePacksRequestBody = lazySchema(() =>
+  z.object({
+    name: PackName.optional(),
+    description: PackDescriptionOrUndefined.optional(),
+    enabled: EnabledOrUndefined.optional(),
+    policy_ids: PolicyIdsOrUndefined.optional(),
+    shards: Shards.optional(),
+    queries: ObjectQueries.optional(),
+  })
+);
 export type CreatePacksRequestBody = z.infer<typeof CreatePacksRequestBody>;
-export const CreatePacksRequestBody = z.object({
-  name: PackName.optional(),
-  description: PackDescriptionOrUndefined.optional(),
-  enabled: EnabledOrUndefined.optional(),
-  policy_ids: PolicyIdsOrUndefined.optional(),
-  shards: Shards.optional(),
-  queries: ObjectQueries.optional(),
-});
 
 /**
  * The response for creating a pack.
  */
-export type CreatePacksResponse = z.infer<typeof CreatePacksResponse>;
-export const CreatePacksResponse = z.object({
-  /**
-   * The created pack.
-   */
-  data: z
-    .object({
+export const CreatePacksResponse = lazySchema(() =>
+  z.object({
+    data: z.object({
       /**
        * The saved object ID of the pack.
        */
-      saved_object_id: z.string().optional(),
+      saved_object_id: z.string(),
+      name: PackName,
+      description: PackDescriptionOrUndefined.optional(),
+      queries: ObjectQueries.optional(),
       /**
-       * The pack name.
-       */
-      name: z.string().optional(),
-      /**
-       * The pack description.
-       */
-      description: z.string().optional(),
-      /**
-       * The queries in the pack.
-       */
-      queries: z.object({}).optional(),
-      /**
-       * The pack version.
+       * The pack version number.
        */
       version: z.number().int().optional(),
+      enabled: EnabledOrUndefined.optional(),
       /**
-       * Whether the pack is enabled.
+       * The date and time the pack was created.
        */
-      enabled: z.boolean().optional(),
-      /**
-       * The creation timestamp.
-       */
-      created_at: z.string().optional(),
+      created_at: z.string().datetime().optional(),
       /**
        * The user who created the pack.
        */
-      created_by: z.string().optional(),
+      created_by: z.string().nullable().optional(),
       /**
-       * The last update timestamp.
+       * The profile UID of the user who created the pack.
        */
-      updated_at: z.string().optional(),
+      created_by_profile_uid: z.string().optional(),
+      /**
+       * The date and time the pack was last updated.
+       */
+      updated_at: z.string().datetime().optional(),
       /**
        * The user who last updated the pack.
        */
-      updated_by: z.string().optional(),
+      updated_by: z.string().nullable().optional(),
       /**
-       * A list of agent policy IDs associated with the pack.
+       * The profile UID of the user who last updated the pack.
        */
-      policy_ids: z.array(z.string()).optional(),
+      updated_by_profile_uid: z.string().optional(),
+      policy_ids: PolicyIdsOrUndefined.optional(),
       /**
-       * Shard configuration for the pack.
+       * Shard configuration as an array of key-value pairs.
        */
-      shards: z.object({}).optional(),
-    })
-    .optional(),
-});
+      shards: z
+        .array(
+          z.object({
+            key: z.string().optional(),
+            value: z.number().optional(),
+          })
+        )
+        .optional(),
+    }),
+  })
+);
+export type CreatePacksResponse = z.infer<typeof CreatePacksResponse>;

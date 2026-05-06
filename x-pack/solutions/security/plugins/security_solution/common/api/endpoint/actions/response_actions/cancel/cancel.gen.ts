@@ -14,28 +14,30 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ResponseActionCreateSuccessResponse,
   BaseActionSchema,
 } from '../../../model/schema/common.gen';
 
-export type CancelRouteRequestBody = z.infer<typeof CancelRouteRequestBody>;
-export const CancelRouteRequestBody = BaseActionSchema.merge(
-  z.object({
-    parameters: z.object({
-      /**
-       * ID of the response action to cancel
-       */
-      id: z.string().min(1),
-    }),
-  })
+export const CancelRouteRequestBody = lazySchema(() =>
+  BaseActionSchema.merge(
+    z.object({
+      parameters: z.object({
+        /**
+         * ID of the response action to cancel
+         */
+        id: z.string().min(1),
+      }),
+    })
+  )
 );
+export type CancelRouteRequestBody = z.infer<typeof CancelRouteRequestBody>;
 
+export const CancelActionRequestBody = lazySchema(() => CancelRouteRequestBody);
 export type CancelActionRequestBody = z.infer<typeof CancelActionRequestBody>;
-export const CancelActionRequestBody = CancelRouteRequestBody;
 export type CancelActionRequestBodyInput = z.input<typeof CancelActionRequestBody>;
 
+export const CancelActionResponse = lazySchema(() => ResponseActionCreateSuccessResponse);
 export type CancelActionResponse = z.infer<typeof CancelActionResponse>;
-export const CancelActionResponse = ResponseActionCreateSuccessResponse;

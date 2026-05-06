@@ -127,7 +127,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
     if (permissions.delete) {
       mainPanelItems.push({
         name: <EuiTextColor color={'danger'}>{i18n.DELETE_FILE}</EuiTextColor>,
-        icon: <EuiIcon type="trash" size="m" color={'danger'} />,
+        icon: <EuiIcon type="trash" size="m" color={'danger'} aria-hidden={true} />,
         onClick: () => {
           closePopover();
           onModalOpen();

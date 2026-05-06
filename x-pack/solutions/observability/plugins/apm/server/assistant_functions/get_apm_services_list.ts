@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { GET_APM_SERVICES_LIST_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
 import type { FunctionRegistrationParameters } from '.';
-import { ServiceHealthStatus } from '../../common/service_health_status';
 import { getApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
 import { getMlClient } from '../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../lib/helpers/get_random_sampler';
@@ -27,7 +27,7 @@ export function registerGetApmServicesListFunction({
       descriptionForUser: i18n.translate(
         'xpack.apm.observabilityAiAssistant.functions.registerGetApmServicesList.descriptionForUser',
         {
-          defaultMessage: `Gets the list of monitored services, their health status, and alerts.`,
+          defaultMessage: `Gets the list of monitored services, their anomaly scores, and alerts.`,
         }
       ),
       parameters: {
@@ -46,16 +46,19 @@ export function registerGetApmServicesListFunction({
             ...NON_EMPTY_STRING,
             description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
-          healthStatus: {
+          anomalySeverities: {
             type: 'array',
-            description: 'Filter service list by health status',
+            description:
+              'Filter services by ML anomaly severity bands (derived from each service’s max anomaly score in the time range).',
             items: {
               type: 'string',
               enum: [
-                ServiceHealthStatus.unknown,
-                ServiceHealthStatus.healthy,
-                ServiceHealthStatus.warning,
-                ServiceHealthStatus.critical,
+                ML_ANOMALY_SEVERITY.CRITICAL,
+                ML_ANOMALY_SEVERITY.MAJOR,
+                ML_ANOMALY_SEVERITY.MINOR,
+                ML_ANOMALY_SEVERITY.WARNING,
+                ML_ANOMALY_SEVERITY.LOW,
+                ML_ANOMALY_SEVERITY.UNKNOWN,
               ],
             },
           },

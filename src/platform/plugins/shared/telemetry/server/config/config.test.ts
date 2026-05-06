@@ -7,7 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '@kbn/core/server/mocks';
 import { config } from './config';
+
+const applyConfigDeprecations = (telemetrySettings: Record<string, unknown> = {}) => {
+  const deprecationContext = configDeprecationsMock.createContext();
+  const deprecations = config.deprecations!(configDeprecationFactory);
+  const { config: migrated } = applyDeprecations(
+    { telemetry: telemetrySettings },
+    deprecations.map((deprecation) => ({
+      deprecation,
+      path: 'telemetry',
+      context: deprecationContext,
+    }))
+  );
+  return migrated as Record<string, Record<string, unknown>>;
+};
 
 describe('config', () => {
   const baseContext = {
@@ -61,5 +77,52 @@ describe('config', () => {
         ).toThrow();
       }
     );
+  });
+
+  describe('deprecations: telemetry.enabled', () => {
+    describe('when telemetry.enabled is set to a falsy value, the plugin stays enabled and telemetry is opted out', () => {
+      test.each([false, 'false', 'False', 'FALSE'])(
+        'migrates telemetry.enabled: %p → removes enabled, sets optIn and allowChangingOptInStatus to false',
+        (enabledValue) => {
+          const migrated = applyConfigDeprecations({ enabled: enabledValue });
+
+          expect(migrated.telemetry.enabled).toBeUndefined();
+          expect(migrated.telemetry.optIn).toBe(false);
+          expect(migrated.telemetry.allowChangingOptInStatus).toBe(false);
+        }
+      );
+
+      test.each([false, 'false', 'False', 'FALSE'])(
+        'also disables tracing and metrics when telemetry.enabled: %p',
+        (enabledValue) => {
+          const migrated = applyConfigDeprecations({ enabled: enabledValue });
+
+          const telemetry = migrated.telemetry as Record<string, Record<string, unknown>>;
+          expect(telemetry.tracing?.enabled).toBe(false);
+          expect(telemetry.metrics?.enabled).toBe(false);
+        }
+      );
+    });
+
+    describe('when telemetry.enabled is absent or truthy, the deprecation does not fire', () => {
+      test('does not modify config when telemetry.enabled is not set', () => {
+        const migrated = applyConfigDeprecations({});
+
+        expect(migrated.telemetry.enabled).toBeUndefined();
+        expect(migrated.telemetry.optIn).toBeUndefined();
+        expect(migrated.telemetry.allowChangingOptInStatus).toBeUndefined();
+      });
+
+      test.each([true, 'true', 'True', 'TRUE'])(
+        'does not modify config when telemetry.enabled: %p',
+        (enabledValue) => {
+          const migrated = applyConfigDeprecations({ enabled: enabledValue });
+
+          expect(migrated.telemetry.enabled).toBe(enabledValue);
+          expect(migrated.telemetry.optIn).toBeUndefined();
+          expect(migrated.telemetry.allowChangingOptInStatus).toBeUndefined();
+        }
+      );
+    });
   });
 });

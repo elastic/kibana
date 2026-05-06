@@ -100,7 +100,7 @@ components:
 
 
     PackId:
-      description: 'The ID of the pack you want to run, retrieve, update, or delete.'
+      description: 'The ID of the pack.'
       example: '3c42c847-eb30-4452-80e0-728584042334'
       type: string
 
@@ -157,6 +157,26 @@ components:
 
     ECSMappingOrUndefined:
       $ref: '#/components/schemas/ECSMapping'
+      nullable: true
+
+    ECSMappingArrayItem:
+      description: 'ECS mapping item in saved-object storage format (key-value pair).'
+      type: object
+      properties:
+        key:
+          description: 'The ECS field name.'
+          type: string
+        value:
+          $ref: '#/components/schemas/ECSMappingItem'
+
+    ECSMappingArray:
+      description: 'ECS mapping in saved-object storage format (array of key-value pairs). The find and copy pack endpoints return this format. The read endpoint returns object format (ECSMapping).'
+      type: array
+      items:
+        $ref: '#/components/schemas/ECSMappingArrayItem'
+
+    ECSMappingArrayOrUndefined:
+      $ref: '#/components/schemas/ECSMappingArray'
       nullable: true
 
     ArrayQueriesItem:

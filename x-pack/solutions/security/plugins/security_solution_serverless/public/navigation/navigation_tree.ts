@@ -39,6 +39,10 @@ export const createNavigationTree = async (
         renderAs: 'home',
       },
       {
+        link: 'inbox' as AppDeepLinkId,
+        icon: 'email',
+      },
+      {
         link: 'discover',
         icon: 'productDiscover',
       },
@@ -73,7 +77,9 @@ export const createNavigationTree = async (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(),
+      defaultNavigationTree.entityAnalytics(
+        services.experimentalFeatures.entityAnalyticsNewHomePageEnabled
+      ),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {
@@ -105,6 +111,7 @@ export const createNavigationTree = async (
               {
                 id: SecurityPageName.siemReadiness,
                 link: securityLink(SecurityPageName.siemReadiness),
+                badgeType: 'new',
               },
               {
                 // value report

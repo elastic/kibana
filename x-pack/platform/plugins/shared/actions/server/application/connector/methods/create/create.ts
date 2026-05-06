@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectAttributes } from '@kbn/core/server';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
@@ -16,6 +17,7 @@ import { isConnectorDeprecated } from '../../lib';
 import type { HookServices, ActionResult } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
+import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
 
@@ -128,6 +130,14 @@ export async function create({
     config,
   });
 
+  const configForSave =
+    actionType.source === ACTION_TYPE_SOURCES.spec
+      ? ensureConfigAuthType(
+          validatedActionTypeConfig as Record<string, unknown>,
+          validatedActionTypeSecrets as Record<string, unknown>
+        )
+      : validatedActionTypeConfig;
+
   const result = await tryCatch(
     async () =>
       await context.unsecuredSavedObjectsClient.create(
@@ -136,7 +146,7 @@ export async function create({
           actionTypeId,
           name,
           isMissingSecrets: false,
-          config: validatedActionTypeConfig as SavedObjectAttributes,
+          config: configForSave as SavedObjectAttributes,
           secrets: validatedActionTypeSecrets as SavedObjectAttributes,
           ...(authMode !== undefined ? { authMode } : {}),
         },

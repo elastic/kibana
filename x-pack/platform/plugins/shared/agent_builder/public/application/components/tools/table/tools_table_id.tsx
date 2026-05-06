@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+  EuiTextTruncate,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
 import React from 'react';
-import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { useToolsActions } from '../../../context/tools_provider';
+import { labels } from '../../../utils/i18n';
+import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 
 export interface ToolIdWithDescriptionProps {
   tool: ToolDefinition;
@@ -25,15 +34,24 @@ export const ToolIdWithDescription = ({ tool }: ToolIdWithDescriptionProps) => {
   `;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <EuiFlexGroup direction="column" gutterSize="xs" css={css({ minWidth: 0 })}>
       <EuiLink href={!tool.readonly ? getEditToolUrl(tool.id) : getViewToolUrl(tool.id)}>
         <EuiText size="s" css={toolIdStyle}>
           {tool.id}
         </EuiText>
       </EuiLink>
-      <EuiText size="s" color="subdued">
-        {truncateAtNewline(tool.description)}
-      </EuiText>
+      <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+        {tool.experimental && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{labels.tools.experimentalLabel}</EuiBadge>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem css={css({ minWidth: 0 })}>
+          <EuiText size="s" color="subdued" css={css({ minWidth: 0 })}>
+            <EuiTextTruncate text={truncateAtNewline(tool.description)} truncation="end" />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 };

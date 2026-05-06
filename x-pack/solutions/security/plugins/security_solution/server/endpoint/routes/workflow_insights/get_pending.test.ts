@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { ExecutionStatus } from '@kbn/agent-builder-plugin/server';
+import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 import { createMockEndpointAppContext, getRegisteredVersionedRouteMock } from '../../mocks';
 import { registerGetPendingRoute } from './get_pending';
 import { WORKFLOW_INSIGHTS_PENDING_ROUTE } from '../../../../common/endpoint/constants';
@@ -190,6 +190,7 @@ describe('Get Pending Insights Route Handler', () => {
             },
             '@timestamp': '2024-01-01T00:00:00Z',
             agentId: 'agent-1',
+            executionMode: AgentExecutionMode.conversation,
             spaceId: 'default',
             agentParams: { conversationId: 'conv-1' },
             eventCount: 0,
@@ -207,6 +208,7 @@ describe('Get Pending Insights Route Handler', () => {
             },
             '@timestamp': '2024-01-01T00:00:01Z',
             agentId: 'agent-2',
+            executionMode: AgentExecutionMode.conversation,
             spaceId: 'default',
             agentParams: { conversationId: 'conv-2' },
             eventCount: 0,
@@ -249,6 +251,7 @@ describe('Get Pending Insights Route Handler', () => {
         },
         '@timestamp': '2024-01-01T00:00:00Z',
         agentId: 'agent-1',
+        executionMode: AgentExecutionMode.conversation,
         spaceId: 'default',
         agentParams: { conversationId: 'conv-1' },
         eventCount: 0,
@@ -279,6 +282,7 @@ describe('Get Pending Insights Route Handler', () => {
           },
           '@timestamp': '2024-01-01T00:00:00Z',
           agentId: 'agent-1',
+          executionMode: AgentExecutionMode.conversation,
           spaceId: 'default',
           agentParams: { conversationId: 'conv-1' },
           eventCount: 0,
@@ -316,6 +320,7 @@ describe('Get Pending Insights Route Handler', () => {
           },
           '@timestamp': '2024-01-01T00:00:00Z',
           agentId: 'agent-1',
+          executionMode: AgentExecutionMode.conversation,
           spaceId: 'default',
           agentParams: {},
           eventCount: 0,

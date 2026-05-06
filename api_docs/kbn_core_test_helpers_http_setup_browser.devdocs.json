@@ -59,6 +59,7 @@
             "lineNumber": 26,
             "columnNumber": 23,
             "deprecated": false,
+            "docsReferencedTypeName": "SetupTap",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -116,6 +117,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ReturnType",
             "trackAdoption": false
           },
           {
@@ -137,6 +139,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ReturnType",
             "trackAdoption": false
           }
         ],

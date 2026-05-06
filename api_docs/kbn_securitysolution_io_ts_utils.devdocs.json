@@ -83,6 +83,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Either",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -137,6 +138,7 @@
             "lineNumber": 54,
             "columnNumber": 64,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -182,6 +184,7 @@
             "lineNumber": 725,
             "columnNumber": 85,
             "deprecated": false,
+            "docsReferencedTypeName": "Either",
             "trackAdoption": false
           }
         ],
@@ -397,6 +400,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -438,6 +442,7 @@
             "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -455,6 +460,7 @@
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "A",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -513,6 +519,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -554,6 +561,7 @@
             "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -571,6 +579,7 @@
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "A",
             "trackAdoption": false,
             "isRequired": true
           }

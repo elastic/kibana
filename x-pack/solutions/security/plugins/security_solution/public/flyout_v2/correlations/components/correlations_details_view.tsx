@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -47,10 +47,9 @@ export interface CorrelationsDetailsViewProps {
    */
   onShowAttack?: (id: string, indexName: string) => void;
   /**
-   * Whether to hide the rule preview link in the correlations table.
-   * Defaults to true (hidden) for the new tools flyout which has no expandable flyout context.
+   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of ChildLink (new flyout system)
    */
-  hidePreviewLink?: boolean;
+  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -64,7 +63,7 @@ export const CorrelationsDetailsView = memo(
     isRulePreview,
     onShowAlert,
     onShowAttack,
-    hidePreviewLink = true,
+    useLegacyExpandableFlyout,
   }: CorrelationsDetailsViewProps) => {
     const eventId = hit.raw._id ?? '';
     const ecsData = useMemo<Ecs>(
@@ -99,7 +98,7 @@ export const CorrelationsDetailsView = memo(
       showSuppressedAlerts;
 
     return (
-      <EuiPanel color="transparent">
+      <>
         {canShowAtLeastOneInsight ? (
           <EuiFlexGroup gutterSize="l" direction="column">
             {showSuppressedAlerts && (
@@ -123,7 +122,7 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
-                  hidePreviewLink={hidePreviewLink}
+                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -134,7 +133,7 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
-                  hidePreviewLink={hidePreviewLink}
+                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -144,7 +143,7 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   documentId={ancestryDocumentId}
                   onShowAlert={onShowAlert}
-                  hidePreviewLink={hidePreviewLink}
+                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -165,7 +164,7 @@ export const CorrelationsDetailsView = memo(
             defaultMessage="No correlations data available."
           />
         )}
-      </EuiPanel>
+      </>
     );
   }
 );
