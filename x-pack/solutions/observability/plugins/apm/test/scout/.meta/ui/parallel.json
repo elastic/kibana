@@ -1,5 +1,5 @@
 {
-  "sha1": "68bf0dcbadaba3f2e03fcf91eba592de79fe9317",
+  "sha1": "d138ef0e1a1e2471aaea51c1d41cb7743abb1e7e",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -505,7 +505,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
-        "line": 66,
+        "line": 73,
         "column": 9
       }
     },
@@ -521,7 +521,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
-        "line": 90,
+        "line": 97,
         "column": 9
       }
     },
@@ -649,8 +649,36 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 68,
+        "line": 63,
         "column": 9
+      }
+    },
+    {
+      "id": "f762bf7edaabdb2-a543bea8165a91c",
+      "title": "Service map - active alert badge on node shows active alert count on service node (stateful)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_alert_badge.spec.ts",
+        "line": 141,
+        "column": 7
+      }
+    },
+    {
+      "id": "f762bf7edaabdb2-61114232b2416d8",
+      "title": "Service map - active alert badge on node shows active alert count on service node (serverless)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_alert_badge.spec.ts",
+        "line": 147,
+        "column": 7
       }
     },
     {
@@ -665,7 +693,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 32,
+        "line": 33,
         "column": 9
       }
     },
@@ -681,7 +709,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 63,
+        "line": 64,
         "column": 9
       }
     },
@@ -713,7 +741,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 91,
+        "line": 90,
         "column": 9
       }
     },
@@ -729,7 +757,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 104,
+        "line": 102,
         "column": 9
       }
     },
@@ -745,7 +773,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 119,
+        "line": 116,
         "column": 9
       }
     },
@@ -761,7 +789,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 138,
+        "line": 134,
         "column": 9
       }
     },
@@ -777,7 +805,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 156,
+        "line": 151,
         "column": 9
       }
     },
