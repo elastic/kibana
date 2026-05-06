@@ -946,6 +946,7 @@
     "@kbn/reporting-fixture": "link:x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture",
     "@kbn/reporting-plugin": "link:x-pack/platform/plugins/private/reporting",
     "@kbn/reporting-public": "link:src/platform/packages/private/kbn-reporting/public",
+    "@kbn/reporting-remote-executor": "link:src/platform/packages/private/kbn-reporting-remote-executor",
     "@kbn/reporting-server": "link:src/platform/packages/private/kbn-reporting/server",
     "@kbn/reporting-test-routes": "link:x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes",
     "@kbn/resizable-layout": "link:src/platform/packages/shared/kbn-resizable-layout",
