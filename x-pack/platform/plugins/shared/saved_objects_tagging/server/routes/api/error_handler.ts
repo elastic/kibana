@@ -39,9 +39,10 @@ export function handleRouteError(
     });
   }
 
-  return res.badRequest({
+  return res.customError({
     body: {
       message: error.message,
     },
+    statusCode: 500,
   });
 }

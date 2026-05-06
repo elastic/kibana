@@ -25,9 +25,9 @@ The legacy tag CRUD endpoints under `/api/saved_objects_tagging` are deprecated.
   - **New**: `PUT /api/tags/{id}` is an **upsert**
     - returns **200** when updating an existing tag
     - returns **201** when creating a tag at the provided `{id}`
-- **List**
+- **Search**
   - **Legacy**: `GET /api/saved_objects_tagging/tags` returns `{ "tags": [ { "id", "name", "description", "color", "managed" } ] }`
-  - **New**: `GET /api/tags` returns `{ "tags": [ { "id", "data": { ... }, "meta": { ... } } ], "total", "page" }`
+  - **New**: `GET /api/tags` returns `{ "data": [ { "id", "data": { ... }, "meta": { ... } } ], "meta": { "page", "per_page", "total" } }`
 - **Delete**
   - **Legacy**: `DELETE /api/saved_objects_tagging/tags/{id}` returns **200**
   - **New**: `DELETE /api/tags/{id}` returns **204**
