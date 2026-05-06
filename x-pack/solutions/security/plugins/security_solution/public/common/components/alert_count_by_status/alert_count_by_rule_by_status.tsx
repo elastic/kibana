@@ -57,6 +57,8 @@ interface StatusSelection {
   [fieldName: string]: Status[];
 }
 
+const DEFAULT_STATUSES: Status[] = ['open'];
+
 type GetTableColumns = (
   openRuleInTimelineWithAdditionalFields: (ruleName: string) => void
 ) => Array<EuiBasicTableColumn<AlertCountByRuleByStatusItem>>;
@@ -113,7 +115,7 @@ export const AlertCountByRuleByStatus = React.memo(
 
     const [selectedStatusesByField, setSelectedStatusesByField] = useLocalStorage<StatusSelection>({
       defaultValue: {
-        [entityTypeCacheKey]: ['open'],
+        [entityTypeCacheKey]: DEFAULT_STATUSES,
       },
       key: LOCAL_STORAGE_KEY,
       isInvalidDefault: (valueFromStorage) => {
@@ -129,7 +131,7 @@ export const AlertCountByRuleByStatus = React.memo(
 
         const timelineFilters: string[] = [];
 
-        for (const status of selectedStatusesByField[entityTypeCacheKey]) {
+        for (const status of selectedStatusesByField[entityTypeCacheKey] || DEFAULT_STATUSES) {
           timelineFilters.push(
             `${euidEntityKqlFilter} AND ${SIGNAL_RULE_NAME_FIELD_NAME}: "${ruleName}" AND ${SIGNAL_STATUS_FIELD_NAME}: "${status}"`
           );
@@ -160,7 +162,7 @@ export const AlertCountByRuleByStatus = React.memo(
       entityType,
       entityRecord,
       queryId,
-      statuses: selectedStatusesByField[entityTypeCacheKey] as Status[],
+      statuses: (selectedStatusesByField[entityTypeCacheKey] || DEFAULT_STATUSES) as Status[],
       skip: !toggleStatus,
       signalIndexName,
     });
@@ -180,7 +182,7 @@ export const AlertCountByRuleByStatus = React.memo(
               <MultiSelectPopover
                 title={i18n.Status}
                 allItems={STATUSES}
-                selectedItems={selectedStatusesByField[entityTypeCacheKey] || ['open']}
+                selectedItems={selectedStatusesByField[entityTypeCacheKey] || DEFAULT_STATUSES}
                 onSelectedItemsChange={(selectedItems) =>
                   updateSelection(selectedItems as Status[])
                 }
