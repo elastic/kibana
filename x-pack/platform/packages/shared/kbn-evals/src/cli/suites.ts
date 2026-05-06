@@ -35,6 +35,12 @@ export interface EvalSuiteMetadata {
   tags?: string[];
   ciLabels?: string[];
   serverConfigSet?: string;
+  /**
+   * Optional Playwright shard count for fanout. When set (>= 1), CI emits
+   * `parallelism: shards` per child step and forwards
+   * `--shard=$BUILDKITE_PARALLEL_JOB+1/$BUILDKITE_PARALLEL_JOB_COUNT`.
+   */
+  shards?: number;
 }
 
 export interface EvalSuiteDefinition {
@@ -49,6 +55,7 @@ export interface EvalSuiteDefinition {
   description?: string;
   source: 'metadata' | 'discovery';
   serverConfigSet?: string;
+  shards?: number;
 }
 
 interface MetadataFile {
@@ -154,7 +161,18 @@ const normalizeSuite = (
     description: metadata?.description,
     source: metadata ? 'metadata' : 'discovery',
     serverConfigSet: metadata?.serverConfigSet,
+    shards: normalizeShards(metadata?.shards),
   };
+};
+
+const normalizeShards = (raw: unknown): number | undefined => {
+  if (raw === undefined || raw === null) {
+    return undefined;
+  }
+  if (typeof raw !== 'number' || !Number.isInteger(raw) || raw < 1) {
+    return undefined;
+  }
+  return raw;
 };
 
 export const discoverEvalSuites = (repoRoot: string, log?: ToolingLog): EvalSuiteDefinition[] => {

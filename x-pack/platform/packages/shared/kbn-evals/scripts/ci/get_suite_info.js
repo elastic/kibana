@@ -26,10 +26,16 @@ if (!suite) {
   process.exit(0);
 }
 
+const shards =
+  typeof suite.shards === 'number' && Number.isInteger(suite.shards) && suite.shards >= 1
+    ? suite.shards
+    : undefined;
+
 process.stdout.write(
   JSON.stringify({
     id: suite.id,
     name: suite.name,
     slackChannel: suite.slackChannel,
+    shards,
   })
 );
