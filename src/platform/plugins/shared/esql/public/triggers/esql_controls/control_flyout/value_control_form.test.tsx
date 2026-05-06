@@ -11,7 +11,7 @@ import React from 'react';
 import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
@@ -38,7 +38,7 @@ jest.mock('@kbn/esql-utils', () => {
             },
           },
         ],
-        values: [],
+        values: [['v1'], ['v2']],
       },
     }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
@@ -363,6 +363,27 @@ describe('ValueControlForm', () => {
         );
 
         expect(await findByTestId('esqlNoValuesForControlCallout')).toBeInTheDocument();
+      });
+
+      it('should disable the save button until the values preview is successfully validated', async () => {
+        const { getByTestId } = render(
+          <IntlProvider locale="en">
+            <KibanaContextProvider services={services}>
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field =="
+              />
+            </KibanaContextProvider>
+          </IntlProvider>
+        );
+
+        const saveButton = getByTestId('saveEsqlControlsFlyoutButton');
+        expect(saveButton).toBeDisabled();
+
+        await waitFor(() => {
+          expect(saveButton).not.toBeDisabled();
+        });
       });
     });
   });
