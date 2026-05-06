@@ -287,7 +287,9 @@ describe('YamlEditor', () => {
 
       // Both should use same singleton
       expect(yamlLanguageService.getInstance()).toBe(firstSingleton);
-      expect(jest.requireMock('@kbn/code-editor').configureMonacoYamlSchema).toHaveBeenCalledTimes(1);
+      expect(jest.requireMock('@kbn/code-editor').configureMonacoYamlSchema).toHaveBeenCalledTimes(
+        1
+      );
 
       // Unmount first component - schemas are cleared but singleton persists
       unmount1();
