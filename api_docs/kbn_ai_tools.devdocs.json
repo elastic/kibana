@@ -2708,7 +2708,7 @@
           "<Record<string, any>>[]; total: number; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-        "lineNumber": 18,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2721,7 +2721,7 @@
             "label": "{\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  filter,\n  size = 1000,\n  fields = [\n    {\n      field: '*',\n      include_unmapped: true,\n    },\n  ],\n  _source = false,\n  timeout = '5s',\n  runtime_mappings,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-            "lineNumber": 35,
+            "lineNumber": 60,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -3725,7 +3725,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 36,
+                "lineNumber": 61,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3741,7 +3741,7 @@
                   "string | string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 37,
+                "lineNumber": 62,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3754,7 +3754,7 @@
                 "label": "start",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 38,
+                "lineNumber": 63,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3767,7 +3767,7 @@
                 "label": "end",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 39,
+                "lineNumber": 64,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3783,7 +3783,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 40,
+                "lineNumber": 65,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3799,7 +3799,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 41,
+                "lineNumber": 66,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3818,7 +3818,7 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 42,
+                "lineNumber": 67,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3836,7 +3836,7 @@
                   ")[] | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 43,
+                "lineNumber": 68,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3852,7 +3852,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 44,
+                "lineNumber": 69,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3868,7 +3868,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 45,
+                "lineNumber": 70,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3885,12 +3885,52 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 46,
+                "lineNumber": 71,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-tools",
+        "id": "def-server.getSampleDocumentsEsql",
+        "type": "Function",
+        "tags": [],
+        "label": "getSampleDocumentsEsql",
+        "description": [
+          "\nES|QL-native companion to `getSampleDocuments` for callers that must sample\nfrom remote clusters or external data sources where classic search APIs are\nnot available. The helper returns `_source`-backed hits instead of `fields`\nhits, which keeps downstream document formatting compatible while avoiding\nQuery DSL.\n\nWhen `sampleSize` is provided, ES|QL has no `random_score` equivalent, and\n`SAMPLE p | LIMIT n` returns sampled rows in storage order. To preserve the\nold random-sampling behavior, this first counts the matching population,\noversamples with `SAMPLE`, shuffles the returned rows client-side, then trims\nto the requested size.\n\n`loadUnmappedFields` emits `SET unmapped_fields=\"LOAD\"` so ES|QL predicates\ncan evaluate source-only fields. This replaces the older fieldCaps +\nruntime_mappings path used for entity-filtered Significant Events sampling."
+        ],
+        "signature": [
+          "({\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  size = 1000,\n  sampleSize,\n  whereCondition,\n  loadUnmappedFields = false,\n}: GetSampleDocumentsEsqlParams) => Promise<GetSampleDocumentsEsqlResponse>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-tools",
+            "id": "def-server.getSampleDocumentsEsql.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  size = 1000,\n  sampleSize,\n  whereCondition,\n  loadUnmappedFields = false,\n}",
+            "description": [],
+            "signature": [
+              "GetSampleDocumentsEsqlParams"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
+            "lineNumber": 130,
+            "columnNumber": 46,
+            "deprecated": false,
+            "docsReferencedTypeName": "GetSampleDocumentsEsqlParams",
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],

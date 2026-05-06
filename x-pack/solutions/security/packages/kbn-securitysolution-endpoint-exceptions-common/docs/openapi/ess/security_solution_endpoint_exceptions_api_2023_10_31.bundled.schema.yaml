@@ -51,6 +51,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      [request body]: expected value of type [object] but got
+                      [undefined]
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -59,18 +67,38 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [POST /api/endpoint_list] is unauthorized for user,
+                      this action is granted by the Kibana privileges
+                      [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Insufficient privileges
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
@@ -132,6 +160,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      Either "item_id" or "id" needs to be defined in the
+                      request
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -140,24 +176,52 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [DELETE
+                      /api/endpoint_list/items?item_id=block-malicious-file] is
+                      unauthorized for user, this action is granted by the
+                      Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Insufficient privileges
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: >-
+                      exception list item item_id: "block-malicious-file" does
+                      not exist
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Endpoint list item not found
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
@@ -219,6 +283,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: id or item_id required
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -227,24 +297,52 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [GET
+                      /api/endpoint_list/items?item_id=block-malicious-file] is
+                      unauthorized for user, this action is granted by the
+                      Kibana privileges [lists-read]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Insufficient privileges
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: >-
+                      exception list item item_id: "block-malicious-file" does
+                      not exist
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Endpoint list item not found
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
@@ -359,6 +457,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body]: name: Required'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -367,24 +471,51 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [POST /api/endpoint_list/items] is unauthorized for
+                      user, this action is granted by the Kibana privileges
+                      [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Insufficient privileges
         '409':
           content:
             application/json:
+              examples:
+                alreadyExists:
+                  value:
+                    message: >-
+                      exception list item id: "block-malicious-file" already
+                      exists
+                    status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Endpoint list item already exists
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
@@ -494,6 +625,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body]: name: Required'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -502,24 +639,49 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [PUT /api/endpoint_list/items] is unauthorized for
+                      user, this action is granted by the Kibana privileges
+                      [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Insufficient privileges
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: 'list item item_id: "block-malicious-file" not found'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Endpoint list item not found
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
@@ -637,6 +799,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request query]: page: Expected number, received string'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -645,24 +813,49 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [GET /api/endpoint_list/items/_find] is unauthorized
+                      for user, this action is granted by the Kibana privileges
+                      [lists-read]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Insufficient privileges
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: 'list id: "endpoint_list" does not exist'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Endpoint list not found
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
