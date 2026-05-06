@@ -305,10 +305,23 @@ function extractRuleAttributes(
     return undefined;
   }
 
+  const queries: string[] = [];
+  const evaluationQuery = rule.evaluation?.query?.base?.trim();
+  if (evaluationQuery) {
+    queries.push(evaluationQuery);
+  }
+  if (rule.recovery_policy?.type === 'query') {
+    const recoveryQuery = rule.recovery_policy.query?.base?.trim();
+    if (recoveryQuery) {
+      queries.push(recoveryQuery);
+    }
+  }
+
   return {
     id: ruleId,
     name: rule.metadata.name,
     kind: rule.kind,
     tags: rule.metadata.tags,
+    ...(queries.length > 0 ? { query: queries } : {}),
   };
 }

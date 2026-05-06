@@ -115,6 +115,7 @@ describe('execution_event_logger', () => {
           name: 'High CPU',
           kind: 'alert',
           tags: ['production'],
+          query: ['FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1'],
         },
       });
 
@@ -134,7 +135,81 @@ describe('execution_event_logger', () => {
         name: 'High CPU',
         kind: 'alert',
         tags: ['production'],
+        query: ['FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1'],
       });
+    });
+
+    it('omits rule.query when no query is supplied', () => {
+      const event = buildExecuteEvent({
+        executionUuid: 'uuid-1',
+        ruleId: 'rule-1',
+        spaceId: 'default',
+        startedAt,
+        endedAt,
+        task,
+        status: 'success',
+        rule: {
+          id: 'rule-1',
+          name: 'High CPU',
+          kind: 'alert',
+        },
+      });
+
+      expect(event?.kibana?.alerting_v2?.rule_executor?.rule).toEqual({
+        id: 'rule-1',
+        name: 'High CPU',
+        kind: 'alert',
+      });
+    });
+
+    it('omits rule.query when an empty array is supplied', () => {
+      const event = buildExecuteEvent({
+        executionUuid: 'uuid-1',
+        ruleId: 'rule-1',
+        spaceId: 'default',
+        startedAt,
+        endedAt,
+        task,
+        status: 'success',
+        rule: {
+          id: 'rule-1',
+          name: 'High CPU',
+          kind: 'alert',
+          query: [],
+        },
+      });
+
+      expect(event?.kibana?.alerting_v2?.rule_executor?.rule).toEqual({
+        id: 'rule-1',
+        name: 'High CPU',
+        kind: 'alert',
+      });
+    });
+
+    it('serializes both evaluation and recovery queries when supplied', () => {
+      const event = buildExecuteEvent({
+        executionUuid: 'uuid-1',
+        ruleId: 'rule-1',
+        spaceId: 'default',
+        startedAt,
+        endedAt,
+        task,
+        status: 'success',
+        rule: {
+          id: 'rule-1',
+          name: 'High CPU',
+          kind: 'alert',
+          query: [
+            'FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+            'FROM logs-* | WHERE recovered = true',
+          ],
+        },
+      });
+
+      expect(event?.kibana?.alerting_v2?.rule_executor?.rule?.query).toEqual([
+        'FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+        'FROM logs-* | WHERE recovered = true',
+      ]);
     });
 
     it('builds a failed summary with reason and error fields', () => {

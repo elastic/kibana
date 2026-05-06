@@ -171,6 +171,10 @@ apiTest.describe('Rule executor execution history events', { tag: tags.stateful.
       expect(ruleExecutor?.rule?.kind).toBe('alert');
       expect(ruleExecutor?.rule?.tags).toContain('e2e');
       expect(ruleExecutor?.rule?.tags).toContain('execution-history');
+      expect(ruleExecutor?.rule?.query).toHaveLength(1);
+      expect(ruleExecutor?.rule?.query).toContain(
+        `FROM ${SOURCE_INDEX} | STATS count = COUNT(*) BY host.name | WHERE count >= 1`
+      );
 
       // Saved-object reference (drives event_log RBAC)
       const savedObjects = executeEvent.kibana?.saved_objects ?? [];
@@ -237,6 +241,41 @@ apiTest.describe('Rule executor execution history events', { tag: tags.stateful.
       expect(executeEvent.error?.message).toBeDefined();
       expect(typeof executeEvent.error?.message).toBe('string');
       expect((executeEvent.error?.message ?? '').length).toBeGreaterThan(0);
+    }
+  );
+
+  apiTest(
+    'captures both evaluation and recovery queries on rule.query when recovery_policy.type is "query"',
+    async ({ apiClient, esClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
+
+      const evaluationQuery = `FROM ${SOURCE_INDEX} | STATS count = COUNT(*) BY host.name | WHERE count >= 1`;
+      const recoveryQuery = `FROM ${SOURCE_INDEX} | WHERE host.name == "never-matches"`;
+
+      const createResponse = await apiClient.post(RULE_API_PATH, {
+        headers: { ...API_HEADERS, ...apiKeyHeader },
+        body: {
+          kind: 'alert',
+          metadata: { name: 'execution-events-recovery-query' },
+          time_field: '@timestamp',
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          evaluation: { query: { base: evaluationQuery } },
+          recovery_policy: { type: 'query', query: { base: recoveryQuery } },
+          grouping: { fields: ['host.name'] },
+        },
+        responseType: 'json',
+      });
+
+      expect(createResponse.statusCode).toBe(200);
+      const ruleId = createResponse.body.id;
+      ruleIds.push(ruleId);
+
+      const [executeEvent] = await waitForRuleExecutorEvents(esClient, ruleId, 'execute', 1);
+
+      const ruleQuery = executeEvent.kibana?.alerting_v2?.rule_executor?.rule?.query;
+      expect(ruleQuery).toHaveLength(2);
+      expect(ruleQuery).toContain(evaluationQuery);
+      expect(ruleQuery).toContain(recoveryQuery);
     }
   );
 

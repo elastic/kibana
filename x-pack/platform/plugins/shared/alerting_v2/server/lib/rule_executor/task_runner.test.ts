@@ -32,6 +32,22 @@ describe('RuleExecutorTaskRunner', () => {
     id: 'rule-1',
     kind: 'alert',
     metadata: { name: 'Sample rule', tags: ['production', 'infra'] },
+    evaluation: {
+      query: { base: 'FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' },
+    },
+  } as unknown as RuleResponse;
+
+  const sampleRuleWithRecoveryQuery = {
+    id: 'rule-1',
+    kind: 'alert',
+    metadata: { name: 'Sample rule', tags: ['production', 'infra'] },
+    evaluation: {
+      query: { base: 'FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' },
+    },
+    recovery_policy: {
+      type: 'query',
+      query: { base: 'FROM logs-* | WHERE recovered = true' },
+    },
   } as unknown as RuleResponse;
 
   beforeEach(() => {
@@ -172,6 +188,24 @@ describe('RuleExecutorTaskRunner', () => {
       expect(summaryEvent?.kibana?.alerting_v2?.rule_executor?.rule?.tags).toEqual([
         'production',
         'infra',
+      ]);
+      expect(summaryEvent?.kibana?.alerting_v2?.rule_executor?.rule?.query).toEqual([
+        'FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+      ]);
+    });
+
+    it('appends the recovery query to rule.query when recovery_policy.type is "query"', async () => {
+      pipeline.execute.mockResolvedValue({
+        completed: true,
+        finalState: createRulePipelineState({ rule: sampleRuleWithRecoveryQuery }),
+      });
+
+      await runner.run({ taskInstance, abortController });
+
+      const summaryEvent = mockEventLogger.logEvent.mock.calls[1][0];
+      expect(summaryEvent?.kibana?.alerting_v2?.rule_executor?.rule?.query).toEqual([
+        'FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+        'FROM logs-* | WHERE recovered = true',
       ]);
     });
 

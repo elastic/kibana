@@ -27,6 +27,7 @@ export interface RuleExecutionRuleAttributes {
   readonly kind: RuleKind;
   readonly tags?: readonly string[];
   readonly version?: number;
+  readonly query?: readonly string[];
 }
 
 export interface ExecuteTaskAttributes {
@@ -208,6 +209,7 @@ export function buildExecuteEvent({
                   kind: rule.kind,
                   ...(rule.version !== undefined ? { version: rule.version } : {}),
                   ...(rule.tags ? { tags: [...rule.tags] } : {}),
+                  ...(rule.query && rule.query.length > 0 ? { query: [...rule.query] } : {}),
                 }
               : {}),
           },

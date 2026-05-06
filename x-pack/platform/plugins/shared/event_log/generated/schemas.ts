@@ -342,6 +342,7 @@ export const EventSchema = schema.maybe(
                     kind: ecsString(),
                     version: ecsStringOrNumber(),
                     tags: ecsStringMulti(),
+                    query: ecsStringMulti(),
                   })
                 ),
                 execution: schema.maybe(

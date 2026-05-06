@@ -779,6 +779,13 @@
                                             "meta": {
                                                 "isArray": "true"
                                             }
+                                        },
+                                        "query": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024,
+                                            "meta": {
+                                                "isArray": "true"
+                                            }
                                         }
                                     }
                                 },
