@@ -15727,14 +15727,6 @@
                 "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts"
               },
               {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/common/stack_connectors_schema/inference.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/common/schema.ts"
-              },
-              {
                 "plugin": "@kbn/connector-schemas",
                 "path": "src/platform/packages/shared/kbn-connector-schemas/openai/schemas/v1.ts"
               },
@@ -15765,6 +15757,14 @@
               {
                 "plugin": "@kbn/sample-log-parser",
                 "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/validate_queries.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/common/stack_connectors_schema/inference.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/common/schema.ts"
               },
               {
                 "plugin": "@kbn/connector-schemas",
@@ -16144,11 +16144,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/locators/ai_value_report/locator.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/agent_builder/attachments/entity.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/agent_builder/attachments/entity.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/common/locators/ai_value_report/locator.ts"
               },
               {
                 "plugin": "@kbn/workflows",
@@ -17038,43 +17038,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/cancel/cancel.gen.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/run_script/run_script.gen.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17087,18 +17055,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/common.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/common/common.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/common/common.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/common/common.gen.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17107,6 +17063,22 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/common/common.gen.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/common/common.gen.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/common/common.gen.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/status.gen.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17230,15 +17202,43 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/status.gen.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/cancel/cancel.gen.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/run_script/run_script.gen.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter.ts"
               }
             ],
             "children": [
@@ -19565,16 +19565,24 @@
                 "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
               },
               {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/services/tools/tool_types/esql/create_schema.ts"
-              },
-              {
                 "plugin": "@kbn/logs-overview",
                 "path": "x-pack/platform/packages/shared/logs-overview/src/services/categorize_logs_service/categorize_documents.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/services/tools/tool_types/esql/create_schema.ts"
+              },
+              {
                 "plugin": "alertingVTwo",
                 "path": "x-pack/platform/plugins/shared/alerting_v2/server/lib/action_policy_client/utils.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/export/export_results.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/export/export_results.gen.ts"
               },
               {
                 "plugin": "osquery",
@@ -19818,50 +19826,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/model/execution_event.gen.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-lists-common",
-                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-lists-common",
-                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-lists-common",
-                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-lists-common",
-                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-lists-common",
-                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-lists-common",
-                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/common.gen.ts"
               },
               {
@@ -19870,14 +19834,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/engine_status_route.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/engine_status_route.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/entities/common.gen.ts"
               },
               {
@@ -19938,6 +19894,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/engine_status_route.gen.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/engine_status_route.gen.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/watchlists/data_source/common.gen.ts"
               },
               {
@@ -19951,6 +19915,50 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/watchlists/management/common.gen.ts"
+              },
+              {
+                "plugin": "@kbn/securitysolution-lists-common",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
+              },
+              {
+                "plugin": "@kbn/securitysolution-lists-common",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
+              },
+              {
+                "plugin": "@kbn/securitysolution-lists-common",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
+              },
+              {
+                "plugin": "@kbn/securitysolution-lists-common",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
+              },
+              {
+                "plugin": "@kbn/securitysolution-lists-common",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
+              },
+              {
+                "plugin": "@kbn/securitysolution-lists-common",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/model/execution_event.gen.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -31955,40 +31963,40 @@
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts"
           },
           {
+            "plugin": "@kbn/alerting-v2-schemas",
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/common.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-v2-schemas",
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/common.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-v2-schemas",
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-v2-schemas",
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts"
+          },
+          {
+            "plugin": "@kbn/entities-schema",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
+          },
+          {
+            "plugin": "@kbn/entities-schema",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
+          },
+          {
+            "plugin": "@kbn/entities-schema",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
+          },
+          {
             "plugin": "@kbn/connector-schemas",
             "path": "src/platform/packages/shared/kbn-connector-schemas/common/auth/schemas/v1.ts"
           },
           {
             "plugin": "@kbn/connector-schemas",
             "path": "src/platform/packages/shared/kbn-connector-schemas/http/schemas/v1.ts"
-          },
-          {
-            "plugin": "@kbn/alerting-v2-schemas",
-            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/common.ts"
-          },
-          {
-            "plugin": "@kbn/alerting-v2-schemas",
-            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/common.ts"
-          },
-          {
-            "plugin": "@kbn/alerting-v2-schemas",
-            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts"
-          },
-          {
-            "plugin": "@kbn/alerting-v2-schemas",
-            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts"
-          },
-          {
-            "plugin": "@kbn/entities-schema",
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
-          },
-          {
-            "plugin": "@kbn/entities-schema",
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
-          },
-          {
-            "plugin": "@kbn/entities-schema",
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
           },
           {
             "plugin": "@kbn/connector-schemas",

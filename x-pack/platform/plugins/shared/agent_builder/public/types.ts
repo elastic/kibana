@@ -16,12 +16,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
-import type {
-  AgentsServiceStartContract,
-  AttachmentServiceStartContract,
-  EventsServiceStartContract,
-  ToolServiceStartContract,
-} from '@kbn/agent-builder-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -31,17 +25,14 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
 import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { AttachmentInput, UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
-import type { EmbeddableConversationProps } from './embeddable/types';
-import type { OpenConversationSidebarOptions } from './sidebar/types';
-export interface ConversationSidebarRef {
-  close(): void;
-}
 
-export interface OpenConversationSidebarReturn {
-  chatRef: ConversationSidebarRef;
-}
+export type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  ConversationSidebarRef,
+  OpenConversationSidebarReturn,
+} from '@kbn/agent-builder-browser';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -72,85 +63,4 @@ export interface AgentBuilderStartDependencies {
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-}
-
-export interface AgentBuilderPluginSetup {}
-
-/**
- * Public start contract for the browser-side agentBuilder plugin.
- */
-export interface AgentBuilderPluginStart {
-  /**
-   * Agent service contract, can be used to list agents.
-   */
-  agents: AgentsServiceStartContract;
-  /**
-   * Attachment service contract, can be used to register and retrieve attachment UI definitions.
-   */
-  attachments: AttachmentServiceStartContract;
-  /**
-   * Tool service contract, can be used to list or execute tools.
-   */
-  tools: ToolServiceStartContract;
-  /**
-   * Events service contract, can be used to listen to chat events.
-   */
-  events: EventsServiceStartContract;
-  /**
-   * Opens the conversation sidebar.
-   *
-   * @param options - Configuration options for the sidebar
-   * @returns An object containing the sidebar reference
-   *
-   * @example
-   * ```tsx
-   * // Open a new conversation with close handler
-   * const { chatRef } = plugins.agentBuilder.openChat({
-   *   onClose: () => console.log('Chat closed')
-   * });
-   *
-   * // Programmatically close the chat
-   * chatRef.close();
-   * ```
-   */
-  openChat: (options?: OpenConversationSidebarOptions) => OpenConversationSidebarReturn;
-  /**
-   * Toggles the conversation sidebar.
-   *
-   * If the sidebar is open, it will be closed. Otherwise, it will be opened.
-   */
-  toggleChat: (options?: OpenConversationSidebarOptions) => void;
-  setChatConfig: (config: EmbeddableConversationProps) => void;
-  clearChatConfig: () => void;
-  /**
-   * Adds an attachment to the active conversation sidebar.
-   * If no sidebar is open, the attachment is ignored.
-   *
-   * @param attachment - The attachment to add
-   */
-  addAttachment: (attachment: AttachmentInput) => void;
-  /**
-   * Updates the origin of an attachment in a conversation.
-   * Use this after saving a by-value attachment to link it to its persistent store.
-   *
-   * @param conversationId - The conversation containing the attachment
-   * @param attachmentId - The ID of the attachment to update
-   * @param origin - Origin string for the attachment (e.g. saved object id); same value passed to `resolve` on the server
-   * @returns Promise resolving to the update result
-   *
-   * @example
-   * ```tsx
-   * // Link attachment to a saved object
-   * await plugins.agentBuilder.updateAttachmentOrigin(
-   *   conversationId,
-   *   attachmentId,
-   *   savedObjectId
-   * );
-   * ```
-   */
-  updateAttachmentOrigin: (
-    conversationId: string,
-    attachmentId: string,
-    origin: string
-  ) => Promise<UpdateOriginResponse>;
 }

@@ -10,9 +10,8 @@ import { sortBy, uniqBy } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
-import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
+import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { getServiceHealthStatus } from '../../../common/service_health_status';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
@@ -160,9 +159,6 @@ export async function getServiceAnomalies({
           ? (recordMetrics.record_score as number)
           : 0;
 
-        const severity = getSeverity(anomalyScore);
-        const healthStatus = getServiceHealthStatus({ severity });
-
         return {
           serviceName: bucket.key.serviceName as string,
           jobId: bucket.key.jobId as string,
@@ -171,7 +167,6 @@ export async function getServiceAnomalies({
             modelPlotMetrics?.by_field_value) as string,
           actualValue: (recordMetrics?.actual || modelPlotMetrics?.actual) as number,
           anomalyScore,
-          healthStatus,
         };
       }),
     };
