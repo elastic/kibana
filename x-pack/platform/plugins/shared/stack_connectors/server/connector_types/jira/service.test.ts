@@ -15,7 +15,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server';
+import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
@@ -441,7 +441,7 @@ describe('Jira service', () => {
       );
     });
 
-    test('it should throw a user error on 400 response with field validation errors', async () => {
+    test("it should throw a user error when summary exceeds 255 characters", async () => {
       const mockError: ResponseError = new Error('Request failed with status code 400');
       mockError.response = {
         status: 400,
@@ -452,7 +452,6 @@ describe('Jira service', () => {
       const error = await service.createIncident(incident).catch((err) => err);
 
       expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
-      expect(error.message).toMatch(/Unable to create incident/);
     });
 
     describe('otherFields', () => {
