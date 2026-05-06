@@ -49,7 +49,7 @@ export const TitleArea = React.memo<TitleAreaProps>(({ title, back }) => {
     <div css={styles.wrapper}>
       {hasBack && <BackButton targets={backTargets} />}
       {title && (
-        <EuiTitle size="xs" css={!hasBack ? styles.titleOffset : undefined}>
+        <EuiTitle size="s" css={!hasBack ? styles.titleOffset : undefined}>
           <h1 className="eui-textTruncate">{title}</h1>
         </EuiTitle>
       )}

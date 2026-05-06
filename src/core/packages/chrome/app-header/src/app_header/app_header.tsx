@@ -56,6 +56,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
         trailing={<AppMenu menu={menu} hasExplicitShare={!!onShare} />}
         tabs={<AppTabs tabs={tabs} />}
+        hasTabs={!!tabs?.length}
         sticky={sticky}
         padding={padding}
       />

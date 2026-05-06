@@ -57,7 +57,7 @@ export const SplitButtonWithNotification = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div css={{ padding: `0 ${euiTheme.size.s}` }}>
+    <>
       <EuiSplitButton
         color="text"
         size="s"
@@ -137,6 +137,6 @@ export const SplitButtonWithNotification = ({
           isSelected={isSelected}
         />
       </EuiSplitButton>
-    </div>
+    </>
   );
 };
