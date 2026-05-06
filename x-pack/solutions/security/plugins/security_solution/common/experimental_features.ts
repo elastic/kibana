@@ -120,6 +120,15 @@ export const allowedExperimentalValues = Object.freeze({
   aiRuleCreationEnabled: true,
 
   /**
+   * Enables the managed MITRE ATT&CK source: a Kibana-managed `.kibana-mitre-attack`
+   * index hydrated from the bundled `@kbn/security-mitre-attack-common` artifact.
+   * When enabled the rule create form (and AI rule creation, in a follow-up PR)
+   * read MITRE data from this source instead of the legacy
+   * `mitre_tactics_techniques.ts` blob.
+   */
+  managedMitreSourceEnabled: false,
+
+  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,

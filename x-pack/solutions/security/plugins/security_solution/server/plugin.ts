@@ -58,6 +58,7 @@ import {
   CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
   DEFAULT_ALERTS_INDEX,
   DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
+  DEFAULT_SPACE_ID,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
@@ -149,6 +150,7 @@ import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import { MitreAttackDataService, registerMitreAttackRoutes } from './lib/mitre_attack';
 import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../common/siem_migrations/constants';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
@@ -184,6 +186,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly siemMigrationsService: SiemMigrationsService;
+  private readonly mitreAttackDataService: MitreAttackDataService;
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
   private readonly asyncTelemetryEventsSender: IAsyncTelemetryEventsSender;
@@ -219,6 +222,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     this.siemMigrationsService = new SiemMigrationsService(
       this.config,
+      this.pluginContext.logger,
+      this.pluginContext.env.packageInfo.version
+    );
+    this.mitreAttackDataService = new MitreAttackDataService(
       this.pluginContext.logger,
       this.pluginContext.env.packageInfo.version
     );
@@ -493,6 +500,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       endpointAppContextService: this.endpointAppContextService,
       ruleMonitoringService: this.ruleMonitoringService,
       siemMigrationsService: this.siemMigrationsService,
+      mitreAttackDataService: this.mitreAttackDataService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
       buildFlavor: pluginContext.env.packageInfo.buildFlavor,
@@ -675,6 +683,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerEndpointExceptionsRoutes(router, this.endpointContext);
     registerScriptsLibraryRoutes(router, this.endpointContext);
 
+    if (experimentalFeatures.managedMitreSourceEnabled) {
+      registerMitreAttackRoutes(router, this.logger.get('mitreAttackRoutes'));
+    }
+
     if (plugins.alerting != null) {
       const ruleNotificationType = legacyRulesNotificationRuleType({ logger });
 
@@ -762,6 +774,21 @@ export class Plugin implements ISecuritySolutionPlugin {
         });
 
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
+
+        if (config.experimentalFeatures.managedMitreSourceEnabled) {
+          this.mitreAttackDataService
+            .setup({ esClient: coreStart.elasticsearch.client.asInternalUser })
+            .then(() =>
+              // Eager hydration for the default space mirrors `RuleMigrationsDataService`.
+              // Other spaces hydrate lazily on first read, see `MitreAttackDataClient`.
+              this.mitreAttackDataService.hydrate(DEFAULT_SPACE_ID)
+            )
+            .catch((err) => {
+              this.logger.error(
+                `Failed to set up MITRE ATT&CK data service: ${err.message ?? String(err)}`
+              );
+            });
+        }
       })
       .catch(() => {}); // it shouldn't reject, but just in case
 
@@ -1145,6 +1172,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryWatcher?.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
     this.siemMigrationsService.stop();
+    this.mitreAttackDataService.stop();
     securityWorkflowInsightsService.stop();
     licenseService.stop();
   }
