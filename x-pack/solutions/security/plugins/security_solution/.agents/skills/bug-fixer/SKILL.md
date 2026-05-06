@@ -13,6 +13,13 @@ description: >
 Orchestrates the full bug-fixing workflow by sequencing two focused skills:
 `bug-reproduce` (investigation + browser reproduction) and `bug-fix` (TDD fix + PR).
 
+## Scope
+
+This skill works for **stateful (ECH) environments only**. Serverless is not supported —
+the local dev server started in Phase 1 runs in stateful mode, and serverless bugs require
+a different environment setup that this skill does not handle. If the ticket is a serverless
+bug, tell the user and stop.
+
 ## Prerequisites
 
 - `gh` CLI installed and authenticated (`gh auth login`)
