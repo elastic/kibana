@@ -32,6 +32,7 @@ const EXECUTION_HISTORY_AUTH_FILTER = fromKueryExpression(
 
 export interface FindActionPolicyExecutionEventsParams {
   request: KibanaRequest;
+  spaceId: string;
   startDate?: string;
   page?: number;
   perPage?: number;
@@ -46,6 +47,7 @@ export interface FindActionPolicyExecutionEventsResult {
 
 export interface CountActionPolicyExecutionEventsSinceParams {
   request: KibanaRequest;
+  spaceId: string;
   since: string;
 }
 
@@ -77,6 +79,7 @@ export class EventLogService implements EventLogServiceContract {
 
   public async findActionPolicyExecutionEvents({
     request,
+    spaceId,
     startDate,
     page = DEFAULT_PAGE,
     perPage = DEFAULT_PAGE_SIZE,
@@ -87,7 +90,7 @@ export class EventLogService implements EventLogServiceContract {
       ACTION_POLICY_SAVED_OBJECT_TYPE,
       [],
       EXECUTION_HISTORY_AUTH_FILTER,
-      undefined, // don't we need to specify a namespace here?
+      spaceId,
       {
         page,
         per_page: perPage,
@@ -106,6 +109,7 @@ export class EventLogService implements EventLogServiceContract {
 
   public async countActionPolicyExecutionEventsSince({
     request,
+    spaceId,
     since,
   }: CountActionPolicyExecutionEventsSinceParams): Promise<CountActionPolicyExecutionEventsSinceResult> {
     const client = this.clientService.getClient(request);
@@ -114,7 +118,7 @@ export class EventLogService implements EventLogServiceContract {
       ACTION_POLICY_SAVED_OBJECT_TYPE,
       [],
       EXECUTION_HISTORY_AUTH_FILTER,
-      undefined,
+      spaceId,
       {
         page: 1,
         per_page: 0,

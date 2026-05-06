@@ -54,7 +54,7 @@ describe('EventLogService', () => {
       mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
       const request = httpServerMock.createKibanaRequest();
 
-      await eventLogService.findActionPolicyExecutionEvents({ request });
+      await eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'default' });
 
       expect(mockClientService.getClient).toHaveBeenCalledWith(request);
     });
@@ -64,7 +64,7 @@ describe('EventLogService', () => {
       mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
       const request = httpServerMock.createKibanaRequest();
 
-      await eventLogService.findActionPolicyExecutionEvents({ request });
+      await eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'default' });
 
       const [type, ids] = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0];
       expect(type).toBe(ACTION_POLICY_SAVED_OBJECT_TYPE);
@@ -76,7 +76,7 @@ describe('EventLogService', () => {
       mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
       const request = httpServerMock.createKibanaRequest();
 
-      await eventLogService.findActionPolicyExecutionEvents({ request });
+      await eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'default' });
 
       const authFilter = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][2];
       expect(authFilter).toMatchObject({ type: 'function', function: 'and' });
@@ -89,7 +89,12 @@ describe('EventLogService', () => {
       );
       const request = httpServerMock.createKibanaRequest();
 
-      await eventLogService.findActionPolicyExecutionEvents({ request, page: 3, perPage: 25 });
+      await eventLogService.findActionPolicyExecutionEvents({
+        request,
+        spaceId: 'default',
+        page: 3,
+        perPage: 25,
+      });
 
       const options = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][4];
       expect(options).toEqual(
@@ -106,7 +111,7 @@ describe('EventLogService', () => {
       mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
       const request = httpServerMock.createKibanaRequest();
 
-      await eventLogService.findActionPolicyExecutionEvents({ request });
+      await eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'default' });
 
       const options = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][4];
       expect(options).toEqual(
@@ -124,26 +129,27 @@ describe('EventLogService', () => {
 
       await eventLogService.findActionPolicyExecutionEvents({
         request,
+        spaceId: 'default',
         startDate: '2026-05-04T00:00:00Z',
       });
       const withStart = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][4];
       expect(withStart).toEqual(expect.objectContaining({ start: '2026-05-04T00:00:00Z' }));
 
       mockEventLogClient.findEventsWithAuthFilter.mockClear();
-      await eventLogService.findActionPolicyExecutionEvents({ request });
+      await eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'default' });
       const withoutStart = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][4];
       expect(withoutStart).not.toHaveProperty('start');
     });
 
-    it('passes namespace as undefined so the client resolves it from the request', async () => {
+    it('passes the provided spaceId as namespace to the client', async () => {
       const { eventLogService, mockEventLogClient } = createEventLogService();
       mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
       const request = httpServerMock.createKibanaRequest();
 
-      await eventLogService.findActionPolicyExecutionEvents({ request });
+      await eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'my-space' });
 
       const namespace = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][3];
-      expect(namespace).toBeUndefined();
+      expect(namespace).toBe('my-space');
     });
 
     it('maps the client result to the contract shape', async () => {
@@ -159,6 +165,7 @@ describe('EventLogService', () => {
 
       const result = await eventLogService.findActionPolicyExecutionEvents({
         request,
+        spaceId: 'default',
         page: 2,
         perPage: 25,
       });
@@ -176,9 +183,9 @@ describe('EventLogService', () => {
       mockEventLogClient.findEventsWithAuthFilter.mockRejectedValue(new Error('boom'));
       const request = httpServerMock.createKibanaRequest();
 
-      await expect(eventLogService.findActionPolicyExecutionEvents({ request })).rejects.toThrow(
-        'boom'
-      );
+      await expect(
+        eventLogService.findActionPolicyExecutionEvents({ request, spaceId: 'default' })
+      ).rejects.toThrow('boom');
     });
   });
 
@@ -191,13 +198,17 @@ describe('EventLogService', () => {
       const request = httpServerMock.createKibanaRequest();
       const since = '2026-05-05T10:00:00.000Z';
 
-      await eventLogService.countActionPolicyExecutionEventsSince({ request, since });
+      await eventLogService.countActionPolicyExecutionEventsSince({
+        request,
+        spaceId: 'default',
+        since,
+      });
 
       const [type, ids, , namespace, options] =
         mockEventLogClient.findEventsWithAuthFilter.mock.calls[0];
       expect(type).toBe(ACTION_POLICY_SAVED_OBJECT_TYPE);
       expect(ids).toEqual([]);
-      expect(namespace).toBeUndefined();
+      expect(namespace).toBe('default');
       expect(options).toEqual(
         expect.objectContaining({
           page: 1,
@@ -215,6 +226,7 @@ describe('EventLogService', () => {
 
       await eventLogService.countActionPolicyExecutionEventsSince({
         request,
+        spaceId: 'default',
         since: '2026-05-05T10:00:00.000Z',
       });
 
@@ -229,6 +241,7 @@ describe('EventLogService', () => {
 
       const result = await eventLogService.countActionPolicyExecutionEventsSince({
         request,
+        spaceId: 'default',
         since: '2026-05-05T10:00:00.000Z',
       });
 
@@ -242,6 +255,7 @@ describe('EventLogService', () => {
 
       await eventLogService.countActionPolicyExecutionEventsSince({
         request,
+        spaceId: 'default',
         since: '2026-05-05T10:00:00.000Z',
       });
 
@@ -256,6 +270,7 @@ describe('EventLogService', () => {
       await expect(
         eventLogService.countActionPolicyExecutionEventsSince({
           request,
+          spaceId: 'default',
           since: '2026-05-05T10:00:00.000Z',
         })
       ).rejects.toThrow('boom');
