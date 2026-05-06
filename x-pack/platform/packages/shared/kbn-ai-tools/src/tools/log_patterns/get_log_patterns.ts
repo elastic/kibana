@@ -479,8 +479,8 @@ export async function getSigEventsLogPatternsEsql({
 
       // Fetch full sources by composite key in a second query. This avoids `_id`
       // collisions across backing indices and keeps every sample value from the
-      // same underlying log line.
-      const pass2Response = (await esClient.esql('fetch_sigevents_log_pattern_samples', {
+      // same underlying log line. Use the wrapped raw client here instead of traced as this is cheap
+      const pass2Response = (await esClient.client.esql.query({
         query: buildPass2Query(
           Array.isArray(index) ? index : [index],
           pass1Rows.map(({ docKey }) => docKey)
