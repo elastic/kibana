@@ -36,6 +36,7 @@ export type MatrixHistogramComponentProps = MatrixHistogramQueryProps &
     sourcererScopeId?: PageScope;
     hideQueryToggle?: boolean;
     applyGlobalQueriesAndFilters?: boolean;
+    applyPageAndTabsFilters?: boolean;
   };
 
 const DEFAULT_PANEL_HEIGHT = 300;
@@ -70,6 +71,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   titleSize,
   hideQueryToggle = false,
   applyGlobalQueriesAndFilters = true,
+  applyPageAndTabsFilters = true,
 }) => {
   const visualizationId = `${id}-embeddable`;
 
@@ -196,6 +198,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             <VisualizationEmbeddable
               scopeId={sourcererScopeId}
               applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
+              applyPageAndTabsFilters={applyPageAndTabsFilters}
               data-test-subj="embeddable-matrix-histogram"
               extraOptions={extraVisualizationOptions}
               getLensAttributes={getLensAttributes}
