@@ -52,7 +52,13 @@ describe('CsvExportButton', () => {
   };
 
   const defaultContext = {
-    services: { http, notifications, rendering: renderingServiceMock.create(), settings, application },
+    services: {
+      http,
+      notifications,
+      rendering: renderingServiceMock.create(),
+      settings,
+      application,
+    },
     ruleTypeIds: ['siem.queryRule'],
     consumers: ['siem'],
     query: { bool: { must: [{ match_all: {} }] } },
