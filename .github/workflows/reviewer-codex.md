@@ -3,15 +3,19 @@ name: Codex Reviewer
 on:
   pull_request_target:
     types: [synchronize, reopened, labeled]
-  issue_comment:
-    types: [created]
-  pull_request_review_comment:
-    types: [created]
   workflow_dispatch:
     inputs:
       pr_number:
         description: Pull request number to review
         required: true
+        type: string
+      comment_id:
+        description: Triggering comment id for dispatched follow-up runs
+        required: false
+        type: string
+      comment_context:
+        description: JSON context for dispatched follow-up runs
+        required: false
         type: string
 resources:
   - prefetch-pr-context.yml
@@ -34,7 +38,7 @@ engine:
 # - Manual runs always activate.
 # - Reviewer label events activate, including labels added while creating a PR.
 # - Synchronize/reopened PR events activate when the reviewer label is already present.
-# - Comment events activate only for `@codex` comments on labeled PRs.
+# - Comment follow-up runs are dispatched by Reviewer Command Dispatcher after fork-safe validation.
 if: >-
   !github.event.repository.fork &&
   (
@@ -42,34 +46,15 @@ if: >-
     (
       github.event.sender.type != 'Bot' &&
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
-      !contains(github.event.issue.labels.*.name, 'reviewer:skip-ai') &&
+      github.event_name == 'pull_request_target' &&
       (
         (
-          github.event_name == 'pull_request_target' &&
-          (
-            (
-              github.event.action == 'labeled' &&
-              github.event.label.name == 'reviewer:codex'
-            ) ||
-            (
-              github.event.action != 'labeled' &&
-              contains(github.event.pull_request.labels.*.name, 'reviewer:codex')
-            )
-          )
+          github.event.action == 'labeled' &&
+          github.event.label.name == 'reviewer:codex'
         ) ||
         (
-          contains(github.event.comment.body, '@codex') &&
-          (
-            contains(github.event.pull_request.labels.*.name, 'reviewer:codex') ||
-            contains(github.event.issue.labels.*.name, 'reviewer:codex')
-          ) &&
-          (
-            github.event_name == 'pull_request_review_comment' ||
-            (
-              github.event_name == 'issue_comment' &&
-              github.event.issue.pull_request
-            )
-          )
+          github.event.action != 'labeled' &&
+          contains(github.event.pull_request.labels.*.name, 'reviewer:codex')
         )
       )
     )
@@ -77,8 +62,8 @@ if: >-
 concurrency:
   # Keep one review lane per PR/comment. Unrelated label events get their own group suffix so they can skip without canceling an in-flight review.
   group: >-
-    gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number || github.run_id }}-${{
-      github.event.comment.id ||
+    gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}-${{
+      github.event.inputs.comment_id ||
       (
         github.event.action == 'labeled' &&
         github.event.label.name != 'reviewer:codex' &&
@@ -88,14 +73,14 @@ concurrency:
       'pr-review'
     }}
   cancel-in-progress: true
-  job-discriminator: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number || github.run_id }}
+  job-discriminator: ${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}
 permissions:
   contents: read
   issues: read
   pull-requests: read
 env:
-  PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
-  PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+  PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
 tools:
   github:
     toolsets: [default]
@@ -148,5 +133,12 @@ safe-outputs:
 # Codex PR Reviewer
 
 Using the imported reviewer instructions:
-- Run in review mode for `pull_request_target` and `workflow_dispatch` workflow events.
-- Run in follow-up response mode for `issue_comment` and `pull_request_review_comment` events that mention `@codex`.
+- Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
+- Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Command Dispatcher.
+
+For dispatched follow-up runs, use this context:
+- PR number: `${{ github.event.inputs.pr_number }}`
+- Comment id: `${{ github.event.inputs.comment_id }}`
+- Comment context JSON: `${{ github.event.inputs.comment_context }}`
+
+When the comment id is non-empty, do not perform a full PR review. Find the triggering comment in the prefetched PR context under `/tmp/gh-aw/agent` or via GitHub tools, then answer that comment. For PR review comments, prefer `reply_to_pull_request_review_comment` with `reply_to_id` set to the triggering comment id.
