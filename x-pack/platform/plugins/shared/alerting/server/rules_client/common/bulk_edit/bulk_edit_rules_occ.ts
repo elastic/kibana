@@ -164,7 +164,6 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
     apiKeysMap,
     shouldInvalidateApiKeys: options.shouldInvalidateApiKeys,
     changeTrackingAction: options.changeTrackingAction,
-    username,
   });
 
   return {
@@ -182,14 +181,12 @@ async function saveBulkUpdatedRules({
   apiKeysMap,
   shouldInvalidateApiKeys,
   changeTrackingAction,
-  username,
 }: {
   context: RulesClientContext;
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   shouldInvalidateApiKeys: boolean;
   apiKeysMap: ApiKeysMap;
   changeTrackingAction?: ChangeTrackingAction;
-  username: string | null;
 }) {
   const apiKeysToInvalidate: string[] = [];
   let result: SavedObjectsBulkResponse<RawRule>;
