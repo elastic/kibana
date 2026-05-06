@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { removePanelsFromDashboard } from '../dashboard_state';
-import type { OperationHandler } from './types';
+import { defineOperation } from './types';
 
-export const removePanelsHandler: OperationHandler<'remove_panels'> = ({
-  dashboardData,
-  operation,
-  context,
-}) => {
-  const { dashboardData: dashboardWithoutPanels, removedPanels } = removePanelsFromDashboard({
-    dashboardData,
-    panelIdsToRemove: operation.panelIds,
-  });
+export const removePanelsOperation = defineOperation({
+  schema: z.object({
+    operation: z.literal('remove_panels'),
+    panelIds: z.array(z.string()).min(1).describe('Panel ids to remove from the dashboard.'),
+  }),
+  handler: ({ dashboardData, operation, context }) => {
+    const { dashboardData: dashboardWithoutPanels, removedPanels } = removePanelsFromDashboard({
+      dashboardData,
+      panelIdsToRemove: operation.panelIds,
+    });
 
-  if (removedPanels.length === 0) {
-    return dashboardData;
-  }
+    if (removedPanels.length === 0) {
+      return dashboardData;
+    }
 
-  context.logger.debug(`Removed ${removedPanels.length} panels from dashboard`);
-  return dashboardWithoutPanels;
-};
+    context.logger.debug(`Removed ${removedPanels.length} panels from dashboard`);
+    return dashboardWithoutPanels;
+  },
+});
