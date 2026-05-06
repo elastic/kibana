@@ -47,7 +47,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' some-object_src-value"`
+        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' some-object_src-value; form-action 'report-sample' 'self'"`
       );
     });
 
@@ -58,8 +58,8 @@ describe('CspDirectives', () => {
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeadersByDisposition()).toMatchInlineSnapshot(`
         Object {
-          "enforceHeader": "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; img-src 'self' img-src-value",
-          "reportOnlyHeader": "form-action 'report-sample' 'self'; default-src 'report-sample' 'none'; font-src 'report-sample' 'self'; img-src 'report-sample' 'self' data: tiles.maps.elastic.co img-src-value; connect-src 'report-sample' 'self' telemetry.elastic.co telemetry-staging.elastic.co feeds.elastic.co tiles.maps.elastic.co vector.maps.elastic.co; script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'",
+          "enforceHeader": "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'; img-src 'self' img-src-value",
+          "reportOnlyHeader": "default-src 'report-sample' 'none'; font-src 'report-sample' 'self'; img-src 'report-sample' 'self' data: tiles.maps.elastic.co img-src-value; connect-src 'report-sample' 'self' telemetry.elastic.co telemetry-staging.elastic.co feeds.elastic.co tiles.maps.elastic.co vector.maps.elastic.co; script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'",
         }
       `);
     });
@@ -102,7 +102,7 @@ describe('CspDirectives', () => {
       const config = cspConfig.schema.validate({});
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'"`
+        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'"`
       );
     });
 
@@ -115,7 +115,7 @@ describe('CspDirectives', () => {
       const directives = CspDirectives.fromConfig(config);
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self' baz; worker-src 'report-sample' 'self' blob: foo; style-src 'report-sample' 'self' 'unsafe-inline' bar dolly; object-src 'report-sample' 'none'"`
+        `"script-src 'report-sample' 'self' baz; worker-src 'report-sample' 'self' blob: foo; style-src 'report-sample' 'self' 'unsafe-inline' bar dolly; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'"`
       );
     });
 
@@ -132,7 +132,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
+        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
       );
     });
 
@@ -142,7 +142,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self' 'unsafe-hashes'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'"`
+        `"script-src 'report-sample' 'self' 'unsafe-hashes'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'"`
       );
     });
 
@@ -165,7 +165,7 @@ describe('CspDirectives', () => {
       };
       const directives = CspDirectives.fromConfig(config, additionalConfig1, additionalConfig2);
       expect(directives.getCspHeader()).toEqual(
-        `script-src 'report-sample' 'self' cdn.host.test; worker-src 'report-sample' 'self' blob: cdn.host.test; style-src 'report-sample' 'self' 'unsafe-inline' cdn.host.test; object-src 'report-sample' 'none'; connect-src 'self' *.foo.bar cdn.host.test; font-src 'self' cdn.host.test; frame-src 'self' cdn.host.test; img-src 'self' *.foo.bar cdn.host.test`
+        `script-src 'report-sample' 'self' cdn.host.test; worker-src 'report-sample' 'self' blob: cdn.host.test; style-src 'report-sample' 'self' 'unsafe-inline' cdn.host.test; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'; connect-src 'self' *.foo.bar cdn.host.test; font-src 'self' cdn.host.test; frame-src 'self' cdn.host.test; img-src 'self' *.foo.bar cdn.host.test`
       );
     });
   });
