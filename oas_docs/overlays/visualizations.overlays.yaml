@@ -14,8 +14,8 @@ actions:
 
         ## When to use this API
 
-        - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards by referencing their ID from the [Dashboards API](#operation/post-dashboards).
-        - Use the [Dashboards API](#operation/post-dashboards) when you want to define a complete dashboard in one request, or when you need ES|QL-based visualizations.
+        - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards by referencing their ID from the [Dashboards API](dashboards#tag/Dashboards/operation/post-dashboards).
+        - Use the [Dashboards API](dashboards#tag/Dashboards/operation/post-dashboards) when you want to define a complete dashboard in one request, or when you need ES|QL-based visualizations.
 
         ## Get started
 
@@ -66,7 +66,7 @@ actions:
         Every visualization requires at minimum:
 
         - **`type`**: the chart to render. Each chart type has its own required fields, so the full structure of the request body depends on which `type` you specify.
-        - **`data_source`**: how data is fetched. You can reference an existing Kibana data view by ID (`"type": "data_view_reference"`), define a data view inline using an index pattern (`"type": "data_view_spec"`), or use an ES|QL query (`"type": "esql"`). Note that ES|QL is only supported via the [Dashboards API](#operation/post-dashboards). For most chart types, `data_source` is a top-level field. For XY charts, it belongs inside each layer in `layers[]`.
+        - **`data_source`**: how data is fetched. You can reference an existing Kibana data view by ID (`"type": "data_view_reference"`), define a data view inline using an index pattern (`"type": "data_view_spec"`), or use an ES|QL query (`"type": "esql"`). Note that ES|QL is only supported via the [Dashboards API](dashboards#tag/Dashboards/operation/post-dashboards). For most chart types, `data_source` is a top-level field. For XY charts, it belongs inside each layer in `layers[]`.
 
         You can also include `query` and `filters` to apply KQL or Lucene filters to all chart data. Both are optional and can be omitted.
 
