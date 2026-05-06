@@ -15,3 +15,7 @@ export {
 } from './src/create_call_apm_api';
 export { routeDefinitions } from './src/routes';
 export type { FooResponse } from './src/routes/foo';
+export {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+} from './src/cps_feature_flag';

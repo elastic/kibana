@@ -94,7 +94,7 @@ import { createCallApmApiV2 } from '@kbn/apm-api-shared';
 import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-} from '../common/cps_feature_flag';
+} from '@kbn/apm-api-shared';
 import type { ConfigSchema } from '.';
 import {
   getApmEnrollmentFlyoutData,
@@ -537,19 +537,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet, discoverShared } = plugins;
+    const isCpsEnabled = core.featureFlags.getBooleanValue(
+      OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+      OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+    );
 
-    const callApmApi = createCallApmApiV2(core);
+    const callApmApi = createCallApmApiV2(core, { cpsManager: plugins.cps?.cpsManager });
 
     const ApmInternalServices: ApmInternalServices = {
       callApmApi,
     };
 
-    if (
-      core.featureFlags.getBooleanValue(
-        OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-        OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
-      )
-    ) {
+    if (isCpsEnabled) {
       plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
       setApmInternalServices({
         ...ApmInternalServices,

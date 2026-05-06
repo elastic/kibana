@@ -11,9 +11,14 @@ import type { EndpointOf, ReturnOf } from '@kbn/server-route-repository-utils';
 import { formatRequest } from '@kbn/server-route-repository-utils';
 import { type RouteRepositoryClient } from '@kbn/server-route-repository';
 import type { HttpFetchOptions } from '@kbn/core/public';
+import type { ICPSManager } from '@kbn/cps-utils';
 import type { SharedAPMRouteRepository } from './routes';
 import type { CallApi } from './call_api';
 import { callApi } from './call_api';
+import {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+} from './cps_feature_flag';
 
 export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
   pathname: string;
@@ -43,13 +48,26 @@ export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   TEndpoint
 >;
 
-export function createCallApmApiV2(core: CoreStart): APMClientV2 {
+interface Dependencies {
+  cpsManager?: ICPSManager;
+}
+
+export function createCallApmApiV2(
+  core: CoreStart,
+  { cpsManager }: Dependencies = {}
+): APMClientV2 {
   return ((endpoint, options) => {
     const { params } = options as unknown as {
       params?: Partial<Record<string, any>>;
     };
 
     const { method, pathname, version } = formatRequest(endpoint, params?.path);
+    const isCpsEnabled = core.featureFlags.getBooleanValue(
+      OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+      OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+    );
+    const projectRouting = isCpsEnabled ? cpsManager?.getProjectRouting() : undefined;
+
     return callApi(core, {
       ...options,
       method,
@@ -59,6 +77,7 @@ export function createCallApmApiV2(core: CoreStart): APMClientV2 {
       version,
       headers: {
         ...(options as any)?.headers,
+        ...(projectRouting ? { 'x-project-routing': projectRouting } : {}),
       },
     } as unknown as Parameters<CallApi>[1]);
   }) as APMClientV2;

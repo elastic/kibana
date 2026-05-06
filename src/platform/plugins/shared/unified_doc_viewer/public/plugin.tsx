@@ -21,6 +21,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { createCallApmApiV2 } from '@kbn/apm-api-shared';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
@@ -49,6 +50,7 @@ export interface UnifiedDocViewerStartDeps {
   fieldsMetadata: FieldsMetadataPublicStart;
   share: SharePluginStart;
   discoverShared: DiscoverSharedPublicStart;
+  cps?: CPSPluginStart;
 }
 
 export class UnifiedDocViewerPublicPlugin
@@ -113,7 +115,7 @@ export class UnifiedDocViewerPublicPlugin
       uiSettings,
       notifications: { toasts },
     } = core;
-    const callApmApiV2 = createCallApmApiV2(core);
+    const callApmApiV2 = createCallApmApiV2(core, { cpsManager: deps.cps?.cpsManager });
     const { data, fieldFormats, fieldsMetadata, share, discoverShared } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
