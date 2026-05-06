@@ -33,6 +33,12 @@ const mockResponse = of([
   },
 ]);
 
+jest.mock('../../../common/license/ml_license', () => {
+  return {
+    ensureMlAvailable: jest.fn(),
+  };
+});
+
 jest.mock('../../application/services/anomaly_detector_service', () => {
   return {
     AnomalyDetectorService: jest.fn().mockImplementation(() => {
