@@ -18,6 +18,7 @@ import { DATASET_UUID_NAMESPACE, MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-com
 import type { DatasetStorageProperties } from './datasets_storage';
 import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
 import { ExampleAlreadyExistsError } from './example_already_exists_error';
+import { ExampleNotFoundError } from './example_not_found_error';
 import type { datasetsStorageSettings } from './datasets_storage';
 import type { DatasetExampleStorageProperties } from './examples_storage';
 import type { datasetExamplesStorageSettings } from './examples_storage';
@@ -341,15 +342,15 @@ export class DatasetClient {
     exampleId: string,
     updates: Partial<Pick<DatasetExampleStorageProperties, 'input' | 'output' | 'metadata'>>,
     expectedDatasetId: string
-  ): Promise<ExampleDocument | undefined> {
+  ): Promise<ExampleDocument> {
     const ownerDatasetId = await this.getExampleDatasetId(exampleId);
     if (!ownerDatasetId || ownerDatasetId !== expectedDatasetId) {
-      return undefined;
+      throw new ExampleNotFoundError(exampleId);
     }
 
     const existing = await this.getExampleById(exampleId);
     if (!existing) {
-      return undefined;
+      throw new ExampleNotFoundError(exampleId);
     }
 
     const updatedExample = normalizeExample({
@@ -386,13 +387,17 @@ export class DatasetClient {
 
     await this.touchDataset(existing.dataset_id);
 
-    return this.getExampleById(updatedId);
+    const updated = await this.getExampleById(updatedId);
+    if (!updated) {
+      throw new ExampleNotFoundError(updatedId);
+    }
+    return updated;
   }
 
-  async deleteExample(exampleId: string, expectedDatasetId: string): Promise<boolean> {
+  async deleteExample(exampleId: string, expectedDatasetId: string): Promise<void> {
     const datasetId = await this.getExampleDatasetId(exampleId);
     if (!datasetId || datasetId !== expectedDatasetId) {
-      return false;
+      throw new ExampleNotFoundError(exampleId);
     }
 
     const response = await this.examplesStorage.delete({
@@ -402,8 +407,6 @@ export class DatasetClient {
     if (response.result === 'deleted') {
       await this.touchDataset(datasetId);
     }
-
-    return response.result === 'deleted';
   }
 
   async deleteExamplesByDatasetId(datasetId: string): Promise<{ deleted: number }> {

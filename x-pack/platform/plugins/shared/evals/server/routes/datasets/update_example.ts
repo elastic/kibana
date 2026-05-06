@@ -21,6 +21,7 @@ import {
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
 import { ExampleAlreadyExistsError } from '../../storage/example_already_exists_error';
+import { ExampleNotFoundError } from '../../storage/example_not_found_error';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerUpdateExampleRoute = ({
@@ -107,12 +108,6 @@ export const registerUpdateExampleRoute = ({
             datasetId
           );
 
-          if (!updatedExample) {
-            return response.notFound({
-              body: { message: `Evaluation dataset example not found: ${exampleId}` },
-            });
-          }
-
           return response.ok({
             body: {
               id: updatedExample.id,
@@ -129,6 +124,12 @@ export const registerUpdateExampleRoute = ({
             logger.error(`Remote decryption failed: ${error.message}`);
             return response.customError({
               statusCode: 400,
+              body: { message: error.message },
+            });
+          }
+
+          if (error instanceof ExampleNotFoundError) {
+            return response.notFound({
               body: { message: error.message },
             });
           }

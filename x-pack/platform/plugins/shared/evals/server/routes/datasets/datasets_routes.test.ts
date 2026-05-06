@@ -34,6 +34,7 @@ import {
 } from '@kbn/evals-common';
 import { DatasetAlreadyExistsError } from '../../storage/dataset_already_exists_error';
 import { ExampleAlreadyExistsError } from '../../storage/example_already_exists_error';
+import { ExampleNotFoundError } from '../../storage/example_not_found_error';
 import {
   RemoteDecryptionError,
   DESTINATION_QUERY_PARAM,
@@ -647,7 +648,7 @@ describe('dataset routes', () => {
         path: EVALS_DATASET_EXAMPLE_URL,
       });
       datasetClient.datasetExists.mockResolvedValueOnce(true);
-      datasetClient.updateExample.mockResolvedValueOnce(undefined);
+      datasetClient.updateExample.mockRejectedValueOnce(new ExampleNotFoundError(exampleId));
 
       const request = httpServerMock.createKibanaRequest({
         method: 'put',
@@ -663,7 +664,7 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.payload).toEqual({
-        message: `Evaluation dataset example not found: ${exampleId}`,
+        message: `Example not found: ${exampleId}`,
       });
       expect(datasetClient.updateExample).toHaveBeenCalledWith(
         exampleId,
@@ -712,7 +713,7 @@ describe('dataset routes', () => {
         path: EVALS_DATASET_EXAMPLE_URL,
       });
       datasetClient.datasetExists.mockResolvedValueOnce(true);
-      datasetClient.deleteExample.mockResolvedValueOnce(true);
+      datasetClient.deleteExample.mockResolvedValueOnce(undefined);
 
       const request = httpServerMock.createKibanaRequest({
         method: 'delete',
@@ -761,7 +762,7 @@ describe('dataset routes', () => {
         path: EVALS_DATASET_EXAMPLE_URL,
       });
       datasetClient.datasetExists.mockResolvedValueOnce(true);
-      datasetClient.deleteExample.mockResolvedValueOnce(false);
+      datasetClient.deleteExample.mockRejectedValueOnce(new ExampleNotFoundError(exampleId));
 
       const request = httpServerMock.createKibanaRequest({
         method: 'delete',
@@ -776,7 +777,7 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.payload).toEqual({
-        message: `Evaluation dataset example not found: ${exampleId}`,
+        message: `Example not found: ${exampleId}`,
       });
       expect(datasetClient.deleteExample).toHaveBeenCalledWith(exampleId, datasetId);
     });
