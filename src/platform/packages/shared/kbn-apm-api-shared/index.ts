@@ -16,6 +16,13 @@ export {
 export { routeDefinitions } from './src/routes';
 export type { FooResponse } from './src/routes/foo';
 export type { HasDataResponse } from './src/routes/historical_data';
+export type { SuggestionsResponse } from './src/routes/suggestions';
+export type {
+  AgentKeysResponse,
+  AgentKeysPrivilegesResponse,
+  InvalidateAgentKeyResponse,
+  CreateAgentKeyResponse,
+} from './src/routes/agent_keys';
 export {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,

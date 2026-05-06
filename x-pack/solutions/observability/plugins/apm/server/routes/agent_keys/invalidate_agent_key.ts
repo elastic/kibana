@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { type InvalidateAgentKeyResponse } from '@kbn/apm-api-shared';
 import type { ApmPluginRequestHandlerContext } from '../typings';
-
-export interface InvalidateAgentKeyResponse {
-  invalidatedAgentKeys: string[];
-}
 
 export async function invalidateAgentKey({
   context,

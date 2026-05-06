@@ -9,12 +9,24 @@
 import { fooRoute } from './foo';
 import { barRoute } from './bar';
 import { hasDataRoute } from './historical_data';
+import { suggestionsRoute } from './suggestions';
+import {
+  agentKeysRoute,
+  agentKeysPrivilegesRoute,
+  invalidateAgentKeyRoute,
+  createAgentKeyRoute,
+} from './agent_keys';
 import type { BuildRepository } from './types';
 
 export const routeDefinitions = {
   foo: fooRoute,
   bar: barRoute,
   hasData: hasDataRoute,
+  suggestions: suggestionsRoute,
+  agentKeys: agentKeysRoute,
+  agentKeysPrivileges: agentKeysPrivilegesRoute,
+  invalidateAgentKey: invalidateAgentKeyRoute,
+  createAgentKey: createAgentKeyRoute,
 };
 
 export type SharedAPMRouteRepository = BuildRepository<typeof routeDefinitions>;
