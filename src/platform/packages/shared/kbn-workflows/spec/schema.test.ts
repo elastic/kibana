@@ -651,23 +651,27 @@ describe('JsonModelSchema', () => {
     const workflow = {
       version: '1',
       name: 'test',
-      triggers: [{ type: 'manual' }],
-      steps: [{ name: 'step1', type: 'console' }],
-      inputs: {
-        properties: {
-          username: {
-            type: 'string',
-            description: "User's username",
-          },
-          age: {
-            type: 'number',
-            description: "User's age",
-            default: 18,
+      triggers: [
+        {
+          type: 'manual',
+          inputs: {
+            properties: {
+              username: {
+                type: 'string',
+                description: "User's username",
+              },
+              age: {
+                type: 'number',
+                description: "User's age",
+                default: 18,
+              },
+            },
+            required: ['username'],
+            additionalProperties: false,
           },
         },
-        required: ['username'],
-        additionalProperties: false,
-      },
+      ],
+      steps: [{ name: 'step1', type: 'console' }],
     };
     const result = WorkflowSchema.safeParse(workflow);
     expect(result.success).toBe(true);
