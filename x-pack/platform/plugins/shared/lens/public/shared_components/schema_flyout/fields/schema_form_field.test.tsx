@@ -26,7 +26,7 @@ const Wrapper = ({
   defaultValues?: Record<string, unknown>;
 }) => {
   const Component = () => {
-    const { control } = useForm({ defaultValues });
+    const { control } = useForm({ defaultValues: defaultValues as Record<string, {}> });
     return <>{children(control)}</>;
   };
   return <Component />;

@@ -144,7 +144,7 @@ export const SchemaFlyoutEditor: React.FC<SchemaFlyoutEditorProps> = ({
     [fieldDescriptors]
   );
 
-  const methods = useForm({ defaultValues });
+  const methods = useForm({ defaultValues: defaultValues as Record<string, {}> });
 
   const stateRef = useRef(state);
   stateRef.current = state;
