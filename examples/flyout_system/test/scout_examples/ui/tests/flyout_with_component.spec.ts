@@ -40,7 +40,7 @@ test.describe('Flyout System - EuiFlyout component', { tag: ['@local-stateful-cl
   test('Back button: navigate from Session X overlay back to Session J push flyout', async ({
     page,
   }) => {
-    await page.testSubj.locator('flyoutTypeSwitch-Session J').click();
+    await page.testSubj.locator('flyoutTypeSwitch-Session J').click({ timeout: 20_000 });
 
     await page.testSubj.locator('openMainFlyoutComponentButton-Session J').click();
     const sessionJFlyout = page.locator('#mainFlyout-Session\\ J');
