@@ -19,7 +19,6 @@ import { createUnifiedAttachmentUserActionBuilder } from './unified_attachment';
 import { createAlertAttachmentUserActionBuilder } from '../../attachments/alert/alert';
 import { createActionAttachmentUserActionBuilder } from '../../attachments/host_isolation/actions';
 import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
-import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 import {
   isLegacyAttachmentRequest,
@@ -34,7 +33,6 @@ interface DeleteLabelTitle {
   userAction: SnakeToCamelCase<CommentUserAction>;
   caseData: UserActionBuilderArgs['caseData'];
   externalReferenceAttachmentTypeRegistry: UserActionBuilderArgs['externalReferenceAttachmentTypeRegistry'];
-  persistableStateAttachmentTypeRegistry: UserActionBuilderArgs['persistableStateAttachmentTypeRegistry'];
   unifiedAttachmentTypeRegistry: UserActionBuilderArgs['unifiedAttachmentTypeRegistry'];
 }
 
@@ -42,7 +40,6 @@ const getDeleteLabelTitle = ({
   userAction,
   caseData,
   externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
 }: DeleteLabelTitle) => {
   const { comment } = userAction.payload;
@@ -63,18 +60,6 @@ const getDeleteLabelTitle = ({
         getAttachmentProps: () => ({
           externalReferenceId: comment.externalReferenceId,
           externalReferenceMetadata: comment.externalReferenceMetadata,
-        }),
-      });
-    }
-
-    if (comment.type === AttachmentType.persistableState) {
-      return getDeleteLabelFromRegistry({
-        caseData,
-        registry: persistableStateAttachmentTypeRegistry,
-        getId: () => comment.persistableStateAttachmentTypeId,
-        getAttachmentProps: () => ({
-          persistableStateAttachmentTypeId: comment.persistableStateAttachmentTypeId,
-          persistableStateAttachmentState: comment.persistableStateAttachmentState,
         }),
       });
     }
@@ -132,7 +117,6 @@ const getDeleteCommentUserAction = ({
   userProfiles,
   caseData,
   externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   handleOutlineComment,
 }: {
@@ -142,7 +126,6 @@ const getDeleteCommentUserAction = ({
   | 'handleOutlineComment'
   | 'userProfiles'
   | 'externalReferenceAttachmentTypeRegistry'
-  | 'persistableStateAttachmentTypeRegistry'
   | 'unifiedAttachmentTypeRegistry'
   | 'caseData'
 >): EuiCommentProps[] => {
@@ -150,7 +133,6 @@ const getDeleteCommentUserAction = ({
     userAction,
     caseData,
     externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
   });
 
@@ -171,7 +153,6 @@ const getCreateCommentUserAction = ({
   userProfiles,
   caseData,
   externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   attachment,
   manageMarkdownEditIds,
@@ -190,7 +171,11 @@ const getCreateCommentUserAction = ({
   attachment: AttachmentUIV2;
 } & Omit<
   UserActionBuilderArgs,
-  'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
+  | 'comments'
+  | 'index'
+  | 'handleOutlineComment'
+  | 'currentUserProfile'
+  | 'persistableStateAttachmentTypeRegistry'
 >): EuiCommentProps[] => {
   if (isLegacyAttachmentRequest(attachment)) {
     switch (attachment.type) {
@@ -233,19 +218,6 @@ const getCreateCommentUserAction = ({
 
         return externalReferenceBuilder.build();
 
-      case AttachmentType.persistableState:
-        const persistableBuilder = createPersistableStateAttachmentUserActionBuilder({
-          userAction,
-          userProfiles,
-          attachment,
-          persistableStateAttachmentTypeRegistry,
-          caseData,
-          isLoading: loadingCommentIds.includes(attachment.id),
-          handleDeleteComment,
-        });
-
-        return persistableBuilder.build();
-
       default:
         return [];
     }
@@ -286,7 +258,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   casesConfiguration,
   userProfiles,
   externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   userAction,
   manageMarkdownEditIds,
@@ -314,7 +285,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         handleOutlineComment,
         userProfiles,
         externalReferenceAttachmentTypeRegistry,
-        persistableStateAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry,
       });
     }
@@ -332,7 +302,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         userProfiles,
         userAction: attachmentUserAction,
         externalReferenceAttachmentTypeRegistry,
-        persistableStateAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry,
         attachment,
         manageMarkdownEditIds,

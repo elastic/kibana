@@ -19,7 +19,15 @@
         "tags": [],
         "label": "CapabilitiesSetup",
         "description": [
-          "\nAPIs to manage the {@link Capabilities} that will be used by the application.\n\nPlugins relying on capabilities to toggle some of their features should register them during the setup phase\nusing the `registerProvider` method.\n\nPlugins having the responsibility to restrict capabilities depending on a given context should register\ntheir capabilities switcher using the `registerSwitcher` method.\n\nRefers to the methods documentation for complete description and examples.\n"
+          "\nAPIs to manage the ",
+          {
+            "pluginId": "@kbn/core-capabilities-server",
+            "scope": "server",
+            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+            "section": "def-server.Capabilities",
+            "text": "Capabilities"
+          },
+          " that will be used by the application.\n\nPlugins relying on capabilities to toggle some of their features should register them during the setup phase\nusing the `registerProvider` method.\n\nPlugins having the responsibility to restrict capabilities depending on a given context should register\ntheir capabilities switcher using the `registerSwitcher` method.\n\nRefers to the methods documentation for complete description and examples.\n"
         ],
         "path": "src/core/packages/capabilities/server/src/contracts.ts",
         "lineNumber": 14,
@@ -34,7 +42,23 @@
             "tags": [],
             "label": "registerProvider",
             "description": [
-              "\nRegister a {@link CapabilitiesProvider} to be used to provide {@link Capabilities}\nwhen resolving them.\n"
+              "\nRegister a ",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "server",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-server.CapabilitiesProvider",
+                "text": "CapabilitiesProvider"
+              },
+              " to be used to provide ",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "server",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-server.Capabilities",
+                "text": "Capabilities"
+              },
+              "\nwhen resolving them.\n"
             ],
             "signature": [
               "(provider: ",
@@ -61,6 +85,7 @@
                 "lineNumber": 51,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "CapabilitiesProvider",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -74,7 +99,23 @@
             "tags": [],
             "label": "registerSwitcher",
             "description": [
-              "\nRegister a {@link CapabilitiesSwitcher} to be used to change the default state\nof the {@link Capabilities} entries when resolving them.\n\nA capabilities switcher can only change the state of existing capabilities.\nCapabilities added or removed when invoking the switcher will be ignored.\n"
+              "\nRegister a ",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "server",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-server.CapabilitiesSwitcher",
+                "text": "CapabilitiesSwitcher"
+              },
+              " to be used to change the default state\nof the ",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "server",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-server.Capabilities",
+                "text": "Capabilities"
+              },
+              " entries when resolving them.\n\nA capabilities switcher can only change the state of existing capabilities.\nCapabilities added or removed when invoking the switcher will be ignored.\n"
             ],
             "signature": [
               "(switcher: ",
@@ -103,6 +144,7 @@
                 "lineNumber": 93,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "CapabilitiesSwitcher",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -120,6 +162,7 @@
                 "lineNumber": 93,
                 "columnNumber": 52,
                 "deprecated": false,
+                "docsReferencedTypeName": "CapabilitiesSwitcherOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -136,7 +179,15 @@
         "tags": [],
         "label": "CapabilitiesStart",
         "description": [
-          "\nAPIs to access the application {@link Capabilities}.\n"
+          "\nAPIs to access the application ",
+          {
+            "pluginId": "@kbn/core-capabilities-server",
+            "scope": "server",
+            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+            "section": "def-server.Capabilities",
+            "text": "Capabilities"
+          },
+          ".\n"
         ],
         "path": "src/core/packages/capabilities/server/src/contracts.ts",
         "lineNumber": 96,
@@ -151,7 +202,15 @@
             "tags": [],
             "label": "resolveCapabilities",
             "description": [
-              "\nResolve the {@link Capabilities} to be used for given request\n"
+              "\nResolve the ",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "server",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-server.Capabilities",
+                "text": "Capabilities"
+              },
+              " to be used for given request\n"
             ],
             "signature": [
               "(request: ",
@@ -185,6 +244,7 @@
                 "lineNumber": 115,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -202,6 +262,7 @@
                 "lineNumber": 116,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ResolveCapabilitiesOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -218,7 +279,15 @@
         "tags": [],
         "label": "CapabilitiesSwitcherOptions",
         "description": [
-          "\nOptions for the {@link CapabilitiesSetup.registerSwitcher} API.\n"
+          "\nOptions for the ",
+          {
+            "pluginId": "@kbn/core-capabilities-server",
+            "scope": "server",
+            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+            "section": "def-server.CapabilitiesSetup.registerSwitcher",
+            "text": "CapabilitiesSetup.registerSwitcher"
+          },
+          " API.\n"
         ],
         "path": "src/core/packages/capabilities/server/src/contracts.ts",
         "lineNumber": 143,
@@ -254,7 +323,15 @@
         "tags": [],
         "label": "ResolveCapabilitiesOptions",
         "description": [
-          "\nOptions for {@link CapabilitiesStart.resolveCapabilities}.\n"
+          "\nOptions for ",
+          {
+            "pluginId": "@kbn/core-capabilities-server",
+            "scope": "server",
+            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+            "section": "def-server.CapabilitiesStart.resolveCapabilities",
+            "text": "CapabilitiesStart.resolveCapabilities"
+          },
+          ".\n"
         ],
         "path": "src/core/packages/capabilities/server/src/contracts.ts",
         "lineNumber": 120,
@@ -311,7 +388,14 @@
         "tags": [],
         "label": "CapabilitiesProvider",
         "description": [
-          "\nSee {@link CapabilitiesSetup}"
+          "\nSee ",
+          {
+            "pluginId": "@kbn/core-capabilities-server",
+            "scope": "server",
+            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+            "section": "def-server.CapabilitiesSetup",
+            "text": "CapabilitiesSetup"
+          }
         ],
         "signature": [
           "() => Partial<",
@@ -334,7 +418,14 @@
         "tags": [],
         "label": "CapabilitiesSwitcher",
         "description": [
-          "\nSee {@link CapabilitiesSetup}"
+          "\nSee ",
+          {
+            "pluginId": "@kbn/core-capabilities-server",
+            "scope": "server",
+            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+            "section": "def-server.CapabilitiesSetup",
+            "text": "CapabilitiesSetup"
+          }
         ],
         "signature": [
           "(request: ",
@@ -375,6 +466,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           },
           {
@@ -391,6 +483,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Capabilities",
             "trackAdoption": false
           },
           {

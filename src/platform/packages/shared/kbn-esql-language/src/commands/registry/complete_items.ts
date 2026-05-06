@@ -84,7 +84,9 @@ export function buildMapKeySuggestion(
     kind: 'Constant',
     detail: description || paramName,
     ...(options?.filterText && { filterText: options.filterText }),
-    ...(options?.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+    ...(options?.replacementRangeStrategy && {
+      replacementRangeStrategy: options.replacementRangeStrategy,
+    }),
   });
 }
 
@@ -138,7 +140,9 @@ export function buildAddValuePlaceholder(
     }),
     category: SuggestionCategory.VALUE,
     filterText: text,
-    ...(options?.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+    ...(options?.replacementRangeStrategy && {
+      replacementRangeStrategy: options.replacementRangeStrategy,
+    }),
   });
 }
 
@@ -353,10 +357,10 @@ export const MAP_VALUE_SNIPPETS: Record<MapValueType, string> = {
 
 export interface MapKeySuggestionOptions {
   filterText?: string;
-  rangeToReplace?: { start: number; end: number };
+  replacementRangeStrategy?: ISuggestionItem['replacementRangeStrategy'];
 }
 
-export function buildSubqueryCompleteItem(filterText?: string): ISuggestionItem {
+export function buildSubqueryCompleteItem(): ISuggestionItem {
   return withAutoSuggest({
     label: '(FROM ...)',
     text: '(FROM $0)',
@@ -365,7 +369,6 @@ export function buildSubqueryCompleteItem(filterText?: string): ISuggestionItem 
     detail: i18n.translate('kbn-esql-language.esql.autocomplete.subqueryFromDoc', {
       defaultMessage: 'Adds a nested ES|QL query to your current query',
     }),
-    ...(filterText && { filterText }),
     category: SuggestionCategory.SUBQUERY,
   });
 }
@@ -671,14 +674,12 @@ export function createResourceBrowserSuggestion(options: {
   label: string;
   description: string;
   commandId: string;
-  rangeToReplace?: { start: number; end: number };
-  filterText?: string;
-  insertText?: string;
   commandArgs?: Record<string, string>;
 }): ISuggestionItem {
   return withAutoSuggest({
     label: options.label,
-    text: options.insertText || '',
+    // Empty string: insertion is handled by the command that opens the browser overlay.
+    text: '',
     kind: 'Folder',
     detail: options.description,
     command: {
@@ -687,15 +688,12 @@ export function createResourceBrowserSuggestion(options: {
       ...(options.commandArgs && { arguments: [options.commandArgs] }),
     },
     asSnippet: false,
-    filterText: options.filterText || '',
-    ...(options.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
     category: SuggestionCategory.CUSTOM_ACTION,
   });
 }
 
 export function createIndicesBrowserSuggestion(
-  commandArgs?: Record<string, string>,
-  innerText?: string
+  commandArgs?: Record<string, string>
 ): ISuggestionItem {
   return createResourceBrowserSuggestion({
     label: i18n.translate('kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionLabel', {
@@ -709,14 +707,6 @@ export function createIndicesBrowserSuggestion(
     ),
     commandId: 'esql.indicesBrowser.open',
     commandArgs,
-    rangeToReplace: innerText
-      ? {
-          start: 0,
-          end: innerText.length + 1,
-        }
-      : undefined,
-    filterText: innerText,
-    insertText: innerText,
   });
 }
 

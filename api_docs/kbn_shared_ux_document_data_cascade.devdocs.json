@@ -180,6 +180,7 @@
             "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataCascadeRowProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -242,6 +243,7 @@
             "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataCascadeRowCellProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -298,6 +300,7 @@
             "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -374,6 +377,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Row",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -433,6 +437,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Row",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -511,6 +516,7 @@
             "lineNumber": 69,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "NumberBadgeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -525,7 +531,15 @@
         "tags": [],
         "label": "toRestorableState",
         "description": [
-          "\nDerives a {@link DataCascadeRestorableState} from a live snapshot,\nkeeping only the fields meaningful for restoration."
+          "\nDerives a ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.DataCascadeRestorableState",
+            "text": "DataCascadeRestorableState"
+          },
+          " from a live snapshot,\nkeeping only the fields meaningful for restoration."
         ],
         "signature": [
           "<G extends ",
@@ -580,6 +594,7 @@
             "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataCascadeUISnapshot",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -685,6 +700,7 @@
             "lineNumber": 45,
             "columnNumber": 67,
             "deprecated": false,
+            "docsReferencedTypeName": "UseConnectedChildVirtualizerOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -950,6 +966,7 @@
                 "lineNumber": 32,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1796,7 +1813,15 @@
         "tags": [],
         "label": "DataCascadeRestorableState",
         "description": [
-          "\nSerializable subset of {@link DataCascadeUISnapshot} that a consumer can\npersist and pass back as `initialState` to restore the component."
+          "\nSerializable subset of ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.DataCascadeUISnapshot",
+            "text": "DataCascadeUISnapshot"
+          },
+          " that a consumer can\npersist and pass back as `initialState` to restore the component."
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
         "lineNumber": 102,
@@ -2306,7 +2331,15 @@
         "tags": [],
         "label": "CascadeRootVirtualizerReturnValue",
         "description": [
-          "\nNarrowed return type for {@link useCascadeVirtualizer} when `isRoot` is `true`.\nGuarantees that `childController` is always defined."
+          "\nNarrowed return type for ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.useCascadeVirtualizer",
+            "text": "useCascadeVirtualizer"
+          },
+          " when `isRoot` is `true`.\nGuarantees that `childController` is always defined."
         ],
         "signature": [
           "Omit<",

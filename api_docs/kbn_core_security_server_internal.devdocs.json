@@ -92,6 +92,7 @@
                 "lineNumber": 22,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "InternalSecurityServiceStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -110,6 +111,7 @@
                 "lineNumber": 23,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -204,6 +206,7 @@
                 "lineNumber": 38,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -297,7 +300,14 @@
             "tags": [],
             "label": "uiam",
             "description": [
-              "\nThe {@link CoreUiamService | UIAM service}"
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-security-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerInternalPluginApi",
+                "section": "def-server.CoreUiamService",
+                "text": "UIAM service"
+              }
             ],
             "signature": [
               "CoreUiamService",

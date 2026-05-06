@@ -14,11 +14,13 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
   RadioGroupFieldSchema,
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import * as i18n from '../../translations';
+import { OptionalFieldLabel } from '../../../optional_field_label';
 
 type RadioGroupProps = z.infer<typeof RadioGroupFieldSchema> & ConditionRenderProps;
 
@@ -28,6 +30,7 @@ interface RadioGroupFieldProps {
   name: string;
   options: Array<{ id: string; label: string }>;
   firstOption: string;
+  isRequired: boolean;
 }
 
 const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
@@ -36,6 +39,7 @@ const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
   name,
   options,
   firstOption,
+  isRequired,
 }) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -55,12 +59,18 @@ const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
     typeof field.value === 'string' && field.value !== '' ? field.value : firstOption;
 
   return (
-    <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
+    <EuiFormRow
+      label={label}
+      labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+      error={errorMessage}
+      isInvalid={isInvalid}
+      fullWidth
+    >
       <EuiRadioGroup
         name={name}
         options={options}
         idSelected={idSelected}
-        onChange={(id) => field.setValue(id)}
+        onChange={field.setValue}
       />
     </EuiFormRow>
   );
@@ -98,12 +108,17 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   );
 
   return (
-    <UseField key={name} path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`} config={config}>
+    <UseField
+      key={name}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
+      config={config}
+    >
       {(field: FieldHook<string>) => (
         <RadioGroupField
           field={field}
           label={label ?? ''}
           name={name}
+          isRequired={isRequired ?? false}
           options={options}
           firstOption={metadata.options[0]}
         />

@@ -8,8 +8,7 @@
  */
 
 import type { ESQLAstUserAgentCommand, ESQLList } from '@elastic/esql/types';
-import { isMap, isList, isStringLiteral } from '@elastic/esql';
-import { EDITOR_MARKER } from '../../definitions/constants';
+import { isAssignment, isMap, isList, isStringLiteral } from '@elastic/esql';
 
 export enum UserAgentPosition {
   AFTER_USER_AGENT_KEYWORD = 'after_user_agent_keyword',
@@ -40,6 +39,7 @@ export function getPosition(
   cursorPosition: number
 ): UserAgentPosition {
   const { targetField, expression, namedParameters } = command;
+  const hasAssignment = command.args.some((arg) => !Array.isArray(arg) && isAssignment(arg));
 
   if (namedParameters !== undefined) {
     const map = isMap(namedParameters) ? namedParameters : undefined;
@@ -67,14 +67,14 @@ export function getPosition(
   }
 
   if (expression !== undefined) {
-    if (
-      expression.text === EDITOR_MARKER ||
-      expression.incomplete ||
-      cursorPosition <= expression.location.max + 1
-    ) {
+    if (expression.incomplete || cursorPosition <= expression.location.max + 1) {
       return UserAgentPosition.AFTER_ASSIGN;
     }
     return UserAgentPosition.AFTER_EXPRESSION;
+  }
+
+  if (hasAssignment) {
+    return UserAgentPosition.AFTER_ASSIGN;
   }
 
   if (targetField && !targetField.incomplete) {

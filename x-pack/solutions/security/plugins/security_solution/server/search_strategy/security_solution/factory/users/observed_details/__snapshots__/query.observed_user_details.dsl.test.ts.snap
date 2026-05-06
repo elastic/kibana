@@ -129,11 +129,6 @@ Object {
           },
         },
         Object {
-          "term": Object {
-            "user.name": "bastion00.siem.estc.dev",
-          },
-        },
-        Object {
           "range": Object {
             "@timestamp": Object {
               "format": "strict_date_optional_time",
@@ -147,5 +142,28 @@ Object {
   },
   "size": 0,
   "track_total_hits": false,
+}
+`;
+
+exports[`buildUserDetailsQuery includes user.name filter when filterQuery is undefined 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "user.name": "bastion00.siem.estc.dev",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "format": "strict_date_optional_time",
+            "gte": "2020-09-02T15:17:13.678Z",
+            "lte": "2020-09-03T15:17:13.678Z",
+          },
+        },
+      },
+    ],
+  },
 }
 `;

@@ -405,6 +405,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -1665,6 +1671,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -1703,6 +1715,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -1751,7 +1773,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -1783,15 +1805,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -1973,6 +1995,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -2017,6 +2047,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -2372,6 +2411,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -2410,6 +2455,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -2458,7 +2513,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -2490,15 +2545,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -2684,6 +2739,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -2728,6 +2791,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -3188,7 +3260,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -3220,15 +3292,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -3939,7 +4011,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -3971,15 +4043,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -4649,7 +4721,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -4681,15 +4753,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -5964,6 +6036,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -6079,6 +6157,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -8777,19 +8861,19 @@ groups:
             - id: production
               value: production
               brief: Production environment
-              stability: development
+              stability: stable
             - id: staging
               value: staging
               brief: Staging environment
-              stability: development
+              stability: stable
             - id: test
               value: test
               brief: Testing environment
-              stability: development
+              stability: stable
             - id: development
               value: development
               brief: Development environment
-              stability: development
+              stability: stable
         brief: |
           Name of the [deployment environment](https://wikipedia.org/wiki/Deployment_environment) (aka deployment tier).
         examples:
@@ -8804,7 +8888,7 @@ groups:
 
           - `service.name=frontend`, `deployment.environment.name=production`
           - `service.name=frontend`, `deployment.environment.name=staging`.
-        stability: development
+        stability: stable
     name: deployment
     lineage:
       provenance:
@@ -10766,6 +10850,323 @@ groups:
             - stability
           locally_overridden_fields:
             - role
+  - id: entity.k8s.node.system_container
+    type: entity
+    brief: |
+      A Kubernetes Node System Container.
+    stability: development
+    attributes:
+      - name: k8s.node.system_container.name
+        type: string
+        brief: |
+          The name of the system container running on the K8s Node.
+        examples:
+          - kubelet
+          - runtime
+          - pods
+          - misc
+        requirement_level: recommended
+        stability: development
+        role: identifying
+    name: k8s.node.system_container
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/entities.yaml
+      attributes:
+        k8s.node.system_container.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - role
+  - id: entity.k8s.persistentvolume
+    type: entity
+    brief: |
+      A Kubernetes [PersistentVolume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) object.
+    stability: development
+    attributes:
+      - name: k8s.persistentvolume.annotation
+        type: template[string]
+        brief: |
+          The annotation placed on the PersistentVolume, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.
+        examples:
+          - kubernetes.io/aws-ebs
+          - ''
+        requirement_level: opt_in
+        note: |
+          Examples:
+
+          - An annotation `pv.kubernetes.io/provisioned-by` with value `kubernetes.io/aws-ebs` SHOULD be recorded as
+            the `k8s.persistentvolume.annotation.pv.kubernetes.io/provisioned-by` attribute with value `"kubernetes.io/aws-ebs"`.
+          - An annotation `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolume.annotation.data` attribute with value `""`.
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolume.label
+        type: template[string]
+        brief: |
+          The label placed on the PersistentVolume, the `<key>` being the label name, the value being the label value, even if the value is empty.
+        examples:
+          - ssd
+          - ''
+        requirement_level: opt_in
+        note: |
+          Examples:
+
+          - A label `type` with value `ssd` SHOULD be recorded as
+            the `k8s.persistentvolume.label.type` attribute with value `"ssd"`.
+          - A label `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolume.label.data` attribute with value `""`.
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolume.name
+        type: string
+        brief: |
+          The name of the PersistentVolume.
+        examples:
+          - pv-data-01
+        requirement_level: recommended
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolume.reclaim_policy
+        type:
+          members:
+            - id: delete
+              value: Delete
+              brief: The volume will be deleted when released from its claim.
+              stability: development
+            - id: recycle
+              value: Recycle
+              brief: The volume will be recycled (basic scrub) when released from its claim.
+              stability: development
+            - id: retain
+              value: Retain
+              brief: The volume will be retained when released from its claim.
+              stability: development
+        brief: |
+          The reclaim policy of the PersistentVolume.
+        examples:
+          - Delete
+          - Retain
+          - Recycle
+        requirement_level: opt_in
+        note: |
+          This attribute aligns with the `persistentVolumeReclaimPolicy` field of the
+          [K8s PersistentVolumeSpec](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeSpec).
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolume.uid
+        type: string
+        brief: |
+          The UID of the PersistentVolume.
+        examples:
+          - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
+        requirement_level: required
+        stability: development
+        role: identifying
+      - name: k8s.storageclass.name
+        type: string
+        brief: |
+          The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.
+        examples:
+          - gold.storageclass.storage.k8s.io
+        requirement_level: recommended
+        stability: development
+        role: descriptive
+    name: k8s.persistentvolume
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/entities.yaml
+      attributes:
+        k8s.persistentvolume.annotation:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.persistentvolume.label:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.persistentvolume.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - role
+        k8s.persistentvolume.reclaim_policy:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.persistentvolume.uid:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.storageclass.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+  - id: entity.k8s.persistentvolumeclaim
+    type: entity
+    brief: |
+      A Kubernetes [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims) object.
+    stability: development
+    attributes:
+      - name: k8s.persistentvolumeclaim.annotation
+        type: template[string]
+        brief: |
+          The annotation placed on the PersistentVolumeClaim, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.
+        examples:
+          - kubernetes.io/aws-ebs
+          - ''
+        requirement_level: opt_in
+        note: |
+          Examples:
+
+          - An annotation `volume.beta.kubernetes.io/storage-provisioner` with value `kubernetes.io/aws-ebs` SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.annotation.volume.beta.kubernetes.io/storage-provisioner` attribute with value `"kubernetes.io/aws-ebs"`.
+          - An annotation `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.annotation.data` attribute with value `""`.
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolumeclaim.label
+        type: template[string]
+        brief: |
+          The label placed on the PersistentVolumeClaim, the `<key>` being the label name, the value being the label value, even if the value is empty.
+        examples:
+          - my-app
+          - ''
+        requirement_level: opt_in
+        note: |
+          Examples:
+
+          - A label `app` with value `my-app` SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.label.app` attribute with value `"my-app"`.
+          - A label `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.label.data` attribute with value `""`.
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolumeclaim.name
+        type: string
+        brief: |
+          The name of the PersistentVolumeClaim.
+        examples:
+          - pvc-data-01
+        requirement_level: recommended
+        stability: development
+        role: descriptive
+      - name: k8s.persistentvolumeclaim.uid
+        type: string
+        brief: |
+          The UID of the PersistentVolumeClaim.
+        examples:
+          - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
+        requirement_level: required
+        stability: development
+        role: identifying
+      - name: k8s.storageclass.name
+        type: string
+        brief: |
+          The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.
+        examples:
+          - gold.storageclass.storage.k8s.io
+        requirement_level: recommended
+        stability: development
+        role: descriptive
+    name: k8s.persistentvolumeclaim
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/entities.yaml
+      attributes:
+        k8s.persistentvolumeclaim.annotation:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.persistentvolumeclaim.label:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.persistentvolumeclaim.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - role
+        k8s.persistentvolumeclaim.uid:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        k8s.storageclass.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
   - id: entity.k8s.pod
     type: entity
     brief: |
@@ -11798,24 +12199,6 @@ groups:
         requirement_level: required
         stability: development
         role: identifying
-      - name: process.executable.name
-        type: string
-        brief: |
-          The name of the process executable. On Linux based systems, this SHOULD be set to the base name of the target of `/proc/[pid]/exe`. On Windows, this SHOULD be set to the base name of `GetProcessImageFileNameW`.
-        examples:
-          - otelcol
-        requirement_level: opt_in
-        stability: development
-        role: descriptive
-      - name: process.executable.path
-        type: string
-        brief: |
-          The full path to the process executable. On Linux based systems, can be set to the target of `proc/[pid]/exe`. On Windows, can be set to the result of `GetProcessImageFileNameW`.
-        examples:
-          - /usr/bin/cmd/otelcol
-        requirement_level: opt_in
-        stability: development
-        role: descriptive
       - name: process.interactive
         type: boolean
         brief: |
@@ -11939,26 +12322,6 @@ groups:
           locally_overridden_fields:
             - requirement_level
             - role
-        process.executable.name:
-          source_group: registry.process
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - role
-        process.executable.path:
-          source_group: registry.process
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - role
         process.interactive:
           source_group: registry.process
           inherited_fields:
@@ -12019,6 +12382,129 @@ groups:
             - requirement_level
             - role
         process.working_directory:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+  - id: entity.process.executable
+    type: entity
+    brief: |
+      The executable of a process.
+    note: |
+      Represents the executable file associated with a process. A single executable may be run my multiple process instances.
+    stability: development
+    attributes:
+      - name: process.executable.build_id.gnu
+        type: string
+        brief: |
+          The GNU build ID as found in the `.note.gnu.build-id` ELF section (hex string).
+        examples:
+          - c89b11207f6479603b0d49bf291c092c2b719293
+        requirement_level: opt_in
+        stability: development
+        role: descriptive
+      - name: process.executable.build_id.go
+        type: string
+        brief: |
+          The Go build ID as retrieved by `go tool buildid <go executable>`.
+        examples:
+          - foh3mEXu7BLZjsN9pOwG/kATcXlYVCDEFouRMQed_/WwRFB1hPo9LBkekthSPG/x8hMC8emW2cCjXD0_1aY
+        requirement_level: opt_in
+        stability: development
+        role: descriptive
+      - name: process.executable.build_id.htlhash
+        type: string
+        brief: |
+          Deterministic build ID for executables.
+        examples:
+          - 600DCAFE4A110000F2BF38C493F5FB92
+        requirement_level: required
+        note: |
+          GNU and Go build IDs may be stripped or unavailable in some environments
+          (e.g., Alpine Linux, Docker images). This attribute provides a deterministic
+          build ID computed by hashing the first and last 4096 bytes of the file
+          along with its length:
+
+          ```
+          Input   ← Concat(File[:4096], File[-4096:], BigEndianUInt64(Len(File)))
+          Digest  ← SHA256(Input)
+          BuildID ← Digest[:16]
+          ```
+
+          The result is the first 16 bytes (128 bits) of the SHA256 digest,
+          represented as a hex string.
+        stability: development
+        role: identifying
+      - name: process.executable.name
+        type: string
+        brief: |
+          The name of the process executable. On Linux based systems, this SHOULD be set to the base name of the target of `/proc/[pid]/exe`. On Windows, this SHOULD be set to the base name of `GetProcessImageFileNameW`.
+        examples:
+          - otelcol
+        requirement_level: recommended
+        stability: development
+        role: descriptive
+      - name: process.executable.path
+        type: string
+        brief: |
+          The full path to the process executable. On Linux based systems, can be set to the target of `proc/[pid]/exe`. On Windows, can be set to the result of `GetProcessImageFileNameW`.
+        examples:
+          - /usr/bin/cmd/otelcol
+        requirement_level: opt_in
+        stability: development
+        role: descriptive
+    name: process.executable
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/process/entities.yaml
+      attributes:
+        process.executable.build_id.gnu:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        process.executable.build_id.go:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        process.executable.build_id.htlhash:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        process.executable.name:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        process.executable.path:
           source_group: registry.process
           inherited_fields:
             - brief
@@ -12154,7 +12640,8 @@ groups:
           - shoppingcart
         requirement_level: required
         note: |
-          MUST be the same for all instances of horizontally scaled services. If the value was not specified, SDKs MUST fallback to `unknown_service:` concatenated with [`process.executable.name`](process.md), e.g. `unknown_service:bash`. If `process.executable.name` is not available, the value MUST be set to `unknown_service`.
+          MUST be the same for all instances of horizontally scaled services. If the value was not specified, SDKs MUST fallback to `unknown_service:` concatenated with the process executable name, e.g. `unknown_service:bash`. If the process executable name is not available, the value MUST be set to `unknown_service`.
+          The process executable name is the name of the process executable, the same value as described by the [`process.executable.name`](process.md) resource attribute.
         stability: stable
         role: identifying
       - name: service.version
@@ -12302,7 +12789,7 @@ groups:
     type: entity
     brief: |
       The distribution of telemetry SDK used to capture data recorded by the instrumentation libraries.
-    stability: development
+    stability: stable
     attributes:
       - name: telemetry.distro.name
         type: string
@@ -12314,7 +12801,8 @@ groups:
         note: |
           Official auto instrumentation agents and distributions SHOULD set the `telemetry.distro.name` attribute to
           a string starting with `opentelemetry-`, e.g. `opentelemetry-java-instrumentation`.
-        stability: development
+        stability: stable
+        role: identifying
       - name: telemetry.distro.version
         type: string
         brief: |
@@ -12322,7 +12810,8 @@ groups:
         examples:
           - 1.2.3
         requirement_level: recommended
-        stability: development
+        stability: stable
+        role: descriptive
     name: telemetry.distro
     lineage:
       provenance:
@@ -12338,6 +12827,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         telemetry.distro.version:
           source_group: registry.telemetry
           inherited_fields:
@@ -12347,6 +12837,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
   - id: entity.telemetry.sdk
     type: entity
     brief: |
@@ -13313,6 +13804,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: db.client.operation.exception
     lineage:
@@ -13487,6 +13984,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: exception
     lineage:
@@ -13568,6 +14071,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: faas.invocation.exception
     lineage:
@@ -14607,6 +15116,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -14645,6 +15160,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -14693,7 +15218,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -14725,15 +15250,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -14916,6 +15441,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -14960,6 +15493,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -15073,6 +15615,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: gen_ai.client.operation.exception
     lineage:
@@ -15761,6 +16309,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: http.client.request.exception
     lineage:
@@ -15834,6 +16388,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: http.server.request.exception
     lineage:
@@ -15907,6 +16467,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: messaging.create.exception
     lineage:
@@ -15980,6 +16546,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: messaging.process.exception
     lineage:
@@ -16053,6 +16625,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: messaging.receive.exception
     lineage:
@@ -16126,6 +16704,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: messaging.send.exception
     lineage:
@@ -16199,6 +16783,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: messaging.settle.exception
     lineage:
@@ -16272,6 +16862,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: rpc.client.call.exception
     lineage:
@@ -16437,6 +17033,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: rpc.server.call.exception
     lineage:
@@ -17134,6 +17736,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     lineage:
       provenance:
@@ -18086,6 +18694,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -18255,6 +18869,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -18803,6 +19423,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -19058,6 +19684,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -19297,6 +19929,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -19605,6 +20243,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -19937,6 +20581,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -20302,6 +20952,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -20558,6 +21214,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -20893,6 +21555,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -21343,6 +22011,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -21755,7 +22429,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -22010,7 +22684,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -27847,6 +28521,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -27952,6 +28632,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -28034,6 +28720,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -32025,7 +32717,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -32277,7 +32969,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -32519,7 +33211,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -32759,7 +33451,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -33055,7 +33747,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -33304,7 +33996,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -33544,7 +34236,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -33776,6 +34468,22 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+  - id: metric.go.memory.gc.pause.duration
+    type: metric
+    brief: Distribution of individual GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again.
+    note: |
+      Computed from `/sched/pauses/total/gc:seconds`. Bucket boundaries are provided by the runtime, and are subject to change.
+    stability: development
+    metric_name: go.memory.gc.pause.duration
+    instrument: histogram
+    unit: s
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/go/metrics.yaml
+    annotations:
+      code_generation:
+        metric_value_type: double
   - id: metric.go.memory.limit
     type: metric
     brief: Go runtime memory limit configured by the user, if a limit exists.
@@ -43014,11 +43722,55 @@ groups:
         metric_value_type: int
   - id: metric.k8s.container.cpu.limit
     type: metric
-    brief: Maximum CPU resource limit set for the container.
-    note: |
-      See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#resourcerequirements-v1-core for details.
+    brief: Deprecated, use `k8s.container.cpu.limit.desired` and `k8s.container.cpu.limit.current` instead.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.container.cpu.limit.desired
+      note: Replaced by `k8s.container.cpu.limit.desired`.
     metric_name: k8s.container.cpu.limit
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.container.cpu.limit_utilization
+    type: metric
+    brief: Deprecated, use `k8s.container.cpu.limit.utilization` instead.
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.container.cpu.limit.utilization
+      note: Replaced by `k8s.container.cpu.limit.utilization`.
+    metric_name: k8s.container.cpu.limit_utilization
+    instrument: gauge
+    unit: '1'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.container.cpu.limit.current
+    type: metric
+    brief: Maximum CPU resource limit currently configured for a running container.
+    note: |
+      This metric aligns with the limit in the
+      [`resources`](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core) field of
+      [K8s ContainerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstatus-v1-core)
+      (status.containerStatuses[*].resources). Also see `Actual Resources` in
+      <https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/> for more details.
+    stability: development
+    metric_name: k8s.container.cpu.limit.current
     instrument: updowncounter
     unit: '{cpu}'
     lineage:
@@ -43030,13 +43782,38 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
-  - id: metric.k8s.container.cpu.limit_utilization
+  - id: metric.k8s.container.cpu.limit.desired
     type: metric
-    brief: The ratio of container CPU usage to its CPU limit.
+    brief: Maximum CPU resource limit as defined by the container spec.
     note: |
-      The value range is [0.0,1.0]. A value of 1.0 means the container is using 100% of its CPU limit. If the CPU limit is not set, this metric SHOULD NOT be emitted for that container.
+      This metric aligns with the limit in the
+      [`resources`](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core) field of
+      [K8s Container](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#container-v1-core)
+      (spec.containers[*].resources). Also see `Desired Resources` in
+      <https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/> for more details.
     stability: development
-    metric_name: k8s.container.cpu.limit_utilization
+    metric_name: k8s.container.cpu.limit.desired
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.container.cpu.limit.utilization
+    type: metric
+    brief: The ratio of container CPU usage to its current CPU limit.
+    note: |
+      The current CPU limit reflects the actual resources applied to the container, as reported by
+      [ContainerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstatus-v1-core).
+      The value range is [0.0,1.0]. A value of 1.0 means the container is using 100% of its actual CPU limit.
+      If the CPU limit is not set, this metric SHOULD NOT be emitted for that container.
+    stability: development
+    metric_name: k8s.container.cpu.limit.utilization
     instrument: gauge
     unit: '1'
     lineage:
@@ -43050,11 +43827,55 @@ groups:
         metric_value_type: double
   - id: metric.k8s.container.cpu.request
     type: metric
-    brief: CPU resource requested for the container.
-    note: |
-      See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#resourcerequirements-v1-core for details.
+    brief: Deprecated, use `k8s.container.cpu.request.desired` and `k8s.container.cpu.request.current` instead.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.container.cpu.request.desired
+      note: Replaced by `k8s.container.cpu.request.desired`.
     metric_name: k8s.container.cpu.request
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.container.cpu.request_utilization
+    type: metric
+    brief: Deprecated, use `k8s.container.cpu.request.utilization` instead.
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.container.cpu.request.utilization
+      note: Replaced by `k8s.container.cpu.request.utilization`.
+    metric_name: k8s.container.cpu.request_utilization
+    instrument: gauge
+    unit: '1'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.container.cpu.request.current
+    type: metric
+    brief: CPU resource requested currently configured for a running container.
+    note: |
+      This metric aligns with the request in the
+      [`resources`](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core) field of
+      [K8s ContainerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstatus-v1-core)
+      (status.containerStatuses[*].resources). Also see `Actual Resources` in
+      <https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/> for more details.
+    stability: development
+    metric_name: k8s.container.cpu.request.current
     instrument: updowncounter
     unit: '{cpu}'
     lineage:
@@ -43066,11 +43887,38 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
-  - id: metric.k8s.container.cpu.request_utilization
+  - id: metric.k8s.container.cpu.request.desired
     type: metric
-    brief: The ratio of container CPU usage to its CPU request.
+    brief: CPU resource requested as defined by the container spec.
+    note: |
+      This metric aligns with the request in the
+      [`resources`](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core) field of
+      [K8s Container](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#container-v1-core)
+      (spec.containers[*].resources). Also see `Desired Resources` in
+      <https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/> for more details.
     stability: development
-    metric_name: k8s.container.cpu.request_utilization
+    metric_name: k8s.container.cpu.request.desired
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.container.cpu.request.utilization
+    type: metric
+    brief: The ratio of container CPU usage to its current CPU request.
+    note: |
+      The current CPU request reflects the request applied to the running container, as reported by
+      [ContainerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstatus-v1-core).
+      The value range is [0.0,1.0]. A value of 1.0 means the container is using 100% of its actual CPU request.
+      If the CPU request is not set, this metric SHOULD NOT be emitted for that container.
+    stability: development
+    metric_name: k8s.container.cpu.request.utilization
     instrument: gauge
     unit: '1'
     lineage:
@@ -44838,6 +45686,78 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+  - id: metric.k8s.node.system_container.cpu.time
+    type: metric
+    brief: Node's system container CPU time.
+    note: |
+      This metric is derived from the [CPUStats.UsageCoreNanoSeconds](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L236) field of the [ContainerStats](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L157C6-L157C20) of [Node.SystemContainers](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L40) of the Kubelet's stats API.
+    stability: development
+    metric_name: k8s.node.system_container.cpu.time
+    instrument: counter
+    unit: s
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.node.system_container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.node.system_container.cpu.usage
+    type: metric
+    brief: Node's system container CPU usage, measured in cpus.
+    note: |
+      This metric is derived from the [CPUStats.UsageNanoCores](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L233) field of the [ContainerStats](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L157C6-L157C20) of [Node.SystemContainers](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L40) of the Kubelet's stats API.
+    stability: development
+    metric_name: k8s.node.system_container.cpu.usage
+    instrument: gauge
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.node.system_container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.node.system_container.memory.usage
+    type: metric
+    brief: Node's system container memory usage.
+    note: |
+      This metric is derived from the [MemoryStats.UsageBytes](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L252) field of the [ContainerStats](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L157C6-L157C20) of [Node.SystemContainers](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L40) of the Kubelet's stats API.
+    stability: development
+    metric_name: k8s.node.system_container.memory.usage
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.node.system_container
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.node.system_container.memory.working_set
+    type: metric
+    brief: The amount of working set memory.
+    note: |
+      This metric is derived from the [MemoryStats.WorkingSetBytes](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L256) field of the [ContainerStats](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L157C6-L157C20) of [Node.SystemContainers](https://github.com/kubernetes/kubelet/blob/v0.35.2/pkg/apis/stats/v1alpha1/types.go#L40) of the Kubelet's stats API.
+    stability: development
+    metric_name: k8s.node.system_container.memory.working_set
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.node.system_container
+    annotations:
+      code_generation:
+        metric_value_type: int
   - id: metric.k8s.node.uptime
     type: metric
     brief: The time the Node has been running.
@@ -44857,6 +45777,186 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
+  - id: metric.k8s.persistentvolume.status.phase
+    type: metric
+    brief: Number of PersistentVolumes in a given phase.
+    note: |
+      All possible phases should be reported at each interval to avoid gaps in the time series.
+      This metric is derived from the `.status.phase` field of the
+      [K8s PersistentVolumeStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeStatus).
+    stability: development
+    attributes:
+      - name: k8s.persistentvolume.status.phase
+        type:
+          members:
+            - id: available
+              value: Available
+              brief: The volume is available and not yet bound to a claim.
+              stability: development
+            - id: bound
+              value: Bound
+              brief: The volume is bound to a claim.
+              stability: development
+            - id: failed
+              value: Failed
+              brief: The volume has failed its automatic reclamation.
+              stability: development
+            - id: pending
+              value: Pending
+              brief: The volume is being provisioned.
+              stability: development
+            - id: released
+              value: Released
+              brief: The claim has been deleted but the volume is not yet available.
+              stability: development
+        brief: |
+          The phase of the PersistentVolume.
+        examples:
+          - Pending
+          - Available
+          - Bound
+          - Released
+          - Failed
+        requirement_level: required
+        note: |
+          This attribute aligns with the `phase` field of the
+          [K8s PersistentVolumeStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeStatus).
+        stability: development
+    metric_name: k8s.persistentvolume.status.phase
+    instrument: updowncounter
+    unit: '{persistentvolume}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+      attributes:
+        k8s.persistentvolume.status.phase:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    entity_associations:
+      - k8s.persistentvolume
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.persistentvolume.storage.capacity
+    type: metric
+    brief: The storage capacity of the PersistentVolume.
+    note: |
+      This metric is derived from the `.spec.capacity.storage` field of the [K8s PersistentVolumeSpec](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeSpec).
+    stability: development
+    metric_name: k8s.persistentvolume.storage.capacity
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.persistentvolume
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.persistentvolumeclaim.status.phase
+    type: metric
+    brief: Number of PersistentVolumeClaims in a given phase.
+    note: |
+      All possible phases should be reported at each interval to avoid gaps in the time series.
+      This metric is derived from the `.status.phase` field of the
+      [K8s PersistentVolumeClaimStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimStatus).
+    stability: development
+    attributes:
+      - name: k8s.persistentvolumeclaim.status.phase
+        type:
+          members:
+            - id: bound
+              value: Bound
+              brief: The claim is bound to a volume.
+              stability: development
+            - id: lost
+              value: Lost
+              brief: The claim has lost its underlying volume (the volume does not exist anymore).
+              stability: development
+            - id: pending
+              value: Pending
+              brief: The claim has not yet been bound to a volume.
+              stability: development
+        brief: |
+          The phase of the PersistentVolumeClaim.
+        examples:
+          - Pending
+          - Bound
+          - Lost
+        requirement_level: required
+        note: |
+          This attribute aligns with the `phase` field of the
+          [K8s PersistentVolumeClaimStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimStatus).
+        stability: development
+    metric_name: k8s.persistentvolumeclaim.status.phase
+    instrument: updowncounter
+    unit: '{persistentvolumeclaim}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+      attributes:
+        k8s.persistentvolumeclaim.status.phase:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    entity_associations:
+      - k8s.persistentvolumeclaim
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.persistentvolumeclaim.storage.capacity
+    type: metric
+    brief: The actual storage capacity provisioned for the PersistentVolumeClaim.
+    note: |
+      Only available when the PVC is bound. May differ from the requested capacity due to provisioner rounding.
+      This metric is derived from the `.status.capacity.storage` field of the
+      [K8s PersistentVolumeClaimStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimStatus).
+    stability: development
+    metric_name: k8s.persistentvolumeclaim.storage.capacity
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.persistentvolumeclaim
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.persistentvolumeclaim.storage.request
+    type: metric
+    brief: The storage requested by the PersistentVolumeClaim.
+    note: |
+      This metric is derived from the `.spec.resources.requests.storage` field of the [K8s PersistentVolumeClaimSpec](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimSpec).
+    stability: development
+    metric_name: k8s.persistentvolumeclaim.storage.request
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.persistentvolumeclaim
+    annotations:
+      code_generation:
+        metric_value_type: int
   - id: metric.k8s.pod.cpu.time
     type: metric
     brief: Total CPU time consumed.
@@ -48716,6 +49816,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -49367,6 +50473,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -49538,6 +50650,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -49775,6 +50893,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -50058,6 +51182,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -50401,6 +51531,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -50643,6 +51779,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -50882,6 +52024,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -51158,6 +52306,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -51443,6 +52597,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -51567,6 +52727,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -51693,6 +52859,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -51818,6 +52990,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -51942,6 +53120,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -52523,6 +53707,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -53387,6 +54577,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -53818,6 +55014,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -54252,6 +55454,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -54531,6 +55739,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -55013,6 +56227,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -55206,6 +56426,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -55700,6 +56926,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -61946,6 +63178,58 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+  - id: metric.v8js.resource.active
+    type: metric
+    brief: Gauge of the active resources that are currently keeping the event loop alive.
+    note: |
+      The values can be retrieved from [`process.getActiveResourcesInfo()`](https://nodejs.org/api/process.html#processgetactiveresourcesinfo)
+    stability: development
+    attributes:
+      - name: v8js.resource.type
+        type:
+          members:
+            - id: immediate
+              value: Immediate
+              brief: Active `setImmediate` callbacks.
+              stability: development
+            - id: tcpserverwrap
+              value: TCPServerWrap
+              brief: Active TCP Servers.
+              stability: development
+            - id: tcpwrap
+              value: TCPWrap
+              brief: Active TCP connections.
+              stability: development
+            - id: timeout
+              value: Timeout
+              brief: Active `setTimeout` or `setInterval` timers.
+              stability: development
+            - id: ttywrap
+              value: TTYWrap
+              brief: Active Terminal I/O (stdin/stdout).
+              stability: development
+        brief: The type of resource keeping the event loop active.
+        requirement_level: required
+        stability: development
+    metric_name: v8js.resource.active
+    instrument: gauge
+    unit: '{resource}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/v8js/metrics.yaml
+      attributes:
+        v8js.resource.type:
+          source_group: registry.v8js
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    annotations:
+      code_generation:
+        metric_value_type: int
   - id: metric.vcs.change.count
     type: metric
     brief: The number of changes (pull requests/merge requests/changelists) in a repository, categorized by their state (e.g. open or merged).
@@ -66647,6 +67931,8 @@ groups:
         examples:
           - '12097'
         requirement_level: recommended
+        note: |
+          For a given pipeline run and task, the `cicd.pipeline.task.run.id` MUST be unique within that run. For the same task across different runs of the same pipeline, the `cicd.pipeline.task.run.id` MAY remain the same, enabling correlation of `cicd.pipeline.task.run.result` values across multiple pipeline runs.
         stability: development
       - name: cicd.pipeline.task.run.result
         type:
@@ -68952,19 +70238,19 @@ groups:
             - id: production
               value: production
               brief: Production environment
-              stability: development
+              stability: stable
             - id: staging
               value: staging
               brief: Staging environment
-              stability: development
+              stability: stable
             - id: test
               value: test
               brief: Testing environment
-              stability: development
+              stability: stable
             - id: development
               value: development
               brief: Development environment
-              stability: development
+              stability: stable
         brief: |
           Name of the [deployment environment](https://wikipedia.org/wiki/Deployment_environment) (aka deployment tier).
         examples:
@@ -68979,7 +70265,7 @@ groups:
 
           - `service.name=frontend`, `deployment.environment.name=production`
           - `service.name=frontend`, `deployment.environment.name=staging`.
-        stability: development
+        stability: stable
       - name: deployment.id
         type: string
         brief: |
@@ -69336,6 +70622,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -69439,6 +70731,12 @@ groups:
           - java.net.ConnectException
           - OSError
         requirement_level: recommended
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     lineage:
       provenance:
@@ -70794,7 +72092,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -70906,6 +72204,11 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level: recommended
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -70948,6 +72251,15 @@ groups:
         brief: The name of the model that generated the response.
         examples:
           - gpt-4-0613
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
         requirement_level: recommended
         stability: development
       - name: gen_ai.retrieval.documents
@@ -71108,7 +72420,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -71140,15 +72452,15 @@ groups:
             ]
         requirement_level: recommended
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.tool.description
         type: string
@@ -71606,7 +72918,7 @@ groups:
         brief: The GraphQL document being executed.
         examples: 'query findBookById { bookById(id: ?) { name } }'
         requirement_level: recommended
-        note: The value may be sanitized to exclude sensitive information.
+        note: If instrumentation can reliably identify and redact sensitive information it SHOULD do it.
         stability: development
       - name: graphql.operation.name
         type: string
@@ -73475,6 +74787,17 @@ groups:
           - node-1
         requirement_level: recommended
         stability: release_candidate
+      - name: k8s.node.system_container.name
+        type: string
+        brief: |
+          The name of the system container running on the K8s Node.
+        examples:
+          - kubelet
+          - runtime
+          - pods
+          - misc
+        requirement_level: recommended
+        stability: development
       - name: k8s.node.uid
         type: string
         brief: |
@@ -73483,6 +74806,190 @@ groups:
           - 1eb3a0c6-0477-4080-a9cb-0cb7db65c6a2
         requirement_level: recommended
         stability: release_candidate
+      - name: k8s.persistentvolume.annotation
+        type: template[string]
+        brief: |
+          The annotation placed on the PersistentVolume, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.
+        examples:
+          - kubernetes.io/aws-ebs
+          - ''
+        requirement_level: recommended
+        note: |
+          Examples:
+
+          - An annotation `pv.kubernetes.io/provisioned-by` with value `kubernetes.io/aws-ebs` SHOULD be recorded as
+            the `k8s.persistentvolume.annotation.pv.kubernetes.io/provisioned-by` attribute with value `"kubernetes.io/aws-ebs"`.
+          - An annotation `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolume.annotation.data` attribute with value `""`.
+        stability: development
+      - name: k8s.persistentvolume.label
+        type: template[string]
+        brief: |
+          The label placed on the PersistentVolume, the `<key>` being the label name, the value being the label value, even if the value is empty.
+        examples:
+          - ssd
+          - ''
+        requirement_level: recommended
+        note: |
+          Examples:
+
+          - A label `type` with value `ssd` SHOULD be recorded as
+            the `k8s.persistentvolume.label.type` attribute with value `"ssd"`.
+          - A label `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolume.label.data` attribute with value `""`.
+        stability: development
+      - name: k8s.persistentvolume.name
+        type: string
+        brief: |
+          The name of the PersistentVolume.
+        examples:
+          - pv-data-01
+        requirement_level: recommended
+        stability: development
+      - name: k8s.persistentvolume.reclaim_policy
+        type:
+          members:
+            - id: delete
+              value: Delete
+              brief: The volume will be deleted when released from its claim.
+              stability: development
+            - id: recycle
+              value: Recycle
+              brief: The volume will be recycled (basic scrub) when released from its claim.
+              stability: development
+            - id: retain
+              value: Retain
+              brief: The volume will be retained when released from its claim.
+              stability: development
+        brief: |
+          The reclaim policy of the PersistentVolume.
+        examples:
+          - Delete
+          - Retain
+          - Recycle
+        requirement_level: recommended
+        note: |
+          This attribute aligns with the `persistentVolumeReclaimPolicy` field of the
+          [K8s PersistentVolumeSpec](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeSpec).
+        stability: development
+      - name: k8s.persistentvolume.status.phase
+        type:
+          members:
+            - id: available
+              value: Available
+              brief: The volume is available and not yet bound to a claim.
+              stability: development
+            - id: bound
+              value: Bound
+              brief: The volume is bound to a claim.
+              stability: development
+            - id: failed
+              value: Failed
+              brief: The volume has failed its automatic reclamation.
+              stability: development
+            - id: pending
+              value: Pending
+              brief: The volume is being provisioned.
+              stability: development
+            - id: released
+              value: Released
+              brief: The claim has been deleted but the volume is not yet available.
+              stability: development
+        brief: |
+          The phase of the PersistentVolume.
+        examples:
+          - Pending
+          - Available
+          - Bound
+          - Released
+          - Failed
+        requirement_level: recommended
+        note: |
+          This attribute aligns with the `phase` field of the
+          [K8s PersistentVolumeStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeStatus).
+        stability: development
+      - name: k8s.persistentvolume.uid
+        type: string
+        brief: |
+          The UID of the PersistentVolume.
+        examples:
+          - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
+        requirement_level: recommended
+        stability: development
+      - name: k8s.persistentvolumeclaim.annotation
+        type: template[string]
+        brief: |
+          The annotation placed on the PersistentVolumeClaim, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.
+        examples:
+          - kubernetes.io/aws-ebs
+          - ''
+        requirement_level: recommended
+        note: |
+          Examples:
+
+          - An annotation `volume.beta.kubernetes.io/storage-provisioner` with value `kubernetes.io/aws-ebs` SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.annotation.volume.beta.kubernetes.io/storage-provisioner` attribute with value `"kubernetes.io/aws-ebs"`.
+          - An annotation `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.annotation.data` attribute with value `""`.
+        stability: development
+      - name: k8s.persistentvolumeclaim.label
+        type: template[string]
+        brief: |
+          The label placed on the PersistentVolumeClaim, the `<key>` being the label name, the value being the label value, even if the value is empty.
+        examples:
+          - my-app
+          - ''
+        requirement_level: recommended
+        note: |
+          Examples:
+
+          - A label `app` with value `my-app` SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.label.app` attribute with value `"my-app"`.
+          - A label `data` with empty string value SHOULD be recorded as
+            the `k8s.persistentvolumeclaim.label.data` attribute with value `""`.
+        stability: development
+      - name: k8s.persistentvolumeclaim.name
+        type: string
+        brief: |
+          The name of the PersistentVolumeClaim.
+        examples:
+          - pvc-data-01
+        requirement_level: recommended
+        stability: development
+      - name: k8s.persistentvolumeclaim.status.phase
+        type:
+          members:
+            - id: bound
+              value: Bound
+              brief: The claim is bound to a volume.
+              stability: development
+            - id: lost
+              value: Lost
+              brief: The claim has lost its underlying volume (the volume does not exist anymore).
+              stability: development
+            - id: pending
+              value: Pending
+              brief: The claim has not yet been bound to a volume.
+              stability: development
+        brief: |
+          The phase of the PersistentVolumeClaim.
+        examples:
+          - Pending
+          - Bound
+          - Lost
+        requirement_level: recommended
+        note: |
+          This attribute aligns with the `phase` field of the
+          [K8s PersistentVolumeClaimStatus](https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimStatus).
+        stability: development
+      - name: k8s.persistentvolumeclaim.uid
+        type: string
+        brief: |
+          The UID of the PersistentVolumeClaim.
+        examples:
+          - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
+        requirement_level: recommended
+        stability: development
       - name: k8s.pod.annotation
         type: template[string]
         brief: |
@@ -76412,10 +77919,24 @@ groups:
       - name: process.executable.build_id.htlhash
         type: string
         brief: |
-          Profiling specific build ID for executables. See the OTel specification for Profiles for more information.
+          Deterministic build ID for executables.
         examples:
           - 600DCAFE4A110000F2BF38C493F5FB92
         requirement_level: recommended
+        note: |
+          GNU and Go build IDs may be stripped or unavailable in some environments
+          (e.g., Alpine Linux, Docker images). This attribute provides a deterministic
+          build ID computed by hashing the first and last 4096 bytes of the file
+          along with its length:
+
+          ```
+          Input   ← Concat(File[:4096], File[-4096:], BigEndianUInt64(Len(File)))
+          Digest  ← SHA256(Input)
+          BuildID ← Digest[:16]
+          ```
+
+          The result is the first 16 bytes (128 bits) of the SHA256 digest,
+          represented as a hex string.
         stability: development
       - name: process.executable.name
         type: string
@@ -77477,7 +78998,8 @@ groups:
           - shoppingcart
         requirement_level: recommended
         note: |
-          MUST be the same for all instances of horizontally scaled services. If the value was not specified, SDKs MUST fallback to `unknown_service:` concatenated with [`process.executable.name`](process.md), e.g. `unknown_service:bash`. If `process.executable.name` is not available, the value MUST be set to `unknown_service`.
+          MUST be the same for all instances of horizontally scaled services. If the value was not specified, SDKs MUST fallback to `unknown_service:` concatenated with the process executable name, e.g. `unknown_service:bash`. If the process executable name is not available, the value MUST be set to `unknown_service`.
+          The process executable name is the name of the process executable, the same value as described by the [`process.executable.name`](process.md) resource attribute.
         stability: stable
       - name: service.namespace
         type: string
@@ -78018,7 +79540,7 @@ groups:
         note: |
           Official auto instrumentation agents and distributions SHOULD set the `telemetry.distro.name` attribute to
           a string starting with `opentelemetry-`, e.g. `opentelemetry-java-instrumentation`.
-        stability: development
+        stability: stable
       - name: telemetry.distro.version
         type: string
         brief: |
@@ -78026,7 +79548,7 @@ groups:
         examples:
           - 1.2.3
         requirement_level: recommended
-        stability: development
+        stability: stable
       - name: telemetry.sdk.language
         type:
           members:
@@ -78879,6 +80401,32 @@ groups:
         requirement_level: recommended
         note: |
           Value can be retrieved from value `space_name` of [`v8.getHeapSpaceStatistics()`](https://nodejs.org/api/v8.html#v8getheapspacestatistics)
+        stability: development
+      - name: v8js.resource.type
+        type:
+          members:
+            - id: immediate
+              value: Immediate
+              brief: Active `setImmediate` callbacks.
+              stability: development
+            - id: tcpserverwrap
+              value: TCPServerWrap
+              brief: Active TCP Servers.
+              stability: development
+            - id: tcpwrap
+              value: TCPWrap
+              brief: Active TCP connections.
+              stability: development
+            - id: timeout
+              value: Timeout
+              brief: Active `setTimeout` or `setInterval` timers.
+              stability: development
+            - id: ttywrap
+              value: TTYWrap
+              brief: Active Terminal I/O (stdin/stdout).
+              stability: development
+        brief: The type of resource keeping the event loop active.
+        requirement_level: recommended
         stability: development
     lineage:
       provenance:
@@ -80080,6 +81628,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -80118,6 +81672,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -80166,7 +81730,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -80198,15 +81762,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -80386,6 +81950,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -80430,6 +82002,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -80775,7 +82356,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -80883,6 +82464,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -80928,6 +82515,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -80976,7 +82573,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -81008,15 +82605,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -81230,6 +82827,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -81283,6 +82888,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -82170,6 +83784,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -82208,6 +83828,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -82256,7 +83886,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -82288,15 +83918,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -82494,6 +84124,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -82538,6 +84176,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -83235,7 +84882,7 @@ groups:
     note: |
       For all pipeline runs, a span with kind `SERVER` SHOULD be created corresponding to the execution of the pipeline run.
 
-      **Span name** MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.55.0/specification/trace/api.md#span).
+      **Span name** MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.56.0/specification/trace/api.md#span).
 
       The span name SHOULD be `{action} {pipeline}` if there is a (low-cardinality) pipeline name available.
       If the pipeline name is not available or is likely to have high cardinality, then the span name SHOULD be `{action}`.
@@ -83327,6 +84974,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -83400,6 +85053,8 @@ groups:
           - '12097'
         requirement_level: required
         sampling_relevant: true
+        note: |
+          For a given pipeline run and task, the `cicd.pipeline.task.run.id` MUST be unique within that run. For the same task across different runs of the same pipeline, the `cicd.pipeline.task.run.id` MAY remain the same, enabling correlation of `cicd.pipeline.task.run.result` values across multiple pipeline runs.
         stability: development
       - name: cicd.pipeline.task.run.result
         type:
@@ -83468,6 +85123,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -83573,6 +85234,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -83725,6 +85392,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -92450,7 +94123,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -92792,7 +94465,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -93258,7 +94931,7 @@ groups:
     note: |
       **Span name** SHOULD be `{gen_ai.operation.name} {gen_ai.request.model}`.
       Semantic conventions for individual GenAI systems and frameworks MAY specify different span name format
-      and MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.55.0/specification/trace/api.md#span).
+      and MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.56.0/specification/trace/api.md#span).
 
       **Span kind** SHOULD be `CLIENT` and MAY be set to `INTERNAL` on spans representing
       call to models running in the same process. It's RECOMMENDED to use `CLIENT` kind
@@ -93516,7 +95189,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -93624,6 +95297,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -93669,6 +95348,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -93717,7 +95406,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -93749,15 +95438,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -93953,6 +95642,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -94006,6 +95703,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
@@ -94390,7 +96096,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -94568,7 +96274,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -94600,15 +96306,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -95259,7 +96965,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -95437,7 +97143,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -95469,15 +97175,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -96140,7 +97846,7 @@ groups:
               stability: development
             - id: azure.ai.openai
               value: azure.ai.openai
-              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              brief: '[Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)'
               stability: development
             - id: ibm.watsonx.ai
               value: ibm.watsonx.ai
@@ -96389,8 +98095,8 @@ groups:
         type: string
         brief: The GraphQL document being executed.
         examples: 'query findBookById { bookById(id: ?) { name } }'
-        requirement_level: recommended
-        note: The value may be sanitized to exclude sensitive information.
+        requirement_level: opt_in
+        note: If instrumentation can reliably identify and redact sensitive information it SHOULD do it.
         stability: development
       - name: graphql.operation.name
         type: string
@@ -99241,6 +100947,12 @@ groups:
             - lived
         requirement_level: recommended
         stability: development
+      - name: gen_ai.request.stream
+        type: boolean
+        brief: Indicates whether the GenAI request was made in streaming mode.
+        requirement_level:
+          conditionally_required: If and only if the request is streaming. If unset, the request is assumed to be non-streaming.
+        stability: development
       - name: gen_ai.request.temperature
         type: double
         brief: The temperature setting for the GenAI request.
@@ -99279,6 +100991,16 @@ groups:
         requirement_level: recommended
         note: |
           If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.response.time_to_first_chunk
+        type: double
+        brief: |
+          Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.
+        examples:
+          - 0.5
+          - 1.2
+        requirement_level:
+          recommended: if the request was a streaming request
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -99327,7 +101049,7 @@ groups:
         stability: development
       - name: gen_ai.tool.definitions
         type: any
-        brief: The list of source system tool definitions available to the GenAI agent or model.
+        brief: The list of tool definitions available to the GenAI agent or model.
         examples:
           - |
             [
@@ -99359,15 +101081,15 @@ groups:
             ]
         requirement_level: opt_in
         note: |
-          The value of this attribute matches source system tool definition format.
+          Instrumentations MUST follow [Tool Definitions JSON Schema](/docs/gen-ai/gen-ai-tool-definitions.json).
 
-          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-          to the instrumentation, the instrumentation SHOULD do the best effort to
-          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
 
           Since this attribute could be large, it's NOT RECOMMENDED to populate
-          it by default. Instrumentations MAY provide a way to enable
-          populating this attribute.
+          non-required properties by default. Instrumentations MAY provide a way
+          to enable populating optional properties.
         stability: development
       - name: gen_ai.usage.cache_creation.input_tokens
         type: int
@@ -99599,6 +101321,14 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        gen_ai.request.stream:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.request.temperature:
           source_group: registry.gen_ai
           inherited_fields:
@@ -99643,6 +101373,15 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - requirement_level
+        gen_ai.response.time_to_first_chunk:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai

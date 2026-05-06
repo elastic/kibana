@@ -10,9 +10,8 @@ import React from 'react';
 import { TestProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
-import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 
 const mockUseUiSetting = jest.fn().mockReturnValue(false);
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -96,7 +95,6 @@ describe('useAgentBuilderAttachment', () => {
         },
       ],
       sessionTag: 'security',
-      agentId: THREAT_HUNTING_AGENT_ID,
     });
   });
 

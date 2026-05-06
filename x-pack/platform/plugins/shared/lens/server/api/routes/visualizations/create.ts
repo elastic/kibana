@@ -7,7 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import { isLensESQLConfig } from '@kbn/lens-embeddable-utils';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 
 import {
@@ -28,17 +28,22 @@ import {
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement, builder }
+  { contentManagement, builder, usageCounter }
 ) => {
   const createRoute = router.post({
     path: LENS_VIS_API_PATH,
     access: LENS_API_ACCESS,
     summary: 'Create visualization',
-    description: 'Create a new visualization.',
+    description: [
+      'Creates a Lens visualization and saves it to the library.',
+      '',
+      'ES|QL visualizations cannot be created through this endpoint.',
+    ].join('\n'),
     options: {
       tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {
@@ -77,36 +82,28 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
         },
       },
     },
-    async (ctx, req, res) => {
-      if (isLensESQLConfig(req.body)) {
-        return res.badRequest({
-          body: {
-            message:
-              'ES|QL charts are not yet supported in Lens. Use POST /api/dashboards instead.',
-          },
-        });
-      }
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(LENS_CONTENT_TYPE);
+        try {
+          const { references, ...data } = getLensRequestConfig(builder, req.body);
+          const options: LensCreateIn['options'] = { ...req.query, references };
+          const { result } = await client.create(data, options);
+          const responseItem = getLensResponseItem(builder, result.item);
 
-      try {
-        const { references, ...data } = getLensRequestConfig(builder, req.body);
-        const options: LensCreateIn['options'] = { ...req.query, references };
-        const { result } = await client.create(data, options);
-        const responseItem = getLensResponseItem(builder, result.item);
+          return res.created<LensCreateResponseBody>({
+            body: responseItem,
+          });
+        } catch (error) {
+          if (isBoom(error) && error.output.statusCode === 403) {
+            return res.forbidden();
+          }
 
-        return res.created<LensCreateResponseBody>({
-          body: responseItem,
-        });
-      } catch (error) {
-        if (isBoom(error) && error.output.statusCode === 403) {
-          return res.forbidden();
+          return boomify(error); // forward unknown error
         }
-
-        return boomify(error); // forward unknown error
-      }
-    }
+      })
   );
 };

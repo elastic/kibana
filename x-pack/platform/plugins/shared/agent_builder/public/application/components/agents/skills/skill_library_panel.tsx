@@ -42,7 +42,6 @@ interface SkillLibraryPanelProps {
   allSkills: PublicSkillSummary[];
   activeSkillIdSet: Set<string>;
   onToggleSkill: (skill: PublicSkillSummary, isActive: boolean) => void;
-  mutatingSkillId: string | null;
   enableElasticCapabilities?: boolean;
   builtinSkillIdSet?: Set<string>;
 }
@@ -52,7 +51,6 @@ export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
   allSkills,
   activeSkillIdSet,
   onToggleSkill,
-  mutatingSkillId,
   enableElasticCapabilities = false,
   builtinSkillIdSet,
 }) => {
@@ -71,7 +69,6 @@ export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
       allItems={allSkills}
       activeItemIdSet={activeSkillIdSet}
       onToggleItem={onToggleSkill}
-      mutatingItemId={mutatingSkillId}
       flyoutTitleId="skillLibraryFlyoutTitle"
       libraryLabels={libraryLabels}
       manageLibraryPath={appPaths.manage.skills}

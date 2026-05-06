@@ -49,6 +49,7 @@
                 "lineNumber": 22,
                 "columnNumber": 64,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]

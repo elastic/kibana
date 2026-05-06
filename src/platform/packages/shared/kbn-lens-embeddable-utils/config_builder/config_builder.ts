@@ -53,7 +53,7 @@ import {
   fromAPItoLensState as fromDatatableAPItoLensState,
   fromLensStateToAPI as fromDatatableLensStateToAPI,
 } from './transforms/charts/datatable';
-import type { LensApiState } from './schema';
+import type { LensApiConfig } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
 
@@ -75,7 +75,7 @@ const compatibilityMap: Record<string, string> = {
 type ChartTypeLike =
   | Pick<LensAttributes, 'visualizationType'>
   | Pick<LensConfig, 'chartType'>
-  | Pick<LensApiState, 'type'>
+  | Pick<LensApiConfig, 'type'>
   | { visualizationType: null | undefined }
   | undefined;
 
@@ -225,7 +225,7 @@ export class LensConfigBuilder {
     return chartState as LensAttributes;
   }
 
-  fromAPIFormat(config: LensApiState): LensAttributes {
+  fromAPIFormat(config: LensApiConfig): LensAttributes {
     const chartType = config.type;
 
     if (!(chartType in this.apiConvertersByChart)) {
@@ -253,7 +253,7 @@ export class LensConfigBuilder {
     };
   }
 
-  toAPIFormat(config: LensAttributes): LensApiState {
+  toAPIFormat(config: LensAttributes): LensApiConfig {
     const visType = config.visualizationType;
     const type = compatibilityMap[visType] ?? visType;
 

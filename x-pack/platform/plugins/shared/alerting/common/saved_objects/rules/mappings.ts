@@ -140,6 +140,18 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     mutedInstanceIds: {
       type: 'keyword',
     },
+    snoozedInstances: {
+      type: 'nested',
+      properties: {
+        instanceId: {
+          type: 'keyword',
+        },
+        snoozeSnapshot: {
+          type: 'object',
+          dynamic: false,
+        },
+      },
+    },
     // NO NEED TO BE INDEXED
     // meta: {
     //   properties: {

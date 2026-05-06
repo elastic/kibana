@@ -25,7 +25,12 @@ import {
   isElementCommandBadge,
 } from './command_badge';
 import { serializeEditorContent } from './serialize';
-import { createTextFragment, getSelectionRange, insertNodeAtCursor } from './utils';
+import {
+  createTextFragment,
+  ensureCaretTargetBeforeFirstBadge,
+  getSelectionRange,
+  insertNodeAtCursor,
+} from './utils';
 
 const EDITOR_MAX_HEIGHT = 240;
 
@@ -212,6 +217,9 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
             : createTextFragment(textData);
 
           insertNodeAtCursor(node);
+          if (ref.current) {
+            ensureCaretTargetBeforeFirstBadge(ref.current);
+          }
 
           onChange();
         }}

@@ -76,7 +76,10 @@ describe('HeaderTitle', () => {
       timestamp: '2024-10-10T10:00:00.000Z',
       alertsCount: 3,
     });
-    mockedUseAttackDetailsContext.mockReturnValue({ attackId: 'attack-1' });
+    mockedUseAttackDetailsContext.mockReturnValue({
+      attackId: 'attack-1',
+      searchHit: { _index: '.alerts-security.alerts-default', _id: 'attack-1' },
+    });
     mockedUseNavigateToAttackDetailsLeftPanel.mockReturnValue(jest.fn());
   });
 

@@ -9,7 +9,7 @@
 
 import { execFileSync } from 'child_process';
 import fs from 'fs';
-import { load as loadYaml } from 'js-yaml';
+import { parse as loadYaml } from 'yaml';
 
 export function emitPipeline(pipelineSteps: string[]) {
   const pipelineStr = [...new Set(pipelineSteps)].join('\n');
@@ -98,10 +98,28 @@ function extractStepKeys(filename: string, doc: unknown): string[] {
   return keys;
 }
 
+const pendingCancelKeys: string[] = [];
+
 function registerCancelOnGateFailureMetadata(keys: string[]) {
-  for (const key of keys) {
-    execFileSync('buildkite-agent', ['meta-data', 'set', `cancel_on_gate_failure:${key}`, 'true']);
-  }
+  pendingCancelKeys.push(...keys);
+}
+
+export function registerCancelKeys(keys: string[]) {
+  pendingCancelKeys.push(...keys);
+}
+
+export function flushCancelOnGateFailureMetadata() {
+  if (pendingCancelKeys.length === 0) return;
+  execFileSync('buildkite-agent', ['meta-data', 'set', 'cancel_on_gate_failure_batch:pipeline'], {
+    input: JSON.stringify(pendingCancelKeys),
+    stdio: ['pipe', 'inherit', 'inherit'],
+  });
+  pendingCancelKeys.length = 0;
+}
+
+/** @internal Exposed only for tests */
+export function _resetPendingCancelKeys() {
+  pendingCancelKeys.length = 0;
 }
 
 export const getPipeline = (filename: string, options?: boolean | GetPipelineOptions) => {

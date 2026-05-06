@@ -33,6 +33,12 @@ export const getCypressBaseConfig = (
       defaultCommandTimeout: 60000,
       execTimeout: 120000,
       pageLoadTimeout: 12000,
+      // Limit per-test DOM snapshots retained in memory. The long response-actions
+      // workflow spec accumulates enough state to crash the browser at the Cypress
+      // default of 50. Combined with `experimentalMemoryManagement` below, this
+      // keeps browser memory bounded across multi-test specs while leaving enough
+      // snapshot history for local debugging on the longest consolidated specs.
+      numTestsKeptInMemory: 10,
       screenshotsFolder: '../../../../../target/kibana-osquery/cypress/screenshots',
       trashAssetsBeforeRuns: false,
       video: true,

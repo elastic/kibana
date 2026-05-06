@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
@@ -13,20 +14,27 @@ import { ALL_ENTITY_TYPES, API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../..
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { BadCRUDRequestError, EntityAlreadyExistsError } from '../../../domain/errors';
+import {
+  BadCRUDRequestError,
+  EntityAlreadyExistsError,
+  EntityStoreNotInstalledError,
+} from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
-const paramsSchema = z
-  .object({
-    entityType: z.enum(ALL_ENTITY_TYPES),
-  })
-  .required();
+const paramsSchema = z.object({
+  entityType: z.enum(ALL_ENTITY_TYPES).describe('The entity type to create.'),
+});
 
 export function registerCRUDCreate(router: EntityStorePluginRouter) {
   router.versioned
     .post({
       path: ENTITY_STORE_ROUTES.public.CRUD_CREATE,
       access: 'public',
+      summary: 'Create an entity',
+      description: 'Create a new entity record in the Entity Store for the specified entity type.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -43,6 +51,9 @@ export function registerCRUDCreate(router: EntityStorePluginRouter) {
             params: buildRouteValidationWithZod(paramsSchema),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/entities_create.yaml'),
+        },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
@@ -53,6 +64,9 @@ export function registerCRUDCreate(router: EntityStorePluginRouter) {
         try {
           await crudClient.createEntity(req.params.entityType, req.body);
         } catch (error) {
+          if (error instanceof EntityStoreNotInstalledError) {
+            return res.badRequest({ body: error });
+          }
           if (error instanceof BadCRUDRequestError) {
             return res.badRequest({ body: error });
           }

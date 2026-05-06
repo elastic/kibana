@@ -151,6 +151,7 @@
             "lineNumber": 16,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "CliOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -188,6 +189,7 @@
             "lineNumber": 27,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "PartialConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -371,6 +373,7 @@
             "lineNumber": 18,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "Config",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -388,6 +391,7 @@
             "lineNumber": 18,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -411,6 +415,7 @@
             "lineNumber": 18,
             "columnNumber": 59,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }

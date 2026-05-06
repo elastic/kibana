@@ -19,9 +19,16 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
+
+const LazyAgentBuilderAnnouncementChromeInner = dynamic(() =>
+  import('./components/announcement/agent_builder_announcement_chrome_inner').then((m) => ({
+    default: m.AgentBuilderAnnouncementChromeInner,
+  }))
+);
 import {
   AgentBuilderAccessChecker,
   AgentService,
@@ -82,6 +89,7 @@ export class AgentBuilderPlugin
     addAttachment: (attachment: AttachmentInput) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private isEarsEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
@@ -97,6 +105,7 @@ export class AgentBuilderPlugin
     });
 
     this.setupServices = { navigationService, usageCollection: deps.usageCollection };
+    this.isEarsEnabled = deps.actions.isEarsEnabled;
 
     registerApp({
       core,
@@ -112,7 +121,7 @@ export class AgentBuilderPlugin
     registerAnalytics({ analytics: core.analytics });
     registerLocators(deps.share);
 
-    registerWorkflowSteps(deps.workflowsExtensions);
+    registerWorkflowSteps(deps.workflowsExtensions, core);
 
     core.chrome.sidebar.registerApp({
       appId: 'agentBuilder',
@@ -212,6 +221,7 @@ export class AgentBuilderPlugin
       usageCollection,
       accessChecker,
       eventsService,
+      isEarsEnabled: this.isEarsEnabled,
       openSidebarConversation: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
       },
@@ -278,6 +288,24 @@ export class AgentBuilderPlugin
     };
 
     if (hasAgentBuilder) {
+      core.chrome.navControls.registerRight({
+        mount: (element) => {
+          ReactDOM.render(
+            <LazyAgentBuilderAnnouncementChromeInner
+              coreStart={core}
+              pluginsStart={startDependencies}
+            />,
+            element,
+            () => {}
+          );
+
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
+        },
+        order: 1000,
+      });
+
       core.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(

@@ -470,47 +470,33 @@ describe('getNormalizedDataStreams', () => {
     expect(useApmVar?.default).toEqual(true);
   });
 
-  it('should use generic.otel as default dataset for dynamic_signal_types packages', () => {
-    const result = getNormalizedDataStreams({
-      ...integrationPkg,
-      type: 'input',
-      policy_templates: [
-        {
-          input: 'otelcol',
-          name: 'otlpreceiver',
-          template_path: 'some/path.hbl',
-          title: 'OTLP',
-          description: 'OTLP input',
-          dynamic_signal_types: true,
-          vars: [],
-        },
-      ],
-    });
-    expect(result).toHaveLength(1);
-    // Dataset should be 'generic.otel', NOT the policy_template-based default 'nginx.otlpreceiver'
-    expect(result[0].dataset).toEqual('generic.otel');
-    expect(result[0].path).toEqual('generic.otel');
-  });
+  it('should derive default dataset from packageName.templateName regardless of dynamic_signal_types', () => {
+    const makePkg = (name: string, dynamicSignalTypes?: boolean) =>
+      getNormalizedDataStreams({
+        ...integrationPkg,
+        type: 'input',
+        policy_templates: [
+          {
+            input: 'otelcol',
+            name,
+            template_path: 'some/path.hbl',
+            title: name,
+            description: name,
+            ...(dynamicSignalTypes !== undefined
+              ? { dynamic_signal_types: dynamicSignalTypes }
+              : {}),
+            vars: [],
+          },
+        ],
+      });
 
-  it('should use policy_template-based default dataset for non-dynamic_signal_types packages', () => {
-    const result = getNormalizedDataStreams({
-      ...integrationPkg,
-      type: 'input',
-      policy_templates: [
-        {
-          input: 'otelcol',
-          name: 'mysqlreceiver',
-          type: 'metrics',
-          template_path: 'some/path.hbl',
-          title: 'MySQL OTel',
-          description: 'MySQL metrics via OTel',
-          vars: [],
-        },
-      ],
-    });
-    expect(result).toHaveLength(1);
-    // Without dynamic_signal_types, dataset is derived from packageName.templateName
-    expect(result[0].dataset).toEqual('nginx.mysqlreceiver');
+    // dynamic_signal_types: true — same createDefaultDatasetName behaviour as non-dynamic
+    expect(makePkg('otlpreceiver', true)[0].dataset).toEqual('nginx.otlpreceiver');
+    expect(makePkg('otlpreceiver', true)[0].path).toEqual('nginx.otlpreceiver');
+
+    // dynamic_signal_types: false / absent — same behaviour
+    expect(makePkg('mysqlreceiver', false)[0].dataset).toEqual('nginx.mysqlreceiver');
+    expect(makePkg('mysqlreceiver')[0].dataset).toEqual('nginx.mysqlreceiver');
   });
 });
 

@@ -1147,16 +1147,40 @@ export class DataViewsService {
     skipFetchFields = false,
     displayErrors = true
   ): Promise<DataView> {
-    if (spec.id && this.dataViewCache.has(spec.id)) {
-      try {
-        return await this.dataViewCache.get(spec.id)!;
-      } catch (e) {
-        // The cached promise failed, so we need to create a new data view
-      }
-    }
+    const specId = spec.id;
+    const cachedDataView = specId ? this.dataViewCache.get(specId) : undefined;
 
+    if (specId && cachedDataView) {
+      const cachedDataViewPromise = (async (): Promise<DataView> => {
+        let dataView: DataView;
+        try {
+          dataView = await cachedDataView;
+        } catch {
+          // Cache may hold a failed `get()` (saved object load). `create(spec)` must still be able
+          // to build an ad hoc data view from `spec` for the same id.
+          const created = this.createFromSpec(spec, skipFetchFields, displayErrors);
+          this.dataViewCache.set(specId, created);
+          return await created;
+        }
+
+        // refresh fields if they are not fetched yet
+        if (!skipFetchFields && dataView.fields.length === 0) {
+          await this.refreshFields(dataView, displayErrors);
+          this.dataViewCache.set(specId, Promise.resolve(dataView));
+        }
+        return dataView;
+      })();
+      // update the cache with the new promise so parallel requests for the same data view will wait for the first one to complete
+      this.dataViewCache.set(specId, cachedDataViewPromise);
+      return cachedDataViewPromise;
+    }
+    // if no cached data view, create a new one
     const dataViewPromise = this.createFromSpec(spec, skipFetchFields, displayErrors);
-    this.dataViewCache.set(spec.id ?? (await dataViewPromise).id!, dataViewPromise);
+    const dataViewId = specId ?? (await dataViewPromise).id;
+    if (!dataViewId) {
+      throw new Error('Unable to create data view: no id available for caching');
+    }
+    this.dataViewCache.set(dataViewId, dataViewPromise);
     return dataViewPromise;
   }
 

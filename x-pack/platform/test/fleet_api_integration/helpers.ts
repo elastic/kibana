@@ -85,6 +85,9 @@ export async function generateAgent(
       const oneWeekAgoTimestamp = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
       data = { policy_revision_idx: 1, last_checkin: new Date(oneWeekAgoTimestamp).toISOString() };
       break;
+    case 'offline-disconnected':
+      data = { policy_revision_idx: 1, last_checkin_status: 'disconnected' };
+      break;
     case 'inactive':
       const threeWeeksAgoTimestamp = new Date().getTime() - 21 * 24 * 60 * 60 * 1000;
       data = {

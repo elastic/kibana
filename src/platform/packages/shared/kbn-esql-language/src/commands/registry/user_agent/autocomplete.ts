@@ -24,7 +24,6 @@ import {
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
 import { Location } from '../types';
 import { getPosition, getPropertiesList, UserAgentPosition } from './utils';
-import { EDITOR_MARKER } from '../../definitions/constants';
 
 export async function autocomplete(
   query: string,
@@ -57,11 +56,8 @@ export async function autocomplete(
 
     case UserAgentPosition.AFTER_ASSIGN: {
       // Only pass expressionRoot when the cursor is inside an incomplete sub-expression.
-      // For empty / EDITOR_MARKER / cursor-at-end-of-complete cases, treat as empty.
-      const expressionRoot =
-        userAgentCommand.expression && userAgentCommand.expression.text !== EDITOR_MARKER
-          ? userAgentCommand.expression
-          : undefined;
+      // For empty / cursor-at-end-of-complete cases, treat as empty.
+      const expressionRoot = userAgentCommand.expression;
       const { suggestions } = await suggestForExpression({
         query,
         expressionRoot,

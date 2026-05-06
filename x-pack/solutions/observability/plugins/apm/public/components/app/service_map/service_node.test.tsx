@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceNode } from './service_node';
-import { ServiceHealthStatus } from '../../../../common/service_health_status';
+import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
+import { useServiceMapSearchHighlight } from '../../shared/service_map/service_map_search_context';
+import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
 import type { ServiceNodeData } from '../../../../common/service_map';
-import { MOCK_EUI_THEME, MOCK_DEFAULT_COLOR, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
+import { MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -41,21 +43,17 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
   }),
 }));
 
-// Mock getServiceHealthStatusColor
-jest.mock('../../../../common/service_health_status', () => ({
-  ...jest.requireActual('../../../../common/service_health_status'),
-  getServiceHealthStatusColor: jest.fn((_theme, status) => {
-    switch (status) {
-      case 'critical':
-        return MOCK_EUI_THEME.colors.danger;
-      case 'warning':
-        return MOCK_EUI_THEME.colors.warning;
-      case 'healthy':
-        return MOCK_EUI_THEME.colors.success;
-      default:
-        return MOCK_DEFAULT_COLOR;
-    }
-  }),
+jest.mock('./use_service_map_alerts_tab_href', () => ({
+  useServiceMapAlertsTabHref: jest.fn(() => '/app/apm/services/Test%20Service/alerts'),
+  useServiceMapAlertsTabNavigate: jest.fn(() => jest.fn()),
+}));
+
+jest.mock('../../shared/service_map/service_map_search_context', () => ({
+  ...jest.requireActual('../../shared/service_map/service_map_search_context'),
+  useServiceMapSearchHighlight: jest.fn(() => ({
+    isSearchMatch: false,
+    isActiveSearchMatch: false,
+  })),
 }));
 
 const defaultNodeProps = {
@@ -122,16 +120,25 @@ describe('ServiceNode', () => {
     expect(label).toBeInTheDocument();
   });
 
+  it('renders context highlight frame when contextHighlight is set', () => {
+    renderServiceNode(createServiceNodeData({ contextHighlight: true }), false);
+    expect(screen.getByTestId('serviceMapNodeContextHighlightFrame')).toBeInTheDocument();
+  });
+
+  it('keeps context highlight frame when the node is selected', () => {
+    renderServiceNode(createServiceNodeData({ contextHighlight: true }), true);
+    expect(screen.getByTestId('serviceMapNodeContextHighlightFrame')).toBeInTheDocument();
+  });
+
   it('renders without icon when agentName is not provided', () => {
     renderServiceNode(createServiceNodeData({ agentName: undefined }));
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 
-  describe('health status styling', () => {
-    it('renders with warning health status', () => {
+  describe('anomaly score styling', () => {
+    it('renders with mid-range anomaly score', () => {
       const data = createServiceNodeData({
         serviceAnomalyStats: {
-          healthStatus: ServiceHealthStatus.warning,
           jobId: 'test-job',
           transactionType: 'request',
           actualValue: 100,
@@ -142,10 +149,9 @@ describe('ServiceNode', () => {
       expect(screen.getByText('Test Service')).toBeInTheDocument();
     });
 
-    it('renders with critical health status', () => {
+    it('renders with high anomaly score', () => {
       const data = createServiceNodeData({
         serviceAnomalyStats: {
-          healthStatus: ServiceHealthStatus.critical,
           jobId: 'test-job',
           transactionType: 'request',
           actualValue: 200,
@@ -161,7 +167,6 @@ describe('ServiceNode', () => {
     it('does not render SLO badge when status is noSLOs', () => {
       renderServiceNode(createServiceNodeData({ sloStatus: 'noSLOs', sloCount: 0 }));
       expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
-      expect(screen.queryByText('No SLOs')).not.toBeInTheDocument();
     });
 
     it('does not render SLO badge for healthy status', () => {
@@ -185,29 +190,77 @@ describe('ServiceNode', () => {
       expect(screen.getByTestId('apmSloBadge')).toBeInTheDocument();
       expect(screen.getByTestId('apmSloBadge')).toHaveAttribute('data-slo-status', 'degrading');
     });
+
+    it('calls onSloBadgeClick with service name and agent when the badge is clicked', () => {
+      const onSloBadgeClick = jest.fn();
+      render(
+        <ReactFlowProvider>
+          <ServiceMapSloFlyoutProvider onSloBadgeClick={onSloBadgeClick}>
+            <ServiceNode
+              {...defaultNodeProps}
+              data={createServiceNodeData({ sloStatus: 'violated', sloCount: 2 })}
+              selected={false}
+              draggable
+            />
+          </ServiceMapSloFlyoutProvider>
+        </ReactFlowProvider>
+      );
+      fireEvent.click(screen.getByTestId('apmSloBadge'));
+      expect(onSloBadgeClick).toHaveBeenCalledWith('Test Service', 'java');
+    });
   });
 
-  describe('alert badge', () => {
-    it('renders alerts badge with count when alertsCount is greater than zero', () => {
-      renderServiceNode(createServiceNodeData({ alertsCount: 4 }));
-      const badge = screen.getByTestId('serviceMapNodeAlertsBadge');
-      expect(badge).toBeInTheDocument();
-      expect(badge).toHaveTextContent('4');
+  describe('Alerts badge', () => {
+    it('calls the alerts navigation handler when the alerts badge is clicked', () => {
+      const navigateCb = jest.fn();
+      jest.mocked(useServiceMapAlertsTabNavigate).mockReturnValue(navigateCb);
+
+      renderServiceNode(createServiceNodeData({ alertsCount: 2 }));
+      fireEvent.click(screen.getByTestId('serviceMapNodeAlertsBadge'));
+      expect(navigateCb).toHaveBeenCalled();
+    });
+  });
+
+  describe('search highlight', () => {
+    const getSearchHighlightWrapper = () => {
+      const node = screen.getByTestId('serviceMapNode-service-test-service');
+      return node.closest('[data-search-match]') ?? node.parentElement;
+    };
+
+    afterEach(() => {
+      jest.mocked(useServiceMapSearchHighlight).mockReturnValue({
+        isSearchMatch: false,
+        isActiveSearchMatch: false,
+      });
     });
 
-    it('does not render alerts badge when alertsCount is zero', () => {
-      renderServiceNode(createServiceNodeData({ alertsCount: 0 }));
-      expect(screen.queryByTestId('serviceMapNodeAlertsBadge')).not.toBeInTheDocument();
-    });
-
-    it('does not render alerts badge when alertsCount is undefined', () => {
+    it('does not set search data attributes when there is no search match', () => {
       renderServiceNode();
-      expect(screen.queryByTestId('serviceMapNodeAlertsBadge')).not.toBeInTheDocument();
+      const wrapper = getSearchHighlightWrapper();
+      expect(wrapper).not.toHaveAttribute('data-search-match');
+      expect(wrapper).not.toHaveAttribute('data-search-active-match');
     });
-  });
 
-  it('exposes a stable test subject on the service circle for e2e', () => {
-    renderServiceNode();
-    expect(screen.getByTestId('serviceMapNodeServiceCircle')).toBeInTheDocument();
+    it('sets data-search-match when the node is an inactive search match', () => {
+      jest.mocked(useServiceMapSearchHighlight).mockReturnValue({
+        isSearchMatch: true,
+        isActiveSearchMatch: false,
+      });
+      renderServiceNode();
+      const wrapper = getSearchHighlightWrapper();
+      expect(wrapper).toHaveAttribute('data-search-match', 'true');
+      expect(wrapper).not.toHaveAttribute('data-search-active-match');
+    });
+
+    it('sets both data attributes when the node is the active search match', () => {
+      jest.mocked(useServiceMapSearchHighlight).mockReturnValue({
+        isSearchMatch: true,
+        isActiveSearchMatch: true,
+      });
+      renderServiceNode();
+      const wrapper = getSearchHighlightWrapper();
+      expect(wrapper).toHaveAttribute('data-search-match', 'true');
+      expect(wrapper).toHaveAttribute('data-search-active-match', 'true');
+    });
   });
 });

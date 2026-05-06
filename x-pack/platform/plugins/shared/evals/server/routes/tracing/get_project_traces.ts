@@ -10,14 +10,13 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   TRACES_INDEX_PATTERN,
-  buildRouteValidationWithZod,
   GetProjectTracesRequestParams,
   GetProjectTracesRequestQuery,
 } from '@kbn/evals-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-
-const escapeWildcard = (value: string): string => value.replace(/[\\*?]/g, (ch) => `\\${ch}`);
+import { escapeWildcard } from './utils';
 
 interface RootSpanSource {
   trace_id?: string;

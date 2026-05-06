@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { from, stats, sort } from '@kbn/esql-composer';
 import {
   LensConfigBuilder,
-  type LensXYConfig,
-  type LensSeriesLayer,
   type LensAnnotationLayer,
-} from '@kbn/lens-embeddable-utils/config_builder';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
+  type LensAttributes,
+  type LensSeriesLayer,
+  type LensXYConfig,
+} from '@kbn/lens-embeddable-utils';
 import { EuiCallOut, EuiLoadingChart, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { fieldConstants } from '@kbn/discover-utils';
@@ -89,7 +89,7 @@ export function SimilarErrorsOccurrencesChart({
 }: SimilarErrorsOccurrencesChartProps) {
   const { data } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
-  const { indexes } = useDataSourcesContext();
+  const { indexes, profileId } = useDataSourcesContext();
   const [lensAttributes, setLensAttributes] = useState<LensAttributes | undefined>(undefined);
   const [hasError, setHasError] = useState<boolean>(false);
   const timeRange = useMemo(
@@ -130,6 +130,9 @@ export function SimilarErrorsOccurrencesChart({
 
   const getParentApi = useCallback(() => {
     return {
+      executionContext: {
+        meta: { profile_id: profileId, metric_id: 'similarErrors' },
+      },
       getSerializedStateForChild: () => ({
         attributes: lensAttributes,
         viewMode: 'view',
@@ -137,7 +140,7 @@ export function SimilarErrorsOccurrencesChart({
       }),
       noPadding: true,
     };
-  }, [lensAttributes, timeRange]);
+  }, [lensAttributes, timeRange, profileId]);
 
   useEffect(() => {
     if (!chartEsqlQuery || !data.dataViews) {

@@ -10,7 +10,7 @@
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { XYPersistedState, XYDataLayerConfig } from '@kbn/lens-common';
-import type { XYState, XYStateNoESQL, XYStateESQL, XYLayer } from '../../../schema';
+import type { XYConfig, XYConfigNoESQL, XYConfigESQL, XYLayer } from '../../../schema';
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
@@ -73,7 +73,7 @@ function convertAPIDomainToStateFormat(
 }
 
 function convertAxisSettingsToStateFormat(
-  axis: XYState['axis']
+  axis: XYConfig['axis']
 ): Pick<
   XYPersistedState,
   | 'xTitle'
@@ -90,11 +90,8 @@ function convertAxisSettingsToStateFormat(
   | 'labelsOrientation'
 > {
   const xAxis = axis?.x;
-  const yPrimaryAnchor = axis?.y?.anchor ?? 'start';
-  const ySecondaryAnchor = axis?.secondary_y?.anchor ?? 'end';
-  const yLeftAxis = yPrimaryAnchor === 'start' ? axis?.y : axis?.secondary_y;
-  const yRightAxis =
-    yPrimaryAnchor === 'end' ? axis?.y : ySecondaryAnchor === 'end' ? axis?.secondary_y : undefined;
+  const yLeftAxis = axis?.y;
+  const yRightAxis = axis?.y2;
 
   const xExtent = convertAPIDomainToStateFormat(xAxis?.domain, DEFAULT_X_AXIS_DOMAIN);
   const yLeftExtent = convertAPIDomainToStateFormat(yLeftAxis?.domain, DEFAULT_Y_AXIS_DOMAIN);
@@ -174,7 +171,7 @@ function getLayerPresence(dataLayers: XYDataLayerConfig[]): LayerPresence {
 type LayerToDataView = Record<string, string>;
 
 export function buildVisualizationState(
-  config: XYState,
+  config: XYConfig,
   usedDataViews: LayerToDataView,
   annotationGroupReferences: SavedObjectReference[]
 ): XYPersistedState {
@@ -198,11 +195,11 @@ export function buildVisualizationState(
   };
 }
 
-function areAllLayersEsql(apiLayers: XYLayer[]): apiLayers is XYStateESQL['layers'] {
+function areAllLayersEsql(apiLayers: XYLayer[]): apiLayers is XYConfigESQL['layers'] {
   return apiLayers.length > 0 && apiLayers.every(isAPIesqlXYLayer);
 }
 
-function areAllLayersNoEsql(apiLayers: XYLayer[]): apiLayers is XYStateNoESQL['layers'] {
+function areAllLayersNoEsql(apiLayers: XYLayer[]): apiLayers is XYConfigNoESQL['layers'] {
   return apiLayers.length > 0 && apiLayers.every((l) => !isAPIesqlXYLayer(l));
 }
 
@@ -212,7 +209,7 @@ export function buildVisualizationAPI(
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   internalReferences: SavedObjectReference[]
-): XYState {
+): XYConfig {
   const dataLayers = config.layers.filter(isLensStateDataLayer);
   if (!dataLayers.length) {
     throw new Error('At least one data layer is required to build the XY API state');
@@ -312,7 +309,7 @@ function convertYDomainStateToAPIFormat(
 
 type YAxisMode = 'left' | 'right';
 type YAccessorAxisModeMap = Map<string, YAxisMode>;
-export type ResolveAxisId = (mode: YAxisMode) => 'y' | 'secondary_y';
+export type ResolveAxisId = (mode: YAxisMode) => 'y' | 'y2';
 
 export function getYAccessorAxisModeMap(
   layer: XYDataLayerConfig,
@@ -334,10 +331,10 @@ export function getYAccessorAxisModeMap(
  * Determines which axis modes (left/right from Lens internal state) are used
  * across all data layers and builds a resolver to map them to API axis IDs.
  *
- * When only one mode is used, all metrics belong to the primary axis (`y`)
- * regardless of which physical side (left/right) they occupy. The anchor
- * on the emitted `y` axis config captures the actual position.
- * When both modes are used, left maps to `y` and right to `secondary_y`.
+ * Left always maps to `y`, right always maps to `y2`.
+ * When only one mode is used, the resolver returns the matching axis ID
+ * (`y` for left-only, `y2` for right-only).
+ * When both modes are used, left maps to `y` and right to `y2`.
  */
 function resolveAxisLayout(config: XYPersistedState): {
   resolveAxisId: ResolveAxisId;
@@ -351,8 +348,7 @@ function resolveAxisLayout(config: XYPersistedState): {
       }
     }
   }
-  const resolveAxisId: ResolveAxisId =
-    usedModes.size <= 1 ? () => 'y' : (mode) => (mode === 'left' ? 'y' : 'secondary_y');
+  const resolveAxisId: ResolveAxisId = (mode) => (mode === 'left' ? 'y' : 'y2');
   return { resolveAxisId, usedModes };
 }
 
@@ -366,7 +362,7 @@ function convertAxisSettingsToAPIFormat(
   config: XYPersistedState,
   layers: Record<string, DataSourceStateLayer>,
   usedModes: Set<YAxisMode>
-): NonNullable<XYState['axis']> {
+): NonNullable<XYConfig['axis']> {
   let xAxisScale: XScaleSchemaType | undefined;
   const firstLayer = config.layers[0];
   const dataSourceLayer = layers[firstLayer.layerId];
@@ -393,7 +389,7 @@ function convertAxisSettingsToAPIFormat(
     scale: xAxisScale,
   } satisfies XAxisSchemaType);
 
-  const buildYAxisConfig = (side: 'left' | 'right', anchor: 'start' | 'end'): YAxisSchemaType => {
+  const buildYAxisConfig = (side: 'left' | 'right'): YAxisSchemaType => {
     const title = side === 'left' ? config.yTitle : config.yRightTitle;
     const titleVisible =
       side === 'left'
@@ -413,7 +409,6 @@ function convertAxisSettingsToAPIFormat(
       side === 'left' ? config.labelsOrientation?.yLeft : config.labelsOrientation?.yRight;
 
     return {
-      anchor,
       title: stripUndefined({
         text: titleVisible !== false && title ? title : undefined,
         visible: titleVisible ?? DEFAULT_AXIS_TITLE_VISIBLE,
@@ -435,19 +430,18 @@ function convertAxisSettingsToAPIFormat(
   const hasLeft = usedModes.has('left');
   const hasRight = usedModes.has('right');
 
-  // secondary y axis is only supported if both left and right sides are used
   if (hasLeft && hasRight) {
     return {
       x: xAxis,
-      y: buildYAxisConfig('left', 'start'),
-      secondary_y: buildYAxisConfig('right', 'end'),
+      y: buildYAxisConfig('left'),
+      y2: buildYAxisConfig('right'),
     };
   }
   if (hasRight) {
-    return { x: xAxis, y: buildYAxisConfig('right', 'end') };
+    return { x: xAxis, y2: buildYAxisConfig('right') };
   }
   if (hasLeft) {
-    return { x: xAxis, y: buildYAxisConfig('left', 'start') };
+    return { x: xAxis, y: buildYAxisConfig('left') };
   }
   return { x: xAxis };
 }

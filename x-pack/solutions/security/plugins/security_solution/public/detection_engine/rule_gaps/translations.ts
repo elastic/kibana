@@ -307,11 +307,18 @@ export const GAP_DETECTION_SCOPE_HEADER = i18n.translate(
   }
 );
 
-export const GAP_DETECTION_SCOPE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleSettings.gapDetectionScopeDescription',
+export const GAP_DETECTION_SCOPE_DESCRIPTION_WITH_AUTO_FILL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.gapDetectionScopeDescriptionWithAutoFill',
   {
     defaultMessage:
       'Define what counts as a gap in your rule monitoring and what will be included in automatic gap filling.',
+  }
+);
+
+export const GAP_DETECTION_SCOPE_DESCRIPTION_WITHOUT_AUTO_FILL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.gapDetectionScopeDescriptionWithoutAutoFill',
+  {
+    defaultMessage: 'Define what counts as a gap in your rule monitoring.',
   }
 );
 

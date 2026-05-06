@@ -12,7 +12,6 @@ export * from './files';
 export * from './application';
 export * from './observables';
 export * from './attachments';
-export { LENS_ATTACHMENT_TYPE } from './visualizations';
 
 /**
  * Cases connector limits.
@@ -342,3 +341,4 @@ export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
  * via lsp references.
  */
 export const CASE_EXTENDED_FIELDS = 'extended_fields' as const;
+export const CASE_EXTENDED_FIELDS_LABELS = 'extended_fields_labels' as const;

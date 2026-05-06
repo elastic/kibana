@@ -43,6 +43,7 @@
             "lineNumber": 18,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -83,6 +84,7 @@
             "lineNumber": 16,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeseriesVisData",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -123,6 +125,7 @@
             "lineNumber": 13,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeseriesVisData",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -216,6 +219,7 @@
               "lineNumber": 65,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "VisTypeTimeseriesRequestHandlerContext",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -234,6 +238,7 @@
               "lineNumber": 66,
               "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "KibanaRequest",
               "trackAdoption": false,
               "isRequired": true
             },

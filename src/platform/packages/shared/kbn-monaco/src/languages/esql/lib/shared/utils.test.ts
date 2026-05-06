@@ -12,14 +12,14 @@ describe('offsetRangeToMonacoRange', () => {
   test('single line', () => {
     const expression = 'FROM kibana_sample_data_logs';
     const range = offsetRangeToMonacoRange(expression, { start: 5, end: 28 });
-    expect(range).toEqual({ startColumn: 6, endColumn: 28, startLineNumber: 1, endLineNumber: 1 });
+    expect(range).toEqual({ startColumn: 6, endColumn: 29, startLineNumber: 1, endLineNumber: 1 });
   });
 
   test('next line', () => {
     const expression = `FROM kibana_sample_data_logs
 | KEEP foo`;
     const range = offsetRangeToMonacoRange(expression, { start: 36, end: 39 });
-    expect(range).toEqual({ startColumn: 8, endColumn: 10, startLineNumber: 2, endLineNumber: 2 });
+    expect(range).toEqual({ startColumn: 8, endColumn: 11, startLineNumber: 2, endLineNumber: 2 });
   });
 
   test('should convert offset range to monaco range for multiple lines query when the cursor is not at the end', () => {
@@ -29,7 +29,7 @@ describe('offsetRangeToMonacoRange', () => {
 
     expect(monacoRange).toEqual({
       startColumn: 17,
-      endColumn: 17,
+      endColumn: 18,
       startLineNumber: 2,
       endLineNumber: 2,
     });

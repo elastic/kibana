@@ -26,9 +26,14 @@ import { useTelemetry } from '../../../../telemetry_context';
 interface DataStreamsTableProps {
   integrationId: string;
   items: DataStreamResponse[];
+  onReanalyzeSuccess?: () => void;
 }
 
-export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps) => {
+export const DataStreamsTable = ({
+  integrationId,
+  items,
+  onReanalyzeSuccess,
+}: DataStreamsTableProps) => {
   const { euiTheme } = useEuiTheme();
   const { deleteDataStreamMutation } = useDeleteDataStream();
   const { reanalyzeDataStreamMutation } = useReanalyzeDataStream();
@@ -43,9 +48,9 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
   const handleOpenEditPipelineFlyout = useCallback(
     (item: DataStreamResponse) => {
       openEditPipelineFlyout(item);
-      reportEditDataStreamFlyoutOpened();
+      reportEditDataStreamFlyoutOpened({ integrationId, dataStreamId: item.dataStreamId });
     },
-    [reportEditDataStreamFlyoutOpened, openEditPipelineFlyout]
+    [integrationId, reportEditDataStreamFlyoutOpened, openEditPipelineFlyout]
   );
   const [dataStreamDeleteTarget, setDataStreamDeleteTarget] = useState<DataStreamResponse | null>(
     null
@@ -89,16 +94,25 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
 
   const isDeleting = (item: DataStreamResponse) => item.status === 'deleting';
 
-  const handleReAnalyzeConfirm = () => {
+  const handleReAnalyzeConfirm = async () => {
     if (!formData?.connectorId || !dataStreamReanalyzeTarget) return;
 
-    reportDataStreamRefreshConfirmed();
-    setDataStreamReanalyzeTarget(null);
-    reanalyzeDataStreamMutation.mutate({
+    const target = dataStreamReanalyzeTarget;
+    reportDataStreamRefreshConfirmed({
       integrationId,
-      dataStreamId: dataStreamReanalyzeTarget.dataStreamId,
-      connectorId: formData.connectorId,
+      dataStreamId: target.dataStreamId,
     });
+    setDataStreamReanalyzeTarget(null);
+    try {
+      await reanalyzeDataStreamMutation.mutateAsync({
+        integrationId,
+        dataStreamId: target.dataStreamId,
+        connectorId: formData.connectorId,
+      });
+      onReanalyzeSuccess?.();
+    } catch {
+      // Error toast is shown by useReanalyzeDataStream
+    }
   };
 
   const handleReanalyzeCancel = () => {
@@ -107,7 +121,10 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
 
   const handleDeleteConfirm = () => {
     if (dataStreamDeleteTarget) {
-      reportDataStreamDeleteConfirmed();
+      reportDataStreamDeleteConfirmed({
+        integrationId,
+        dataStreamId: dataStreamDeleteTarget.dataStreamId,
+      });
       setDataStreamDeleteTarget(null);
       deleteDataStreamMutation.mutate({
         integrationId,

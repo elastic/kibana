@@ -10,9 +10,13 @@
     "config.mock.ts",
     "common/**/*.json",
     "public/**/*.json",
-    "../../../../../typings/index.d.ts"
+    "../../../../../typings/index.d.ts",
+    "test/scout/**/*",
+    "test/scout_search_sessions/**/*"
   ],
   "kbn_references": [
+    "@kbn/scout",
+    "@kbn/core-http-common",
     "@kbn/core",
     "@kbn/ui-actions-plugin",
     "@kbn/share-plugin",
@@ -66,6 +70,7 @@
     "@kbn/apm-utils",
     "@kbn/std",
     "@kbn/core-elasticsearch-server",
+    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*"]
 }

@@ -83,7 +83,11 @@ export const useTabs = (
       tabs.push(getGraphViewTab({ entityId: entityStoreEntityId, scopeId }));
       if (hasEntityResolutionLicense) {
         tabs.push(
-          getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.user })
+          getResolutionGroupTab({
+            entityId: entityStoreEntityId,
+            entityType: EntityType.user,
+            scopeId,
+          })
         );
       }
     }

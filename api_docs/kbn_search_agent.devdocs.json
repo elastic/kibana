@@ -24,23 +24,6 @@
     "misc": [
       {
         "parentPluginId": "@kbn/search-agent",
-        "id": "def-common.agents",
-        "type": "Array",
-        "tags": [],
-        "label": "agents",
-        "description": [],
-        "signature": [
-          "{ id: string; name: string; description: string; labels: string[]; avatar_icon: string; configuration: { instructions: string; }; }[]"
-        ],
-        "path": "src/platform/packages/shared/kbn-search-agent/src/agents/index.ts",
-        "lineNumber": 15,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-agent",
         "id": "def-common.skills",
         "type": "Array",
         "tags": [],
@@ -50,7 +33,7 @@
           "{ id: string; name: string; description: string; content: string; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-search-agent/src/skills/index.ts",
-        "lineNumber": 25,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -128,12 +111,12 @@
       },
       {
         "parentPluginId": "@kbn/search-agent",
-        "id": "def-common.elasticsearchOnboardingAgent",
+        "id": "def-common.elasticsearchOnboardingSkill",
         "type": "Object",
         "tags": [],
-        "label": "elasticsearchOnboardingAgent",
+        "label": "elasticsearchOnboardingSkill",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+        "path": "src/platform/packages/shared/kbn-search-agent/src/skills/elasticsearch_onboarding.ts",
         "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
@@ -141,12 +124,12 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-agent",
-            "id": "def-common.elasticsearchOnboardingAgent.id",
+            "id": "def-common.elasticsearchOnboardingSkill.id",
             "type": "string",
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/elasticsearch_onboarding.ts",
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
@@ -154,12 +137,12 @@
           },
           {
             "parentPluginId": "@kbn/search-agent",
-            "id": "def-common.elasticsearchOnboardingAgent.name",
+            "id": "def-common.elasticsearchOnboardingSkill.name",
             "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/elasticsearch_onboarding.ts",
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
@@ -167,12 +150,12 @@
           },
           {
             "parentPluginId": "@kbn/search-agent",
-            "id": "def-common.elasticsearchOnboardingAgent.description",
+            "id": "def-common.elasticsearchOnboardingSkill.description",
             "type": "string",
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/elasticsearch_onboarding.ts",
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
@@ -180,60 +163,16 @@
           },
           {
             "parentPluginId": "@kbn/search-agent",
-            "id": "def-common.elasticsearchOnboardingAgent.labels",
-            "type": "Array",
+            "id": "def-common.elasticsearchOnboardingSkill.content",
+            "type": "string",
             "tags": [],
-            "label": "labels",
+            "label": "content",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
+            "path": "src/platform/packages/shared/kbn-search-agent/src/skills/elasticsearch_onboarding.ts",
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-agent",
-            "id": "def-common.elasticsearchOnboardingAgent.avatar_icon",
-            "type": "string",
-            "tags": [],
-            "label": "avatar_icon",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
-            "lineNumber": 18,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-agent",
-            "id": "def-common.elasticsearchOnboardingAgent.configuration",
-            "type": "Object",
-            "tags": [],
-            "label": "configuration",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
-            "lineNumber": 19,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/search-agent",
-                "id": "def-common.elasticsearchOnboardingAgent.configuration.instructions",
-                "type": "string",
-                "tags": [],
-                "label": "instructions",
-                "description": [],
-                "path": "src/platform/packages/shared/kbn-search-agent/src/agents/elasticsearch_onboarding.ts",
-                "lineNumber": 20,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "initialIsOpen": false

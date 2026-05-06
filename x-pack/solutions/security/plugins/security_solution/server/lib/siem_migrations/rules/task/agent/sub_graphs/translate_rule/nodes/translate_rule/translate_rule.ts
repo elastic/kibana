@@ -52,6 +52,7 @@ export const getTranslateRuleNode = (params: GetTranslateSplToEsqlParams): Graph
         description: state.original_rule.description,
         inlineQuery: state.inline_query,
         indexPattern: indexPatterns,
+        knowledgeBase,
       }));
     }
 

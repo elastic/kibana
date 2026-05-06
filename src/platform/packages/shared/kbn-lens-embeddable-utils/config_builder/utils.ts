@@ -37,7 +37,7 @@ import type {
   LensDataviewDataset,
   LensESQLDataset,
 } from './types';
-import type { LensApiState } from './schema';
+import type { LensApiConfig, LensApiConfigESQL, LensApiConfigNoESQL } from './schema';
 import type { DataSourceType } from './schema/data_source';
 
 type DataSourceStateLayer =
@@ -350,7 +350,7 @@ export function isDataViewDataset(dataset: LensDataset): dataset is LensDataview
   return 'index' in dataset;
 }
 
-export function isLensAPIFormat(config: unknown): config is LensApiState {
+export function isLensAPIFormat(config: unknown): config is LensApiConfig {
   return typeof config === 'object' && config !== null && 'type' in config;
 }
 
@@ -376,10 +376,14 @@ export function groupIsNotCollapsed(def: {
   return def.collapse_by == null;
 }
 
-export function isLensESQLConfig(config: LensApiState): boolean {
+export function isLensESQLConfig(config: LensApiConfig): config is LensApiConfigESQL {
   if (config.type === 'xy')
     return config.layers.some(
       (layer) => 'data_source' in layer && layer.data_source?.type === 'esql'
     );
   return config.data_source?.type === 'esql';
+}
+
+export function isLensDSLConfig(config: LensApiConfig): config is LensApiConfigNoESQL {
+  return !isLensESQLConfig(config);
 }

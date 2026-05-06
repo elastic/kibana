@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Subscription } from 'rxjs';
+import { distinctUntilChanged, type Subscription } from 'rxjs';
 import type { AnalyticsServiceSetup, Logger, CoreSetup, CoreStart } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
@@ -58,7 +58,6 @@ export class UiamApiKeyProvisioningTask {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
   private readonly analytics: AnalyticsServiceSetup;
-  private isTaskScheduled: boolean | undefined = undefined;
   private featureFlagSubscription: Subscription | undefined;
 
   constructor({
@@ -152,6 +151,7 @@ export class UiamApiKeyProvisioningTask {
 
     this.featureFlagSubscription = core.featureFlags
       .getBooleanValue$(PROVISION_UIAM_API_KEYS_FLAG, false)
+      .pipe(distinctUntilChanged())
       .subscribe((enabled: boolean) => {
         this.applyProvisioningFlag(enabled, taskManager).catch(() => {});
       });
@@ -172,7 +172,6 @@ export class UiamApiKeyProvisioningTask {
       state: emptyState,
       params: {},
     });
-    this.isTaskScheduled = true;
     this.logger.info(
       `${PROVISION_UIAM_API_KEYS_FLAG} enabled - Task ${API_KEY_PROVISIONING_TASK_TYPE} scheduled`,
       { tags: TAGS }
@@ -183,7 +182,6 @@ export class UiamApiKeyProvisioningTask {
     taskManager: TaskManagerStartContract
   ): Promise<void> => {
     await taskManager.removeIfExists(API_KEY_PROVISIONING_TASK_ID);
-    this.isTaskScheduled = false;
     this.logger.info(
       `${PROVISION_UIAM_API_KEYS_FLAG} disabled - Task ${API_KEY_PROVISIONING_TASK_TYPE} removed`,
       { tags: TAGS }
@@ -194,7 +192,7 @@ export class UiamApiKeyProvisioningTask {
     enabled: boolean,
     taskManager: TaskManagerStartContract
   ): Promise<void> => {
-    if (enabled && this.isTaskScheduled !== true) {
+    if (enabled) {
       try {
         await this.scheduleProvisioningTask(taskManager);
       } catch (e) {
@@ -203,7 +201,7 @@ export class UiamApiKeyProvisioningTask {
           { tags: TAGS }
         );
       }
-    } else if (!enabled && this.isTaskScheduled === true) {
+    } else {
       try {
         await this.unscheduleProvisioningTask(taskManager);
       } catch (e) {
@@ -366,15 +364,14 @@ export class UiamApiKeyProvisioningTask {
 
       return { provisioningStatusForCompletedRules, provisioningStatusForFailedRules };
     } catch (error) {
+      // Do not invalidate minted UIAM keys on a bulkUpdate throw: if ES already committed
+      // (transport drop / timeout mid-response) the persisted keys are live and invalidating
+      // them would break rule execution. Rules whose write did not land will be re-picked on
+      // the next run and provisioned with a fresh key; the minted-but-orphaned keys from a
+      // pre-commit throw are accepted as a bounded leak.
       this.logger.error(`Error bulk updating rules with UIAM API keys: ${getErrorMessage(error)}`, {
         error: { stack_trace: error instanceof Error ? error.stack : undefined, tags: TAGS },
       });
-      const orphanedUiamApiKeys = Array.from(rulesWithUiamApiKeys.values(), (r) => r.uiamApiKey);
-      await bulkMarkApiKeysForInvalidation(
-        { apiKeys: orphanedUiamApiKeys },
-        this.logger,
-        context.savedObjectsClient
-      );
       throw error;
     }
   };
@@ -388,14 +385,31 @@ export class UiamApiKeyProvisioningTask {
       return;
     }
     try {
-      await context.savedObjectsClient.bulkCreate(docs, { overwrite: true });
+      const result = await context.savedObjectsClient.bulkCreate(docs, { overwrite: true });
+      for (const so of result?.saved_objects ?? []) {
+        if (so.error) {
+          // Per-item SOR failure: next run will re-attempt the same id via `overwrite: true`.
+          // We surface it as a warn so operators can spot systematically broken docs instead
+          // of the failure being silently swallowed inside the bulk response.
+          this.logger.warn(
+            `Failed to persist UIAM provisioning status for rule ${so.id}: ${so.error.message}`,
+            { tags: TAGS }
+          );
+        }
+      }
       this.logger.info(
         `Wrote provisioning status: ${counts.total} total (${counts.skipped} skipped, ${counts.failedConversions} failed conversions, ${counts.completed} completed, ${counts.failed} failed updates).`,
         { tags: TAGS }
       );
     } catch (e) {
+      // Whole-call failure is tagged so log pipelines can alert on 'status-write-failed'
+      // without parsing the message. The error is swallowed: status writes are best-effort
+      // and must not fail the provisioning run.
       this.logger.error(`Error writing provisioning status: ${getErrorMessage(e)}`, {
-        error: { stack_trace: e instanceof Error ? e.stack : undefined, tags: TAGS },
+        error: {
+          stack_trace: e instanceof Error ? e.stack : undefined,
+          tags: [...TAGS, 'status-write-failed'],
+        },
       });
     }
   };
