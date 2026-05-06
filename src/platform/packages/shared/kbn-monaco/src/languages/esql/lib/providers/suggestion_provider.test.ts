@@ -7,67 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PartialFieldsMetadataClient } from '@kbn/esql-types';
-import { suggest, getIndexSourcesFromQuery } from '@kbn/esql-language';
+import { ESQLVariableType, type PartialFieldsMetadataClient } from '@kbn/esql-types';
 import { monaco } from '../../../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from '../../language';
+import { createDisposedTextModel, createField, createTextModel } from './test_helpers/providers';
 
-jest.mock('@kbn/esql-language', () => ({
-  getHoverItem: jest.fn(),
-  suggest: jest.fn(),
-  getIndexSourcesFromQuery: jest.fn(),
-}));
+const cancellationToken = new monaco.CancellationTokenSource().token;
+
+export const getCompletionItemFromProvider = async (
+  suggestionProvider: monaco.languages.CompletionItemProvider,
+  model: monaco.editor.ITextModel,
+  label: string,
+  position = new monaco.Position(1, model.getValue().length + 1)
+) => {
+  const result = await suggestionProvider.provideCompletionItems(
+    model,
+    position,
+    {} as monaco.languages.CompletionContext,
+    cancellationToken
+  );
+  return result?.suggestions.find((suggestion) => suggestion.label === label);
+};
 
 describe('suggestion_provider', () => {
   describe('resolveCompletionItem', () => {
-    const mockSuggest = suggest as jest.MockedFunction<typeof suggest>;
-    const mockGetIndexSourcesFromQuery = getIndexSourcesFromQuery as jest.MockedFunction<
-      typeof getIndexSourcesFromQuery
-    >;
-
-    beforeEach(() => {
-      mockSuggest.mockResolvedValue([]);
-      // Default: naive extraction of index names from FROM clause
-      mockGetIndexSourcesFromQuery.mockImplementation((query: string) => {
-        const fromMatch = query.match(/FROM\s+([^|]+)/i);
-        if (!fromMatch) return [];
-        return fromMatch[1]
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean);
-      });
-    });
-
     afterEach(() => {
       jest.clearAllMocks();
     });
-
-    const createModel = (query: string) =>
-      ({
-        getValue: jest.fn().mockReturnValue(query),
-        isDisposed: () => false,
-      } as unknown as monaco.editor.ITextModel);
-
-    const makeFieldSuggestion = (label: string) => ({
-      label,
-      text: label,
-      kind: 'Variable' as const,
-      detail: 'field',
-    });
-
-    const getItemFromProvider = async (
-      suggestionProvider: ReturnType<typeof ESQLLang.getSuggestionProvider>,
-      model: monaco.editor.ITextModel,
-      label: string
-    ) => {
-      const result = await suggestionProvider.provideCompletionItems(
-        model,
-        new monaco.Position(1, 1),
-        {} as any,
-        {} as any
-      );
-      return result?.suggestions.find((s) => s.label === label)!;
-    };
 
     it('should resolve completion item with field metadata', async () => {
       const mockGetFieldsMetadata: Promise<PartialFieldsMetadataClient> = Promise.resolve({
@@ -84,12 +50,18 @@ describe('suggestion_provider', () => {
 
       const suggestionProvider = ESQLLang.getSuggestionProvider({
         getFieldsMetadata: mockGetFieldsMetadata,
+        getColumnsFor: jest.fn(async () => [
+          createField('test.field'),
+          createField('test.field.keyword'),
+        ]),
       });
 
-      mockSuggest.mockResolvedValue([makeFieldSuggestion('test.field')]);
-      const model = createModel('FROM index | EVAL test.field');
-      const ecsItem = await getItemFromProvider(suggestionProvider, model, 'test.field');
-      const resolvedItem = await suggestionProvider.resolveCompletionItem!(ecsItem, {} as any);
+      const model = createTextModel({ value: 'FROM index | WHERE ' });
+      const ecsItem = await getCompletionItemFromProvider(suggestionProvider, model, 'test.field');
+      const resolvedItem = await suggestionProvider.resolveCompletionItem!(
+        ecsItem!,
+        cancellationToken
+      );
 
       expect(resolvedItem).toEqual({
         ...ecsItem,
@@ -98,15 +70,14 @@ describe('suggestion_provider', () => {
         },
       });
 
-      mockSuggest.mockResolvedValue([makeFieldSuggestion('test.field.keyword')]);
-      const ecsItemWithKeywordSuffix = await getItemFromProvider(
+      const ecsItemWithKeywordSuffix = await getCompletionItemFromProvider(
         suggestionProvider,
         model,
         'test.field.keyword'
       );
       const resolvedItemWithKeywordSuffix = await suggestionProvider.resolveCompletionItem!(
-        ecsItemWithKeywordSuffix,
-        {} as any
+        ecsItemWithKeywordSuffix!,
+        cancellationToken
       );
 
       expect(resolvedItemWithKeywordSuffix).toEqual({
@@ -127,12 +98,15 @@ describe('suggestion_provider', () => {
 
       const suggestionProvider = ESQLLang.getSuggestionProvider({
         getFieldsMetadata: mockGetFieldsMetadata,
+        getColumnsFor: jest.fn(async () => [createField('test.field')]),
       });
 
-      mockSuggest.mockResolvedValue([makeFieldSuggestion('test.field')]);
-      const model = createModel('FROM index | WHERE test.field');
-      const item = await getItemFromProvider(suggestionProvider, model, 'test.field');
-      const resolvedItem = await suggestionProvider.resolveCompletionItem!(item, {} as any);
+      const model = createTextModel({ value: 'FROM index | WHERE EVAL test.field' });
+      const item = await getCompletionItemFromProvider(suggestionProvider, model, 'test.field');
+      const resolvedItem = await suggestionProvider.resolveCompletionItem!(
+        item!,
+        cancellationToken
+      );
 
       expect(resolvedItem).toEqual(item);
     });
@@ -148,31 +122,34 @@ describe('suggestion_provider', () => {
 
       const suggestionProvider = ESQLLang.getSuggestionProvider({
         getFieldsMetadata: mockGetFieldsMetadata,
+        getColumnsFor: jest.fn(async () => [createField('not.ecs.field')]),
       });
 
-      // Use a wildcard query so streamNames is empty — stream fetch won't fire
-      const model = createModel('FROM logs-* | EVAL');
+      // Use a wildcard query so streamNames is empty and stream fetch will not fire.
+      const model = createTextModel({ value: 'FROM logs-* | ' });
 
-      // Keyword kind (not Variable) — ECS check still fires, then early return
-      mockSuggest.mockResolvedValue([
-        { label: 'CASE', text: 'CASE', kind: 'Keyword', detail: 'CASE' },
-      ]);
-      const notFieldItem = await getItemFromProvider(suggestionProvider, model, 'CASE');
+      // Keyword kind (not Variable): ECS check still fires, then early return.
+      const notFieldItem = await getCompletionItemFromProvider(suggestionProvider, model, 'LIMIT');
       const notFieldResolvedItem = await suggestionProvider.resolveCompletionItem!(
-        notFieldItem,
-        {} as any
+        notFieldItem!,
+        cancellationToken
       );
       expect(mockFind).toBeCalledTimes(1);
       expect(notFieldResolvedItem).toEqual(notFieldItem);
 
+      // Variable kind but field not in ECS
+      const fieldModel = createTextModel({ value: 'FROM logs-* | WHERE ' });
+      const notECSFieldItem = await getCompletionItemFromProvider(
+        suggestionProvider,
+        fieldModel,
+        'not.ecs.field'
+      );
+
       mockFind.mockClear();
 
-      // Variable kind but field not in ECS
-      mockSuggest.mockResolvedValue([makeFieldSuggestion('not.ecs.field')]);
-      const notECSFieldItem = await getItemFromProvider(suggestionProvider, model, 'not.ecs.field');
       const notECSFieldResolvedItem = await suggestionProvider.resolveCompletionItem!(
-        notECSFieldItem,
-        {} as any
+        notECSFieldItem!,
+        cancellationToken
       );
       expect(mockFind).toBeCalledTimes(1);
       expect(notECSFieldResolvedItem).toEqual(notECSFieldItem);
@@ -196,12 +173,15 @@ describe('suggestion_provider', () => {
 
         const suggestionProvider = ESQLLang.getSuggestionProvider({
           getFieldsMetadata: Promise.resolve({ find: mockFind }),
+          getColumnsFor: jest.fn(async () => [createField('body.text')]),
         });
 
-        mockSuggest.mockResolvedValue([makeFieldSuggestion('body.text')]);
-        const model = createModel('FROM logs-kibana.otel-default | WHERE body.text');
-        const item = await getItemFromProvider(suggestionProvider, model, 'body.text');
-        const resolvedItem = await suggestionProvider.resolveCompletionItem!(item, {} as any);
+        const model = createTextModel({ value: 'FROM logs-kibana.otel-default | WHERE ' });
+        const item = await getCompletionItemFromProvider(suggestionProvider, model, 'body.text');
+        const resolvedItem = await suggestionProvider.resolveCompletionItem!(
+          item!,
+          cancellationToken
+        );
 
         expect(resolvedItem).toEqual({
           ...item,
@@ -233,12 +213,15 @@ describe('suggestion_provider', () => {
 
         const suggestionProvider = ESQLLang.getSuggestionProvider({
           getFieldsMetadata: Promise.resolve({ find: mockFind }),
+          getColumnsFor: jest.fn(async () => [createField('body.text')]),
         });
 
-        mockSuggest.mockResolvedValue([makeFieldSuggestion('body.text')]);
-        const model = createModel('FROM logs-kibana.otel-default | WHERE body.text');
-        const item = await getItemFromProvider(suggestionProvider, model, 'body.text');
-        const resolvedItem = await suggestionProvider.resolveCompletionItem!(item, {} as any);
+        const model = createTextModel({ value: 'FROM logs-kibana.otel-default | WHERE ' });
+        const item = await getCompletionItemFromProvider(suggestionProvider, model, 'body.text');
+        const resolvedItem = await suggestionProvider.resolveCompletionItem!(
+          item!,
+          cancellationToken
+        );
 
         expect(resolvedItem).toEqual({
           ...item,
@@ -270,12 +253,15 @@ describe('suggestion_provider', () => {
 
         const suggestionProvider = ESQLLang.getSuggestionProvider({
           getFieldsMetadata: Promise.resolve({ find: mockFind }),
+          getColumnsFor: jest.fn(async () => [createField('my.field')]),
         });
 
-        mockSuggest.mockResolvedValue([makeFieldSuggestion('my.field')]);
-        const model = createModel('FROM stream-a, stream-b | WHERE my.field');
-        const item = await getItemFromProvider(suggestionProvider, model, 'my.field');
-        const resolvedItem = await suggestionProvider.resolveCompletionItem!(item, {} as any);
+        const model = createTextModel({ value: 'FROM stream-a, stream-b | WHERE ' });
+        const item = await getCompletionItemFromProvider(suggestionProvider, model, 'my.field');
+        const resolvedItem = await suggestionProvider.resolveCompletionItem!(
+          item!,
+          cancellationToken
+        );
 
         expect(resolvedItem).toEqual({
           ...item,
@@ -291,13 +277,16 @@ describe('suggestion_provider', () => {
 
         const suggestionProvider = ESQLLang.getSuggestionProvider({
           getFieldsMetadata: Promise.resolve({ find: mockFind }),
+          getColumnsFor: jest.fn(async () => [createField('body.text')]),
         });
 
-        mockSuggest.mockResolvedValue([makeFieldSuggestion('body.text')]);
-        // No FROM clause — streamNames will be empty, so no stream fetch
-        const model = createModel('ROW 1 | EVAL body_text = "test"');
-        const item = await getItemFromProvider(suggestionProvider, model, 'body.text');
-        const resolvedItem = await suggestionProvider.resolveCompletionItem!(item, {} as any);
+        // No FROM clause: streamNames will be empty, so no stream fetch.
+        const model = createTextModel({ value: 'ROW body = "test" | EVAL ' });
+        const item = await getCompletionItemFromProvider(suggestionProvider, model, 'body');
+        const resolvedItem = await suggestionProvider.resolveCompletionItem!(
+          item!,
+          cancellationToken
+        );
 
         expect(resolvedItem).toEqual(item);
         // Only the upfront ECS list check, no stream fetch
@@ -325,12 +314,16 @@ describe('suggestion_provider', () => {
 
         const suggestionProvider = ESQLLang.getSuggestionProvider({
           getFieldsMetadata: Promise.resolve({ find: mockFind }),
+          getColumnsFor: jest.fn(async () => [createField('body.text')]),
         });
 
-        mockSuggest.mockResolvedValue([makeFieldSuggestion('body.text.keyword')]);
-        const model = createModel('FROM logs-kibana.otel-default | WHERE body.text.keyword');
-        const item = await getItemFromProvider(suggestionProvider, model, 'body.text.keyword');
-        const resolvedItem = await suggestionProvider.resolveCompletionItem!(item, {} as any);
+        const model = createTextModel({ value: 'FROM logs-kibana.otel-default | WHERE ' });
+        const item = await getCompletionItemFromProvider(suggestionProvider, model, 'body.text');
+        item!.label = 'body.text.keyword';
+        const resolvedItem = await suggestionProvider.resolveCompletionItem!(
+          item!,
+          cancellationToken
+        );
 
         expect(resolvedItem).toEqual({
           ...item,
@@ -345,15 +338,15 @@ describe('suggestion_provider', () => {
 
         const suggestionProvider = ESQLLang.getSuggestionProvider({
           getFieldsMetadata: Promise.resolve({ find: mockFind }),
+          getColumnsFor: jest.fn(async () => [createField('body.text')]),
         });
 
-        mockSuggest.mockResolvedValue([makeFieldSuggestion('body.text')]);
-        const model = createModel('FROM logs-* | WHERE body.text');
-        const item = await getItemFromProvider(suggestionProvider, model, 'body.text');
-        await suggestionProvider.resolveCompletionItem!(item, {} as any);
+        const model = createTextModel({ value: 'FROM wild-* | WHERE ' });
+        const item = await getCompletionItemFromProvider(suggestionProvider, model, 'body.text');
+        await suggestionProvider.resolveCompletionItem!(item!, cancellationToken);
 
-        // Wildcard source excluded — only the ECS list check, no stream fetch
-        expect(mockFind).toBeCalledTimes(1);
+        // Wildcard source excluded: no stream fetch.
+        expect(mockFind).not.toHaveBeenCalledWith(expect.objectContaining({ source: ['streams'] }));
       });
     });
 
@@ -361,59 +354,25 @@ describe('suggestion_provider', () => {
       const mockOnSuggestionsWithCustomCommandShown = jest.fn();
 
       const mockDeps: ESQLDependencies = {
+        canSuggestVariables: () => true,
+        getVariables: () => [
+          {
+            key: 'value',
+            value: 10,
+            type: ESQLVariableType.VALUES,
+          },
+        ],
+        getColumnsFor: jest.fn(async () => [createField('agent.name')]),
         telemetry: {
           onSuggestionsWithCustomCommandShown: mockOnSuggestionsWithCustomCommandShown,
         },
       };
 
-      // Mock the suggest function to return suggestions with custom commands
-      mockSuggest.mockResolvedValue([
-        {
-          label: 'EVAL',
-          text: 'EVAL',
-          kind: 'Keyword',
-          detail: 'EVAL command',
-          command: {
-            title: 'Trigger suggest',
-            id: 'editor.action.triggerSuggest',
-          },
-        },
-        {
-          label: 'Custom Command 1',
-          text: 'custom1',
-          kind: 'Method',
-          detail: 'Custom command 1',
-          command: {
-            title: 'Custom Action 1',
-            id: 'custom.command.1',
-          },
-        },
-        {
-          label: 'Custom Command 2',
-          text: 'custom2',
-          kind: 'Method',
-          detail: 'Custom command 2',
-          command: {
-            title: 'Custom Action 2',
-            id: 'custom.command.2',
-          },
-        },
-        {
-          label: 'No Command',
-          text: 'nocommand',
-          kind: 'Variable',
-          detail: 'No command item',
-        },
-      ]);
-
       const suggestionProvider = ESQLLang.getSuggestionProvider(mockDeps);
 
-      const mockModel = {
-        getValue: jest.fn().mockReturnValue('FROM index | EVAL'),
-        isDisposed: () => false,
-      } as unknown as monaco.editor.ITextModel;
+      const mockModel = createTextModel({ value: 'FROM index | LIMIT ?' });
 
-      const mockPosition = new monaco.Position(1, 18);
+      const mockPosition = new monaco.Position(1, 'FROM index | LIMIT ?'.length + 1);
       const mockContext = {} as monaco.languages.CompletionContext;
       const mockToken = {} as monaco.CancellationToken;
 
@@ -424,31 +383,22 @@ describe('suggestion_provider', () => {
         mockToken
       );
 
-      // Should be called with the custom command IDs (excluding 'editor.action.triggerSuggest')
       expect(mockOnSuggestionsWithCustomCommandShown).toHaveBeenCalledWith([
-        'custom.command.1',
-        'custom.command.2',
+        'esql.control.values.create',
       ]);
     });
   });
 
   describe('disposed model', () => {
-    it('getCompletion returns an empty list when the model is disposed (after focus gating allows run to touch the model)', async () => {
-      (suggest as jest.MockedFunction<typeof suggest>).mockClear();
-
-      const disposedModel = {
-        getValue: jest.fn(),
-        isDisposed: () => true,
-        getValueLength: jest.fn(),
-        getLineCount: jest.fn(),
-      } as unknown as monaco.editor.ITextModel;
+    it('getCompletion returns an empty list when the model is disposed without calling the model value', async () => {
+      const disposedModel = createDisposedTextModel();
 
       const getEditorsSpy = jest.spyOn(monaco.editor, 'getEditors').mockReturnValue([
         {
           getModel: () => disposedModel,
           hasTextFocus: () => true,
         },
-      ] as any);
+      ] as monaco.editor.IStandaloneCodeEditor[]);
 
       try {
         const suggestionProvider = ESQLLang.getSuggestionProvider();
@@ -463,7 +413,6 @@ describe('suggestion_provider', () => {
         );
 
         expect(result).toEqual({ suggestions: [] });
-        expect(suggest).not.toHaveBeenCalled();
         expect(disposedModel.getValue).not.toHaveBeenCalled();
       } finally {
         getEditorsSpy.mockRestore();

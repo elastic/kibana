@@ -7,33 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getHoverItem } from '@kbn/esql-language';
 import { monaco } from '../../../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from '../../language';
-
-jest.mock('@kbn/esql-language', () => ({
-  getHoverItem: jest.fn(),
-  suggest: jest.fn(),
-  getIndexSourcesFromQuery: jest.fn(),
-}));
+import { createDisposedTextModel, createField, createTextModel } from './test_helpers/providers';
 
 describe('hover_provider', () => {
   let mockModel: monaco.editor.ITextModel;
   let mockPosition: monaco.Position;
   let mockToken: monaco.CancellationToken;
-  let mockGetHoverItem: jest.MockedFunction<typeof getHoverItem>;
 
   beforeEach(() => {
-    mockModel = {
-      getValue: jest.fn().mockReturnValue('FROM index | EVAL field = 1'),
-      getWordAtPosition: jest.fn(),
-      getDecorationsInRange: jest.fn().mockReturnValue([]),
-      isDisposed: () => false,
-    } as unknown as monaco.editor.ITextModel;
+    mockModel = createTextModel({ value: 'FROM index | EVAL field = 1' });
 
     mockPosition = new monaco.Position(1, 10);
     mockToken = {} as monaco.CancellationToken;
-    mockGetHoverItem = getHoverItem as jest.MockedFunction<typeof getHoverItem>;
   });
 
   afterEach(() => {
@@ -41,23 +28,27 @@ describe('hover_provider', () => {
   });
 
   describe('basic hover functionality', () => {
-    it('should call getHoverItem correctly', async () => {
+    it('should return hover content from the language service', async () => {
+      const queryText = 'from a | eval round(numberField)';
       const mockDeps: ESQLDependencies = {
-        getFieldsMetadata: Promise.resolve({} as any),
+        getColumnsFor: jest.fn(async () => [createField('numberField', 'double')]),
         telemetry: {
           onDecorationHoverShown: jest.fn(),
         },
       };
 
-      const mockHoverResult = {
-        contents: [{ value: 'Test hover content' }],
-      };
-      mockGetHoverItem.mockResolvedValue(mockHoverResult);
+      const hoverModel = createTextModel({ value: queryText });
 
       const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
-      await hoverProvider.provideHover(mockModel, mockPosition, mockToken);
+      const result = await hoverProvider.provideHover(
+        hoverModel,
+        new monaco.Position(1, queryText.indexOf('round') + 1),
+        mockToken
+      );
 
-      expect(mockGetHoverItem).toHaveBeenCalledWith('FROM index | EVAL field = 1', 9, mockDeps);
+      expect(result?.contents.map(({ value }) => value)).toEqual(
+        expect.arrayContaining([expect.stringContaining('ROUND(')])
+      );
     });
   });
 
@@ -86,9 +77,6 @@ describe('hover_provider', () => {
 
       (mockModel.getWordAtPosition as jest.Mock).mockReturnValue(mockWordAtPosition);
       (mockModel.getDecorationsInRange as jest.Mock).mockReturnValue(mockDecorations);
-      mockGetHoverItem.mockResolvedValue({
-        contents: [],
-      });
 
       const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
       await hoverProvider.provideHover(mockModel, mockPosition, mockToken);
@@ -120,9 +108,6 @@ describe('hover_provider', () => {
 
       (mockModel.getWordAtPosition as jest.Mock).mockReturnValue(mockWordAtPosition);
       (mockModel.getDecorationsInRange as jest.Mock).mockReturnValue(mockDecorations);
-      mockGetHoverItem.mockResolvedValue({
-        contents: [],
-      });
 
       const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
 
@@ -164,9 +149,6 @@ describe('hover_provider', () => {
       ];
 
       (mockModel.getDecorationsInRange as jest.Mock).mockReturnValue(mockDecorations);
-      mockGetHoverItem.mockResolvedValue({
-        contents: [],
-      });
 
       const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
 
@@ -197,9 +179,6 @@ describe('hover_provider', () => {
 
       (mockModel.getWordAtPosition as jest.Mock).mockReturnValue(mockWordAtPosition);
       (mockModel.getDecorationsInRange as jest.Mock).mockReturnValue([]);
-      mockGetHoverItem.mockResolvedValue({
-        contents: [],
-      });
 
       const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
       await hoverProvider.provideHover(mockModel, mockPosition, mockToken);
@@ -229,9 +208,6 @@ describe('hover_provider', () => {
 
       (mockModel.getWordAtPosition as jest.Mock).mockReturnValue(mockWordAtPosition);
       (mockModel.getDecorationsInRange as jest.Mock).mockReturnValue(mockDecorations);
-      mockGetHoverItem.mockResolvedValue({
-        contents: [],
-      });
 
       const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
       await hoverProvider.provideHover(mockModel, mockPosition, mockToken);
@@ -241,13 +217,8 @@ describe('hover_provider', () => {
   });
 
   describe('disposed model', () => {
-    it('getHover returns null and does not call the language service when the model is disposed', async () => {
-      (getHoverItem as jest.MockedFunction<typeof getHoverItem>).mockClear();
-
-      const disposedModel = {
-        getValue: jest.fn(),
-        isDisposed: () => true,
-      } as unknown as monaco.editor.ITextModel;
+    it('getHover returns null without accessing the model value when the model is disposed', async () => {
+      const disposedModel = createDisposedTextModel();
 
       const hoverProvider = ESQLLang.getHoverProvider!();
       const result = await hoverProvider.provideHover(
@@ -257,7 +228,6 @@ describe('hover_provider', () => {
       );
 
       expect(result).toBeNull();
-      expect(getHoverItem).not.toHaveBeenCalled();
       expect(disposedModel.getValue).not.toHaveBeenCalled();
     });
   });

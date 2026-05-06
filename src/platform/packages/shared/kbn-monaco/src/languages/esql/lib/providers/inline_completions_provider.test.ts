@@ -7,31 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { inlineSuggest } from '@kbn/esql-language';
 import { monaco } from '../../../../monaco_imports';
 import { getInlineCompletionsProvider } from './inline_completions_provider';
-
-jest.mock('@kbn/esql-language', () => ({
-  inlineSuggest: jest.fn(),
-}));
+import { createDisposedTextModel, createField, createTextModel } from './test_helpers/providers';
 
 describe('Inline completion provider', () => {
-  const mockInlineSuggest = inlineSuggest as jest.MockedFunction<typeof inlineSuggest>;
-
   describe('provideInlineCompletions', () => {
     it('returns inline suggestions from the language service', async () => {
-      mockInlineSuggest.mockResolvedValue({
-        items: [{ insertText: 'optional suggestion' }],
-      });
+      const fullText = 'FROM logs*';
+      const callbacks = {
+        getColumnsFor: jest.fn(async () => [
+          createField('@timestamp', 'date'),
+          createField('message', 'text'),
+        ]),
+        getEditorExtensions: jest.fn(async () => ({
+          recommendedQueries: [
+            { query: 'FROM logs* | STATS count = COUNT(*)', name: 'Count aggregation' },
+          ],
+          recommendedFields: [],
+        })),
+        getHistoryStarredItems: jest.fn(async () => []),
+      };
+      const model = createTextModel({ value: fullText });
 
-      const fullText = 'FROM index';
-      const model = {
-        getValue: jest.fn().mockReturnValue(fullText),
-        getValueInRange: jest.fn().mockReturnValue(fullText),
-        isDisposed: () => false,
-      } as unknown as monaco.editor.ITextModel;
-
-      const provider = getInlineCompletionsProvider();
+      const provider = getInlineCompletionsProvider(callbacks);
       const result = await provider.provideInlineCompletions(
         model,
         new monaco.Position(1, fullText.length + 1),
@@ -39,20 +38,17 @@ describe('Inline completion provider', () => {
         new monaco.CancellationTokenSource().token
       );
 
-      expect(result).toEqual({ items: [{ insertText: 'optional suggestion' }] });
-      expect(mockInlineSuggest).toHaveBeenCalled();
+      expect(result!.items).toContainEqual(
+        expect.objectContaining({
+          insertText: ' | STATS count = COUNT(*)',
+        })
+      );
     });
   });
 
   describe('disposed model', () => {
-    it('returns an empty item list and does not call the language service', async () => {
-      mockInlineSuggest.mockClear();
-
-      const disposedModel = {
-        getValue: jest.fn(),
-        getValueInRange: jest.fn(),
-        isDisposed: () => true,
-      } as unknown as monaco.editor.ITextModel;
+    it('returns an empty item list without accessing the model value', async () => {
+      const disposedModel = createDisposedTextModel();
 
       const provider = getInlineCompletionsProvider();
       const result = await provider.provideInlineCompletions(
@@ -63,7 +59,6 @@ describe('Inline completion provider', () => {
       );
 
       expect(result).toEqual({ items: [] });
-      expect(mockInlineSuggest).not.toHaveBeenCalled();
       expect(disposedModel.getValue).not.toHaveBeenCalled();
     });
   });

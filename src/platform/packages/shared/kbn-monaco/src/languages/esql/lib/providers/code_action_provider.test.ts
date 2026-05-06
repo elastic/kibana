@@ -7,24 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getQuickFixForMessage } from '@kbn/esql-language';
 import { monaco } from '../../../../monaco_imports';
 import { getCodeActionProvider } from './code_action_provider';
+import {
+  createDisposedTextModel,
+  createTextModel,
+  createWiredStreamSource,
+} from './test_helpers/providers';
 import type { ESQLDependencies } from './types';
 
-jest.mock('@kbn/esql-language', () => ({
-  getQuickFixForMessage: jest.fn(),
-}));
-
 describe('Code actions provider', () => {
-  const mockGetQuickFixForMessage = getQuickFixForMessage as jest.MockedFunction<
-    typeof getQuickFixForMessage
-  >;
-
   describe('provideCodeActions', () => {
     it('returns quick fixes from the language service when markers match editor messages', async () => {
-      mockGetQuickFixForMessage.mockResolvedValue({ title: 'Rewrite', fixedText: 'ROW 1' });
-
+      const queryText = 'FROM logs.otel.child | KEEP missingField';
       const uri = monaco.Uri.parse('inmemory://test');
       const editorMessage = {
         severity: monaco.MarkerSeverity.Error,
@@ -33,14 +28,17 @@ describe('Code actions provider', () => {
         startColumn: 1,
         endLineNumber: 1,
         endColumn: 10,
-        code: 'syntax.error',
+        code: 'unknownColumn',
       };
+
+      const getSources = jest.fn(async () => [createWiredStreamSource('logs.otel.child')]);
 
       const deps: ESQLDependencies = {
         getEditorMessages: () => ({
           errors: [editorMessage],
           warnings: [],
         }),
+        getSources,
       };
 
       const marker: monaco.editor.IMarkerData = {
@@ -52,12 +50,7 @@ describe('Code actions provider', () => {
         endColumn: editorMessage.endColumn,
       };
 
-      const model = {
-        getValue: jest.fn().mockReturnValue('FROM'),
-        isDisposed: () => false,
-        uri,
-        getFullModelRange: jest.fn().mockReturnValue(new monaco.Range(1, 1, 1, 100)),
-      } as unknown as monaco.editor.ITextModel;
+      const model = createTextModel({ value: queryText, uri });
 
       const provider = getCodeActionProvider(deps);
       const result = await provider.provideCodeActions(
@@ -66,24 +59,23 @@ describe('Code actions provider', () => {
         {
           markers: [marker],
           trigger: monaco.languages.CodeActionTriggerType.Invoke,
-        } as monaco.languages.CodeActionContext,
+        },
         new monaco.CancellationTokenSource().token
       );
 
       expect(result?.actions).toHaveLength(1);
-      expect(result?.actions[0].title).toBe('Rewrite');
-      expect(mockGetQuickFixForMessage).toHaveBeenCalled();
+      expect(result?.actions[0].title).toBe('Load unmapped fields');
+      const firstWorkspaceEdit = result?.actions[0].edit
+        ?.edits?.[0] as monaco.languages.IWorkspaceTextEdit;
+      expect(firstWorkspaceEdit?.textEdit?.text).toBe(
+        `SET unmapped_fields = "LOAD";\nFROM logs.otel.child\n  | KEEP missingField`
+      );
     });
   });
 
   describe('disposed model', () => {
-    it('returns an empty code action list and does not call the language service', async () => {
-      mockGetQuickFixForMessage.mockClear();
-
-      const disposedModel = {
-        getValue: jest.fn(),
-        isDisposed: () => true,
-      } as unknown as monaco.editor.ITextModel;
+    it('returns an empty code action list without accessing the model value', async () => {
+      const disposedModel = createDisposedTextModel();
 
       const provider = getCodeActionProvider();
       const result = await provider.provideCodeActions(
@@ -97,7 +89,6 @@ describe('Code actions provider', () => {
       );
 
       expect(result).toEqual({ actions: [], dispose: expect.any(Function) });
-      expect(mockGetQuickFixForMessage).not.toHaveBeenCalled();
       expect(disposedModel.getValue).not.toHaveBeenCalled();
     });
   });

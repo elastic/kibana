@@ -7,41 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSignatureHelp } from '@kbn/esql-language';
 import { monaco } from '../../../../monaco_imports';
 import { getSignatureProvider } from './signature_help_provider';
+import { createDisposedTextModel, createTextModel } from './test_helpers/providers';
 
-jest.mock('@kbn/esql-language', () => ({
-  getSignatureHelp: jest.fn(),
-}));
+const cancellationToken = new monaco.CancellationTokenSource().token;
 
 describe('Signature Help Provider', () => {
-  const mockGetSignatureHelp = getSignatureHelp as jest.MockedFunction<typeof getSignatureHelp>;
-
   describe('provideSignatureHelp', () => {
     it('maps signature help from the language service', async () => {
-      mockGetSignatureHelp.mockResolvedValue({
-        signatures: [
-          {
-            label: 'COUNT()',
-            documentation: 'Counts values',
-            parameters: [{ label: 'field', documentation: 'Field to count' }],
-          },
-        ],
-        activeSignature: 0,
-        activeParameter: 0,
-      });
+      const queryText = 'FROM logs | STATS COUNT(';
 
-      const model = {
-        getValue: jest.fn().mockReturnValue('COUNT('),
-        isDisposed: () => false,
-      } as unknown as monaco.editor.ITextModel;
+      const model = createTextModel({ value: queryText });
 
       const provider = getSignatureProvider();
       const result = await provider.provideSignatureHelp(
         model,
-        new monaco.Position(1, 7),
-        new monaco.CancellationTokenSource().token,
+        new monaco.Position(1, queryText.length + 1),
+        cancellationToken,
         {
           triggerCharacter: '(',
           triggerKind: monaco.languages.SignatureHelpTriggerKind.Invoke,
@@ -49,38 +32,38 @@ describe('Signature Help Provider', () => {
         }
       );
 
-      expect(mockGetSignatureHelp).toHaveBeenCalled();
-      expect(result).toEqual({
-        value: {
-          signatures: [
-            {
-              label: 'COUNT()',
-              documentation: { value: 'Counts values' },
-              parameters: [{ label: 'field', documentation: { value: 'Field to count' } }],
-            },
-          ],
-          activeSignature: 0,
-          activeParameter: 0,
-        },
-        dispose: expect.any(Function),
-      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          value: expect.objectContaining({
+            signatures: expect.arrayContaining([
+              expect.objectContaining({
+                label: expect.stringContaining('COUNT('),
+                documentation: expect.objectContaining({
+                  value: expect.any(String),
+                }),
+                parameters: expect.arrayContaining([
+                  expect.objectContaining({
+                    label: expect.stringContaining('field?:'),
+                  }),
+                ]),
+              }),
+            ]),
+          }),
+          dispose: expect.any(Function),
+        })
+      );
     });
   });
 
   describe('disposed model', () => {
-    it('returns null and does not call the language service', async () => {
-      mockGetSignatureHelp.mockClear();
-
-      const disposedModel = {
-        getValue: jest.fn(),
-        isDisposed: () => true,
-      } as unknown as monaco.editor.ITextModel;
+    it('returns null without accessing the model value', async () => {
+      const disposedModel = createDisposedTextModel();
 
       const provider = getSignatureProvider();
       const result = await provider.provideSignatureHelp(
         disposedModel,
         new monaco.Position(1, 1),
-        new monaco.CancellationTokenSource().token,
+        cancellationToken,
         {
           triggerCharacter: '',
           triggerKind: monaco.languages.SignatureHelpTriggerKind.Invoke,
@@ -89,7 +72,6 @@ describe('Signature Help Provider', () => {
       );
 
       expect(result).toBeNull();
-      expect(mockGetSignatureHelp).not.toHaveBeenCalled();
       expect(disposedModel.getValue).not.toHaveBeenCalled();
     });
   });

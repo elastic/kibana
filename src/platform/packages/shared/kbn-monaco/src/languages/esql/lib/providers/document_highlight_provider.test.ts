@@ -7,60 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getDocumentHighlightItems } from '@kbn/esql-language';
 import { monaco } from '../../../../monaco_imports';
 import { getDocumentHighlightProvider } from './document_highlight_provider';
+import { createDisposedTextModel, createTextModel } from './test_helpers/providers';
 
-jest.mock('@kbn/esql-language', () => ({
-  getDocumentHighlightItems: jest.fn(),
-}));
+const cancellationToken = new monaco.CancellationTokenSource().token;
 
 describe('Document highlight provider', () => {
-  const mockGetDocumentHighlightItems = getDocumentHighlightItems as jest.MockedFunction<
-    typeof getDocumentHighlightItems
-  >;
-
   describe('provideDocumentHighlights', () => {
     it('maps highlight ranges from the language service', async () => {
-      mockGetDocumentHighlightItems.mockReturnValue([{ start: 0, end: 4 }]);
-
-      const model = {
-        getValue: jest.fn().mockReturnValue('FROM'),
-        isDisposed: () => false,
-      } as unknown as monaco.editor.ITextModel;
+      const model = createTextModel({
+        value: 'FROM index | WHERE field1 > field2 | STATS count() BY field1',
+      });
 
       const provider = getDocumentHighlightProvider();
       const result = await provider.provideDocumentHighlights(
         model,
-        new monaco.Position(1, 2),
-        new monaco.CancellationTokenSource().token
+        new monaco.Position(1, 20),
+        cancellationToken
       );
 
-      expect(mockGetDocumentHighlightItems).toHaveBeenCalledWith('FROM', 1);
-      expect(result).toHaveLength(1);
+      expect(result).toHaveLength(2);
       expect(result![0].kind).toBe(monaco.languages.DocumentHighlightKind.Read);
-      expect(result![0].range).toBeInstanceOf(monaco.Range);
+      expect(result![0].range).toEqual(new monaco.Range(1, 20, 1, 26));
+      expect(result![1].range).toEqual(new monaco.Range(1, 55, 1, 61));
     });
   });
 
   describe('disposed model', () => {
-    it('returns an empty highlight list and does not call the language service', async () => {
-      mockGetDocumentHighlightItems.mockClear();
-
-      const disposedModel = {
-        getValue: jest.fn(),
-        isDisposed: () => true,
-      } as unknown as monaco.editor.ITextModel;
+    it('returns an empty highlight list without accessing the model value', async () => {
+      const disposedModel = createDisposedTextModel();
 
       const provider = getDocumentHighlightProvider();
       const result = await provider.provideDocumentHighlights(
         disposedModel,
         new monaco.Position(1, 1),
-        new monaco.CancellationTokenSource().token
+        cancellationToken
       );
 
       expect(result).toEqual([]);
-      expect(mockGetDocumentHighlightItems).not.toHaveBeenCalled();
       expect(disposedModel.getValue).not.toHaveBeenCalled();
     });
   });
