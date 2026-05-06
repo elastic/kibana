@@ -93,7 +93,7 @@ or architectural changes means stop and ask the user before continuing.
 
 Restart services for a clean environment — stale reproduction state produces false positives:
 
-1. Stop and restart (same commands as Phase 1, same `server_args`)
+1. Stop and restart the Scout server (same commands as Phase 1, same `server_args` and `config_sets/bug_fixer/kibana.yml`)
 2. Re-create test data from scratch (same steps as Phase 2)
 3. Browser reproduction — bug should not reproduce
 4. `browser_console_messages` + `browser_network_requests` — Phase 3 errors gone, no new errors
