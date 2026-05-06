@@ -46,6 +46,15 @@ export const COLUMN_ASSIGNEES = i18n.translate('xpack.securitySolution.alertsV2.
   defaultMessage: 'Assignees',
 });
 
+export const COLUMN_STATUS = i18n.translate('xpack.securitySolution.alertsV2.column.status', {
+  defaultMessage: 'Status',
+});
+
+export const STATUS_ACKNOWLEDGED = i18n.translate(
+  'xpack.securitySolution.alertsV2.status.acknowledged',
+  { defaultMessage: 'Acknowledged' }
+);
+
 export const FLYOUT_TITLE = i18n.translate('xpack.securitySolution.alertsV2.flyout.title', {
   defaultMessage: 'Alert details',
 });

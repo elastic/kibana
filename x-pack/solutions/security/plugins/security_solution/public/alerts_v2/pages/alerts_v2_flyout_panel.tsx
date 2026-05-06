@@ -43,7 +43,6 @@ import { useBulkGetProfiles } from '@kbn/alerting-v2-episodes-ui/hooks/use_bulk_
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
 import { AlertEpisodeStatusBadge } from '@kbn/alerting-v2-episodes-ui/components/status/status_badge';
-import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/components/status/status_badges';
 import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
@@ -541,22 +540,9 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
   return (
     <>
       <FlyoutHeader>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h2>{i18n.FLYOUT_TITLE}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {lastStatus && (
-            <EuiFlexItem grow={false}>
-              <AlertEpisodeStatusBadges
-                status={lastStatus}
-                episodeAction={episodeAction}
-                groupAction={groupAction}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <EuiTitle size="s">
+          <h2>{i18n.FLYOUT_TITLE}</h2>
+        </EuiTitle>
         {tags.length > 0 && (
           <>
             <EuiSpacer size="s" />

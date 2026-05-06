@@ -8,9 +8,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiFieldSearch,
-  EuiFilterButton,
-  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -43,10 +42,7 @@ import type {
 } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import {
-  EpisodeStatusCell,
-  EpisodeRuleCell,
-} from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
+import { EpisodeRuleCell } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
 import { getEpisodesFromDocIds } from '@kbn/alerting-v2-episodes-ui/utils/bulk_selection';
 import { useKibana } from '../../common/lib/kibana';
@@ -61,9 +57,7 @@ const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection
 
 const TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
-    duration: { width: 100 },
     assignees: { width: 120 },
-    'episode.status': { width: 220 },
   },
 };
 
@@ -75,6 +69,10 @@ const CUSTOM_GRID_COLUMNS: CustomGridColumnsConfiguration = {
   assignees: ({ column }) => ({
     ...column,
     displayAsText: i18n.COLUMN_ASSIGNEES,
+  }),
+  last_ack_action: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.COLUMN_STATUS,
   }),
 };
 
@@ -125,20 +123,17 @@ export const AlertsV2Page = () => {
 
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-24h', to: 'now' });
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const filterState = useMemo<EpisodesFilterState>(
     () => ({
       queryString: searchQuery || null,
-      status: statusFilter,
     }),
-    [searchQuery, statusFilter]
+    [searchQuery]
   );
   const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
-    'episode.status',
     '@timestamp',
     'rule.id',
-    'duration',
+    'last_ack_action',
     'tags',
     'assignees',
   ]);
@@ -281,17 +276,20 @@ export const AlertsV2Page = () => {
     setSearchQuery(value);
   }, []);
 
-  const toggleStatusFilter = useCallback((status: string) => {
-    setStatusFilter((prev) => (prev === status ? null : status));
-  }, []);
-
   const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
     setColumns(cols);
   }, []);
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
-      'episode.status': (props) => <EpisodeStatusCell {...props} />,
+      last_ack_action: ({ row }) => {
+        const value = row.flattened.last_ack_action as string | undefined | null;
+        if (!value || value === 'unack') return <></>;
+        if (value === 'ack') {
+          return <EuiBadge color="warning">{i18n.STATUS_ACKNOWLEDGED}</EuiBadge>;
+        }
+        return <></>;
+      },
       tags: ({ row }) => {
         const raw = row.flattened.last_tags;
         const safeTags = Array.isArray(raw) ? (raw as string[]) : raw ? [String(raw)] : [];
@@ -347,34 +345,6 @@ export const AlertsV2Page = () => {
                   aria-label={i18n.SEARCH_PLACEHOLDER}
                   fullWidth
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFilterGroup compressed>
-                  <EuiFilterButton
-                    hasActiveFilters={statusFilter === 'active'}
-                    onClick={() => toggleStatusFilter('active')}
-                  >
-                    {i18n.FILTER_ACTIVE}
-                  </EuiFilterButton>
-                  <EuiFilterButton
-                    hasActiveFilters={statusFilter === 'pending'}
-                    onClick={() => toggleStatusFilter('pending')}
-                  >
-                    {i18n.FILTER_PENDING}
-                  </EuiFilterButton>
-                  <EuiFilterButton
-                    hasActiveFilters={statusFilter === 'recovering'}
-                    onClick={() => toggleStatusFilter('recovering')}
-                  >
-                    {i18n.FILTER_RECOVERING}
-                  </EuiFilterButton>
-                  <EuiFilterButton
-                    hasActiveFilters={statusFilter === 'inactive'}
-                    onClick={() => toggleStatusFilter('inactive')}
-                  >
-                    {i18n.FILTER_INACTIVE}
-                  </EuiFilterButton>
-                </EuiFilterGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSuperDatePicker
