@@ -8,7 +8,7 @@
 import React from 'react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
 import { EuiPanel } from '@elastic/eui';
