@@ -31,6 +31,11 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
     incrementalId: { enabled: true, taskIntervalMinutes: 10, taskStartDelayMinutes: 10 },
+    analytics: {
+      enabled: false,
+      reconciliation: { interval: '30m' },
+      write: { max_retries: 3, retry_initial_delay_ms: 250 },
+    },
     templates: { enabled: true },
     attachments: { enabled: true },
     ...overrides,
@@ -166,6 +171,16 @@ describe('Cases Plugin', () => {
       expect(pluginStart).toMatchInlineSnapshot(`
         Object {
           "config": Object {
+            "analytics": Object {
+              "enabled": false,
+              "reconciliation": Object {
+                "interval": "30m",
+              },
+              "write": Object {
+                "max_retries": 3,
+                "retry_initial_delay_ms": 250,
+              },
+            },
             "attachments": Object {
               "enabled": true,
             },

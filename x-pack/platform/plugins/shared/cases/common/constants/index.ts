@@ -202,6 +202,21 @@ export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
  */
 
 export const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
+export const CASES_ANALYTICS_RECONCILIATION_TASK_TYPE = 'cases-analytics:reconciliation';
+
+/**
+ * Cases as Data (RFC 0001) — three cluster-level analytics indices, one per surface.
+ * The aliases are public; backing indices follow `.internal.<alias>-NNNNNN` and rollover via ILM.
+ */
+export const CASES_DATA_CASE_ALIAS = '.cases-data.case';
+export const CASES_DATA_CASE_ACTIVITY_ALIAS = '.cases-data.case_activity';
+export const CASES_DATA_CASE_LIFECYCLE_ALIAS = '.cases-data.case_lifecycle';
+export const CASES_DATA_ILM_POLICY_ID = 'cases-data-ilm-policy';
+export const CASES_DATA_INDEX_TEMPLATE_PREFIX = 'cases-data';
+
+/** Shared SO type holding the reconciliation watermark (single document per cluster). */
+export const CASES_ANALYTICS_STATE_SO_TYPE = 'cases-analytics-state';
+export const CASES_ANALYTICS_STATE_SO_ID = 'cases-analytics-state';
 
 /**
  * Telemetry

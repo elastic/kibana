@@ -14,9 +14,23 @@ import {
 } from '../common/constants/incremental_id';
 
 export const ConfigSchema = schema.object({
-  // NOTE: the `analytics` config block intentionally does not exist on `main` after the
-  // legacy reindex pipeline was removed. A new block will be (re)introduced by the
-  // follow-up cases-as-data writer PR — see RFC 0001.
+  /**
+   * Cases-as-data writer + reconciliation + index bootstrap.
+   *
+   * Disabled by default until PR C wires the `kibana-cases-security` ES plugin
+   * implicit-privileges provider — without that, end users have no read path to
+   * `.cases-data.*` even when the writer is running.
+   */
+  analytics: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    reconciliation: schema.object({
+      interval: schema.string({ defaultValue: '30m' }),
+    }),
+    write: schema.object({
+      max_retries: schema.number({ defaultValue: 3, min: 0, max: 10 }),
+      retry_initial_delay_ms: schema.number({ defaultValue: 250, min: 0, max: 10_000 }),
+    }),
+  }),
   attachments: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),

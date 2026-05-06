@@ -12,6 +12,16 @@ describe('config validation', () => {
     it('sets the defaults correctly', () => {
       expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
         Object {
+          "analytics": Object {
+            "enabled": false,
+            "reconciliation": Object {
+              "interval": "30m",
+            },
+            "write": Object {
+              "max_retries": 3,
+              "retry_initial_delay_ms": 250,
+            },
+          },
           "attachments": Object {
             "enabled": false,
           },

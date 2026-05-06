@@ -18,6 +18,7 @@ import { caseIdIncrementerSavedObjectType } from './id_incrementer';
 import { createCaseAttachmentSavedObjectType } from './attachments';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import { caseTemplateSavedObjectType } from './templates';
+import { casesAnalyticsStateSavedObjectType } from '../cases_analytics';
 import type { ConfigType } from '../config';
 
 interface RegisterSavedObjectsArgs {
@@ -56,6 +57,10 @@ export const registerSavedObjects = ({
 
   core.savedObjects.registerType(casesTelemetrySavedObjectType);
   core.savedObjects.registerType(casesRulesSavedObjectType);
+
+  if (config.analytics?.enabled) {
+    core.savedObjects.registerType(casesAnalyticsStateSavedObjectType);
+  }
 
   if (config.templates?.enabled) {
     core.savedObjects.registerType(caseTemplateSavedObjectType);

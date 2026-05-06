@@ -28,6 +28,7 @@ import type {
   CaseCustomFields,
 } from '../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { CasesAnalyticsWriterContract } from '../../cases_analytics';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
@@ -180,6 +181,11 @@ export interface ServiceContext {
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
   isCasesAttachmentsEnabled?: boolean;
+  /**
+   * Optional cases-as-data writer hook. Defaults to NOOP when omitted (e.g. in
+   * unit tests that don't need analytics behavior).
+   */
+  analyticsWriter?: CasesAnalyticsWriterContract;
 }
 
 export interface PushTimeFrameInfo {

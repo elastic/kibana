@@ -60,6 +60,7 @@ import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
+import type { CasesAnalyticsWriterContract } from '../cases_analytics';
 import { getSavedObjectsTypes } from '../../common';
 
 interface CasesClientFactoryArgs {
@@ -80,6 +81,12 @@ interface CasesClientFactoryArgs {
   filesPluginStart: FilesStart;
   usageCounter?: IUsageCounter;
   config: ConfigType;
+  /**
+   * Cases-as-data writer hook surface. When the analytics feature is disabled, this
+   * is the NOOP_WRITER and call sites pay zero cost. Wired into the SO services so
+   * SO writes produce analytics docs as a post-success side effect.
+   */
+  analyticsWriter: CasesAnalyticsWriterContract;
   closeReasonValidator?: (
     closeReason: string,
     owner: string,
@@ -238,6 +245,7 @@ export class CasesClientFactory {
       log: this.logger,
       unsecuredSavedObjectsClient,
       attachmentService,
+      analyticsWriter: this.options.analyticsWriter,
     });
 
     const licensingService = new LicensingService(
@@ -272,6 +280,7 @@ export class CasesClientFactory {
         savedObjectsSerializer,
         auditLogger,
         isCasesAttachmentsEnabled: this.options.config.attachments?.enabled === true,
+        analyticsWriter: this.options.analyticsWriter,
       }),
       attachmentService,
       licensingService,

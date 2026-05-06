@@ -55,6 +55,7 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { registerCaseWorkflowSteps } from './workflows';
 import { initUiSettings } from './ui_settings';
+import { CasesAnalyticsService } from './cases_analytics';
 
 export class CasePlugin
   implements
@@ -79,6 +80,7 @@ export class CasePlugin
   private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
   private readonly closeReasonValidators: Map<string, CloseReasonValidator> = new Map();
+  private readonly casesAnalyticsService: CasesAnalyticsService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -90,6 +92,10 @@ export class CasePlugin
     this.unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
     this.userProfileService = new UserProfileService(this.logger);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    this.casesAnalyticsService = new CasesAnalyticsService({
+      logger: this.logger,
+      config: this.caseConfig.analytics,
+    });
   }
 
   public setup(
@@ -111,6 +117,13 @@ export class CasePlugin
     );
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
+
+    this.casesAnalyticsService.setup({
+      core,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      config: this.caseConfig.analytics,
+    });
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -236,6 +249,14 @@ export class CasePlugin
       if (this.caseConfig.incrementalId.enabled) {
         void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
       }
+
+      // Bootstrap cases-as-data writer + reconciliation. Best-effort: failures here
+      // log but do not block plugin start.
+      void this.casesAnalyticsService
+        .start({ core, taskManager: plugins.taskManager, isServerless: this.isServerless })
+        .catch((err) => {
+          this.logger.warn(`cases.analytics: start failed: ${err.message}`);
+        });
     }
 
     this.userProfileService.initialize({
@@ -274,6 +295,7 @@ export class CasePlugin
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       usageCounter: this.usageCounter!,
       config: this.caseConfig,
+      analyticsWriter: this.casesAnalyticsService.getWriter(),
       closeReasonValidator:
         this.closeReasonValidators.size > 0
           ? (closeReason, owner, request) => {
@@ -298,6 +320,7 @@ export class CasePlugin
 
   public stop() {
     this.logger.debug(`Stopping Case Workflow`);
+    this.casesAnalyticsService.stop();
   }
 
   private createRouteHandlerContext = ({

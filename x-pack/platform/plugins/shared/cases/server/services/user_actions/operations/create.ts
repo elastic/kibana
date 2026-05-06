@@ -472,6 +472,13 @@ export class UserActionPersister {
 
     for (let i = 0; i < userActions.length; i++) {
       this.auditLogger.log(userActions[i].eventDetails, createdUserActions.saved_objects[i].id);
+
+      // Cases-as-data: emit an analytics activity row per persisted user-action.
+      // NOOP_WRITER when the feature is disabled. The writer extracts the join
+      // key (cases.id) from the SO's references; if missing, the row is dropped.
+      if (this.context.analyticsWriter) {
+        this.context.analyticsWriter.appendActivity(createdUserActions.saved_objects[i]);
+      }
     }
   }
 

@@ -55,6 +55,8 @@ import {
   transformESModelToCase,
 } from './transform';
 import type { AttachmentService } from '../attachments';
+import type { CasesAnalyticsWriterContract } from '../../cases_analytics';
+import { NOOP_WRITER } from '../../cases_analytics';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError, isSOError } from '../../common/error';
 import type {
@@ -99,19 +101,28 @@ export class CasesService {
   private readonly log: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly attachmentService: AttachmentService;
+  private readonly analyticsWriter: CasesAnalyticsWriterContract;
 
   constructor({
     log,
     unsecuredSavedObjectsClient,
     attachmentService,
+    analyticsWriter,
   }: {
     log: Logger;
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     attachmentService: AttachmentService;
+    /**
+     * Optional. When omitted (e.g. in `cases_connector` paths or unit tests),
+     * defaults to a no-op so the service can be constructed without coupling tests
+     * to the analytics subsystem.
+     */
+    analyticsWriter?: CasesAnalyticsWriterContract;
   }) {
     this.log = log;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.attachmentService = attachmentService;
+    this.analyticsWriter = analyticsWriter ?? NOOP_WRITER;
   }
 
   private buildCaseIdsAggs = (
@@ -393,6 +404,8 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to DELETE case ${caseId}`);
       await this.unsecuredSavedObjectsClient.delete(CASE_SAVED_OBJECT, caseId, { refresh });
+      // Cases-as-data: drop the analytics doc post-success.
+      this.analyticsWriter.deleteCase(caseId);
     } catch (error) {
       this.log.error(`Error on DELETE case ${caseId}: ${error}`);
       throw error;
@@ -409,6 +422,12 @@ export class CasesService {
     try {
       this.log.debug(() => `Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
       await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
+      // Cases-as-data: drop analytics docs for any case-typed entries in the batch.
+      for (const entity of entities) {
+        if (entity.type === CASE_SAVED_OBJECT) {
+          this.analyticsWriter.deleteCase(entity.id);
+        }
+      }
     } catch (error) {
       this.log.error(`Error bulk deleting case entities ${JSON.stringify(entities)}: ${error}`);
     }
@@ -765,6 +784,10 @@ export class CasesService {
         { id, references: transformedAttributes.referenceHandler.build(), refresh }
       );
 
+      // Cases-as-data: fire-and-forget post-success analytics upsert. NOOP_WRITER
+      // when the feature is disabled. Failures are swallowed inside the writer.
+      this.analyticsWriter.upsertCase(createdCase);
+
       const res = transformSavedObjectToExternalModel(createdCase);
       const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
 
@@ -813,6 +836,9 @@ export class CasesService {
           return theCase;
         }
 
+        // Cases-as-data: emit one analytics doc per successfully created case.
+        this.analyticsWriter.upsertCase(theCase);
+
         const transformedCase = transformSavedObjectToExternalModel(theCase);
         const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(transformedCase.attributes);
 
@@ -851,6 +877,18 @@ export class CasesService {
           refresh,
         }
       );
+
+      // Cases-as-data: re-emit the full case doc and recompute lifecycle. SO update
+      // returns only the changed attributes, so we merge against the original to
+      // reconstruct the full-shape SO for the writer.
+      this.analyticsWriter.upsertCase({
+        ...originalCase,
+        attributes: {
+          ...originalCase.attributes,
+          ...(updatedCase.attributes ?? transformedAttributes.attributes),
+        },
+      });
+      this.analyticsWriter.recomputeLifecycle(caseId);
 
       const res = transformUpdateResponseToExternalModel(updatedCase);
       const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(res.attributes);
@@ -897,6 +935,11 @@ export class CasesService {
           acc.push(theCase);
           return acc;
         }
+
+        // Cases-as-data: trigger lifecycle recompute for each successful row.
+        // Reconciliation backfills the case doc within its next tick — keeping the
+        // bulk path lean (no per-row case-doc construction) is intentional.
+        this.analyticsWriter.recomputeLifecycle(theCase.id);
 
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
         const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
