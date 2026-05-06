@@ -572,8 +572,10 @@ ${buildEnrichedEntityFieldsEsql()}
     }
   "}")
 | STATS badge = COUNT(*),
-  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, _id, null)),
-  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, _id, null)),
+  // Use TO_STRING(null) — bare null in CASE-else has surfaced as ES|QL planner NPE
+  // ("Cannot invoke java.util.Set.isEmpty() because nullExpressions is null") on certain plans.
+  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, _id, TO_STRING(null))),
+  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, _id, TO_STRING(null))),
   isAlert = MV_MAX(VALUES(isAlert)),
   docs = VALUES(docData),
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
@@ -596,7 +598,8 @@ ${buildEnrichedEntityFieldsEsql()}
   // target attributes
   targetNodeId = CASE(
     // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
-    COUNT_DISTINCT(targetEntityId) == 0, null,
+    // Use TO_STRING(null) — bare null branches have surfaced as ES|QL planner NPE on certain plans.
+    COUNT_DISTINCT(targetEntityId) == 0, TO_STRING(null),
     CASE(
       MV_COUNT(VALUES(targetEntityId)) == 1, TO_STRING(VALUES(targetEntityId)),
       MD5(MV_CONCAT(MV_SORT(VALUES(targetEntityId)), ","))
