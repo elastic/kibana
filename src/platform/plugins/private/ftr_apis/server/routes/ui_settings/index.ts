@@ -8,16 +8,8 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { registerKbnClientSoRoutes } from './kbn_client_so';
-import { registerTaskManagerRoutes } from './task_manager';
-import { registerUiSettingsRoutes } from './ui_settings';
+import { registerRefreshRoute } from './refresh';
 
-export const registerRoutes = (
-  router: IRouter,
-  getTaskManager: () => TaskManagerStartContract | undefined
-) => {
-  registerKbnClientSoRoutes(router);
-  registerTaskManagerRoutes(router, getTaskManager);
-  registerUiSettingsRoutes(router);
+export const registerUiSettingsRoutes = (router: IRouter) => {
+  registerRefreshRoute(router);
 };

@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { emptyAssets, type Streams } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -20,6 +19,7 @@ import {
   indexAndAssertTargetStream,
 } from './helpers/requests';
 import { STREAMS_SNAPSHOT_REPO_PATH } from '../../default_configs/common_paths';
+import { updateSignificantEventsSettingAndWait } from './helpers/ui_settings';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -41,20 +41,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-      });
     });
 
     after(async () => {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-      });
     });
 
     describe('Full workflow with snapshot and restore', () => {
       before(async () => {
+        await enableStreams(apiClient);
+        await updateSignificantEventsSettingAndWait({
+          kibanaServer,
+          apiClient,
+          enabled: true,
+        });
         // Create snapshot repository
         await esClient.snapshot.createRepository({
           name: REPO_NAME,
@@ -70,6 +70,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
+        await updateSignificantEventsSettingAndWait({
+          kibanaServer,
+          apiClient,
+          enabled: false,
+        });
         // Cleanup: Delete snapshot and repository
         try {
           await esClient.snapshot.delete({
