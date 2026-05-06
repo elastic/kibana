@@ -133,14 +133,26 @@ export class EvalsClient {
       body,
       ignoreErrors: [400, 429, 500],
     });
-    const parsedBody = IngestScoresResponse.parse(getResponseData(response));
     const statusCode = getResponseStatusCode(response);
+    const data = getResponseData(response);
 
     if (statusCode === 400 || statusCode === 429 || statusCode === 500) {
-      throw toIngestScoresError(statusCode, parsedBody);
+      const parseResult = IngestScoresResponse.safeParse(data);
+      if (parseResult.success) {
+        throw toIngestScoresError(statusCode, parseResult.data);
+      }
+      const message =
+        typeof data === 'object' && data !== null && 'message' in data
+          ? String((data as { message: unknown }).message)
+          : `Server returned ${statusCode}`;
+      throw toIngestScoresError(statusCode, {
+        ingested: 0,
+        conflicted: 0,
+        failed: [{ index: -1, status: statusCode, reason: message }],
+      });
     }
 
-    return parsedBody;
+    return IngestScoresResponse.parse(data);
   }
 
   async getRunStats(runId: string, options?: GetRunFilters): Promise<RunStats | null> {

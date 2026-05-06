@@ -124,7 +124,7 @@ export class EvaluationScoreService {
   constructor(private readonly logger: Logger, private readonly isServerless: boolean) {}
 
   async installAssets(esClient: ElasticsearchClient): Promise<void> {
-    return this.installAssetsOnce(esClient);
+    return this.doInstallAssets(esClient);
   }
 
   async write(
@@ -141,12 +141,15 @@ export class EvaluationScoreService {
 
     const bulkStats = await esClient.helpers.bulk({
       datasource: documents,
-      onDocument: ({ payload }) => ({
-        create: {
-          _index: EVALUATIONS_DATA_STREAM_ALIAS,
-          _id: computeScoreDocumentId(payload),
+      onDocument: ({ payload }) => [
+        {
+          create: {
+            _index: EVALUATIONS_DATA_STREAM_ALIAS,
+            _id: computeScoreDocumentId(payload),
+          },
         },
-      }),
+        payload,
+      ],
       onDrop: (document) => {
         droppedDocuments.push(document as BulkDroppedDocument);
       },
@@ -173,7 +176,7 @@ export class EvaluationScoreService {
     };
   }
 
-  private async installAssetsOnce(esClient: ElasticsearchClient): Promise<void> {
+  private async doInstallAssets(esClient: ElasticsearchClient): Promise<void> {
     if (!this.isServerless) {
       await this.ensureLifecyclePolicy(esClient);
     }
