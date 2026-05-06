@@ -144,7 +144,7 @@ const renderTable = ({
 
 describe('Table', () => {
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
   });
 
   afterEach(() => {
