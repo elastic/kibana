@@ -1375,11 +1375,7 @@ steps:
         mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
         mockEsClient.index.mockResolvedValueOnce({ _id: 'my-workflow' } as any);
 
-        const resultA = await service.createWorkflow(
-          { yaml: validYaml },
-          'space-a',
-          mockRequest
-        );
+        const resultA = await service.createWorkflow({ yaml: validYaml }, 'space-a', mockRequest);
 
         // Space B: the same base ID ("my-workflow") is now taken globally,
         // so the resolver must skip it and fall through to "my-workflow-1".
@@ -1390,11 +1386,7 @@ steps:
         } as any);
         mockEsClient.index.mockResolvedValueOnce({ _id: 'my-workflow-1' } as any);
 
-        const resultB = await service.createWorkflow(
-          { yaml: validYaml },
-          'space-b',
-          mockRequest
-        );
+        const resultB = await service.createWorkflow({ yaml: validYaml }, 'space-b', mockRequest);
 
         expect(resultA.id).toBe('my-workflow');
         expect(resultB.id).toBe('my-workflow-1');
@@ -1430,11 +1422,7 @@ steps:
         } as any);
 
         await expect(
-          service.createWorkflow(
-            { id: 'shared-id', yaml: validYaml },
-            'space-b',
-            mockRequest
-          )
+          service.createWorkflow({ id: 'shared-id', yaml: validYaml }, 'space-b', mockRequest)
         ).rejects.toThrow(/already exists/);
         expect(mockEsClient.index).not.toHaveBeenCalled();
 
@@ -1464,11 +1452,7 @@ steps:
         } as any);
 
         await expect(
-          service.createWorkflow(
-            { id: 'recycled-id', yaml: validYaml },
-            'default',
-            mockRequest
-          )
+          service.createWorkflow({ id: 'recycled-id', yaml: validYaml }, 'default', mockRequest)
         ).rejects.toThrow(/already exists/);
         expect(mockEsClient.index).not.toHaveBeenCalled();
 
@@ -1497,11 +1481,7 @@ steps:
         } as any);
         mockEsClient.index.mockResolvedValue({ _id: 'my-workflow-1' } as any);
 
-        const result = await service.createWorkflow(
-          { yaml: validYaml },
-          'default',
-          mockRequest
-        );
+        const result = await service.createWorkflow({ yaml: validYaml }, 'default', mockRequest);
 
         expect(result.id).toBe('my-workflow-1');
         expect(mockEsClient.index).toHaveBeenCalledWith(
@@ -1527,11 +1507,7 @@ steps:
           .mockRejectedValueOnce(conflict) // first attempt loses the race
           .mockResolvedValueOnce({ _id: 'my-workflow-1' } as any); // retry succeeds
 
-        const result = await service.createWorkflow(
-          { yaml: validYaml },
-          'default',
-          mockRequest
-        );
+        const result = await service.createWorkflow({ yaml: validYaml }, 'default', mockRequest);
 
         expect(result.id).toBe('my-workflow-1');
         expect(mockEsClient.index).toHaveBeenCalledTimes(2);
@@ -1555,11 +1531,7 @@ steps:
         mockEsClient.index.mockRejectedValueOnce(conflict);
 
         await expect(
-          service.createWorkflow(
-            { id: 'my-id', yaml: validYaml },
-            'default',
-            mockRequest
-          )
+          service.createWorkflow({ id: 'my-id', yaml: validYaml }, 'default', mockRequest)
         ).rejects.toThrow(/already exists/);
         // No retry: caller picked the ID and silently rewriting it would be wrong.
         expect(mockEsClient.index).toHaveBeenCalledTimes(1);
@@ -2506,11 +2478,7 @@ steps:
           items: [{ create: { _id: 'a', status: 201 } }],
         } as any);
 
-        await service.bulkCreateWorkflows(
-          [{ yaml: validYaml('A') }],
-          'space-x',
-          mockRequest
-        );
+        await service.bulkCreateWorkflows([{ yaml: validYaml('A') }], 'space-x', mockRequest);
 
         // The collision query must be a flat ids query — no `bool.must` term on spaceId.
         const searchArgs = mockEsClient.search.mock.calls[0][0] as any;
