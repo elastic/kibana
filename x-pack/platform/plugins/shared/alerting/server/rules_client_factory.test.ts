@@ -40,7 +40,6 @@ import {
 import { backfillClientMock } from './backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-
 import type { SecurityStartMock } from '@kbn/core-security-server-mocks';
 import type { ActionsAuthorizationMock } from '@kbn/actions-plugin/server/authorization/actions_authorization.mock';
 import type { BackfillClient } from './backfill_client/backfill_client';
@@ -59,6 +58,11 @@ let alertingAuthorizationClientFactory: ReturnType<
 
 let actionsAuthorization: ActionsAuthorizationMock;
 let backfillClient: jest.Mocked<BackfillClient>;
+let scopedChangeTrackingService: {
+  log: jest.Mock;
+  logBulk: jest.Mock;
+  getHistory: jest.Mock;
+};
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
@@ -85,6 +89,11 @@ describe('RulesClientFactory', () => {
 
     const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
     backfillClient = backfillClientMock.create();
+    scopedChangeTrackingService = {
+      log: jest.fn(),
+      logBulk: jest.fn(),
+      getHistory: jest.fn(),
+    };
 
     rulesClientFactoryParams = {
       logger: loggingSystemMock.create().get(),
@@ -99,9 +108,7 @@ describe('RulesClientFactory', () => {
       actions: actionsMock.createStart(),
       eventLog: eventLogMock.createStart(),
       changeTrackingService: {
-        log: jest.fn(),
-        logBulk: jest.fn(),
-        getHistory: jest.fn(),
+        asScoped: jest.fn().mockReturnValue(scopedChangeTrackingService),
       },
       kibanaVersion: '7.10.0',
       authorization:
@@ -181,7 +188,7 @@ describe('RulesClientFactory', () => {
         spaceId: 'default',
         namespace: 'default',
         getUserName: expect.any(Function),
-        changeTrackingService: rulesClientFactoryParams.changeTrackingService,
+        changeTrackingService: scopedChangeTrackingService,
         getActionsClient: expect.any(Function),
         getEventLogClient: expect.any(Function),
         createAPIKey: expect.any(Function),
@@ -263,7 +270,7 @@ describe('RulesClientFactory', () => {
         spaceId: 'default',
         namespace: 'default',
         getUserName: expect.any(Function),
-        changeTrackingService: rulesClientFactoryParams.changeTrackingService,
+        changeTrackingService: scopedChangeTrackingService,
         createAPIKey: expect.any(Function),
         internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
         encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,

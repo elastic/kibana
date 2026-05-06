@@ -298,7 +298,7 @@ export class RulesClientFactory {
       internalSavedObjectsRepository: this.internalSavedObjectsRepository,
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
-      changeTrackingService: this.changeTrackingService,
+      changeTrackingService: this.changeTrackingService?.asScoped(request),
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
       backfillClient: this.backfillClient,

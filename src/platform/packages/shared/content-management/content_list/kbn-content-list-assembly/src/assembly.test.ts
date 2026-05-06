@@ -381,7 +381,7 @@ describe('createComponent with resolve', () => {
     label: string;
   }
 
-  column.createComponent<CustomColumnProps>({
+  const CustomColumn = column.createComponent<CustomColumnProps>({
     resolve: (attributes, context) => ({
       field: attributes.field,
       label: `${context.prefix}: ${attributes.label}`,
@@ -407,6 +407,8 @@ describe('createComponent with resolve', () => {
       preset: undefined,
       instanceId: 'custom',
       attributes: { field: 'size', label: 'Size' },
+      // componentType is required to look up the per-component resolver.
+      componentType: CustomColumn as unknown as (...args: unknown[]) => unknown,
     };
     const result = column.resolve(part, { prefix: 'Col' });
     expect(result).toEqual({ field: 'size', label: 'Col: Size' });
@@ -419,10 +421,141 @@ describe('createComponent with resolve', () => {
       preset: 'name',
       instanceId: 'name',
       attributes: { label: 'Title' },
+      componentType: CustomColumn as unknown as (...args: unknown[]) => unknown,
     };
     // Should use the preset resolver, not the custom one.
     const result = column.resolve(part, { prefix: 'Col' });
     expect(result).toEqual({ field: 'title', label: 'Col: Title' });
+  });
+});
+
+describe('createComponent — per-instance resolver isolation', () => {
+  // Regression: previously `customResolver` was a single shared closure slot.
+  // A second `createComponent({ resolve })` call for the same part would
+  // silently overwrite the first, so both components would dispatch to the
+  // newest resolver (the recents-filter global-resolver bug).
+  //
+  // The fix keys resolvers on the component function reference stored in
+  // `ParsedPart.componentType`. Each component gets its own entry; resolvers
+  // are independent.
+
+  interface FilterOutput {
+    label: string;
+  }
+
+  it('resolves two custom components with different resolvers independently', () => {
+    const asm = defineAssembly({ name: 'IsolationTest' });
+    const part = asm.definePart<Record<never, never>, FilterOutput, void>({ name: 'filter' });
+
+    const CompA = part.createComponent<Record<never, never>>({
+      resolve: () => ({ label: 'source-A' }),
+    });
+    const CompB = part.createComponent<Record<never, never>>({
+      resolve: () => ({ label: 'source-B' }),
+    });
+
+    const partA = {
+      type: 'part' as const,
+      part: 'filter',
+      preset: undefined,
+      instanceId: 'filter-0',
+      attributes: {},
+      componentType: CompA as unknown as (...args: unknown[]) => unknown,
+    };
+    const partB = {
+      type: 'part' as const,
+      part: 'filter',
+      preset: undefined,
+      instanceId: 'filter-1',
+      attributes: {},
+      componentType: CompB as unknown as (...args: unknown[]) => unknown,
+    };
+
+    expect(part.resolve(partA)).toEqual({ label: 'source-A' });
+    expect(part.resolve(partB)).toEqual({ label: 'source-B' });
+  });
+
+  it('resolver for the first component is not overwritten when a second component is created', () => {
+    const asm = defineAssembly({ name: 'OverwriteTest' });
+    const part = asm.definePart<Record<never, never>, FilterOutput, void>({ name: 'filter' });
+
+    const CompA = part.createComponent<Record<never, never>>({
+      resolve: () => ({ label: 'A' }),
+    });
+
+    // Creating CompB must not change how CompA resolves.
+    part.createComponent<Record<never, never>>({
+      resolve: () => ({ label: 'B' }),
+    });
+
+    const partA = {
+      type: 'part' as const,
+      part: 'filter',
+      preset: undefined,
+      instanceId: 'filter-0',
+      attributes: {},
+      componentType: CompA as unknown as (...args: unknown[]) => unknown,
+    };
+
+    // CompA should still resolve to 'A', not 'B'.
+    expect(part.resolve(partA)).toEqual({ label: 'A' });
+  });
+
+  it('resolves two custom skeleton resolvers independently', () => {
+    const asm = defineAssembly({ name: 'SkeletonIsolationTest' });
+    const part = asm.definePart<Record<never, never>, FilterOutput, void>({ name: 'filter' });
+
+    const CompA = part.createComponent<Record<never, never>>({
+      resolve: () => ({ label: 'A' }),
+      skeleton: () => ({ shape: 'text', width: '30%' }),
+    });
+    const CompB = part.createComponent<Record<never, never>>({
+      resolve: () => ({ label: 'B' }),
+      skeleton: () => ({ shape: 'rectangle', width: '60%' }),
+    });
+
+    const partA = {
+      type: 'part' as const,
+      part: 'filter',
+      preset: undefined,
+      instanceId: 'filter-0',
+      attributes: {},
+      componentType: CompA as unknown as (...args: unknown[]) => unknown,
+    };
+    const partB = {
+      type: 'part' as const,
+      part: 'filter',
+      preset: undefined,
+      instanceId: 'filter-1',
+      attributes: {},
+      componentType: CompB as unknown as (...args: unknown[]) => unknown,
+    };
+
+    expect(part.resolveSkeleton(partA)).toEqual({ shape: 'text', width: '30%' });
+    expect(part.resolveSkeleton(partB)).toEqual({ shape: 'rectangle', width: '60%' });
+  });
+
+  it('falls back to undefined when componentType is absent (hand-constructed ParsedPart)', () => {
+    const asm = defineAssembly({ name: 'FallbackTest' });
+    const part = asm.definePart<Record<never, never>, FilterOutput, void>({ name: 'filter' });
+
+    part.createComponent<Record<never, never>>({ resolve: () => ({ label: 'A' }) });
+
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    // No componentType: simulates a hand-constructed part or legacy usage.
+    const partWithoutType = {
+      type: 'part' as const,
+      part: 'filter',
+      preset: undefined,
+      instanceId: 'filter-0',
+      attributes: {},
+    };
+
+    // Without componentType there is no way to look up the resolver.
+    const result = part.resolve(partWithoutType);
+    expect(result).toBeUndefined();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('No resolver found'));
+    warnSpy.mockRestore();
   });
 });
 
@@ -575,7 +708,7 @@ describe('resolveSkeleton', () => {
     width?: string;
   }
 
-  column.createComponent<CustomColumnProps>({
+  const CustomColumn = column.createComponent<CustomColumnProps>({
     resolve: (attrs) => ({ field: attrs.field }),
     skeleton: (attrs) => ({ shape: 'rectangle', width: attrs.width ?? '100%' }),
   });
@@ -632,6 +765,7 @@ describe('resolveSkeleton', () => {
       preset: 'sort',
       instanceId: 'sort',
       attributes: { field: 'sort' },
+      componentType: CustomColumn as unknown as (...args: unknown[]) => unknown,
     };
     const result = column.resolveSkeleton(part, { theme: 'light' });
     expect(result).toEqual({ shape: 'rectangle', width: '100%' });
@@ -644,6 +778,7 @@ describe('resolveSkeleton', () => {
       preset: undefined,
       instanceId: 'custom',
       attributes: { field: 'bytes', width: '80px' },
+      componentType: CustomColumn as unknown as (...args: unknown[]) => unknown,
     };
     const result = column.resolveSkeleton(part, { theme: 'light' });
     expect(result).toEqual({ shape: 'rectangle', width: '80px' });
