@@ -22,7 +22,7 @@ import type {
 import {
   isToolCallStep,
   isCompactionStep,
-  isTodosStep,
+  findTodosStep,
   ConversationRoundStatus,
   ConversationRoundStepType,
   carriedOverTodos,
@@ -154,7 +154,7 @@ const createConversationActions = ({
             conversationAttachments: current?.attachments,
           });
 
-          const prevTodosStep = draft?.rounds?.at(-1)?.steps?.filter(isTodosStep)?.at(-1);
+          const prevTodosStep = findTodosStep(draft?.rounds?.at(-1)?.steps);
           const carryoverTodos = carriedOverTodos(prevTodosStep?.todos);
 
           const nextRound = createNewRound({
@@ -163,7 +163,7 @@ const createConversationActions = ({
             steps: carryoverTodos
               ? [
                   {
-                    type: ConversationRoundStepType.todos,
+                    type: ConversationRoundStepType.updateTodos,
                     todos: carryoverTodos,
                     carried_over: true,
                   },
@@ -258,12 +258,12 @@ const createConversationActions = ({
     },
     addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => {
       setCurrentRound((round) => {
-        const existing = round.steps.find(isTodosStep);
+        const existing = findTodosStep(round.steps);
         if (existing) {
           existing.todos = todos;
           existing.carried_over = false;
         } else {
-          const step: TodosStep = { type: ConversationRoundStepType.todos, todos };
+          const step: TodosStep = { type: ConversationRoundStepType.updateTodos, todos };
           round.steps.push(step);
         }
       });

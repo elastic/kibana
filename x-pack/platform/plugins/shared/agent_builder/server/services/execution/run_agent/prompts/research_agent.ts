@@ -15,7 +15,6 @@ import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
 import { getFileSystemInstructions } from '../../runner/store';
-import { getTodoInstructions } from './utils/todos';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
@@ -95,8 +94,6 @@ Before each tool call, assess whether your current approach is making progress:
 ${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
 
 ${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
-
-${experimentalFeatures.todos ? getTodoInstructions() : ''}
 
 ## INSTRUCTIONS
 

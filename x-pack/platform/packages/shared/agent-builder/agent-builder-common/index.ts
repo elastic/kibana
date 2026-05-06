@@ -20,7 +20,6 @@ export {
   platformStreamsSigEventsTools,
   attachmentTools,
   filestoreTools,
-  todoTools,
   internalTools,
   defaultAgentToolIds,
   editableToolTypes,
@@ -154,6 +153,7 @@ export {
   isBackgroundAgentCompleteStep,
   type BackgroundAgentCompleteStep,
   isTodosStep,
+  findTodosStep,
   type TodosStep,
   carriedOverTodos,
   ChatEventType,
@@ -212,6 +212,8 @@ export {
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
   isTodosUpdatedEvent,
+  TODOS_UPDATED_UI_EVENT,
+  type TodosUpdatedUiEventData,
 } from './chat';
 export {
   type PublicSkillDefinition,

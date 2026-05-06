@@ -16,7 +16,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
-import { isTodosStep } from '@kbn/agent-builder-common/chat/conversation';
+import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
@@ -82,7 +82,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
   const [promptResponses, setPromptResponses] = useState<Record<string, { allow: boolean }>>({});
   const { steps, response, input, status, pending_prompts: pendingPrompts } = rawRound;
-  const todosStep = useMemo(() => steps.find(isTodosStep), [steps]);
+  const todosStep = useMemo(() => findTodosStep(steps), [steps]);
 
   const {
     isResponseLoading,

@@ -44,6 +44,8 @@ import {
   isBackgroundAgentCompleteEvent,
   isToolUiEvent,
   carriedOverTodos,
+  TODOS_UPDATED_UI_EVENT,
+  type TodosUpdatedUiEventData,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
@@ -298,7 +300,12 @@ const createRound = ({
 
   // Collect todos_updated UI events; only the last snapshot is stored as a round step
   const lastTodosData = events.reduce<TodoItem[] | undefined>((last, e) => {
-    if (isToolUiEvent<'todos_updated', { todos: TodoItem[] }>(e, 'todos_updated')) {
+    if (
+      isToolUiEvent<typeof TODOS_UPDATED_UI_EVENT, TodosUpdatedUiEventData>(
+        e,
+        TODOS_UPDATED_UI_EVENT
+      )
+    ) {
       return e.data.data.todos;
     }
     return last;
@@ -355,11 +362,10 @@ const createRound = ({
 
   steps.push(...stepEvents.flatMap(eventToStep));
 
-  const carriedTodos = carriedOverTodos(initialTodos);
-  const todosForStep = lastTodosData ?? carriedTodos;
+  const todosForStep = lastTodosData ?? carriedOverTodos(initialTodos);
   if (todosForStep !== undefined) {
     const todosStep: TodosStep = {
-      type: ConversationRoundStepType.todos,
+      type: ConversationRoundStepType.updateTodos,
       todos: todosForStep,
       ...(lastTodosData === undefined ? { carried_over: true } : {}),
     };

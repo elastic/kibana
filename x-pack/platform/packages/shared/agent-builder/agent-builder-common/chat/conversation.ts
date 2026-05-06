@@ -78,7 +78,7 @@ export enum ConversationRoundStepType {
   reasoning = 'reasoning',
   compaction = 'compaction',
   backgroundAgentComplete = 'background_agent_complete',
-  todos = 'todos',
+  updateTodos = 'update_todos',
 }
 
 // tool call step
@@ -215,10 +215,20 @@ export interface TodosStepData {
   carried_over?: boolean;
 }
 
-export type TodosStep = ConversationRoundStepMixin<ConversationRoundStepType.todos, TodosStepData>;
+export type TodosStep = ConversationRoundStepMixin<ConversationRoundStepType.updateTodos, TodosStepData>;
 
 export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
-  return step.type === ConversationRoundStepType.todos;
+  return step.type === ConversationRoundStepType.updateTodos;
+};
+
+/**
+ * Returns the (single) todos step from a list of steps, if present.
+ * A round only ever has at most one todos step, which is updated in place.
+ */
+export const findTodosStep = (
+  steps: ConversationRoundStep[] | undefined
+): TodosStep | undefined => {
+  return steps?.find(isTodosStep);
 };
 
 /**
@@ -335,12 +345,10 @@ export interface Conversation {
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
-export type TodoPriority = 'high' | 'medium' | 'low';
 
 export interface TodoItem {
   content: string;
   status: TodoStatus;
-  priority: TodoPriority;
 }
 
 /**

@@ -17,7 +17,6 @@ export {
   type ConversationInternalState,
   type TodoItem,
   type TodoStatus,
-  type TodoPriority,
   type BackgroundExecutionState,
   type BackgroundExecutionCompletedAt,
   type BackgroundAgentCompleteStep,
@@ -25,6 +24,7 @@ export {
   type TodosStep,
   type TodosStepData,
   isTodosStep,
+  findTodosStep,
   carriedOverTodos,
   type ConversationWithoutRounds,
   type ConversationRoundStepMixin,
@@ -102,5 +102,7 @@ export {
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
   isTodosUpdatedEvent,
+  TODOS_UPDATED_UI_EVENT,
+  type TodosUpdatedUiEventData,
 } from './events';
 export type { RoundState } from './round_state';
