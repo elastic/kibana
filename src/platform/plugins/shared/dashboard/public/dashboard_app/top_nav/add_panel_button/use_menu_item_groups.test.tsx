@@ -29,7 +29,7 @@ jest.mock('../../../services/kibana_services', () => {
 });
 
 describe('useMenuItemGroups', () => {
-  test('gets sorted groups from visTypes, visTypeAliases, and add panel actions', async () => {
+  test('gets sorted groups + items from ADD_PANEL_TRIGGER actions', async () => {
     mockGetTriggerCompatibleActions.mockResolvedValueOnce([
       {
         id: 'mockAddPanelAction',
