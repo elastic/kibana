@@ -12,6 +12,11 @@ Investigate and reproduce a Security Solution bug. Produces `analysis.json` and
 
 ## Phase 0: Analyze
 
+If `analysis.json` already exists at the repo root from a prior session, skip the fetch
+and parse steps — but you still must execute Phases 1, 2, and 3 in full. A prior analysis
+does not substitute for a live reproduction. The environment must be started fresh and the
+bug must be reproduced in the browser before any fix work begins.
+
 The default repo is `elastic/kibana`. If the user provides only a number, fetch from there.
 A different repo must be stated explicitly — don't search across repos.
 
@@ -169,7 +174,8 @@ Present the report to the user and wait for their response before doing anything
 This is a required stop — the user must review what the browser showed before
 investigation turns into implementation.
 
-- Bug reproduced → update `user_acknowledged` to `yes` once the user responds, signal to
-  the orchestrator that Phase A is complete
+- Bug reproduced → wait for the user to reply in the conversation, then set
+  `user_acknowledged` to `yes`. This field must only be written after a real user reply —
+  never pre-emptively. Writing it before the user responds is a protocol violation.
 - Could not reproduce → set `status` to `not_reproduced`, tell the user what you tried
   and observed, ask how to proceed. Do not signal completion.
