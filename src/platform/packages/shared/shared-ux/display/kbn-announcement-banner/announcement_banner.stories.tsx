@@ -14,9 +14,32 @@ import { EuiText } from '@elastic/eui';
 
 import { AnnouncementBanner } from './announcement_banner';
 import type { AnnouncementBannerProps } from './types';
-import illustrationUrl from './assets/illustration.svg';
 
-const Illustration = () => <img src={illustrationUrl} alt="" width="100%" height="100%" />;
+import illustrationSmallUrl from './assets/illustration_s.svg';
+import illustrationSmallUrlDark from './assets/illustration_s_dark.svg';
+import illustrationMediumUrl from './assets/illustration_m.svg';
+
+const illustrationStyles = css`
+  max-inline-size: 100%;
+`;
+
+const Illustration = ({ urlLight, urlDark }: { urlLight: string; urlDark?: string }) => {
+  const { colorMode } = useEuiTheme();
+
+  return (
+    <img
+      src={colorMode === 'DARK' ? urlDark ?? urlLight : urlLight}
+      alt=""
+      aria-hidden="true"
+      css={illustrationStyles}
+    />
+  );
+};
+
+const IllustrationMedium = () => <Illustration urlLight={illustrationMediumUrl} />;
+const IllustrationSmall = () => (
+  <Illustration urlLight={illustrationSmallUrl} urlDark={illustrationSmallUrlDark} />
+);
 
 /**
  * Story args extend the public props with three synthetic booleans so the
@@ -33,7 +56,7 @@ const buildAnnouncementProps = (args: StoryArgs): AnnouncementBannerProps => {
   const { media, primaryAction, secondaryAction, ...rest } = args;
   return {
     ...rest,
-    media: media ? <Illustration /> : undefined,
+    media: media ? size === 's' ? <IllustrationSmall /> : <IllustrationMedium /> : undefined,
     actionProps: {
       primary: primaryAction
         ? { children: 'Primary action', onClick: action('primary onClick') }
