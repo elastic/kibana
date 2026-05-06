@@ -28,7 +28,7 @@ export const deleteCompositeSummaryDoc = async (
         esClient.delete({
           index: COMPOSITE_SUMMARY_INDEX_NAME,
           id: docId,
-          refresh: 'wait_for',
+          refresh: true,
         }),
       { logger }
     );
