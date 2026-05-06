@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutTestConfig} from '@kbn/scout';
+import type { ScoutTestConfig } from '@kbn/scout';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
@@ -23,14 +23,14 @@ const getExpected = (config: ScoutTestConfig) => {
       'observabilityGroup',
       'legacyGroup',
     ],
-    count: 27
-  }
+    count: 27,
+  };
 };
 
 /**
- * Dashboard's add panel menu is populated 
+ * Dashboard's add panel menu is populated
  * by ui_actions trigger ADD_PANEL_TRIGGER.
- * This test exists to ensures additions to menu 
+ * This test exists to ensures additions to menu
  * notify our team and can be reviewed by design.
  */
 spaceTest.describe.only(
