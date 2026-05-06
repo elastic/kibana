@@ -82,8 +82,7 @@ test.describe(
 
       await test.step('update the query and save', async () => {
         await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(UPDATED_ESQL_QUERY);
-        await pageObjects.streams.clickQueryStreamFormSaveButton();
-        await expect(pageObjects.streams.queryStreamUpdatedSuccessToast).toBeVisible();
+        await pageObjects.streams.saveInlineQueryStreamEdit();
       });
 
       await test.step('verify the ES|QL view was updated', async () => {
