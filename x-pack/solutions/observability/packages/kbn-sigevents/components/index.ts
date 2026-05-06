@@ -23,6 +23,9 @@ export type { OtherPromotedEventsProps } from './other_promoted_events';
 export { StatusHeader } from './status_header';
 export type { StatusHeaderProps, StatusHeaderVariant } from './status_header';
 
+export { StatusHeaderBanner } from './status_header_banner';
+export type { StatusHeaderBannerProps } from './status_header_banner';
+
 export { MainSignificantEvent } from './main_significant_event';
 export type { MainSignificantEventProps, ImpactedService } from './main_significant_event';
 

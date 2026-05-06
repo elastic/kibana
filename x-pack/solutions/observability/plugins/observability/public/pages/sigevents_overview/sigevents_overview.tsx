@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,6 +28,7 @@ import {
   SigeventsOverview,
   SignificantEventDetailBody,
   SignificantEventDetailHeader,
+  StatusHeaderBanner,
 } from '@kbn/sigevents';
 import type { HealthyMetricCardItem } from '@kbn/sigevents';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -38,15 +40,28 @@ const containerStyles = css`
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100%;
+  flex: 1 1 auto;
   min-height: 0;
 `;
 
 const contentColumnStyles = css`
+  position: relative;
   width: 100%;
   max-width: ${MAX_CONTENT_WIDTH}px;
   height: 100%;
   min-height: 0;
+`;
+
+// The page section wraps its children with `paddingSize="l"` (24px) on every
+// side. The banner needs to span the full width of the page, so we cancel out
+// that horizontal padding with negative margins. Pulling the top up by the same
+// amount lets the banner sit flush with the top of the section while still
+// allowing `top: 0` to stick to the scroll container's top edge.
+const stickyBannerStyles = (paddingSize: string) => css`
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin: -${paddingSize} -${paddingSize} 0;
 `;
 
 const embeddableConversationWrapperStyles = css`
@@ -97,8 +112,10 @@ export function SigeventsOverviewPage() {
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
   const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
   const [conversationKey, setConversationKey] = useState(0);
+  const [isBannerVisible, setIsBannerVisible] = useState(false);
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigeventsDetailFlyout' });
   const returnFocusRef = useRef<Element | null>(null);
+  const overviewRef = useRef<HTMLDivElement | null>(null);
 
   const openDetailFlyout = useCallback(() => {
     returnFocusRef.current = document.activeElement;
@@ -110,6 +127,52 @@ export function SigeventsOverviewPage() {
       (returnFocusRef.current as HTMLElement | null)?.focus();
     });
   }, []);
+
+  // Show the sticky banner once the user has scrolled past the centered status
+  // header inside the overview. We use a scroll listener (in capture phase) so it
+  // works regardless of which ancestor is the actual scroll container, and we
+  // measure `getBoundingClientRect` on the StatusHeader element itself so the
+  // trigger is reliable on slow incremental scrolls (where IntersectionObserver
+  // can miss threshold crossings if the surrounding overview is taller than the
+  // viewport).
+  useEffect(() => {
+    const overviewEl = overviewRef.current;
+    if (!overviewEl) {
+      return;
+    }
+
+    let rafId: number | null = null;
+
+    const compute = () => {
+      rafId = null;
+      const headerEl = overviewEl.querySelector<HTMLElement>(
+        '[data-test-subj="sigeventsOverviewStatusHeader"]'
+      );
+      if (!headerEl) {
+        setIsBannerVisible(false);
+        return;
+      }
+      const rect = headerEl.getBoundingClientRect();
+      setIsBannerVisible(rect.bottom <= 0);
+    };
+
+    const onScrollOrResize = () => {
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(compute);
+    };
+
+    compute();
+
+    window.addEventListener('scroll', onScrollOrResize, { capture: true, passive: true });
+    window.addEventListener('resize', onScrollOrResize);
+    return () => {
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', onScrollOrResize, {
+        capture: true,
+      } as EventListenerOptions);
+      window.removeEventListener('resize', onScrollOrResize);
+    };
+  }, [eventData, overviewLoading, loading, error, overviewError]);
 
   useEffect(() => {
     if (!isDetailFlyoutOpen) {
@@ -331,6 +394,30 @@ export function SigeventsOverviewPage() {
     <ObservabilityPageTemplate
       isPageDataLoaded={true}
       data-test-subj="obltSigeventsOverviewPageHeader"
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.observability.sigeventsOverview.pageTitle', {
+          defaultMessage: 'Nightshift',
+        }),
+        bottomBorder: 'extended',
+        rightSideItems: [
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            color="text"
+            size="s"
+            display="empty"
+            data-test-subj="obltSigeventsOverviewPageHeaderActions"
+            aria-label={i18n.translate(
+              'xpack.observability.sigeventsOverview.pageHeader.moreActionsAriaLabel',
+              { defaultMessage: 'More actions' }
+            )}
+          />,
+        ],
+        rightSideGroupProps: {
+          responsive: false,
+          alignItems: 'center',
+        },
+        'data-test-subj': 'obltSigeventsOverviewPageTitleHeader',
+      }}
       pageSectionProps={{
         grow: true,
         contentProps: {
@@ -342,6 +429,15 @@ export function SigeventsOverviewPage() {
         },
       }}
     >
+      {isBannerVisible && !loading && !overviewLoading && !error && !overviewError && (
+        <div css={stickyBannerStyles(euiTheme.size.l)}>
+          <StatusHeaderBanner
+            variant={eventData ? 'critical' : 'noCriticalEvents'}
+            timestamp={lastUpdatedLabel}
+            contentMaxWidth={MAX_CONTENT_WIDTH}
+          />
+        </div>
+      )}
       <div css={containerStyles}>
         <div css={contentColumnStyles}>
           <EuiFlexGroup
@@ -351,60 +447,62 @@ export function SigeventsOverviewPage() {
             data-test-subj="obltSigeventsConversation"
           >
             <EuiFlexItem grow={false}>
-              {loading || overviewLoading ? (
-                <EuiFlexGroup
-                  direction="column"
-                  alignItems="center"
-                  gutterSize="s"
-                  responsive={false}
-                  css={css`
-                    padding: ${euiTheme.size.l};
-                  `}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="l" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : error || overviewError ? (
-                <EuiEmptyPrompt
-                  iconType="warning"
-                  color="danger"
-                  title={
-                    <h2>
-                      {i18n.translate('xpack.observability.sigeventsOverview.errorTitle', {
-                        defaultMessage: 'Unable to load significant events',
-                      })}
-                    </h2>
-                  }
-                  body={<p>{(error ?? overviewError)!.message}</p>}
-                />
-              ) : eventData ? (
-                <SigeventsOverview
-                  state={eventData.state}
-                  blastRadiusScore={eventData.blastRadiusScore}
-                  mainEventTitle={eventData.mainEventTitle}
-                  mainEventDescription={eventData.description}
-                  severityLabel={eventData.severityLabel}
-                  severityColor={eventData.severityColor}
-                  impactedServices={eventData.impactedServices}
-                  impactedCards={eventData.impactedCards}
-                  healthyMetrics={healthyMetrics}
-                  otherPromotedEvents={otherPromotedEvents}
-                  lowerPriorityEvents={overviewData?.acknowledgedEvents}
-                  lastUpdatedLabel={lastUpdatedLabel}
-                  onViewDetails={openDetailFlyout}
-                  onRemediate={handleRemediate}
-                  onRemediateEvent={handleRemediateEvent}
-                />
-              ) : (
-                <SigeventsOverview
-                  state="healthy"
-                  healthyMetrics={healthyMetrics}
-                  lowerPriorityEvents={overviewData?.acknowledgedEvents}
-                  onViewDetails={openDetailFlyout}
-                  onRemediateEvent={handleRemediateEvent}
-                />
-              )}
+              <div ref={overviewRef}>
+                {loading || overviewLoading ? (
+                  <EuiFlexGroup
+                    direction="column"
+                    alignItems="center"
+                    gutterSize="s"
+                    responsive={false}
+                    css={css`
+                      padding: ${euiTheme.size.l};
+                    `}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner size="l" />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : error || overviewError ? (
+                  <EuiEmptyPrompt
+                    iconType="warning"
+                    color="danger"
+                    title={
+                      <h2>
+                        {i18n.translate('xpack.observability.sigeventsOverview.errorTitle', {
+                          defaultMessage: 'Unable to load significant events',
+                        })}
+                      </h2>
+                    }
+                    body={<p>{(error ?? overviewError)!.message}</p>}
+                  />
+                ) : eventData ? (
+                  <SigeventsOverview
+                    state={eventData.state}
+                    blastRadiusScore={eventData.blastRadiusScore}
+                    mainEventTitle={eventData.mainEventTitle}
+                    mainEventDescription={eventData.description}
+                    severityLabel={eventData.severityLabel}
+                    severityColor={eventData.severityColor}
+                    impactedServices={eventData.impactedServices}
+                    impactedCards={eventData.impactedCards}
+                    healthyMetrics={healthyMetrics}
+                    otherPromotedEvents={otherPromotedEvents}
+                    lowerPriorityEvents={overviewData?.acknowledgedEvents}
+                    lastUpdatedLabel={lastUpdatedLabel}
+                    onViewDetails={openDetailFlyout}
+                    onRemediate={handleRemediate}
+                    onRemediateEvent={handleRemediateEvent}
+                  />
+                ) : (
+                  <SigeventsOverview
+                    state="healthy"
+                    healthyMetrics={healthyMetrics}
+                    lowerPriorityEvents={overviewData?.acknowledgedEvents}
+                    onViewDetails={openDetailFlyout}
+                    onRemediateEvent={handleRemediateEvent}
+                  />
+                )}
+              </div>
             </EuiFlexItem>
 
             {EmbeddableConversation && (
