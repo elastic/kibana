@@ -6,14 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import * as t from 'io-ts';
-import { defineRoute } from './types';
+import { defineRoute } from '../types';
 
-export interface FooResponse {
-  msg: string;
+export interface AgentKeysPrivilegesResponse {
+  areApiKeysEnabled: boolean;
+  isAdmin: boolean;
+  canManage: boolean;
 }
 
-export const fooRoute = defineRoute<FooResponse>()({
-  endpoint: 'GET /internal/apm/foo/{serviceName}' as const,
-  params: t.type({ query: t.partial({ foo: t.string }), path: t.type({ serviceName: t.string }) }),
+export const agentKeysPrivilegesRoute = defineRoute<AgentKeysPrivilegesResponse>()({
+  endpoint: 'GET /internal/apm/agent_keys/privileges',
 });

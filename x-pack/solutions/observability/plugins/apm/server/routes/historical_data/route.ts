@@ -11,7 +11,7 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { hasHistoricalAgentData } from './has_historical_agent_data';
 
 const hasDataRoute = createApmServerRoute({
-  endpoint: routeDefinitions.hasData.endpoint,
+  endpoint: routeDefinitions.historicalData.hasData.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<HasDataResponse> => {
     const apmEventClient = await getApmEventClient(resources);

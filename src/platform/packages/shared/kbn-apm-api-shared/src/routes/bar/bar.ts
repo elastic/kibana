@@ -7,23 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import * as t from 'io-ts';
-import { defineRoute } from './types';
-import { rangeRt } from '../default_api_types';
+import { defineRoute } from '../types';
 
-export interface SuggestionsResponse {
-  terms: string[];
+export interface BarResponse {
+  barMsg: string;
 }
 
-export const suggestionsRoute = defineRoute<SuggestionsResponse>()({
-  endpoint: 'GET /internal/apm/suggestions' as const,
-  params: t.type({
-    query: t.intersection([
-      t.type({
-        fieldName: t.string,
-        fieldValue: t.string,
-      }),
-      rangeRt,
-      t.partial({ serviceName: t.string }),
-    ]),
-  }),
+export const barRoute = defineRoute<BarResponse>()({
+  endpoint: 'GET /internal/apm/bar',
+  params: t.type({ query: t.partial({ foo: t.string }) }),
 });

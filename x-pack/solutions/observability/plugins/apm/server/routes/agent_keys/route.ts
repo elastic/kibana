@@ -19,7 +19,7 @@ import { invalidateAgentKey } from './invalidate_agent_key';
 import { createAgentKey } from './create_agent_key';
 
 const agentKeysRoute = createApmServerRoute({
-  endpoint: routeDefinitions.agentKeys.endpoint,
+  endpoint: routeDefinitions.agentKeys.agentKeys.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
 
   handler: async (resources): Promise<AgentKeysResponse> => {
@@ -33,7 +33,7 @@ const agentKeysRoute = createApmServerRoute({
 });
 
 const agentKeysPrivilegesRoute = createApmServerRoute({
-  endpoint: routeDefinitions.agentKeysPrivileges.endpoint,
+  endpoint: routeDefinitions.agentKeys.agentKeysPrivileges.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<AgentKeysPrivilegesResponse> => {
     const { context, core } = resources;
@@ -49,8 +49,8 @@ const agentKeysPrivilegesRoute = createApmServerRoute({
 });
 
 const invalidateAgentKeyRoute = createApmServerRoute({
-  endpoint: routeDefinitions.invalidateAgentKey.endpoint,
-  params: routeDefinitions.invalidateAgentKey.params,
+  endpoint: routeDefinitions.agentKeys.invalidateAgentKey.endpoint,
+  params: routeDefinitions.agentKeys.invalidateAgentKey.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_settings_write'],
@@ -79,8 +79,8 @@ const invalidateAgentKeyRoute = createApmServerRoute({
 });
 
 const createAgentKeyRoute = createApmServerRoute({
-  endpoint: routeDefinitions.createAgentKey.endpoint,
-  params: routeDefinitions.createAgentKey.params,
+  endpoint: routeDefinitions.agentKeys.createAgentKey.endpoint,
+  params: routeDefinitions.agentKeys.createAgentKey.params,
   options: { tags: ['oas-tag:APM agent keys'] },
   security: {
     authz: {

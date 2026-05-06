@@ -8,8 +8,8 @@ import { routeDefinitions, type FooResponse } from '@kbn/apm-api-shared';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 
 const fooRoute = createApmServerRoute({
-  endpoint: routeDefinitions.foo.endpoint,
-  params: routeDefinitions.foo.params,
+  endpoint: routeDefinitions.foo.foo.endpoint,
+  params: routeDefinitions.foo.foo.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<FooResponse> => {
     return { msg: resources.params.query.foo ?? 'hello world' };

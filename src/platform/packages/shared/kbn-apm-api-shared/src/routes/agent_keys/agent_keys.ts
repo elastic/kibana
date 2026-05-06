@@ -6,12 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { defineRoute } from './types';
+import type { ApiKey } from '@kbn/security-plugin-types-common';
+import { defineRoute } from '../types';
 
-export interface HasDataResponse {
-  hasData: boolean;
+export interface AgentKeysResponse {
+  agentKeys: ApiKey[];
 }
 
-export const hasDataRoute = defineRoute<HasDataResponse>()({
-  endpoint: 'GET /internal/apm/has_data' as const,
+export const agentKeysRoute = defineRoute<AgentKeysResponse>()({
+  endpoint: 'GET /internal/apm/agent_keys',
 });

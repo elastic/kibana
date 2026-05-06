@@ -20,7 +20,10 @@ export type ExtractResponse<T> = T extends WithResponse<infer R extends Record<s
   : Record<string, never>;
 
 export function defineRoute<TResponse extends Record<string, any>>() {
-  return <TEndpoint extends string, TParams extends RouteParamsRT | undefined = undefined>(config: {
+  return <
+    const TEndpoint extends string,
+    TParams extends RouteParamsRT | undefined = undefined
+  >(config: {
     endpoint: TEndpoint;
     params?: TParams;
   }) => config as typeof config & WithResponse<TResponse>;
@@ -35,3 +38,11 @@ export type BuildRepository<T extends Record<string, { endpoint: string; params?
     any
   >;
 };
+
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void
+  ? I
+  : never;
+
+export type BuildGroupedRepository<
+  T extends Record<string, Record<string, { endpoint: string; params?: any }>>
+> = UnionToIntersection<{ [K in keyof T]: BuildRepository<T[K]> }[keyof T]>;

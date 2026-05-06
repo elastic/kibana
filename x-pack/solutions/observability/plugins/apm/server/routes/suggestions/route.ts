@@ -14,8 +14,8 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const suggestionsRoute = createApmServerRoute({
-  endpoint: routeDefinitions.suggestions.endpoint,
-  params: routeDefinitions.suggestions.params,
+  endpoint: routeDefinitions.suggestions.suggestions.endpoint,
+  params: routeDefinitions.suggestions.suggestions.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<SuggestionsResponse> => {
     const apmEventClient = await getApmEventClient(resources);

@@ -14,19 +14,13 @@ export {
   type APIReturnType,
 } from './src/create_call_apm_api';
 export { routeDefinitions } from './src/routes';
-export type { FooResponse } from './src/routes/foo';
-export type { HasDataResponse } from './src/routes/historical_data';
-export type { SuggestionsResponse } from './src/routes/suggestions';
-export type {
-  AgentKeysResponse,
-  AgentKeysPrivilegesResponse,
-  InvalidateAgentKeyResponse,
-  CreateAgentKeyResponse,
-} from './src/routes/agent_keys';
-export type {
-  UnifiedTracesByIdResponse,
-  UnifiedTracesByIdSummaryResponse,
-} from './src/routes/traces';
+export type { SharedAPMRouteRepository } from './src/routes';
+export type * from './src/routes/foo';
+export type * from './src/routes/bar';
+export type * from './src/routes/historical_data';
+export type * from './src/routes/suggestions';
+export type * from './src/routes/agent_keys';
+export type * from './src/routes/traces';
 export {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,

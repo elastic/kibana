@@ -81,8 +81,8 @@ const tracesRoute = createApmServerRoute({
 });
 
 const unifiedTracesByIdRoute = createApmServerRoute({
-  endpoint: routeDefinitions.unifiedTracesById.endpoint,
-  params: routeDefinitions.unifiedTracesById.params,
+  endpoint: routeDefinitions.traces.unifiedTracesById.endpoint,
+  params: routeDefinitions.traces.unifiedTracesById.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<UnifiedTracesByIdResponse> => {
     const [apmEventClient, logsClient] = await Promise.all([
@@ -131,8 +131,8 @@ const unifiedTracesByIdRoute = createApmServerRoute({
 });
 
 const unifiedTracesByIdSummaryRoute = createApmServerRoute({
-  endpoint: routeDefinitions.unifiedTracesByIdSummary.endpoint,
-  params: routeDefinitions.unifiedTracesByIdSummary.params,
+  endpoint: routeDefinitions.traces.unifiedTracesByIdSummary.endpoint,
+  params: routeDefinitions.traces.unifiedTracesByIdSummary.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<UnifiedTracesByIdSummaryResponse> => {
     const [apmEventClient, logsClient] = await Promise.all([
@@ -171,8 +171,8 @@ const unifiedTracesByIdSummaryRoute = createApmServerRoute({
 });
 
 const unifiedTracesByIdErrorsRoute = createApmServerRoute({
-  endpoint: routeDefinitions.unifiedTracesByIdErrors.endpoint,
-  params: routeDefinitions.unifiedTracesByIdErrors.params,
+  endpoint: routeDefinitions.traces.unifiedTracesByIdErrors.endpoint,
+  params: routeDefinitions.traces.unifiedTracesByIdErrors.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorsByTraceId> => {
     const [apmEventClient, logsClient] = await Promise.all([

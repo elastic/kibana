@@ -6,14 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import * as t from 'io-ts';
-import { defineRoute } from './types';
+import { defineRoute } from '../types';
 
-export interface BarResponse {
-  barMsg: string;
+export interface HasDataResponse {
+  hasData: boolean;
 }
 
-export const barRoute = defineRoute<BarResponse>()({
-  endpoint: 'GET /internal/apm/bar' as const,
-  params: t.type({ query: t.partial({ foo: t.string }) }),
+export const hasDataRoute = defineRoute<HasDataResponse>()({
+  endpoint: 'GET /internal/apm/has_data',
 });
