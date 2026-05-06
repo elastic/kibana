@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType, VariableNamePrefix } from '@kbn/esql-types';
 import { TIME_SPAN_UNITS } from '@elastic/esql';
