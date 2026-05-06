@@ -28,7 +28,7 @@ globalSetupHook(
     log.debug('[setup:discover] turning off isEsqlDefault by default for all tests');
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'discover.isEsqlDefault': 'false',
+        'discover.isEsqlDefault': false,
       },
     });
 
