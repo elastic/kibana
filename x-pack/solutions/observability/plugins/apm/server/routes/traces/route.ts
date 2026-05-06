@@ -14,6 +14,7 @@ import {
   type UnifiedTracesRootSpanResponse,
   type RootTransactionByTraceIdResponse,
   type TransactionByNameResponse,
+  type TransactionByIdResponse,
 } from '@kbn/apm-api-shared';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
@@ -267,19 +268,10 @@ const rootItemByTraceIdRoute = createApmServerRoute({
 });
 
 const transactionByIdRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/transactions/{transactionId}',
-  params: t.type({
-    path: t.type({
-      transactionId: t.string,
-    }),
-    query: rangeRt,
-  }),
+  endpoint: routeDefinitions.traces.transactionById.endpoint,
+  params: routeDefinitions.traces.transactionById.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    transaction?: Transaction;
-  }> => {
+  handler: async (resources): Promise<TransactionByIdResponse> => {
     const {
       params: {
         path: { transactionId },

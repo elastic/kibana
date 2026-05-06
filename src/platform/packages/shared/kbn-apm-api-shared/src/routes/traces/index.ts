@@ -12,6 +12,7 @@ import { unifiedTracesByIdErrorsRoute } from './unified_traces_by_id_errors';
 import { unifiedTracesRootSpanRoute } from './unified_traces_root_span';
 import { rootTransactionByTraceIdRoute } from './root_transaction_by_trace_id';
 import { transactionByNameRoute } from './transaction_by_name';
+import { transactionByIdRoute } from './transaction_by_id';
 
 export const tracesRouteDefinitions = {
   unifiedTracesById: unifiedTracesByIdRoute,
@@ -20,6 +21,7 @@ export const tracesRouteDefinitions = {
   unifiedTracesRootSpan: unifiedTracesRootSpanRoute,
   rootTransactionByTraceId: rootTransactionByTraceIdRoute,
   transactionByName: transactionByNameRoute,
+  transactionById: transactionByIdRoute,
 };
 
 export type { UnifiedTracesByIdResponse } from './unified_traces_by_id';
@@ -27,3 +29,4 @@ export type { UnifiedTracesByIdSummaryResponse } from './unified_traces_by_id_su
 export type { UnifiedTracesRootSpanResponse } from './unified_traces_root_span';
 export type { RootTransactionByTraceIdResponse } from './root_transaction_by_trace_id';
 export type { TransactionByNameResponse } from './transaction_by_name';
+export type { TransactionByIdResponse } from './transaction_by_id';
