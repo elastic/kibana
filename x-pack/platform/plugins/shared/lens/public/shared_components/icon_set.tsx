@@ -12,13 +12,13 @@ import {
   iconSortCriteria,
   type IconSet,
   sharedSetOfIcons,
-  annotationReferenceLineIconsSet,
+  annotationReferenceLineSharedSetOfIcons,
   emptyIconEntry,
 } from '@kbn/visualization-ui-components';
 
 export const referenceLineIconsSet: IconSet<AvailableReferenceLineIcon> = [
   emptyIconEntry,
-  ...annotationReferenceLineIconsSet,
+  ...annotationReferenceLineSharedSetOfIcons,
 ];
 
 export const metricIconsSet: IconSet<AvailableMetricIcon> = [

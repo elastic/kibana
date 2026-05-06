@@ -117,30 +117,30 @@ export const sharedSetOfIcons: IconSet<SharedSetOfIcons> = [
   },
 ];
 
-export const annotationReferenceLineIconsSet: IconSet<AnnotationReferenceLineIcons> = [
+export const annotationReferenceLineSharedSetOfIcons: IconSet<AnnotationReferenceLineIcons> = [
   ...sharedSetOfIcons,
   {
     value: 'circle',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.circleIconLabel', {
+    label: i18n.translate('annotationReferenceLine.iconSelect.circleIconLabel', {
       defaultMessage: 'Circle',
     }),
     icon: IconCircle,
   },
   {
     value: 'pinFilled',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.mapPinLabel', {
+    label: i18n.translate('annotationReferenceLine.iconSelect.mapPinLabel', {
       defaultMessage: 'Map Pin',
     }),
   },
   {
     value: 'starFilled',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.starFilledLabel', {
+    label: i18n.translate('annotationReferenceLine.iconSelect.starFilledLabel', {
       defaultMessage: 'Star filled',
     }),
   },
   {
     value: 'triangle',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.triangleIconLabel', {
+    label: i18n.translate('annotationReferenceLine.iconSelect.triangleIconLabel', {
       defaultMessage: 'Triangle',
     }),
     icon: IconTriangle,

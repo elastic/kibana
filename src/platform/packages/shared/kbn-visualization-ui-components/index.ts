@@ -37,7 +37,7 @@ export {
   sharedSetOfIcons,
   hasIcon,
   iconSortCriteria,
-  annotationReferenceLineIconsSet,
+  annotationReferenceLineSharedSetOfIcons,
   emptyIconEntry,
 } from './util';
 
