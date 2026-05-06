@@ -111,8 +111,33 @@ export class AgentContextLayerPlugin
 
     return {
       search: smlService.search,
-      checkItemsAccess: smlService.checkItemsAccess,
-      getDocuments: smlService.getDocuments,
+      getDocuments: async ({ ids, request, spaceId }) => {
+        if (ids.length === 0) {
+          return new Map();
+        }
+        const resolvedSpaceId = spaceId ?? spaces?.spacesService?.getSpaceId(request) ?? 'default';
+        const esClient = elasticsearch.client.asScoped(request);
+
+        // Authorize IDs first, then fetch only the documents the user can access.
+        // Unauthorized or missing IDs are absent from the returned map — callers
+        // cannot distinguish "denied" from "not found", which is intentional to
+        // avoid leaking existence of documents the user is not allowed to see.
+        const accessMap = await smlService.checkItemsAccess({
+          ids,
+          spaceId: resolvedSpaceId,
+          esClient,
+          request,
+        });
+        const authorizedIds = ids.filter((id) => accessMap.get(id) === true);
+        if (authorizedIds.length === 0) {
+          return new Map();
+        }
+        return smlService.getDocuments({
+          ids: authorizedIds,
+          spaceId: resolvedSpaceId,
+          esClient,
+        });
+      },
       getTypeDefinition: smlService.getTypeDefinition,
       resolveSmlAttachItems: (params) => resolveSmlAttachItems({ ...params, sml: smlService }),
       indexAttachment: async (params) => {

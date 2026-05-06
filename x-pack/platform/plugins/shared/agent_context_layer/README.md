@@ -29,13 +29,28 @@ interface AgentContextLayerPluginSetup {
 ```typescript
 interface AgentContextLayerPluginStart {
   search(params): Promise<{ results: SmlSearchResult[]; total: number }>;
-  checkItemsAccess(params): Promise<Map<string, boolean>>;
-  getDocuments(params): Promise<Map<string, SmlDocument>>;
+  /**
+   * Fetch SML documents by chunk IDs. Permission checks are performed internally
+   * — the returned map only contains documents the user (identified by `request`)
+   * is authorized to access. Unauthorized or missing IDs are absent from the
+   * result.
+   */
+  getDocuments(params: {
+    ids: string[];
+    request: KibanaRequest;
+    spaceId?: string; // resolved from request when omitted
+  }): Promise<Map<string, SmlDocument>>;
   getTypeDefinition(typeId: string): SmlTypeDefinition | undefined;
   resolveSmlAttachItems(params): Promise<SmlResolvedItemResult[]>;
   indexAttachment(params: SmlIndexAttachmentParams): Promise<void>;
 }
 ```
+
+> Note: an explicit `checkItemsAccess` primitive is intentionally **not** part of
+> the public contract. `getDocuments` is safe by default and `resolveSmlAttachItems`
+> covers the "convert chunks to attachments" workflow. If you find yourself wanting
+> a standalone access check, use `getDocuments` and look at which IDs are present
+> in the result.
 
 ## Registering an SML type
 
