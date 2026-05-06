@@ -65,14 +65,6 @@ export async function getKibanaServer(): Promise<Root> {
   );
 }
 
-export async function stopKibana(kibanaServer: Root) {
-  await timer(2_000);
-  await runWithTimeout(
-    kibanaServer.shutdown.bind(kibanaServer),
-    'Timeout waiting for Kibana to stop'
-  );
-}
-
 export async function stopElasticsearch(esServer: TestElasticsearchUtils) {
   await timer(2_000);
   await runWithTimeout(esServer.stop.bind(esServer), 'Timeout waiting for ES to stop');

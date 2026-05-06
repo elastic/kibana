@@ -28,7 +28,7 @@ export type MigrationAlgorithm = 'v2' | 'zdt';
 export interface TaskContext {
   gitRev: string;
   serverlessGitRev?: string;
-  esServer?: TestElasticsearchUtils;
+  esServer?: Promise<TestElasticsearchUtils>;
   kibanaServer?: Root;
   registeredTypes?: SavedObjectsType<any>[];
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
