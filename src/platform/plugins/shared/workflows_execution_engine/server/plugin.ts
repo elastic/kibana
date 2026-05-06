@@ -43,6 +43,7 @@ import {
   resolveInterruptedWorkflowResumeTask,
   resolveInterruptedWorkflowRunTask,
 } from './lib/task_recovery';
+import { normalizeEventChainVisitedWorkflowIds } from './lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
@@ -645,6 +646,23 @@ export class WorkflowsExecutionEnginePlugin
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const metadata = context.metadata as Record<string, unknown> | undefined;
+      const eventPayload = context.event as Record<string, unknown> | undefined;
+      let rootEventChainDepth: number | undefined;
+      if (eventPayload) {
+        const rawDepth = eventPayload.eventChainDepth;
+        if (typeof rawDepth === 'number' && !Number.isNaN(rawDepth) && rawDepth >= 0) {
+          rootEventChainDepth = rawDepth;
+        } else if (typeof rawDepth === 'string' && rawDepth.trim() !== '') {
+          const parsed = parseInt(rawDepth, 10);
+          if (!Number.isNaN(parsed) && parsed >= 0) {
+            rootEventChainDepth = parsed;
+          }
+        }
+      }
+      const rootVisited = normalizeEventChainVisitedWorkflowIds(
+        eventPayload?.eventChainVisitedWorkflowIds,
+        this.config.eventDriven.maxChainDepth
+      );
       const dispatchEventId =
         typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
       const workflowExecution: Partial<EsWorkflowExecution> = {
@@ -660,6 +678,8 @@ export class WorkflowsExecutionEnginePlugin
         executedBy: authenticatedUser,
         triggeredBy,
         ...(metadata ? { metadata } : {}),
+        ...(rootEventChainDepth !== undefined ? { eventChainDepth: rootEventChainDepth } : {}),
+        ...(rootVisited.length > 0 ? { eventChainVisitedWorkflowIds: rootVisited } : {}),
         ...(dispatchEventId ? { dispatchEventId } : {}),
       };
 
@@ -1225,6 +1245,9 @@ export class WorkflowsExecutionEnginePlugin
         spaceId,
         fakeRequest: request,
       });
+
+      // Same idea as cancel: nudge TM so the resume task runs as soon as possible
+      await workflowTaskManager.forceRunIdleTasks(executionId);
     };
 
     const workflowEventLoggerService = new WorkflowEventLoggerService(
@@ -1235,6 +1258,7 @@ export class WorkflowsExecutionEnginePlugin
 
     const triggerEventHandler = new TriggerEventHandler({
       coreStart,
+      workflowRepository,
       workflowsExtensions: plugins.workflowsExtensions,
       spaces: plugins.spaces?.spacesService,
       scheduleWorkflow,
