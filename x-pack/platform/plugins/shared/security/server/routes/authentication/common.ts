@@ -158,7 +158,7 @@ export function defineCommonRoutes({
         body: schema.object({
           providerType: schema.string({ maxLength: 1024 }),
           providerName: schema.string({ maxLength: 1024 }),
-          currentURL: schema.string({ maxLength: 8192 }),
+          currentURL: schema.string({ minLength: 0, maxLength: 8192 }),
           params: schema.conditional(
             schema.siblingRef('providerType'),
             schema.oneOf([
