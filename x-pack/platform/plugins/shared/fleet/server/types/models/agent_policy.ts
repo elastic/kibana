@@ -333,8 +333,8 @@ export const AgentPolicySchemaV6 = AgentPolicySchemaV5.extends({
         schema.object({
           requests: schema.maybe(
             schema.object({
-              memory: schema.maybe(schema.string()),
-              cpu: schema.maybe(schema.string()),
+              memory: schema.maybe(schema.string({ validate: validateMemory })),
+              cpu: schema.maybe(schema.string({ validate: validateCPU })),
             })
           ),
         })
