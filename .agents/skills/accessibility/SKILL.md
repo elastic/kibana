@@ -1,5 +1,6 @@
 ---
 name: accessibility
+disable-model-invocation: true
 description: Accessibility guidance for Kibana. Use this skill when working with or reviewing EUI components, resolving a11y-related (@elastic/eui) ESLint issues, and ensuring proper use of ARIA attributes, focus management, keyboard interactions, and accessible naming conventions.
 ---
 
