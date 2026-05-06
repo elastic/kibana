@@ -622,8 +622,13 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                     isRetryRun,
                     durationMs,
                   });
-                } else if (asRun?.runs && !asRun.totalFailed) {
+                } else if (asRun?.runs && asRun.totalFailed === 0) {
                   // Real success: both `runs` present and `totalFailed === 0`.
+                  // Strict `=== 0` (not `!asRun.totalFailed`) is deliberate:
+                  // the falsy collapse is the same pattern that produced the
+                  // original false-green bug (an `undefined` totalFailed would
+                  // satisfy `!totalFailed` and route here as a checkpointed
+                  // success).
                   recordCypressResult({
                     spec: filePath,
                     kind: 'success',
@@ -651,23 +656,35 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
           } catch (error) {
             log.error(error);
 
+            // Seed both arrays unconditionally for every spec in the group.
+            // If startup throws before the inner loop above seeds
+            // `failedSpecFilePaths`, the previous membership guard collapsed to
+            // false for every spec, leaving both arrays empty, no
+            // `runner_failure` record written, and `stillFailing` false at the
+            // final exit check — i.e. the same false-green checkpoint pathway
+            // this PR is closing, just triggered by an early-startup throw
+            // instead of a malformed run result.
+            const message = error instanceof Error ? error.message : String(error);
             for (const filePath of group.specFilePaths) {
-              if (failedSpecFilePaths.includes(filePath)) {
-                infraFailedSpecFilePaths.push(filePath);
-                recordCypressResult({
-                  spec: filePath,
-                  kind: 'runner_failure',
-                  status: 'thrown',
-                  message: error instanceof Error ? error.message : String(error),
-                  isRetryRun,
-                });
+              if (!failedSpecFilePaths.includes(filePath)) {
+                failedSpecFilePaths.push(filePath);
               }
+              if (!infraFailedSpecFilePaths.includes(filePath)) {
+                infraFailedSpecFilePaths.push(filePath);
+              }
+              recordCypressResult({
+                spec: filePath,
+                kind: 'runner_failure',
+                status: 'thrown',
+                message,
+                isRetryRun,
+              });
             }
 
             results.push({
               status: 'failed',
               failures: 1,
-              message: error.message,
+              message,
             });
           }
 
