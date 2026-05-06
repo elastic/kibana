@@ -30,6 +30,7 @@ export interface ProvisioningStatusDocs {
     entityType: string;
     status: string;
     message?: string;
+    errorCode?: string;
   };
 }
 
