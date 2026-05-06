@@ -8,9 +8,9 @@
 import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
-import type { estypes } from '@elastic/elasticsearch';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { DEMO_DENIED_EVENT_TITLES } from './use_fetch_latest_significant_event';
 
 interface SigeventsKibanaServices {
@@ -62,20 +62,11 @@ export interface SystemOverviewData {
   acknowledgedEvents: EventDocument[];
 }
 
-interface ImpactAggBucket {
-  key: string;
-  doc_count: number;
-  by_verdict: {
-    buckets: Array<{ key: string; doc_count: number }>;
-  };
-}
-
-interface ImpactAggResponse {
-  aggregations?: {
-    by_impact: {
-      buckets: ImpactAggBucket[];
-    };
-  };
+/**
+ * Builds an ES|QL WHERE clause fragment that excludes denied titles.
+ */
+function buildDenyFilter(): string {
+  return DEMO_DENIED_EVENT_TITLES.map((t) => `title != "${t}"`).join(' AND ');
 }
 
 export function useFetchSystemOverview(): {
@@ -95,39 +86,17 @@ export function useFetchSystemOverview(): {
   } = useQuery<SystemOverviewData, Error>(
     ['systemOverview'],
     async ({ signal }) => {
-      const eventsParams: estypes.SearchRequest = {
-        index: EVENTS_INDEX,
-        size: 5,
-        query: {
-          bool: {
-            must_not: [
-              { term: { verdict: 'demoted' } },
-              ...DEMO_DENIED_EVENT_TITLES.map((t) => ({ match_phrase: { title: t } })),
-            ],
-          },
-        },
-        sort: [{ criticality: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
-      };
+      const denyFilter = buildDenyFilter();
 
-      const priorityParams: estypes.SearchRequest = {
-        index: EVENTS_INDEX,
-        size: 0,
-        query: {
-          bool: {
-            must_not: DEMO_DENIED_EVENT_TITLES.map((t) => ({ match_phrase: { title: t } })),
-          },
-        },
-        aggs: {
-          by_impact: {
-            terms: { field: 'impact', size: 10 },
-            aggs: {
-              by_verdict: {
-                terms: { field: 'verdict', size: 10 },
-              },
-            },
-          },
-        },
-      };
+      const eventsQuery = `FROM ${EVENTS_INDEX}
+| WHERE verdict != "demoted" AND ${denyFilter}
+| SORT criticality DESC, \`@timestamp\` DESC
+| LIMIT 5
+| KEEP \`@timestamp\`, event_id, verdict_id, discovery_id, discovery_slug, verdict, title, summary, root_cause, rule_names, stream_names, criticality, impact, recommendations, recommended_action, last_reviewed_at`;
+
+      const countsQuery = `FROM ${EVENTS_INDEX}
+| WHERE ${denyFilter}
+| STATS count = COUNT(*) BY impact, verdict`;
 
       // Fetch KI features for entity and technology counts.
       // Gracefully degrade when Streams is disabled or the user lacks access.
@@ -137,26 +106,34 @@ export function useFetchSystemOverview(): {
             .catch(() => ({ features: [] as KiFeatureDocument[] }))
         : Promise.resolve({ features: [] as KiFeatureDocument[] });
 
-      const [eventsResp, priorityResp, featuresResp] = await Promise.all([
+      const [eventsResp, countsResp, featuresResp] = await Promise.all([
         lastValueFrom(
           dataService.search.search<
-            { params: estypes.SearchRequest },
-            { rawResponse: estypes.SearchResponse<EventDocument> }
-          >({ params: eventsParams }, { abortSignal: signal })
+            { params: ESQLSearchParams },
+            { rawResponse: ESQLSearchResponse }
+          >({ params: { query: eventsQuery } }, { strategy: 'esql', abortSignal: signal })
         ),
         lastValueFrom(
           dataService.search.search<
-            { params: estypes.SearchRequest },
-            { rawResponse: estypes.SearchResponse<unknown> & ImpactAggResponse }
-          >({ params: priorityParams }, { abortSignal: signal })
+            { params: ESQLSearchParams },
+            { rawResponse: ESQLSearchResponse }
+          >({ params: { query: countsQuery } }, { strategy: 'esql', abortSignal: signal })
         ),
         featuresPromise,
       ]);
 
-      const acknowledgedEvents = (eventsResp.rawResponse.hits.hits ?? [])
-        .map((hit) => hit._source)
-        .filter((doc): doc is EventDocument => doc !== undefined);
+      // Parse events: columnar → row objects
+      const eventsRaw = eventsResp.rawResponse;
+      const eventColumns = eventsRaw.columns.map((c) => c.name);
+      const acknowledgedEvents: EventDocument[] = (eventsRaw.values ?? []).map((row) => {
+        const obj: Record<string, unknown> = {};
+        eventColumns.forEach((col, i) => {
+          obj[col] = (row as unknown[])[i];
+        });
+        return obj as unknown as EventDocument;
+      });
 
+      // Parse counts: impact × verdict → priority buckets
       const sigEventsByPriority: Record<SigEventPriority, PriorityCounts> = {
         critical: { open: 0, resolved: 0 },
         high: { open: 0, resolved: 0 },
@@ -164,17 +141,24 @@ export function useFetchSystemOverview(): {
         low: { open: 0, resolved: 0 },
       };
 
-      const impactBuckets = priorityResp.rawResponse.aggregations?.by_impact?.buckets ?? [];
-      for (const bucket of impactBuckets) {
-        const priority = bucket.key as SigEventPriority;
-        if (!(priority in sigEventsByPriority)) {
-          continue;
-        }
-        for (const verdictBucket of bucket.by_verdict.buckets) {
-          if (verdictBucket.key === 'demoted') {
-            sigEventsByPriority[priority].resolved += verdictBucket.doc_count;
+      const countsRaw = countsResp.rawResponse;
+      const countColumns = countsRaw.columns.map((c) => c.name);
+      const countIdx = countColumns.indexOf('count');
+      const impactIdx = countColumns.indexOf('impact');
+      const verdictIdx = countColumns.indexOf('verdict');
+
+      for (const row of countsRaw.values ?? []) {
+        const typedRow = row as unknown[];
+        const count = typedRow[countIdx] as number;
+        const impact = typedRow[impactIdx] as string;
+        const verdict = typedRow[verdictIdx] as string;
+
+        if (impact in sigEventsByPriority) {
+          const priority = impact as SigEventPriority;
+          if (verdict === 'demoted') {
+            sigEventsByPriority[priority].resolved += count;
           } else {
-            sigEventsByPriority[priority].open += verdictBucket.doc_count;
+            sigEventsByPriority[priority].open += count;
           }
         }
       }

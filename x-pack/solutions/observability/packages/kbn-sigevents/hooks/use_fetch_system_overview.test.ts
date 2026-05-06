@@ -39,6 +39,44 @@ function createWrapper() {
 
 const timestamp = '2026-04-30T19:30:00Z';
 
+/**
+ * Helper: build an ES|QL columnar response from an array of EventDocument objects.
+ */
+function makeEsqlEventsResponse(docs: Array<Record<string, unknown>>) {
+  const columns = [
+    '@timestamp',
+    'event_id',
+    'verdict_id',
+    'discovery_id',
+    'discovery_slug',
+    'verdict',
+    'title',
+    'summary',
+    'root_cause',
+    'rule_names',
+    'stream_names',
+    'criticality',
+    'impact',
+    'recommendations',
+    'recommended_action',
+    'last_reviewed_at',
+  ].map((name) => ({ name, type: 'keyword' }));
+
+  const values = docs.map((doc) => columns.map((col) => doc[col.name] ?? null));
+
+  return { columns, values };
+}
+
+function makeEsqlCountsResponse(counts: Array<{ count: number; impact: string; verdict: string }>) {
+  const columns = [
+    { name: 'count', type: 'long' },
+    { name: 'impact', type: 'keyword' },
+    { name: 'verdict', type: 'keyword' },
+  ];
+  const values = counts.map((c) => [c.count, c.impact, c.verdict]);
+  return { columns, values };
+}
+
 describe('useFetchSystemOverview', () => {
   const acknowledgedDocs = makeAcknowledgedEvents(timestamp);
 
@@ -76,48 +114,24 @@ describe('useFetchSystemOverview', () => {
       ],
     });
 
-    mockSearch.mockImplementation(({ params }: { params: { index: string; size?: number } }) => {
-      if (params.index === 'sigevents-events-ms' && params.size === 5) {
+    mockSearch.mockImplementation(({ params }: { params: { query: string } }) => {
+      if (params.query.includes('LIMIT 5')) {
+        // Events query
         return of({
-          rawResponse: {
-            hits: {
-              hits: acknowledgedDocs.map((doc) => ({ _source: doc })),
-              total: { value: acknowledgedDocs.length, relation: 'eq' },
-            },
-          },
+          rawResponse: makeEsqlEventsResponse(acknowledgedDocs),
         });
       }
-      if (params.index === 'sigevents-events-ms' && params.size === 0) {
+      if (params.query.includes('STATS')) {
+        // Counts query
         return of({
-          rawResponse: {
-            hits: { hits: [], total: { value: 0, relation: 'eq' } },
-            aggregations: {
-              by_impact: {
-                buckets: [
-                  {
-                    key: 'medium',
-                    doc_count: 1,
-                    by_verdict: {
-                      buckets: [{ key: 'acknowledged', doc_count: 1 }],
-                    },
-                  },
-                  {
-                    key: 'low',
-                    doc_count: 2,
-                    by_verdict: {
-                      buckets: [
-                        { key: 'acknowledged', doc_count: 1 },
-                        { key: 'demoted', doc_count: 1 },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          },
+          rawResponse: makeEsqlCountsResponse([
+            { count: 1, impact: 'medium', verdict: 'acknowledged' },
+            { count: 1, impact: 'low', verdict: 'acknowledged' },
+            { count: 1, impact: 'low', verdict: 'demoted' },
+          ]),
         });
       }
-      return of({ rawResponse: { hits: { hits: [], total: { value: 0, relation: 'eq' } } } });
+      return of({ rawResponse: { columns: [], values: [] } });
     });
 
     mockUseKibana.mockReturnValue({
@@ -181,7 +195,7 @@ describe('useFetchSystemOverview', () => {
     );
   });
 
-  it('counts sigEvents by priority from impact agg', async () => {
+  it('counts sigEvents by priority from ES|QL stats', async () => {
     const { result } = renderHook(() => useFetchSystemOverview(), {
       wrapper: createWrapper(),
     });
@@ -213,38 +227,19 @@ describe('useFetchSystemOverview', () => {
   });
 
   it('skips unknown impact bucket keys without crashing', async () => {
-    mockSearch.mockImplementation(({ params }: { params: { index: string; size?: number } }) => {
-      if (params.index === 'sigevents-events-ms' && params.size === 5) {
+    mockSearch.mockImplementation(({ params }: { params: { query: string } }) => {
+      if (params.query.includes('LIMIT 5')) {
+        return of({ rawResponse: { columns: [], values: [] } });
+      }
+      if (params.query.includes('STATS')) {
         return of({
-          rawResponse: {
-            hits: { hits: [], total: { value: 0, relation: 'eq' } },
-          },
+          rawResponse: makeEsqlCountsResponse([
+            { count: 5, impact: 'unknown_priority', verdict: 'promoted' },
+            { count: 2, impact: 'critical', verdict: 'promoted' },
+          ]),
         });
       }
-      if (params.index === 'sigevents-events-ms' && params.size === 0) {
-        return of({
-          rawResponse: {
-            hits: { hits: [], total: { value: 0, relation: 'eq' } },
-            aggregations: {
-              by_impact: {
-                buckets: [
-                  {
-                    key: 'unknown_priority',
-                    doc_count: 5,
-                    by_verdict: { buckets: [{ key: 'promoted', doc_count: 5 }] },
-                  },
-                  {
-                    key: 'critical',
-                    doc_count: 2,
-                    by_verdict: { buckets: [{ key: 'promoted', doc_count: 2 }] },
-                  },
-                ],
-              },
-            },
-          },
-        });
-      }
-      return of({ rawResponse: { hits: { hits: [], total: { value: 0, relation: 'eq' } } } });
+      return of({ rawResponse: { columns: [], values: [] } });
     });
 
     const { result } = renderHook(() => useFetchSystemOverview(), {
@@ -257,26 +252,11 @@ describe('useFetchSystemOverview', () => {
     expect(result.current.data!.sigEventsByPriority.critical).toEqual({ open: 2, resolved: 0 });
   });
 
-  it('handles missing aggregations gracefully (null responses)', async () => {
+  it('handles empty ES|QL responses gracefully', async () => {
     mockHttpFetch.mockResolvedValue({ features: [] });
 
-    mockSearch.mockImplementation(({ params }: { params: { index: string; size?: number } }) => {
-      if (params.index === 'sigevents-events-ms' && params.size === 5) {
-        return of({
-          rawResponse: {
-            hits: { hits: [], total: { value: 0, relation: 'eq' } },
-          },
-        });
-      }
-      if (params.index === 'sigevents-events-ms' && params.size === 0) {
-        return of({
-          rawResponse: {
-            hits: { hits: [], total: { value: 0, relation: 'eq' } },
-            aggregations: undefined,
-          },
-        });
-      }
-      return of({ rawResponse: { hits: { hits: [], total: { value: 0, relation: 'eq' } } } });
+    mockSearch.mockImplementation(() => {
+      return of({ rawResponse: { columns: [], values: [] } });
     });
 
     const { result } = renderHook(() => useFetchSystemOverview(), {

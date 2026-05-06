@@ -190,7 +190,10 @@ export function useFetchLatestSignificantEvent(): {
     (): estypes.SearchRequest => ({
       index: SIGEVENTS_INDEX,
       query: {
-        term: { verdict: 'promoted' },
+        bool: {
+          must: [{ term: { verdict: 'promoted' } }],
+          must_not: DEMO_DENIED_EVENT_TITLES.map((t) => ({ term: { 'title.keyword': t } })),
+        },
       },
       sort: [{ '@timestamp': { order: 'desc' as const } }],
       size: 100,
