@@ -9,6 +9,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { isBoom } from '@hapi/boom';
+import { isKibanaHttpError } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { isKibanaResponse } from '@kbn/core-http-server';
@@ -142,7 +143,10 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           return response.custom(merge(opts, CLIENT_CLOSED_REQUEST));
         }
 
-        if (isBoom(error)) {
+        if (isKibanaHttpError(error)) {
+          opts.statusCode = error.output.statusCode;
+          opts.body.attributes.data = error.data;
+        } else if (isBoom(error)) {
           opts.statusCode = error.output.statusCode;
           opts.body.attributes.data = error?.data;
         }

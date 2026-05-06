@@ -8,9 +8,8 @@
  */
 
 import { modifyUrl } from '@kbn/std';
-import type { Request } from '@hapi/hapi';
 import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
-import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import { ensureRawRequest, type FrameworkRawRequest } from '@kbn/core-http-router-server-internal';
 
 /**
  * Core internal implementation of {@link IBasePath}
@@ -18,7 +17,7 @@ import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
  * @internal
  */
 export class BasePath implements IBasePath {
-  private readonly basePathCache = new WeakMap<Request, string>();
+  private readonly basePathCache = new WeakMap<FrameworkRawRequest, string>();
 
   public readonly serverBasePath: string;
   public readonly publicBaseUrl?: string;

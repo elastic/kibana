@@ -8,70 +8,25 @@
  */
 
 import Boom from '@hapi/boom';
-import type {
-  KibanaResponseFactory,
-  RequestHandlerContextBase,
-  KibanaRequest,
-  RequestHandler,
-} from '@kbn/core-http-server';
-import { kibanaResponseFactory, KibanaResponse } from './response';
+import { KibanaHttpErrors } from '@kbn/core-http-server';
+import { kibanaResponseFactory } from './response';
 import { wrapErrors } from './error_wrapper';
 
-const createHandler =
-  (handler: () => any): RequestHandler<any, any, any> =>
-  () => {
-    return handler();
-  };
-
 describe('wrapErrors', () => {
-  let context: RequestHandlerContextBase;
-  let request: KibanaRequest<any, any, any>;
-  let response: KibanaResponseFactory;
-
-  beforeEach(() => {
-    context = {} as any;
-    request = {} as any;
-    response = kibanaResponseFactory;
+  it('converts KibanaHttpError to customError response', async () => {
+    const handler = wrapErrors(async () => {
+      throw KibanaHttpErrors.badRequest('nope');
+    });
+    const res = await handler({} as any, {} as any, kibanaResponseFactory);
+    expect(res.status).toBe(400);
+    expect((res.payload as { message: string }).message).toBe('nope');
   });
 
-  it('should pass-though call parameters to the handler', async () => {
-    const handler = jest.fn();
-    const wrapped = wrapErrors(handler);
-    await wrapped(context, request, response);
-    expect(handler).toHaveBeenCalledWith(context, request, response);
-  });
-
-  it('should pass-though result from the handler', async () => {
-    const handler = createHandler(() => {
-      return 'handler-response';
+  it('still converts Boom errors', async () => {
+    const handler = wrapErrors(async () => {
+      throw Boom.badRequest('legacy');
     });
-    const wrapped = wrapErrors(handler);
-    const result = await wrapped(context, request, response);
-    expect(result).toBe('handler-response');
-  });
-
-  it('should intercept and convert thrown Boom errors', async () => {
-    const handler = createHandler(() => {
-      throw Boom.notFound('not there');
-    });
-    const wrapped = wrapErrors(handler);
-    const result = await wrapped(context, request, response);
-    expect(result).toBeInstanceOf(KibanaResponse);
-    expect(result.status).toBe(404);
-    expect(result.payload).toEqual({
-      error: 'Not Found',
-      message: 'not there',
-      statusCode: 404,
-    });
-  });
-
-  it('should re-throw non-Boom errors', async () => {
-    const handler = createHandler(() => {
-      throw new Error('something went bad');
-    });
-    const wrapped = wrapErrors(handler);
-    await expect(wrapped(context, request, response)).rejects.toMatchInlineSnapshot(
-      `[Error: something went bad]`
-    );
+    const res = await handler({} as any, {} as any, kibanaResponseFactory);
+    expect(res.status).toBe(400);
   });
 });

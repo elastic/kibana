@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { finished } from 'node:stream/promises';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
+import fastifyMultipart from '@fastify/multipart';
+import type { RouterRoute } from '@kbn/core-http-server';
+
+import { KIBANA_HAPI_COMPAT_REQUEST } from './fastify_auth';
+
+/** Matches the default `parts` limit in `@fastify/multipart` unless overridden at register time. */
+const MULTIPART_MAX_PARTS = 1000;
+
+function acceptsMultipartRoute(accepts: string | readonly string[] | undefined): boolean {
+  if (accepts == null) {
+    return false;
+  }
+  const list = Array.isArray(accepts) ? accepts : [accepts];
+  return list.some((mime) => mime === 'multipart/form-data');
+}
+
+function multipartRequestOptions(fileSize: number) {
+  return { limits: { fileSize, parts: MULTIPART_MAX_PARTS } };
+}
+
+async function drainMultipartBody(req: FastifyRequest, maxFileSize: number): Promise<void> {
+  try {
+    for await (const part of req.parts(multipartRequestOptions(maxFileSize))) {
+      if (part.type === 'file') {
+        part.file.resume();
+        await finished(part.file);
+      }
+    }
+  } catch {
+    // Malformed multipart or aborted request — ignore so the request cycle can finish.
+  }
+}
+
+/**
+ * Registers `@fastify/multipart` (adds the `multipart/form-data` content-type parser) and
+ * builds a Hapi-compatible {@link FastifyRequest.body} for routes that declare
+ * `options.body.accepts: 'multipart/form-data'` (saved_objects `_import`, etc.).
+ *
+ * Runs in `preValidation` **before** {@link registerFastifyAuthentication} so auth builds
+ * the cached Hapi-compat request with the parsed payload. Drops the compat cache when we
+ * mutate `req.body` so `makeRouteHandler` reconstructs `payload` from the multipart parse.
+ *
+ * @internal
+ */
+export async function registerFastifyMultipartAndKibanaBodyHook(params: {
+  fastify: FastifyInstance;
+  maxPayloadBytes: number;
+}): Promise<void> {
+  const { fastify, maxPayloadBytes } = params;
+
+  await fastify.register(fastifyMultipart, {
+    limits: {
+      fileSize: maxPayloadBytes,
+      parts: MULTIPART_MAX_PARTS,
+    },
+  });
+
+  fastify.addHook('preValidation', async (req: FastifyRequest) => {
+    const isMultipart = (req as FastifyRequest & { isMultipart?: () => boolean }).isMultipart?.();
+    if (!isMultipart) {
+      return;
+    }
+
+    const app = (req as FastifyRequest & { app?: Record<string | symbol, unknown> }).app;
+    const route = app?.matchedRoute as RouterRoute | undefined;
+    const accepts = route?.options?.body?.accepts as string | readonly string[] | undefined;
+
+    if (!acceptsMultipartRoute(accepts)) {
+      await drainMultipartBody(req, maxPayloadBytes);
+      return;
+    }
+
+    const maxBytes = route?.options?.body?.maxBytes ?? maxPayloadBytes;
+    const body: Record<string, unknown> = {};
+
+    for await (const part of req.parts(multipartRequestOptions(maxBytes))) {
+      if (part.type === 'file') {
+        const stream = part.file;
+        Object.assign(stream as { hapi?: { filename: string } }, {
+          hapi: { filename: part.filename ?? 'upload.ndjson' },
+        });
+        body[part.fieldname] = stream;
+      } else if (part.type === 'field') {
+        body[part.fieldname] = part.value;
+      }
+    }
+
+    req.body = body;
+    if (app) {
+      delete app[KIBANA_HAPI_COMPAT_REQUEST];
+    }
+  });
+}

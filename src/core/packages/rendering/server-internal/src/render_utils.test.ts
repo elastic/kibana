@@ -7,7 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getThemeStylesheetPaths, getCommonStylesheetPaths, getScriptPaths } from './render_utils';
+import {
+  getBundlesHref,
+  getThemeStylesheetPaths,
+  getCommonStylesheetPaths,
+  getScriptPaths,
+} from './render_utils';
+
+describe('getBundlesHref', () => {
+  it('does not produce protocol-relative URLs when baseHref is a lone slash (Fastify static assets digest regression)', () => {
+    expect(getBundlesHref('/')).toBe('/bundles');
+    expect(getBundlesHref('')).toBe('/bundles');
+  });
+
+  it('appends /bundles for path and CDN bases', () => {
+    expect(getBundlesHref('/abc123')).toBe('/abc123/bundles');
+    expect(getBundlesHref('https://cdn.example/kibana')).toBe('https://cdn.example/kibana/bundles');
+  });
+});
 
 describe('getScriptPaths', () => {
   it('returns the correct list when darkMode is `system`', () => {

@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validateHapiRequest validates hapi requests and returns kibana requests: error case 1`] = `
+Object {
+  "body": "[request body.ok]: expected value to equal [true]",
+  "status": 400,
+}
+`;

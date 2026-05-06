@@ -95,7 +95,15 @@ export type {
   RouterDeprecatedApiDetails,
   RouterAccessDeprecatedApiDetails,
   RouterRouteDeprecatedApiDetails,
+  HttpFrameworkResponse,
+  HttpFrameworkResponseToolkit,
 } from './router';
+export type {
+  KibanaHttpErrorOptions,
+  KibanaHttpErrorOutput,
+  KibanaHttpErrorOutputPayload,
+} from './kibana_http_error';
+export { KibanaHttpError, KibanaHttpErrors, isKibanaHttpError } from './kibana_http_error';
 export type { IKibanaSocket } from './socket';
 export type { RequestTiming, Timer, TimingEvent } from './timing';
 export type {
@@ -106,5 +114,5 @@ export type {
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from './response_factory';
-export type { RawRequest, FakeRawRequest } from './raw_request';
+export type { RawRequest, FakeRawRequest, OpaqueRawRequest } from './raw_request';
 export { getRequestValidation, getResponseValidation, isFullValidatorContainer } from './utils';

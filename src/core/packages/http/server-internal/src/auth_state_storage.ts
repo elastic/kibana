@@ -10,11 +10,11 @@
 import type { Request } from '@hapi/hapi';
 import type { KibanaRequest, IsAuthenticated } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';
-import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import { ensureRawRequest, type FrameworkRawRequest } from '@kbn/core-http-router-server-internal';
 
 /** @internal */
 export class AuthStateStorage {
-  private readonly storage = new WeakMap<Request, unknown>();
+  private readonly storage = new WeakMap<FrameworkRawRequest, unknown>();
 
   constructor(private readonly canBeAuthenticated: () => boolean) {}
 

@@ -133,9 +133,14 @@ export class SessionCookie {
     sessionValue: Readonly<Omit<SessionCookieValue, 'path'>>,
     options?: SessionStorageSetOptions
   ) {
-    (await this.cookieSessionValueStorage)
-      .asScoped(request)
-      .set({ ...sessionValue, path: this.serverBasePath }, options);
+    // Fastify-backed cookie storage seals asynchronously (`@hapi/iron`); Hapi's implementation
+    // sets cookies synchronously via `h.state`. Always await so session creation finishes
+    // before the HTTP response is finalized — otherwise Set-Cookie runs after headers are sent.
+    await Promise.resolve(
+      (await this.cookieSessionValueStorage)
+        .asScoped(request)
+        .set({ ...sessionValue, path: this.serverBasePath }, options)
+    );
   }
 
   /**

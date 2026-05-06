@@ -9,7 +9,6 @@
 
 import type { RouteOptionsCors, ServerOptions } from '@hapi/hapi';
 import type { IHttpConfig } from './types';
-import { defaultValidationErrorHandler } from './default_validation_error_handler';
 import { getServerListener } from './get_listener';
 
 const corsAllowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'];
@@ -45,7 +44,6 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
         timeout: config.payloadTimeout,
       },
       validate: {
-        failAction: defaultValidationErrorHandler,
         options: {
           abortEarly: false,
         },

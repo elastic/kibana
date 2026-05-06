@@ -261,6 +261,16 @@ export class HttpServer {
     const config = await firstValueFrom(config$);
     this.config = config;
 
+    if (config.experimental?.framework === 'fastify') {
+      // The Fastify backend is being introduced gradually. This branch only logs intent today,
+      // because the swap is performed in `HttpService` which selects the framework-specific
+      // implementation. Tests assert this log line as a smoke check.
+      this.log.warn(
+        '[experimental] server.experimental.framework is set to "fastify", but this `HttpServer` (Hapi) instance was started. ' +
+          'The Fastify backend is being introduced incrementally; this warning tracks paths that have not yet been migrated.'
+      );
+    }
+
     const serverOptions = getServerOptions(config);
 
     this.server = createServer(serverOptions);

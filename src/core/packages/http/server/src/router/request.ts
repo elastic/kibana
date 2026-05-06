@@ -9,7 +9,6 @@
 
 import type { URL } from 'url';
 import type { Span as OTelSpan } from '@opentelemetry/api';
-import type { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
 import type { Observable } from 'rxjs';
 import type { Span } from 'elastic-apm-node';
 import type { RecursiveReadonly } from '@kbn/utility-types';
@@ -26,9 +25,10 @@ export type RouteSecurityGetter = (request?: {
 export type InternalRouteSecurity = RouteSecurity | RouteSecurityGetter;
 
 /**
+ * Application metadata attached to a route (`route.settings.app` in the HTTP framework).
  * @public
  */
-export interface KibanaRouteOptions extends RouteOptionsApp {
+export interface KibanaRouteOptions {
   deprecated?: RouteDeprecationInfo;
   xsrfRequired: boolean;
   access: 'internal' | 'public';
@@ -45,9 +45,10 @@ export interface RequestTimingState {
 }
 
 /**
+ * Per-request application state (`request.app` in the HTTP framework).
  * @public
  */
-export interface KibanaRequestState extends RequestApplicationState {
+export interface KibanaRequestState {
   requestId: string;
   requestUuid: string;
   rewrittenUrl?: URL;

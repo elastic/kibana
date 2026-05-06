@@ -96,6 +96,8 @@ export type {
   RouterDeprecatedApiDetails,
   RouterAccessDeprecatedApiDetails,
   RouterRouteDeprecatedApiDetails,
+  HttpFrameworkResponse,
+  HttpFrameworkResponseToolkit,
   IKibanaSocket,
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
@@ -105,6 +107,10 @@ export type {
   LifecycleResponseFactory,
   RawRequest,
   FakeRawRequest,
+  OpaqueRawRequest,
+  KibanaHttpErrorOptions,
+  KibanaHttpErrorOutput,
+  KibanaHttpErrorOutputPayload,
   RouteValidator,
   RouteValidatorRequestAndResponses,
   RouteValidatorFullConfigRequest,
@@ -134,6 +140,7 @@ export type {
   TimingEvent,
   RequestTimingState,
 } from './src/router';
+export { KibanaHttpError, KibanaHttpErrors, isKibanaHttpError } from './src/router';
 export {
   validBodyOutput,
   RouteValidationError,

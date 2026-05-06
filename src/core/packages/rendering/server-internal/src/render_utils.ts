@@ -30,7 +30,13 @@ export const getSettingValue = <T>(
   return convert(value);
 };
 
-export const getBundlesHref = (baseHref: string): string => `${baseHref}/bundles`;
+export const getBundlesHref = (baseHref: string): string => {
+  const base = baseHref.replace(/\/+$/, '');
+  if (base === '') {
+    return '/bundles';
+  }
+  return `${base}/bundles`;
+};
 
 export const getScriptPaths = ({
   themeName,

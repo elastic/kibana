@@ -1,0 +1,224 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import * as iron from '@hapi/iron';
+import { isDeepStrictEqual } from 'util';
+import type { Logger } from '@kbn/logging';
+import type {
+  KibanaRequest,
+  SessionStorage,
+  SessionStorageCookieOptions,
+  SessionStorageFactory,
+  SessionStorageSetOptions,
+} from '@kbn/core-http-server';
+
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+
+const IRON_DEFAULTS: iron.SealOptions = {
+  ...iron.defaults,
+};
+
+interface RawHttpAccess {
+  cookieHeader: string | undefined;
+  setCookies: (cookieStrings: string[]) => void;
+}
+
+/**
+ * Reads/writes the raw HTTP cookie state from the request the Kibana router resolved.
+ * This intentionally targets the FastifyReply raw `ServerResponse`, which is exposed via
+ * the Hapi-shaped `raw.res` field on the request object built by
+ * `buildHapiCompatRequestFromFastify`.
+ */
+const getRawHttpAccess = (kbnRequest: KibanaRequest): RawHttpAccess | null => {
+  const raw = ensureRawRequest(kbnRequest) as unknown as {
+    raw?: { req?: { headers?: { cookie?: string } }; res?: import('http').ServerResponse };
+    headers?: { cookie?: string };
+  };
+  const cookieHeader = raw.raw?.req?.headers?.cookie ?? raw.headers?.cookie;
+  const res = raw.raw?.res;
+  if (!res) return null;
+  return {
+    cookieHeader,
+    setCookies(cookieStrings) {
+      if (!cookieStrings.length) return;
+      if (res.headersSent) {
+        return;
+      }
+      const existing = res.getHeader('Set-Cookie');
+      const merged: string[] = Array.isArray(existing)
+        ? existing.map(String)
+        : existing != null
+        ? [String(existing)]
+        : [];
+      for (const c of cookieStrings) merged.push(c);
+      res.setHeader('Set-Cookie', merged);
+    },
+  };
+};
+
+const parseCookieHeader = (header: string | undefined, name: string): string | undefined => {
+  if (!header) return undefined;
+  for (const part of header.split(';')) {
+    const eq = part.indexOf('=');
+    if (eq < 0) continue;
+    const k = part.slice(0, eq).trim();
+    if (k !== name) continue;
+    return decodeURIComponent(part.slice(eq + 1).trim());
+  }
+  return undefined;
+};
+
+interface SerializeOptions {
+  isSecure?: boolean;
+  isHttpOnly?: boolean;
+  sameSite?: 'Strict' | 'Lax' | 'None' | false;
+  path: string;
+  partitioned?: boolean;
+  expires?: Date;
+}
+
+const serializeCookie = (name: string, value: string, options: SerializeOptions): string => {
+  const parts: string[] = [`${name}=${encodeURIComponent(value)}`];
+  parts.push(`Path=${options.path}`);
+  if (options.isHttpOnly) parts.push('HttpOnly');
+  if (options.isSecure) parts.push('Secure');
+  if (options.sameSite) parts.push(`SameSite=${options.sameSite}`);
+  if (options.partitioned) parts.push('Partitioned');
+  if (options.expires) parts.push(`Expires=${options.expires.toUTCString()}`);
+  return parts.join('; ');
+};
+
+class ScopedFastifyCookieSessionStorage<T extends object> implements SessionStorage<T> {
+  constructor(
+    private readonly log: Logger,
+    private readonly cookieOptions: SessionStorageCookieOptions<T>,
+    private readonly basePath: string,
+    private readonly disableEmbedding: boolean,
+    private readonly request: KibanaRequest
+  ) {}
+
+  public async get(): Promise<T | null> {
+    const access = getRawHttpAccess(this.request);
+    if (!access) return null;
+
+    const sealed = parseCookieHeader(access.cookieHeader, this.cookieOptions.name);
+    if (!sealed) return null;
+
+    try {
+      const value = (await iron.unseal(
+        sealed,
+        this.cookieOptions.encryptionKey,
+        IRON_DEFAULTS
+      )) as T;
+      const result = this.cookieOptions.validate(value);
+      if (!result.isValid) {
+        this.clearWithPath(result.path ?? this.basePath);
+        return null;
+      }
+      return value;
+    } catch (err) {
+      this.log.debug(`Failed to read session cookie: ${(err as Error)?.message ?? err}`);
+      return null;
+    }
+  }
+
+  public async set(sessionValue: T, options?: SessionStorageSetOptions): Promise<void> {
+    const access = getRawHttpAccess(this.request);
+    if (!access) return;
+
+    const sealed = await iron.seal(
+      sessionValue as unknown,
+      this.cookieOptions.encryptionKey,
+      IRON_DEFAULTS
+    );
+    const isSecure = options?.isSecure ?? this.cookieOptions.isSecure;
+    const sameSite = options?.sameSite ?? this.cookieOptions.sameSite ?? false;
+    const partitioned = sameSite === 'None' && Boolean(isSecure) && !this.disableEmbedding;
+
+    access.setCookies([
+      serializeCookie(this.cookieOptions.name, sealed, {
+        path: this.basePath,
+        isHttpOnly: true,
+        isSecure: Boolean(isSecure),
+        sameSite,
+        partitioned,
+      }),
+    ]);
+  }
+
+  public clear(): void {
+    this.clearWithPath(this.basePath);
+  }
+
+  private clearWithPath(path: string) {
+    const access = getRawHttpAccess(this.request);
+    if (!access) return;
+    access.setCookies([
+      serializeCookie(this.cookieOptions.name, '', {
+        path: path || '/',
+        isHttpOnly: true,
+        isSecure: this.cookieOptions.isSecure,
+        sameSite: this.cookieOptions.sameSite ?? false,
+        expires: new Date(0),
+      }),
+    ]);
+  }
+}
+
+const validateOptions = <T>(options: SessionStorageCookieOptions<T>) => {
+  if (options.sameSite === 'None' && options.isSecure !== true) {
+    throw new Error('"SameSite: None" requires Secure connection');
+  }
+};
+
+/**
+ * Creates a Fastify-backed `SessionStorageFactory` whose cookie wire format is identical
+ * to the Hapi backend (`@hapi/cookie` -> `@hapi/iron`). This means sessions survive a
+ * runtime swap of the `server.experimental.framework` flag.
+ *
+ * @internal
+ */
+export const createFastifyCookieSessionStorageFactory = async <T extends object>(
+  log: Logger,
+  cookieOptions: SessionStorageCookieOptions<T>,
+  disableEmbedding: boolean,
+  basePath?: string
+): Promise<SessionStorageFactory<T>> => {
+  validateOptions(cookieOptions);
+  const path = basePath === undefined ? '/' : basePath;
+  // Used by the in-development equality assertion to stop accidental option changes
+  // surprising operators after migration.
+  if (process.env.KIBANA_FASTIFY_DEBUG_SESSIONS) {
+    log.warn(
+      `[Fastify backend] cookie session options snapshot: ${JSON.stringify({
+        name: cookieOptions.name,
+        isSecure: cookieOptions.isSecure,
+        sameSite: cookieOptions.sameSite,
+        partitionedExpected:
+          cookieOptions.sameSite === 'None' && cookieOptions.isSecure && !disableEmbedding,
+        path,
+      })}`
+    );
+  }
+  // Reference `isDeepStrictEqual` so the import isn't dropped under tree-shaking; future
+  // work may want to compare cookie payloads to avoid redundant Set-Cookie writes.
+  void isDeepStrictEqual;
+
+  return {
+    asScoped(request: KibanaRequest) {
+      return new ScopedFastifyCookieSessionStorage<T>(
+        log,
+        cookieOptions,
+        path,
+        disableEmbedding,
+        request
+      );
+    },
+  };
+};
