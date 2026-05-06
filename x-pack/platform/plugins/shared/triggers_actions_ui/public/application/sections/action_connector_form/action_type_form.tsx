@@ -412,20 +412,6 @@ export const ActionTypeForm = ({
     setActionFrequencyProperty('summary', summary, index);
   };
 
-  const actionNotifyWhen = (
-    <RuleActionsNotifyWhen
-      frequency={actionItem.frequency}
-      throttle={actionThrottle}
-      throttleUnit={actionThrottleUnit}
-      hasAlertsMappings={hasAlertsMappings}
-      onChange={onActionFrequencyChange}
-      showMinimumThrottleWarning={showMinimumThrottleWarning}
-      showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
-      notifyWhenSelectOptions={notifyWhenSelectOptions}
-      onUseDefaultMessage={() => setUseDefaultMessage(true)}
-    />
-  );
-
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
@@ -449,6 +435,24 @@ export const ActionTypeForm = ({
   const ruleType = ruleTypeId ? ruleTypesState.data.get(ruleTypeId) : null;
 
   const showActionAlertsFilter = ruleType?.hasAlertsMappings || producerId === AlertConsumers.SIEM;
+
+  const isRecoveredActionGroup =
+    !!selectedActionGroup?.id && selectedActionGroup.id === ruleType?.recoveryActionGroup?.id;
+
+  const actionNotifyWhen = (
+    <RuleActionsNotifyWhen
+      frequency={actionItem.frequency}
+      throttle={actionThrottle}
+      throttleUnit={actionThrottleUnit}
+      hasAlertsMappings={hasAlertsMappings}
+      onChange={onActionFrequencyChange}
+      showMinimumThrottleWarning={showMinimumThrottleWarning}
+      showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+      notifyWhenSelectOptions={notifyWhenSelectOptions}
+      onUseDefaultMessage={() => setUseDefaultMessage(true)}
+      isRecoveredActionGroup={isRecoveredActionGroup}
+    />
+  );
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
