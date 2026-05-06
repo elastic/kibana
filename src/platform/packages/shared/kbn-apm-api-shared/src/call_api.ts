@@ -42,6 +42,8 @@ export async function callApi<T = void>(
   fetchOptions: FetchOptions
 ): Promise<T> {
   const inspectableEsQueriesEnabled: boolean =
+    // For now this needs to be hardcoded as we cannot import the key, as it lives inside the observability plugin,
+    // and refactoring it is outside the scope of this PR, but ideally this should be imported from the same place as the key is defined
     uiSettings?.get('observability:enableInspectEsQueries') ?? false;
   const cacheKey = getCacheKey(fetchOptions);
   const cacheResponse = cache.get(cacheKey);
