@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiModal,
   EuiModalHeader,
@@ -19,6 +19,7 @@ import {
   EuiSuperSelect,
   EuiCheckbox,
   EuiSpacer,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -88,6 +89,11 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
     setExportFiltered((prev) => !prev);
   }, []);
 
+  const tooltipAnchorProps = useMemo(
+    () => ({ 'data-test-subj': 'osqueryExportFilteredCheckboxTooltip' } as const),
+    []
+  );
+
   return (
     <EuiModal
       onClose={onClose}
@@ -119,20 +125,29 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
           />
         </EuiFormRow>
 
-        {hasActiveFilters && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCheckbox
-              id="export-filtered-results"
-              label={i18n.translate('xpack.osquery.exportModal.exportFiltered', {
-                defaultMessage: 'Only export filtered results',
-              })}
-              checked={exportFiltered}
-              onChange={handleFilteredToggle}
-              data-test-subj="osqueryExportFilteredCheckbox"
-            />
-          </>
-        )}
+        <EuiSpacer size="m" />
+        <EuiToolTip
+          content={
+            hasActiveFilters
+              ? undefined
+              : i18n.translate('xpack.osquery.exportModal.exportFilteredDisabledTooltip', {
+                  defaultMessage:
+                    'Apply a search query or filter to enable exporting only filtered results.',
+                })
+          }
+          anchorProps={tooltipAnchorProps}
+        >
+          <EuiCheckbox
+            id="export-filtered-results"
+            label={i18n.translate('xpack.osquery.exportModal.exportFiltered', {
+              defaultMessage: 'Only export filtered results',
+            })}
+            checked={hasActiveFilters && exportFiltered}
+            onChange={handleFilteredToggle}
+            disabled={!hasActiveFilters}
+            data-test-subj="osqueryExportFilteredCheckbox"
+          />
+        </EuiToolTip>
 
         {filteredTotal != null && filteredTotal >= LARGE_EXPORT_THRESHOLD && (
           <>

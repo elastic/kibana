@@ -58,9 +58,14 @@ export const useExportResults = ({
           }),
         }).id;
 
+        const kuery = filters?.kuery;
+        const esFilters = filters?.esFilters?.length ? filters.esFilters : undefined;
         const body =
-          filters?.kuery || (filters?.esFilters && filters.esFilters.length > 0)
-            ? { kuery: filters.kuery, esFilters: filters.esFilters }
+          kuery || esFilters
+            ? {
+                ...(kuery && { kuery }),
+                ...(esFilters && { esFilters }),
+              }
             : undefined;
 
         const response = await http.fetch(path, {
@@ -109,7 +114,13 @@ export const useExportResults = ({
         document.body.appendChild(anchor);
         anchor.click();
         document.body.removeChild(anchor);
-        URL.revokeObjectURL(url);
+        // Defer revocation: in some browsers (notably Safari and older
+        // Chromium) `anchor.click()` schedules the actual download
+        // asynchronously, so revoking the URL on the next synchronous line
+        // can race with the browser fetching the blob and produce a broken
+        // download. A `setTimeout(_, 0)` lets the browser pick up the URL
+        // before we drop it.
+        setTimeout(() => URL.revokeObjectURL(url), 0);
 
         notifications.toasts.addSuccess(
           i18n.translate('xpack.osquery.exportResults.successToast', {

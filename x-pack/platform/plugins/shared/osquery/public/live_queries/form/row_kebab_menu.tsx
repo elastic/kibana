@@ -16,7 +16,7 @@ import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
 import { useExportResults } from '../../results/use_export_results';
 import { ExportResultsModal } from '../../results/export_results_modal';
-import { useExportFiltersContext } from '../../results/export_filters_context';
+import { useExportFilters } from '../../results/export_filters_context';
 import type { ExportFormat } from '../../results/use_export_results';
 import type { AddToTimelineHandler } from '../../types';
 
@@ -33,14 +33,13 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
   ({ row, actionId, agentIds, addToTimeline, scheduleId, executionCount }) => {
     const isCasesAttachment = useContext(CasesAttachmentWrapperContext);
     const isExportEnabled = useIsExperimentalFeatureEnabled('exportResults');
-    const exportFiltersCtx = useExportFiltersContext();
     const [isOpen, setIsOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const close = useCallback(() => setIsOpen(false), []);
     const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
 
     const rowActionId = row.action_id ?? '';
-    const exportFilters = exportFiltersCtx?.getFilters(rowActionId);
+    const exportFilters = useExportFilters(row.action_id);
     const hasActiveFilters = !!(
       exportFilters?.kuery ||
       (exportFilters?.activeFilters && exportFilters.activeFilters.length > 0)

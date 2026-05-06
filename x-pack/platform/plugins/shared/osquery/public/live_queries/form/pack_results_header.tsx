@@ -25,7 +25,7 @@ import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
 import { useKibana } from '../../common/lib/kibana';
 import { ExportResultsButton } from '../../results/export_results_button';
-import { useExportFiltersContext } from '../../results/export_filters_context';
+import { useExportFilters } from '../../results/export_filters_context';
 import type { AddToTimelineHandler } from '../../types';
 
 const ADD_TAGS_LABEL = i18n.translate('xpack.osquery.packResultsHeader.addTagsLabel', {
@@ -89,8 +89,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
     // available via the row kebab menu.
     const exportQueryId = queryIds.length === 1 ? queryIds[0] : undefined;
     const showExport = isHistoryEnabled && isExportEnabled && !!exportQueryId;
-    const exportFiltersCtx = useExportFiltersContext();
-    const exportFilters = exportQueryId ? exportFiltersCtx?.getFilters(exportQueryId) : undefined;
+    const exportFilters = useExportFilters(exportQueryId);
 
     const { data: liveQueryDetails } = useLiveQueryDetails({
       actionId,

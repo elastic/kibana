@@ -238,22 +238,20 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     executionCount,
   });
 
-  // Publish active filters to context so the page-header export button and
-  // the row kebab menu can read them. We extract `setFilters` (which is stable)
-  // rather than depending on the whole context value, since the context value
-  // changes whenever the underlying filters map updates and would otherwise
-  // re-trigger this effect.
-  const setExportFilters = useExportFiltersContext()?.setFilters;
+  // Publish active filters to the ref-backed context so the page-header export
+  // button and row kebab menu can read them. The store does not re-render this
+  // tree on writes; only subscribers of this `actionId` re-render.
+  const exportFiltersStore = useExportFiltersContext();
   const unfilteredTotal = actionResultsData?.aggregations?.totalRowCount;
   useEffect(() => {
-    setExportFilters?.(actionId, {
+    exportFiltersStore?.setFilters(actionId, {
       kuery: userKuery,
       activeFilters,
       filteredTotal: allResultsData?.total,
       total: unfilteredTotal,
     });
   }, [
-    setExportFilters,
+    exportFiltersStore,
     actionId,
     userKuery,
     activeFilters,
