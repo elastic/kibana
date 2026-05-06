@@ -19,6 +19,7 @@ import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
 
 import type { MlCoreSetup } from '../plugin';
 import { getEmbeddableTimeRange } from './get_embeddable_time_range';
+import { isMlAvailable } from '../../common/license/ml_license';
 
 export interface OpenInSingleMetricViewerActionContext extends EmbeddableApiContext {
   embeddable: SingleMetricViewerEmbeddableApi;
@@ -91,6 +92,7 @@ export function createOpenInSingleMetricViewerAction(
       }
     },
     async isCompatible(context: EmbeddableApiContext) {
+      if (!(await isMlAvailable(getStartServices))) return false;
       return isSingleMetricViewerEmbeddableContext(context);
     },
   };
