@@ -1,5 +1,5 @@
 {
-  "sha1": "34c40bba529e52331e9259aa23f1c7a192051ec8",
+  "sha1": "356618e0b950b155f6994dd8b28ad730b05c728b",
   "tests": [
     {
       "id": "451ff2b9982142c-9a17f71a4f5ef91",
@@ -24,7 +24,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts",
-        "line": 42,
+        "line": 130,
         "column": 9
       }
     },
@@ -51,7 +51,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts",
-        "line": 96,
+        "line": 176,
         "column": 9
       }
     },

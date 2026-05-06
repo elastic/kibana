@@ -19,7 +19,7 @@ type NumberFormatEditorProps = React.ComponentProps<typeof NumberFormatEditor>;
 
 const fieldType = 'number';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => (input: number) => input * 2),
+  reactConvert: jest.fn().mockImplementation((input: number) => input * 2),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { pattern: '0,0.[000]' };
   }),

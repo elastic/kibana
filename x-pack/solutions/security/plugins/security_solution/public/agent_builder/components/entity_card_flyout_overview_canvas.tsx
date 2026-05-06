@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
@@ -76,7 +76,7 @@ import { useObservedService } from '../../flyout/entity_details/service_right/ho
 import { ServiceDetailsPanelKey } from '../../flyout/entity_details/service_details_left';
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout/entity_details/service_right';
 import type { ESQuery } from '../../../common/typed_json';
-import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
+import { FlyoutLoading } from '../../flyout_v2/shared/components/flyout_loading';
 import { APP_UI_ID } from '../../../common/constants';
 import type { EntityAttachmentIdentifier } from '../attachment_types/entity_attachment/types';
 import { useEntityForAttachment } from '../attachment_types/entity_attachment/use_entity_for_attachment';

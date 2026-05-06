@@ -13,6 +13,7 @@ import React from 'react';
 import { getTagFindReferences, parseQuery } from '@kbn/saved-objects-management-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 
 import type {
   EuiSearchBarProps,
@@ -81,12 +82,14 @@ interface BaseSavedObjectFinder {
     name: string,
     savedObject: SavedObjectCommon
   ) => void;
+  getHref?: (id: SavedObjectCommon['id'], type: SavedObjectCommon['type']) => string | undefined;
   noItemsMessage?: ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
   leftChildren?: ReactElement | ReactElement[];
   children?: ReactElement | ReactElement[];
   helpText?: string;
+  tableCaption?: string;
   getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
 }
 
@@ -214,6 +217,7 @@ class SavedObjectFinderUiClass extends React.Component<
   public render() {
     const {
       onChoose,
+      getHref,
       savedObjectMetaData,
       euiTablePersist: { pageSize, sorting, onTableChange },
     } = this.props;
@@ -297,9 +301,14 @@ class SavedObjectFinderUiClass extends React.Component<
 
           const link = (
             <EuiLink
+              href={getHref?.(item.id, item.type)}
               onClick={
                 onChoose
-                  ? () => {
+                  ? (e: React.MouseEvent) => {
+                      if (getHref && hasActiveModifierKey(e)) {
+                        return;
+                      }
+                      e.preventDefault();
                       onChoose(item.id, item.type, fullName, item.simple);
                     }
                   : undefined
@@ -397,9 +406,12 @@ class SavedObjectFinderUiClass extends React.Component<
             items={this.state.items}
             columns={columns}
             data-test-subj="savedObjectsFinderTable"
-            tableCaption={i18n.translate('savedObjectsFinder.tableCaption', {
-              defaultMessage: 'Saved objects search results',
-            })}
+            tableCaption={
+              this.props.tableCaption ??
+              i18n.translate('savedObjectsFinder.tableCaption', {
+                defaultMessage: 'Saved objects search results',
+              })
+            }
             noItemsMessage={this.props.noItemsMessage}
             search={search}
             pagination={pagination}

@@ -46,8 +46,10 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
   const streamName = useStreamsRoutingSelector(
     (snapshot) => snapshot.context.definition.stream.name
   );
-  const hasPrivileges = useStreamsRoutingSelector(
-    (snapshot) => snapshot.context.definition.privileges.manage
+  const hasPrivileges = useStreamsRoutingSelector((snapshot) =>
+    'privileges' in snapshot.context.definition
+      ? snapshot.context.definition.privileges.manage
+      : true
   );
   const isForking = useStreamsRoutingSelector((snapshot) =>
     snapshot.matches({
@@ -144,8 +146,10 @@ export const EditRoutingRuleControls = ({
   const canRemoveRoutingRule = useStreamsRoutingSelector((snapshot) =>
     snapshot.can({ type: 'routingRule.remove' })
   );
-  const hasPrivileges = useStreamsRoutingSelector(
-    (snapshot) => snapshot.context.definition.privileges.manage
+  const hasPrivileges = useStreamsRoutingSelector((snapshot) =>
+    'privileges' in snapshot.context.definition
+      ? snapshot.context.definition.privileges.manage
+      : true
   );
 
   const onViewCodeClick = () => {
@@ -233,8 +237,10 @@ export const EditSuggestedRuleControls = ({
   const canSave = useStreamsRoutingSelector((snapshot) =>
     snapshot.can({ type: 'suggestion.saveSuggestion' })
   );
-  const hasPrivileges = useStreamsRoutingSelector(
-    (snapshot) => snapshot.context.definition.privileges.manage
+  const hasPrivileges = useStreamsRoutingSelector((snapshot) =>
+    'privileges' in snapshot.context.definition
+      ? snapshot.context.definition.privileges.manage
+      : true
   );
 
   const hasValidationErrors = !!conditionError;

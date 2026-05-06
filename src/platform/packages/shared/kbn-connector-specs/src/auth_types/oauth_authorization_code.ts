@@ -7,44 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import { normalizeAuthorizationHeaderValue } from './oauth_authz_code_and_ears_helpers';
+import { isConnectorAuthorizationError } from '../errors';
 import * as i18n from './translations';
 
-const authSchema = z
-  .object({
-    authorizationUrl: z.url().meta({
-      label: i18n.OAUTH_AUTHORIZATION_URL_LABEL,
-      validate: { allowedHosts: true },
-    }),
-    tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL, validate: { allowedHosts: true } }),
-    clientId: z
-      .string()
-      .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
-      .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
-    clientSecret: z
-      .string()
-      .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
-      .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
-    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
-    useBasicAuth: z.boolean().default(true).optional().meta({
-      hidden: true, // Hidden from UI - uses connector spec defaults
-    }),
-    scopeParamName: z.string().optional().meta({
-      hidden: true, // Override the authorization URL query param name (falls back to 'scope')
-    }),
-    accessTokenPath: z.string().optional().meta({
-      hidden: true, // JSON path for access_token in the token response (falls back to 'access_token')
-    }),
-    tokenTypePath: z.string().optional().meta({
-      hidden: true, // JSON path for token_type in the token response (falls back to 'token_type')
-    }),
-    tokenType: z.string().optional().meta({
-      hidden: true, // Literal token type for Authorization header, bypasses response extraction
-    }),
-  })
-  .meta({ label: i18n.OAUTH_AUTHORIZATION_CODE_LABEL });
+export const OAUTH_AUTHORIZATION_CODE_AUTH_ID = 'oauth_authorization_code';
+
+const authSchema = lazySchema(() =>
+  z
+    .object({
+      authorizationUrl: z.url().meta({
+        label: i18n.OAUTH_AUTHORIZATION_URL_LABEL,
+        validate: { allowedHosts: true },
+      }),
+      tokenUrl: z
+        .url()
+        .meta({ label: i18n.OAUTH_TOKEN_URL_LABEL, validate: { allowedHosts: true } }),
+      clientId: z
+        .string()
+        .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
+        .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
+      clientSecret: z
+        .string()
+        .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
+        .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
+      scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
+      useBasicAuth: z.boolean().default(true).optional().meta({
+        hidden: true, // Hidden from UI - uses connector spec defaults
+      }),
+      scopeParamName: z.string().optional().meta({
+        hidden: true, // Override the authorization URL query param name (falls back to 'scope')
+      }),
+      accessTokenPath: z.string().optional().meta({
+        hidden: true, // JSON path for access_token in the token response (falls back to 'access_token')
+      }),
+      tokenTypePath: z.string().optional().meta({
+        hidden: true, // JSON path for token_type in the token response (falls back to 'token_type')
+      }),
+      tokenType: z.string().optional().meta({
+        hidden: true, // Literal token type for Authorization header, bypasses response extraction
+      }),
+    })
+    .meta({ label: i18n.OAUTH_AUTHORIZATION_CODE_LABEL })
+);
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 
@@ -95,7 +103,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * The _start_oauth_flow and _oauth_callback routes are generic and work with any provider.
  */
 export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
-  id: 'oauth_authorization_code',
+  id: OAUTH_AUTHORIZATION_CODE_AUTH_ID,
   schema: authSchema,
   authMode: 'per-user',
   configure: async (
@@ -119,6 +127,9 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
         tokenType: secret.tokenType,
       });
     } catch (error) {
+      if (isConnectorAuthorizationError(error)) {
+        throw error;
+      }
       throw new Error(
         `Unable to retrieve/refresh the access token. User may need to re-authorize: ${error.message}`
       );
@@ -129,7 +140,7 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
     }
 
     // set global defaults
-    axiosInstance.defaults.headers.common.Authorization = token;
+    axiosInstance.defaults.headers.common.Authorization = normalizeAuthorizationHeaderValue(token);
 
     return axiosInstance;
   },
