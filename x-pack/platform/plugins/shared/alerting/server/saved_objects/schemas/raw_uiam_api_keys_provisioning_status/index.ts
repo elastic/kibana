@@ -10,3 +10,4 @@ export {
   UiamApiKeyProvisioningStatus,
   UiamApiKeyProvisioningEntityType,
 } from './v1';
+export { rawUiamApiKeysProvisioningStatusSchema as rawUiamApiKeysProvisioningStatusSchemaV2 } from './v2';
