@@ -6,30 +6,42 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { buildDataTableRecord, type DataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { useResponseActionsView } from './use_response_actions_view';
-import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
-import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
-import { useGetAutomatedActionList } from '../../../../management/hooks/response_actions/use_get_automated_action_list';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { mockSearchHit } from '../../../flyout/document_details/shared/mocks/mock_search_hit';
+import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
-const ecsData = mockDataAsNestedObject;
-const rawEventData = mockSearchHit;
+const hit = buildDataTableRecord(mockSearchHit as EsHitRecord);
+const hitWithoutAlertId = {
+  ...hit,
+  raw: {
+    ...hit.raw,
+    _id: undefined,
+  },
+  flattened: {
+    ...hit.flattened,
+    _id: undefined,
+  },
+} as DataTableRecord;
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../management/hooks/response_actions/use_get_automated_action_list');
+jest.mock('../../../common/components/user_privileges');
+jest.mock('../../../management/hooks/response_actions/use_get_automated_action_list');
 
 const useGetAutomatedActionListMock = useGetAutomatedActionList as jest.Mock;
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 describe('useResponseActionsView', () => {
   beforeEach(() => {
-    useGetAutomatedActionListMock.mockImplementationOnce(() => ({
+    useGetAutomatedActionListMock.mockReturnValue({
       data: [],
       isFetched: true,
-    }));
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    });
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: {
+        canAccessEndpointActionsLogManagement: true,
+      },
+    });
   });
 
   afterEach(() => {
@@ -39,29 +51,33 @@ describe('useResponseActionsView', () => {
   it('should return the normal component', () => {
     const { result } = renderHook(() =>
       useResponseActionsView({
-        ecsData,
-        rawEventData,
+        hit,
       })
     );
 
-    expect(result.current.id).toEqual('response-actions-results-view');
-    expect(result.current.name).toEqual('Response Results');
-    expect(result.current.append).toBeDefined();
-    expect(result.current.content).toBeDefined();
+    expect(result.current).toBeDefined();
+    expect(useGetAutomatedActionListMock).toHaveBeenCalledWith(
+      {
+        alertIds: [hit.raw._id],
+      },
+      { enabled: true, isLive: false }
+    );
   });
 
-  it('returns early return if rawEventData is undefined', () => {
+  it('returns empty content if alert id is missing', () => {
     const { result } = renderHook(() =>
       useResponseActionsView({
-        ecsData,
-        rawEventData: undefined,
+        hit: hitWithoutAlertId,
       })
     );
 
-    expect(result.current.id).toEqual('response-actions-results-view');
-    expect(result.current.name).toEqual('Response Results');
-    expect(result.current.append).not.toBeDefined();
-    expect(result.current.content).toBeDefined();
+    expect(result.current).toBeDefined();
+    expect(useGetAutomatedActionListMock).toHaveBeenCalledWith(
+      {
+        alertIds: [],
+      },
+      { enabled: false, isLive: false }
+    );
   });
 
   it('does not get data with `useGetAutomatedActionList` if feature is enabled but user does not have privileges', () => {
@@ -73,18 +89,17 @@ describe('useResponseActionsView', () => {
 
     const { result } = renderHook(() =>
       useResponseActionsView({
-        ecsData,
-        rawEventData,
+        hit,
       })
     );
 
     expect(useGetAutomatedActionListMock).toHaveBeenCalledWith(
       {
-        alertIds: [rawEventData._id],
+        alertIds: [hit.raw._id],
       },
       { enabled: false, isLive: false }
     );
 
-    expect(result.current.content).toMatchSnapshot();
+    expect(result.current).toMatchSnapshot();
   });
 });

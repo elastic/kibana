@@ -5,44 +5,33 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import styled from '@emotion/styled';
-import type { EuiTabbedContentTab } from '@elastic/eui';
-import { EuiLink, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
+import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { ResponseActionsEmptyPrompt as ResponseActionsPrivilegeRequiredCallout } from '../../../../common/components/response_actions/response_actions_empty_prompt';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { ResponseActionsEmptyPrompt as ResponseActionsPrivilegeRequiredCallout } from '../../../common/components/response_actions/response_actions_empty_prompt';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { RESPONSE_NO_DATA_TEST_ID } from '../components/test_ids';
-import type { SearchHit } from '../../../../../common/search_strategy';
-import type {
-  ExpandedEventFieldsObject,
-  RawEventData,
-} from '../../../../../common/types/response_actions';
-import { ResponseActionsResults } from '../../../../common/components/response_actions/response_actions_results';
-import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
-import { useGetAutomatedActionList } from '../../../../management/hooks/response_actions/use_get_automated_action_list';
+import type { ResponseActionTypesEnum } from '../../../../common/types/response_actions';
+import { ResponseActionsResults } from '../../../common/components/response_actions/response_actions_results';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
+import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
 
-const RESPONSE_ACTIONS_VIEW = i18n.translate(
-  'xpack.securitySolution.flyout.response.responseActionsView',
-  {
-    defaultMessage: 'Response Results',
-  }
-);
-
-const TabContentWrapper = styled.div`
+const tabContentWrapperCss = css`
   height: 100%;
   position: relative;
 `;
-const InlineBlock = styled.div`
+
+const emptyResponseActionsCss = css`
   display: inline-block;
   line-height: 1.7em;
 `;
 
 const EmptyResponseActions = () => {
   return (
-    <InlineBlock data-test-subj={RESPONSE_NO_DATA_TEST_ID}>
+    <div css={emptyResponseActionsCss} data-test-subj={RESPONSE_NO_DATA_TEST_ID}>
       <FormattedMessage
         id="xpack.securitySolution.flyout.left.response.noDataDescription"
         defaultMessage="There are no response actions defined for this event. To add some, edit the rule's settings and set up {link}."
@@ -60,96 +49,102 @@ const EmptyResponseActions = () => {
           ),
         }}
       />
-    </InlineBlock>
+    </div>
   );
 };
 
-const viewData = {
-  id: 'response-actions-results-view',
-  name: RESPONSE_ACTIONS_VIEW,
+interface RuleParametersWithResponseActions {
+  response_actions?: Array<{
+    action_type_id: ResponseActionTypesEnum;
+    params?: Record<string, unknown>;
+  }>;
+}
+
+type MaybeArray<T> = T | T[] | null | undefined;
+
+const getFirstValue = <T,>(value: MaybeArray<T>): T | undefined => {
+  if (value == null) {
+    return undefined;
+  }
+
+  return Array.isArray(value) ? value[0] : value;
+};
+
+const getFirstFieldValue = <T,>(hit: DataTableRecord, field: string): T | undefined => {
+  return getFirstValue(getFieldValue(hit, field) as MaybeArray<T>);
 };
 
 export interface UseResponseActionsViewParams {
   /**
-   * An object with top level fields from the ECS object
+   * Alert document used to fetch and display response actions.
    */
-  ecsData?: Ecs | null;
-  /**
-   * The actual raw document object
-   */
-  rawEventData: SearchHit | undefined;
+  hit: DataTableRecord;
 }
 
-/**
- *
- */
-export const useResponseActionsView = <T extends object = JSX.Element>({
-  rawEventData,
-  ecsData,
-}: UseResponseActionsViewParams): EuiTabbedContentTab => {
+export const useResponseActionsView = ({ hit }: UseResponseActionsViewParams): React.ReactNode => {
   const { canAccessEndpointActionsLogManagement } = useUserPrivileges().endpointPrivileges;
 
-  const expandedEventFieldsObject = rawEventData
-    ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
-    : undefined;
+  const alertId = useMemo(() => hit.raw._id ?? getFirstFieldValue<string>(hit, '_id') ?? '', [hit]);
+  const indexName = useMemo(
+    () => hit.raw._index ?? getFirstFieldValue<string>(hit, '_index') ?? '',
+    [hit]
+  );
+  const responseActions = useMemo(
+    () =>
+      getFirstFieldValue<RuleParametersWithResponseActions>(hit, 'kibana.alert.rule.parameters')
+        ?.response_actions,
+    [hit]
+  );
+  const ruleName = useMemo(() => getFirstFieldValue<string>(hit, 'kibana.alert.rule.name'), [hit]);
+  const ecsData = useMemo<Ecs>(
+    () => ({
+      ...(expandDottedObject(hit.flattened) as Ecs),
+      _id: alertId,
+      _index: indexName,
+    }),
+    [alertId, hit.flattened, indexName]
+  );
+  const hasAlertId = !!alertId;
 
-  const responseActions =
-    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
-  const hasRawEventData = !!rawEventData;
-
-  const alertId = rawEventData?._id ?? '';
   const [isLive, setIsLive] = useState(false);
 
   const { data: automatedList, isFetched } = useGetAutomatedActionList(
     {
-      alertIds: [alertId],
+      alertIds: alertId ? [alertId] : [],
     },
-    // fetch action details if we have raw event data and user has privileges
-    { enabled: hasRawEventData && canAccessEndpointActionsLogManagement, isLive }
+    // fetch action details if we have alert metadata and user has privileges
+    { enabled: hasAlertId && canAccessEndpointActionsLogManagement, isLive }
   );
 
   const showResponseActions =
     canAccessEndpointActionsLogManagement && isFetched && !!automatedList?.items?.length;
 
-  // calculating whether or not our useGetAutomatedActionList (react-query) should try to refetch data
   useEffect(() => {
-    setIsLive(() => !(!responseActions?.length || !!automatedList?.items?.length));
-  }, [automatedList, responseActions?.length]);
+    setIsLive(!!responseActions?.length && !automatedList?.items?.length);
+  }, [automatedList?.items?.length, responseActions?.length]);
 
-  if (!hasRawEventData) {
-    return {
-      ...viewData,
-      content: <EmptyResponseActions />,
-    };
-  } else {
-    const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name?.[0];
-
-    const automatedListItems = automatedList?.items ?? [];
-    return {
-      ...viewData,
-      append: (
-        <EuiNotificationBadge data-test-subj="response-actions-notification">
-          {automatedListItems.length}
-        </EuiNotificationBadge>
-      ),
-      content: (
-        <>
-          <EuiSpacer size="s" />
-          <TabContentWrapper data-test-subj="responseActionsViewWrapper">
-            {!canAccessEndpointActionsLogManagement ? (
-              <ResponseActionsPrivilegeRequiredCallout type="endpoint" />
-            ) : showResponseActions ? (
-              <ResponseActionsResults
-                actions={automatedListItems}
-                ruleName={ruleName}
-                ecsData={ecsData}
-              />
-            ) : (
-              <EmptyResponseActions />
-            )}
-          </TabContentWrapper>
-        </>
-      ),
-    };
+  if (!hasAlertId) {
+    return <EmptyResponseActions />;
   }
+
+  const automatedListItems = automatedList?.items ?? [];
+
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <div css={tabContentWrapperCss} data-test-subj="responseActionsViewWrapper">
+        {!canAccessEndpointActionsLogManagement ? (
+          <ResponseActionsPrivilegeRequiredCallout type="endpoint" />
+        ) : showResponseActions ? (
+          <ResponseActionsResults
+            actions={automatedListItems}
+            ruleName={ruleName}
+            ecsData={ecsData}
+          />
+        ) : (
+          <EmptyResponseActions />
+        )}
+      </div>
+    </>
+  );
 };

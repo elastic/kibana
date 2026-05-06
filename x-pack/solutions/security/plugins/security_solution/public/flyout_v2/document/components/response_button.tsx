@@ -8,22 +8,20 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LeftPanelResponseTab } from '../../left';
 import { RESPONSE_BUTTON_TEST_ID } from './test_ids';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+
+export interface ResponseButtonProps {
+  onShowResponseDetails: () => void;
+}
 
 /**
- * Response button that opens Response section in the left panel
+ * Response button that opens Response details.
  */
-export const ResponseButton: React.FC = () => {
-  const goToResponseTab = useNavigateToLeftPanel({
-    tab: LeftPanelResponseTab,
-  });
-
+export const ResponseButton: React.FC<ResponseButtonProps> = ({ onShowResponseDetails }) => {
   return (
     <>
       <EuiButton
-        onClick={goToResponseTab}
+        onClick={onShowResponseDetails}
         iconType="documentation"
         data-test-subj={RESPONSE_BUTTON_TEST_ID}
         size="s"

@@ -7,20 +7,31 @@
 
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
-import { useDocumentDetailsContext } from '../../shared/context';
 import { useResponseActionsView } from '../hooks/use_response_actions_view';
 
-/**
- * Automated response actions results, displayed in the document details expandable flyout left section under the Insights tab, Response tab
- */
-export const ResponseDetails: React.FC = () => {
-  const { searchHit, dataAsNestedObject, isRulePreview } = useDocumentDetailsContext();
+export interface ResponseDetailsContentProps {
+  /**
+   * Alert document used to fetch and display response actions.
+   */
+  hit: DataTableRecord;
+  /**
+   * Whether the flyout is opened in rule preview mode.
+   */
+  isRulePreview?: boolean;
+}
 
+/**
+ * Automated response actions results.
+ */
+export const ResponseDetailsContent: React.FC<ResponseDetailsContentProps> = ({
+  hit,
+  isRulePreview = false,
+}) => {
   const responseActionsView = useResponseActionsView({
-    rawEventData: searchHit,
-    ecsData: dataAsNestedObject,
+    hit,
   });
 
   return (
@@ -42,11 +53,11 @@ export const ResponseDetails: React.FC = () => {
           </EuiTitle>
           <EuiSpacer size="s" />
 
-          {responseActionsView?.content}
+          {responseActionsView}
         </>
       )}
     </div>
   );
 };
 
-ResponseDetails.displayName = 'ResponseDetails';
+ResponseDetailsContent.displayName = 'ResponseDetailsContent';

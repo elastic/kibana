@@ -8,18 +8,19 @@
 import React, { memo } from 'react';
 
 import { EuiPanel } from '@elastic/eui';
-import { ResponseDetails } from '../components/response_details';
+import type { ResponseDetailsContentProps } from './response_details';
+import { ResponseDetailsContent } from './response_details';
 import { RESPONSE_TAB_CONTENT_TEST_ID } from './test_ids';
 
+export type ResponseTabProps = ResponseDetailsContentProps;
+
 /**
- * Response view displayed in the document details expandable flyout left section
+ * Response tab content displayed in the legacy expandable flyout left panel.
  */
-export const ResponseTab = memo(() => {
-  return (
-    <EuiPanel data-test-subj={RESPONSE_TAB_CONTENT_TEST_ID} hasShadow={false}>
-      <ResponseDetails />
-    </EuiPanel>
-  );
-});
+export const ResponseTab = memo<ResponseTabProps>(({ hit, isRulePreview }) => (
+  <EuiPanel data-test-subj={RESPONSE_TAB_CONTENT_TEST_ID} hasShadow={false}>
+    <ResponseDetailsContent hit={hit} isRulePreview={isRulePreview} />
+  </EuiPanel>
+));
 
 ResponseTab.displayName = 'ResponseTab';

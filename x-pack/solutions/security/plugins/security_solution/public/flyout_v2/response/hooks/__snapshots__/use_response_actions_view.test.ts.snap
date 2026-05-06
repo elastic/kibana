@@ -5,12 +5,13 @@ exports[`useResponseActionsView does not get data with \`useGetAutomatedActionLi
   <EuiSpacer
     size="s"
   />
-  <TabContentWrapper
+  <div
+    css="unknown styles"
     data-test-subj="responseActionsViewWrapper"
   >
     <ResponseActionsEmptyPrompt
       type="endpoint"
     />
-  </TabContentWrapper>
+  </div>
 </React.Fragment>
 `;
