@@ -2877,7 +2877,7 @@
           "(toolName: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts",
-        "lineNumber": 44,
+        "lineNumber": 46,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2893,7 +2893,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts",
-            "lineNumber": 44,
+            "lineNumber": 46,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -3970,6 +3970,43 @@
             "docsReferencedTypeName": "TEvent",
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.isVisibleSearchSource",
+        "type": "Function",
+        "tags": [],
+        "label": "isVisibleSearchSource",
+        "description": [],
+        "signature": [
+          "(name: string) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/dot_index_allow_list.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.isVisibleSearchSource.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/dot_index_allow_list.ts",
+            "lineNumber": 45,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -5197,6 +5234,21 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentListOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentListOptions",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/crud.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.AgentResearchStepConfiguration",
         "type": "Interface",
         "tags": [],
@@ -6252,6 +6304,38 @@
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/events.ts",
             "lineNumber": 288,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.ConversationListOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConversationListOptions",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation_list.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ConversationListOptions.agentId",
+            "type": "string",
+            "tags": [],
+            "label": "agentId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation_list.ts",
+            "lineNumber": 9,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8869,6 +8953,14 @@
             "references": [
               {
                 "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/application/utils/new_conversation.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/conversations/conversation_rounds/round_layout.tsx"
+              },
+              {
+                "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/execution/run_agent/utils/prepare_conversation.ts"
               },
               {
@@ -8902,14 +8994,6 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/conversation/client/migrate_attachments.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/public/application/utils/new_conversation.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/conversations/conversation_rounds/round_layout.tsx"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -9700,6 +9784,21 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ToolDefinition.experimental",
+            "type": "boolean",
+            "tags": [],
+            "label": "experimental",
+            "description": [
+              "\nWhen true, this tool is only available when experimental features are enabled."
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9730,7 +9829,7 @@
           "<TType, TConfig>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
-        "lineNumber": 81,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9790,7 +9889,7 @@
               " | undefined; _prefault?: unknown; }"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
-            "lineNumber": 85,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11255,6 +11354,56 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentCreateRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentCreateRequest",
+        "description": [],
+        "signature": [
+          "{ id: string; name: string; description: string; configuration: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentConfiguration",
+            "text": "AgentConfiguration"
+          },
+          "; labels?: string[] | undefined; visibility?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentVisibility",
+            "text": "AgentVisibility"
+          },
+          " | undefined; avatar_icon?: string | undefined; avatar_color?: string | undefined; avatar_symbol?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/crud.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentDeleteRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentDeleteRequest",
+        "description": [],
+        "signature": [
+          "{ id: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/crud.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.AgentType",
         "type": "string",
         "tags": [],
@@ -11264,6 +11413,47 @@
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
         "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentUpdateRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentUpdateRequest",
+        "description": [],
+        "signature": [
+          "Partial<Pick<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentDefinition",
+            "text": "AgentDefinition"
+          },
+          ", \"name\" | \"description\" | \"labels\" | \"avatar_color\" | \"avatar_symbol\">> & { visibility?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentVisibility",
+            "text": "AgentVisibility"
+          },
+          " | undefined; configuration?: Partial<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentConfiguration",
+            "text": "AgentConfiguration"
+          },
+          "> | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/crud.ts",
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12389,7 +12579,7 @@
           "string[]"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -14281,6 +14471,33 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.DOT_INDEX_ALLOW_LIST_PATTERNS",
+        "type": "Object",
+        "tags": [],
+        "label": "DOT_INDEX_ALLOW_LIST_PATTERNS",
+        "description": [
+          "\nCurated allow-list of dot-prefixed index / alias / data-stream patterns that\nAgent Builder is willing to expose to end users and to the LLM index selection\nflow.\n\nThis is an INTENTIONAL allow-list. Adding a pattern here makes the matching\nresources visible to LLM tool selection and to the UI index picker in the\n`index_search` tool. Review additions carefully — consider whether:\n  - The data is meant to be queried by end users (not internal plumbing).\n  - Access is already authorized via Elasticsearch index privileges; we do\n    not re-check Kibana feature access here.\n  - The pattern is narrow enough that it won't accidentally match unrelated\n    future dot-prefixed resources.\n\nPatterns use a simplified glob syntax: `*` matches any sequence of characters\n(including `.`), everything else is literal. See ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.isVisibleSearchSource",
+            "text": "isVisibleSearchSource"
+          },
+          "."
+        ],
+        "signature": [
+          "readonly string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/dot_index_allow_list.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.filestoreTools",
         "type": "Object",
         "tags": [],
@@ -14357,7 +14574,7 @@
           "\nList of internally used namespaces\nNote: those are not necessarily all protected."
         ],
         "signature": [
-          "{ readonly platformCore: \"platform.core\"; readonly platformDashboard: \"platform.dashboard\"; readonly platformStreams: \"platform.streams\"; readonly filestore: \"filestore\"; readonly attachments: \"attachments\"; readonly observability: \"observability\"; readonly search: \"search\"; readonly security: \"security\"; readonly streams: \"platform.streams\"; readonly workflows: \"platform.workflows\"; }"
+          "{ readonly platformCore: \"platform.core\"; readonly platformAlerting: \"platform.alerting\"; readonly platformDashboard: \"platform.dashboard\"; readonly platformStreams: \"platform.streams\"; readonly filestore: \"filestore\"; readonly attachments: \"attachments\"; readonly observability: \"observability\"; readonly search: \"search\"; readonly security: \"security\"; readonly streams: \"platform.streams\"; readonly workflows: \"platform.workflows\"; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts",
         "lineNumber": 12,
