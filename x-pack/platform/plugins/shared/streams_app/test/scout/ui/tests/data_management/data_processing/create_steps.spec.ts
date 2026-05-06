@@ -15,13 +15,13 @@ import { generateLogsData } from '../../../fixtures/generators';
 // These UI tests focus on the user experience: validation, button states, cancel flows, and duplication
 test.describe(
   'Stream data processing - creating steps',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.all] },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing processors before each test
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
