@@ -32,6 +32,12 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/se
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
+import {
+  createSignificantEventAttachmentType,
+  type ObservabilityAgentBuilderCoreSetup,
+} from '@kbn/observability-agent-builder-plugin/server';
 import { getLogsFeature } from './features/logs_feature';
 import type { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
@@ -56,6 +62,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   alerting: AlertingServerSetup;
+  agentBuilder: AgentBuilderPluginSetup;
   cases?: CasesServerSetup;
   features: FeaturesPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
@@ -119,6 +126,13 @@ export class ObservabilityPlugin
       alertsLocator,
       logsLocator,
     });
+
+    plugins.agentBuilder.attachments.registerType(
+      createSignificantEventAttachmentType({
+        core: core as unknown as ObservabilityAgentBuilderCoreSetup,
+        logger: this.logger,
+      }) as AttachmentTypeDefinition
+    );
 
     void core.getStartServices().then(([coreStart, pluginStart]) => {
       const isCompleteOverviewEnabled = coreStart.pricing.isFeatureAvailable(

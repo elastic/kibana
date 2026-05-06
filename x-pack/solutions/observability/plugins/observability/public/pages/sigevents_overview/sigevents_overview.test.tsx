@@ -68,12 +68,19 @@ jest.mock('@kbn/sigevents', () => {
     SignificantEventDetailBody: ({
       event,
       hideHeader,
+      onRemediate,
     }: {
       event: { label: string };
       hideHeader?: boolean;
+      onRemediate?: () => void;
     }) => (
       <div data-test-subj="mockSignificantEventDetailBody" data-hide-header={String(!!hideHeader)}>
         {event.label}
+        {onRemediate && (
+          <button data-test-subj="mockFlyoutRemediateButton" onClick={onRemediate}>
+            Remediate
+          </button>
+        )}
       </div>
     ),
     SignificantEventDetailHeader: ({ title }: { title: string }) => (
@@ -215,6 +222,32 @@ describe('SigeventsOverviewPage', () => {
 
       fireEvent.keyDown(document, { key: 'Escape' });
       expect(screen.queryByTestSubject('obltSigeventsDetailFlyout')).not.toBeInTheDocument();
+    });
+
+    it('keeps the flyout open when remediate is clicked inside it', () => {
+      const mockAgentBuilder = agentBuilderMocks.createStart();
+      const MockEmbeddableConversation = jest.fn(() => (
+        <div data-test-subj="agentBuilderEmbeddableConversation" />
+      ));
+      mockAgentBuilder.getEmbeddableConversation.mockReturnValue(MockEmbeddableConversation);
+
+      renderWithProviders(mockAgentBuilder);
+
+      fireEvent.click(screen.getByTestSubject('mockSigeventsViewDetailsButton'));
+      expect(screen.getByTestSubject('obltSigeventsDetailFlyout')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestSubject('mockFlyoutRemediateButton'));
+
+      // Flyout remains open
+      expect(screen.getByTestSubject('obltSigeventsDetailFlyout')).toBeInTheDocument();
+      // Chat receives the remediation prompt
+      expect(MockEmbeddableConversation).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          initialMessage: expect.stringContaining('remediate'),
+          autoSendInitialMessage: true,
+        }),
+        expect.anything()
+      );
     });
   });
 });

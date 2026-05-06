@@ -18,7 +18,10 @@ export {
   OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_SIGNIFICANT_EVENT_ATTACHMENT_TYPE_ID,
 } from '../common/constants';
+
+export type { SignificantEventDocument } from '../common/types';
 
 export type {
   ObservabilityAgentBuilderPluginPublicSetup,

@@ -48,9 +48,15 @@ export function StreamLink({ name }: { name: string }) {
   const router = useStreamsAppRouter();
   const href = router.link('/{key}', { path: { key: name } });
   return (
-    <EuiLink href={href} data-test-subj="streamsDiscoveryStreamLink" color="text">
-      <EuiBadge color="hollow">{name}</EuiBadge>
-    </EuiLink>
+    <EuiToolTip
+      content={i18n.translate('xpack.streams.sigEventsDiscovery.multiStep.links.viewStreamTooltip', {
+        defaultMessage: 'View stream',
+      })}
+    >
+      <EuiLink href={href} data-test-subj="streamsDiscoveryStreamLink" color="text">
+        <EuiBadge color="hollow">{name}</EuiBadge>
+      </EuiLink>
+    </EuiToolTip>
   );
 }
 

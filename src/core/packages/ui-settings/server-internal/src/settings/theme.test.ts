@@ -93,16 +93,16 @@ describe('process.env.KBN_OPTIMIZER_THEMES handling', () => {
   it('defaults to properties of first tag', () => {
     process.env.KBN_OPTIMIZER_THEMES = 'borealisdark,borealislight';
     let settings = getThemeSettings({ ...defaultOptions, isDist: false });
-    expect(settings['theme:darkMode'].value).toBe('enabled');
+    expect(settings['theme:darkMode'].value).toBe('system');
 
     process.env.KBN_OPTIMIZER_THEMES = 'borealislight,borealisdark';
     settings = getThemeSettings({ ...defaultOptions, isDist: false });
-    expect(settings['theme:darkMode'].value).toBe('disabled');
+    expect(settings['theme:darkMode'].value).toBe('system');
   });
 
   it('ignores the value when isDist is true', () => {
     process.env.KBN_OPTIMIZER_THEMES = 'borealisdark';
     const settings = getThemeSettings({ ...defaultOptions, isDist: true });
-    expect(settings['theme:darkMode'].value).toBe('disabled');
+    expect(settings['theme:darkMode'].value).toBe('system');
   });
 });

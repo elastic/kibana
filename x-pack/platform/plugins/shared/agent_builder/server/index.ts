@@ -56,3 +56,6 @@ export type {
   ConversationExecutionParams,
   ConversationAgentExecution,
 } from '@kbn/agent-builder-server/execution';
+
+export { executeWorkflow } from './services/workflow';
+export type { ExecuteWorkflowParams, WorkflowExecutionResult } from './services/workflow';

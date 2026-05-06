@@ -80,7 +80,10 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
+import {
+  OBSERVABILITY_SIGNIFICANT_EVENT_ATTACHMENT_TYPE_ID,
+  type ObservabilityAgentBuilderPluginPublicStart,
+} from '@kbn/observability-agent-builder-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
@@ -540,6 +543,17 @@ export class Plugin
       updater$: this.appUpdater$,
       pricing: coreStart.pricing,
     });
+
+    pluginsStart.agentBuilder?.attachments.addAttachmentType(
+      OBSERVABILITY_SIGNIFICANT_EVENT_ATTACHMENT_TYPE_ID,
+      {
+        getLabel: () =>
+          i18n.translate('xpack.observability.attachments.significantEvent.label', {
+            defaultMessage: 'Significant event',
+          }),
+        getIcon: () => 'pattern',
+      }
+    );
 
     import('./navigation_tree').then(({ createDefinition }) => {
       return pluginsStart.navigation.addSolutionNavigation(

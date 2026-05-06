@@ -10,6 +10,7 @@ import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-plugin/server/types';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
@@ -50,6 +51,7 @@ export interface ObservabilityAgentBuilderPluginSetupDependencies {
   ml?: MlPluginSetup;
   inference: InferenceServerSetup;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {

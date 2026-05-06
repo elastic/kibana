@@ -1,0 +1,111 @@
+## Significant event remediation
+
+You are helping after **Observability significant event** work has already produced a structured finding. The canonical document is loaded with **`get_sigevent_event`** (attachment-bounded). Add **live telemetry that answers new questions** the attachment does not fully answer (fresh time, different dimension, caller/dependency health, a second rule). Do **not** cold-start a full RCA, fire unrelated `ki_search`, or re-run the **same** evidence pipeline many times.
+
+---
+
+## Default investigation ladder (follow in order)
+
+1. **`get_sigevent_event`** — Call **once** if you do not already have the full `_source` payload in this turn.
+2. **One validation `execute_esql`** when `evidences[].esql_query` exists:
+   - Pick **one** query: prefer an evidence row with `confirmed: true`, else the latest by `collected_at`.
+   - **Dedupe** identical `esql_query` strings — run each distinct pipeline **once** only.
+   - Use a **short** `time_range` (e.g. `now-2h` to `now` unless the user specified otherwise). Respect existing `LIMIT`; keep row counts small.
+3. **Complementary expansion** (next section) — when its conditions apply, you **must** run it before the final answer. This is **not** optional thoroughness; it is how you obtain **orthogonal** live data.
+4. **Synthesize**: prior findings from the document, delta from step 2, **new** facts from step 3 when you ran it, then prioritized remediation from `recommendations[]` adjusted only when tools justify it.
+5. **Remediation workflow (mandatory, always last)** — After steps 1–4, you **must** call **`observability.remediation_workflow`** **exactly once** in a **dedicated final tool round**, **alone**, **immediately before** your closing user-facing message. Do **not** batch it with step 2, step 3, complementary tools, or `ki_search`. Set **`workflow_type`** on that single tool call:
+   - **`k8s_rollback`** — Bad deployment / rollout regression (broken image, misconfig, code regression); also the **default** when evidence and `recommendations[]` point to reverting the live revision.
+   - **`service_scaling`** — Confirmed **resource exhaustion** (OOMKill, CPU throttling, HPA at ceiling, saturation).
+   - **`circuit_breaker`** — **Traffic isolation** for transient upstream issues, partial pod failure, or mesh-level shedding when rollback is not the right lever.
+
+   Kibana will **prompt the user for confirmation** before the workflow runs (in-handler HITL, same pattern as `observability.elasticsearch`): the tool resolves the workflow, **interrupts** for confirmation, then **resumes** on the next agent step after the user accepts. Continue the conversation via **`/api/agent_builder/converse`** and supply the pending prompt id under `prompts` when the round is awaiting confirmation; in standalone / non-interactive mode the call is declined. Use **snake_case** parameters as defined for the chosen variant (`service_name`, `namespace`, `reason`, and variant-specific fields). Derive values from the strongest validated evidence (`service.name`, `dependency_edges`, `recommendations[]`, APM/tool output, or user text). If `namespace` is absent, use **`default`** unless the event or user clearly names another; if `service_name` is ambiguous, pick the single primary failing or focal service from the attachment and state the choice in `reason`.
+
+---
+
+## Complementary expansion (orthogonal live data)
+
+Run this **after** step 2, **in separate tool rounds** (never batch step 2 with these in one round). Each call must target information the **attachment did not already contain** (e.g. narrative + sample ES|QL in the doc; you add **service health**, **caller/checkout**, **second rule**, or **one** distinct ES|QL — not the same query again with no new intent).
+
+**When validation shows the issue is still active** (or the user asked to verify, extend, or assess blast radius), perform **complementary expansion** if **any** trigger below applies. Use **up to three** complementary tool calls total from the bullets (pick what applies; skip bullets that do not apply):
+
+- **`dependency_edges` is non-empty** — You **must** call **`get_services`** scoped to the **`source` and `target`** service names from those edges (one combined filter or at most two calls). Optionally **`get_service_topology`** for one of those services **only if** it adds a fact **`get_services` did not**. If topology returns no meaningful connections, do not chain more topology or **`get_traces`** for the same question unless the user expands scope.
+- **`recommendations[]` implies another scope** (e.g. “query checkout …”, “blast radius on checkout”) — You **must** call **`get_logs`** or a **narrow `execute_esql`** for that scope. The query **must differ** from the evidence ES|QL in step 2 (different filters, entity, or aggregate — e.g. checkout errors or error-rate buckets, not another copy of the same LIMIT-5 evidence pipeline).
+- **More than one `rule_names` entry** and the evidence ES|QL only reflects **one** rule — Add **one** additional **`execute_esql`** aligned to the **other** rule’s intent (bounded `LIMIT`), not a rerun of the same string as step 2.
+- **User explicitly asks for knowledge indicators or alerts** — After the bullets above that apply, you may call **`ki_search`** once with **`stream_names`**, **low `limit`**, and **`search_text`** built only from **`rule_names`** + **`cause_kis[].name`** (no broad semantic blur).
+
+If the user only wanted a quick read of the attachment **and** validation shows **resolved** (no ongoing failure class), you may **skip** this entire section and answer from the document + step 2 only.
+
+---
+
+## When to use this skill
+
+- A significant-event attachment is present, or the user refers to that event after you loaded it.
+- The user wants remediation, validation, or next steps.
+
+The document already carries `root_cause`, `summary`, `evidences`, `stream_names`, `cause_kis`, `dependency_edges`, and `recommendations` when present — treat them as **prior evidence**, not something to re-discover from scratch.
+
+---
+
+## Hard gates (token and precision)
+
+### No parallel validation + expansion
+
+Do **not** batch the **first** validation **`execute_esql`** with **`ki_search`**, **`get_services`**, **`get_service_topology`**, **`get_traces`**, **`get_logs`**, or **`observability.remediation_workflow`** in the **same** tool round. Finish **attachment + one validation `execute_esql`** first; then run complementary tools in following round(s). **Exactly one** **`observability.remediation_workflow`** call is **terminal and mandatory** when this skill applies: run it **alone** in the **final** tool round (ladder step 5), after all other tool work for this skill is done.
+
+### `ki_search` — narrow and late
+
+**Do not call `ki_search`** when **all** of the following are true:
+
+- You already ran validation ES|QL and complementary expansion as required above, and
+- You have enough to answer remediation without indicators, and
+- The user did not ask for KIs or alerts.
+
+**Call `ki_search` only when** the user asks for indicators/alerts, or you need **one** narrow retrieval tied to **`rule_names`** + **`cause_kis[].name`** after expansion. Use **low `limit`**, **`stream_names`**, minimal `search_text`.
+
+### APM / services (`get_services`, `get_service_topology`, `get_traces`)
+
+When **`dependency_edges` is non-empty** and validation shows **still active** (or the user asked blast radius / caller impact), **`get_services`** for `source`/`target` is **required** as part of complementary expansion — not optional. **`get_service_topology`** / **`get_traces`** remain optional under the caps and empty-topology rule in “Complementary expansion” above.
+
+### `get_logs`, `generate_esql`, `run_log_rate_analysis`
+
+- **Required** when a **`recommendations[]`** line clearly implies a log or rate query that step 2 did not cover.
+- **Otherwise** use for contradictions or thin validation — cap **extra** ad-hoc ES|QL beyond step 2 to **two** additional **distinct** pipelines total (including the “second rule” bullet in complementary expansion).
+
+### Non-duplication
+
+Never rerun the **same** `evidences[].esql_query` string or a semantically identical pipeline to “be thorough.” If you need volume or trend, use **`STATS` / buckets** or a **different filter** so the result is not the same few rows the attachment already summarized.
+
+### Scope discipline in the answer
+
+Do not chase unrelated KI or log themes unless tied to this event’s **`rule_names`**, **`cause_kis`**, **`dependency_edges`**, **`recommendations[]`**, or **`root_cause`**.
+
+---
+
+## Prior findings (after `get_sigevent_event`)
+
+Briefly list from the document: `title`, `summary`, `root_cause`, `rule_names`, impact/criticality if present, and the key `evidences` rows you relied on. Label these **platform findings**.
+
+---
+
+## Synthesis
+
+- **Cause story**: Start from **`root_cause`**, then add what validation and **complementary** tools changed or proved.
+- **Remediation**: Start from **`recommendations[]`**; cite new evidence from expansion where it supports or reprioritizes steps; mark human / out-of-band items when needed.
+- **Remediation workflow (required)**: Ladder step 5 **always** runs **`observability.remediation_workflow`** once — incorporate its result (workflow execution status / error) and the **`workflow_type`**, **`service_name`**, **`namespace`**, and action context you used into your closing remediation summary.
+
+---
+
+## Anti-patterns
+
+- Do not run broad **`get_logs`** before the deduped evidence validation **`execute_esql`** when that query exists.
+- Do not ask which stream to use when `stream_names` is populated.
+- Do not fabricate results; tie claims to the attachment or tool output you ran.
+- Do not end the conversation without calling **exactly one** **`observability.remediation_workflow`** as the **last** tool round for this skill.
+
+---
+
+## Tips
+
+- Pass **`time_range`** to **`execute_esql`** / **`generate_esql`** when supported.
+- Prefer aggregates and tight `LIMIT` on row-returning ES|QL.
+- If ES|QL errors on field names, adapt minimally and retry **once**.

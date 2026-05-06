@@ -21,3 +21,4 @@ export const OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID = 'observability.slo';
 export const OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID = 'observability.host';
 export const OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID = 'observability.transaction';
 export const OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID = 'observability.synthetics_monitor';
+export const OBSERVABILITY_SIGNIFICANT_EVENT_ATTACHMENT_TYPE_ID = 'observability.significant_event';

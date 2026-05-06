@@ -10,71 +10,18 @@ import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { estypes } from '@elastic/elasticsearch';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { SignificantEventDocument } from '@kbn/observability-agent-builder-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ImpactedService } from '../components/main_significant_event';
 import type { ImpactedCardItem } from '../components/sigevents_overview';
 import type { SignificantEventDetailFields } from '../components/significant_event_detail_body';
+import { normalizeRecommendations } from '../components/event_utils';
 
 interface SigeventsKibanaServices {
   data: DataPublicPluginStart;
 }
 
-const SIGEVENTS_INDEX = 'sigevents-events-ms';
-
-interface BlastRadiusItem {
-  ki_id: string;
-  name: string;
-  stream_name: string;
-  confirmed: boolean;
-}
-
-interface CauseKiItem {
-  ki_id?: string;
-  name: string;
-  stream_name: string;
-  confirmed?: boolean;
-}
-
-interface DependencyEdge {
-  source: string;
-  target: string;
-  protocol: string;
-  exposure: 'exposed' | 'not_exposed';
-}
-
-interface EvidenceDocument {
-  description: string;
-  esql_query: string;
-  result: string;
-  row_count: number;
-  collected_at: string;
-  rule_name: string;
-  stream_name: string;
-  confirmed?: boolean;
-}
-
-interface SignificantEventDocument {
-  '@timestamp': string;
-  event_id: string;
-  discovery_id: string;
-  discovery_slug: string;
-  verdict: 'promoted' | 'acknowledged' | 'demoted';
-  title: string;
-  summary: string;
-  root_cause: string;
-  rule_names: string[];
-  stream_names: string[];
-  blast_radius?: BlastRadiusItem[];
-  cause_kis: CauseKiItem[];
-  dependency_edges?: DependencyEdge[];
-  evidences?: EvidenceDocument[];
-  criticality: number;
-  recommended_action: 'escalate' | 'monitor' | 'resolve' | 'investigate';
-  impact: 'critical' | 'high' | 'medium' | 'low';
-  recommendations: string[];
-  verdict_id: string;
-  last_reviewed_at: string;
-}
+export const SIGEVENTS_INDEX = 'sigevents-events-ms';
 
 export interface LatestSignificantEventData {
   raw: SignificantEventDocument;
@@ -182,7 +129,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     severityColor: severity.color,
     summary: doc.summary ?? '',
     rootCause: doc.root_cause ?? '',
-    recommendations: doc.recommendations ?? [],
+    recommendations: normalizeRecommendations(doc.recommendations),
     recommendedAction: doc.recommended_action ?? 'monitor',
     criticality: doc.criticality ?? 0,
     impact: doc.impact ?? 'low',
@@ -216,7 +163,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     state: severity.state,
     blastRadiusScore: doc.criticality ?? 0,
     mainEventTitle: doc.title ?? '',
-    description: doc.summary || (doc.recommendations ?? [])[0] || '',
+    description: doc.summary || normalizeRecommendations(doc.recommendations)[0] || '',
     impactedServices,
     impactedCards,
     severityLabel: severity.label,
@@ -225,6 +172,9 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     timestamp: doc['@timestamp'],
   };
 }
+
+// --- DEMO DENY LIST: remove to restore full event visibility ---
+export const DEMO_DENIED_EVENT_TITLES = ['payment \u2014 credit card data exposure'];
 
 export function useFetchLatestSignificantEvent(): {
   loading: boolean;
@@ -278,7 +228,8 @@ export function useFetchLatestSignificantEvent(): {
 
     const docs = result.hits.hits
       .map((hit) => hit._source)
-      .filter((doc): doc is SignificantEventDocument => doc !== undefined);
+      .filter((doc): doc is SignificantEventDocument => doc !== undefined)
+      .filter((doc) => !DEMO_DENIED_EVENT_TITLES.includes(doc.title?.toLowerCase()));
 
     // Primary event: highest-impact promoted event (critical > high > medium > low)
     const impactPriority: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };

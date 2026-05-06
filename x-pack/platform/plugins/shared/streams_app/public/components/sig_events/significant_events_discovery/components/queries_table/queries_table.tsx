@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -43,10 +42,12 @@ import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../../hooks/sig_event
 import { getFormattedError } from '../../../../../util/errors';
 import { AssetImage } from '../../../../asset_image';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
+import { useStreamsAppParams } from '../../../../../hooks/use_streams_app_params';
 import { LoadingPanel } from '../../../../loading_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { SeverityBadge } from '../severity_badge/severity_badge';
+import { StreamLink } from '../multi_step/links';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { buildDiscoverParams } from '../../utils/discover_helpers';
 import {
@@ -88,6 +89,7 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
 export function QueriesTable() {
   const router = useStreamsAppRouter();
+  const { query: routeQuery } = useStreamsAppParams('/_discovery/{tab}');
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
@@ -105,11 +107,6 @@ export function QueriesTable() {
     size: number;
   }>({ ...DEFAULT_PAGINATION });
 
-  const [selectedQuery, setSelectedQuery] = useState<SignificantEventQueryRow | null>(null);
-
-  const handleSelectQuery = useCallback((item: SignificantEventQueryRow) => {
-    setSelectedQuery((prev) => (prev?.query.id === item.query.id ? null : item));
-  }, []);
   const {
     data: queriesData,
     isLoading: queriesLoading,
@@ -120,14 +117,44 @@ export function QueriesTable() {
     perPage: pagination.size,
     status: ['active'],
   });
-  const queriesList = queriesData?.queries;
-  useEffect(() => {
-    if (!queriesList) return;
-    setSelectedQuery((prev) => {
-      if (!prev) return null;
-      return queriesList.find((q) => q.query.id === prev.query.id) ?? null;
+
+  // Derived from the URL param — no local state needed. Changing it pushes a
+  // new history entry so the browser back button restores the previous flyout state.
+  const selectedQuery = useMemo(
+    () =>
+      routeQuery?.queryFlyoutId
+        ? (queriesData?.queries.find((q) => q.query.id === routeQuery.queryFlyoutId) ?? null)
+        : null,
+    [queriesData?.queries, routeQuery?.queryFlyoutId]
+  );
+
+  // Builds route query params for push/replace, preserving the time range.
+  const buildQueryRouteParams = useCallback(
+    (queryFlyoutId?: string) => ({
+      ...(routeQuery?.rangeFrom ? { rangeFrom: routeQuery.rangeFrom } : {}),
+      ...(routeQuery?.rangeTo ? { rangeTo: routeQuery.rangeTo } : {}),
+      ...(queryFlyoutId ? { queryFlyoutId } : {}),
+    }),
+    [routeQuery?.rangeFrom, routeQuery?.rangeTo]
+  );
+
+  const handleSelectQuery = useCallback(
+    (item: SignificantEventQueryRow) => {
+      const isAlreadyOpen = item.query.id === routeQuery?.queryFlyoutId;
+      router.push('/_discovery/{tab}', {
+        path: { tab: 'queries' },
+        query: buildQueryRouteParams(isAlreadyOpen ? undefined : item.query.id),
+      });
+    },
+    [router, routeQuery?.queryFlyoutId, buildQueryRouteParams]
+  );
+
+  const closeQueryFlyout = useCallback(() => {
+    router.push('/_discovery/{tab}', {
+      path: { tab: 'queries' },
+      query: buildQueryRouteParams(),
     });
-  }, [queriesList, setSelectedQuery]);
+  }, [router, buildQueryRouteParams]);
 
   useEffect(() => {
     setSelectedItems([]);
@@ -175,7 +202,7 @@ export function QueriesTable() {
     },
     onSuccess: async (_, { queryId }) => {
       await invalidateQueriesData();
-      setSelectedQuery(null);
+      closeQueryFlyout();
       setSelectedItems((prev) => prev.filter((item) => item.query.id !== queryId));
     },
     onError: (error) => {
@@ -289,7 +316,7 @@ export function QueriesTable() {
         name: STREAM_COLUMN,
         width: '130px',
         render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
+          <StreamLink name={item.stream_name} />
         ),
       },
       {
@@ -491,7 +518,7 @@ export function QueriesTable() {
       {selectedQuery && (
         <QueryDetailsFlyout
           item={selectedQuery}
-          onClose={() => setSelectedQuery(null)}
+          onClose={closeQueryFlyout}
           onDelete={(queryId, streamName) =>
             deleteQueryMutation.mutateAsync({ queryId, streamName })
           }

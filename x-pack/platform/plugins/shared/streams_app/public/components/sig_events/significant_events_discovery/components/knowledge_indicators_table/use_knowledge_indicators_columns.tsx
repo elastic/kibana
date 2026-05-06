@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
@@ -15,11 +15,13 @@ import { SparkPlot } from '../../../../spark_plot';
 import { KnowledgeIndicatorActionsCell } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
+import { StreamLink } from '../multi_step/links';
 import { getKnowledgeIndicatorTitle } from './use_knowledge_indicators_table';
 import {
   TITLE_COLUMN_LABEL,
   EVENTS_COLUMN_LABEL,
   TYPE_COLUMN_LABEL,
+  SUBTYPE_COLUMN_LABEL,
   MATCH_QUERY_TYPE_LABEL,
   STATS_QUERY_TYPE_LABEL,
   STREAM_COLUMN_LABEL,
@@ -27,11 +29,19 @@ import {
   VIEW_DETAILS_ARIA_LABEL,
   MINIMIZE_DETAILS_ARIA_LABEL,
   OCCURRENCES_TOOLTIP_NAME,
+  FILTER_FOR_TYPE_LABEL,
+  FILTER_FOR_SUBTYPE_LABEL,
 } from './translations';
 
 const EMPTY_ANNOTATIONS: never[] = [];
 const capitalizeStyle = css`
   text-transform: capitalize;
+`;
+const clickableBadgeStyle = css`
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 interface UseKnowledgeIndicatorsColumnsParams {
@@ -39,6 +49,8 @@ interface UseKnowledgeIndicatorsColumnsParams {
   selectedKnowledgeIndicatorId: string | undefined;
   toggleSelectedKnowledgeIndicator: (ki: KnowledgeIndicator) => void;
   setKnowledgeIndicatorsToDelete: (items: KnowledgeIndicator[]) => void;
+  onFilterByType: (type: string) => void;
+  onFilterBySubtype: (subtype: string) => void;
 }
 
 export const useKnowledgeIndicatorsColumns = ({
@@ -46,6 +58,8 @@ export const useKnowledgeIndicatorsColumns = ({
   selectedKnowledgeIndicatorId,
   toggleSelectedKnowledgeIndicator,
   setKnowledgeIndicatorsToDelete,
+  onFilterByType,
+  onFilterBySubtype,
 }: UseKnowledgeIndicatorsColumnsParams) =>
   useMemo<Array<EuiBasicTableColumn<KnowledgeIndicator>>>(
     () => [
@@ -103,17 +117,44 @@ export const useKnowledgeIndicatorsColumns = ({
         name: TYPE_COLUMN_LABEL,
         width: '7.5em',
         render: (ki: KnowledgeIndicator) => {
-          if (ki.kind === 'feature') {
-            return (
-              <EuiBadge color="hollow" css={capitalizeStyle}>
-                {ki.feature.type}
-              </EuiBadge>
-            );
-          }
+          const label =
+            ki.kind === 'feature'
+              ? ki.feature.type
+              : ki.query.type === QUERY_TYPE_STATS
+              ? STATS_QUERY_TYPE_LABEL
+              : MATCH_QUERY_TYPE_LABEL;
+          const filterValue = ki.kind === 'feature' ? ki.feature.type : label;
           return (
-            <EuiBadge color="hollow">
-              {ki.query.type === QUERY_TYPE_STATS ? STATS_QUERY_TYPE_LABEL : MATCH_QUERY_TYPE_LABEL}
-            </EuiBadge>
+            <EuiToolTip content={FILTER_FOR_TYPE_LABEL}>
+              <EuiBadge
+                color="hollow"
+                css={[capitalizeStyle, clickableBadgeStyle]}
+                onClick={() => onFilterByType(filterValue)}
+                onClickAriaLabel={FILTER_FOR_TYPE_LABEL}
+              >
+                {label}
+              </EuiBadge>
+            </EuiToolTip>
+          );
+        },
+      },
+      {
+        name: SUBTYPE_COLUMN_LABEL,
+        width: '7.5em',
+        render: (ki: KnowledgeIndicator) => {
+          if (ki.kind !== 'feature' || !ki.feature.subtype) return null;
+          const subtype = ki.feature.subtype;
+          return (
+            <EuiToolTip content={FILTER_FOR_SUBTYPE_LABEL}>
+              <EuiBadge
+                color="hollow"
+                css={[capitalizeStyle, clickableBadgeStyle]}
+                onClick={() => onFilterBySubtype(subtype)}
+                onClickAriaLabel={FILTER_FOR_SUBTYPE_LABEL}
+              >
+                {subtype}
+              </EuiBadge>
+            </EuiToolTip>
           );
         },
       },
@@ -121,7 +162,7 @@ export const useKnowledgeIndicatorsColumns = ({
         name: STREAM_COLUMN_LABEL,
         width: '9.5em',
         render: (ki: KnowledgeIndicator) => {
-          return <EuiBadge color="hollow">{getKnowledgeIndicatorStreamName(ki)}</EuiBadge>;
+          return <StreamLink name={getKnowledgeIndicatorStreamName(ki)} />;
         },
       },
       {
@@ -142,5 +183,7 @@ export const useKnowledgeIndicatorsColumns = ({
       selectedKnowledgeIndicatorId,
       toggleSelectedKnowledgeIndicator,
       setKnowledgeIndicatorsToDelete,
+      onFilterByType,
+      onFilterBySubtype,
     ]
   );

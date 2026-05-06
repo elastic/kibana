@@ -25,12 +25,16 @@ import { FormattedRelativeTime } from '@kbn/i18n-react';
 import {
   useFetchLatestSignificantEvent,
   useFetchSystemOverview,
+  useFlyoutFocusManagement,
   SigeventsOverview,
   SignificantEventDetailBody,
   SignificantEventDetailHeader,
   StatusHeaderBanner,
+  SIGEVENTS_INDEX,
 } from '@kbn/sigevents';
+import type { EmbeddableConversationProps } from '@kbn/agent-builder-plugin/public';
 import type { HealthyMetricCardItem } from '@kbn/sigevents';
+import { OBSERVABILITY_SIGNIFICANT_EVENT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
 
@@ -69,11 +73,9 @@ const embeddableConversationWrapperStyles = css`
     background: transparent;
   }
 
-  /* Hide the lazy-load spinner so it doesn't cause layout shift */
-  > .euiFlexGroup {
-    .euiLoadingSpinner {
-      display: none;
-    }
+  /* Hide all spinners so they don't cause layout shift */
+  .euiLoadingSpinner {
+    display: none;
   }
 `;
 
@@ -112,19 +114,45 @@ export function SigeventsOverviewPage() {
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
   const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
   const [conversationKey, setConversationKey] = useState(0);
+  const [attachments, setAttachments] = useState<EmbeddableConversationProps['attachments']>([]);
   const [isBannerVisible, setIsBannerVisible] = useState(false);
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigeventsDetailFlyout' });
-  const returnFocusRef = useRef<Element | null>(null);
   const overviewRef = useRef<HTMLDivElement | null>(null);
 
-  const openDetailFlyout = useCallback(() => {
-    returnFocusRef.current = document.activeElement;
-    setIsDetailFlyoutOpen(true);
-  }, []);
   const closeDetailFlyout = useCallback(() => {
     setIsDetailFlyoutOpen(false);
-    requestAnimationFrame(() => {
-      (returnFocusRef.current as HTMLElement | null)?.focus();
+  }, []);
+
+  const { open: openFlyoutFocus } = useFlyoutFocusManagement({
+    isOpen: isDetailFlyoutOpen,
+    onClose: closeDetailFlyout,
+    flyoutTestSubj: 'obltSigeventsDetailFlyout',
+  });
+
+  const openDetailFlyout = useCallback(() => {
+    openFlyoutFocus();
+    setIsDetailFlyoutOpen(true);
+  }, [openFlyoutFocus]);
+
+  useEffect(() => {
+    if (eventData?.raw.event_id) {
+      setAttachments([
+        {
+          type: OBSERVABILITY_SIGNIFICANT_EVENT_ATTACHMENT_TYPE_ID,
+          data: {
+            index: SIGEVENTS_INDEX,
+            eventId: eventData?.raw.event_id,
+          },
+        },
+      ]);
+    }
+  }, [eventData?.raw.event_id]);
+
+  const buildRemediationPrompt = useCallback((eventTitle: string) => {
+    return i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
+      defaultMessage:
+        'Help me remediate: {eventTitle}. Anchor on the significant event attachment, validate and extend it with live telemetry, then give an updated root cause narrative and prioritized remediation steps.',
+      values: { eventTitle },
     });
   }, []);
 
@@ -174,63 +202,23 @@ export function SigeventsOverviewPage() {
     };
   }, [eventData, overviewLoading, loading, error, overviewError]);
 
-  useEffect(() => {
-    if (!isDetailFlyoutOpen) {
-      return;
-    }
-
-    // Focus the close button inside the flyout once it renders
-    const timerId = setTimeout(() => {
-      const flyout = document.querySelector<HTMLElement>(
-        '[data-test-subj="obltSigeventsDetailFlyout"]'
-      );
-      const closeBtn = flyout?.querySelector<HTMLElement>(
-        '[data-test-subj="euiFlyoutCloseButton"]'
-      );
-      closeBtn?.focus();
-    }, 50);
-
-    // Handle Escape key to close the flyout
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeDetailFlyout();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      clearTimeout(timerId);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isDetailFlyoutOpen, closeDetailFlyout]);
-
   const handleRemediate = useCallback(() => {
     const eventTitle = eventData?.mainEventTitle ?? 'the significant event';
-    setRemediationPrompt(
-      i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
-        defaultMessage:
-          'Help me remediate: {eventTitle}. What are the possible root causes and recommended next steps?',
-        values: { eventTitle },
-      })
-    );
+    setRemediationPrompt(buildRemediationPrompt(eventTitle));
     setConversationKey((prev) => prev + 1);
-  }, [eventData?.mainEventTitle]);
+  }, [eventData?.mainEventTitle, buildRemediationPrompt]);
 
   const handleFlyoutRemediate = useCallback(() => {
     handleRemediate();
-    closeDetailFlyout();
-  }, [handleRemediate, closeDetailFlyout]);
+  }, [handleRemediate]);
 
-  const handleRemediateEvent = useCallback((eventTitle: string) => {
-    setRemediationPrompt(
-      i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
-        defaultMessage:
-          'Help me remediate: {eventTitle}. What are the possible root causes and recommended next steps?',
-        values: { eventTitle },
-      })
-    );
-    setConversationKey((prev) => prev + 1);
-  }, []);
+  const handleRemediateEvent = useCallback(
+    (eventTitle: string) => {
+      setRemediationPrompt(buildRemediationPrompt(eventTitle));
+      setConversationKey((prev) => prev + 1);
+    },
+    [buildRemediationPrompt]
+  );
 
   const EmbeddableConversation = useMemo(
     () => agentBuilder?.getEmbeddableConversation(),
@@ -505,7 +493,7 @@ export function SigeventsOverviewPage() {
               </div>
             </EuiFlexItem>
 
-            {EmbeddableConversation && (
+            {EmbeddableConversation && !loading && !overviewLoading && (
               <EuiFlexItem
                 grow={true}
                 css={embeddableConversationWrapperStyles}
@@ -521,6 +509,7 @@ export function SigeventsOverviewPage() {
                   autoSendInitialMessage={!!remediationPrompt}
                   autoFocus={false}
                   newConversation={conversationKey > 0}
+                  attachments={attachments}
                 />
               </EuiFlexItem>
             )}

@@ -43,6 +43,7 @@ import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { InfoPanel } from '../../../../info_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { SeverityBadge } from '../severity_badge/severity_badge';
+import { StreamLink } from '../multi_step/links';
 import {
   OCCURRENCES_COLUMN,
   THRESHOLD_BREACHES_TOOLTIP_NAME,
@@ -184,9 +185,7 @@ export function QueryDetailsFlyout({
             </EuiFlexItem>
             <EuiFlexItem>
               <FlyoutMetadataCard title={STREAM_LABEL}>
-                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                  {item.stream_name}
-                </EuiBadge>
+                <StreamLink name={item.stream_name} />
               </FlyoutMetadataCard>
             </EuiFlexItem>
           </EuiFlexGroup>
