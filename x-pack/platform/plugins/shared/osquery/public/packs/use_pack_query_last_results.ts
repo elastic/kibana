@@ -19,6 +19,7 @@ interface UsePackQueryLastResultsProps {
   skip?: boolean;
   startDate?: string;
   endDate?: string;
+  scheduleId?: string;
 }
 
 export const usePackQueryLastResults = ({
@@ -27,13 +28,57 @@ export const usePackQueryLastResults = ({
   startDate,
   endDate,
   skip = false,
+  scheduleId,
 }: UsePackQueryLastResultsProps) => {
   const data = useKibana().services.data;
   const { data: logsDataView } = useLogsDataView({ skip });
 
   return useQuery(
-    ['scheduledQueryLastResults', { actionId }],
+    ['scheduledQueryLastResults', { actionId, scheduleId }],
     async () => {
+      if (scheduleId) {
+        const scheduleSearchSource = await data.search.searchSource.create({
+          size: 0,
+          query: {
+            // @ts-expect-error update types
+            term: { schedule_id: scheduleId },
+          },
+        });
+
+        scheduleSearchSource.setField('index', logsDataView);
+        scheduleSearchSource.setField('aggs', {
+          per_execution: {
+            terms: {
+              field: 'osquery_meta.schedule_execution_count',
+              size: 1,
+              order: { max_ingested: 'desc' },
+            },
+            aggs: {
+              max_ingested: { max: { field: 'event.ingested' } },
+              unique_agents: { cardinality: { field: 'agent.id' } },
+            },
+          },
+        });
+
+        const scheduleResponse = await lastValueFrom(scheduleSearchSource.fetch$());
+        // @ts-expect-error update types
+        const buckets = scheduleResponse?.rawResponse?.aggregations?.per_execution?.buckets;
+
+        if (!buckets?.length) {
+          return null;
+        }
+
+        const bucket = buckets[0];
+
+        return {
+          lastResultTime: [bucket.max_ingested?.value_as_string],
+          uniqueAgentsCount: bucket.unique_agents?.value,
+          docCount: bucket.doc_count,
+        };
+      }
+
+      if (!actionId) return null;
+
       const lastResultsSearchSource = await data.search.searchSource.create({
         size: 1,
         sort: [{ 'event.ingested': SortDirection.desc }],
@@ -103,7 +148,7 @@ export const usePackQueryLastResults = ({
     },
     {
       keepPreviousData: true,
-      enabled: !!(!skip && actionId && logsDataView),
+      enabled: !!(!skip && (actionId || scheduleId) && logsDataView),
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
     }

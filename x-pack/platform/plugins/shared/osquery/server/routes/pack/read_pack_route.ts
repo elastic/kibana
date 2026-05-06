@@ -102,7 +102,7 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           saved_object_id: id,
           queries: mapValues(
             convertSOQueriesToPack(attributes.queries),
-            ({ schedule_id: _s, start_date: _d, ...restQuery }) => restQuery
+            ({ start_date: _d, ...restQuery }) => restQuery
           ),
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,

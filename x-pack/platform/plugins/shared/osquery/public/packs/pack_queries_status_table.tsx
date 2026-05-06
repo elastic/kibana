@@ -354,6 +354,7 @@ interface ScheduledQueryLastResultsProps {
   actionId?: string;
   queryId?: string;
   interval: number;
+  scheduleId?: string;
 }
 
 interface ScheduledQueryErrorsProps {
@@ -367,10 +368,12 @@ interface ScheduledQueryErrorsProps {
 const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   actionId,
   interval,
+  scheduleId,
 }) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
+    scheduleId,
   });
 
   const timestamp = useMemo(() => {
@@ -408,10 +411,15 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   );
 };
 
-const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionId, interval }) => {
+const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({
+  actionId,
+  interval,
+  scheduleId,
+}) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
+    scheduleId,
   });
 
   if (isLoading) {
@@ -433,10 +441,15 @@ const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionId,
   );
 };
 
-const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionId, interval }) => {
+const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({
+  actionId,
+  interval,
+  scheduleId,
+}) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
+    scheduleId,
   });
   if (isLoading) {
     return <EuiLoadingSpinner data-test-subj={'docsLoading'} />;
@@ -624,19 +637,31 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   const renderLastResultsColumn = useCallback(
     (item: PackQueryFormData) => (
-      <ScheduledQueryLastResults actionId={actionIdForQuery(item.id)} interval={item.interval} />
+      <ScheduledQueryLastResults
+        actionId={actionIdForQuery(item.id)}
+        interval={item.interval}
+        scheduleId={item.schedule_id}
+      />
     ),
     [actionIdForQuery]
   );
   const renderDocsColumn = useCallback(
     (item: PackQueryFormData) => (
-      <DocsColumnResults actionId={actionIdForQuery(item.id)} interval={item.interval} />
+      <DocsColumnResults
+        actionId={actionIdForQuery(item.id)}
+        interval={item.interval}
+        scheduleId={item.schedule_id}
+      />
     ),
     [actionIdForQuery]
   );
   const renderAgentsColumn = useCallback(
     (item: PackQueryFormData) => (
-      <AgentsColumnResults actionId={actionIdForQuery(item.id)} interval={item.interval} />
+      <AgentsColumnResults
+        actionId={actionIdForQuery(item.id)}
+        interval={item.interval}
+        scheduleId={item.schedule_id}
+      />
     ),
     [actionIdForQuery]
   );
