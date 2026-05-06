@@ -17,163 +17,18 @@ jobs:
       github.event.pull_request.user.login != 'kibanamachine' &&
       contains(github.event.pull_request.labels.*.name, 'backport')
     steps:
-      - name: Select reviewers
-        id: select-reviewers
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          sparse-checkout: .github
+          sparse-checkout-cone-mode: true
+          fetch-depth: 1
+
+      - name: Assign reviewers
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
           script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const prAuthor = context.payload.pull_request.user.login;
-            const normalize = (s) => s.replace(/^@/, '').trim();
-            const isHumanReviewer = (login) =>
-              Boolean(login) &&
-              login !== 'kibanamachine' &&
-              !login.endsWith('[bot]');
-
-            const title = context.payload.pull_request.title ?? '';
-            const body = context.payload.pull_request.body ?? '';
-            const sourcePullRequestIndex = body.indexOf('"sourcePullRequest"');
-            const originalPrNumberFromMetadata =
-              sourcePullRequestIndex === -1
-                ? undefined
-                : body
-                    .slice(sourcePullRequestIndex)
-                    .match(/"number"\s*:\s*(\d+)/)?.[1];
-            const originalPrNumberFromTitle = title.match(/\(#(\d+)\)\s*$/)?.[1];
-            const originalPrNumber = Number(
-              originalPrNumberFromMetadata ?? originalPrNumberFromTitle
-            );
-
-            if (!Number.isInteger(originalPrNumber)) {
-              return;
-            }
-
-            const reviewHistory = await github.graphql(
-              `query($owner: String!, $repo: String!, $number: Int!) {
-                repository(owner: $owner, name: $repo) {
-                  pullRequest(number: $number) {
-                    reviews(first: 100) {
-                      nodes {
-                        state
-                        submittedAt
-                        author {
-                          login
-                        }
-                        onBehalfOf(first: 10) {
-                          nodes {
-                            slug
-                            organization {
-                              login
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }`,
-              {
-                owner,
-                repo,
-                number: originalPrNumber,
-              }
-            );
-
-            const reviews = (reviewHistory.repository.pullRequest?.reviews?.nodes ?? [])
-              .filter((review) => Boolean(review.submittedAt))
-              .sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt));
-
-            const reviewedTeams = [];
-            for (const review of reviews) {
-              for (const team of review.onBehalfOf.nodes ?? []) {
-                const combinedSlug = `${team.organization.login}/${team.slug}`;
-                if (!reviewedTeams.includes(combinedSlug)) {
-                  reviewedTeams.push(combinedSlug);
-                }
-              }
-            }
-
-            let matchedTeams = [];
-            try {
-              const result = await github.graphql(
-                `query($login: String!) {
-                  organization(login: "elastic") {
-                    teams(first: 100, userLogins: [$login]) {
-                      nodes { combinedSlug }
-                    }
-                  }
-                }`,
-                { login: prAuthor }
-              );
-              const authorTeams = new Set(
-                result.organization.teams.nodes.map((t) => normalize(t.combinedSlug))
-              );
-              matchedTeams = reviewedTeams.filter((team) => authorTeams.has(team));
-            } catch (error) {
-              core.warning(`Failed to query author's org teams: ${error.message}`);
-            }
-
-            if (matchedTeams.length > 0) {
-              core.setOutput('team_reviewers', matchedTeams.join(','));
-              return;
-            }
-
-            const fallbackReview = reviews
-              .filter((review) => {
-                const login = review.author?.login;
-                return (
-                  review.state === 'APPROVED' &&
-                  isHumanReviewer(login) &&
-                  Boolean(review.submittedAt)
-                );
-              })[0];
-
-            if (!fallbackReview) {
-              return;
-            }
-
-            core.setOutput('reviewer', fallbackReview.author.login);
-
-      - name: Update reviewers
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        with:
-          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
-          script: |
-            const currentPrId = context.payload.pull_request.node_id;
-            const teamReviewers = '${{ steps.select-reviewers.outputs.team_reviewers }}'
-              .split(',')
-              .filter(Boolean);
-            const reviewer = '${{ steps.select-reviewers.outputs.reviewer }}';
-
-            if (teamReviewers.length === 0 && !reviewer) {
-              core.info('No team reviewers or fallback reviewer found');
-              return;
-            }
-
-            core.info(`Updating reviewers: teamReviewers=${teamReviewers}, reviewer=${reviewer}`);
-
-            await github.graphql(
-              `mutation RequestReviewsByLogin(
-                $pullRequestId: ID!
-                $userLogins: [String!]
-                $teamSlugs: [String!]
-              ) {
-                requestReviewsByLogin(
-                  input: {
-                    pullRequestId: $pullRequestId
-                    userLogins: $userLogins
-                    teamSlugs: $teamSlugs
-                    union: false
-                  }
-                ) {
-                  clientMutationId
-                }
-              }`,
-              {
-                pullRequestId: currentPrId,
-                userLogins: reviewer ? [reviewer] : [],
-                teamSlugs: teamReviewers,
-              }
-            );
+            const assignBackportReviewer = require('./.github/scripts/assign_backport_reviewer');
+            await assignBackportReviewer({ github, context, core });
