@@ -24,6 +24,7 @@ describe('deleteCompositeSummaryDoc', () => {
     expect(esClient.delete).toHaveBeenCalledWith({
       index: COMPOSITE_SUMMARY_INDEX_NAME,
       id: docId,
+      refresh: 'wait_for',
     });
     expect(logger.error).not.toHaveBeenCalled();
   });
