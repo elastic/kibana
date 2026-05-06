@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { rawEventData, TestProviders } from '../../../common/mock';
-import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
+import { RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID, RESPONSE_DETAILS_TEST_ID } from './test_ids';
 import { ResponseDetailsContent } from './response_details';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
@@ -104,7 +104,7 @@ describe('<ResponseDetails />', () => {
     const wrapper = renderResponseDetails(contextWithResponseActions);
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getByTestId('responseActionsViewWrapper')).toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID)).toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
     // TODO mock osquery results
   });
@@ -118,7 +118,7 @@ describe('<ResponseDetails />', () => {
     const wrapper = renderResponseDetails(contextWithResponseActions);
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getByTestId('responseActionsViewWrapper')).toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID)).toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(NO_PRIVILEGES_MESSAGE);
@@ -133,7 +133,7 @@ describe('<ResponseDetails />', () => {
     const wrapper = renderResponseDetails(defaultContextValue);
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.queryByTestId('responseActionsViewWrapper')).toBeInTheDocument();
+    expect(wrapper.queryByTestId(RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID)).toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);

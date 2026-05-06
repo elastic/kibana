@@ -11,9 +11,13 @@ import { EuiLink, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ResponseActionsEmptyPrompt as ResponseActionsPrivilegeRequiredCallout } from '../../../common/components/response_actions/response_actions_empty_prompt';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { RESPONSE_NO_DATA_TEST_ID } from '../components/test_ids';
+import {
+  RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID,
+  RESPONSE_NO_DATA_TEST_ID,
+} from '../components/test_ids';
 import type { ResponseActionTypesEnum } from '../../../../common/types/response_actions';
 import { ResponseActionsResults } from '../../../common/components/response_actions/response_actions_results';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
@@ -77,14 +81,11 @@ export const useResponseActionsView = ({ hit }: UseResponseActionsViewParams): R
   );
   const responseActions = useMemo(
     () =>
-      (getFieldValue(hit, 'kibana.alert.rule.parameters') as RuleParametersWithResponseActions)
+      (getFieldValue(hit, ALERT_RULE_PARAMETERS) as RuleParametersWithResponseActions)
         ?.response_actions,
     [hit]
   );
-  const ruleName = useMemo(
-    () => getFieldValue(hit, 'kibana.alert.rule.name') as string | undefined,
-    [hit]
-  );
+  const ruleName = useMemo(() => getFieldValue(hit, ALERT_RULE_NAME) as string, [hit]);
   const ecsData = useMemo<Ecs>(
     () => ({
       ...(expandDottedObject(hit.flattened) as Ecs),
@@ -121,7 +122,7 @@ export const useResponseActionsView = ({ hit }: UseResponseActionsViewParams): R
   return (
     <>
       <EuiSpacer size="s" />
-      <div css={tabContentWrapperCss} data-test-subj="responseActionsViewWrapper">
+      <div css={tabContentWrapperCss} data-test-subj={RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID}>
         {!canAccessEndpointActionsLogManagement ? (
           <ResponseActionsPrivilegeRequiredCallout type="endpoint" />
         ) : showResponseActions ? (

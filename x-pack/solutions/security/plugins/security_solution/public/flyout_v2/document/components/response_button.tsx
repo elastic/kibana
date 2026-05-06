@@ -19,19 +19,17 @@ export interface ResponseButtonProps {
  */
 export const ResponseButton: React.FC<ResponseButtonProps> = ({ onShowResponseDetails }) => {
   return (
-    <>
-      <EuiButton
-        onClick={onShowResponseDetails}
-        iconType="documentation"
-        data-test-subj={RESPONSE_BUTTON_TEST_ID}
-        size="s"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.right.response.responseButtonLabel"
-          defaultMessage="Response"
-        />
-      </EuiButton>
-    </>
+    <EuiButton
+      onClick={onShowResponseDetails}
+      iconType="documentation"
+      data-test-subj={RESPONSE_BUTTON_TEST_ID}
+      size="s"
+    >
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.right.response.responseButtonLabel"
+        defaultMessage="Response"
+      />
+    </EuiButton>
   );
 };
 
