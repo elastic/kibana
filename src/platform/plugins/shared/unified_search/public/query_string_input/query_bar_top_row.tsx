@@ -25,7 +25,7 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
-import { ESQLLangEditor, type ESQLEditorProps } from '@kbn/esql/public';
+import { ESQLLangEditor, QuickSearchVisor, type ESQLEditorProps } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -661,6 +661,19 @@ export const QueryBarTopRow = React.memo(
       [onSubmit]
     );
 
+    const propsOnTextLangQueryChange = props.onTextLangQueryChange;
+    const onVisorUpdateAndSubmit = useCallback(
+      (newEsqlQuery: string) => {
+        const aggregateQuery = { esql: newEsqlQuery } as AggregateQuery;
+        propsOnTextLangQueryChange(aggregateQuery);
+        onSubmit({
+          query: aggregateQuery as unknown as Query | QT,
+          dateRange: dateRangeRef.current,
+        });
+      },
+      [propsOnTextLangQueryChange, onSubmit]
+    );
+
     const {
       onDraftChange,
       isDirty: draftIsDirty,
@@ -1194,8 +1207,9 @@ export const QueryBarTopRow = React.memo(
 
     const flexDirection: 'column' | 'row' =
       isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row';
-    const flexJustifyContent: 'flexStart' | 'flexEnd' =
-      shouldShowDatePickerAsBadge() && !shouldRenderESQLUi ? 'flexStart' : 'flexEnd';
+    const flexJustifyContent: 'flexStart' | 'flexEnd' = shouldShowDatePickerAsBadge()
+      ? 'flexStart'
+      : 'flexEnd';
     const queryBarFlexGroupProps = {
       className: 'kbnQueryBar',
       'data-test-subj': 'kbnQueryBar',
@@ -1223,15 +1237,18 @@ export const QueryBarTopRow = React.memo(
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
                 {/* Optional wrapper for the ES|QL controls elements */}
                 {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
-                  <EuiFlexItem
-                    grow={true}
-                    css={css`
-                      margin-right: auto;
-                    `}
-                  >
+                  <EuiFlexItem grow={false}>
                     {props.esqlVariablesConfig?.controlsWrapper}
                   </EuiFlexItem>
                 )}
+                <EuiFlexItem>
+                  <QuickSearchVisor
+                    query={
+                      props.query && isOfAggregateQueryType(props.query) ? props.query.esql : ''
+                    }
+                    onUpdateAndSubmitQuery={onVisorUpdateAndSubmit}
+                  />
+                </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}
               </EuiFlexGroup>
               {!shouldShowDatePickerAsBadge() && props.filterBar}

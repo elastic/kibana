@@ -9,7 +9,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export interface EsqlEditorActions {
-  toggleVisor: () => void;
   toggleHistory: () => void;
   toggleStarredQuery: () => void;
   submitEsqlQuery: (query: string) => void;

@@ -208,12 +208,10 @@ const ESQLEditorInternal = function ESQLEditor({
     useState<EsqlStarredQueriesService | null>(null);
   const [isCurrentQueryStarred, setIsCurrentQueryStarred] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
-  const [isVisorOpen, setIsVisorOpen] = useRestorableState('isVisorOpen', false);
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
   const controlsContextRef = useRef(controlsContext);
-  const isVisorOpenRef = useRef(isVisorOpen);
 
   const trimmedQuery = useMemo(() => getTrimmedQuery(code ?? ''), [code]);
 
@@ -346,8 +344,7 @@ const ESQLEditorInternal = function ESQLEditor({
   useEffect(() => {
     esqlVariablesRef.current = esqlVariables;
     controlsContextRef.current = controlsContext;
-    isVisorOpenRef.current = isVisorOpen;
-  }, [esqlVariables, controlsContext, isVisorOpen]);
+  }, [esqlVariables, controlsContext]);
 
   const triggerSuggestions = useCallback(() => {
     setTimeout(() => {
@@ -477,25 +474,21 @@ const ESQLEditorInternal = function ESQLEditor({
     [onSuggestionsReady, telemetryService]
   );
 
-  const { editorActions, onClickQueryHistory, onToggleVisor } = useEsqlEditorActions({
+  const { editorActions, onClickQueryHistory } = useEsqlEditorActions({
     code,
     isHistoryOpen,
     isCurrentQueryStarred,
     onUpdateAndSubmitQuery,
-    onVisorClosed: () => editorRef.current?.focus(),
     starredQueriesService,
     trimmedQuery,
-    isVisorOpenRef,
     setIsHistoryOpen,
     setIsCurrentQueryStarred,
-    setIsVisorOpen,
     trackQueryHistoryOpened: (isOpen) => telemetryService.trackQueryHistoryOpened(isOpen),
   });
   useEsqlEditorActionsRegistration(editorActions);
 
   // Stable proxies for callbacks captured by long-lived Monaco command closures
   const stableOnQuerySubmit = useStableCallback(onQuerySubmit);
-  const stableOnToggleVisor = useStableCallback(onToggleVisor);
   const stableOnPrettifyQuery = useStableCallback(onPrettifyQuery);
 
   const esqlCallbacks = useEsqlCallbacks({
@@ -625,29 +618,41 @@ const ESQLEditorInternal = function ESQLEditor({
           ${sourcesBadgeStyle}
         `}
       />
-      {Boolean(editorIsInline) && !hideRunQueryButton ? (
+      {Boolean(editorIsInline) && (!hideRunQueryButton || !hideQuickSearch) ? (
         <EuiFlexGroup
-          gutterSize="none"
+          gutterSize="s"
           responsive={false}
-          justifyContent="flexEnd"
           alignItems="center"
           css={css`
             padding: ${theme.euiTheme.size.s};
           `}
         >
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color={queryRunButtonProperties.color as EuiButtonColor}
-              onClick={() => onQuerySubmit(QuerySource.MANUAL)}
-              size="s"
-              isLoading={isLoading && !allowQueryCancellation}
-              isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
-              data-test-subj="ESQLEditor-run-query-button"
-              aria-label={queryRunButtonProperties.label}
-            >
-              {queryRunButtonProperties.label}
-            </EuiButton>
-          </EuiFlexItem>
+          {!hideQuickSearch && (
+            <EuiFlexItem>
+              <QuickSearchVisor
+                query={code}
+                isSpaceReduced={measuredEditorWidth < BREAKPOINT_WIDTH}
+                onUpdateAndSubmitQuery={(newQuery) =>
+                  onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
+                }
+              />
+            </EuiFlexItem>
+          )}
+          {!hideRunQueryButton && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color={queryRunButtonProperties.color as EuiButtonColor}
+                onClick={() => onQuerySubmit(QuerySource.MANUAL)}
+                size="s"
+                isLoading={isLoading && !allowQueryCancellation}
+                isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
+                data-test-subj="ESQLEditor-run-query-button"
+                aria-label={queryRunButtonProperties.label}
+              >
+                {queryRunButtonProperties.label}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       ) : null}
       <EuiFlexGroup
@@ -725,12 +730,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   });
 
                   // Add editor key bindings
-                  addEditorKeyBindings(
-                    editor,
-                    stableOnQuerySubmit,
-                    stableOnToggleVisor,
-                    stableOnPrettifyQuery
-                  );
+                  addEditorKeyBindings(editor, stableOnQuerySubmit, stableOnPrettifyQuery);
 
                   // Store disposables for cleanup
                   const currentEditor = editorRef.current;
@@ -746,9 +746,6 @@ const ESQLEditorInternal = function ESQLEditor({
                   editor.onMouseDown((e) => {
                     if (datePickerOpenStatusRef.current) {
                       setPopoverPosition({});
-                    }
-                    if (isVisorOpenRef.current) {
-                      setIsVisorOpen(false);
                     }
                     if (enableResourceBrowser) {
                       sourcesLabelClickHandler(e);
@@ -811,17 +808,6 @@ const ESQLEditorInternal = function ESQLEditor({
           </EuiFlexItem>
         </div>
       </EuiFlexGroup>
-      {!hideQuickSearch && (
-        <QuickSearchVisor
-          query={code}
-          isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
-          isVisible={isVisorOpen}
-          onUpdateAndSubmitQuery={(newQuery) =>
-            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
-          }
-          onToggleVisor={onToggleVisor}
-        />
-      )}
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
         <ResizableButton
           onMouseDownResizeHandler={(mouseDownEvent) => {

@@ -325,7 +325,6 @@ export const EsqlQueryExpression: React.FC<
           isLoading={isLoading}
           editorIsInline
           expandToFitQueryOnMount
-          hasOutline
           mergeExternalMessages
         />
       </EuiFormRow>

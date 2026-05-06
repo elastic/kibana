@@ -8,20 +8,14 @@
  */
 import React, { Suspense, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isMac } from '@kbn/shared-ux-utility';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
 import { useEsqlEditorActions } from '../editor_actions_context';
-import { searchPlaceholder } from '../editor_visor';
-import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 import { KeyboardShortcuts } from '../editor_footer/keyboard_shortcuts';
 import { QueryWrapComponent } from '../editor_footer/query_wrap_component';
-import { MagnifySparklesIcon } from './magnify_sparkles_icon';
 import {
   addStarredQueryLabel,
   helpLabel,
   hideHistoryLabel,
-  searchTooltipLabel,
-  searchWithNlTooltipLabel,
   removeStarredQueryLabel,
   showHistoryLabel,
 } from './menu_i18n';
@@ -41,12 +35,6 @@ export function ESQLMenu({
   onPrettifyQuery?: () => void;
 } = {}) {
   const editorActions = useEsqlEditorActions();
-  const isNlToEsqlEnabled = useNlToEsqlCheck();
-  const commandKey = isMac ? '⌘' : 'Ctrl';
-  const visorTooltip = isNlToEsqlEnabled
-    ? searchWithNlTooltipLabel(commandKey)
-    : searchTooltipLabel(commandKey);
-  const onToggleVisor = editorActions?.toggleVisor;
   const onToggleHistory = editorActions?.toggleHistory;
   const onToggleStarredQuery = editorActions?.toggleStarredQuery;
   const historyLabel = editorActions?.isHistoryOpen ? hideHistoryLabel : showHistoryLabel;
@@ -64,19 +52,6 @@ export function ESQLMenu({
 
   return (
     <>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'search'}
-            size="xs"
-            aria-label={searchPlaceholder}
-            onClick={onToggleVisor}
-            isDisabled={!onToggleVisor}
-            data-test-subj="esql-menu-button"
-            color="text"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
       {onPrettifyQuery && <QueryWrapComponent onPrettifyQuery={onPrettifyQuery} />}
       <KeyboardShortcuts />
       {!hideHistory && (

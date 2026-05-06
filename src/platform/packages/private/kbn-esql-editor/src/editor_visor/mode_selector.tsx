@@ -22,8 +22,8 @@ const nlLabel = i18n.translate('esqlEditor.visor.modeNaturalLanguage', {
 });
 
 const modeOptions: Array<EuiComboBoxOptionOption<VisorMode>> = [
-  { label: kqlLabel, value: VisorMode.KQL },
   { label: nlLabel, value: VisorMode.NaturalLanguage },
+  { label: kqlLabel, value: VisorMode.KQL },
 ];
 
 interface ModeSelectorProps {

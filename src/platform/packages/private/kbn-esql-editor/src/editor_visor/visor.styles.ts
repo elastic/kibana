@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { UseEuiTheme } from '@elastic/eui';
-import { euiFontSizeFromScale, euiShadow } from '@elastic/eui';
+import { euiFontSizeFromScale } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { VisorMode } from './mode_selector';
 
@@ -25,7 +25,6 @@ export const visorStyles = (
   euiThemeContext: UseEuiTheme,
   comboBoxWidth: number,
   isSpaceReduced: boolean,
-  isVisible: boolean,
   mode: VisorMode
 ) => {
   const { euiTheme } = euiThemeContext;
@@ -33,27 +32,18 @@ export const visorStyles = (
   const modeSelectWidth = mode === VisorMode.KQL ? MODE_SELECT_WIDTH_KQL : MODE_SELECT_WIDTH_NL;
   const borderRadius = euiTheme.border.radius.medium;
 
-  const boxStyles = css`
-    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
-    border-radius: ${borderRadius};
-    ${euiShadow(euiThemeContext, 'xs')}
-  `;
-
   return {
     visorContainer: css`
       background-color: ${euiTheme.colors.backgroundBasePlain};
-      width: ${isSpaceReduced ? '98%' : `calc(${visorWidthPercentage * 100}%)`};
-      margin: ${isVisible ? `0 auto ${euiTheme.size.base}` : '0 auto 0'};
-      height: ${isVisible ? `calc(${euiTheme.size.xl} + ${VISOR_INNER_PADDING})` : '0'};
-      opacity: ${isVisible ? 1 : 0};
-      pointer-events: ${isVisible ? 'auto' : 'none'};
-      transition: all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+      width: 100%;
+      height: calc(${euiTheme.size.xl} + ${VISOR_INNER_PADDING});
     `,
     visorWrapper: css`
-      width: calc(100% - ${euiTheme.size.xl});
+      width: 100%;
     `,
     visorBox: css`
-      ${boxStyles}
+      border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+      border-radius: ${borderRadius};
     `,
     comboBoxWrapper: css`
       justify-content: center;
@@ -61,14 +51,6 @@ export const visorStyles = (
       flex-grow: 1;
       max-width: ${isSpaceReduced ? `calc(${visorWidthPercentage * 100}%)` : `${comboBoxWidth}px`};
       overflow: hidden;
-    `,
-    closeButtonWrapper: css`
-      ${boxStyles}
-      margin-left: ${euiTheme.size.xs};
-    `,
-    closeButton: css`
-      border-radius: ${borderRadius};
-      border: none;
     `,
     separator: css`
       width: 1px;

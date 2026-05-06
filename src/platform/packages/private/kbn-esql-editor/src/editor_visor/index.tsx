@@ -9,7 +9,6 @@
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -37,12 +36,8 @@ export interface QuickSearchVisorProps {
   query: string;
   // Handling smaller space for the visor
   isSpaceReduced?: boolean;
-  // Whether the visor is visible
-  isVisible: boolean;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
-  // Callback to toggle the visor visibility
-  onToggleVisor: () => void;
 }
 
 export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
@@ -53,10 +48,6 @@ const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
   defaultMessage: 'Describe the query you want in plain language',
 });
 
-const closeButtonAriaLabel = i18n.translate('esqlEditor.visor.closeButtonAriaLabel', {
-  defaultMessage: 'Close quick search visor',
-});
-
 const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip', {
   defaultMessage: 'Technical preview',
 });
@@ -64,9 +55,7 @@ const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip',
 export function QuickSearchVisor({
   query,
   isSpaceReduced,
-  isVisible,
   onUpdateAndSubmitQuery,
-  onToggleVisor,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, core, data } = kibana.services;
@@ -74,7 +63,7 @@ export function QuickSearchVisor({
   const euiThemeContext = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
-  const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
+  const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.NaturalLanguage);
   const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(undefined);
@@ -158,6 +147,12 @@ export function QuickSearchVisor({
   );
 
   useEffect(() => {
+    if (visorMode === VisorMode.NaturalLanguage) {
+      checkConnectorAvailability();
+    }
+  }, [visorMode, checkConnectorAvailability]);
+
+  useEffect(() => {
     const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);
     const sources = sourceFromUpdatedQuery
       ? sourceFromUpdatedQuery.split(',').map((source) => ({ label: source.trim() }))
@@ -182,7 +177,7 @@ export function QuickSearchVisor({
   );
 
   useEffect(() => {
-    if (!isVisible || !sourcesKey) {
+    if (!sourcesKey) {
       setAdHocDataView(null);
       return;
     }
@@ -199,14 +194,7 @@ export function QuickSearchVisor({
     return () => {
       cancelled = true;
     };
-  }, [isVisible, sourcesKey, data.dataViews]);
-
-  useEffect(() => {
-    if (isVisible && visorMode === VisorMode.KQL && kqlInputRef.current) {
-      const textArea = kqlInputRef.current.querySelector('textarea');
-      textArea?.focus();
-    }
-  }, [isVisible, visorMode]);
+  }, [sourcesKey, data.dataViews]);
 
   const comboBoxWidth = useMemo(() => {
     const labelLength = selectedSources.map((s) => s.label).join(', ').length || 0;
@@ -214,13 +202,7 @@ export function QuickSearchVisor({
     return calculateWidthFromCharCount(labelLength, { maxWidth: maxComboBoxWidth });
   }, [selectedSources]);
 
-  const styles = visorStyles(
-    euiThemeContext,
-    comboBoxWidth,
-    Boolean(isSpaceReduced),
-    isVisible,
-    visorMode
-  );
+  const styles = visorStyles(euiThemeContext, comboBoxWidth, Boolean(isSpaceReduced), visorMode);
 
   if (!KQLComponent) {
     return null;
@@ -234,9 +216,8 @@ export function QuickSearchVisor({
       responsive={false}
       css={styles.visorContainer}
       data-test-subj="ESQLEditor-quick-search-visor"
-      {...(!isVisible && { inert: '' })}
     >
-      <EuiFlexItem grow={false} css={styles.visorWrapper}>
+      <EuiFlexItem css={styles.visorWrapper}>
         <EuiFlexGroup
           gutterSize="none"
           alignItems="center"
@@ -257,7 +238,7 @@ export function QuickSearchVisor({
           )}
           {visorMode === VisorMode.KQL || !isNlToEsqlEnabled ? (
             <>
-              <EuiFlexItem css={styles.comboBoxWrapper}>
+              <EuiFlexItem grow={false} css={styles.comboBoxWrapper}>
                 <SourcesDropdown
                   currentSources={selectedSources.map((source) => source.label)}
                   onChangeSources={(newSources) => {
@@ -270,7 +251,6 @@ export function QuickSearchVisor({
               <EuiFlexItem css={styles.searchWrapper}>
                 <div ref={kqlInputRef}>
                   <KQLComponent
-                    isDisabled={!isVisible}
                     // If we remove the prop, the icon still appears (!!)
                     iconType=""
                     disableLanguageSwitcher={true}
@@ -280,7 +260,7 @@ export function QuickSearchVisor({
                       query: searchValue,
                       language: 'kuery',
                     }}
-                    disableAutoFocus={false}
+                    disableAutoFocus={true}
                     placeholder={searchPlaceholder}
                     onChange={(newQuery) => {
                       onKqlValueChange(newQuery.query as string);
@@ -303,7 +283,7 @@ export function QuickSearchVisor({
                 <NLInput
                   value={nlValue}
                   placeholder={nlPlaceholder}
-                  disabled={!isVisible || isNlLoading}
+                  disabled={isNlLoading}
                   onChange={setNlValue}
                   onSubmit={onNlSubmit}
                   inputStyles={styles.nlInput}
@@ -312,18 +292,6 @@ export function QuickSearchVisor({
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={styles.closeButtonWrapper}>
-        <EuiButtonIcon
-          color="text"
-          display="base"
-          size="s"
-          iconSize="m"
-          onClick={onToggleVisor}
-          iconType="cross"
-          aria-label={closeButtonAriaLabel}
-          css={styles.closeButton}
-        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -56,7 +56,10 @@ describe('Quick search visor', () => {
     );
   }
 
-  const switchToNlMode = async (getByTestId: ReturnType<typeof renderWithI18n>['getByTestId']) => {
+  const switchMode = async (
+    getByTestId: ReturnType<typeof renderWithI18n>['getByTestId'],
+    targetLabel: 'KQL' | 'Natural language'
+  ) => {
     let modeSelect: HTMLElement;
     await waitFor(() => {
       modeSelect = getByTestId('esqlVisorModeSelect');
@@ -68,11 +71,11 @@ describe('Quick search visor', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Natural language')).toBeInTheDocument();
+      expect(screen.getByText(targetLabel)).toBeInTheDocument();
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByText('Natural language'));
+      fireEvent.click(screen.getByText(targetLabel));
     });
   };
 
@@ -93,9 +96,7 @@ describe('Quick search visor', () => {
     props = {
       query: 'FROM test_index',
       isSpaceReduced: false,
-      isVisible: true,
       onUpdateAndSubmitQuery: jest.fn(),
-      onToggleVisor: jest.fn(),
     };
   });
 
@@ -103,8 +104,9 @@ describe('Quick search visor', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the sources dropdown and the KQL query input', async () => {
+  it('should render the sources dropdown and the KQL query input when KQL mode is selected', async () => {
     const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
+    await switchMode(getByTestId, 'KQL');
     // find the dropdown
     expect(getByTestId('ESQLEditor-visor-sources-dropdown')).toBeInTheDocument();
 
@@ -113,6 +115,7 @@ describe('Quick search visor', () => {
 
   it('should display the available sources in the dropdown list', async () => {
     const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
+    await switchMode(getByTestId, 'KQL');
 
     // Open the dropdown
     const dropdownButton = getByTestId('visorSourcesDropdownButton');
@@ -132,6 +135,7 @@ describe('Quick search visor', () => {
 
   it('should default to the first fetched source when query has no source', async () => {
     const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props, query: 'ROW x =1' }));
+    await switchMode(getByTestId, 'KQL');
 
     await waitFor(() => {
       expect(getByTestId('visorSourcesDropdownButton')).toHaveTextContent('test_index');
@@ -158,10 +162,8 @@ describe('Quick search visor', () => {
     });
   });
 
-  it('should switch to NL mode and show the NL input when connectors are available', async () => {
+  it('should default to NL mode and show the NL input when connectors are available', async () => {
     const { getByTestId, queryByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
-
-    await switchToNlMode(getByTestId);
 
     await waitFor(() => {
       expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
@@ -182,8 +184,6 @@ describe('Quick search visor', () => {
     });
 
     const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
-
-    await switchToNlMode(getByTestId);
 
     await waitFor(() => {
       expect(getByTestId('esqlVisorNoConnectorMessage')).toBeInTheDocument();

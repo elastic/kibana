@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLAdHocDataview: jest.fn().mockResolvedValue(null),
+}));
+
 jest.mock('@kbn/esql/public/kibana_services', () => ({
   useKibanaServices: jest.fn(() => ({})),
   untilPluginStartServicesReady: jest.fn(() => new Promise(() => {})),
