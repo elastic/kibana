@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/agent-builder-workflows-plugin",
-  "owner": "@elastic/workchat-eng",
+  "owner": ["@elastic/workchat-eng", "@elastic/workflows-eng"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
