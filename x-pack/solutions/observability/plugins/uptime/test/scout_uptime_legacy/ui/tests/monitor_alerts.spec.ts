@@ -18,7 +18,7 @@ const mlJobId = '0000_intermittent_high_latency_by_geo';
 
 test.describe('MonitorAlerts', { tag: '@local-stateful-classic' }, () => {
   test.afterAll(async ({ apiServices }) => {
-    await apiServices.ml.jobs.delete({
+    await apiServices.ml.anomalyDetection.delete({
       jobIds: [mlJobId],
       deleteUserAnnotations: true,
       deleteAlertingRules: true,
