@@ -10,8 +10,11 @@ import {
   DEFAULT_TRANSFORM_FREQUENCY,
   DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST,
+  TRANSFORM_FUNCTION,
 } from '../../../../../../common/constants';
 import type { TransformConfigUnion, TransformId } from '../../../../../../common/types/transform';
+import type { TransformFunction } from '../../../../../../common/constants';
 
 export type EsIndexName = string;
 export type EsIngestPipelineName = string;
@@ -40,7 +43,9 @@ export interface StepDetailsExposedState {
   _meta?: Record<string, unknown>;
 }
 
-export function getDefaultStepDetailsState(): StepDetailsExposedState {
+export function getDefaultStepDetailsState(
+  transformFunction?: TransformFunction
+): StepDetailsExposedState {
   return {
     continuousModeDateField: '',
     continuousModeDelay: DEFAULT_CONTINUOUS_MODE_DELAY,
@@ -53,7 +58,10 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
     transformId: '',
     transformDescription: '',
     transformFrequency: DEFAULT_TRANSFORM_FREQUENCY,
-    transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+    transformSettingsMaxPageSearchSize:
+      transformFunction === TRANSFORM_FUNCTION.LATEST
+        ? DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
+        : DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
     transformSettingsDocsPerSecond: DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
     transformSettingsNumFailureRetries: undefined,
     destinationIndex: '',
