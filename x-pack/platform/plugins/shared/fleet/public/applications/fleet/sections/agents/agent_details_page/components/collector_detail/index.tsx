@@ -5,82 +5,26 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useMemo, useState } from 'react';
-import { EuiCallOut, EuiLoadingSpinner, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import type { Agent } from '../../../../../types';
 import { useGetAgentEffectiveConfigQuery } from '../../../../../hooks';
-import { Loading } from '../../../../../components';
-
-import { PipelineSelector } from '../../../../../../../components/otel_ui/collector_config_view/pipeline_selector';
-import { CollectorDetailTabs } from '../../../../../../../components/otel_ui/collector_config_view/collector_detail/collector_detail_tabs';
-
-const GraphView = lazy(() =>
-  import('../../../../../../../components/otel_ui/collector_config_view/graph_view').then((m) => ({
-    default: m.GraphView,
-  }))
-);
-
-const ALL_PIPELINES = '__all__';
+import { CollectorConfigView } from '../../../../../../../components/otel_ui';
 
 export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> = ({ agent }) => {
-  const { data: configData, isLoading: isConfigLoading } = useGetAgentEffectiveConfigQuery(
-    agent.id
-  );
-  const config = configData?.effective_config ?? {};
-  const [selectedPipelineId, setSelectedPipelineId] = useState(ALL_PIPELINES);
+  const { data: configData, isLoading } = useGetAgentEffectiveConfigQuery(agent.id);
 
-  const pipelineIds = useMemo(
-    () => Object.keys(config?.service?.pipelines ?? {}),
-    [config?.service?.pipelines]
-  );
+  if (isLoading) {
+    return <EuiLoadingSpinner />;
+  }
 
   return (
-    <>
-      {/* Pipeline Graph */}
-      <EuiPanel paddingSize="m" hasBorder>
-        {isConfigLoading ? (
-          <Loading />
-        ) : pipelineIds.length === 0 ? (
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate('xpack.fleet.collectorDetail.noPipelines', {
-              defaultMessage: 'No pipelines configured',
-            })}
-            iconType="visLine"
-            color="primary"
-          />
-        ) : (
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <PipelineSelector
-              pipelineIds={pipelineIds}
-              selectedPipelineId={selectedPipelineId}
-              onChange={setSelectedPipelineId}
-            />
-            <EuiSpacer size="m" />
-            <GraphView
-              config={config}
-              selectedPipelineId={selectedPipelineId}
-              health={agent.health}
-            />
-          </Suspense>
-        )}
-      </EuiPanel>
-
-      <EuiSpacer size="m" />
-
-      {/* Tabbed detail panel: Health, Info, Configuration */}
-      <EuiPanel paddingSize="m" hasBorder>
-        <CollectorDetailTabs
-          agent={agent}
-          config={config}
-          health={agent.health}
-          isConfigLoading={isConfigLoading}
-        />
-      </EuiPanel>
-
-      <EuiSpacer size="m" />
-    </>
+    <CollectorConfigView
+      config={configData?.effective_config ?? {}}
+      health={agent.health}
+      agents={[agent]}
+    />
   );
 };

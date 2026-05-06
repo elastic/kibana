@@ -19,12 +19,11 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 
 import type { ComponentHealth, OTelCollectorConfig } from '../../../../../common/types';
 
@@ -48,29 +47,6 @@ interface CollectorDetailHealthProps {
   ) => void;
   selectedComponentId?: string;
 }
-
-const FormattedTimestamp: React.FC<{ nanos: number }> = ({ nanos }) => {
-  const ms = nanos / 1_000_000;
-  return (
-    <EuiToolTip
-      content={
-        <FormattedDate
-          value={ms}
-          year="numeric"
-          month="short"
-          day="2-digit"
-          hour="numeric"
-          minute="numeric"
-          timeZoneName="short"
-        />
-      }
-    >
-      <span tabIndex={0}>
-        <FormattedRelative value={ms} />
-      </span>
-    </EuiToolTip>
-  );
-};
 
 const FormattedAbsoluteTimestamp: React.FC<{ nanos: number }> = ({ nanos }) => {
   const ms = nanos / 1_000_000;
@@ -172,9 +148,6 @@ const PipelineAccordion: React.FC<{
     0
   );
   const unhealthyCount = totalComponents - healthyCount;
-
-  const pipelineHealth = findComponentHealth(health, 'pipeline', pipelineId);
-  const pipelineStatus = getComponentHealthStatus(pipelineHealth);
 
   return (
     <EuiAccordion
