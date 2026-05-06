@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
@@ -13,7 +13,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import type { AppHeaderTab } from '@kbn/app-header';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { PageHeader } from '../../components/page_header';
 
 import { Section } from '../../../../common/constants';
@@ -45,9 +44,18 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   history,
 }) => {
   const {
+    core: { chrome },
     plugins: { console: consolePlugin },
     privs,
   } = useAppContext();
+
+  useEffect(() => {
+    chrome.registerAppDocumentationLink(documentationService.getIdxMgmtDocumentationLink());
+
+    return () => {
+      chrome.registerAppDocumentationLink('');
+    };
+  }, [chrome]);
   const onSectionChange = (newSection: Section) => {
     history.push(`/${newSection}`);
   };
@@ -101,26 +109,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     });
   }
 
-  const appMenu = useMemo<AppMenuConfig>(
-    () => ({
-      items: [
-        {
-          id: 'documentationLink',
-          order: 0,
-          overflow: true,
-          label: i18n.translate('xpack.idxMgmt.home.idxMgmtDocsLinkText', {
-            defaultMessage: 'Documentation',
-          }),
-          iconType: 'documentation',
-          href: documentationService.getIdxMgmtDocumentationLink(),
-          target: '_blank',
-          testId: 'documentationLink',
-        },
-      ],
-    }),
-    []
-  );
-
   const indexManagementTabs = (
     <>
       <PageHeader
@@ -128,7 +116,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           defaultMessage: 'Index Management',
         })}
         tabs={tabs}
-        menu={appMenu}
         padding={{ bleed: 'l' }}
         fallback={{
           'data-test-subj': 'indexManagementHeaderContent',

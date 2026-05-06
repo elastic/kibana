@@ -8,13 +8,17 @@
  */
 
 import { useMemo } from 'react';
-import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import type {
+  AppMenuConfig,
+  AppMenuItemType,
+  AppMenuStaticItem,
+} from '@kbn/core-chrome-app-menu-components';
 import { APP_MENU_SHARE_ID, getTooltip } from '@kbn/core-chrome-app-menu-components';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
 
-const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuItemType => ({
+const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem => ({
   label: i18n.translate('chrome.appHeader.feedbackMenuItemLabel', {
     defaultMessage: 'Feedback',
   }),
@@ -22,9 +26,10 @@ const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuItemType =>
   iconType: 'comment',
   order: 1,
   run: feedbackHandler,
+  global: true,
 });
 
-const createDocumentationMenuItem = (href: string): AppMenuItemType => ({
+const createDocumentationMenuItem = (href: string): AppMenuStaticItem => ({
   label: i18n.translate('chrome.appHeader.documentationMenuItemLabel', {
     defaultMessage: 'Documentation',
   }),
@@ -47,7 +52,7 @@ const useStaticItems = () => {
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
 
   return useMemo(() => {
-    const staticItems: AppMenuItemType[] = [];
+    const staticItems: AppMenuStaticItem[] = [];
 
     if (feedbackHandler) {
       staticItems.push(createFeedbackMenuItem(feedbackHandler));
@@ -90,7 +95,7 @@ export function useAppHeaderMenu(
   hasExplicitShare: boolean
 ): {
   config: AppMenuConfig | undefined;
-  staticItems: AppMenuItemType[];
+  staticItems: AppMenuStaticItem[];
 } {
   const { menu } = useResolvedAppMenu(pageAppMenu, hasExplicitShare);
   const staticItems = useStaticItems();

@@ -5,43 +5,32 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { documentationService } from '../../services/documentation';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
+import { useAppContext } from '../../app_context';
 import { PageHeader } from '../../components/page_header';
 
 import { CreatePolicyWizard } from './create_policy_wizard';
 import { CreatePolicyContextProvider } from './create_policy_context';
 
 export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = () => {
+  const {
+    core: { chrome },
+  } = useAppContext();
+
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.enrichPoliciesCreate);
-  }, []);
+    chrome.registerAppDocumentationLink(documentationService.getCreateEnrichPolicyLink());
 
-  const appMenu = useMemo<AppMenuConfig>(
-    () => ({
-      items: [
-        {
-          id: 'createEnrichPolicyDocumentationLink',
-          order: 0,
-          overflow: true,
-          label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.titleDocsLinkText', {
-            defaultMessage: 'Documentation',
-          }),
-          iconType: 'documentation',
-          href: documentationService.getCreateEnrichPolicyLink(),
-          target: '_blank',
-          testId: 'createEnrichPolicyDocumentationLink',
-        },
-      ],
-    }),
-    []
-  );
+    return () => {
+      chrome.registerAppDocumentationLink('');
+    };
+  }, [chrome]);
 
   return (
     <CreatePolicyContextProvider>
@@ -50,7 +39,6 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
           defaultMessage: 'Create enrich policy',
         })}
         back="/app/management/data/index_management/enrich_policies"
-        menu={appMenu}
         padding={{ bleed: 'l' }}
         fallback={{
           'data-test-subj': 'createEnrichPolicyHeaderContent',
