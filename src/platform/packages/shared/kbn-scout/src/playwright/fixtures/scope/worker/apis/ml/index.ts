@@ -30,74 +30,110 @@ export interface DeleteJobsOptions {
   deleteAlertingRules?: boolean;
 }
 
-export interface MlJobsApi {
+export interface MlADJobsApi {
+  /** Delete anomaly detection jobs via the Kibana API */
   delete: (options: DeleteJobsOptions) => Promise<void>;
+  /** Get all anomaly detection jobs via the Elasticsearch API */
   getAllJobs: () => Promise<estypes.MlJob[]>;
+  /** Wait for an anomaly detection job to exist by polling the Elasticsearch API */
   waitForJobToExist: (jobId: string, timeout?: number) => Promise<void>;
+  /** Wait for an anomaly detection job to be deleted by polling the Elasticsearch API */
   waitForJobNotToExist: (jobId: string, timeout?: number) => Promise<void>;
+  /** Delete all anomaly detection jobs via the Elasticsearch API */
   deleteAllJobs: () => Promise<void>;
+  /** Delete expired ML data via the Elasticsearch API */
   deleteExpiredData: () => Promise<void>;
+  calendars: MlCalendarsApi;
+  filters: MlFiltersApi;
+  annotations: MlAnnotationsApi;
 }
 
 export interface MlCalendarsApi {
+  /** Get all ML calendars via the Elasticsearch API */
   getAll: () => Promise<estypes.MlGetCalendarsCalendar[]>;
+  /** Wait for a calendar to exist by polling the Elasticsearch API */
   waitForCalendarToExist: (calendarId: string) => Promise<void>;
+  /** Wait for a calendar to be deleted by polling the Elasticsearch API */
   waitForCalendarNotToExist: (calendarId: string) => Promise<void>;
+  /** Delete a calendar via the Elasticsearch API */
   delete: (calendarId: string) => Promise<void>;
+  /** Delete all calendars via the Elasticsearch API */
   deleteAll: () => Promise<void>;
 }
 
 export interface MlFiltersApi {
+  /** Get all ML filters via the Elasticsearch API */
   getAll: () => Promise<estypes.MlFilter[]>;
+  /** Get an ML filter by ID via the Elasticsearch API */
   getById: (filterId: string) => Promise<estypes.MlFilter | null>;
+  /** Wait for a filter to exist by polling the Elasticsearch API */
   waitForFilterToExist: (filterId: string) => Promise<void>;
+  /** Wait for a filter to be deleted by polling the Elasticsearch API */
   waitForFilterToNotExist: (filterId: string) => Promise<void>;
+  /** Delete a filter via the Elasticsearch API */
   delete: (filterId: string) => Promise<void>;
+  /** Delete all filters via the Elasticsearch API */
   deleteAll: () => Promise<void>;
 }
 
 export interface MlAnnotationsApi {
+  /** Get all ML annotations by querying Elasticsearch directly */
   getAll: () => Promise<Array<{ _id: string; _source: Annotation }>>;
+  /** Get an ML annotation by ID by querying Elasticsearch directly */
   getById: (annotationId: string) => Promise<{ _id: string; _source: Annotation } | undefined>;
+  /** Wait for an annotation to exist by polling Elasticsearch directly */
   waitForAnnotationToExist: (annotationId: string) => Promise<void>;
+  /** Wait for an annotation to be deleted by polling Elasticsearch directly */
   waitForAnnotationNotToExist: (annotationId: string) => Promise<void>;
+  /** Delete an annotation via the Kibana API */
   delete: (annotationId: string) => Promise<void>;
+  /** Delete all annotations via the Kibana API */
   deleteAll: () => Promise<void>;
 }
 
 export interface MlDataFrameAnalyticsApi {
+  /** Get all data frame analytics jobs via the Elasticsearch API */
   getAllJobs: () => Promise<estypes.MlDataframeAnalyticsSummary[]>;
+  /** Wait for a data frame analytics job to exist by polling the Elasticsearch API */
   waitForJobToExist: (analyticsId: string, timeout?: number) => Promise<void>;
+  /** Wait for a data frame analytics job to be deleted by polling the Elasticsearch API */
   waitForJobNotToExist: (analyticsId: string, timeout?: number) => Promise<void>;
+  /** Delete all data frame analytics jobs via the Elasticsearch API */
   deleteAllJobs: () => Promise<void>;
 }
 
 export interface MlTrainedModelsApi {
+  /** Get all trained models via the Elasticsearch API */
   getAll: () => Promise<estypes.MlTrainedModelConfig[]>;
+  /** Delete all trained models (excluding internal models) via the Elasticsearch API */
   deleteAll: () => Promise<void>;
 }
 
 export interface MlIngestPipelinesApi {
+  /** Delete all ML-related ingest pipelines via the Elasticsearch API */
   deleteAll: () => Promise<void>;
 }
 
 export interface MlSavedObjectsApi {
+  /** Initialize ML saved objects via the Kibana API */
   init: (simulate?: boolean, space?: string) => Promise<void>;
+  /** Sync ML saved objects via the Kibana API */
   sync: (simulate?: boolean, space?: string) => Promise<void>;
 }
 
 export interface MlIndicesApi {
+  /** Clean up all anomaly detection resources via Kibana and Elasticsearch APIs */
   cleanAnomalyDetection: () => Promise<void>;
+  /** Clean up all data frame analytics resources via Kibana and Elasticsearch APIs */
   cleanDataFrameAnalytics: () => Promise<void>;
+  /** Clean up all trained models and ingest pipelines via Kibana and Elasticsearch APIs */
   cleanTrainedModels: () => Promise<void>;
+  /** Clean up all ML resources via Kibana and Elasticsearch APIs */
   cleanAll: () => Promise<void>;
 }
 
 export interface MlApiService {
-  jobs: MlJobsApi;
-  calendars: MlCalendarsApi;
-  filters: MlFiltersApi;
-  annotations: MlAnnotationsApi;
+  anomalyDetection: MlADJobsApi;
   dataFrameAnalytics: MlDataFrameAnalyticsApi;
   trainedModels: MlTrainedModelsApi;
   ingestPipelines: MlIngestPipelinesApi;
@@ -150,89 +186,6 @@ export const getMlApiHelper = (
         method: 'GET',
         path,
         headers: { [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31' },
-      });
-    },
-  };
-
-  const jobs: MlJobsApi = {
-    async delete({
-      jobIds,
-      deleteUserAnnotations = false,
-      deleteAlertingRules = false,
-    }: DeleteJobsOptions): Promise<void> {
-      await measurePerformanceAsync(log, `mlApi.jobs.delete [${jobIds.join(', ')}]`, async () => {
-        await kbnClient.request({
-          method: 'POST',
-          path: '/internal/ml/jobs/delete_jobs',
-          headers: ML_INTERNAL_HEADERS,
-          body: {
-            jobIds,
-            deleteUserAnnotations,
-            deleteAlertingRules,
-          },
-        });
-        for (const jobId of jobIds) {
-          await this.waitForJobNotToExist(jobId);
-        }
-      });
-    },
-
-    async getAllJobs(): Promise<estypes.MlJob[]> {
-      return measurePerformanceAsync(log, 'mlApi.anomalyDetection.getAllJobs', async () => {
-        const { jobs: adJobs } = await esClient.ml.getJobs({ job_id: '_all' });
-        return adJobs;
-      });
-    },
-
-    async waitForJobToExist(jobId: string, timeout = 5 * 1000): Promise<void> {
-      await waitForCondition(
-        `anomaly detection job '${jobId}' to exist`,
-        async () => {
-          const { jobs: adJobs } = await esClient.ml.getJobs({
-            job_id: jobId,
-            allow_no_match: true,
-          });
-          if (adJobs.length > 0) return true;
-          throw new Error(`Anomaly detection job '${jobId}' does not exist`);
-        },
-        timeout
-      );
-    },
-
-    async waitForJobNotToExist(jobId: string, timeout = 5 * 1000): Promise<void> {
-      await waitForCondition(
-        `anomaly detection job '${jobId}' to not exist`,
-        async () => {
-          const { jobs: adJobs } = await esClient.ml.getJobs({
-            job_id: jobId,
-            allow_no_match: true,
-          });
-          if (adJobs.length === 0) return true;
-          throw new Error(`Anomaly detection job '${jobId}' still exists`);
-        },
-        timeout
-      );
-    },
-
-    async deleteAllJobs(): Promise<void> {
-      await measurePerformanceAsync(log, 'mlApi.anomalyDetection.deleteAllJobs', async () => {
-        const adJobs = await this.getAllJobs();
-        for (const job of adJobs) {
-          await esClient.ml
-            .deleteJob({ job_id: job.job_id, force: true, wait_for_completion: true })
-            .catch(() => {
-              /* ignore errors */
-            });
-        }
-      });
-    },
-
-    async deleteExpiredData(): Promise<void> {
-      await measurePerformanceAsync(log, 'mlApi.deleteExpiredData', async () => {
-        await esClient.transport.request({
-          method: 'DELETE',
-          path: '/_ml/_delete_expired_data',
-        });
       });
     },
   };
@@ -430,6 +383,97 @@ export const getMlApiHelper = (
     },
   };
 
+  const anomalyDetection: MlADJobsApi = {
+    async delete({
+      jobIds,
+      deleteUserAnnotations = false,
+      deleteAlertingRules = false,
+    }: DeleteJobsOptions): Promise<void> {
+      await measurePerformanceAsync(
+        log,
+        `mlApi.anomalyDetection.delete [${jobIds.join(', ')}]`,
+        async () => {
+          await kbnClient.request({
+            method: 'POST',
+            path: '/internal/ml/jobs/delete_jobs',
+            headers: ML_INTERNAL_HEADERS,
+            body: {
+              jobIds,
+              deleteUserAnnotations,
+              deleteAlertingRules,
+            },
+          });
+          for (const jobId of jobIds) {
+            await this.waitForJobNotToExist(jobId);
+          }
+        }
+      );
+    },
+
+    async getAllJobs(): Promise<estypes.MlJob[]> {
+      return measurePerformanceAsync(log, 'mlApi.anomalyDetection.getAllJobs', async () => {
+        const { jobs: adJobs } = await esClient.ml.getJobs({ job_id: '_all' });
+        return adJobs;
+      });
+    },
+
+    async waitForJobToExist(jobId: string, timeout = 5 * 1000): Promise<void> {
+      await waitForCondition(
+        `anomaly detection job '${jobId}' to exist`,
+        async () => {
+          const { jobs: adJobs } = await esClient.ml.getJobs({
+            job_id: jobId,
+            allow_no_match: true,
+          });
+          if (adJobs.length > 0) return true;
+          throw new Error(`Anomaly detection job '${jobId}' does not exist`);
+        },
+        timeout
+      );
+    },
+
+    async waitForJobNotToExist(jobId: string, timeout = 5 * 1000): Promise<void> {
+      await waitForCondition(
+        `anomaly detection job '${jobId}' to not exist`,
+        async () => {
+          const { jobs: adJobs } = await esClient.ml.getJobs({
+            job_id: jobId,
+            allow_no_match: true,
+          });
+          if (adJobs.length === 0) return true;
+          throw new Error(`Anomaly detection job '${jobId}' still exists`);
+        },
+        timeout
+      );
+    },
+
+    async deleteAllJobs(): Promise<void> {
+      await measurePerformanceAsync(log, 'mlApi.anomalyDetection.deleteAllJobs', async () => {
+        const adJobs = await this.getAllJobs();
+        for (const job of adJobs) {
+          await esClient.ml
+            .deleteJob({ job_id: job.job_id, force: true, wait_for_completion: true })
+            .catch(() => {
+              /* ignore errors */
+            });
+        }
+      });
+    },
+
+    async deleteExpiredData(): Promise<void> {
+      await measurePerformanceAsync(log, 'mlApi.anomalyDetection.deleteExpiredData', async () => {
+        await esClient.transport.request({
+          method: 'DELETE',
+          path: '/_ml/_delete_expired_data',
+        });
+      });
+    },
+
+    calendars,
+    filters,
+    annotations,
+  };
+
   const dataFrameAnalytics: MlDataFrameAnalyticsApi = {
     async getAllJobs(): Promise<estypes.MlDataframeAnalyticsSummary[]> {
       return measurePerformanceAsync(log, 'mlApi.dataFrameAnalytics.getAllJobs', async () => {
@@ -541,11 +585,11 @@ export const getMlApiHelper = (
   const indices: MlIndicesApi = {
     async cleanAnomalyDetection() {
       await measurePerformanceAsync(log, 'mlApi.indices.cleanAnomalyDetection', async () => {
-        await jobs.deleteAllJobs();
-        await calendars.deleteAll();
-        await filters.deleteAll();
-        await annotations.deleteAll();
-        await jobs.deleteExpiredData();
+        await anomalyDetection.deleteAllJobs();
+        await anomalyDetection.calendars.deleteAll();
+        await anomalyDetection.filters.deleteAll();
+        await anomalyDetection.annotations.deleteAll();
+        await anomalyDetection.deleteExpiredData();
         await savedObjects.sync();
       });
     },
@@ -575,10 +619,7 @@ export const getMlApiHelper = (
   };
 
   return {
-    jobs,
-    calendars,
-    filters,
-    annotations,
+    anomalyDetection,
     dataFrameAnalytics,
     trainedModels,
     ingestPipelines,
