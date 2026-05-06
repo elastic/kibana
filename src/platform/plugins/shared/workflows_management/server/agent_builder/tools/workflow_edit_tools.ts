@@ -10,7 +10,6 @@
 import { v4 } from 'uuid';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import type { EditResult, StepDefinition } from './yaml_edit_utils';
@@ -29,17 +28,7 @@ import {
 } from '../../../common/agent_builder/constants';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { WorkflowsAiTelemetryClient } from '../../telemetry/workflows_ai_telemetry_client';
-import type { AgentBuilderPluginSetupContract } from '../../types';
-
-const workflowEditAvailability = {
-  handler: async ({ uiSettings }: { uiSettings: { get: <T>(id: string) => Promise<T> } }) => {
-    const isEnabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-    return isEnabled
-      ? ({ status: 'available' } as const)
-      : ({ status: 'unavailable', reason: 'AI workflow authoring is disabled' } as const);
-  },
-  cacheMode: 'space' as const,
-};
+import type { AgentBuilderPluginSetup } from '../../types';
 
 const baseWorkflowEditSchema = z.object({
   attachmentId: z
@@ -257,7 +246,7 @@ const handleEditResult = async (
 };
 
 export function registerWorkflowEditTools(
-  agentBuilder: AgentBuilderPluginSetupContract,
+  agentBuilder: AgentBuilderPluginSetup,
   api: WorkflowsManagementApi,
   aiTelemetryClient: WorkflowsAiTelemetryClient
 ): void {
@@ -277,7 +266,7 @@ export function registerWorkflowEditTools(
         ),
     }),
     tags: ['workflows', 'yaml', 'edit'],
-    availability: workflowEditAvailability,
+    experimental: true,
     handler: async (
       { attachmentId: targetAttachmentId, step, insertAfterStep: afterStep, description },
       context
@@ -312,7 +301,7 @@ export function registerWorkflowEditTools(
       updatedStep: stepDefinitionSchema as z.ZodType<StepDefinition>,
     }),
     tags: ['workflows', 'yaml', 'edit'],
-    availability: workflowEditAvailability,
+    experimental: true,
     handler: async (
       { attachmentId: targetAttachmentId, stepName, updatedStep, description },
       context
@@ -348,7 +337,7 @@ export function registerWorkflowEditTools(
       value: z.unknown().describe('The new value for the property'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
-    availability: workflowEditAvailability,
+    experimental: true,
     handler: async (
       { attachmentId: targetAttachmentId, stepName, property, value, description },
       context
@@ -385,7 +374,7 @@ export function registerWorkflowEditTools(
       value: z.unknown().describe('The new value for the property'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
-    availability: workflowEditAvailability,
+    experimental: true,
     handler: async (
       { attachmentId: targetAttachmentId, property, value, description },
       context
@@ -419,7 +408,7 @@ export function registerWorkflowEditTools(
       stepName: z.string().describe('The name of the step to delete'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
-    availability: workflowEditAvailability,
+    experimental: true,
     handler: async ({ attachmentId: targetAttachmentId, stepName, description }, context) => {
       const attachment = findWorkflowYamlAttachment(context, targetAttachmentId);
       if (!attachment) return noAttachmentError();
@@ -449,7 +438,7 @@ export function registerWorkflowEditTools(
       yaml: z.string().describe('The complete new workflow YAML content'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
-    availability: workflowEditAvailability,
+    experimental: true,
     handler: async ({ attachmentId: targetAttachmentId, yaml, description }, context) => {
       const attachment = findWorkflowYamlAttachment(context, targetAttachmentId);
       const proposalId = v4();
