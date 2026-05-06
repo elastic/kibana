@@ -389,7 +389,7 @@ export class DatasetClient {
 
     const updated = await this.getExampleById(updatedId);
     if (!updated) {
-      throw new ExampleNotFoundError(updatedId);
+      throw new Error(`Failed to read back updated example "${updatedId}"`);
     }
     return updated;
   }
