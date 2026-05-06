@@ -22,6 +22,7 @@ import {
 import { ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID } from '../../common/advanced_settings';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
+import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
 import { RulesClient } from '../lib/rules_client';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
@@ -99,6 +100,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       );
     })
     .inRequestScope();
+  bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();

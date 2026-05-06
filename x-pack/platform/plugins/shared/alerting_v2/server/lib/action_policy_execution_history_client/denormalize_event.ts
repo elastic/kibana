@@ -7,8 +7,8 @@
 
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { PolicyExecutionHistoryItem, PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { ACTION_POLICY_EVENT_ACTIONS } from '../../../lib/dispatcher/steps/constants';
+import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
 
 export type { PolicyExecutionHistoryItem };
 

@@ -13,9 +13,8 @@ import {
   countPolicyExecutionEventsQuerySchema,
   countPolicyExecutionEventsResponseSchema,
 } from '@kbn/alerting-v2-schemas';
+import { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { EventLogServiceToken } from '../../lib/services/event_log_service/tokens';
-import type { EventLogServiceContract } from '../../lib/services/event_log_service/event_log_service';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH } from '../constants';
@@ -59,7 +58,8 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
       z.infer<typeof countPolicyExecutionEventsQuerySchema>,
       unknown
     >,
-    @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract
+    @inject(ActionPolicyExecutionHistoryClient)
+    private readonly executionHistoryClient: ActionPolicyExecutionHistoryClient
   ) {
     super(ctx);
   }
@@ -67,7 +67,7 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
   protected async execute() {
     const { since } = this.request.query ?? { since: new Date().toISOString() };
 
-    const result = await this.eventLogService.countActionPolicyExecutionEventsSince({
+    const result = await this.executionHistoryClient.countNewEventsSince({
       request: this.request,
       since,
     });

@@ -6,8 +6,8 @@
  */
 
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { ACTION_POLICY_EVENT_ACTIONS } from '../../../lib/dispatcher/steps/constants';
+import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
 import {
   collectIdsFromEvents,
   denormalizeEvent,
