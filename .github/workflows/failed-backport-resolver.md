@@ -118,7 +118,7 @@ steps:
 
 # Failed Backport Resolver
 
-Resolve failed automatic backports for the pull request identified by the injected `<github-context>` and the prefetched PR context files in `/tmp/gh-aw/agent`.
+Resolve failed automatic backports for the pull request identified by the injected `GH_AW_GITHUB_EVENT_ISSUE_NUMBER` value for PR comments, or `GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER` when present. Use the injected `GH_AW_GITHUB_REPOSITORY` and `GH_AW_GITHUB_RUN_ID` values to construct the workflow run URL as `https://github.com/<GH_AW_GITHUB_REPOSITORY>/actions/runs/<GH_AW_GITHUB_RUN_ID>`.
 
 ## Parent Workflow
 
@@ -128,7 +128,7 @@ Resolve failed automatic backports for the pull request identified by the inject
 4. Read `versions.json` and build the active branch allowlist from `versions[].branch`. Drop any parsed failed branch that is not in that allowlist, and mention the skipped branch in the final comment.
 5. Read `.backportrc.json` for non-branch PR conventions only. Ignore branch lists in `.backportrc.json`; active branches come from `versions.json`.
 6. Before starting a target branch, inspect only source PR-local data for an existing backport: `pr-metadata.json`, `pr-issue-comments.json`, and any PRs directly linked from those comments or the source PR body. Treat a linked open PR as existing only when it has the `backport` label and targets the same branch. Do not perform broad repository PR searches.
-7. For each remaining target branch, launch one parallel task with the `backport-branch-worker` sub-agent defined at the end of this workflow. Pass only the source PR number, source PR title, source PR URL, source branch, source merge commit SHA, target branch, repository, and workflow run URL from `<github-context>`.
+7. For each remaining target branch, launch one parallel task with the `backport-branch-worker` sub-agent defined at the end of this workflow. Pass only the source PR number, source PR title, source PR URL, source branch, source merge commit SHA, target branch, repository from `GH_AW_GITHUB_REPOSITORY`, and the workflow run URL built from `GH_AW_GITHUB_REPOSITORY` and `GH_AW_GITHUB_RUN_ID`.
 8. Wait for every branch task to finish. Do not stop after the first failure.
 9. For each successful branch task, ensure it called `create_pull_request`. Do not call `create_pull_request` again for the same branch.
 10. Post exactly one final `add_comment` after all branch tasks finish. Include a compact table with `Branch`, `Status`, and `Result`. Use statuses: `created`, `existing`, `skipped`, `needs manual backport`, or `failed`. Do not fabricate PR URLs; gh-aw safe outputs will attach related created PRs to the comment after processing.
