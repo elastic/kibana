@@ -79,7 +79,6 @@ if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then
     local-serverless-security_complete
     local-serverless-security_essentials
     local-serverless-security_ease
-    local-serverless-workplaceai
   )
 
   TEST_TARGET_FLAGS=()
@@ -94,16 +93,12 @@ if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then
     done
   fi
 
-  # NOTE: --testing-scope is not yet wired into create-test-tracks; that switch
-  # lands in the post-#264506 unification commit. Until then, the lanes branch
-  # publishes the artifact above (used by FTR/Jest skip and any other consumer)
-  # but its own filtering still runs at full scope.
   node scripts/scout create-test-tracks \
-    --estimatedLaneSetupMinutes "${SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES:-3}" \
+    --estimatedLaneSetupMinutes "${SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES:-5}" \
     --targetRuntimeMinutes "${SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES:-15}" \
+    --testing-scope "$TESTING_SCOPE_FILE" \
     "${TEST_TARGET_FLAGS[@]}" \
     --showMultiTrackSummary
-
 else
   if [[ "${BUILDKITE_BRANCH:-}" == "main" || "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" == "main" ]]; then
     SCOUT_DISCOVERY_TARGET="local"
