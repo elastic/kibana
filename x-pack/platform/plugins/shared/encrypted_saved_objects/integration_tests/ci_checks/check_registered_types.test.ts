@@ -143,6 +143,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "fleet-fleet-server-host|2",
         "fleet-fleet-server-host|1",
         "fleet-uninstall-tokens|1",
+        "ingest-download-sources|2",
         "ingest-download-sources|1",
         "ingest-outputs|9",
         "ingest-outputs|8",
