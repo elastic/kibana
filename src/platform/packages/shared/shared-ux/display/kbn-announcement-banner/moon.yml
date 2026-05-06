@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/test-jest-helpers'
+  - '@kbn/css-utils'
 tags:
   - shared-browser
   - package
