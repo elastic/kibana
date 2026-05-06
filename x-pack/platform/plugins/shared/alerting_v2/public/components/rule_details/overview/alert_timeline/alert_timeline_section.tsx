@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
@@ -159,7 +160,12 @@ export const AlertTimelineSection: React.FC = () => {
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="ruleAlertTimelineSection">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            flex-shrink: 0;
+          `}
+        >
           <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.alertingV2.alertTimeline.title', {
@@ -173,6 +179,7 @@ export const AlertTimelineSection: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiSuperDatePicker
                 compressed
+                width="auto"
                 start={timeRange.from}
                 end={timeRange.to}
                 onTimeChange={handleTimeChange}
