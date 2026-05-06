@@ -461,10 +461,6 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
-  inlineStatsNotAllowedAfterLimit: {
-    message: string;
-    type: {};
-  };
   joinOnSingleExpression: {
     message: string;
     type: {};

@@ -272,7 +272,7 @@
           "\nConvert instruction variant id into display text.\n"
         ],
         "signature": [
-          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\") => string"
+          "(id: \"PHP\" | \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\") => string"
         ],
         "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
         "lineNumber": 65,
@@ -288,7 +288,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\""
+              "\"PHP\" | \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\""
             ],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
             "lineNumber": 71,
@@ -1010,7 +1010,7 @@
           ">) => void; }"
         ],
         "path": "src/platform/plugins/shared/home/public/plugin.ts",
-        "lineNumber": 181,
+        "lineNumber": 182,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1060,7 +1060,7 @@
           ") => void; }"
         ],
         "path": "src/platform/plugins/shared/home/public/plugin.ts",
-        "lineNumber": 178,
+        "lineNumber": 179,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1201,7 +1201,7 @@
           ") => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
         ],
         "path": "src/platform/plugins/shared/home/public/plugin.ts",
-        "lineNumber": 184,
+        "lineNumber": 185,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1530,7 +1530,7 @@
       "label": "HomePublicPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/home/public/plugin.ts",
-      "lineNumber": 190,
+      "lineNumber": 191,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1564,7 +1564,7 @@
             ") => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",
-          "lineNumber": 192,
+          "lineNumber": 193,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1590,7 +1590,7 @@
             ") => void; }"
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",
-          "lineNumber": 193,
+          "lineNumber": 194,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1622,7 +1622,7 @@
             ") => void; }"
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",
-          "lineNumber": 194,
+          "lineNumber": 195,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1644,7 +1644,7 @@
             }
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",
-          "lineNumber": 195,
+          "lineNumber": 196,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1672,7 +1672,7 @@
             ">) => void; }"
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",
-          "lineNumber": 196,
+          "lineNumber": 197,
           "columnNumber": 3,
           "deprecated": true,
           "removeBy": "8.8.0",
@@ -1691,7 +1691,7 @@
       "label": "HomePublicPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/home/public/plugin.ts",
-      "lineNumber": 205,
+      "lineNumber": 206,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1713,7 +1713,7 @@
             }
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",
-          "lineNumber": 206,
+          "lineNumber": 207,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false

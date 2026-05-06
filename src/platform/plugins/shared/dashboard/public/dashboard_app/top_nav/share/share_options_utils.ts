@@ -131,7 +131,10 @@ export function buildExportSharingData(
       id: DASHBOARD_APP_LOCATOR,
       params: locatorParams,
     },
-    exportJson: () => dashboardApi.getSerializedState().attributes,
+    exportJson: () => {
+      const dashboardState = dashboardApi.getSerializedState().attributes;
+      return dashboardState.title.length ? dashboardState : { ...dashboardState, title };
+    },
   };
 }
 

@@ -23,7 +23,9 @@ export const EDGE_OPBEANS_JAVA_TO_POSTGRESQL = `${SERVICE_OPBEANS_JAVA}~>${DEPEN
 export const SERVICE_GO = 'service-go';
 export const SERVICE_NODE = 'service-node';
 export const OPBEANS_JAVA_INSTANCE = 'opbeans-java-prod-1';
+export const ENVIRONMENT_ALL = 'ENVIRONMENT_ALL';
 export const PRODUCTION_ENVIRONMENT = 'production';
+export const METRICS_ENVIRONMENT = 'metrics';
 
 // Service map multi-environment test data
 export const SERVICE_MAP_TEST_SERVICE = 'service-map-test';
@@ -47,6 +49,8 @@ export const SERVICE_MOBILE_IOS = 'synth-ios';
 export const SERVICE_SYNTH_GO = 'synth-go-1';
 export const SERVICE_SYNTH_GO_2 = 'synth-go-2';
 export const SERVICE_SYNTH_NODE_1 = 'synth-node-1';
+
+export { APM_METRICS_SERVICE_NAMES } from '@kbn/synthtrace/src/scenarios/helpers/apm_metrics_dashboards';
 
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
 export const APPLE_TRANSACTION_NAME = 'GET /apple 🍎';

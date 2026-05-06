@@ -10,8 +10,6 @@ tree-dump
 @opentelemetry/exporter-metrics-otlp-http
 inversify
 @types/d3-color
-canvas-confetti
-@types/canvas-confetti
 undici
 liquidjs
 xml-formatter
@@ -44,6 +42,10 @@ tar-fs
 browserslist
 react-day-picker
 jszip
+@rsdoctor/rspack-plugin
+@rspack/core
+@rspack/plugin-react-refresh
+@swc/helpers
 patch-package
 @opentelemetry/resources
 @opentelemetry/exporter-logs-otlp-grpc
