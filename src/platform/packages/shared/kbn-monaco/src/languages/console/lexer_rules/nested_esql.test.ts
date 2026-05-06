@@ -7,53 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { lexerRules, keywords, builtinFunctions } from '../../esql/lib/esql_lexer_rules';
-import type { monaco } from '../../../monaco_imports';
-
-const getNextState = (
-  action: monaco.languages.IMonarchLanguageAction | undefined
-): string | undefined => {
-  if (!action || typeof action !== 'object' || !('next' in action)) return undefined;
-  return typeof action.next === 'string' ? action.next : undefined;
-};
-
-const isRuleWithNextState = (
-  rule: monaco.languages.IMonarchLanguageRule,
-  next: string
-): boolean => {
-  if (!Array.isArray(rule) || rule.length < 2) return false;
-  const action = rule[1];
-  return getNextState(typeof action === 'string' ? undefined : action) === next;
-};
-
-jest.mock('../../esql/lib/esql_lexer_rules', () => {
-  const actual = jest.requireActual('../../esql/lib/esql_lexer_rules');
-  return {
-    ...actual,
-    lexerRules: {
-      ...actual.lexerRules,
-      tokenizer: {
-        ...actual.lexerRules.tokenizer,
-        strings: [
-          ...actual.lexerRules.tokenizer.strings,
-          // A string rule that shouldn't be remapped to cover the branch
-          [/ignore/, 'string'],
-          // A rule without a next state
-          [/ignore2/, { token: 'string' }],
-          // Not an array rule
-          'ignore3',
-        ],
-      },
-    },
-  };
-});
-
-import { languageTolerantRules } from './constants';
+import { keywords, builtinFunctions } from '../../esql/lib/esql_lexer_rules';
+import { ESQL_LANG_ID } from '../../esql/lib/constants';
 import { buildEsqlStartRule, buildEsqlRules, esqlLanguageAttributes } from './nested_esql';
+import { languageTolerantRules } from './constants';
 
 describe('Console nested ES|QL lexer rules', () => {
   describe('buildEsqlStartRule', () => {
-    it('builds a start rule for single quotes', () => {
+    it('builds a start rule for single quotes (no nextEmbedded)', () => {
       const rule = buildEsqlStartRule(false);
       expect(rule[0]).toEqual(/("query")(\s*?)(:)(\s*?)(")/);
       expect(rule[1]).toEqual([
@@ -61,14 +22,11 @@ describe('Console nested ES|QL lexer rules', () => {
         'whitespace',
         'punctuation.colon',
         'whitespace',
-        {
-          token: 'punctuation',
-          next: '@esql_root_single_quotes',
-        },
+        { token: 'punctuation', next: '@esql_root_single_quotes' },
       ]);
     });
 
-    it('builds a start rule for triple quotes', () => {
+    it('builds a start rule for triple quotes (nextEmbedded)', () => {
       const rule = buildEsqlStartRule(true);
       expect(rule[0]).toEqual(/("query")(\s*?)(:)(\s*?)(""")/);
       expect(rule[1]).toEqual([
@@ -76,19 +34,16 @@ describe('Console nested ES|QL lexer rules', () => {
         'whitespace',
         'punctuation.colon',
         'whitespace',
-        {
-          token: 'punctuation',
-          next: '@esql_root_triple_quotes',
-        },
+        { token: 'punctuation', next: 'esql_root_triple_quotes', nextEmbedded: ESQL_LANG_ID },
       ]);
     });
 
     it('accepts a custom root state name', () => {
       const rule = buildEsqlStartRule(true, 'custom_root');
-      const action = (rule[1] as Array<monaco.languages.IMonarchLanguageAction | string>)[4];
-      expect(getNextState(typeof action === 'string' ? undefined : action)).toEqual(
-        '@custom_root_triple_quotes'
-      );
+      const action = (rule[1] as Array<Record<string, unknown> | string>)[4];
+      if (typeof action === 'string') throw new Error('Expected an action object');
+      expect(action.next).toEqual('custom_root_triple_quotes');
+      expect(action.nextEmbedded).toEqual(ESQL_LANG_ID);
     });
   });
 
@@ -99,20 +54,25 @@ describe('Console nested ES|QL lexer rules', () => {
       expect(rules).toHaveProperty('esql_root_single_quotes');
       expect(rules).toHaveProperty('esql_string');
       expect(rules).toHaveProperty('comment');
+    });
 
-      // Verify the language tolerant rules are present at the beginning (after the pop rule)
+    it('triple quotes state only has the closing delimiter rule (delegates to embedded grammar)', () => {
+      const rules = buildEsqlRules();
       const tripleQuotesRules = rules.esql_root_triple_quotes;
-      expect(tripleQuotesRules[1]).toEqual(languageTolerantRules[0]);
-      expect(tripleQuotesRules[2]).toEqual(languageTolerantRules[1]);
-      expect(tripleQuotesRules[3]).toEqual(languageTolerantRules[2]);
+      expect(tripleQuotesRules).toHaveLength(1);
+      expect(tripleQuotesRules[0]).toEqual([
+        /"""/,
+        { token: 'punctuation', next: '@pop', nextEmbedded: '@pop' },
+      ]);
+    });
 
-      // Verify strings were remapped
-      const hasRemappedStringRule = tripleQuotesRules.some((r) =>
-        isRuleWithNextState(r, '@esql_string')
-      );
-      if (lexerRules.tokenizer.strings && lexerRules.tokenizer.strings.length > 0) {
-        expect(hasRemappedStringRule).toBe(true);
-      }
+    it('single quotes state includes language tolerant rules and ES|QL root rules', () => {
+      const rules = buildEsqlRules();
+      const singleQuotesRules = rules.esql_root_single_quotes;
+      // languageTolerantRules are included (after the escape and closing quote rules)
+      expect(singleQuotesRules).toContainEqual(languageTolerantRules[0]);
+      expect(singleQuotesRules).toContainEqual(languageTolerantRules[1]);
+      expect(singleQuotesRules).toContainEqual(languageTolerantRules[2]);
     });
 
     it('builds esql rules with custom root name', () => {
@@ -121,15 +81,11 @@ describe('Console nested ES|QL lexer rules', () => {
       expect(rules).toHaveProperty('custom_root_single_quotes');
     });
 
-    it('remaps string states correctly', () => {
+    it('esql_string has lookahead pop rules before the original string rules', () => {
       const rules = buildEsqlRules();
       const stringState = rules.esql_string;
-
-      // Should have lookahead pop rules at the start
       expect(stringState[0]).toEqual([/(?=""")/, { token: '', next: '@pop' }]);
       expect(stringState[1]).toEqual([/(?=")/, { token: '', next: '@pop' }]);
-
-      // Should contain the original string rules
       expect(stringState.length).toBeGreaterThan(2);
     });
   });
