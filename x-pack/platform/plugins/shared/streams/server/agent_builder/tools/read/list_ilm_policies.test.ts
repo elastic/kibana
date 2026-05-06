@@ -23,6 +23,7 @@ interface ListIlmPoliciesResultData {
     managed: boolean;
     deprecated: boolean;
     in_use_by_streams: string[];
+    in_use_by_indices: string[];
   }>;
 }
 
@@ -63,7 +64,10 @@ describe('createListIlmPoliciesTool handler', () => {
             delete: { min_age: '30d', actions: { delete: {} } },
           },
         },
-        in_use_by: { indices: ['.ds-logs-nginx-000001'], data_streams: ['logs-nginx'] },
+        in_use_by: {
+          indices: ['.ds-logs-nginx-000001', 'standalone-index'],
+          data_streams: ['logs-nginx'],
+        },
       },
       'metrics-short': {
         policy: {
@@ -86,6 +90,7 @@ describe('createListIlmPoliciesTool handler', () => {
     });
     mockEsMethodResolvedValue(esClient.indices.get, {
       '.ds-logs-nginx-000001': { data_stream: 'logs-nginx' },
+      'standalone-index': {},
     });
 
     const result = await tool.handler({}, context);
@@ -98,6 +103,7 @@ describe('createListIlmPoliciesTool handler', () => {
     expect(logsDefault?.managed).toBe(false);
     expect(logsDefault?.deprecated).toBe(false);
     expect(logsDefault?.in_use_by_streams).toEqual(['logs-nginx']);
+    expect(logsDefault?.in_use_by_indices).toEqual(['standalone-index']);
     expect(Object.keys(logsDefault!.phases)).toEqual(['hot', 'warm', 'delete']);
     const logsWarm = logsDefault!.phases.warm as Record<string, unknown>;
     expect(logsWarm.min_age).toBe('7d');
@@ -107,6 +113,7 @@ describe('createListIlmPoliciesTool handler', () => {
     const metricsShort = data.policies.find((p) => p.name === 'metrics-short');
     expect(metricsShort?.deprecated).toBe(true);
     expect(metricsShort?.in_use_by_streams).toEqual([]);
+    expect(metricsShort?.in_use_by_indices).toEqual([]);
     const metricsDelete = metricsShort!.phases.delete as Record<string, unknown>;
     expect(metricsDelete.min_age).toBe('7d');
 
@@ -114,6 +121,7 @@ describe('createListIlmPoliciesTool handler', () => {
     expect(Object.keys(unused!.phases)).toEqual(['hot']);
     expect(unused?.managed).toBe(false);
     expect(unused?.in_use_by_streams).toEqual([]);
+    expect(unused?.in_use_by_indices).toEqual([]);
   });
 
   it('returns empty policies array when cluster has no ILM policies', async () => {

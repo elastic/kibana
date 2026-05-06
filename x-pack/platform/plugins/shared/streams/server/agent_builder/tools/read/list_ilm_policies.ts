@@ -9,6 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
 import {
@@ -16,17 +18,14 @@ import {
   normalizeIlmPhases,
   type IlmPoliciesResponse,
 } from '../../../lib/streams/lifecycle/ilm_policies';
+import { processAsyncInChunks } from '../../../utils/process_async_in_chunks';
 import { STREAMS_LIST_ILM_POLICIES_TOOL_ID as LIST_ILM_POLICIES } from '../tool_ids';
 import { classifyError } from '../../utils/error_utils';
 
 const listIlmPoliciesSchema = z.object({});
 
 const getDataStreamByBackingIndices = async (
-  scopedClusterClient: {
-    asCurrentUser: {
-      indices: { get: Function };
-    };
-  },
+  scopedClusterClient: IScopedClusterClient,
   policiesResponse: IlmPoliciesResponse
 ): Promise<Record<string, string>> => {
   const inUseIndices = Array.from(
@@ -39,12 +38,16 @@ const getDataStreamByBackingIndices = async (
     return {};
   }
 
-  const indexResponse = (await scopedClusterClient.asCurrentUser.indices.get({
-    index: inUseIndices,
-    allow_no_indices: true,
-    ignore_unavailable: true,
-    filter_path: ['*.data_stream'],
-  })) as Record<string, { data_stream?: string }>;
+  const indexResponse = await processAsyncInChunks<IndicesGetResponse>(
+    inUseIndices,
+    async (indicesChunk) =>
+      scopedClusterClient.asCurrentUser.indices.get({
+        index: indicesChunk,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+        filter_path: ['*.data_stream'],
+      })
+  );
 
   return Object.fromEntries(
     Object.entries(indexResponse).flatMap(([indexName, indexData]) => {
@@ -72,7 +75,7 @@ export const createListIlmPoliciesTool = ({
     - Before suggesting an ILM policy in update_stream — verify the policy exists
 
     Returns policy names, full phase definitions (with min_age, rollover, delete settings),
-    managed/deprecated status, and which streams currently use each policy.
+    managed/deprecated status, and which streams and indices currently use each policy.
     Internal system policies (managed + dot-prefixed) are filtered out.
     On serverless deployments, returns ilm_available: false.
 
@@ -123,6 +126,7 @@ export const createListIlmPoliciesTool = ({
             managed: policyEntry.policy?._meta?.managed === true,
             deprecated: policyEntry.policy?.deprecated ?? false,
             in_use_by_streams: in_use_by.data_streams,
+            in_use_by_indices: in_use_by.indices,
           };
         });
 
