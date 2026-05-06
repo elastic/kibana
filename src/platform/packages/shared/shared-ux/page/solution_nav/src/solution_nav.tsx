@@ -13,10 +13,8 @@ import React, { FC, useState, useMemo, useEffect } from 'react';
 import classNames from 'classnames';
 import {
   EuiAvatarProps,
-  EuiCollapsibleNavGroup,
   EuiFlyout,
   EuiFlyoutProps,
-  EuiPanel,
   EuiSideNav,
   EuiSideNavItemType,
   EuiSideNavProps,
@@ -185,7 +183,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     if (isLargerBreakpoint) {
       return isOpenOnDesktop ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
     }
-    if (isMediumBreakpoint) {
+    if (isMediumBreakpoint || isSmallerBreakpoint) {
       return isSideNavOpenOnMobile || !canBeCollapsed ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
     }
     return '0';
@@ -194,6 +192,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     isOpenOnDesktop,
     isSideNavOpenOnMobile,
     canBeCollapsed,
+    isSmallerBreakpoint,
     isMediumBreakpoint,
     isLargerBreakpoint,
   ]);
@@ -208,23 +207,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
 
   return (
     <>
-      {isSmallerBreakpoint && (
-        // @ts-expect-error Mismatch in collapsible vs unconllapsible props
-        <EuiCollapsibleNavGroup
-          className={sideNavClasses}
-          paddingSize="none"
-          background="none"
-          title={titleText}
-          titleElement="span"
-          isCollapsible={canBeCollapsed}
-          initialIsOpen={false}
-        >
-          <EuiPanel color="transparent" paddingSize="s">
-            {sideNavContent}
-          </EuiPanel>
-        </EuiCollapsibleNavGroup>
-      )}
-      {isMediumBreakpoint && (
+      {(isSmallerBreakpoint || isMediumBreakpoint) && (
         <>
           {(isSideNavOpenOnMobile || !canBeCollapsed) && (
             <EuiFlyout

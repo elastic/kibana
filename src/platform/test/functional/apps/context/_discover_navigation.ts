@@ -122,8 +122,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await rowActions[0].click();
       });
 
-      const hasDocHit = await testSubjects.exists('doc-hit');
-      expect(hasDocHit).to.be(true);
+      await retry.try(async () => {
+        const hasDocHit = await testSubjects.exists('doc-hit');
+        expect(hasDocHit).to.be(true);
+      });
 
       await testSubjects.click('~breadcrumb & ~first');
       await discover.waitForDiscoverAppOnScreen();
