@@ -1,19 +1,12 @@
----
-name: scout-migration-planner
-description: Analyze an FTR test directory and produce a structured Markdown migration plan for Scout. Use when planning an FTR-to-Scout migration, triaging FTR suites for Scout readiness, or when asked to create a migration plan before writing code. Does not write test code; outputs an architectural blueprint for an executor skill or human.
----
+# Migration planning
 
-# Scout Migration Planner
+Detailed step-by-step instructions for the **Plan** step of the parent skill ([`SKILL.md`](../SKILL.md)). Produce a single Markdown file capturing every architectural decision the executor needs.
 
-## Purpose
+The plan answers _what_ and _why_; [`execute-plan.md`](execute-plan.md) answers _how_.
 
-Analyze an FTR test directory end-to-end and produce a single Markdown file (`migration_plan.md`) that contains the key architectural decisions needed to migrate those tests to Scout. The planner does **not** write test code: it front-loads the analysis and high-level decisions so an executor (human or skill) can implement with minimal ambiguity.
+## Required sub-skill
 
-**Key principle**: go deep on FTR analysis (read every file, understand every pattern, flag every issue). Stay at the decision level for Scout, as the executor skill already knows Scout's APIs, fixtures, and patterns. The planner's job is to say _what_ was found and _what_ should happen, not _how_ to implement it in Scout code.
-
-## Required sub-skills
-
-- **REQUIRED SUB-SKILL:** ftr-testing (understand FTR structure, `loadTestFile`, configs, services, page objects).
+- **REQUIRED SUB-SKILL:** ftr-testing — to understand FTR structure, `loadTestFile`, configs, services, and page objects while analyzing the source suite.
 
 ## Inputs
 
@@ -24,9 +17,22 @@ Before starting, collect or confirm:
 3. **Target Scout module root**: where the Scout tests will live (e.g. `x-pack/platform/plugins/shared/dashboard`). If unknown, infer from the plugin that owns the FTR tests.
 4. **Deployment targets**: stateful, serverless, or both. Default: both.
 
-## Core workflow
+## Output filename convention
 
-### Step 1: Deep-read and index every FTR file
+Write the plan to `migration-plan-<source-dir-slug>-<YYYY-MM-DD>.md` in the target Scout module root, where `<source-dir-slug>` is the basename of the FTR source directory and the date is the day the plan was generated. Examples:
+
+- FTR source `x-pack/platform/test/functional/apps/painless_lab` → `migration-plan-painless_lab-2026-05-06.md`
+- FTR source `x-pack/solutions/observability/test/api_integration/apm` → `migration-plan-apm-2026-05-06.md`
+
+The shared `migration-plan-` prefix makes plans easy to identify and group; the source-dir slug + date together prevent collisions across multiple migrations under the same plugin while still allowing intentional re-runs on the same source/day to overwrite cleanly.
+
+## Approach
+
+Go deep on FTR analysis (read every file, understand every pattern, flag every issue). Stay at the decision level for Scout — the executor step already knows Scout's APIs, fixtures, and patterns. The planner's job is to say _what_ was found and _what_ should happen, not _how_ to implement it in Scout code.
+
+## Steps
+
+### 1. Deep-read and index every FTR file
 
 Recursively read the FTR directory. For each file, record:
 
@@ -41,23 +47,13 @@ Also read thoroughly:
 - Every `index.ts` file that uses `loadTestFile`: capture shared `before`/`after` hooks and their setup logic. Note what state they create and whether downstream tests depend on it.
 - Every FTR service and page object referenced: note which files use them, what they do, and whether they contain hidden assertions (`existOrFail`, `missingOrFail`, `expect` inside helpers).
 
-### Step 2: Triage (what should exist, what should change)
+### 2. Triage (what should exist, what should change)
 
-For every test file, decide:
-
-| Decision | Criteria |
-|----------|----------|
-| **Keep as UI test** | Tests user flows, navigation, rendering that require a real browser and running server |
-| **Convert to API test** | Asserts exact data values, validates API responses, or checks backend logic through the UI |
-| **Convert to unit test (RTL/Jest)** | Tests isolated component logic: loading states, conditional rendering, table structure, tooltip content, form validation, hover behaviors |
-| **Drop** | Duplicates existing coverage, tests deprecated features, or is an artifact of FTR limitations |
-| **Defer** | Depends on capabilities that don't yet exist in Scout (flag explicitly what's missing) |
-
-For each decision, write a one-line justification.
+For every test file, decide UI test / API test / unit test (RTL/Jest) / drop / defer using the criteria in [`pick-correct-test-type.md`](pick-correct-test-type.md). For each decision, write a one-line justification.
 
 **File splitting**: when a single FTR file tests multiple roles or unrelated flows, recommend splitting it into separate specs (one role + one flow per file). List the proposed splits.
 
-### Step 3: Complexity estimation
+### 3. Complexity estimation
 
 Rate each test file:
 
@@ -67,7 +63,7 @@ Rate each test file:
 
 Sort the full inventory by complexity (simple first).
 
-### Step 4: Parallelism and isolation
+### 4. Parallelism and isolation
 
 For each test (or group), decide whether it can run in parallel or must run sequentially:
 
@@ -76,7 +72,7 @@ For each test (or group), decide whether it can run in parallel or must run sequ
 
 Document which tests can share the same parallel pool and which need isolation. Explain why, referencing the specific state or mutation that drives the decision.
 
-### Step 5: Test data and setup strategy
+### 5. Test data and setup strategy
 
 For each archive, data fixture, or setup pattern found:
 
@@ -87,7 +83,7 @@ For each archive, data fixture, or setup pattern found:
 5. **Catalog UI settings mutations**: list every `kibanaServer.uiSettings.replace`, `uiSettings.update`, `uiSettings.delete` call, which tests use them, and whether they use replace-all semantics (wipes all settings) vs selective set
 6. **Catalog repeated magic values**: archive paths, index names, time ranges, saved object IDs that appear in multiple files. These are candidates for a shared constants file.
 
-### Step 6: Auth and roles
+### 6. Auth and roles
 
 1. **Catalog every role**: list every FTR role from configs and test files, with the full privilege definition (ES cluster/index privileges, Kibana feature/space privileges)
 2. **Note usage frequency**: how many test files use each role
@@ -95,9 +91,9 @@ For each archive, data fixture, or setup pattern found:
 4. **Flag roles used widely** (≥3 files): these warrant a shared auth helper rather than inline definitions
 5. **Flag special auth patterns**: `run_as`, API-key-based auth, certificate auth, or any non-standard FTR auth
 
-The executor will decide the specific Scout auth API to use; the planner just provides the complete role inventory with privilege definitions and usage context.
+The execution step will decide the specific Scout auth API to use; the plan just provides the complete role inventory with privilege definitions and usage context.
 
-### Step 7: Reusability and abstraction audit
+### 7. Reusability and abstraction audit
 
 1. **Catalog every FTR service and page object** used by the tests: name, what it does, which files use it, and whether it contains hidden assertions (`existOrFail`, `missingOrFail`, or `expect` calls that should move to specs)
 2. **Check for existing Scout equivalents**: does a matching page object or API service already exist in the Scout packages or in other plugins' `test/scout` trees? Note: exists / exists-but-in-wrong-scope / missing
@@ -106,7 +102,7 @@ The executor will decide the specific Scout auth API to use; the planner just pr
 5. **Flag brittle locator strategies**: `find.byCssSelector(...)`, `find.byClassName(...)`, or text-based lookups. Note where `data-test-subj` attributes are missing in source code and need to be added
 6. **Flag FTR page objects with hidden assertions**: these need restructuring since page objects should return state, with assertions belonging in the spec
 
-### Step 8: Server configuration and feature flags
+### 8. Server configuration and feature flags
 
 1. **List every server arg** from `kbnTestServer.serverArgs` and `esTestCluster.serverArgs` across all relevant configs (including inherited base configs)
 2. **Classify each arg**:
@@ -115,20 +111,25 @@ The executor will decide the specific Scout auth API to use; the planner just pr
    - **Requires server config**: needs a custom Scout server config set. Check if a matching one already exists under `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/`
 3. **Flag experimental feature flags** and note whether they're compile-time or runtime-settable
 
-### Step 9: Deployment targets and cloud portability
+### 9. Deployment targets and Cloud portability
 
-For each test group, determine where it should run:
+Scout is deployment-agnostic — the goal is "write once, run locally and on Elastic Cloud." Reference [Design tests with a cloud-first mindset](../../../../docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset) for the underlying principles.
 
-- **Everywhere** (stateful + serverless): preferred when the feature exists in all environments
-- **Stateful only**: feature/API doesn't exist in serverless
-- **Serverless only**: serverless-specific behavior
-- **Specific serverless projects**: e.g. security-only, observability-only
+For each test group, answer all four:
 
-Cross-reference with existing FTR tags (`@skipServerless`, `@skipStateful`, etc.) and `.buildkite/ftr_*_configs.yml` to preserve CI coverage. Flag tests that currently only run in one environment but could run in both.
+1. **Where do the FTR tests run today?** Cross-reference existing FTR tags (`@skipServerless`, `@skipStateful`, etc.) and `.buildkite/ftr_*_configs.yml` so CI coverage is preserved.
+2. **Where should they ideally run in Scout?**
+   - **Platform tests** (`src/platform/**`, `x-pack/platform/**`): use `tags.deploymentAgnostic` when the original intent was "run everywhere."
+   - **Solution tests** (`x-pack/solutions/observability|security|search/...`): use explicit `tags.stateful.*` + `tags.serverless.<solution>.*` rather than `tags.deploymentAgnostic`.
+   - Flag tests that currently run in only one environment but could run in both.
+3. **Can they run on Cloud out-of-the-box?** Flag any blockers:
+   - Hardcoded `localhost` URLs or local file paths
+   - Node topology assumptions (single-node, specific port)
+   - Cluster settings unavailable on Elastic Cloud
+   - Custom server args / feature flags set in FTR configs (these need to become runtime settings or move to a Scout server config set)
+4. **Custom servers config or default?** State whether the migrated tests can use Scout's default test servers config, or whether they need a [custom servers config](../../../../docs/extend/scout/feature-flags.md#scout-feature-flags-custom-servers). If custom, list which args force the choice and whether a matching config set already exists.
 
-**Cloud portability**: flag FTR tests that make non-portable assumptions (hardcoded `localhost` URLs, local file paths, node topology assumptions, or cluster settings unavailable on Elastic Cloud).
-
-### Step 10: FTR test smells
+### 10. FTR test smells
 
 Scan every test file for patterns that need attention during migration:
 
@@ -150,7 +151,7 @@ Scan every test file for patterns that need attention during migration:
 
 For each smell, note the file and relevant context.
 
-### Step 11: Propose migration batches
+### 11. Propose migration batches
 
 Group tests into ordered batches that can be migrated independently:
 
@@ -165,18 +166,19 @@ For each batch:
 - Dependencies on previous batches (e.g. "needs the page object created in batch 2")
 - Any blockers (missing Scout features, missing `data-test-subj` in source code)
 
-### Step 12: Write the migration plan
+### 12. Write the migration plan
 
-Output the plan to `migration_plan.md` in the target Scout module root. Use the template in [references/output_template.md](references/output_template.md).
+Output the plan to `migration-plan-<source-dir-slug>-<YYYY-MM-DD>.md` (see **Output filename convention** above) in the target Scout module root. Follow [`plan-template.md`](plan-template.md) exactly for section structure, table formats, and bullet styles so the executor and any reviewers can parse sections programmatically.
 
 ## Guardrails
 
-- **Read-only**: do not create, modify, or delete any test files. Only produce the plan document.
+- **Read-only**: do not create, modify, or delete any test files during planning.
 - **Deep on FTR, light on Scout**: every FTR finding must reference concrete file paths and line numbers. Scout recommendations stay at the decision level; the executor knows the APIs.
 - **No guessing**: if you can't determine something (e.g. whether a feature flag is runtime-settable), flag it as `NEEDS VERIFICATION` rather than guessing.
 - **Preserve intent**: when recommending dropping or converting a test, explain what coverage is lost and where it moves.
-- **Machine-parseable**: use consistent Markdown headings, tables, and bullet formats so the executor skill can parse sections programmatically.
 
 ## References
 
-- Output template with all sections and formatting: [references/output_template.md](references/output_template.md)
+- Plan output structure (every section, table, and bullet format): [`plan-template.md`](plan-template.md)
+- Test-type downgrade catalog (UI vs API vs RTL/Jest): [`pick-correct-test-type.md`](pick-correct-test-type.md)
+- Cloud-first mindset (rationale for step 9): [`docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset`](../../../../docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset)
