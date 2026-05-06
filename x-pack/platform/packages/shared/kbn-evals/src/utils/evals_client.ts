@@ -163,7 +163,7 @@ export class EvalsClient {
         query: buildRunQuery(options),
       });
 
-      return mapStatsResponse(GetEvaluationRunResponse.parse(response));
+      return mapStatsResponse(GetEvaluationRunResponse.parse(getResponseData(response)));
     } catch (error: unknown) {
       this.log.error(`Failed to retrieve stats for run ID ${runId}:`, error);
       return null;
@@ -177,7 +177,7 @@ export class EvalsClient {
         method: 'GET',
         query: buildRunQuery(options),
       });
-      const parsed = GetEvaluationRunScoresResponse.parse(response);
+      const parsed = GetEvaluationRunScoresResponse.parse(getResponseData(response));
 
       if (parsed.total > MAX_SCORES_PER_QUERY) {
         throw new Error(
