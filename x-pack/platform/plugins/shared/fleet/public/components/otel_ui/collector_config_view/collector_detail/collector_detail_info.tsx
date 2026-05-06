@@ -16,7 +16,7 @@ import { AgentHealth } from '../../../../applications/fleet/sections/agents/comp
 
 interface CollectorDetailInfoProps {
   agent: Agent;
-  config: OTelCollectorConfig;
+  config?: OTelCollectorConfig;
 }
 
 const FormattedTimestampOrDash: React.FC<{ value?: string }> = ({ value }) => {

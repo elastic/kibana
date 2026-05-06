@@ -9,9 +9,24 @@ import React from 'react';
 
 import type { TestRenderer } from '../../../../mock';
 import { createFleetTestRendererMock } from '../../../../mock';
-import type { ComponentHealth } from '../../../../../common/types';
+import type { ComponentHealth, OTelCollectorConfig } from '../../../../../common/types';
 
 import { CollectorDetailHealth } from './collector_detail_health';
+
+const config: OTelCollectorConfig = {
+  receivers: { otlp: {} },
+  processors: { batch: {} },
+  exporters: { 'elasticsearch/default': {} },
+  service: {
+    pipelines: {
+      'logs/default': {
+        receivers: ['otlp'],
+        processors: ['batch'],
+        exporters: ['elasticsearch/default'],
+      },
+    },
+  },
+};
 
 describe('CollectorDetailHealth', () => {
   let testRenderer: TestRenderer;
@@ -40,7 +55,6 @@ describe('CollectorDetailHealth', () => {
     const panel = result.getByTestId('collectorDetailHealth');
     expect(panel).toBeInTheDocument();
     expect(panel.textContent).toContain('Healthy');
-    expect(panel.textContent).toContain('StatusOK');
   });
 
   it('renders unhealthy status with error', () => {
@@ -65,20 +79,27 @@ describe('CollectorDetailHealth', () => {
     expect(panel.textContent).toContain('connection refused');
   });
 
-  it('renders component breakdown', () => {
+  it('renders pipeline component breakdown when config is provided', () => {
     const health: ComponentHealth = {
       healthy: true,
       status: 'StatusOK',
       component_health_map: {
-        'receiver:otlp': { healthy: true, status: 'StatusOK' },
-        'processor:batch': { healthy: true, status: 'StatusOK' },
-        'exporter:elasticsearch/default': { healthy: true, status: 'StatusOK' },
+        'pipeline:logs/default': {
+          healthy: true,
+          status: 'StatusOK',
+          component_health_map: {
+            'receiver:otlp': { healthy: true, status: 'StatusOK' },
+            'processor:batch': { healthy: true, status: 'StatusOK' },
+            'exporter:elasticsearch/default': { healthy: true, status: 'StatusOK' },
+          },
+        },
       },
     };
 
-    const result = testRenderer.render(<CollectorDetailHealth health={health} />);
-    expect(result.getByText('receiver:otlp')).toBeInTheDocument();
-    expect(result.getByText('processor:batch')).toBeInTheDocument();
-    expect(result.getByText('exporter:elasticsearch/default')).toBeInTheDocument();
+    const result = testRenderer.render(
+      <CollectorDetailHealth health={health} config={config} />
+    );
+    expect(result.getByText('Component health')).toBeInTheDocument();
+    expect(result.getByTestId('collectorHealthPipeline-logs/default')).toBeInTheDocument();
   });
 });

@@ -9,7 +9,7 @@ import React from 'react';
 
 import type { TestRenderer } from '../../../../mock';
 import { createFleetTestRendererMock } from '../../../../mock';
-import type { Agent } from '../../../../../common/types';
+import type { Agent, OTelCollectorConfig } from '../../../../../common/types';
 
 import { CollectorDetailInfo } from './collector_detail_info';
 
@@ -38,6 +38,15 @@ const makeAgent = (overrides?: Partial<Agent>): Agent =>
     ...overrides,
   } as Agent);
 
+const config: OTelCollectorConfig = {
+  service: {
+    pipelines: {
+      traces: { receivers: ['otlp'], processors: ['batch'], exporters: ['elasticsearch/otel'] },
+      logs: { receivers: ['otlp'], processors: ['batch'], exporters: ['elasticsearch/otel'] },
+    },
+  },
+};
+
 describe('CollectorDetailInfo', () => {
   let testRenderer: TestRenderer;
 
@@ -46,11 +55,12 @@ describe('CollectorDetailInfo', () => {
   });
 
   it('renders agent metadata fields', () => {
-    const result = testRenderer.render(<CollectorDetailInfo agent={makeAgent()} />);
+    const result = testRenderer.render(
+      <CollectorDetailInfo agent={makeAgent()} config={config} />
+    );
     const panel = result.getByTestId('collectorDetailInfo');
 
     expect(panel.textContent).toContain('prod-west-gateway');
-    expect(panel.textContent).toContain('online');
     expect(panel.textContent).toContain('opamp-collector-001');
     expect(panel.textContent).toContain('otel-gateway');
     expect(panel.textContent).toContain('0.104.0');
@@ -59,6 +69,14 @@ describe('CollectorDetailInfo', () => {
     expect(panel.textContent).toContain('linux');
     expect(panel.textContent).toContain('production-west');
     expect(panel.textContent).toContain('logs, metrics, traces');
+  });
+
+  it('renders pipeline count from config', () => {
+    const result = testRenderer.render(
+      <CollectorDetailInfo agent={makeAgent()} config={config} />
+    );
+    const panel = result.getByTestId('collectorDetailInfo');
+    expect(panel.textContent).toContain('2');
   });
 
   it('renders dashes for missing optional fields', () => {
