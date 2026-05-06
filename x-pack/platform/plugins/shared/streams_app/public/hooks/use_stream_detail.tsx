@@ -36,14 +36,9 @@ const StreamDetailContext = React.createContext<StreamDetailContextValue | undef
  * API response in a production-resilient way.
  *
  * - In development, throws immediately so schema drift surfaces in tests / local dev.
- * - In production, runs a non-strict `safeParse` to distinguish two cases:
- *     1. Non-strict passes → schema drift (extra/unknown fields). Schedules a
- *        deferred throw so APM and the global error handler capture it, while
- *        execution continues normally (page stays usable).
- *     2. Non-strict also fails + `throwOnActualTypeError` is `true` → data is
- *        genuinely the wrong type; throws synchronously.
- *     3. Non-strict also fails + `throwOnActualTypeError` is `false` → schedules
- *        a deferred throw with the Zod error details and returns normally.
+ * - In production, runs a non-strict `safeParse` to build a descriptive message,
+ *   then schedules a deferred throw so APM and the global error handler capture it
+ *   while execution continues normally (page stays usable).
  *
  * The deferred-throw pattern is required because:
  *   • A direct `throw` aborts execution and leaves the page blank.
@@ -54,18 +49,13 @@ const StreamDetailContext = React.createContext<StreamDetailContextValue | undef
 const handleStrictSchemaFailure = (
   value: unknown,
   nonStrictSchema: { safeParse: (v: unknown) => { success: boolean; error?: unknown } },
-  errorMessage: string,
-  throwOnActualTypeError = false
+  errorMessage: string
 ): void => {
   if (process.env.NODE_ENV !== 'production') {
     throw new Error(errorMessage);
   }
 
   const nonStrictResult = nonStrictSchema.safeParse(value);
-
-  if (!nonStrictResult.success && throwOnActualTypeError) {
-    throw new Error(errorMessage);
-  }
 
   const reason = nonStrictResult.success
     ? 'The response passed non-strict validation but failed strict (DeepStrict) validation — the API response contains extra or unknown fields.'
@@ -210,13 +200,10 @@ export function useStreamDetailAsIngestStream() {
     !Streams.ClassicStream.GetResponse.is(ctx.definition)
   ) {
     // Both strict (DeepStrict) type guards failed — delegate to shared handler.
-    // throwOnActualTypeError=true so we still throw synchronously when the data
-    // is genuinely the wrong stream type (not just schema drift).
     handleStrictSchemaFailure(
       ctx.definition,
       Streams.ingest.all.GetResponse.right,
-      `[Streams] useStreamDetailAsIngestStream: definition for stream "${ctx.definition.stream.name}" failed strict schema validation.`,
-      true
+      `[Streams] useStreamDetailAsIngestStream: definition for stream "${ctx.definition.stream.name}" failed strict schema validation.`
     );
   }
   return ctx as {
