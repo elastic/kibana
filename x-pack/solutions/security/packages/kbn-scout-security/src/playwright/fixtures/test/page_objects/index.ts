@@ -16,6 +16,7 @@ import { TimelinePage } from './timeline';
 import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
+import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 
@@ -30,6 +31,7 @@ export interface SecurityPageObjects extends PageObjects {
   /** Indicator match (threat match) rule creation page — threat index and field mapping controls. */
   threatMatchRuleCreatePage: ThreatMatchRuleCreatePage;
   attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
+  serverlessProjectChromePage: ServerlessProjectChromePage;
 }
 
 export function extendPageObjects(
@@ -52,5 +54,6 @@ export function extendPageObjects(
     ),
     threatMatchRuleCreatePage: createLazyPageObject(ThreatMatchRuleCreatePage, page),
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
+    serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),
   };
 }

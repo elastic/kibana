@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { AuthType, SSLCertType } from '../constants';
 
-export const authTypeSchema = z
-  .union([
-    z.literal(AuthType.Basic),
-    z.literal(AuthType.SSL),
-    z.literal(AuthType.OAuth2ClientCredentials),
-    z.literal(null),
-  ])
-  .default(AuthType.Basic)
-  .optional();
+export const authTypeSchema = lazySchema(() =>
+  z
+    .union([
+      z.literal(AuthType.Basic),
+      z.literal(AuthType.SSL),
+      z.literal(AuthType.OAuth2ClientCredentials),
+      z.literal(null),
+    ])
+    .default(AuthType.Basic)
+    .optional()
+);
 
-export const hasAuthSchema = z.boolean().default(true);
+export const hasAuthSchema = lazySchema(() => z.boolean().default(true));
 
-const HeadersSchema = z.record(z.string(), z.string());
+const HeadersSchema = lazySchema(() => z.record(z.string(), z.string()));
 
 export const AuthConfiguration = {
   hasAuth: hasAuthSchema,
@@ -97,15 +99,17 @@ export const SecretConfigurationSchemaValidation = {
   },
 };
 
-export const SecretConfigurationSchema = z
-  .object(SecretConfiguration)
-  .strict()
-  .superRefine((secrets, ctx) => {
-    const errorMessage = SecretConfigurationSchemaValidation.validate(secrets);
-    if (errorMessage) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: errorMessage,
-      });
-    }
-  });
+export const SecretConfigurationSchema = lazySchema(() =>
+  z
+    .object(SecretConfiguration)
+    .strict()
+    .superRefine((secrets, ctx) => {
+      const errorMessage = SecretConfigurationSchemaValidation.validate(secrets);
+      if (errorMessage) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: errorMessage,
+        });
+      }
+    })
+);
