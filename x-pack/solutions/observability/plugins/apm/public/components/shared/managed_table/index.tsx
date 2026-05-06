@@ -28,8 +28,8 @@ import {
   getItemsFilteredBySearchQuery,
   TableSearchBar,
 } from '../table_search_bar/table_search_bar';
-import type { ActionGroups } from '../actions_context_menu';
 import { ActionsContextMenu } from '../actions_context_menu';
+import { resolveTableActions, type TableActions } from './table_actions';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -70,51 +70,14 @@ export interface TableSearchBar<T> {
   techPreview?: boolean;
 }
 
-export interface TableActionSubItem<T> {
-  id: string;
-  name: string;
-  onClick?: (item: T) => void;
-  href?: (item: T) => string | undefined;
-  icon?: string;
-}
-
-export interface TableAction<T> {
-  id: string;
-  name: string;
-  onClick?: (item: T) => void;
-  href?: (item: T) => string | undefined;
-  icon?: string;
-  items?: Array<TableActionSubItem<T>>;
-}
-
-export interface TableActionGroup<T> {
-  id: string;
-  groupLabel?: string;
-  actions: Array<TableAction<T>>;
-}
-
-export type TableActions<T> = Array<TableActionGroup<T>>;
-
-function resolveTableActions<T>(actions: TableActions<T>, item: T): ActionGroups {
-  return actions.map((group) => ({
-    id: group.id,
-    groupLabel: group.groupLabel,
-    actions: group.actions.map((action) => ({
-      id: action.id,
-      name: action.name,
-      icon: action.icon,
-      onClick: action.onClick ? () => action.onClick!(item) : undefined,
-      href: action.href ? action.href(item) : undefined,
-      items: action.items?.map((subItem) => ({
-        id: subItem.id,
-        name: subItem.name,
-        icon: subItem.icon,
-        onClick: subItem.onClick ? () => subItem.onClick!(item) : undefined,
-        href: subItem.href ? subItem.href(item) : undefined,
-      })),
-    })),
-  }));
-}
+export type {
+  TableActionItem,
+  TableActionSubItem,
+  TableAction,
+  TableActionGroup,
+  TableActions,
+} from './table_actions';
+export { resolveTableActions } from './table_actions';
 
 function ActionsCell<T extends object>({
   item,
