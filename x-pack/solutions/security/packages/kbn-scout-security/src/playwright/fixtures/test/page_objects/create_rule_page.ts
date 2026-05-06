@@ -64,7 +64,7 @@ export class CreateRulePage {
 
   async navigate() {
     await this.page.gotoApp(PAGE_URL);
-    await this.importQueryFromTimelineLink.waitFor({ state: 'visible' });
+    await this.importQueryFromTimelineLink.waitFor({ state: 'visible', timeout: 30000 });
   }
 
   async importQueryFromTimeline(timelineId: string) {
