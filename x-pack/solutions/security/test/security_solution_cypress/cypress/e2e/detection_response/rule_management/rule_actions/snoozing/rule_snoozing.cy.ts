@@ -229,7 +229,9 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
         visitRuleDetailsPage(rule.id);
       });
 
-      cy.get(DISABLED_SNOOZE_BADGE).trigger('mouseover');
+      cy.get(DISABLED_SNOOZE_BADGE)
+        .find('[data-test-subj="rulesListNotifyBadge-unsnoozed"]')
+        .trigger('mouseover');
 
       cy.get(TOOLTIP).contains('Unable to fetch snooze settings');
     });
