@@ -9,11 +9,7 @@
 
 import { monaco } from '../../../../monaco_imports';
 import { getCodeActionProvider } from './code_action_provider';
-import {
-  createDisposedTextModel,
-  createTextModel,
-  createWiredStreamSource,
-} from './test_helpers/providers';
+import { createDisposedTextModel, createTextModel, createWiredStreamSource } from './test_helpers';
 import type { ESQLDependencies } from './types';
 
 describe('Code actions provider', () => {

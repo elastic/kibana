@@ -8,11 +8,7 @@
  */
 
 import { monaco } from '../../../../monaco_imports';
-import {
-  createDisposedTextModel,
-  createIndexSource,
-  createTextModel,
-} from './test_helpers/providers';
+import { createDisposedTextModel, createIndexSource, createTextModel } from './test_helpers';
 import { esqlValidate } from './validate';
 
 describe('esqlValidate', () => {

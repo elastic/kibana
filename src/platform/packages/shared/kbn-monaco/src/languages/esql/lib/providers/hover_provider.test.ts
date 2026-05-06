@@ -9,7 +9,7 @@
 
 import { monaco } from '../../../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from '../../language';
-import { createDisposedTextModel, createField, createTextModel } from './test_helpers/providers';
+import { createDisposedTextModel, createField, createTextModel } from './test_helpers';
 
 describe('hover_provider', () => {
   let mockModel: monaco.editor.ITextModel;

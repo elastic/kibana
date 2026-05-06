@@ -9,7 +9,7 @@
 
 import { monaco } from '../../../../monaco_imports';
 import { getInlineCompletionsProvider } from './inline_completions_provider';
-import { createDisposedTextModel, createField, createTextModel } from './test_helpers/providers';
+import { createDisposedTextModel, createField, createTextModel } from './test_helpers';
 
 describe('Inline completion provider', () => {
   describe('provideInlineCompletions', () => {

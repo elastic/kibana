@@ -9,7 +9,7 @@
 
 import type { ESQLFieldWithMetadata, ESQLSourceResult, EsqlFieldType } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
-import { monaco } from '../../../../../monaco_imports';
+import { monaco } from '../../../../monaco_imports';
 
 export const createTextModel = ({
   value,

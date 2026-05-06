@@ -10,7 +10,7 @@
 import { ESQLVariableType, type PartialFieldsMetadataClient } from '@kbn/esql-types';
 import { monaco } from '../../../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from '../../language';
-import { createDisposedTextModel, createField, createTextModel } from './test_helpers/providers';
+import { createDisposedTextModel, createField, createTextModel } from './test_helpers';
 
 const cancellationToken = new monaco.CancellationTokenSource().token;
 

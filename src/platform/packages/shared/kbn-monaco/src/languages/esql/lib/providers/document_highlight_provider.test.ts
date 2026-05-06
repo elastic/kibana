@@ -9,7 +9,7 @@
 
 import { monaco } from '../../../../monaco_imports';
 import { getDocumentHighlightProvider } from './document_highlight_provider';
-import { createDisposedTextModel, createTextModel } from './test_helpers/providers';
+import { createDisposedTextModel, createTextModel } from './test_helpers';
 
 const cancellationToken = new monaco.CancellationTokenSource().token;
 
