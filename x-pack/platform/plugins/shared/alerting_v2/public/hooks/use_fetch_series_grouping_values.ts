@@ -66,6 +66,7 @@ export const useFetchSeriesGroupingValues = ({
       groupingFields
     ),
     enabled: isEnabled,
+    refetchOnWindowFocus: false,
     queryFn: ({ signal }) =>
       runDslSearch({
         data,

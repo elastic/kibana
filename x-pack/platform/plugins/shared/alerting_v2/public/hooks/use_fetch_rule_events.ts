@@ -74,6 +74,7 @@ export const useFetchRuleEvents = ({
   const topNSeriesQuery = useQuery({
     queryKey: ruleOverviewQueryKeys.topNSeries(ruleId ?? '', gteMs, lteMs),
     enabled,
+    refetchOnWindowFocus: false,
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
         data,
@@ -106,6 +107,7 @@ export const useFetchRuleEvents = ({
       topNHashes
     ),
     enabled: eventsEnabled,
+    refetchOnWindowFocus: false,
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
         data,
@@ -128,6 +130,7 @@ export const useFetchRuleEvents = ({
   const summaryQuery = useQuery({
     queryKey: ruleOverviewQueryKeys.timelineSummary(ruleId ?? '', gteMs, lteMs),
     enabled,
+    refetchOnWindowFocus: false,
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
         data,

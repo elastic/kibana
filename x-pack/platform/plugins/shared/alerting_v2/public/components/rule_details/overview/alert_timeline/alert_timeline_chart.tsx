@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { PluginStart } from '@kbn/core-di';
@@ -26,6 +27,7 @@ export interface AlertTimelineChartProps {
   lteMs: number;
   ruleId: string;
   basePath: IBasePath;
+  timeZone?: string;
   onEpisodeClick?: (episodeId: string) => void;
   getEpisodeHref?: (episodeId: string) => string;
 }
@@ -36,6 +38,7 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
   lteMs,
   ruleId,
   basePath,
+  timeZone,
   onEpisodeClick,
   getEpisodeHref,
 }) => {
@@ -49,11 +52,18 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
       gutterSize="m"
       responsive={false}
       alignItems="stretch"
+      aria-label={i18n.translate('xpack.alertingV2.alertTimeline.chart.ariaLabel', {
+        defaultMessage: 'Alert activity timeline chart',
+      })}
       data-test-subj="alertTimelineChart"
     >
-      <EuiFlexItem grow={false} style={{ width: META_COLUMN_WIDTH_PX }}>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          width: ${META_COLUMN_WIDTH_PX}px;
+        `}
+      >
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          {/* Spacer to align with the time axis above the bar tracks */}
           <EuiFlexItem grow={false}>
             <div
               css={css`
@@ -67,7 +77,9 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
                 alignItems="center"
                 gutterSize="none"
                 responsive={false}
-                style={{ height: ROW_HEIGHT_PX }}
+                css={css`
+                  height: ${ROW_HEIGHT_PX}px;
+                `}
               >
                 <EuiFlexItem>
                   <AlertTimelineSeriesLabel
@@ -96,6 +108,7 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
             lteMs={lteMs}
             height={ROW_HEIGHT_PX}
             baseTheme={baseTheme}
+            timeZone={timeZone}
             onEpisodeClick={onEpisodeClick}
             getEpisodeHref={getEpisodeHref}
           />

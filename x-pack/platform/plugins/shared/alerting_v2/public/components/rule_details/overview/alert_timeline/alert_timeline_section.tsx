@@ -45,14 +45,6 @@ const DAY_MS = 24 * HOUR_MS;
 
 const DEFAULT_ALERT_TIMELINE_TIME_RANGE = { from: 'now-7d', to: 'now' };
 
-const COMMONLY_USED_RANGES = [
-  { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
-  { start: 'now-6h', end: 'now', label: 'Last 6 hours' },
-  { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
-  { start: 'now-7d', end: 'now', label: 'Last 7 days' },
-  { start: 'now-30d', end: 'now', label: 'Last 30 days' },
-];
-
 const resolveGteLte = (from: string, to: string): { gteMs: number; lteMs: number } => {
   const fromMs = datemath.parse(from)?.valueOf();
   const toMs = datemath.parse(to, { roundUp: true })?.valueOf();
@@ -71,6 +63,7 @@ export const AlertTimelineSection: React.FC = () => {
   const http = useService(CoreStart('http'));
   const rule = useRule();
   const groupingFields = useMemo(() => rule.grouping?.fields ?? [], [rule.grouping?.fields]);
+  const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
 
   const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ALERT_TIMELINE_TIME_RANGE);
   const [refreshTick, setRefreshTick] = useState(0);
@@ -84,11 +77,10 @@ export const AlertTimelineSection: React.FC = () => {
 
   const handleRefresh = useCallback(() => setRefreshTick((n) => n + 1), []);
 
-  const { gteMs, lteMs } = useMemo(
-    () => resolveGteLte(timeRange.from, timeRange.to),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timeRange.from, timeRange.to, refreshTick]
-  );
+  const { gteMs, lteMs } = useMemo(() => {
+    void refreshTick;
+    return resolveGteLte(timeRange.from, timeRange.to);
+  }, [timeRange.from, timeRange.to, refreshTick]);
 
   const bufferMs = useMemo(() => {
     const scheduleMs = parseDurationToMs(rule.schedule.every);
@@ -187,8 +179,6 @@ export const AlertTimelineSection: React.FC = () => {
                 onRefresh={handleRefresh}
                 isLoading={isLoading}
                 showUpdateButton="iconOnly"
-                commonlyUsedRanges={COMMONLY_USED_RANGES}
-                width="auto"
                 data-test-subj="alertTimelineDatePicker"
               />
             </EuiFlexItem>
@@ -284,6 +274,7 @@ export const AlertTimelineSection: React.FC = () => {
             lteMs={lteMs}
             ruleId={rule.id}
             basePath={http.basePath}
+            timeZone={timeZone}
             onEpisodeClick={onEpisodeClick}
             getEpisodeHref={getEpisodeHref}
           />

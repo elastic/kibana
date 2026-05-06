@@ -10,17 +10,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiStat, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertTimelineSummary } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
-import { alertTimelineStatusColor } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
-
-const formatDuration = (ms: number): string => {
-  if (!Number.isFinite(ms) || ms <= 0) return '—';
-  const totalMinutes = Math.round(ms / 60_000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  if (hours === 0) return `${minutes}m`;
-  if (minutes === 0) return `${hours}h`;
-  return `${hours}h ${minutes}m`;
-};
+import {
+  alertTimelineStatusColor,
+  formatDuration,
+} from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 
 export interface AlertTimelineStatsRowProps {
   summary: AlertTimelineSummary;
@@ -70,7 +63,7 @@ export const AlertTimelineStatsRow: React.FC<AlertTimelineStatsRowProps> = ({ su
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiStat
-          title={formatDuration(summary.medianDurationMs)}
+          title={formatDuration(summary.medianDurationMs, '—')}
           description={i18n.translate('xpack.alertingV2.alertTimeline.statMedianDuration', {
             defaultMessage: 'Median duration',
           })}

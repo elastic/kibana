@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { AlertTimelineSection } from './alert_timeline/alert_timeline_section';
 
 export const RuleOverviewSection: React.FC = () => (
   <div data-test-subj="ruleOverviewSection">
-    <AlertTimelineSection />
+    <EuiErrorBoundary>
+      <AlertTimelineSection />
+    </EuiErrorBoundary>
   </div>
 );

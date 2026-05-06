@@ -20,12 +20,12 @@ export interface AlertTimelineTimeRange {
 }
 
 interface PersistedAppState {
-  ganttTimeRange?: AlertTimelineTimeRange;
+  activityTimeRange?: AlertTimelineTimeRange;
 }
 
 /**
  * Two-way URL state sync for the Alert Timeline time range. Hydrates
- * from `_a.ganttTimeRange` on mount and writes back on every change so the
+ * from `_a.activityTimeRange` on mount and writes back on every change so the
  * page URL is shareable and refresh-stable.
  */
 export const useAlertTimelineUrlState = (
@@ -40,7 +40,7 @@ export const useAlertTimelineUrlState = (
 
   const [timeRange, setTimeRange] = useState<AlertTimelineTimeRange>(() => {
     const persisted = stateStorage.get<PersistedAppState>(APP_STATE_STORAGE_KEY);
-    return persisted?.ganttTimeRange ?? defaultTimeRange;
+    return persisted?.activityTimeRange ?? defaultTimeRange;
   });
 
   const isFirstWrite = useRef(true);
@@ -52,7 +52,7 @@ export const useAlertTimelineUrlState = (
     const current = stateStorage.get<PersistedAppState>(APP_STATE_STORAGE_KEY) ?? {};
     stateStorage.set<PersistedAppState>(
       APP_STATE_STORAGE_KEY,
-      { ...current, ganttTimeRange: timeRange },
+      { ...current, activityTimeRange: timeRange },
       { replace: true }
     );
   }, [stateStorage, timeRange]);

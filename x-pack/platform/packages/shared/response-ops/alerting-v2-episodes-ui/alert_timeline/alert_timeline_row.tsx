@@ -140,6 +140,7 @@ export interface AlertTimelineRowProps {
   lteMs: number;
   height: number;
   baseTheme: Theme;
+  timeZone?: string;
   onEpisodeClick?: (episodeId: string) => void;
   getEpisodeHref?: (episodeId: string) => string;
 }
@@ -150,6 +151,7 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
   lteMs,
   height,
   baseTheme,
+  timeZone,
   onEpisodeClick,
   getEpisodeHref,
 }) => {
@@ -239,7 +241,7 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
                   'xpack.alertingV2.alertTimeline.tooltip.transitionTime',
                   {
                     defaultMessage: 'Transitioned at {when}',
-                    values: { when: formatTimestamp(datum.x) },
+                    values: { when: formatTimestamp(datum.x, timeZone) },
                   }
                 )}
               />
@@ -255,18 +257,16 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
             <RectAnnotation
               key={`rect-${status}`}
               id={`alert-timeline-row-${row.groupHash}-rect-${status}`}
-              dataValues={
-                segments.map((s) => ({
-                  coordinates: { x0: s.x0Ms, x1: s.x1Ms, y0: RECT_Y0, y1: RECT_Y1 },
-                  details: {
-                    kind: 'segment',
-                    episodeId: s.episodeId,
-                    status: s.status,
-                    x0Ms: s.x0Ms,
-                    x1Ms: s.x1Ms,
-                  },
-                })) as unknown as RectAnnotationDatum[]
-              }
+              dataValues={segments.map((s) => ({
+                coordinates: { x0: s.x0Ms, x1: s.x1Ms, y0: RECT_Y0, y1: RECT_Y1 },
+                details: {
+                  kind: 'segment',
+                  episodeId: s.episodeId,
+                  status: s.status,
+                  x0Ms: s.x0Ms,
+                  x1Ms: s.x1Ms,
+                } as unknown as string,
+              }))}
               style={{ fill, strokeWidth: 0, opacity: 1 }}
               customTooltip={({ details }) => {
                 const d = details as SegmentDetails | undefined;
@@ -278,11 +278,11 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
                     episodeId={d.episodeId}
                     primaryLine={i18n.translate('xpack.alertingV2.alertTimeline.tooltip.from', {
                       defaultMessage: 'From: {when}',
-                      values: { when: formatTimestamp(d.x0Ms) },
+                      values: { when: formatTimestamp(d.x0Ms, timeZone) },
                     })}
                     secondaryLine={i18n.translate('xpack.alertingV2.alertTimeline.tooltip.to', {
                       defaultMessage: 'To: {when}',
-                      values: { when: formatTimestamp(d.x1Ms) },
+                      values: { when: formatTimestamp(d.x1Ms, timeZone) },
                     })}
                     durationLabel={i18n.translate(
                       'xpack.alertingV2.alertTimeline.tooltip.duration',
