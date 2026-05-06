@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiButtonGroup, EuiCallOut, EuiFlyout, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
@@ -14,6 +14,11 @@ import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
+import {
+  DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
+  DEPRECATED_LLM_CONNECTOR_INFO,
+} from '@kbn/response-ops-rule-form/src/translations';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -85,21 +90,17 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     }
   }, [initialConnector, allActionTypes, actionType]);
 
-  const emptyConnector = {
-    actionTypeId: actionType?.id ?? '',
-    isDeprecated: false,
-    config: {},
-    secrets: {},
-    isMissingSecrets: false,
-    isConnectorTypeDeprecated: false,
-  };
-
-  const defaultConnector = initialConnector
-    ? {
-        ...emptyConnector,
-        ...initialConnector,
-      }
-    : emptyConnector;
+  const defaultConnector = useMemo(() => {
+    const empty = {
+      actionTypeId: actionType?.id ?? '',
+      isDeprecated: false,
+      config: {},
+      secrets: {},
+      isMissingSecrets: false,
+      isConnectorTypeDeprecated: false,
+    };
+    return initialConnector ? { ...empty, ...initialConnector } : empty;
+  }, [actionType?.id, initialConnector]);
 
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
 
@@ -136,10 +137,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const resetConnectorForm = useRef<ResetForm | undefined>();
 
-  const setResetForm = (reset: ResetForm) => {
+  const setResetForm = useCallback((reset: ResetForm) => {
     resetConnectorForm.current = reset;
     setShowFormErrors(false);
-  };
+  }, []);
 
   const onChangeGroupAction = (id: string) => {
     if (allActionTypes && allActionTypes[id]) {
@@ -299,6 +300,22 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                   data-test-subj="slackTypeChangeButton"
                 />
                 <EuiSpacer size="xs" />
+              </>
+            )}
+
+            {isLLMConnectorTypeId(actionType.id) && (
+              <>
+                <EuiCallOut
+                  announceOnMount={false}
+                  size="s"
+                  color="warning"
+                  iconType="warning"
+                  data-test-subj="deprecatedLLMConnectorCallout"
+                  title={DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE}
+                >
+                  {DEPRECATED_LLM_CONNECTOR_INFO}
+                </EuiCallOut>
+                <EuiSpacer size="m" />
               </>
             )}
 

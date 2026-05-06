@@ -62,6 +62,7 @@ packages:
     - core
     - kbn-scout
     - kbn-streamlang-tests
+    - user-storage
   disabled:
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
 

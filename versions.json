@@ -17,11 +17,6 @@
       "branchType": "release"
     },
     {
-      "version": "9.2.9",
-      "branch": "9.2",
-      "branchType": "release"
-    },
-    {
       "version": "8.19.16",
       "branch": "8.19",
       "branchType": "release"
