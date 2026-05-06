@@ -151,30 +151,32 @@ const IlmLifecycleSummary = ({
           <EuiSpacer size="s" />
         </>
       )}
-      <DataLifecycleSummary
-        model={{
-          phases: ilmSummary.phases,
-          loading: ilmSummary.loading,
-        }}
-        showDownsampling={isMetricsStream}
-        capabilities={{ canManageLifecycle: definition.privileges.lifecycle }}
-        headerActions={headerActions}
-        phaseActions={{
-          onRemovePhase: ilmSummary.onRemovePhase,
-          onEditPhase: (phaseName) => ilmSummary.onEditPhase?.(phaseName as PhaseName),
-          showPhaseActions: true,
-        }}
-        downsamplingActions={{
-          onRemoveDownsampleStep: ilmSummary.onRemoveDownsampleStep,
-          onEditDownsampleStep: (stepNumber, phaseName) =>
-            ilmSummary.onEditDownsampleStep?.(stepNumber, phaseName as PhaseName | undefined),
-        }}
-        uiState={{
-          editedPhaseName: ilmSummary.editingPhase,
-          isEditLifecycleFlyoutOpen,
-          invalidPhases,
-        }}
-      />
+      {!ilmSummary.policyMissing && (
+        <DataLifecycleSummary
+          model={{
+            phases: ilmSummary.phases,
+            loading: ilmSummary.loading,
+          }}
+          showDownsampling={isMetricsStream}
+          capabilities={{ canManageLifecycle: definition.privileges.lifecycle }}
+          headerActions={headerActions}
+          phaseActions={{
+            onRemovePhase: ilmSummary.onRemovePhase,
+            onEditPhase: (phaseName) => ilmSummary.onEditPhase?.(phaseName as PhaseName),
+            showPhaseActions: true,
+          }}
+          downsamplingActions={{
+            onRemoveDownsampleStep: ilmSummary.onRemoveDownsampleStep,
+            onEditDownsampleStep: (stepNumber, phaseName) =>
+              ilmSummary.onEditDownsampleStep?.(stepNumber, phaseName as PhaseName | undefined),
+          }}
+          uiState={{
+            editedPhaseName: ilmSummary.editingPhase,
+            isEditLifecycleFlyoutOpen,
+            invalidPhases,
+          }}
+        />
+      )}
 
       {ilmSummary.modals}
     </>
