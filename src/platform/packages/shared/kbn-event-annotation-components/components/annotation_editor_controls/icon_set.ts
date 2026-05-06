@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { IconSet } from '@kbn/visualization-ui-components';
-import { annotationReferenceLineSharedSetOfIcons } from '@kbn/visualization-ui-components';
+import {
+  annotationReferenceLineSharedSetOfIcons,
+  iconSortCriteria,
+} from '@kbn/visualization-ui-components';
 import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
 
 export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
   ...annotationReferenceLineSharedSetOfIcons,
-];
+].sort(iconSortCriteria);

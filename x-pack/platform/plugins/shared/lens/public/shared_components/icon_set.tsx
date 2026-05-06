@@ -19,7 +19,7 @@ import {
 export const referenceLineIconsSet: IconSet<AvailableReferenceLineIcon> = [
   emptyIconEntry,
   ...annotationReferenceLineSharedSetOfIcons,
-];
+].sort(iconSortCriteria);
 
 export const metricIconsSet: IconSet<AvailableMetricIcon> = [
   emptyIconEntry,
