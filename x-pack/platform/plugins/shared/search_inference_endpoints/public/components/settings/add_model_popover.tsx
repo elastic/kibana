@@ -10,18 +10,40 @@ import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui';
+import { InferenceConnectorType } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { useConnectors } from '../../hooks/use_connectors';
 import { getConnectorIcon } from '../../utils/connector_display';
+
+const getConnectorTaskType = (connector: InferenceConnector): string => {
+  if (connector.isInferenceEndpoint) {
+    const fromConfig = connector.config?.taskType;
+    if (typeof fromConfig === 'string' && fromConfig.length > 0) {
+      return fromConfig;
+    }
+  }
+  if (
+    connector.type === InferenceConnectorType.OpenAI ||
+    connector.type === InferenceConnectorType.Bedrock ||
+    connector.type === InferenceConnectorType.Gemini
+  ) {
+    return 'chat_completion';
+  }
+  return '';
+};
 
 interface AddModelPopoverProps {
   existingEndpointIds: string[];
   onAdd: (endpointId: string) => void;
+  /** When set, only connectors compatible with this inference task type are listed. */
+  taskType?: string;
   panelWidth?: number;
 }
 
 export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
   existingEndpointIds,
   onAdd,
+  taskType,
   panelWidth,
 }) => {
   const { data: connectors = [] } = useConnectors();
@@ -29,7 +51,15 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
 
   const options: EuiSelectableOption[] = useMemo(() => {
     const existingSet = new Set(existingEndpointIds);
-    const available = connectors.filter((connector) => !existingSet.has(connector.connectorId));
+    const available = connectors.filter((connector) => {
+      if (existingSet.has(connector.connectorId)) {
+        return false;
+      }
+      if (!taskType) {
+        return true;
+      }
+      return getConnectorTaskType(connector) === taskType;
+    });
 
     const nameToCount = connectors.reduce<Map<string, number>>((acc, connector) => {
       acc.set(connector.name, (acc.get(connector.name) ?? 0) + 1);
@@ -45,7 +75,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
         prepend: <EuiIcon type={getConnectorIcon(connector)} size="s" aria-hidden />,
       };
     });
-  }, [connectors, existingEndpointIds]);
+  }, [connectors, existingEndpointIds, taskType]);
 
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
