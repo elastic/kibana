@@ -50,8 +50,10 @@ dependsOn:
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/es-query'
   - '@kbn/rison'
-  - '@kbn/core-mount-utils-browser'
   - '@kbn/reporting-common'
+  - '@kbn/core-rendering-browser-mocks'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/core-rendering-browser'
 tags:
   - shared-browser
   - package
