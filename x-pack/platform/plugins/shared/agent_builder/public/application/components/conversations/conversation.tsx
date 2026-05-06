@@ -26,6 +26,7 @@ import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useShouldStickToBottom } from '../../context/conversation/use_should_stick_to_bottom';
 import { useSendMessage } from '../../context/send_message/send_message_context';
+import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversation_streaming';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
@@ -53,6 +54,7 @@ export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
   const { isResponseLoading } = useSendMessage();
+  const isAnyStreaming = useIsAnyConversationStreaming();
   const conversationRounds = useConversationRounds();
   const lastRound = conversationRounds.at(-1);
   const { isFetched } = useConversationStatus();
@@ -65,9 +67,10 @@ export const Conversation: React.FC<{}> = () => {
   const [dismissStaleAttachments, setDismissStaleAttachments] = useState(false);
   useSendPredefinedInitialMessage();
 
+  // Page-leave guard fires for any in-flight stream, not just this conversation's.
   useNavigationAbort({
     onAppLeave,
-    isResponseLoading,
+    isResponseLoading: isAnyStreaming,
   });
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
