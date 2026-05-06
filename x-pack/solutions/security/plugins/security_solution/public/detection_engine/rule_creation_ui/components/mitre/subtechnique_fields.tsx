@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import type { Threats, ThreatSubtechnique } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -21,18 +21,7 @@ import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
-import type { MitreSubTechnique } from '../../../../../common/detection_engine/mitre/types';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-  );
-};
+import { useMitreConfiguration } from './hooks/use_mitre_configuration';
 
 const SubtechniqueContainer = styled.div`
   margin-left: 48px;
@@ -56,16 +45,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   onFieldChange,
 }): JSX.Element => {
   const values = field.value as Threats;
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
-
-  useEffect(() => {
-    async function getMitre() {
-      const mitreConfig = await lazyMitreConfiguration();
-      setSubtechniquesOptions(mitreConfig.subtechniques);
-    }
-
-    getMitre();
-  }, []);
+  const { subtechniques: subtechniquesOptions } = useMitreConfiguration();
 
   const technique = useMemo(() => {
     return [...(values[threatIndex].technique ?? [])];

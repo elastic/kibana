@@ -14,7 +14,7 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import { kebabCase } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
 import type { Threats, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -23,21 +23,8 @@ import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
-import type {
-  MitreSubTechnique,
-  MitreTechnique,
-} from '../../../../../common/detection_engine/mitre/types';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-  );
-};
+import type { MitreSubTechnique } from '../../../../../common/detection_engine/mitre/types';
+import { useMitreConfiguration } from './hooks/use_mitre_configuration';
 
 const hasSubtechniqueOptions = (
   subtechniquesOptions: MitreSubTechnique[],
@@ -69,18 +56,8 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
 }): JSX.Element => {
   const values = field.value as Threats;
 
-  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
-
-  useEffect(() => {
-    async function getMitre() {
-      const mitreConfig = await lazyMitreConfiguration();
-      setTechniquesOptions(mitreConfig.techniques);
-      setSubtechniquesOptions(mitreConfig.subtechniques);
-    }
-
-    getMitre();
-  }, []);
+  const { techniques: techniquesOptions, subtechniques: subtechniquesOptions } =
+    useMitreConfiguration();
 
   const removeTechnique = useCallback(
     (index: number) => {

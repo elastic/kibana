@@ -41,10 +41,10 @@ describe('MitreAttackDataClient', () => {
     const result = await client.list({ framework: 'enterprise', types: ['tactic'] });
 
     expect(result).toEqual([sampleTactic]);
-    const search = esScopedClient.asInternalUser.search.mock.calls[0][0];
-    expect(search.index).toBe('.kibana-mitre-attack-default');
-    expect(search.sort).toEqual([{ name: 'asc' }]);
-    expect(search.query?.bool?.filter).toEqual([
+    const search = esScopedClient.asInternalUser.search.mock.calls[0]?.[0];
+    expect(search?.index).toBe('.kibana-mitre-attack-default');
+    expect(search?.sort).toEqual([{ name: 'asc' }]);
+    expect(search?.query?.bool?.filter).toEqual([
       { term: { framework: 'enterprise' } },
       { terms: { type: ['tactic'] } },
     ]);
@@ -56,8 +56,8 @@ describe('MitreAttackDataClient', () => {
 
     await client.list({ types: ['subtechnique'], techniqueId: 'T1078' });
 
-    const search = esScopedClient.asInternalUser.search.mock.calls[0][0];
-    expect(search.query?.bool?.filter).toEqual([
+    const search = esScopedClient.asInternalUser.search.mock.calls[0]?.[0];
+    expect(search?.query?.bool?.filter).toEqual([
       { terms: { type: ['subtechnique'] } },
       { term: { techniqueId: 'T1078' } },
     ]);
@@ -76,9 +76,9 @@ describe('MitreAttackDataClient', () => {
       limit: 10,
     });
 
-    const search = esScopedClient.asInternalUser.search.mock.calls[0][0];
-    expect(search.size).toBe(10);
-    expect(search.query?.bool?.must).toEqual([
+    const search = esScopedClient.asInternalUser.search.mock.calls[0]?.[0];
+    expect(search?.size).toBe(10);
+    expect(search?.query?.bool?.must).toEqual([
       {
         multi_match: {
           query: 'credential dumping',
@@ -87,7 +87,7 @@ describe('MitreAttackDataClient', () => {
         },
       },
     ]);
-    expect(search.query?.bool?.filter).toEqual([
+    expect(search?.query?.bool?.filter).toEqual([
       { term: { framework: 'enterprise' } },
       { terms: { type: ['technique', 'subtechnique'] } },
     ]);
@@ -98,10 +98,10 @@ describe('MitreAttackDataClient', () => {
     esScopedClient.asInternalUser.search.mockResolvedValue({ hits: { hits: [] } } as never);
 
     await client.search({ query: 'x', limit: 99999 });
-    expect(esScopedClient.asInternalUser.search.mock.calls[0][0].size).toBe(1500);
+    expect(esScopedClient.asInternalUser.search.mock.calls[0]?.[0]?.size).toBe(1500);
 
     await client.search({ query: 'x', limit: 0 });
-    expect(esScopedClient.asInternalUser.search.mock.calls[1][0].size).toBe(1);
+    expect(esScopedClient.asInternalUser.search.mock.calls[1]?.[0]?.size).toBe(1);
   });
 
   it('getById() builds a deterministic doc id and returns the source', async () => {
