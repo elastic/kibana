@@ -54,7 +54,13 @@ export class IndexEditorObject extends FtrService {
     await this.testSubjects.click('indexEditorAddColumnButton');
     await this.testSubjects.exists('indexEditorColumnTypeSelect');
     await this.retry.try(async () => {
+      // The visible chip can desync from React state when comboBox.set is interrupted
+      // by a re-render mid-click. Clear first to bypass the `isOptionSelected` shortcut,
+      // then verify the name input appeared (conditionally rendered only when columnType
+      // is actually set in React state).
+      await this.comboBox.clear('indexEditorColumnTypeSelect');
       await this.comboBox.set('indexEditorColumnTypeSelect', type);
+      await this.testSubjects.existOrFail('indexEditorColumnNameInput', { timeout: 5000 });
     });
     await this.testSubjects.setValue('indexEditorColumnNameInput', name);
     await this.common.pressEnterKey();
