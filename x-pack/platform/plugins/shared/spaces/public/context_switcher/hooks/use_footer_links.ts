@@ -11,28 +11,42 @@ import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { LinksListItem } from '@kbn/context-switcher-components';
 import type { CoreStart } from '@kbn/core/public';
+import { OBSERVABILITY_ONBOARDING_APP_ID } from '@kbn/deeplinks-observability';
+import { SEARCH_GETTING_STARTED } from '@kbn/deeplinks-search';
+import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
+import { HOME_APP_ID } from '@kbn/deeplinks-shared';
+import type { WorkplaceAIApp } from '@kbn/deeplinks-workplace-ai';
 import { i18n } from '@kbn/i18n';
 
 import type { Space } from '../../../common';
 
+type GetStartedAppId =
+  | typeof HOME_APP_ID
+  | typeof OBSERVABILITY_ONBOARDING_APP_ID
+  | typeof SEARCH_GETTING_STARTED
+  | typeof SECURITY_APP_ID
+  | WorkplaceAIApp;
+
 interface GetStartedTarget {
-  appId: string;
+  appId: GetStartedAppId;
   path?: string;
 }
 
+const WORKPLACE_AI_APP_ID: WorkplaceAIApp = 'workplace_ai';
+
 const SERVERLESS_TARGETS: Record<string, GetStartedTarget> = {
-  observability: { appId: 'observabilityOnboarding' },
-  search: { appId: 'searchGettingStarted' },
-  security: { appId: 'securitySolutionUI', path: '/get_started' },
-  workplaceai: { appId: 'workplace_ai' },
+  observability: { appId: OBSERVABILITY_ONBOARDING_APP_ID },
+  search: { appId: SEARCH_GETTING_STARTED },
+  security: { appId: SECURITY_APP_ID, path: '/get_started' },
+  workplaceai: { appId: WORKPLACE_AI_APP_ID },
 };
 
 const SPACE_SOLUTION_TARGETS: Record<string, GetStartedTarget> = {
-  oblt: { appId: 'observabilityOnboarding' },
-  es: { appId: 'searchGettingStarted' },
-  security: { appId: 'securitySolutionUI', path: '/get_started' },
-  workplaceai: { appId: 'workplace_ai' },
-  classic: { appId: 'home' },
+  oblt: { appId: OBSERVABILITY_ONBOARDING_APP_ID },
+  es: { appId: SEARCH_GETTING_STARTED },
+  security: { appId: SECURITY_APP_ID, path: '/get_started' },
+  workplaceai: { appId: WORKPLACE_AI_APP_ID },
+  classic: { appId: HOME_APP_ID },
 };
 
 export const useFooterLinks = ({
@@ -83,7 +97,9 @@ export const useFooterLinks = ({
     const serverlessProjectType = isServerless === true ? cloud?.serverless.projectType : undefined;
 
     const preferredTarget = (serverlessProjectType && SERVERLESS_TARGETS[serverlessProjectType]) ??
-      (activeSpaceSolution && SPACE_SOLUTION_TARGETS[activeSpaceSolution]) ?? { appId: 'home' };
+      (activeSpaceSolution && SPACE_SOLUTION_TARGETS[activeSpaceSolution]) ?? {
+        appId: HOME_APP_ID,
+      };
 
     const isObservability =
       serverlessProjectType === 'observability' || activeSpaceSolution === 'oblt';

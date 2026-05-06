@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { AppId, DeepLinkId } from './deep_links';
+export const HOME_APP_ID = 'home';
+
+export type AppId = typeof HOME_APP_ID;
+
+export type DeepLinkId = AppId;
