@@ -85,8 +85,6 @@ export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> 
 
       {/* Error pattern panel — will be implemented in https://github.com/elastic/ingest-dev/issues/7074 */}
       {/* <ErrorPatternPanel agentId={agent.id} /> */}
-
-      <EuiSpacer size="xl" />
     </>
   );
 };
