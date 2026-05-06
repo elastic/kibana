@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
-  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -382,30 +381,6 @@ export function SigeventsOverviewPage() {
     <ObservabilityPageTemplate
       isPageDataLoaded={true}
       data-test-subj="obltSigeventsOverviewPageHeader"
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.sigeventsOverview.pageTitle', {
-          defaultMessage: 'Nightshift',
-        }),
-        bottomBorder: 'extended',
-        rightSideItems: [
-          <EuiButtonIcon
-            iconType="boxesVertical"
-            color="text"
-            size="s"
-            display="empty"
-            data-test-subj="obltSigeventsOverviewPageHeaderActions"
-            aria-label={i18n.translate(
-              'xpack.observability.sigeventsOverview.pageHeader.moreActionsAriaLabel',
-              { defaultMessage: 'More actions' }
-            )}
-          />,
-        ],
-        rightSideGroupProps: {
-          responsive: false,
-          alignItems: 'center',
-        },
-        'data-test-subj': 'obltSigeventsOverviewPageTitleHeader',
-      }}
       pageSectionProps={{
         grow: true,
         contentProps: {

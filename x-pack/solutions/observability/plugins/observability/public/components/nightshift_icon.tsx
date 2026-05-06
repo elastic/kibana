@@ -15,34 +15,86 @@ const NIGHTSHIFT_ICON_CLASS = 'nightshiftIcon';
  * Nightshift navigation icon — rendered inside the chrome navigation
  * `kbnChromeNav-iconWrapper`. Uses a brand gradient from blue to purple.
  *
- * When the chrome nav item is selected (`data-highlighted="true"`), the icon
- * wrapper background is swapped to the same accent gradient used by the
- * AgentBuilderNavControlButton (see `useAiButtonGradientStyles` accent variant)
- * so the two AI surfaces stay visually consistent.
+ * The icon wrapper background mirrors the AgentBuilderNavControlButton so the
+ * two AI surfaces stay visually consistent:
+ * - Default (not selected): same gradient as the AiButton "base" variant
+ *   (backgroundLightPrimary -> backgroundLightAssistance) so the entry stays
+ *   visible in the side nav even when not selected.
+ * - Selected (`data-highlighted="true"`): same gradient as the AiButton
+ *   "accent" variant (backgroundFilledPrimary -> backgroundFilledAssistance).
+ *
+ * See `useAiButtonGradientStyles` for the source of these stops.
  */
 export const NightshiftIcon = (props: React.SVGProps<SVGSVGElement>) => {
   const reactId = useId();
   const gradientId = `nightshiftIconGradient-${reactId}`;
   const { euiTheme } = useEuiTheme();
 
-  // Mirrors the AiButton "accent" variant used by AgentBuilderNavControlButton:
-  // diagonal 135deg gradient from backgroundFilledPrimary -> backgroundFilledAssistance
-  // with the same start/end stops as `useAiButtonGradientStyles`.
-  const highlightedIconWrapperBgCss = css`
+  // Mirrors `useAiButtonGradientStyles` (`base` variant, iconOnly):
+  // - rest:  linear-gradient(135deg, backgroundLightPrimary 2.98%, backgroundLightAssistance 66.24%)
+  // - hover: linear-gradient(180deg, backgroundPrimaryHover 18%, backgroundAssistanceHover 83%)
+  //          layered over the rest gradient
+  const baseGradient = `linear-gradient(
+    135deg,
+    ${euiTheme.colors.backgroundLightPrimary} 2.98%,
+    ${euiTheme.colors.backgroundLightAssistance} 66.24%
+  )`;
+  const accentGradient = `linear-gradient(
+    135deg,
+    ${euiTheme.colors.backgroundFilledPrimary} 2.98%,
+    ${euiTheme.colors.backgroundFilledAssistance} 66.24%
+  )`;
+  const hoverOverlayGradient = `linear-gradient(
+    180deg,
+    ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
+    ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
+  )`;
+
+  const iconWrapperBgCss = css`
+    .kbnChromeNav-iconWrapper:has(svg.${NIGHTSHIFT_ICON_CLASS}) {
+      background: ${baseGradient};
+    }
+
+    [data-menu-item]:hover
+      .kbnChromeNav-iconWrapper:has(svg.${NIGHTSHIFT_ICON_CLASS}),
+    [data-menu-item]:focus-visible
+      .kbnChromeNav-iconWrapper:has(svg.${NIGHTSHIFT_ICON_CLASS}) {
+      background: ${hoverOverlayGradient}, ${baseGradient};
+    }
+
     [data-menu-item][data-highlighted='true']
       .kbnChromeNav-iconWrapper:has(svg.${NIGHTSHIFT_ICON_CLASS}) {
-      background: linear-gradient(
-        135deg,
-        ${euiTheme.colors.backgroundFilledPrimary} 2.98%,
-        ${euiTheme.colors.backgroundFilledAssistance} 66.24%
-      );
+      background: ${accentGradient};
     }
 
     [data-menu-item][data-highlighted='true']:hover
+      .kbnChromeNav-iconWrapper:has(svg.${NIGHTSHIFT_ICON_CLASS}),
+    [data-menu-item][data-highlighted='true']:focus-visible
+      .kbnChromeNav-iconWrapper:has(svg.${NIGHTSHIFT_ICON_CLASS}) {
+      background: ${hoverOverlayGradient}, ${accentGradient};
+    }
+
+    /* Neutralise the chrome nav's hover/active ::before overlay so the gradient
+       background remains visible (mirrors the AiButton ::before treatment in
+       useAiButtonGradientStyles). */
+    [data-menu-item]:hover
       .kbnChromeNav-iconWrapper:has(svg.${NIGHTSHIFT_ICON_CLASS})::before,
-    [data-menu-item][data-highlighted='true']:active
+    [data-menu-item]:focus-visible
+      .kbnChromeNav-iconWrapper:has(svg.${NIGHTSHIFT_ICON_CLASS})::before,
+    [data-menu-item]:active
       .kbnChromeNav-iconWrapper:has(svg.${NIGHTSHIFT_ICON_CLASS})::before {
       background-color: transparent;
+    }
+
+    /* Selected: drop the AI gradient on the icon glyph and switch to a flat
+       inverse text color so it reads on the filled accent background — same
+       behaviour as the AiButton 'accent' variant, which uses textInverse for
+       its label/icon (see resolveVariantStyles in useAiButtonGradientStyles). */
+    [data-menu-item][data-highlighted='true']
+      .kbnChromeNav-iconWrapper
+      svg.${NIGHTSHIFT_ICON_CLASS}
+      path {
+      fill: ${euiTheme.colors.textInverse};
     }
   `;
 
@@ -53,31 +105,34 @@ export const NightshiftIcon = (props: React.SVGProps<SVGSVGElement>) => {
 
   return (
     <>
-      <Global styles={highlightedIconWrapperBgCss} />
+      <Global styles={iconWrapperBgCss} />
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="16"
         height="16"
-        viewBox="0 0 16 16"
+        viewBox="0 0 32 32"
         fill="none"
         className={mergedClassName}
         {...rest}
       >
         <path
-          d="M6.01419 7.73856C5.51974 7.73856 5.03639 7.88518 4.62527 8.15989C4.21415 8.43459 3.89371 8.82504 3.7045 9.28185C3.51528 9.73867 3.46577 10.2413 3.56223 10.7263C3.65869 11.2112 3.8968 11.6567 4.24643 12.0063C4.59606 12.356 5.04152 12.5941 5.52647 12.6905C6.01142 12.787 6.51409 12.7375 6.9709 12.5483C7.42772 12.359 7.81816 12.0386 8.09287 11.6275C8.36757 11.2164 8.51419 10.733 8.51419 10.2386C8.51419 9.57552 8.2508 8.93963 7.78196 8.47079C7.31312 8.00195 6.67724 7.73856 6.01419 7.73856ZM6.01419 11.7386C5.71752 11.7386 5.42751 11.6506 5.18084 11.4858C4.93417 11.3209 4.74191 11.0867 4.62837 10.8126C4.51484 10.5385 4.48514 10.2369 4.54302 9.94592C4.60089 9.65495 4.74376 9.38768 4.95353 9.1779C5.16331 8.96812 5.43059 8.82526 5.72156 8.76738C6.01253 8.7095 6.31413 8.73921 6.58822 8.85274C6.86231 8.96627 7.09658 9.15853 7.2614 9.4052C7.42622 9.65188 7.51419 9.94189 7.51419 10.2386C7.51419 10.6364 7.35616 11.0179 7.07485 11.2992C6.79355 11.5805 6.41202 11.7386 6.01419 11.7386ZM13.8679 7.88481C13.9144 7.93125 13.9513 7.98639 13.9765 8.04709C14.0016 8.10779 14.0146 8.17285 14.0146 8.23856C14.0146 8.30427 14.0016 8.36933 13.9765 8.43003C13.9513 8.49073 13.9144 8.54587 13.8679 8.59231L10.8679 11.5923C10.7741 11.6861 10.6469 11.7388 10.5142 11.7388C10.3815 11.7388 10.2543 11.6861 10.1604 11.5923C10.0666 11.4985 10.0139 11.3712 10.0139 11.2386C10.0139 11.1059 10.0666 10.9786 10.1604 10.8848L13.1604 7.88481C13.2069 7.83832 13.262 7.80144 13.3227 7.77628C13.3834 7.75112 13.4485 7.73817 13.5142 7.73817C13.5799 7.73817 13.645 7.75112 13.7057 7.77628C13.7664 7.80144 13.8215 7.83832 13.8679 7.88481ZM10.0142 8.73856C9.91525 8.73864 9.8185 8.70935 9.7362 8.65442C9.65391 8.59948 9.58976 8.52137 9.55188 8.42995C9.51401 8.33854 9.5041 8.23795 9.52343 8.14091C9.54276 8.04386 9.59044 7.95474 9.66044 7.88481L11.1604 6.38481C11.2069 6.33835 11.262 6.3015 11.3227 6.27636C11.3834 6.25122 11.4485 6.23828 11.5142 6.23828C11.5799 6.23828 11.6449 6.25122 11.7056 6.27636C11.7663 6.3015 11.8215 6.33835 11.8679 6.38481C11.9144 6.43126 11.9512 6.48641 11.9764 6.54711C12.0015 6.60781 12.0145 6.67286 12.0145 6.73856C12.0145 6.80426 12.0015 6.86931 11.9764 6.93001C11.9512 6.9907 11.9144 7.04585 11.8679 7.09231L10.3679 8.59231C10.3215 8.63873 10.2663 8.67553 10.2056 8.70063C10.1449 8.72572 10.0799 8.73861 10.0142 8.73856ZM14.3679 4.59231L13.3679 5.59231C13.2741 5.68613 13.1469 5.73884 13.0142 5.73884C12.8815 5.73884 12.7543 5.68613 12.6604 5.59231C12.5666 5.49849 12.5139 5.37124 12.5139 5.23856C12.5139 5.10588 12.5666 4.97863 12.6604 4.88481L13.6604 3.88481C13.7069 3.83835 13.762 3.8015 13.8227 3.77636C13.8834 3.75122 13.9485 3.73828 14.0142 3.73828C14.0799 3.73828 14.1449 3.75122 14.2056 3.77636C14.2663 3.8015 14.3215 3.83835 14.3679 3.88481C14.4144 3.93126 14.4512 3.98641 14.4764 4.04711C14.5015 4.10781 14.5145 4.17286 14.5145 4.23856C14.5145 4.30426 14.5015 4.36931 14.4764 4.43001C14.4512 4.4907 14.4144 4.54585 14.3679 4.59231ZM7.66044 5.88481L12.1604 1.38481C12.2069 1.33835 12.262 1.3015 12.3227 1.27636C12.3834 1.25122 12.4485 1.23828 12.5142 1.23828C12.5799 1.23828 12.6449 1.25122 12.7056 1.27636C12.7663 1.3015 12.8215 1.33835 12.8679 1.38481C12.9144 1.43126 12.9512 1.48641 12.9764 1.54711C13.0015 1.60781 13.0145 1.67286 13.0145 1.73856C13.0145 1.80426 13.0015 1.86931 12.9764 1.93001C12.9512 1.9907 12.9144 2.04585 12.8679 2.09231L8.36794 6.59231C8.27412 6.68613 8.14688 6.73884 8.01419 6.73884C7.88151 6.73884 7.75426 6.68613 7.66044 6.59231C7.56662 6.49849 7.51392 6.37124 7.51392 6.23856C7.51392 6.10588 7.56662 5.97863 7.66044 5.88481ZM9.19607 12.7136C9.28977 12.8073 9.3424 12.9344 9.3424 13.067C9.3424 13.1995 9.28977 13.3267 9.19607 13.4204C8.77946 13.8439 8.28313 14.1807 7.73572 14.4113C7.1883 14.642 6.60063 14.762 6.0066 14.7644C5.41258 14.7669 4.82395 14.6516 4.27467 14.4254C3.7254 14.1992 3.22634 13.8665 2.8063 13.4465C2.38626 13.0264 2.05353 12.5274 1.82733 11.9781C1.60112 11.4288 1.4859 10.8402 1.48832 10.2461C1.49074 9.65212 1.61074 9.06445 1.84142 8.51704C2.07209 7.96962 2.40887 7.47329 2.83232 7.05668L8.00357 1.88481C8.05002 1.83835 8.10517 1.8015 8.16587 1.77636C8.22657 1.75122 8.29162 1.73828 8.35732 1.73828C8.42302 1.73828 8.48807 1.75122 8.54877 1.77636C8.60946 1.8015 8.66461 1.83835 8.71107 1.88481C8.75752 1.93126 8.79437 1.98641 8.81952 2.04711C8.84466 2.10781 8.8576 2.17286 8.8576 2.23856C8.8576 2.30426 8.84466 2.36931 8.81952 2.43001C8.79437 2.4907 8.75752 2.54585 8.71107 2.59231L3.53919 7.76356C2.88278 8.41997 2.51402 9.31025 2.51402 10.2386C2.51402 11.1669 2.88278 12.0571 3.53919 12.7136C4.19561 13.37 5.08589 13.7387 6.01419 13.7387C6.9425 13.7387 7.83278 13.37 8.48919 12.7136C8.58295 12.6199 8.71008 12.5672 8.84263 12.5672C8.97518 12.5672 9.10231 12.6199 9.19607 12.7136Z"
+          d="M30.0003 12C30.0003 12.2652 29.8949 12.5196 29.7074 12.7071C29.5198 12.8946 29.2655 13 29.0003 13H27.0003V15C27.0003 15.2652 26.8949 15.5196 26.7074 15.7071C26.5198 15.8946 26.2655 16 26.0003 16C25.735 16 25.4807 15.8946 25.2931 15.7071C25.1056 15.5196 25.0003 15.2652 25.0003 15V13H23.0003C22.735 13 22.4807 12.8946 22.2931 12.7071C22.1056 12.5196 22.0003 12.2652 22.0003 12C22.0003 11.7348 22.1056 11.4804 22.2931 11.2929C22.4807 11.1054 22.735 11 23.0003 11H25.0003V9C25.0003 8.73478 25.1056 8.48043 25.2931 8.29289C25.4807 8.10536 25.735 8 26.0003 8C26.2655 8 26.5198 8.10536 26.7074 8.29289C26.8949 8.48043 27.0003 8.73478 27.0003 9V11H29.0003C29.2655 11 29.5198 11.1054 29.7074 11.2929C29.8949 11.4804 30.0003 11.7348 30.0003 12ZM18.0003 7H19.0003V8C19.0003 8.26522 19.1056 8.51957 19.2931 8.70711C19.4807 8.89464 19.735 9 20.0003 9C20.2655 9 20.5198 8.89464 20.7074 8.70711C20.8949 8.51957 21.0003 8.26522 21.0003 8V7H22.0003C22.2655 7 22.5198 6.89464 22.7074 6.70711C22.8949 6.51957 23.0003 6.26522 23.0003 6C23.0003 5.73478 22.8949 5.48043 22.7074 5.29289C22.5198 5.10536 22.2655 5 22.0003 5H21.0003V4C21.0003 3.73478 20.8949 3.48043 20.7074 3.29289C20.5198 3.10536 20.2655 3 20.0003 3C19.735 3 19.4807 3.10536 19.2931 3.29289C19.1056 3.48043 19.0003 3.73478 19.0003 4V5H18.0003C17.735 5 17.4807 5.10536 17.2931 5.29289C17.1056 5.48043 17.0003 5.73478 17.0003 6C17.0003 6.26522 17.1056 6.51957 17.2931 6.70711C17.4807 6.89464 17.735 7 18.0003 7ZM27.0965 19.125C27.2129 19.2605 27.2909 19.4248 27.3223 19.6006C27.3538 19.7765 27.3375 19.9575 27.2753 20.125C26.5814 22.0174 25.422 23.7045 23.9041 25.0306C22.3862 26.3568 20.5588 27.2792 18.5904 27.7128C16.622 28.1464 14.5761 28.0773 12.6415 27.5117C10.7069 26.9461 8.94593 25.9023 7.5211 24.4767C6.09627 23.051 5.05349 21.2895 4.48901 19.3546C3.92452 17.4196 3.8565 15.3737 4.29124 13.4055C4.72598 11.4374 5.64947 9.61048 6.97647 8.09336C8.30347 6.57624 9.99124 5.41782 11.884 4.725C12.0506 4.66399 12.2304 4.64839 12.405 4.67982C12.5797 4.71125 12.7428 4.78857 12.8776 4.90384C13.0125 5.01911 13.1143 5.16819 13.1725 5.33578C13.2307 5.50337 13.2433 5.68343 13.209 5.8575C12.8586 7.63121 12.9504 9.46393 13.4763 11.1937C14.0023 12.9235 14.9462 14.4972 16.2246 15.7756C17.5031 17.0541 19.0767 17.998 20.8065 18.5239C22.5363 19.0499 24.369 19.1417 26.1428 18.7913C26.317 18.7572 26.4973 18.7701 26.6649 18.8288C26.8325 18.8875 26.9815 18.9897 27.0965 19.125ZM24.6728 20.985C24.449 20.9963 24.224 21.0025 24.0003 21.0025C20.5531 20.9989 17.2483 19.6277 14.811 17.19C12.3738 14.7523 11.0032 11.4471 11.0003 8C11.0003 7.77625 11.0003 7.55125 11.0178 7.3275C9.68724 8.09314 8.55085 9.15482 7.69663 10.4303C6.84241 11.7057 6.2933 13.1607 6.09184 14.6825C5.89038 16.2044 6.04199 17.7521 6.5349 19.2059C7.02782 20.6597 7.84882 21.9805 8.93429 23.066C10.0198 24.1514 11.3406 24.9724 12.7943 25.4654C14.2481 25.9583 15.7959 26.1099 17.3177 25.9084C18.8395 25.707 20.2945 25.1578 21.57 24.3036C22.8454 23.4494 23.9071 22.313 24.6728 20.9825V20.985Z"
           fill={`url(#${gradientId})`}
         />
         <defs>
+          {/* Mirrors `SvgAiGradientDefs` (used by AiButton `base` variant icons):
+              same direction and stop offsets, scaled 2x for the 32x32 viewBox,
+              and using the same theme tokens (`textPrimary` -> `textAssistance`). */}
           <linearGradient
             id={gradientId}
-            x1="0.0635416"
-            y1="-0.875186"
-            x2="13.7782"
-            y2="10.5406"
+            x1="-1"
+            y1="-5"
+            x2="31"
+            y2="19"
             gradientUnits="userSpaceOnUse"
           >
-            <stop offset="0.168292" stopColor="#1750BA" />
-            <stop offset="0.83" stopColor="#6B3C9F" />
+            <stop offset="16%" stopColor={euiTheme.colors.textPrimary} />
+            <stop offset="83%" stopColor={euiTheme.colors.textAssistance} />
           </linearGradient>
         </defs>
       </svg>
