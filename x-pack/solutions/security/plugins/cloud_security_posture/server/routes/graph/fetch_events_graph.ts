@@ -302,11 +302,14 @@ const buildPinnedEsql = (pinnedIds?: string[]): string => {
 
   const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
 
+  // Final branch uses TO_STRING(null) (not bare null) to give the CASE result an explicit
+  // string type, matching the empty-pinnedIds path above. Bare null in the else branch has
+  // surfaced as an ES|QL planner NPE ("nullExpressions is null") on certain query plans.
   return `| EVAL pinned = CASE(
     _id IN (${pinnedParamsStr}), _id,
     actorEntityId IN (${pinnedParamsStr}), actorEntityId,
     targetEntityId IN (${pinnedParamsStr}), targetEntityId,
-    null
+    TO_STRING(null)
   )`;
 };
 

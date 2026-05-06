@@ -879,12 +879,11 @@ describe('GraphInvestigation Component', () => {
       await showActionsByNode(container, entityIdFilter);
       const queryInput = getByTestId('queryInput');
       await userEvent.type(queryInput, 'host1');
-      const querySubmitBtn = getByTestId('querySubmitButton');
-      querySubmitBtn.click();
-      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+      await userEvent.click(getByTestId('querySubmitButton'));
+      await userEvent.click(getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID));
 
       // Assert
-      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      await waitFor(() => expect(onInvestigateInTimeline).toHaveBeenCalled());
       // Query should remain unchanged since there are no originEventIds to add
       expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
         query: 'host1',
