@@ -9,6 +9,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import { execFileSync } from 'child_process';
 import {
   rspack,
   type RuleSetRule,
@@ -18,6 +19,25 @@ import {
 import { getSharedConfig } from '@kbn/transpiler-config';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import type { ThemeTag } from '../types';
+
+/**
+ * Resolve the tsconfig file rspack should use for `paths`-based module resolution.
+ *
+ * `tsconfig.base.json` includes a few `.d.ts` path mappings (axios, @langchain/core)
+ * that exist solely to make TypeScript declaration emit work; they break bundlers.
+ * `tsconfig.runtime.json` is a generated copy with those mappings stripped — use it
+ * here so rspack resolves these packages via `node_modules` like any other dependency.
+ *
+ * Auto-generates the runtime tsconfig if missing so a fresh checkout still builds.
+ */
+function resolveRuntimeTsConfig(repoRoot: string): string {
+  const runtime = Path.resolve(repoRoot, 'tsconfig.runtime.json');
+  const generator = Path.resolve(repoRoot, 'scripts', 'generate_tsconfig_runtime.js');
+  if (!Fs.existsSync(runtime) && Fs.existsSync(generator)) {
+    execFileSync(process.execPath, [generator], { cwd: repoRoot, stdio: 'inherit' });
+  }
+  return Fs.existsSync(runtime) ? runtime : Path.resolve(repoRoot, 'tsconfig.base.json');
+}
 
 /**
  * Shared resolve configuration for all RSPack builds.
@@ -46,7 +66,7 @@ export function getSharedResolveConfig(repoRoot: string): Configuration['resolve
         require.resolve('punycode'),
       ],
     },
-    tsConfig: Path.resolve(repoRoot, 'tsconfig.base.json'),
+    tsConfig: resolveRuntimeTsConfig(repoRoot),
   };
 }
 

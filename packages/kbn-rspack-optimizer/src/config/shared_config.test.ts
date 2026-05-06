@@ -76,8 +76,10 @@ describe('shared_config', () => {
       ]);
     });
 
-    it('should reference tsconfig.base.json', () => {
-      expect(resolveConfig.tsConfig).toBe(Path.resolve(REPO_ROOT, 'tsconfig.base.json'));
+    it('should reference the generated tsconfig.runtime.json (or fall back to tsconfig.base.json)', () => {
+      const runtime = Path.resolve(REPO_ROOT, 'tsconfig.runtime.json');
+      const base = Path.resolve(REPO_ROOT, 'tsconfig.base.json');
+      expect([runtime, base]).toContain(resolveConfig.tsConfig);
     });
   });
 
