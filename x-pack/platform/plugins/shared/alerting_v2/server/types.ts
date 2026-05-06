@@ -22,6 +22,10 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
@@ -41,6 +45,7 @@ export interface AlertingServerSetupDependencies {
   spaces: SpacesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   eventLog: IEventLogService;
   usageCollection?: UsageCollectionSetup;
   agentBuilder?: AgentBuilderPluginSetup;
@@ -55,4 +60,5 @@ export interface AlertingServerStartDependencies {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   eventLog: IEventLogClientService;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
