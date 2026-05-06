@@ -547,7 +547,11 @@ ${buildEnrichedEntityFieldsEsql()}
   }
 | EVAL isOriginAlert = ${
     originAlertIds.length > 0
-      ? `COALESCE(isOrigin AND event.id in (${originAlertIds
+      ? // COALESCE wraps just the IN so AND sees two guaranteed-non-null booleans.
+        // Wrapping the whole AND-IN expression has surfaced as an ES|QL planner
+        // illegal_state ("PropagateNullable: notNullExpressions is null", ES #141579)
+        // when event.id is null in the input rows.
+        `isOrigin AND COALESCE(event.id in (${originAlertIds
           .map((_id, idx) => `?og_alrt_id${idx}`)
           .join(', ')}), false)`
       : 'false'
