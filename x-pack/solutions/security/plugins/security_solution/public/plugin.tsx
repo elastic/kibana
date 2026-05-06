@@ -74,11 +74,11 @@ import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
-import { registerRuleAttachment } from './agent_builder/attachment_types/rule';
 import {
   registerAttachmentUiDefinitions,
   registerEntityAnalyticsDashboardAttachment,
   registerEntityAttachment,
+  registerRuleAttachment,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
