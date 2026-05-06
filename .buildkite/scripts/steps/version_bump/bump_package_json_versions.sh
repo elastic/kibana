@@ -49,6 +49,7 @@ delete_baseline_archives() {
 }
 
 run_tests() {
+  echo --- Running integration tests to update snapshots
   node scripts/jest_integration.js -u src/core/server/integration_tests/saved_objects/migrations/group1/v2_migration.test.ts
 
   local test_file="src/core/server/integration_tests/saved_objects/migrations/group1/create_test_archives.test.ts"
@@ -56,7 +57,7 @@ run_tests() {
   sed -i "s/describe\.skip(/describe(/" "$test_file"
   local exit_code=0
 
-  # node scripts/jest_integration.js -u "$test_file" || exit_code=$?
+  node scripts/jest_integration.js -u "$test_file" || exit_code=$?
 
   sed -i "s/describe(/describe.skip(/" "$test_file"
   return "$exit_code"
