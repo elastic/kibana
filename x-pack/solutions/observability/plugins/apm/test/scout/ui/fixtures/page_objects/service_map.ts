@@ -27,6 +27,14 @@ export class ServiceMapPage {
   public serviceMapFocusMapButton: Locator;
   public serviceMapDependencyDetailsButton: Locator;
   public serviceMapEdgeExploreTracesButton: Locator;
+  public serviceMapOptionsPanel: Locator;
+  public serviceMapFindInPageInput: Locator;
+  /**
+   * Native search `<input>` (`SERVICE_MAP_FIND_INPUT_ID`). Prefer this for fill/focus so React
+   * `onFocus` runs and find highlights sync (`service_map_find_in_page` gates on `isFocused`).
+   */
+  public serviceMapFindInPageNativeInput: Locator;
+  public serviceMapFindMatchSummary: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.serviceMap = page.testSubj.locator('serviceMap');
@@ -52,9 +60,10 @@ export class ServiceMapPage {
     this.serviceMapEdgeExploreTracesButton = page.testSubj.locator(
       'apmEdgeContentsOpenInDiscoverButton'
     );
+    this.serviceMapOptionsPanel = page.testSubj.locator('serviceMapOptionsPanel');
+    this.serviceMapFindMatchSummary = page.testSubj.locator('serviceMapFindMatchSummary');
   }
 
-  async gotoWithDateSelected(start: string, end: string, options?: { kuery?: string }) {
     const params = new URLSearchParams({
       rangeFrom: start,
       rangeTo: end,
@@ -181,6 +190,15 @@ export class ServiceMapPage {
   /** Wrapper for a service node (icon, badges row, label). `data.id` on the map matches the service name in tests. */
   getServiceNodeRoot(serviceName: string) {
     return this.serviceMapGraph.getByTestId(`serviceMapNode-service-${serviceName}`);
+  }
+
+  /**
+   * Highlight frame around the active find-in-page match (`HighlightWrapper` when `isActiveSearchMatch`).
+   */
+  getActiveFindMatchHighlightFrame(serviceName: string) {
+    return this.getServiceNodeRoot(serviceName).locator(
+      'xpath=ancestor::*[@data-test-subj="serviceMapNodeSearchHighlightFrame"][1]'
+    );
   }
 
   /**
