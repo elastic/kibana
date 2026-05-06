@@ -57,6 +57,7 @@ import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
+import type { RulesClientCreateOptions } from './rules_client_factory';
 import {
   RulesSettingsClientFactory,
   RulesSettingsService,
@@ -177,14 +178,18 @@ export interface AlertingServerStart {
   getAllTypes: RuleTypeRegistry['getAllTypes'];
   getType: RuleTypeRegistry['get'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
-  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
+  getRulesClientWithRequest(
+    request: KibanaRequest,
+    options?: RulesClientCreateOptions
+  ): Promise<RulesClientApi>;
   /**
    * Creates a RulesClient that is bound to the provided spaceId (namespace) while preserving
    * the original request (and its auth context).
    */
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string
+    spaceId: string,
+    options?: RulesClientCreateOptions
   ): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
@@ -654,7 +659,10 @@ export class AlertingPlugin {
       features: plugins.features,
     });
 
-    changeTrackingService?.initialize(core.elasticsearch.client.asInternalUser);
+    changeTrackingService?.initialize({
+      elasticsearchClient: core.elasticsearch.client.asInternalUser,
+      authService: core.security.authc,
+    });
 
     rulesClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
@@ -698,22 +706,29 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
     });
 
-    const getRulesClientWithRequest = async (request: KibanaRequest) => {
+    const getRulesClientWithRequest = async (
+      request: KibanaRequest,
+      options?: RulesClientCreateOptions
+    ) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
           `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
-      return rulesClientFactory!.create(request, core.savedObjects);
+      return rulesClientFactory!.create(request, core.savedObjects, options);
     };
 
-    const getRulesClientWithRequestInSpace = async (request: KibanaRequest, spaceId: string) => {
+    const getRulesClientWithRequestInSpace = async (
+      request: KibanaRequest,
+      spaceId: string,
+      options?: RulesClientCreateOptions
+    ) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
           `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
-      return rulesClientFactory!.createWithSpaceId(request, core.savedObjects, spaceId);
+      return rulesClientFactory!.createWithSpaceId(request, core.savedObjects, spaceId, options);
     };
 
     this.getRulesClientWithRequest = getRulesClientWithRequest;

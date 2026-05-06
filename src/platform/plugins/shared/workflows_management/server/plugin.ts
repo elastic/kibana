@@ -39,7 +39,7 @@ import {
 import { WorkflowsManagementFeatureConfig } from './features';
 import { WorkflowsAiTelemetryClient } from './telemetry/workflows_ai_telemetry_client';
 import type {
-  AgentBuilderPluginSetupContract,
+  AgentBuilderPluginSetup,
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
   WorkflowsServerPluginSetupDeps,
@@ -155,7 +155,7 @@ export class WorkflowsPlugin
     aiTelemetryClient: WorkflowsAiTelemetryClient
   ): void {
     void core.plugins
-      .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
+      .onSetup<{ agentBuilder: AgentBuilderPluginSetup }>('agentBuilder')
       .then(({ agentBuilder }) => {
         if (agentBuilder.found) {
           this.logger.debug(

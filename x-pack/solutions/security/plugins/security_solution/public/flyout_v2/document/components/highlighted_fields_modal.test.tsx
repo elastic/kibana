@@ -32,7 +32,7 @@ jest.mock(
 jest.mock('../../../detection_engine/rule_creation_ui/pages/form');
 jest.mock('../../../detection_engine/rule_management/logic/use_update_rule');
 jest.mock('../hooks/use_highlighted_fields');
-jest.mock('../../../flyout/rule_details/hooks/use_rule_details');
+jest.mock('../../rule/hooks/use_rule_details');
 
 const mockAddSuccess = jest.fn();
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
