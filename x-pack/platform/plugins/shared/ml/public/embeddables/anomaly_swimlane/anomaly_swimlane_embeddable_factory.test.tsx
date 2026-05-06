@@ -33,9 +33,9 @@ const mockResponse = of([
   },
 ]);
 
-jest.mock('../ensure_license', () => {
+jest.mock('../../../common/license/ml_license', () => {
   return {
-    ensureLicense: jest.fn(),
+    ensureMlAvailable: jest.fn(),
   };
 });
 

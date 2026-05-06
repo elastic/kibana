@@ -26,6 +26,9 @@ export interface EntitiesGroupingAggregation {
   resolutionRiskScore?: {
     value: number | null;
   };
+  bucketRiskScore?: {
+    value: number | null;
+  };
 }
 
 export interface TargetEntityMetadata {
