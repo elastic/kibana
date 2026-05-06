@@ -28,19 +28,25 @@ describe('criteria evaluator system prompt', () => {
   });
 
   it('includes a worked example showing PASS when a tool was called but returned no data', () => {
-    expect(systemPrompt).toMatch(/not found|no entity found|returned ["']?not found["']?|ENOENT|no such file/i);
+    expect(systemPrompt).toMatch(
+      /not found|no entity found|returned ["']?not found["']?|ENOENT|no such file/i
+    );
     expect(systemPrompt).toMatch(/PASS/);
   });
 
   it('instructs the judge to treat disjunctive ("OR") criteria as satisfied by either branch', () => {
     expect(systemPrompt).toMatch(/disjunctive/i);
-    expect(systemPrompt).toMatch(/either branch is sufficient|satisfying\s+\*?\*?either\*?\*?\s+branch|\beither\s+branch\b/i);
+    expect(systemPrompt).toMatch(
+      /either branch is sufficient|satisfying\s+\*?\*?either\*?\*?\s+branch|\beither\s+branch\b/i
+    );
     expect(systemPrompt).toMatch(/do not (require both|treat the unfulfilled branch)/i);
   });
 
   it('includes a worked example for a disjunctive criterion satisfied by the second branch', () => {
     expect(systemPrompt).toMatch(/Worked example B|disjunctive criterion/i);
-    expect(systemPrompt).toMatch(/clearly state (that )?no .* (data )?is (not )?available|no login data is available/i);
+    expect(systemPrompt).toMatch(
+      /clearly state (that )?no .* (data )?is (not )?available|no login data is available/i
+    );
   });
 
   it('explains that conjunctive ("AND") criteria require both parts to hold', () => {
