@@ -9,6 +9,7 @@ import { EntityType } from '../../../../common/search_strategy';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildRiskScoreBucket,
+  getBaseScoreESQL,
   getESQL,
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
@@ -99,6 +100,37 @@ describe('Calculate risk scores with ESQL', () => {
           1000,
           '.alerts-security.alerts-default',
           '.entity_analytics.risk_score.lookup-default'
+        )
+      ).toThrow('Entity ID contains an unsupported control character');
+    });
+
+    it('escapes quote and backslash characters in getBaseScoreESQL bounds', () => {
+      const query = getBaseScoreESQL(
+        EntityType.host,
+        { lower: 'host:edge"with-quote', upper: 'host:edge\\with-slash' },
+        10000,
+        3500,
+        '.alerts-security.alerts-default'
+      );
+
+      expect(query).toContain('entity_id > "host:edge\\"with-quote"');
+      expect(query).toContain('entity_id <= "host:edge\\\\with-slash"');
+    });
+
+    it.each([
+      ['NUL', '\u0000'],
+      ['LF', '\u000A'],
+      ['CR', '\u000D'],
+      ['LS', '\u2028'],
+      ['PS', '\u2029'],
+    ])('throws when getBaseScoreESQL bounds contain %s control character', (_label, char) => {
+      expect(() =>
+        getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:abel', upper: `host:bad${char}` },
+          10000,
+          3500,
+          '.alerts-security.alerts-default'
         )
       ).toThrow('Entity ID contains an unsupported control character');
     });

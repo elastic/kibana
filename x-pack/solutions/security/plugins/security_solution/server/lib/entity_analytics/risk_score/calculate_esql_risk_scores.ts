@@ -543,8 +543,20 @@ export const getBaseScoreESQL = (
     throw new Error('Either lower or upper bound must be provided for EUID pagination');
   }
 
-  const lower = bounds.lower ? `entity_id > "${bounds.lower}"` : undefined;
-  const upper = bounds.upper ? `entity_id <= "${bounds.upper}"` : undefined;
+  // Bounds come from composite-agg bucket keys derived from alert fields
+  // (host.id, user.name, ...) and may contain quotes, backslashes, or
+  // unsupported control characters. Validate + escape before interpolating
+  // into the double-quoted ES|QL literal — same pattern as
+  // getResolutionScoreESQLByIds.
+  const boundsToValidate = [bounds.lower, bounds.upper].filter(
+    (value): value is string => value !== undefined
+  );
+  assertEsqlInterpolatableIds(boundsToValidate);
+
+  const lower = bounds.lower ? `entity_id > "${escapeEsqlStringLiteral(bounds.lower)}"` : undefined;
+  const upper = bounds.upper
+    ? `entity_id <= "${escapeEsqlStringLiteral(bounds.upper)}"`
+    : undefined;
   const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
 
   // Filter on entity_id (computed from cheap field evals) BEFORE the
