@@ -29,8 +29,9 @@
  *   a leading ./.
  *
  * Exit codes:
- *   0 — DEAD (no importer found)
- *   1 — ALIVE (one or more importers; printed to stdout)
+ *   0 — DEAD (no real importer; either no references at all, or only jest.mock()
+ *       strings — those mock blocks are orphaned and should be removed too)
+ *   1 — ALIVE (one or more real importers; printed to stdout)
  *   2 — usage / setup error
  */
 
@@ -126,7 +127,8 @@ const DYNAMIC_IMPORT = /import\s*\(\s*['"]([^'"\n]+)['"]\s*\)/g;
 const REQUIRE = /require\s*\(\s*['"]([^'"\n]+)['"]\s*\)/g;
 const JEST_MOCK = /jest\.mock\s*\(\s*['"]([^'"\n]+)['"]/g;
 
-const importers = new Set();
+const realImporters = new Set();
+const jestMockOnly = new Set();
 
 for (const file of allFiles) {
   if (file === candidate) continue; // skip self
@@ -137,28 +139,57 @@ for (const file of allFiles) {
     continue;
   }
 
-  for (const rx of [STATIC_IMPORT, DYNAMIC_IMPORT, REQUIRE, JEST_MOCK]) {
+  let realHit = false;
+  let mockHit = false;
+  for (const rx of [STATIC_IMPORT, DYNAMIC_IMPORT, REQUIRE]) {
     rx.lastIndex = 0;
     let m;
     while ((m = rx.exec(src)) !== null) {
-      const spec = m[1];
-      const resolved = resolveSpec(spec, file);
-      if (resolved === candidate) {
-        importers.add(file);
+      if (resolveSpec(m[1], file) === candidate) {
+        realHit = true;
         break;
       }
     }
+    if (realHit) break;
   }
+  JEST_MOCK.lastIndex = 0;
+  let m;
+  while ((m = JEST_MOCK.exec(src)) !== null) {
+    if (resolveSpec(m[1], file) === candidate) {
+      mockHit = true;
+      break;
+    }
+  }
+
+  if (realHit) realImporters.add(file);
+  else if (mockHit) jestMockOnly.add(file);
 }
 
-if (importers.size === 0) {
+if (realImporters.size === 0 && jestMockOnly.size === 0) {
   console.log(`DEAD: ${relative(REPO_ROOT, candidate)}`);
   process.exit(0);
 }
 
+if (realImporters.size === 0) {
+  // Only jest.mock() string references — file is dead, the mocks are orphaned.
+  // Delete the file AND remove the orphan jest.mock blocks from these tests.
+  console.log(`DEAD (jest.mock-only): ${relative(REPO_ROOT, candidate)}`);
+  console.log(`Orphaned jest.mock in (${jestMockOnly.size}):`);
+  for (const f of [...jestMockOnly].sort()) {
+    console.log(`  ${relative(REPO_ROOT, f)}`);
+  }
+  process.exit(0);
+}
+
 console.log(`ALIVE: ${relative(REPO_ROOT, candidate)}`);
-console.log(`Importers (${importers.size}):`);
-for (const f of [...importers].sort()) {
+console.log(`Importers (${realImporters.size}):`);
+for (const f of [...realImporters].sort()) {
   console.log(`  ${relative(REPO_ROOT, f)}`);
+}
+if (jestMockOnly.size > 0) {
+  console.log(`Also referenced by jest.mock in (${jestMockOnly.size}):`);
+  for (const f of [...jestMockOnly].sort()) {
+    console.log(`  ${relative(REPO_ROOT, f)}`);
+  }
 }
 process.exit(1);

@@ -134,6 +134,13 @@ b. **Resolve-aware import scan** — run:
    package-id deep imports — both are invisible to plain `import` parsing but caught
    here.
 
+   **`jest.mock`-only is dead.** If the only references are `jest.mock()` strings — no
+   real `import`/`require` from production code — the file is dead and the mock is
+   orphaned (it's mocking something nothing under test imports). The verifier reports
+   this as `DEAD (jest.mock-only)` and lists the orphan test files. Delete the source
+   file AND remove the orphan `jest.mock(...)` blocks from each listed test in the
+   same commit.
+
    If a match comes from an **external package**, STOP and skip — Kibana convention
    forbids cross-package deep imports, so this is a real bug. Open a follow-up issue
    against the owning team rather than deleting. Tells: a comment like
