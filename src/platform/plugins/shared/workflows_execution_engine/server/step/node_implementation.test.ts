@@ -28,6 +28,7 @@ const createStepExecutionRuntime = (overrides: Record<string, unknown> = {}) => 
   finishStep: jest.fn(),
   failStep: jest.fn(),
   setInput: jest.fn(),
+  recordOutputSize: jest.fn(),
   stepExecutionId: 'step-exec-1',
   node: { configuration: {} },
   workflowExecution: { workflowDefinition: {} },

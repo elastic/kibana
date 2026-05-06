@@ -21,7 +21,7 @@ import {
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
-import { extractReferencedStepIds } from './extract_referenced_step_ids';
+import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -34,6 +34,7 @@ export interface ContextManagerInit {
   templateEngine: WorkflowTemplatingEngine;
   workflowExecutionGraph: WorkflowGraph;
   workflowExecutionState: WorkflowExecutionState;
+  stepIoService: StepIoService;
   node: GraphNodeUnion;
   stackFrames: StackFrame[];
   // New properties for internal actions
@@ -54,6 +55,7 @@ type ContextPath = ContextPathSegment[];
 export class WorkflowContextManager {
   private workflowExecutionGraph: WorkflowGraph;
   private workflowExecutionState: WorkflowExecutionState;
+  private stepIoService: StepIoService;
   private esClient: ElasticsearchClient;
   private templateEngine: WorkflowTemplatingEngine;
   private fakeRequest: KibanaRequest;
@@ -85,6 +87,7 @@ export class WorkflowContextManager {
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionState = init.workflowExecutionState;
+    this.stepIoService = init.stepIoService;
     this.esClient = init.esClient;
     this.fakeRequest = init.fakeRequest;
     this.coreStart = init.coreStart;
@@ -104,50 +107,10 @@ export class WorkflowContextManager {
    * zero overhead.
    */
   public async ensureContextReady(): Promise<void> {
-    if (!this.workflowExecutionState.hasEvictedOutputs()) {
-      return;
-    }
-
-    const neededIds = new Set<string>();
-    const executionId = this.workflowExecutionState.getWorkflowExecution().id;
-
-    // 1. Predecessors — use static template analysis to rehydrate only the step
-    //    outputs actually referenced by this node's expressions. Falls back to
-    //    all predecessors when analysis is ambiguous (dynamic bracket access, etc.).
-    const referencedStepIds = extractReferencedStepIds(this.node);
-
-    if (referencedStepIds === null) {
-      // Fallback: rehydrate all predecessors
-      for (const pred of this.predecessors) {
-        const latestExec = this.workflowExecutionState.getLatestStepExecution(pred.stepId);
-        if (latestExec) {
-          neededIds.add(latestExec.id);
-        }
-      }
-    } else {
-      // Targeted: rehydrate only the step IDs found in template expressions
-      for (const stepId of referencedStepIds) {
-        const latestExec = this.workflowExecutionState.getLatestStepExecution(stepId);
-        if (latestExec) {
-          neededIds.add(latestExec.id);
-        }
-      }
-    }
-
-    // 2. Scope stack entries (needed by enrichStepContextAccordingToStepScope)
-    let currentScope = WorkflowScopeStack.fromStackFrames(
-      this.workflowExecutionState.getWorkflowExecution().scopeStack
-    );
-    while (!currentScope.isEmpty()) {
-      const frame = currentScope.getCurrentScope();
-      currentScope = currentScope.exitScope();
-      neededIds.add(buildStepExecutionId(executionId, frame.stepId, currentScope.stackFrames));
-    }
-
-    // data.set outputs are pinned (never evicted by evictCompletedStepOutputs),
-    // so they do not need rehydration here.
-
-    await this.workflowExecutionState.rehydrateOutputs(Array.from(neededIds));
+    await this.stepIoService.prepareForRead({
+      node: this.node,
+      predecessorsResolver: () => this.predecessors,
+    });
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work

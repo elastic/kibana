@@ -20,6 +20,7 @@ import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
 import { WorkflowTemplatingEngine } from '../../templating_engine';
+import type { StepIoService } from '../step_io_service';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
@@ -195,12 +196,18 @@ const createBroaderSurfaceContainer = () => {
     return actualRender(obj, context);
   });
 
+  const stepIoService = {
+    hasEvictedOutputs: jest.fn().mockReturnValue(false),
+    prepareForRead: jest.fn().mockResolvedValue(undefined),
+  } as unknown as StepIoService;
+
   const contextManager = new WorkflowContextManager({
     templateEngine: templatingEngine,
     node,
     stackFrames: [],
     workflowExecutionGraph,
     workflowExecutionState,
+    stepIoService,
     esClient,
     dependencies,
     fakeRequest: {} as KibanaRequest,

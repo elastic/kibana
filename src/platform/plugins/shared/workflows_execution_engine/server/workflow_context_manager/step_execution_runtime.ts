@@ -12,6 +12,7 @@ import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import type { StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -23,6 +24,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
   workflowExecutionState: WorkflowExecutionState;
+  stepIoService: StepIoService;
   workflowExecutionGraph: WorkflowGraph;
   stepLogger: IWorkflowEventLogger;
   stepExecutionId: string;
@@ -51,6 +53,7 @@ interface StepExecutionRuntimeInit {
  */
 export class StepExecutionRuntime {
   private workflowExecutionState: WorkflowExecutionState;
+  private stepIoService: StepIoService;
   private workflowGraph: WorkflowGraph;
   private stackFrames: StackFrame[];
 
@@ -99,6 +102,7 @@ export class StepExecutionRuntime {
     // Use workflow execution ID as traceId for APM compatibility
     this.stepLogger = stepExecutionRuntimeInit.stepLogger;
     this.workflowExecutionState = stepExecutionRuntimeInit.workflowExecutionState;
+    this.stepIoService = stepExecutionRuntimeInit.stepIoService;
     this.node = stepExecutionRuntimeInit.node;
     this.stepExecutionId = stepExecutionRuntimeInit.stepExecutionId;
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
@@ -153,34 +157,33 @@ export class StepExecutionRuntime {
   }
 
   public setInput(input: Record<string, unknown>): void {
-    this.workflowExecutionState.upsertStep({
-      id: this.stepExecutionId,
-      input: input as JsonValue,
-    });
+    this.stepIoService.setStepInput(this.stepExecutionId, input as JsonValue);
   }
 
   public finishStep(stepOutput?: unknown): void {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
-    const stepExecutionUpdate = {
+    const finishedAt = new Date().toISOString();
+    const executionTimeMs = startedStepExecution?.startedAt
+      ? new Date(finishedAt).getTime() - new Date(startedStepExecution.startedAt).getTime()
+      : undefined;
+
+    this.stepIoService.completeStep({
+      id: this.stepExecutionId,
+      output: stepOutput,
+      finishedAt,
+      executionTimeMs,
+    });
+    this.logStepComplete({
       id: this.stepExecutionId,
       status: ExecutionStatus.COMPLETED,
-      finishedAt: new Date().toISOString(),
-      output: stepOutput,
-    } as Partial<EsWorkflowStepExecution>;
-
-    if (startedStepExecution?.startedAt) {
-      stepExecutionUpdate.executionTimeMs =
-        new Date(stepExecutionUpdate.finishedAt as string).getTime() -
-        new Date(startedStepExecution.startedAt).getTime();
-    }
-
-    this.workflowExecutionState.upsertStep(stepExecutionUpdate);
-    this.logStepComplete(stepExecutionUpdate);
+      finishedAt,
+      executionTimeMs,
+    });
   }
 
   public failStep(error: Error): void {
-    // if there is a last step execution, fail it
-    // if not, create a new step execution with fail
+    // If there is a last step execution, fail it. If not, create a new step
+    // execution with FAILED status.
     const executionError = ExecutionError.fromError(error);
     const serializedError = executionError.toSerializableObject();
 
@@ -191,26 +194,23 @@ export class StepExecutionRuntime {
     });
 
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
-    const stepExecutionUpdate = {
-      id: this.stepExecutionId,
-      stepId: this.node.stepId,
-      stepType: this.node.stepType,
-      status: ExecutionStatus.FAILED,
-      scopeStack: this.stackFrames,
-      finishedAt: new Date().toISOString(),
-      output: null,
-      error: serializedError,
-    } as Partial<EsWorkflowStepExecution>;
+    const finishedAt = new Date().toISOString();
+    const executionTimeMs = startedStepExecution?.startedAt
+      ? new Date(finishedAt).getTime() - new Date(startedStepExecution.startedAt).getTime()
+      : undefined;
 
-    if (startedStepExecution && startedStepExecution.startedAt) {
-      stepExecutionUpdate.executionTimeMs =
-        new Date(stepExecutionUpdate.finishedAt as string).getTime() -
-        new Date(startedStepExecution.startedAt).getTime();
-    }
     this.workflowExecutionState.updateWorkflowExecution({
       error: serializedError,
     });
-    this.workflowExecutionState.upsertStep(stepExecutionUpdate);
+    this.stepIoService.failStep({
+      id: this.stepExecutionId,
+      stepId: this.node.stepId,
+      stepType: this.node.stepType,
+      error: serializedError,
+      finishedAt,
+      executionTimeMs,
+      scopeStack: this.stackFrames,
+    });
     this.logStepFail(executionError);
   }
 
@@ -296,11 +296,11 @@ export class StepExecutionRuntime {
    * Records the output byte size for this step execution.
    * Used by the eviction system to decide whether a completed step's output
    * is large enough to evict from memory after it has been flushed to ES.
-   * The size is computed by Layer 2 enforcement (safeOutputSize) and passed here
-   * at zero additional serialization cost.
+   * The size is computed by Layer 2 enforcement (safeOutputSize) and passed
+   * here at zero additional serialization cost.
    */
   public recordOutputSize(bytes: number): void {
-    this.workflowExecutionState.recordOutputSize(this.stepExecutionId, bytes);
+    this.stepIoService.recordOutputSize(this.stepExecutionId, bytes);
   }
 
   /** Modifies workflow-level execution state. Use sparingly — prefer step output for step-scoped data. */

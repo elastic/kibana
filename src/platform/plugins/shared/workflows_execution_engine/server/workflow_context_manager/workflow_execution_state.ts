@@ -7,23 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
-import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
+import type { StepIoService, StepIoStateAccessor } from './step_io_service';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { formatBytes } from '../step/errors';
-
-/**
- * Step types whose outputs must never be evicted from in-memory state,
- * even for non-latest iterations in a loop.
- *
- * - data.set: getVariables reads all executions, not just the latest
- * - waitForInput: user-provided answers must be preserved for auditability
- *   and downstream access across all loop iterations
- */
-const EVICTION_EXEMPT_STEP_TYPES = new Set(['data.set', 'waitForInput']);
 
 /** Context for the step that failed during this run; used to build workflow_execution_failed event. */
 export interface FailedStepContext {
@@ -32,6 +20,20 @@ export interface FailedStepContext {
   stepExecutionId: string;
 }
 
+/**
+ * In-memory step/workflow document store with deferred ES persistence.
+ *
+ * Owns the canonical step-execution map, change tracking, and the bulk
+ * upsert path. The IO lifecycle (input/output reads, output-size
+ * tracking, eviction, on-demand rehydration) lives in `StepIoService`,
+ * which mutates step `input`/`output` here via the three narrow,
+ * memory-only mutators (`clearStepOutputInMemory`,
+ * `clearStepInputInMemory`, `restoreStepOutputInMemory`).
+ *
+ * The service is registered after construction via `setIoService` so
+ * the bidirectional dependency (state ↔ service) can be wired in
+ * either order in `setup_dependencies.ts`.
+ */
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private workflowExecution: EsWorkflowExecution;
@@ -41,60 +43,59 @@ export class WorkflowExecutionState {
   private lastFailedStepContext: FailedStepContext | undefined = undefined;
 
   /**
-   * Maps step IDs to their execution IDs in chronological order.
-   * This index enables efficient lookup of all executions for a given step,
-   * which is especially important for steps that execute multiple times
-   * (e.g., in loops or retries).
+   * Maps step IDs to their execution IDs in chronological order. Enables
+   * efficient lookup of all executions for a step that runs multiple times
+   * (loops, retries).
    */
   private stepIdExecutionIdIndex = new Map<string, string[]>();
 
-  /**
-   * Step execution IDs whose `output` field has been evicted from in-memory state
-   * after being flushed to Elasticsearch. The output data remains in ES and can be
-   * re-fetched on demand via `rehydrateOutputs()`.
-   */
-  private readonly evictedOutputIdsAndBytes = new Map<string, number>();
-
-  /**
-   * Recorded output sizes in bytes, keyed by step execution ID.
-   * Populated by Layer 2 enforcement (safeOutputSize) via `recordOutputSize()`.
-   * Used to decide whether a completed step's output is large enough to evict.
-   * In-memory only — not persisted to Elasticsearch.
-   */
-  private readonly outputSizes = new Map<string, number>();
-
-  /**
-   * Step execution IDs whose outputs were persisted in the previous flush and
-   * should be evaluated for eviction on the NEXT flush. This one-cycle deferral
-   * keeps outputs in memory long enough for the immediately-following step to
-   * read them without an ES round-trip.
-   */
-  private pendingOutputEvictionIds: string[] = [];
+  private ioService: StepIoService | undefined;
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
     private workflowExecutionRepository: WorkflowExecutionRepository,
-    private workflowStepExecutionRepository: StepExecutionRepository,
-    /**
-     * Minimum output size in bytes for a step to be eligible for eviction.
-     * 0 = evict all. Infinity = disable eviction.
-     * Defaults to Infinity (disabled) so callers that omit the config value
-     * don't accidentally trigger aggressive eviction.
-     */
-    private readonly evictionMinBytes: number = Infinity,
-    private readonly logger?: Logger
+    private workflowStepExecutionRepository: StepExecutionRepository
   ) {
     this.workflowExecution = initialWorkflowExecution;
   }
 
   /**
+   * Wires in the IO service after construction. Must be called before any
+   * load/flush/runtime activity. Throws on a second call to make accidental
+   * re-wiring loud.
+   */
+  public setIoService(ioService: StepIoService): void {
+    if (this.ioService) {
+      throw new Error('WorkflowExecutionState: IO service already registered');
+    }
+    this.ioService = ioService;
+  }
+
+  /**
+   * Narrow accessor exposed to `StepIoService`. Defined as an instance
+   * property whose methods close over `this`, so the service can be
+   * constructed with a stable adapter before the state knows about it.
+   */
+  public readonly ioStateAccessor: StepIoStateAccessor = {
+    getStepExecution: (id) => this.stepExecutions.get(id),
+    getLatestStepExecution: (stepId) => this.getLatestStepExecution(stepId),
+    upsertStep: (step) => this.upsertStep(step),
+    clearStepOutputInMemory: (id) => this.clearStepOutputInMemory(id),
+    clearStepInputInMemory: (id) => this.clearStepInputInMemory(id),
+    restoreStepOutputInMemory: (id, output) => this.restoreStepOutputInMemory(id, output),
+    getWorkflowExecutionStatus: () => this.workflowExecution.status,
+    getWorkflowExecutionId: () => this.workflowExecution.id,
+    getWorkflowExecutionScopeStack: () => this.workflowExecution.scopeStack,
+  };
+
+  /**
    * Loads step executions from Elasticsearch for a resumed workflow.
-   * To reduce memory footprint, outputs are excluded from the initial fetch and
-   * marked as deferred — the existing `ensureContextReady()` → `rehydrateOutputs()`
-   * path will fetch them on demand when a step actually needs them.
    *
-   * `data.set` outputs are the exception: they are eagerly loaded because
-   * `getVariables()` reads ALL data.set outputs globally.
+   * To reduce memory footprint, outputs are excluded from the initial fetch.
+   * The IO service marks non-pinned steps as deferred (rehydrated on demand
+   * by `prepareForRead`) and identifies the pinned IDs whose outputs must be
+   * eagerly fetched (data.set is read globally by getVariables; waitForInput
+   * answers must always be present).
    */
   public async load(): Promise<void> {
     if (!this.workflowExecution.stepExecutionIds) {
@@ -102,8 +103,9 @@ export class WorkflowExecutionState {
         'WorkflowExecutionState: Workflow execution must have step execution IDs to be loaded'
       );
     }
+    const ioService = this.requireIoService();
 
-    // Fetch step metadata without the (potentially large) output field
+    // Step 1: fetch step metadata without `output` (potentially large).
     const foundSteps = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
       this.workflowExecution.stepExecutionIds,
       undefined,
@@ -111,23 +113,17 @@ export class WorkflowExecutionState {
     );
     foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
 
-    // Mark non-pinned steps as deferred so rehydrateOutputs() will fetch them on demand.
-    // Pinned step types (data.set, waitForInput) are eagerly loaded below because their
-    // outputs are needed globally (getVariables reads all data.set; waitForInput answers
-    // must be preserved for downstream access across loop iterations).
-    const pinnedIds: string[] = [];
-    for (const step of foundSteps) {
-      if (step.stepType && EVICTION_EXEMPT_STEP_TYPES.has(step.stepType)) {
-        pinnedIds.push(step.id);
-      } else {
-        this.evictedOutputIdsAndBytes.set(step.id, 0);
-      }
-    }
+    // Step 2: ask the IO service to register deferred-output bookkeeping
+    // and tell us which pinned steps need eager output fetch.
+    const { pinnedIdsToFetch } = ioService.onLoad(foundSteps);
 
-    // Kick off the pinned-output fetch concurrently with the synchronous index build
+    // Step 3: kick off the pinned-output fetch concurrently with the index build.
     const pinnedOutputsPromise =
-      pinnedIds.length > 0
-        ? this.workflowStepExecutionRepository.getStepExecutionsByIds(pinnedIds, ['id', 'output'])
+      pinnedIdsToFetch.length > 0
+        ? this.workflowStepExecutionRepository.getStepExecutionsByIds(pinnedIdsToFetch, [
+            'id',
+            'output',
+          ])
         : Promise.resolve([]);
 
     this.buildStepIdExecutionIdIndex();
@@ -139,10 +135,6 @@ export class WorkflowExecutionState {
         existing.output = doc.output;
       }
     }
-
-    this.logger?.debug(
-      `Loaded ${foundSteps.length} step(s) with deferred outputs (${pinnedIds.length} pinned outputs eagerly loaded)`
-    );
   }
 
   public getWorkflowExecution(): EsWorkflowExecution {
@@ -177,36 +169,22 @@ export class WorkflowExecutionState {
   }
 
   /**
-   * Retrieves all executions for a specific workflow step in chronological order.
-   * @param stepId The unique identifier of the step
-   * @returns An array of step execution objects or undefined if no executions exist
+   * Retrieves all executions for a workflow step in chronological order.
+   * Returns `[]` when the step has not executed yet.
    */
   public getStepExecutionsByStepId(stepId: string): EsWorkflowStepExecution[] {
-    if (!this.stepIdExecutionIdIndex.has(stepId)) {
+    const executionIds = this.stepIdExecutionIdIndex.get(stepId);
+    if (!executionIds) {
       return [];
     }
-
-    return (
-      this.stepIdExecutionIdIndex
-        .get(stepId)
-        ?.map((executionId) => this.stepExecutions.get(executionId) as EsWorkflowStepExecution) ??
-      []
+    return executionIds.map(
+      (executionId) => this.stepExecutions.get(executionId) as EsWorkflowStepExecution
     );
   }
 
-  /**
-   * Retrieves the latest execution for a specific workflow step.
-   * @param stepId The unique identifier of the step
-   * @returns The latest step execution object or undefined if no executions exist
-   */
   public getLatestStepExecution(stepId: string): EsWorkflowStepExecution | undefined {
     const allExecutions = this.getStepExecutionsByStepId(stepId);
-
-    if (!allExecutions?.length) {
-      return undefined;
-    }
-
-    return allExecutions[allExecutions.length - 1];
+    return allExecutions.length ? allExecutions[allExecutions.length - 1] : undefined;
   }
 
   public upsertStep(step: Partial<EsWorkflowStepExecution>): void {
@@ -221,208 +199,13 @@ export class WorkflowExecutionState {
     }
   }
 
-  /**
-   * Records the output byte size for a step execution.
-   * Called by Layer 2 enforcement after `safeOutputSize()` has already serialized the output,
-   * so this carries zero additional serialization cost.
-   */
-  public recordOutputSize(stepExecutionId: string, bytes: number): void {
-    this.outputSizes.set(stepExecutionId, bytes);
-  }
-
-  /**
-   * Returns aggregate output size statistics from both active and evicted steps.
-   * Uses pre-recorded sizes (no serialization) — safe to call after eviction.
-   */
-  public getOutputSizeStats(): OutputSizeStats {
-    let totalBytes = 0;
-    let stepCount = 0;
-    for (const bytes of this.outputSizes.values()) {
-      totalBytes += bytes;
-      stepCount++;
-    }
-    for (const bytes of this.evictedOutputIdsAndBytes.values()) {
-      totalBytes += bytes;
-      stepCount++;
-    }
-    return { totalBytes, stepCount };
-  }
-
-  /** Returns true if any step outputs have been evicted from memory. */
-  public hasEvictedOutputs(): boolean {
-    return this.evictedOutputIdsAndBytes.size > 0;
-  }
-
-  /**
-   * Re-fetches evicted output fields from Elasticsearch for the requested step execution IDs.
-   * Only IDs that are actually evicted are fetched; if none are evicted, this is a no-op
-   * with zero ES calls.
-   */
-  public async rehydrateOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void> {
-    const idsToRehydrate = stepExecutionIds.filter((id) => this.evictedOutputIdsAndBytes.has(id));
-    if (idsToRehydrate.length === 0) {
-      return;
-    }
-
-    const totalBytes = idsToRehydrate.reduce(
-      (sum, id) => sum + (this.evictedOutputIdsAndBytes.get(id) ?? 0),
-      0
-    );
-
-    const startMs = performance.now();
-    // Fetch only the `output` field to minimize network transfer
-    const docs = await this.workflowStepExecutionRepository.getStepExecutionsByIds(idsToRehydrate, [
-      'id',
-      'output',
-    ]);
-
-    let restoredCount = 0;
-    for (const doc of docs) {
-      const existing = this.stepExecutions.get(doc.id);
-      if (existing) {
-        existing.output = doc.output;
-        restoredCount++;
-      }
-      const previousBytes = this.evictedOutputIdsAndBytes.get(doc.id) ?? 0;
-      this.evictedOutputIdsAndBytes.delete(doc.id);
-      // Restore size tracking so that:
-      // 1. getOutputSizeStats() remains accurate after rehydration
-      // 2. The step is eligible for re-eviction (isEvictionCandidate checks outputSizes)
-      // On the resume path, the original size is unknown (stored as 0), so we measure
-      // the rehydrated output. For steps evicted during live execution, the original
-      // recorded size is preserved.
-      if (previousBytes > 0) {
-        this.outputSizes.set(doc.id, previousBytes);
-      } else if (doc.output != null) {
-        try {
-          this.outputSizes.set(doc.id, Buffer.byteLength(JSON.stringify(doc.output)));
-        } catch {
-          // If serialization fails, record 0 — the step won't be re-evicted but
-          // that's safer than leaving it out of size tracking entirely.
-          this.outputSizes.set(doc.id, 0);
-        }
-      }
-    }
-
-    // Defensive: remove IDs that were not found in ES so we don't retry forever
-    const missingIds = idsToRehydrate.filter((id) => this.evictedOutputIdsAndBytes.has(id));
-    for (const id of missingIds) {
-      this.evictedOutputIdsAndBytes.delete(id);
-    }
-
-    const elapsedMs = Math.round(performance.now() - startMs);
-    this.logger?.debug(
-      `Rehydrated ${restoredCount}/${idsToRehydrate.length} step output(s) (${formatBytes(
-        totalBytes
-      )}) from ES in ${elapsedMs}ms, ${this.evictedOutputIdsAndBytes.size} still evicted`
-    );
-
-    if (missingIds.length > 0) {
-      this.logger?.warn(
-        `${
-          missingIds.length
-        } evicted step output(s) not found in ES during rehydration: ${missingIds.join(', ')}`
-      );
-    }
-  }
-
-  /**
-   * Evaluates the given step execution IDs for eviction eligibility and evicts
-   * large outputs from completed steps. Only the provided candidate IDs are
-   * checked — callers should pass only the IDs that were just flushed to ES.
-   *
-   * This is a memory-only operation — the output data remains in Elasticsearch.
-   * It does NOT modify `stepDocumentsChanges`, so the next flush will not
-   * accidentally overwrite the persisted output in ES.
-   */
-  public evictCompletedStepOutputs(candidateIds: ReadonlyArray<string>): void {
-    let evictedCount = 0;
-    for (const id of candidateIds) {
-      const step = this.stepExecutions.get(id);
-      if (step && this.isEvictionCandidate(id, step)) {
-        const sizeBytes = this.outputSizes.get(id) ?? 0;
-        step.output = undefined;
-        this.evictedOutputIdsAndBytes.set(id, sizeBytes);
-        this.outputSizes.delete(id);
-        evictedCount++;
-        this.logger?.debug(
-          `Evicted output of step '${step.stepId}' (${formatBytes(sizeBytes)}) from memory`
-        );
-      }
-    }
-    if (evictedCount > 0) {
-      this.logger?.debug(
-        `Evicted ${evictedCount} step output(s), total evicted: ${this.evictedOutputIdsAndBytes.size}`
-      );
-    }
-  }
-
-  /**
-   * Evicts input fields from terminal (COMPLETED/FAILED) steps to reduce memory footprint.
-   * Unlike output eviction, this has no size threshold and no deferral — no successor step
-   * references a predecessor's input. Input data remains in Elasticsearch.
-   * This is a memory-only operation — it does NOT modify `stepDocumentsChanges`.
-   */
-  private evictCompletedStepInputs(candidateIds: ReadonlyArray<string>): void {
-    let evictedCount = 0;
-    for (const id of candidateIds) {
-      const step = this.stepExecutions.get(id);
-      if (step) {
-        const isTerminal =
-          step.status === ExecutionStatus.COMPLETED || step.status === ExecutionStatus.FAILED;
-        if (isTerminal && step.input !== undefined) {
-          step.input = undefined;
-          evictedCount++;
-        }
-      }
-    }
-    if (evictedCount > 0) {
-      this.logger?.debug(`Evicted input from ${evictedCount} completed step(s)`);
-    }
-  }
-
-  private isEvictionCandidate(stepExecutionId: string, step: EsWorkflowStepExecution): boolean {
-    if (this.evictedOutputIdsAndBytes.has(stepExecutionId)) {
-      return false;
-    }
-
-    // Only evict COMPLETED steps. Failed steps have `output: null` (not a large payload)
-    // and evicting them would shift the semantic from null ("no output") to undefined
-    // ("output evicted"), which downstream code (e.g. getVariables) can distinguish.
-    if (step.status !== ExecutionStatus.COMPLETED) {
-      return false;
-    }
-
-    // Guard against steps whose output was already cleared by evictStaleLoopOutputs
-    if (step.output === undefined) {
-      return false;
-    }
-
-    // Pinned step types must never be evicted (data.set: getVariables reads globally;
-    // waitForInput: user-provided answers must be preserved for downstream access)
-    if (step.stepType && EVICTION_EXEMPT_STEP_TYPES.has(step.stepType)) {
-      return false;
-    }
-
-    const recordedSize = this.outputSizes.get(stepExecutionId);
-    // Steps without a recorded size (control flow, steps where Layer 2 didn't measure)
-    // are assumed small and not evicted
-    if (recordedSize === undefined || recordedSize < this.evictionMinBytes) {
-      return false;
-    }
-
-    return true;
-  }
-
   public async flushStepChanges(): Promise<void> {
+    const ioService = this.ioService;
     if (!this.stepDocumentsChanges.size) {
-      // No new changes, but still drain any pending output evictions
-      // from the previous flush cycle.
-      if (this.pendingOutputEvictionIds.length > 0) {
-        const toEvict = this.pendingOutputEvictionIds;
-        this.pendingOutputEvictionIds = [];
-        this.evictCompletedStepOutputs(toEvict);
-      }
+      // No new doc changes — but the IO service may still have a pending
+      // eviction queue from the previous flush cycle that needs draining
+      // on its scheduled tick.
+      ioService?.onStepsFlushed([]);
       return;
     }
     const flushedIds = Array.from(this.stepDocumentsChanges.keys());
@@ -431,17 +214,7 @@ export class WorkflowExecutionState {
     this.stepDocumentsChanges.clear();
     await this.workflowStepExecutionRepository.bulkUpsert(stepDocumentsChanges);
 
-    // Deferred output eviction: evict the PREVIOUS flush's candidates,
-    // then queue THIS flush's candidates for the next cycle.
-    if (this.pendingOutputEvictionIds.length > 0) {
-      const toEvict = this.pendingOutputEvictionIds;
-      this.pendingOutputEvictionIds = [];
-      this.evictCompletedStepOutputs(toEvict);
-    }
-    this.pendingOutputEvictionIds = flushedIds;
-
-    // Input eviction: immediate (no deferral needed — no successor reads predecessor input)
-    this.evictCompletedStepInputs(flushedIds);
+    ioService?.onStepsFlushed(flushedIds);
   }
 
   public async flush(): Promise<void> {
@@ -462,7 +235,7 @@ export class WorkflowExecutionState {
   }
 
   private createStep(step: Partial<EsWorkflowStepExecution>) {
-    const stepExecutions = this.getStepExecutionsByStepId(step.stepId as string) || [];
+    const stepExecutions = this.getStepExecutionsByStepId(step.stepId as string);
     if (!stepExecutions.length) {
       this.stepIdExecutionIdIndex.set(step.stepId as string, []);
     }
@@ -479,10 +252,9 @@ export class WorkflowExecutionState {
     } as EsWorkflowStepExecution;
     this.stepExecutions.set(step.id as string, newStep);
     this.stepDocumentsChanges.set(step.id as string, newStep);
-    // As we are creating a new step execution, we need to update the workflow execution with the new step execution ID
-    // Due to the fact that execution and flushes are synchronous, it's safe to use incremental approach to update the step execution IDs
-    // while still keeping the order of the step execution IDs according to the global execution index
-    // At the same time it's safer because we don't rely on how many step executions are loaded in resume task.
+    // Execution and flushes are synchronous, so an incremental update here
+    // preserves the global execution order without depending on what was
+    // loaded by the resume task.
     this.updateWorkflowExecution({
       stepExecutionIds: [...(this.workflowExecution.stepExecutionIds || []), step.id as string],
     });
@@ -495,8 +267,8 @@ export class WorkflowExecutionState {
       ...step,
     } as EsWorkflowStepExecution;
     this.stepExecutions.set(stepId, updatedStep);
-    // Accumulate changes for the next flush — merge with any pending changes
-    // ES partial update (doc_as_upsert) preserves fields not included in the update
+    // Accumulate changes for the next flush — merge with any pending changes.
+    // ES partial update (doc_as_upsert) preserves fields not included.
     this.stepDocumentsChanges.set(stepId, {
       ...(this.stepDocumentsChanges.get(stepId) || {}),
       ...step,
@@ -508,55 +280,86 @@ export class WorkflowExecutionState {
    * for the given step IDs, reducing memory pressure after a loop completes.
    *
    * Preserves:
-   * - The latest execution per stepId (needed by getContext → getLatestStepExecution)
-   * - All data.set step outputs (needed by getVariables which reads all executions)
-   * - All waitForInput step outputs (user-provided values that must be preserved for
-   *   auditability and downstream access across all iterations)
-   * - All metadata fields (needed by telemetry at terminal state)
+   * - The latest execution per stepId (needed by `getLatestStepExecution`).
+   * - All pinned step types (`data.set` outputs are read globally by
+   *   `getVariables`; `waitForInput` answers must persist for auditability).
+   * - All metadata fields (status, timing, scopeStack, error) — those still
+   *   matter at terminal state for telemetry and UI.
    *
-   * Note: eviction uses global-latest-wins semantics — it keeps the absolute latest
-   * execution per stepId across all loop iterations, not scoped to a specific loop scope.
-   * This means that after outer-loop eviction, only the latest execution from the last
-   * outer iteration retains its output. This is correct because getLatestStepExecution
-   * always returns the absolute latest execution.
+   * Eviction here uses global-latest-wins semantics: only the absolute latest
+   * execution per stepId across all loop iterations retains its IO. After
+   * outer-loop completion, only the latest execution from the last outer
+   * iteration keeps its output. Correct because `getLatestStepExecution`
+   * always returns the absolute latest.
    *
-   * Does NOT touch ES-persisted documents — this is in-memory only.
-   * On resume, ES documents still hold the original outputs.
+   * Memory-only — ES-persisted documents are untouched and on resume still
+   * hold the original outputs.
    */
   public evictStaleLoopOutputs(innerStepIds: Iterable<string>): void {
+    const ioService = this.requireIoService();
     for (const stepId of innerStepIds) {
       const executionIds = this.stepIdExecutionIdIndex.get(stepId);
       if (executionIds && executionIds.length > 1) {
         const staleIds = executionIds.slice(0, -1);
         for (const execId of staleIds) {
-          const stepExec = this.stepExecutions.get(execId);
-          if (
-            stepExec &&
-            (stepExec.stepType == null || !EVICTION_EXEMPT_STEP_TYPES.has(stepExec.stepType))
-          ) {
-            // Replace with a shallow copy so any pending stepDocumentsChanges entry
-            // for this execution is not mutated (it shares the same object reference
-            // when the step was first created via createStep).
-            this.stepExecutions.set(execId, { ...stepExec, output: undefined, input: undefined });
-          }
+          ioService.clearStepIo(execId);
         }
       }
     }
+  }
+
+  // ----- IO mutators (memory-only) -----------------------------------------
+  // The only places where `step.input` / `step.output` are mutated out-of-band
+  // relative to `stepDocumentsChanges`. They replace the entry in
+  // `stepExecutions` with a shallow copy rather than mutating in place, because
+  // `createStep` stores the same object reference in both `stepExecutions` and
+  // `stepDocumentsChanges`. An in-place mutation would corrupt a pending flush
+  // payload — the step would be upserted to ES with `output: undefined`,
+  // contradicting the "memory-only" contract.
+
+  private clearStepOutputInMemory(stepExecutionId: string): void {
+    const step = this.stepExecutions.get(stepExecutionId);
+    if (step) {
+      this.stepExecutions.set(stepExecutionId, { ...step, output: undefined });
+    }
+  }
+
+  private clearStepInputInMemory(stepExecutionId: string): void {
+    const step = this.stepExecutions.get(stepExecutionId);
+    if (step) {
+      this.stepExecutions.set(stepExecutionId, { ...step, input: undefined });
+    }
+  }
+
+  private restoreStepOutputInMemory(stepExecutionId: string, output: JsonValue | null): void {
+    const step = this.stepExecutions.get(stepExecutionId);
+    if (step) {
+      // `null` is a legitimate FAILED-step value; `undefined` is not produced
+      // by this path. Same shallow-copy guard as the clear mutators.
+      this.stepExecutions.set(stepExecutionId, {
+        ...step,
+        output: output as JsonValue,
+      });
+    }
+  }
+
+  private requireIoService(): StepIoService {
+    if (!this.ioService) {
+      throw new Error('WorkflowExecutionState: IO service not registered');
+    }
+    return this.ioService;
   }
 
   private buildStepIdExecutionIdIndex(): void {
     this.stepIdExecutionIdIndex.clear();
     for (const step of this.stepExecutions.values()) {
       let idsList = this.stepIdExecutionIdIndex.get(step.stepId);
-
       if (!idsList) {
         idsList = [];
         this.stepIdExecutionIdIndex.set(step.stepId, idsList);
       }
-
       idsList.push(step.id);
     }
-
     for (const [stepId, stepExecutionIds] of this.stepIdExecutionIdIndex.entries()) {
       this.stepIdExecutionIdIndex.set(
         stepId,

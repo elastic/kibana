@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
@@ -14,8 +15,59 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
+import type { CompleteStepArgs, FailStepArgs, StepIoService } from '../step_io_service';
 import type { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
+
+/**
+ * Builds a `StepIoService` test double that delegates IO writes back to the
+ * provided state mock. Lets existing assertions on `state.upsertStep`
+ * continue to verify the runtime's behaviour without rewriting them, while
+ * still routing writes through the service as production does.
+ */
+function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoService {
+  return {
+    setStepInput: (id: string, input: JsonValue) => state.upsertStep({ id, input }),
+    completeStep: ({ id, output, finishedAt, executionTimeMs }: CompleteStepArgs) =>
+      state.upsertStep({
+        id,
+        status: ExecutionStatus.COMPLETED,
+        finishedAt,
+        output,
+        ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
+      } as Partial<EsWorkflowStepExecution>),
+    failStep: ({
+      id,
+      stepId,
+      stepType,
+      error,
+      finishedAt,
+      executionTimeMs,
+      scopeStack,
+    }: FailStepArgs) =>
+      state.upsertStep({
+        id,
+        stepId,
+        stepType,
+        status: ExecutionStatus.FAILED,
+        scopeStack,
+        finishedAt,
+        output: null,
+        error,
+        ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
+      } as Partial<EsWorkflowStepExecution>),
+    recordOutputSize: jest.fn(),
+    getStepInput: jest.fn(),
+    getStepOutput: jest.fn(),
+    getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
+    hasEvictedOutputs: jest.fn().mockReturnValue(false),
+    rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
+    prepareForRead: jest.fn().mockResolvedValue(undefined),
+    onLoad: jest.fn().mockReturnValue({ pinnedIdsToFetch: [] }),
+    onStepsFlushed: jest.fn(),
+    clearStepIo: jest.fn(),
+  } as unknown as StepIoService;
+}
 
 describe('StepExecutionRuntime', () => {
   let underTest: StepExecutionRuntime;
@@ -23,6 +75,7 @@ describe('StepExecutionRuntime', () => {
   let workflowExecutionGraph: WorkflowGraph;
   let workflowLogger: IWorkflowEventLogger;
   let workflowExecutionState: WorkflowExecutionState;
+  let stepIoService: StepIoService;
   let workflowContextManager: WorkflowContextManager;
   const fakeStepExecutionId = 'fake_step_execution_id';
   const fakeNode = {
@@ -104,6 +157,8 @@ describe('StepExecutionRuntime', () => {
       }
     });
 
+    stepIoService = createPassthroughStepIoService(workflowExecutionState);
+
     underTest = new StepExecutionRuntime({
       node: fakeNode,
       stackFrames: fakeStackFrames,
@@ -112,6 +167,7 @@ describe('StepExecutionRuntime', () => {
       workflowExecutionGraph,
       stepLogger: workflowLogger,
       workflowExecutionState,
+      stepIoService,
     });
   });
 
@@ -592,6 +648,7 @@ describe('StepExecutionRuntime', () => {
         workflowExecutionGraph,
         stepLogger: workflowLogger,
         workflowExecutionState,
+        stepIoService,
       });
 
       runtime.failStep(new Error('fail'));
@@ -617,6 +674,7 @@ describe('StepExecutionRuntime', () => {
         workflowExecutionGraph,
         stepLogger: workflowLogger,
         workflowExecutionState,
+        stepIoService,
       });
 
       runtime.failStep(new Error('fail'));
