@@ -6,16 +6,65 @@
  */
 
 import React from 'react';
+import type { IconColor, IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { TodoItem, TodosStep } from '@kbn/agent-builder-common/chat/conversation';
+import type {
+  TodoItem,
+  TodoStatus,
+  TodosStep,
+} from '@kbn/agent-builder-common/chat/conversation';
 
 interface TodosStepDisplayProps {
   step: TodosStep;
 }
 
-const isActive = (todo: TodoItem) => todo.status !== 'completed' && todo.status !== 'cancelled';
+interface TodoStatusDisplay {
+  iconType: IconType;
+  iconColor: IconColor;
+  label: string;
+  isInactive: boolean;
+}
+
+// Single source of truth for how each todo status renders.
+// Add/adjust a status here and both the icon and the line-through styling follow.
+const TODO_STATUS_DISPLAY: Record<TodoStatus, TodoStatusDisplay> = {
+  pending: {
+    iconType: 'dashedCircle',
+    iconColor: 'subdued',
+    isInactive: false,
+    label: i18n.translate('xpack.agentBuilder.conversation.todos.statusPending', {
+      defaultMessage: 'Pending',
+    }),
+  },
+  in_progress: {
+    iconType: 'dotInCircle',
+    iconColor: 'primary',
+    isInactive: false,
+    label: i18n.translate('xpack.agentBuilder.conversation.todos.statusInProgress', {
+      defaultMessage: 'In progress',
+    }),
+  },
+  completed: {
+    iconType: 'checkInCircleFilled',
+    iconColor: 'success',
+    isInactive: true,
+    label: i18n.translate('xpack.agentBuilder.conversation.todos.statusCompleted', {
+      defaultMessage: 'Completed',
+    }),
+  },
+  cancelled: {
+    iconType: 'crossCircle',
+    iconColor: 'subdued',
+    isInactive: true,
+    label: i18n.translate('xpack.agentBuilder.conversation.todos.statusCancelled', {
+      defaultMessage: 'Cancelled',
+    }),
+  },
+};
+
+const isActive = (todo: TodoItem) => !TODO_STATUS_DISPLAY[todo.status].isInactive;
 
 const expandIn = keyframes`
   from {
@@ -51,7 +100,7 @@ export const TodosStepDisplay: React.FC<TodosStepDisplayProps> = ({ step }) => {
     margin-top: ${euiTheme.size.s};
   `;
 
-  const itemCompletedStyles = css`
+  const itemInactiveStyles = css`
     text-decoration: line-through;
     color: ${euiTheme.colors.textSubdued};
   `;
@@ -81,19 +130,20 @@ export const TodosStepDisplay: React.FC<TodosStepDisplayProps> = ({ step }) => {
       {!isCarriedOver && (
         <EuiFlexGroup direction="column" gutterSize="s" css={itemsStyles} responsive={false}>
           {todos.map((todo, index) => {
-            const done = !isActive(todo);
+            const display = TODO_STATUS_DISPLAY[todo.status];
             return (
               <EuiFlexItem key={index} grow={false}>
                 <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    {done ? (
-                      <EuiIcon type="checkInCircleFilled" size="s" color="success" />
-                    ) : (
-                      <EuiIcon type="plusInCircle" size="s" color="subdued" />
-                    )}
+                    <EuiIcon
+                      type={display.iconType}
+                      size="s"
+                      color={display.iconColor}
+                      aria-label={display.label}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiText size="s" css={done ? itemCompletedStyles : undefined}>
+                    <EuiText size="s" css={display.isInactive ? itemInactiveStyles : undefined}>
                       {todo.content}
                     </EuiText>
                   </EuiFlexItem>

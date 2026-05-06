@@ -43,6 +43,7 @@ import {
   isToolCallStep,
   isBackgroundAgentCompleteEvent,
   isToolUiEvent,
+  carriedOverTodos,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
@@ -504,17 +505,6 @@ const buildRoundState = ({
   };
 
   return state;
-};
-
-/**
- * Returns the todo list to carry over from the previous round, or undefined if nothing should carry over.
- * Carryover only happens when at least one item is still incomplete (pending / in_progress).
- * When carried over, both complete and incomplete items are included so the full plan is visible.
- */
-const carriedOverTodos = (todos: TodoItem[] | undefined): TodoItem[] | undefined => {
-  if (!todos?.length) return undefined;
-  const hasIncomplete = todos.some((t) => t.status !== 'completed' && t.status !== 'cancelled');
-  return hasIncomplete ? todos : undefined;
 };
 
 const mergeModelUsage = (

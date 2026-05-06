@@ -221,6 +221,17 @@ export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
   return step.type === ConversationRoundStepType.todos;
 };
 
+/**
+ * Returns the todo list to carry over from the previous round, or undefined if nothing should carry over.
+ * Carryover only happens when at least one item is still incomplete (pending / in_progress).
+ * When carried over, both complete and incomplete items are included so the full plan is visible.
+ */
+export const carriedOverTodos = (todos: TodoItem[] | undefined): TodoItem[] | undefined => {
+  if (!todos?.length) return undefined;
+  const hasIncomplete = todos.some((t) => t.status !== 'completed' && t.status !== 'cancelled');
+  return hasIncomplete ? todos : undefined;
+};
+
 export type ConversationRoundStep =
   | ToolCallStep
   | ReasoningStep

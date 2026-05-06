@@ -155,6 +155,7 @@ export {
   type BackgroundAgentCompleteStep,
   isTodosStep,
   type TodosStep,
+  carriedOverTodos,
   ChatEventType,
   ConversationRoundStatus,
   type ChatEventBase,
@@ -210,6 +211,7 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  isTodosUpdatedEvent,
 } from './chat';
 export {
   type PublicSkillDefinition,

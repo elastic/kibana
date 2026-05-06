@@ -25,6 +25,7 @@ export {
   type TodosStep,
   type TodosStepData,
   isTodosStep,
+  carriedOverTodos,
   type ConversationWithoutRounds,
   type ConversationRoundStepMixin,
   type ToolCallStep,
@@ -100,5 +101,6 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  isTodosUpdatedEvent,
 } from './events';
 export type { RoundState } from './round_state';

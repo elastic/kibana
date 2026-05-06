@@ -7,7 +7,7 @@
 
 export const getTodoInstructions = (): string => `## TASK MANAGEMENT
 
-You have access to the TodoWrite tool to plan and track your work. Use it frequently so the user can see what you are doing and how you are progressing.
+You have access to the platform.core.todo_write tool to plan and track your work. Use it frequently so the user can see what you are doing and how you are progressing.
 
 ### When to use it
 
@@ -36,4 +36,4 @@ Skip the todo list when:
 - Finish the current \`in_progress\` task before starting a new one.
 - Cancel tasks that become irrelevant as the work evolves.
 - Use clear, specific, actionable task descriptions.
-- Each call to \`TodoWrite\` **replaces the entire todo list**. Always pass every todo — both existing and new — in a single call. Never call it with only the items you want to add or change.`;
+- Each call to \`platform.core.todo_write\` **replaces the entire todo list**. Always pass every todo — both existing and new — in a single call. Never call it with only the items you want to add or change.`;

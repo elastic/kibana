@@ -25,6 +25,7 @@ import {
   isTodosStep,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  carriedOverTodos,
 } from '@kbn/agent-builder-common';
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
@@ -153,13 +154,8 @@ const createConversationActions = ({
             conversationAttachments: current?.attachments,
           });
 
-          // Carry over todos from the previous round if any items are still incomplete
           const prevTodosStep = draft?.rounds?.at(-1)?.steps?.filter(isTodosStep)?.at(-1);
-          const carryoverTodos = prevTodosStep?.todos?.some(
-            (t) => t.status !== 'completed' && t.status !== 'cancelled'
-          )
-            ? prevTodosStep.todos
-            : undefined;
+          const carryoverTodos = carriedOverTodos(prevTodosStep?.todos);
 
           const nextRound = createNewRound({
             userMessage,

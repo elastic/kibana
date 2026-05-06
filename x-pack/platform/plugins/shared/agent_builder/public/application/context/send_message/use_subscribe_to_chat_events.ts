@@ -20,10 +20,9 @@ import {
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
   isBackgroundAgentCompleteEvent,
-  isToolUiEvent,
+  isTodosUpdatedEvent,
   ConversationRoundStepType,
 } from '@kbn/agent-builder-common';
-import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import {
   createReasoningStep,
   createToolCallStep,
@@ -165,7 +164,7 @@ export const useSubscribeToChatEvents = ({
           ...event.data.execution,
         },
       });
-    } else if (isToolUiEvent<'todos_updated', { todos: TodoItem[] }>(event, 'todos_updated')) {
+    } else if (isTodosUpdatedEvent(event)) {
       conversationActions.addOrUpdateTodosStep({ todos: event.data.data.todos });
     }
   };
