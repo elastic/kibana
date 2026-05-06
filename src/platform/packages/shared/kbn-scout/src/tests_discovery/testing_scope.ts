@@ -10,6 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import { minimatch } from 'minimatch';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -171,4 +172,137 @@ export const resolveScoutTestingScope = (
     `Selective testing: dependency-tree mode — ${affectedModuleIds.size} affected module(s)`
   );
   return { kind: 'dependency-tree', affectedModuleIds };
+};
+
+/**
+ * Serialised, file-friendly view of a `ScoutTestingScope`. This is the public
+ * hand-off contract published by `scout resolve-testing-scope` and consumed by
+ * every downstream step (configs CLI, lanes CLI, FTR/Jest skip check, ...).
+ *
+ * Field semantics:
+ *   - `kind` / `reason`        : the decision (mirrors ScoutTestingScope).
+ *   - `skipNonScoutTests`      : pre-computed boolean; true only for
+ *                                `kind: 'tests-only'`. Downstream short-circuits
+ *                                read this without re-implementing dispatch.
+ *   - `affectedModules`        : ALWAYS present (sorted, possibly empty). Used
+ *                                both as the dependency-tree filter set AND for
+ *                                generic "isAffected" labeling regardless of kind.
+ *   - `affectedConfigs`        : present only when `kind === 'tests-only'`. The
+ *                                exact set of Playwright configs to run.
+ */
+export interface SerializedScoutTestingScope {
+  kind: ScoutTestingScope['kind'];
+  reason?: 'selective-disabled' | 'critical-files';
+  skipNonScoutTests: boolean;
+  affectedModules: readonly string[];
+  affectedConfigs?: readonly string[];
+}
+
+/**
+ * Convert a `ScoutTestingScope` into a JSON-serialisable shape suitable for
+ * sharing across pipeline steps (e.g. as a Buildkite artifact).
+ *
+ * `affectedModules` is sourced from the original `CodeChanges` and is always
+ * included — even when the scope is `full` or `tests-only` — so consumers
+ * can mark items as "affected" for CI labeling regardless of which selective-
+ * testing branch is active.
+ */
+export const serializeScoutTestingScope = (
+  scope: ScoutTestingScope,
+  affectedModules: ReadonlySet<string>
+): SerializedScoutTestingScope => {
+  const sortedModules = Array.from(affectedModules).sort();
+  switch (scope.kind) {
+    case 'full':
+      return {
+        kind: 'full',
+        reason: scope.reason,
+        skipNonScoutTests: false,
+        affectedModules: sortedModules,
+      };
+    case 'tests-only':
+      return {
+        kind: 'tests-only',
+        skipNonScoutTests: true,
+        affectedModules: sortedModules,
+        affectedConfigs: Array.from(scope.affectedConfigPaths).sort(),
+      };
+    case 'dependency-tree':
+      return {
+        kind: 'dependency-tree',
+        skipNonScoutTests: false,
+        // Note: scope.affectedModuleIds === affectedModules in this branch.
+        affectedModules: Array.from(scope.affectedModuleIds).sort(),
+      };
+  }
+};
+
+/**
+ * Write the serialised scope to disk, creating the parent directory if needed.
+ * Used by `scout resolve-testing-scope` to publish a tiny, stable hand-off
+ * artifact for other pipeline steps (configs/lanes filter, FTR/Jest skip).
+ */
+export const writeScoutTestingScope = (
+  scope: ScoutTestingScope,
+  affectedModules: ReadonlySet<string>,
+  outputPath: string
+): void => {
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.writeFileSync(
+    outputPath,
+    `${JSON.stringify(serializeScoutTestingScope(scope, affectedModules), null, 2)}\n`
+  );
+};
+
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((entry) => typeof entry === 'string');
+
+const isSerializedScoutTestingScope = (value: unknown): value is SerializedScoutTestingScope => {
+  if (typeof value !== 'object' || value === null) return false;
+  const candidate = value as Record<string, unknown>;
+  if (
+    candidate.kind !== 'full' &&
+    candidate.kind !== 'tests-only' &&
+    candidate.kind !== 'dependency-tree'
+  ) {
+    return false;
+  }
+  if (typeof candidate.skipNonScoutTests !== 'boolean') return false;
+  if (!isStringArray(candidate.affectedModules)) return false;
+  if (candidate.affectedConfigs !== undefined && !isStringArray(candidate.affectedConfigs)) {
+    return false;
+  }
+  return true;
+};
+
+/**
+ * Read and validate a testing-scope JSON file produced by `scout
+ * resolve-testing-scope`. Throws (via createFailError) on missing/invalid
+ * input — downstream consumers must not silently fall back to a wrong mode.
+ */
+export const readScoutTestingScope = (filePath: string): SerializedScoutTestingScope => {
+  const absolutePath = path.isAbsolute(filePath) ? filePath : path.join(REPO_ROOT, filePath);
+  let content: string;
+  try {
+    content = fs.readFileSync(absolutePath, 'utf-8');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw createFailError(`Failed to read testing-scope file '${filePath}': ${message}`);
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw createFailError(`Testing-scope file is not valid JSON ('${filePath}'): ${message}`);
+  }
+
+  if (!isSerializedScoutTestingScope(parsed)) {
+    throw createFailError(
+      `Testing-scope file '${filePath}' must contain { kind: 'full'|'tests-only'|'dependency-tree', skipNonScoutTests: boolean, affectedModules: string[], affectedConfigs?: string[] }`
+    );
+  }
+
+  return parsed;
 };

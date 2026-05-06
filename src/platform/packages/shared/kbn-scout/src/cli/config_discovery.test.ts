@@ -322,15 +322,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage![0]).toContain('1 package(s)'); // packageA
   });
 
-  it('fails when --selective-testing is set without --code-changes', () => {
-    flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
-    flagsReader.string.mockReturnValue('');
-
-    expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
-      '--selective-testing requires --code-changes'
-    );
-  });
-
   it('filters configs based on target tags for "mki" target (@cloud-serverless-*)', () => {
     flagsReader.enum.mockReturnValue('mki');
     flagsReader.boolean.mockReturnValue(false);
@@ -1409,15 +1400,13 @@ describe('runDiscoverPlaywrightConfigs', () => {
     });
   });
 
-  describe('"--code-changes" flag', () => {
-    const setupCodeChanges = (
-      mergeBase: string,
-      changedFiles: string[],
-      affectedModules: string[]
-    ) => {
+  describe('"--testing-scope" flag', () => {
+    const TESTING_SCOPE_PATH = '/mock/testing_scope.json';
+
+    const setupTestingScope = (scope: Record<string, unknown>) => {
       (fs.readFileSync as jest.Mock).mockImplementation((readPath: string) => {
-        if (readPath === '/mock/code_changes.json') {
-          return JSON.stringify({ mergeBase, changedFiles, affectedModules });
+        if (readPath === TESTING_SCOPE_PATH) {
+          return JSON.stringify(scope);
         }
         if (typeof readPath === 'string' && readPath.endsWith('package.json')) {
           return JSON.stringify({ name: 'kibana', version: '1.0.0' });
@@ -1438,84 +1427,81 @@ describe('runDiscoverPlaywrightConfigs', () => {
       });
     });
 
-    it('with --selective-testing routes critical Scout file diffs to a full suite run', () => {
+    it('routes kind=full/critical-files to a full suite run (warning preserved upstream, no "limited to" message here)', () => {
       flagsReader.enum.mockReturnValue('mki');
-      flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
+      flagsReader.boolean.mockReturnValue(false);
       flagsReader.string.mockImplementation((name: string) =>
-        name === 'code-changes' ? '/mock/code_changes.json' : ''
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
       );
-      setupCodeChanges(
-        'abc123',
-        ['src/platform/packages/shared/kbn-scout/src/runner/index.ts'],
-        ['@kbn/scout']
-      );
+      setupTestingScope({
+        kind: 'full',
+        reason: 'critical-files',
+        skipNonScoutTests: false,
+        affectedModules: ['@kbn/scout'],
+      });
 
       runDiscoverPlaywrightConfigs(flagsReader, log);
 
-      expect(log.warning).toHaveBeenCalledWith(
-        expect.stringContaining('critical Scout files touched')
-      );
-      // Full suite preserved: no "limited to" message.
       const infoCalls = log.info.mock.calls;
+      // No filtering applied: every module passes through to the target-tag step.
       expect(infoCalls.some((call) => String(call[0]).includes('limited to'))).toBe(false);
     });
 
-    it('with --selective-testing routes Scout-tests-only diffs to the configs fast path', () => {
+    it('routes kind=tests-only to the configs fast path using affectedConfigs', () => {
       flagsReader.enum.mockReturnValue('all');
-      flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
+      flagsReader.boolean.mockReturnValue(false);
       flagsReader.string.mockImplementation((name: string) =>
-        name === 'code-changes' ? '/mock/code_changes.json' : ''
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
       );
-      setupCodeChanges(
-        'abc123',
-        ['x-pack/platform/plugins/private/pluginA/test/scout/ui/tests/foo.spec.ts'],
-        ['@kbn/pluginA']
-      );
-      // Pretend the owning Playwright config exists on disk so the resolver keeps it.
-      (fs.existsSync as jest.Mock).mockImplementation((p: string) =>
-        p.endsWith('/pluginA/test/scout/ui/playwright.config.ts')
-      );
+      setupTestingScope({
+        kind: 'tests-only',
+        skipNonScoutTests: true,
+        affectedModules: ['@kbn/pluginA'],
+        affectedConfigs: [
+          'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
+        ],
+      });
 
       runDiscoverPlaywrightConfigs(flagsReader, log);
 
       const infoCalls = log.info.mock.calls;
-      expect(infoCalls.some((call) => String(call[0]).includes('tests-only fast path'))).toBe(true);
       expect(
         infoCalls.some((call) => String(call[0]).includes('limited to affected configs'))
       ).toBe(true);
     });
 
-    it('with --selective-testing falls back to dependency-tree mode for mixed source+test diffs', () => {
+    it('routes kind=dependency-tree to the affected-modules filter', () => {
       flagsReader.enum.mockReturnValue('mki');
-      flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
+      flagsReader.boolean.mockReturnValue(false);
       flagsReader.string.mockImplementation((name: string) =>
-        name === 'code-changes' ? '/mock/code_changes.json' : ''
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
       );
-      setupCodeChanges(
-        'abc123',
-        [
-          'x-pack/platform/plugins/private/pluginA/test/scout/ui/tests/foo.spec.ts',
-          'x-pack/platform/plugins/private/pluginA/public/foo.ts',
-        ],
-        ['@kbn/pluginA']
-      );
+      setupTestingScope({
+        kind: 'dependency-tree',
+        skipNonScoutTests: false,
+        affectedModules: ['@kbn/pluginA'],
+      });
 
       runDiscoverPlaywrightConfigs(flagsReader, log);
 
       const infoCalls = log.info.mock.calls;
-      expect(infoCalls.some((call) => String(call[0]).includes('dependency-tree mode'))).toBe(true);
       expect(
         infoCalls.some((call) => String(call[0]).includes('limited to affected modules'))
       ).toBe(true);
     });
 
-    it('without --selective-testing only marks isAffected (no filtering)', () => {
+    it('marks isAffected on every module from scope.affectedModules even when kind=full', () => {
       flagsReader.enum.mockReturnValue('mki');
       flagsReader.boolean.mockReturnValue(false);
       flagsReader.string.mockImplementation((name: string) =>
-        name === 'code-changes' ? '/mock/code_changes.json' : ''
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
       );
-      setupCodeChanges('abc123', ['some/file.ts'], ['@kbn/pluginA']);
+      setupTestingScope({
+        kind: 'full',
+        reason: 'selective-disabled',
+        skipNonScoutTests: false,
+        affectedModules: ['@kbn/pluginA'],
+      });
 
       runDiscoverPlaywrightConfigs(flagsReader, log);
 
@@ -1527,25 +1513,35 @@ describe('runDiscoverPlaywrightConfigs', () => {
       expect(foundMessage).toBeDefined();
       expect(foundMessage![0]).toContain('2 plugin(s)');
       expect(foundMessage![0]).toContain('1 package(s)');
+      // Marking ran: the "Affected modules: ..." line appears.
+      expect(infoCalls.some((call) => String(call[0]).includes('Affected modules:'))).toBe(true);
     });
 
-    it('throws when the code-changes file is missing required fields', () => {
-      flagsReader.enum.mockReturnValue('all');
-      flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
-      flagsReader.string.mockImplementation((name: string) =>
-        name === 'code-changes' ? '/mock/code_changes.json' : ''
-      );
-      (fs.readFileSync as jest.Mock).mockImplementation((readPath: string) => {
-        if (readPath === '/mock/code_changes.json') {
-          return JSON.stringify({ mergeBase: 'abc' }); // missing changedFiles, affectedModules
-        }
-        if (typeof readPath === 'string' && readPath.endsWith('package.json')) {
-          return JSON.stringify({ name: 'kibana', version: '1.0.0' });
-        }
-        return '';
-      });
+    it('runs the full suite without marking when --testing-scope is omitted', () => {
+      flagsReader.enum.mockReturnValue('mki');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation(() => '');
 
-      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(/code-changes file/i);
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const infoCalls = log.info.mock.calls;
+      // Marking did NOT run.
+      expect(infoCalls.some((call) => String(call[0]).includes('Affected modules:'))).toBe(false);
+      // Full-suite log is emitted.
+      expect(infoCalls.some((call) => String(call[0]).includes('no testing-scope provided'))).toBe(
+        true
+      );
+    });
+
+    it('throws when the testing-scope file is missing required fields', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
+      );
+      setupTestingScope({ kind: 'full' }); // missing skipNonScoutTests + affectedModules
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(/testing-scope file/i);
     });
   });
 });
