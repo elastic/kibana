@@ -12635,7 +12635,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"register\" | \"init\"> & { deserialize: ",
+              ", \"init\" | \"register\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -15844,6 +15844,10 @@
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
               },
               {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/partition/suggestions.test.ts"
               },
@@ -15882,10 +15886,6 @@
               {
                 "plugin": "@kbn/lens-embeddable-utils",
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/dynamic_colors.mock.ts"
               }
             ]
           }
@@ -17338,6 +17338,10 @@
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
               },
               {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/lens_attributes/risk_score_summary.ts"
               },
@@ -17380,10 +17384,6 @@
               {
                 "plugin": "@kbn/lens-embeddable-utils",
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/dynamic_colors.mock.ts"
               }
             ]
           },
