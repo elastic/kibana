@@ -12,11 +12,17 @@ import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-p
 import type { ColumnHeaderType } from '../../../common/types';
 import type { Maybe } from '../../../common/search_strategy';
 import { DefaultCellRenderer } from '../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { IP_FIELD_TYPE } from '../../timelines/components/timeline/body/renderers/constants';
+import {
+  IP_FIELD_TYPE,
+  LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+  SIGNAL_STATUS_FIELD_NAME,
+} from '../../timelines/components/timeline/body/renderers/constants';
 import { getEcsField } from '../../flyout/document_details/right/components/table_field_name_cell';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { IpCellRenderer } from './ip_cell_renderer';
+import { RuleNameCellRenderer } from './rule_name_cell_renderer';
 import { ONE_DISCOVER_SCOPE_ID } from '../constants';
 
 export type SecuritySolutionRowCellRendererGetter = Awaited<
@@ -27,9 +33,13 @@ export type SecuritySolutionRowCellRendererGetter = Awaited<
  *
  * This controls the list of fields that are allowed custom security solution rendering
  * in Discover's contextual View
- *
+ * Also see: src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security/constants.ts
  */
-const ALLOWED_DISCOVER_RENDERED_FIELDS = ['kibana.alert.workflow_status'];
+const ALLOWED_DISCOVER_RENDERED_FIELDS = [
+  SIGNAL_STATUS_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+  LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
+];
 
 export const getCellRendererForGivenRecord = (
   services: StartServices,
@@ -37,6 +47,15 @@ export const getCellRendererForGivenRecord = (
 ): SecuritySolutionRowCellRendererGetter => {
   return (fieldName: string) => {
     if (ALLOWED_DISCOVER_RENDERED_FIELDS.includes(fieldName)) {
+      if (
+        fieldName === SIGNAL_RULE_NAME_FIELD_NAME ||
+        fieldName === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME
+      ) {
+        return function RuleNameFieldRenderer(props: DataGridCellValueElementProps) {
+          return <RuleNameCellRenderer {...props} services={services} store={store} />;
+        };
+      }
+
       return function UnifiedFieldRenderBySecuritySolution(props: DataGridCellValueElementProps) {
         // convert discover data format to timeline data format
         const data: TimelineNonEcsData[] = useMemo(

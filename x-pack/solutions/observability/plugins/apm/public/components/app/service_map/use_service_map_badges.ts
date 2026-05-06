@@ -6,8 +6,19 @@
  */
 
 import { useMemo } from 'react';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { useLicenseContext } from '../../../context/license/use_license_context';
+import { isActivePlatinumLicense } from '../../../../common/license_check';
+import { isServiceNodeData } from '../../../../common/service_map';
+import type { ServiceMapNode } from '../../../../common/service_map';
 import type { Environment } from '../../../../common/environment_rt';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { mergeServiceMapNodesWithBadges } from './merge_service_map_nodes_with_badges';
+
+interface ServiceMapBadgesReturn {
+  nodes: ServiceMapNode[];
+  status: FETCH_STATUS;
+}
 
 /**
  * One POST returns **per-service** alert counts and SLO stats for every service node on the map
@@ -16,33 +27,52 @@ import type { Environment } from '../../../../common/environment_rt';
  * `serviceName` with its own `alertsCount` / SLO summary for badge merge on each node.
  */
 export function useServiceMapBadges({
-  serviceNames,
   environment,
   start,
   end,
   kuery,
-  enabled,
+  nodes,
+  nodesStatus,
 }: {
-  serviceNames: string[];
   environment: Environment;
   start: string;
   end: string;
   kuery: string;
-  enabled: boolean;
-}) {
+  nodes: ServiceMapNode[];
+  nodesStatus: FETCH_STATUS;
+}): ServiceMapBadgesReturn {
+  const { config } = useApmPluginContext();
+  const license = useLicenseContext();
+
+  const serviceNamesForBadges = useMemo(() => {
+    const names = new Set<string>();
+    for (const node of nodes) {
+      if (isServiceNodeData(node.data)) {
+        names.add(node.data.label);
+      }
+    }
+    return [...names].sort();
+  }, [nodes]);
+
+  const enabled =
+    !!license &&
+    isActivePlatinumLicense(license) &&
+    config.serviceMapEnabled &&
+    nodesStatus === FETCH_STATUS.SUCCESS &&
+    serviceNamesForBadges.length > 0;
+
   // useFetcher compares `fnDeps` by reference; a new inline array every render re-runs the
   // effect, aborts in-flight requests, and can prevent badges from ever reaching SUCCESS.
   const fetcherDeps = useMemo(
-    () => [enabled, serviceNames, start, end, environment, kuery],
-    [enabled, serviceNames, start, end, environment, kuery]
+    () => [enabled, serviceNamesForBadges, start, end, environment, kuery],
+    [enabled, serviceNamesForBadges, start, end, environment, kuery]
   );
 
-  return useFetcher(
+  const { data: badgesData, status: badgesStatus } = useFetcher(
     (callApmApi) => {
-      if (!enabled || serviceNames.length === 0) {
+      if (!enabled) {
         return;
       }
-      const uniqueSorted = [...new Set(serviceNames)].sort();
       return callApmApi('POST /internal/apm/service-map/service_badges', {
         params: {
           query: {
@@ -54,7 +84,7 @@ export function useServiceMapBadges({
           body: {
             // io-ts `jsonRt.pipe(t.array(t.string))` expects a JSON string (see service inventory
             // `POST /internal/apm/services/detailed_statistics`).
-            serviceNames: JSON.stringify(uniqueSorted),
+            serviceNames: JSON.stringify(serviceNamesForBadges),
           },
         },
       });
@@ -65,4 +95,11 @@ export function useServiceMapBadges({
     fetcherDeps,
     { showToastOnError: false }
   );
+
+  return useMemo(() => {
+    if (badgesStatus !== FETCH_STATUS.SUCCESS || !badgesData) {
+      return { nodes, status: badgesStatus };
+    }
+    return { nodes: mergeServiceMapNodesWithBadges(nodes, badgesData), status: badgesStatus };
+  }, [badgesData, badgesStatus, nodes]);
 }

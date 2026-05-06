@@ -56,29 +56,28 @@ test.describe(
         PARENT_STREAM_NAME,
         `FROM $.logs.ecs | LIMIT 100`
       );
-      await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
 
       await pageObjects.streams.gotoStreamMainPage();
       await pageObjects.streams.clickStreamNameLink(PARENT_STREAM_NAME);
       await pageObjects.streams.gotoPartitioningTab(PARENT_STREAM_NAME);
       await pageObjects.streams.selectChildStreamType('Query');
       await pageObjects.streams.openCreateChildQueryStreamForm();
-      await pageObjects.streams.fillAndSaveChildQueryStream(
+      await pageObjects.streams.fillChildQueryStreamForm(
         CHILD_STREAM_NAME,
         `FROM $.${PARENT_STREAM_NAME} | LIMIT 100`
       );
-      await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
+      await pageObjects.streams.saveChildQueryStream();
 
       await pageObjects.streams.gotoStreamMainPage();
       await pageObjects.streams.clickStreamNameLink(CHILD_FULL_NAME);
       await pageObjects.streams.gotoPartitioningTab(CHILD_FULL_NAME);
       await pageObjects.streams.selectChildStreamType('Query');
       await pageObjects.streams.openCreateChildQueryStreamForm();
-      await pageObjects.streams.fillAndSaveChildQueryStream(
+      await pageObjects.streams.fillChildQueryStreamForm(
         GRANDCHILD_STREAM_NAME,
         `FROM $.${CHILD_FULL_NAME} | LIMIT 100`
       );
-      await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
+      await pageObjects.streams.saveChildQueryStream();
 
       await pageObjects.streams.gotoStreamMainPage();
       await pageObjects.streams.deleteQueryStreamFromAdvancedTab(CHILD_FULL_NAME);
