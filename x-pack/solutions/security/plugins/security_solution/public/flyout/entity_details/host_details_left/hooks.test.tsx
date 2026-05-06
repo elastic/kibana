@@ -10,8 +10,14 @@ import { renderHook, act } from '@testing-library/react';
 import { useSelectedTab, useTabs } from './hooks';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TestProviders } from '../../../common/mock';
-import { RESOLUTION_GROUP_TAB_TEST_ID } from '../../../entity_analytics/components/entity_resolution/test_ids';
+import {
+  getRiskInputTab,
+  getInsightsInputTab,
+  getResolutionGroupTab,
+} from '../../../entity_analytics/components/entity_details_flyout';
+import { getGraphViewTab } from '../shared/components/left';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { HostDetailsPanelProps } from '.';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
@@ -25,6 +31,35 @@ jest.mock('@kbn/expandable-flyout', () => ({
 jest.mock('../../../common/hooks/use_has_entity_resolution_license', () => ({
   useHasEntityResolutionLicense: jest.fn(() => false),
 }));
+
+jest.mock('../../../entity_analytics/components/entity_details_flyout', () => ({
+  getRiskInputTab: jest.fn(),
+  getInsightsInputTab: jest.fn(),
+  getResolutionGroupTab: jest.fn(),
+}));
+
+jest.mock('../shared/components/left', () => ({
+  getGraphViewTab: jest.fn(),
+}));
+
+// `useTabs` calls these factory functions to build the tab objects. The
+// mocks return placeholder shapes with the correct `id` so inclusion/order
+// assertions still work, while leaving the call arguments available for
+// shape verification via `toHaveBeenCalledWith`.
+const setupTabFactoryMocks = () => {
+  (getRiskInputTab as jest.Mock).mockImplementation(() => ({
+    id: EntityDetailsLeftPanelTab.RISK_INPUTS,
+  }));
+  (getInsightsInputTab as jest.Mock).mockImplementation(() => ({
+    id: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+  }));
+  (getGraphViewTab as jest.Mock).mockImplementation(() => ({
+    id: EntityDetailsLeftPanelTab.GRAPH_VIEW,
+  }));
+  (getResolutionGroupTab as jest.Mock).mockImplementation(() => ({
+    id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
+  }));
+};
 
 const defaultParams: HostDetailsPanelProps = {
   isRiskScoreExist: true,
@@ -48,13 +83,12 @@ const defaultTabs: LeftPanelTabsType = [
   },
 ];
 
-// Failing: See https://github.com/elastic/kibana/issues/261569
-describe.skip('hooks', () => {
+describe('hooks', () => {
   describe('useSelectedTab', () => {
     const mockOpenLeftPanel = jest.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      jest.resetAllMocks();
       (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
     });
 
@@ -105,8 +139,10 @@ describe.skip('hooks', () => {
 
   describe('useTabs', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      jest.resetAllMocks();
       (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+      (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: jest.fn() });
+      setupTabFactoryMocks();
     });
 
     it('should include the risk score tab when isRiskScoreExist and name are true', () => {
@@ -115,6 +151,14 @@ describe.skip('hooks', () => {
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
       ]);
+      // Risk tab receives `entityStoreEntityId` (not the panel param `entityId`).
+      // When entity is not in the entity store, this is `undefined` by design.
+      expect(getRiskInputTab).toHaveBeenCalledWith({
+        entityName: 'testHost',
+        entityType: EntityType.host,
+        scopeId: 'test',
+        entityId: undefined,
+      });
     });
 
     it('should include the insights tab when any findings or alerts are present', () => {
@@ -135,9 +179,16 @@ describe.skip('hooks', () => {
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.CSP_INSIGHTS }),
       ]);
+      expect(getInsightsInputTab).toHaveBeenCalledWith({
+        field: 'host.name',
+        value: 'testHost',
+        entityId: 'testEntityId',
+        scopeId: 'test',
+        entityType: EntityType.host,
+      });
     });
 
-    it('should return only the graph view tab when no other tabs are available', () => {
+    it('should return the risk inputs and graph view tabs when entityStoreEntityId and hostName are set', () => {
       const { result } = renderHook(
         () =>
           useTabs({
@@ -154,11 +205,24 @@ describe.skip('hooks', () => {
       );
 
       expect(result.current).toEqual([
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
       ]);
+      // When the entity is in the entity store, the risk tab receives the
+      // `entityStoreEntityId` so it can look up unscored-entity context.
+      expect(getRiskInputTab).toHaveBeenCalledWith({
+        entityName: 'testHost',
+        entityType: EntityType.host,
+        scopeId: 'scope1',
+        entityId: 'testEntityStoreId',
+      });
+      expect(getGraphViewTab).toHaveBeenCalledWith({
+        entityId: 'testEntityStoreId',
+        scopeId: 'scope1',
+      });
     });
 
-    it('should return an empty array when no tabs are available and entityId is not provided', () => {
+    it('should return an empty array when no risk score, no entity store entity, no insights signals, and isRiskScoreExist is false', () => {
       const { result } = renderHook(
         () =>
           useTabs({
@@ -174,6 +238,10 @@ describe.skip('hooks', () => {
       );
 
       expect(result.current).toEqual([]);
+      expect(getRiskInputTab).not.toHaveBeenCalled();
+      expect(getInsightsInputTab).not.toHaveBeenCalled();
+      expect(getGraphViewTab).not.toHaveBeenCalled();
+      expect(getResolutionGroupTab).not.toHaveBeenCalled();
     });
 
     it('includes Resolution tab when entityStoreEntityId is set and Entity Resolution license is active', () => {
@@ -190,11 +258,15 @@ describe.skip('hooks', () => {
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
-        expect.objectContaining({
-          id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
-          'data-test-subj': RESOLUTION_GROUP_TAB_TEST_ID,
-        }),
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP }),
       ]);
+      // The Resolution tab is the host variant, scoped correctly, and uses the
+      // entity store ID — guards against host/user copy-paste bugs.
+      expect(getResolutionGroupTab).toHaveBeenCalledWith({
+        entityId: 'stored-host-entity-1',
+        entityType: EntityType.host,
+        scopeId: 'test',
+      });
     });
 
     it('does not include Resolution tab when entityStoreEntityId is set but license is inactive', () => {
@@ -212,6 +284,7 @@ describe.skip('hooks', () => {
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
       ]);
+      expect(getResolutionGroupTab).not.toHaveBeenCalled();
     });
 
     it('does not include Resolution tab when license is active but entityStoreEntityId is missing', () => {
@@ -221,6 +294,10 @@ describe.skip('hooks', () => {
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
       ]);
+      // Both Graph and Resolution are gated on `entityStoreEntityId`. License
+      // alone must not enable either.
+      expect(getGraphViewTab).not.toHaveBeenCalled();
+      expect(getResolutionGroupTab).not.toHaveBeenCalled();
     });
   });
 });
