@@ -33,6 +33,18 @@ interface UsePackQueryLastResultsProps {
   scheduleId?: string;
 }
 
+/**
+ * Fetches the most recent execution metadata for a pack query.
+ *
+ * If `scheduleId` is provided, results come from the per-execution `terms` agg
+ * over `osquery_meta.schedule_execution_count` (single round-trip). This branch
+ * does not honor `startDate` / `endDate` because the latest execution is found
+ * by ordering on `event.ingested`.
+ *
+ * Otherwise the legacy `actionId` branch is used (one search for the latest
+ * hit, one aggregation for `unique_agents` / `docCount`). The `startDate` /
+ * `endDate` props apply to that branch only.
+ */
 export const usePackQueryLastResults = ({
   actionId,
   interval,
@@ -66,8 +78,9 @@ export const usePackQueryLastResults = ({
               size: 1,
               // Order by sub-agg max_ingested to get the most recent execution
               // bucket. shard_size widens the per-shard candidate set so the
-              // ordering is accurate when results are spread across many shards.
-              shard_size: 10,
+              // ordering stays accurate when results are spread across many
+              // shards (typical for pack result indices that roll over).
+              shard_size: 100,
               order: { max_ingested: 'desc' },
             },
             aggs: {
@@ -95,6 +108,10 @@ export const usePackQueryLastResults = ({
             : undefined,
           uniqueAgentsCount: bucket.unique_agents?.value,
           docCount: bucket.doc_count,
+          // Bucket key is the value of `osquery_meta.schedule_execution_count`
+          // for the most recent execution. Callers (e.g. View in Discover/Lens)
+          // use this to scope link filters to exactly that execution.
+          executionCount: bucket.key,
         };
       }
 

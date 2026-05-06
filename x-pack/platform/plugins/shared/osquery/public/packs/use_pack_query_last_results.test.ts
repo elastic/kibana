@@ -69,7 +69,7 @@ describe('usePackQueryLastResults', () => {
   });
 
   describe('scheduleId path', () => {
-    it('returns lastResultTime, uniqueAgentsCount, and docCount from aggregation bucket', async () => {
+    it('returns lastResultTime, uniqueAgentsCount, docCount, and executionCount from aggregation bucket', async () => {
       const queryClient = createQueryClient();
 
       mockSearchSource.fetch$.mockReturnValue(
@@ -105,6 +105,7 @@ describe('usePackQueryLastResults', () => {
         lastResultTime: ['2023-11-14T22:13:20.000Z'],
         uniqueAgentsCount: 5,
         docCount: 150,
+        executionCount: 42,
       });
     });
 
@@ -176,6 +177,33 @@ describe('usePackQueryLastResults', () => {
         lastResultTime: ['2023-11-14T22:13:20.000Z'],
         uniqueAgentsCount: 3,
         docCount: 42,
+      });
+
+      // First call: latest hit by event.ingested. Second call: range-bound aggs
+      // for unique_agents and total docs. Both must filter on action_id.
+      expect(mockSearchSource.create).toHaveBeenCalledTimes(2);
+      expect(mockSearchSource.create).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: [{ match_phrase: { action_id: 'action-uuid-1234' } }],
+            }),
+          }),
+        })
+      );
+      expect(mockSearchSource.create).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([{ match_phrase: { action_id: 'action-uuid-1234' } }]),
+            }),
+          }),
+        })
+      );
+      expect(mockSearchSource.setField).toHaveBeenCalledWith('aggs', {
+        unique_agents: { cardinality: { field: 'agent.id' } },
       });
     });
 
@@ -268,6 +296,7 @@ describe('usePackQueryLastResults', () => {
         lastResultTime: ['2023-11-14T22:13:20.000Z'],
         uniqueAgentsCount: 2,
         docCount: 7,
+        executionCount: 1,
       });
     });
   });

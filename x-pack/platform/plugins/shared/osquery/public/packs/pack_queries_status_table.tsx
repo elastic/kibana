@@ -62,6 +62,8 @@ export enum ViewResultsActionButtonType {
 
 interface ViewResultsInDiscoverActionProps {
   actionId?: string;
+  scheduleId?: string;
+  executionCount?: number;
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
@@ -70,8 +72,17 @@ interface ViewResultsInDiscoverActionProps {
 
 export function getLensAttributes(
   logsDataView: LogsDataView,
-  actionId: string
+  actionId: string,
+  scheduleId?: string,
+  executionCount?: number
 ): TypedLensByValueInput['attributes'] {
+  // Scheduled-pack result docs filter by `schedule_id`; live-action docs by `action_id`.
+  const filterField = scheduleId ? 'schedule_id' : 'action_id';
+  const filterValue = scheduleId ?? actionId;
+  // For scheduled queries, narrow further to a specific execution to match
+  // exactly the documents counted in the "Last results" / "Docs" / "Agents"
+  // columns; without this the link would return all historical executions.
+  const includeExecutionFilter = scheduleId && typeof executionCount === 'number';
   const dataLayer: PersistedIndexPatternLayer = {
     columnOrder: ['8690befd-fd69-4246-af4a-dd485d2a3b38', 'ed999e9d-204c-465b-897f-fe1a125b39ed'],
     columns: {
@@ -123,7 +134,7 @@ export function getLensAttributes(
 
   return {
     visualizationType: 'lnsPie',
-    title: `Action ${actionId} results`,
+    title: scheduleId ? `Schedule ${scheduleId} results` : `Action ${actionId} results`,
     references: [
       {
         id: logsDataView.id,
@@ -158,17 +169,38 @@ export function getLensAttributes(
             alias: null,
             disabled: false,
             params: {
-              query: actionId,
+              query: filterValue,
             },
             type: 'phrase',
-            key: 'action_id',
+            key: filterField,
           },
           query: {
             match_phrase: {
-              action_id: actionId,
+              [filterField]: filterValue,
             },
           },
         },
+        ...(includeExecutionFilter
+          ? [
+              {
+                $state: { store: FilterStateStore.APP_STATE },
+                meta: {
+                  index: 'filter-index-pattern-0',
+                  negate: false,
+                  alias: null,
+                  disabled: false,
+                  params: { query: executionCount },
+                  type: 'phrase',
+                  key: 'osquery_meta.schedule_execution_count',
+                },
+                query: {
+                  match_phrase: {
+                    'osquery_meta.schedule_execution_count': executionCount,
+                  },
+                },
+              },
+            ]
+          : []),
       ],
       query: { language: 'kuery', query: '' },
       visualization: xyConfig,
@@ -178,6 +210,8 @@ export function getLensAttributes(
 
 const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
   actionId,
+  scheduleId,
+  executionCount,
   buttonType,
   endDate,
   startDate,
@@ -185,7 +219,8 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
+  const hasIdentifier = !!(actionId || scheduleId);
+  const { data: logsDataView } = useLogsDataView({ skip: !hasIdentifier, checkOnly: true });
 
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -200,7 +235,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
               to: endDate ?? 'now',
               mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
             },
-            attributes: getLensAttributes(logsDataView, actionId ?? ''),
+            attributes: getLensAttributes(logsDataView, actionId ?? '', scheduleId, executionCount),
           },
           {
             openInNewTab: true,
@@ -209,7 +244,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
         );
       }
     },
-    [actionId, endDate, lensService, logsDataView, mode, startDate]
+    [actionId, scheduleId, executionCount, endDate, lensService, logsDataView, mode, startDate]
   );
 
   if (!isLensAvailable) {
@@ -240,6 +275,8 @@ export const ViewResultsInLensAction = React.memo(ViewResultsInLensActionCompone
 
 const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
   actionId,
+  scheduleId,
+  executionCount,
   buttonType,
   endDate,
   startDate,
@@ -247,13 +284,21 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover_v2;
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
+  const hasIdentifier = !!(actionId || scheduleId);
+  const { data: logsDataView } = useLogsDataView({ skip: !hasIdentifier, checkOnly: true });
 
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
   useEffect(() => {
     const getDiscoverUrl = async () => {
       if (!locator || !logsDataView) return;
+
+      // Scheduled-pack docs filter by `schedule_id`; live-action docs by `action_id`.
+      const filterField = scheduleId ? 'schedule_id' : 'action_id';
+      const filterValue = scheduleId ?? actionId;
+      // For scheduled queries, narrow further to one execution so the link
+      // matches exactly the docs counted in the column.
+      const includeExecutionFilter = scheduleId && typeof executionCount === 'number';
 
       const newUrl = await locator.getUrl({
         indexPatternId: logsDataView.id,
@@ -265,12 +310,33 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
               negate: false,
               disabled: false,
               type: 'phrase',
-              key: 'action_id',
-              params: { query: actionId },
+              key: filterField,
+              params: { query: filterValue },
             },
-            query: { match_phrase: { action_id: actionId } },
+            query: { match_phrase: { [filterField]: filterValue } },
             $state: { store: FilterStateStore.APP_STATE },
           },
+          ...(includeExecutionFilter
+            ? [
+                {
+                  meta: {
+                    index: logsDataView.id,
+                    alias: null,
+                    negate: false,
+                    disabled: false,
+                    type: 'phrase',
+                    key: 'osquery_meta.schedule_execution_count',
+                    params: { query: executionCount },
+                  },
+                  query: {
+                    match_phrase: {
+                      'osquery_meta.schedule_execution_count': executionCount,
+                    },
+                  },
+                  $state: { store: FilterStateStore.APP_STATE },
+                },
+              ]
+            : []),
         ],
         refreshInterval: {
           pause: true,
@@ -293,7 +359,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     };
 
     getDiscoverUrl();
-  }, [actionId, endDate, startDate, locator, logsDataView]);
+  }, [actionId, scheduleId, executionCount, endDate, startDate, locator, logsDataView]);
 
   if (!discoverPermissions.show) {
     return null;
@@ -330,17 +396,23 @@ export const ViewResultsInDiscoverAction = React.memo(ViewResultsInDiscoverActio
 
 interface ScheduledQueryExpandedContentProps {
   actionId?: string;
+  scheduleId?: string;
   agentIds?: string[];
   interval: number;
 }
 
 const ScheduledQueryExpandedContent = React.memo<ScheduledQueryExpandedContentProps>(
-  ({ actionId, agentIds, interval }) => (
+  ({ actionId, scheduleId, agentIds, interval }) => (
     <EuiFlexGroup direction="column" gutterSize="xl">
       <EuiFlexItem>
         <EuiSpacer size="m" />
         <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
-          <ScheduledQueryErrorsTable actionId={actionId} agentIds={agentIds} interval={interval} />
+          <ScheduledQueryErrorsTable
+            actionId={actionId}
+            scheduleId={scheduleId}
+            agentIds={agentIds}
+            interval={interval}
+          />
         </EuiPanel>
         <EuiSpacer size="m" />
       </EuiFlexItem>
@@ -359,9 +431,10 @@ interface ScheduledQueryLastResultsProps {
 
 interface ScheduledQueryErrorsProps {
   actionId?: string;
+  scheduleId?: string;
   queryId: string;
   interval: number;
-  toggleErrors: (payload: { queryId: string; interval: number }) => void;
+  toggleErrors: (payload: { queryId: string; interval: number; scheduleId?: string }) => void;
   expanded: boolean;
 }
 
@@ -472,18 +545,20 @@ const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({
 
 const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
   actionId,
+  scheduleId,
   interval,
   queryId,
   toggleErrors,
   expanded,
 }) => {
   const handleErrorsToggle = useCallback(
-    () => toggleErrors({ queryId, interval }),
-    [toggleErrors, queryId, interval]
+    () => toggleErrors({ queryId, interval, scheduleId }),
+    [toggleErrors, queryId, interval, scheduleId]
   );
 
   const { data: errorsData, isLoading: errorsLoading } = usePackQueryErrors({
     actionId,
+    scheduleId,
     interval,
   });
   if (errorsLoading) {
@@ -523,15 +598,18 @@ const getPackActionId = (queryId: string, packName: string, spaceId?: string) =>
 
 interface PackViewInActionProps {
   actionId?: string;
+  scheduleId?: string;
   interval: number;
 }
 
 const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
   actionId,
+  scheduleId,
   interval,
 }) => {
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
+    scheduleId,
     interval,
   });
 
@@ -545,6 +623,8 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
   return (
     <ViewResultsInDiscoverAction
       actionId={actionId}
+      scheduleId={scheduleId}
+      executionCount={lastResultsData?.executionCount}
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
@@ -555,9 +635,14 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
 
 const PackViewInDiscoverAction = React.memo(PackViewInDiscoverActionComponent);
 
-const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ actionId, interval }) => {
+const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
+  actionId,
+  scheduleId,
+  interval,
+}) => {
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
+    scheduleId,
     interval,
   });
 
@@ -571,6 +656,8 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ action
   return (
     <ViewResultsInLensAction
       actionId={actionId}
+      scheduleId={scheduleId}
+      executionCount={lastResultsData?.executionCount}
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
@@ -615,8 +702,19 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     );
   }, []);
 
+  // Scheduled-pack docs filter by `schedule_id`; live-action docs by `action_id`.
+  // Hooks downstream prefer `scheduleId` when both are present, so callers can
+  // pass `actionId` unconditionally and let the precedence rule pick.
   const toggleErrors = useCallback(
-    ({ queryId, interval }: { queryId: string; interval: number }) => {
+    ({
+      queryId,
+      interval,
+      scheduleId,
+    }: {
+      queryId: string;
+      interval: number;
+      scheduleId?: string;
+    }) => {
       const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
       if (itemIdToExpandedRowMapValues[queryId]) {
         delete itemIdToExpandedRowMapValues[queryId];
@@ -624,6 +722,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         itemIdToExpandedRowMapValues[queryId] = (
           <ScheduledQueryExpandedContent
             actionId={actionIdForQuery(queryId)}
+            scheduleId={scheduleId}
             agentIds={agentIds}
             interval={interval}
           />
@@ -638,9 +737,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderLastResultsColumn = useCallback(
     (item: PackQueryFormData) => (
       <ScheduledQueryLastResults
-        actionId={item.schedule_id ? undefined : actionIdForQuery(item.id)}
-        interval={item.interval}
+        actionId={actionIdForQuery(item.id)}
         scheduleId={item.schedule_id}
+        interval={item.interval}
       />
     ),
     [actionIdForQuery]
@@ -648,9 +747,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderDocsColumn = useCallback(
     (item: PackQueryFormData) => (
       <DocsColumnResults
-        actionId={item.schedule_id ? undefined : actionIdForQuery(item.id)}
-        interval={item.interval}
+        actionId={actionIdForQuery(item.id)}
         scheduleId={item.schedule_id}
+        interval={item.interval}
       />
     ),
     [actionIdForQuery]
@@ -658,9 +757,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderAgentsColumn = useCallback(
     (item: PackQueryFormData) => (
       <AgentsColumnResults
-        actionId={item.schedule_id ? undefined : actionIdForQuery(item.id)}
-        interval={item.interval}
+        actionId={actionIdForQuery(item.id)}
         scheduleId={item.schedule_id}
+        interval={item.interval}
       />
     ),
     [actionIdForQuery]
@@ -671,6 +770,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         queryId={item.id}
         interval={item.interval}
         actionId={actionIdForQuery(item.id)}
+        scheduleId={item.schedule_id}
         toggleErrors={toggleErrors}
         expanded={!!itemIdToExpandedRowMap[item.id]}
       />
@@ -680,14 +780,22 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   const renderDiscoverResultsAction = useCallback(
     (item: PackQueryFormData) => (
-      <PackViewInDiscoverAction actionId={actionIdForQuery(item.id)} interval={item.interval} />
+      <PackViewInDiscoverAction
+        actionId={actionIdForQuery(item.id)}
+        scheduleId={item.schedule_id}
+        interval={item.interval}
+      />
     ),
     [actionIdForQuery]
   );
 
   const renderLensResultsAction = useCallback(
     (item: PackQueryFormData) => (
-      <PackViewInLensAction actionId={actionIdForQuery(item.id)} interval={item.interval} />
+      <PackViewInLensAction
+        actionId={actionIdForQuery(item.id)}
+        scheduleId={item.schedule_id}
+        interval={item.interval}
+      />
     ),
     [actionIdForQuery]
   );
