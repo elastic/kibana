@@ -10,6 +10,7 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiBasicTable,
+  EuiCallOut,
   EuiCodeBlock,
   EuiComment,
   EuiCommentList,
@@ -34,6 +35,8 @@ import { useQueryClient } from '@kbn/react-query';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeEventDataQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query';
+import { useAlertingEpisodeSourceDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episode_source_data_view';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
@@ -136,7 +139,7 @@ const CopyableId: React.FC<{ value: string }> = ({ value }) => (
   </EuiCopy>
 );
 
-type FlyoutTab = 'overview' | 'json' | 'events_log';
+type FlyoutTab = 'overview' | 'metadata' | 'json' | 'events_log';
 
 const ACTION_TYPE_LABELS: Record<string, string> = {
   ack: 'Acknowledged',
@@ -231,7 +234,11 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
     refetch: refetchEvents,
   } = useFetchEpisodeEventsQuery({ episodeId, data: services.data });
 
-  const { data: episodeEventData } = useFetchEpisodeEventDataQuery({
+  const {
+    data: episodeEventData,
+    isLoading: isLoadingEventData,
+    isError: isEventDataError,
+  } = useFetchEpisodeEventDataQuery({
     episodeId,
     data: services.data,
   });
@@ -397,6 +404,32 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
   const ruleIds = useMemo(() => (ruleId ? [ruleId] : []), [ruleId]);
   const { rulesCache } = useAlertingRulesCache({ ruleIds, services });
   const ruleName = ruleId ? rulesCache[ruleId]?.metadata?.name : undefined;
+  const ruleQuery = ruleId ? rulesCache[ruleId]?.evaluation?.query?.base : undefined;
+
+  const metadataServices = useMemo(
+    () => ({ dataViews: services.dataViews, http: services.http }),
+    [services.dataViews, services.http]
+  );
+
+  const { value: metadataDataView, loading: isMetadataDataViewLoading } =
+    useAlertingEpisodeSourceDataView({
+      query: ruleQuery,
+      services: metadataServices,
+    });
+
+  const docViewerRegistry = (
+    services as unknown as { unifiedDocViewer?: { registry: { getAll: () => Array<{ id: string; render?: (props: Record<string, unknown>) => React.ReactNode }> } } }
+  ).unifiedDocViewer?.registry;
+
+  const tableDocView = useMemo(
+    () => docViewerRegistry?.getAll()?.find((dv) => dv.id === 'doc_view_table'),
+    [docViewerRegistry]
+  );
+
+  const metadataHit = useMemo(() => {
+    if (!episodeEventData || !metadataDataView) return undefined;
+    return buildDataTableRecord({ _source: episodeEventData.data }, metadataDataView);
+  }, [episodeEventData, metadataDataView]);
 
   const assigneeUid = episodeAction?.lastAssigneeUid ?? undefined;
 
@@ -547,6 +580,64 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
     </EuiCodeBlock>
   );
 
+  const renderMetadataTab = () => {
+    if (isEventDataError) {
+      return (
+        <EuiText size="s" color="subdued">
+          {i18n.FLYOUT_METADATA_ERROR}
+        </EuiText>
+      );
+    }
+
+    if (isLoadingEventData || isMetadataDataViewLoading) {
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (!metadataHit || !metadataDataView || !episodeEventData) {
+      return (
+        <EuiText size="s" color="subdued">
+          {i18n.FLYOUT_METADATA_EMPTY}
+        </EuiText>
+      );
+    }
+
+    return (
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        css={css`
+          height: 100%;
+        `}
+      >
+        {episodeEventData.isStale && (
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              iconType="clock"
+              title={i18n.FLYOUT_METADATA_STALE}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem
+          grow
+          css={css`
+            min-height: 0;
+          `}
+        >
+          {tableDocView?.render?.({ hit: metadataHit, dataView: metadataDataView }) ?? null}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   const renderEventsLogTab = () => {
     if (isLoadingEventsLog) {
       return (
@@ -634,6 +725,12 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
             {i18n.FLYOUT_TAB_JSON}
           </EuiTab>
           <EuiTab
+            isSelected={selectedTab === 'metadata'}
+            onClick={() => onTabClick('metadata')}
+          >
+            {i18n.FLYOUT_TAB_METADATA}
+          </EuiTab>
+          <EuiTab
             isSelected={selectedTab === 'events_log'}
             onClick={() => onTabClick('events_log')}
           >
@@ -651,6 +748,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
       <FlyoutBody>
         {selectedTab === 'overview' && renderOverviewTab()}
         {selectedTab === 'json' && renderJsonTab()}
+        {selectedTab === 'metadata' && renderMetadataTab()}
         {selectedTab === 'events_log' && renderEventsLogTab()}
       </FlyoutBody>
 

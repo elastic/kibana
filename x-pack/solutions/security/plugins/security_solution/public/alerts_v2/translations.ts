@@ -181,6 +181,29 @@ export const FLYOUT_TAB_EVENTS_LOG = i18n.translate(
   { defaultMessage: 'Events log' }
 );
 
+export const FLYOUT_TAB_METADATA = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.tabMetadata',
+  { defaultMessage: 'Metadata' }
+);
+
+export const FLYOUT_METADATA_EMPTY = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.metadataEmpty',
+  { defaultMessage: 'No evaluation data is available for this episode.' }
+);
+
+export const FLYOUT_METADATA_ERROR = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.metadataError',
+  { defaultMessage: 'Failed to load metadata.' }
+);
+
+export const FLYOUT_METADATA_STALE = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.metadataStale',
+  {
+    defaultMessage:
+      'Showing data from the last active rule event that matched source data.',
+  }
+);
+
 export const FLYOUT_EVENTS_LOG_EMPTY = i18n.translate(
   'xpack.securitySolution.alertsV2.flyout.eventsLogEmpty',
   { defaultMessage: 'No actions have been recorded for this episode yet.' }
