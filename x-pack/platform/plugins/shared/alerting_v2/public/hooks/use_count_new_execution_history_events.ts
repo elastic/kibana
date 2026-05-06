@@ -29,7 +29,7 @@ export const useCountNewExecutionHistoryEvents = ({
   return useQuery<CountNewExecutionHistoryEventsResponse, Error>({
     queryKey: executionHistoryKeys.countSince(since),
     queryFn: () => executionHistoryApi.countNewSince(since),
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     refetchInterval: POLL_INTERVAL_MS,
     refetchIntervalInBackground: false,
     enabled,
