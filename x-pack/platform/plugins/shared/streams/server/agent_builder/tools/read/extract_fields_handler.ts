@@ -506,7 +506,8 @@ const buildKeyValueHints = (parsedDocuments: FlattenRecord[]): string[] => {
 
     hints.push(
       `Field "${fieldName}" has values like "${values[0]}" — all share a "${prefix}=" prefix. ` +
-        `If only the part after "=" is meaningful, ask the user whether to add a dissect step that strips it.`
+        `If only the part after "=" is meaningful, ask the user whether to refine the extraction. ` +
+        `To refine: call design_pipeline with extract_fields: false and a complete description of ALL fields to extract (use field_changes from this result), specifying that this field should be extracted without the prefix.`
     );
   }
 
