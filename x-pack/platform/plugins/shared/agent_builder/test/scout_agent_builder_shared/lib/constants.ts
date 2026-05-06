@@ -20,7 +20,7 @@ export const ELASTIC_API_VERSION = '2023-10-31';
 
 /**
  * Fixed port for GitHub-style plugin mock; must match
- * `agent_builder_api` Scout server config (`kbn-scout` config_sets).
+ * `agent_builder` Scout server config (`kbn-scout` config_sets).
  */
 export const SCOUT_AGENT_BUILDER_GITHUB_MOCK_PORT = 18387;
 

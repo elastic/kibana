@@ -11,7 +11,15 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
- * Stateful defaults with Agent Builder UI test settings: Agent Builder debug logging,
+ * Fixed port for the in-repo GitHub-style plugin mock used by Agent Builder plugin install tests.
+ * Kept in sync with `SCOUT_AGENT_BUILDER_GITHUB_MOCK_PORT` in Agent Builder Scout shared fixtures.
+ */
+const AGENT_BUILDER_GITHUB_MOCK_PORT = 18387;
+
+/**
+ * Stateful Kibana + Elasticsearch defaults with Agent Builder test settings:
+ * experimental Agent Builder UI flags, verbose Agent Builder plugin logging,
+ * `xpack.agentBuilder.githubBaseUrl` pointing at the local plugin registry mock,
  * AI agents feature flag, and AI Assistant chat experience set to agent mode.
  */
 export const servers: ScoutServerConfig = {
@@ -26,10 +34,17 @@ export const servers: ScoutServerConfig = {
           level: 'all',
           appenders: ['deprecation'],
         },
-        { name: 'plugins.agentBuilder', level: 'debug', appenders: ['console'] },
+        {
+          name: 'plugins.agentBuilder',
+          level: 'all',
+          appenders: ['default'],
+        },
       ])}`,
+      '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      '--uiSettings.overrides.agentContextLayer:experimentalFeatures=true',
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       '--uiSettings.overrides.aiAssistant:preferredChatExperience=agent',
+      `--xpack.agentBuilder.githubBaseUrl=http://localhost:${AGENT_BUILDER_GITHUB_MOCK_PORT}`,
     ],
   },
 };

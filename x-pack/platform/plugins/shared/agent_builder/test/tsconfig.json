@@ -5,9 +5,8 @@
     "types": ["node"]
   },
   "include": [
-    "./scout_agent_builder_api/**/*",
+    "./scout_agent_builder/**/*",
     "./scout_agent_builder_smoke/**/*",
-    "./scout_agent_builder_functional/**/*",
     "./scout_agent_builder_shared/**/*"
   ],
   "exclude": ["target/**/*"],

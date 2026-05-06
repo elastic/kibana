@@ -8,7 +8,7 @@
 module.exports = {
   overrides: [
     {
-      files: ['scout_agent_builder_api/api/**/*.ts', 'scout_agent_builder_smoke/api/**/*.ts'],
+      files: ['scout_agent_builder/api/**/*.ts', 'scout_agent_builder_smoke/api/**/*.ts'],
       rules: {
         '@kbn/eslint/scout_require_api_client_in_api_test': [
           'error',

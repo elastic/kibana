@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { servers as defaultConfig } from '../../default/serverless/search.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
  * Fixed port for the in-repo GitHub-style plugin mock used by Agent Builder plugin install tests.
- * Kept in sync with `SCOUT_AGENT_BUILDER_GITHUB_MOCK_PORT` in Agent Builder Scout API fixtures.
+ * Kept in sync with `SCOUT_AGENT_BUILDER_GITHUB_MOCK_PORT` in Agent Builder Scout shared fixtures.
  */
 const AGENT_BUILDER_GITHUB_MOCK_PORT = 18387;
 
 /**
- * Stateful Kibana + Elasticsearch defaults with Agent Builder API test settings:
- * experimental Agent Builder UI flags, verbose Agent Builder plugin logging, and
- * `xpack.agentBuilder.githubBaseUrl` pointing at the local plugin registry mock.
+ * Serverless Elasticsearch project defaults with Agent Builder test settings:
+ * experimental Agent Builder UI flags, `githubBaseUrl` for plugin installation tests,
+ * AI agents feature flag, and AI Assistant chat experience set to agent mode.
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -28,14 +28,11 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       `--logging.loggers=${JSON.stringify([
-        {
-          name: 'plugins.agentBuilder',
-          level: 'all',
-          appenders: ['default'],
-        },
+        { name: 'plugins.agentBuilder', level: 'debug', appenders: ['console'] },
       ])}`,
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
-      '--uiSettings.overrides.agentContextLayer:experimentalFeatures=true',
+      '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
+      '--uiSettings.overrides.aiAssistant:preferredChatExperience=agent',
       `--xpack.agentBuilder.githubBaseUrl=http://localhost:${AGENT_BUILDER_GITHUB_MOCK_PORT}`,
     ],
   },

@@ -12,7 +12,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/agents_list.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/agents_list.spec.ts",
         "line": 58,
         "column": 9
       }
@@ -28,7 +28,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/conversation_error_handling.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
         "line": 45,
         "column": 9
       }
@@ -44,7 +44,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/conversation_error_handling.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
         "line": 91,
         "column": 9
       }
@@ -60,7 +60,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/conversation_error_handling.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
         "line": 117,
         "column": 9
       }
@@ -76,7 +76,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/conversation_error_handling.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
         "line": 163,
         "column": 9
       }
@@ -92,7 +92,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/conversation_error_handling.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
         "line": 210,
         "column": 9
       }
@@ -108,7 +108,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/conversation_error_handling.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
         "line": 253,
         "column": 9
       }
@@ -124,7 +124,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/conversation_flow.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_flow.spec.ts",
         "line": 43,
         "column": 9
       }
@@ -140,7 +140,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/conversation_flow.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_flow.spec.ts",
         "line": 56,
         "column": 9
       }
@@ -156,7 +156,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/conversation_history.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_history.spec.ts",
         "line": 61,
         "column": 9
       }
@@ -172,7 +172,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/create_agent.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/create_agent.spec.ts",
         "line": 52,
         "column": 9
       }
@@ -188,7 +188,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/create_tool.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/create_tool.spec.ts",
         "line": 64,
         "column": 9
       }
@@ -204,7 +204,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/edit_agent.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/edit_agent.spec.ts",
         "line": 58,
         "column": 9
       }
@@ -220,7 +220,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/landing_page.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/landing_page.spec.ts",
         "line": 45,
         "column": 9
       }
@@ -236,7 +236,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/landing_page.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/landing_page.spec.ts",
         "line": 53,
         "column": 9
       }
@@ -252,7 +252,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/manage_tool.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
         "line": 45,
         "column": 9
       }
@@ -268,7 +268,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/manage_tool.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
         "line": 68,
         "column": 9
       }
@@ -284,7 +284,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/manage_tool.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
         "line": 95,
         "column": 9
       }
@@ -300,7 +300,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/manage_tool.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
         "line": 111,
         "column": 9
       }
@@ -316,7 +316,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/manage_tool.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
         "line": 129,
         "column": 9
       }
@@ -332,7 +332,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/mcp_tools.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_tools.spec.ts",
         "line": 65,
         "column": 9
       }
@@ -348,7 +348,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/sidebar_agent_switch.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_agent_switch.spec.ts",
         "line": 64,
         "column": 9
       }
@@ -364,7 +364,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/sidebar_conversation_flow.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_conversation_flow.spec.ts",
         "line": 44,
         "column": 9
       }
@@ -380,7 +380,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/sidebar_conversation_history.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_conversation_history.spec.ts",
         "line": 56,
         "column": 9
       }
@@ -396,7 +396,7 @@
         "@cloud-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_functional/ui/tests/sidebar_error_handling.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_error_handling.spec.ts",
         "line": 44,
         "column": 9
       }
