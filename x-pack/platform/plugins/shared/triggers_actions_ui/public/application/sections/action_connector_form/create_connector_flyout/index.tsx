@@ -14,6 +14,11 @@ import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
+import {
+  DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
+  DEPRECATED_LLM_CONNECTOR_INFO,
+} from '@kbn/response-ops-rule-form/src/translations';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -295,6 +300,22 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                   data-test-subj="slackTypeChangeButton"
                 />
                 <EuiSpacer size="xs" />
+              </>
+            )}
+
+            {isLLMConnectorTypeId(actionType.id) && (
+              <>
+                <EuiCallOut
+                  announceOnMount={false}
+                  size="s"
+                  color="warning"
+                  iconType="warning"
+                  data-test-subj="deprecatedLLMConnectorCallout"
+                  title={DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE}
+                >
+                  {DEPRECATED_LLM_CONNECTOR_INFO}
+                </EuiCallOut>
+                <EuiSpacer size="m" />
               </>
             )}
 
