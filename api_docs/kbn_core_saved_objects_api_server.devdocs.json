@@ -6541,6 +6541,30 @@
                 "path": "x-pack/platform/plugins/private/canvas/server/workpad_route_context.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/integration_tests/timeline_migrations_7_16.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/integration_tests/timeline_migrations_7_16.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/integration_tests/timeline_migrations_7_16.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/integration_tests/timeline_migrations_7_16.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/integration_tests/timeline_migrations_7_16.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/integration_tests/timeline_migrations_7_16.test.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/create.test.ts"
               },
