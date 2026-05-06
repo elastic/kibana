@@ -524,9 +524,9 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
           })
           .expect(200);
@@ -540,9 +540,9 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
           })
           .expect(200);
@@ -599,9 +599,9 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
           })
           .expect(200);
@@ -615,9 +615,9 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['test.fr:443', 'test.com:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
           })
           .expect(200);
@@ -644,9 +644,9 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
           })
           .expect(200);
@@ -660,9 +660,9 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             config_yaml: 'shipper: {}',
             shipper: {
@@ -732,12 +732,12 @@ export default function (providerContext: FtrProviderContext) {
               disk_queue_encryption_enabled: true,
             },
             ssl: {
-              certificate: 'CERTIFICATE',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             secrets: {
               ssl: {
-                key: 'KEY',
+                key: '/KEY',
               },
             },
           })
@@ -747,7 +747,7 @@ export default function (providerContext: FtrProviderContext) {
         const secretId = res.body.item.secrets.ssl.key.id;
         const secret = await getSecretById(secretId);
         // @ts-ignore _source unknown type
-        expect(secret._source.value).to.equal('KEY');
+        expect(secret._source.value).to.equal('/KEY');
 
         const updateRes = await supertest
           .put(`/api/fleet/outputs/${outputId}`)
@@ -765,8 +765,8 @@ export default function (providerContext: FtrProviderContext) {
               disk_queue_encryption_enabled: true,
             },
             ssl: {
-              certificate: 'CERTIFICATE',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             secrets: {
               ssl: {
@@ -1121,9 +1121,9 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
           })
           .expect(200);
@@ -1136,9 +1136,9 @@ export default function (providerContext: FtrProviderContext) {
           is_default: false,
           is_default_monitoring: false,
           ssl: {
-            certificate: 'CERTIFICATE',
-            key: 'KEY',
-            certificate_authorities: ['CA1', 'CA2'],
+            certificate: '/CERTIFICATE',
+            key: '/KEY',
+            certificate_authorities: ['/CA1', '/CA2'],
           },
         });
       });
@@ -1153,9 +1153,9 @@ export default function (providerContext: FtrProviderContext) {
             hosts: ['test.fr:443'],
             is_default: true,
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
           })
           .expect(200);
@@ -1168,9 +1168,9 @@ export default function (providerContext: FtrProviderContext) {
           is_default: true,
           is_default_monitoring: false,
           ssl: {
-            certificate: 'CERTIFICATE',
-            key: 'KEY',
-            certificate_authorities: ['CA1', 'CA2'],
+            certificate: '/CERTIFICATE',
+            key: '/KEY',
+            certificate_authorities: ['/CA1', '/CA2'],
           },
         });
 
@@ -1194,9 +1194,9 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['https://test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
           })
           .expect(400);
@@ -1432,9 +1432,9 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             config_yaml: 'shipper: {}',
             shipper: {
@@ -1511,12 +1511,12 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             config_yaml: 'shipper: {}',
-            secrets: { ssl: { key: 'KEY' } },
+            secrets: { ssl: { key: '/KEY' } },
           })
           .expect(400);
 
@@ -1563,13 +1563,13 @@ export default function (providerContext: FtrProviderContext) {
               disk_queue_encryption_enabled: true,
             },
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             secrets: {
               ssl: {
-                key: 'KEY',
+                key: '/KEY',
               },
             },
           })
@@ -1587,12 +1587,12 @@ export default function (providerContext: FtrProviderContext) {
             type: 'elasticsearch',
             hosts: ['https://test.fr'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             config_yaml: 'shipper: {}',
-            secrets: { ssl: { key: 'KEY' } },
+            secrets: { ssl: { key: '/KEY' } },
           })
           .expect(400);
 
@@ -1608,12 +1608,12 @@ export default function (providerContext: FtrProviderContext) {
             type: 'remote_elasticsearch',
             hosts: ['https://test.fr'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             config_yaml: 'shipper: {}',
-            secrets: { ssl: { key: 'KEY' } },
+            secrets: { ssl: { key: '/KEY' } },
           })
           .expect(400);
 
@@ -1637,12 +1637,12 @@ export default function (providerContext: FtrProviderContext) {
               disk_queue_encryption_enabled: true,
             },
             ssl: {
-              certificate: 'CERTIFICATE',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             secrets: {
               ssl: {
-                key: 'KEY',
+                key: '/KEY',
               },
             },
           })
@@ -1651,7 +1651,7 @@ export default function (providerContext: FtrProviderContext) {
         const secretId = res.body.item.secrets.ssl.key.id;
         const secret = await getSecretById(secretId);
         // @ts-ignore _source unknown type
-        expect(secret._source.value).to.equal('KEY');
+        expect(secret._source.value).to.equal('/KEY');
       });
 
       it('should create ssl.password secret correctly', async function () {
@@ -1709,11 +1709,11 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             config_yaml: 'shipper: {}',
-            secrets: { ssl: { key: 'KEY' } },
+            secrets: { ssl: { key: '/KEY' } },
           })
           .expect(200);
 
@@ -1725,7 +1725,7 @@ export default function (providerContext: FtrProviderContext) {
         const secretId = res.body.item.secrets.ssl.key.id;
         const secret = await getSecretById(secretId);
         // @ts-ignore _source unknown type
-        expect(secret._source.value).to.equal('KEY');
+        expect(secret._source.value).to.equal('/KEY');
       });
 
       it('should not store secrets if fleet server does not meet minimum version', async function () {
@@ -1741,18 +1741,18 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             config_yaml: 'shipper: {}',
-            secrets: { ssl: { key: 'KEY' } },
+            secrets: { ssl: { key: '/KEY' } },
           })
           .expect(200);
 
         expect(Object.keys(res.body.item)).not.to.contain('secrets');
         expect(Object.keys(res.body.item)).to.contain('ssl');
         expect(Object.keys(res.body.item.ssl)).to.contain('key');
-        expect(res.body.item.ssl.key).to.equal('KEY');
+        expect(res.body.item.ssl.key).to.equal('/KEY');
       });
 
       it('should store secrets if there is no fleet server', async function () {
@@ -1767,11 +1767,11 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             config_yaml: 'shipper: {}',
-            secrets: { ssl: { key: 'KEY' } },
+            secrets: { ssl: { key: '/KEY' } },
           })
           .expect(200);
 
@@ -1790,9 +1790,9 @@ export default function (providerContext: FtrProviderContext) {
             type: 'elasticsearch',
             hosts: ['https://test.fr'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
           })
           .expect(200);
@@ -1806,9 +1806,9 @@ export default function (providerContext: FtrProviderContext) {
           is_default_monitoring: false,
           preset: 'balanced',
           ssl: {
-            certificate: 'CERTIFICATE',
-            key: 'KEY',
-            certificate_authorities: ['CA1', 'CA2'],
+            certificate: '/CERTIFICATE',
+            key: '/KEY',
+            certificate_authorities: ['/CA1', '/CA2'],
           },
         });
       });
@@ -1822,9 +1822,9 @@ export default function (providerContext: FtrProviderContext) {
             type: 'remote_elasticsearch',
             hosts: ['https://test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
           })
           .expect(200);
@@ -1837,9 +1837,9 @@ export default function (providerContext: FtrProviderContext) {
           is_default: false,
           is_default_monitoring: false,
           ssl: {
-            certificate: 'CERTIFICATE',
-            key: 'KEY',
-            certificate_authorities: ['CA1', 'CA2'],
+            certificate: '/CERTIFICATE',
+            key: '/KEY',
+            certificate_authorities: ['/CA1', '/CA2'],
           },
         });
       });
@@ -1852,12 +1852,12 @@ export default function (providerContext: FtrProviderContext) {
             type: 'elasticsearch',
             hosts: ['https://test.fr'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             secrets: {
               ssl: {
-                key: 'KEY',
+                key: '/KEY',
               },
             },
           })
@@ -1873,12 +1873,12 @@ export default function (providerContext: FtrProviderContext) {
             type: 'remote_elasticsearch',
             hosts: ['https://test.fr:443'],
             ssl: {
-              certificate: 'CERTIFICATE',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
             secrets: {
               ssl: {
-                key: 'KEY',
+                key: '/KEY',
               },
             },
           })
@@ -2018,7 +2018,7 @@ export default function (providerContext: FtrProviderContext) {
               name: 'Default logstash',
               type: 'logstash',
               hosts: ['logstash'],
-              ssl: { certificate: 'CERTIFICATE', key: 'KEY', certificate_authorities: [] },
+              ssl: { certificate: '/CERTIFICATE', key: '/KEY', certificate_authorities: [] },
               is_default: true,
               is_default_monitoring: true,
             })
@@ -2112,12 +2112,12 @@ export default function (providerContext: FtrProviderContext) {
                 disk_queue_encryption_enabled: true,
               },
               ssl: {
-                certificate: 'CERTIFICATE',
-                certificate_authorities: ['CA1', 'CA2'],
+                certificate: '/CERTIFICATE',
+                certificate_authorities: ['/CA1', '/CA2'],
               },
               secrets: {
                 ssl: {
-                  key: 'KEY',
+                  key: '/KEY',
                 },
               },
             })
@@ -2159,12 +2159,12 @@ export default function (providerContext: FtrProviderContext) {
               version: '1.0.0',
               required_acks: 1,
               ssl: {
-                certificate: 'CERTIFICATE',
-                certificate_authorities: ['CA1', 'CA2'],
+                certificate: '/CERTIFICATE',
+                certificate_authorities: ['/CA1', '/CA2'],
               },
               secrets: {
                 ssl: {
-                  key: 'KEY',
+                  key: '/KEY',
                 },
               },
             })

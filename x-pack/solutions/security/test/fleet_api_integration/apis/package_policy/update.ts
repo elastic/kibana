@@ -695,7 +695,7 @@ export default function (providerContext: FtrProviderContext) {
           ssl: {
             certificate: 'CERTIFICATE',
             key: 'KEY',
-            certificate_authorities: ['CA1', 'CA2'],
+            certificate_authorities: ['/CA1', '/CA2'],
           },
         })
         .expect(200);

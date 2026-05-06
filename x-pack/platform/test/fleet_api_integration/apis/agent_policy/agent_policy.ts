@@ -2312,7 +2312,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Default logstash',
             type: 'logstash',
             hosts: ['logstash'],
-            ssl: { certificate: 'CERTIFICATE', key: 'KEY', certificate_authorities: [] },
+            ssl: { certificate: '/CERTIFICATE', key: '/KEY', certificate_authorities: [] },
             is_default: true,
             is_default_monitoring: true,
           })

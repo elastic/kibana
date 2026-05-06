@@ -305,10 +305,10 @@ describe('EditOutputFlyout', () => {
       is_default: false,
       is_default_monitoring: false,
       hosts: ['logstash'],
-      ssl: { certificate: 'cert', key: 'key', certificate_authorities: [] },
+      ssl: { certificate: '/cert', key: '/key', certificate_authorities: [] },
     });
 
-    expect((utils.getByTestId('sslKeySecretInput') as HTMLInputElement).value).toEqual('key');
+    expect((utils.getByTestId('sslKeySecretInput') as HTMLInputElement).value).toEqual('/key');
 
     fireEvent.click(utils.getByText('Save and apply settings'));
 
@@ -316,8 +316,8 @@ describe('EditOutputFlyout', () => {
       expect(mockSendPutOutput).toHaveBeenCalledWith(
         'outputL',
         expect.objectContaining({
-          secrets: { ssl: { key: 'key' } },
-          ssl: { certificate: 'cert', certificate_authorities: [] },
+          secrets: { ssl: { key: '/key' } },
+          ssl: { certificate: '/cert', certificate_authorities: [] },
         })
       );
     });

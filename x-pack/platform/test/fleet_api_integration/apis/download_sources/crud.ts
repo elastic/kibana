@@ -310,9 +310,9 @@ export default function (providerContext: FtrProviderContext) {
             host: 'http://test.fr:443',
             is_default: false,
             ssl: {
-              certificate: 'cert',
-              certificate_authorities: ['ca'],
-              key: 'KEY1',
+              certificate: '/cert',
+              certificate_authorities: ['/ca'],
+              key: '/KEY1',
             },
           })
           .expect(200);
@@ -323,9 +323,9 @@ export default function (providerContext: FtrProviderContext) {
           host: 'http://test.fr:443',
           is_default: false,
           ssl: {
-            certificate: 'cert',
-            certificate_authorities: ['ca'],
-            key: 'KEY1',
+            certificate: '/cert',
+            certificate_authorities: ['/ca'],
+            key: '/KEY1',
           },
         });
       });

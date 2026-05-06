@@ -333,12 +333,12 @@ export default function (providerContext: FtrProviderContext) {
             type: 'elasticsearch',
             hosts: ['https://data-output.fr:9200'],
             ssl: {
-              certificate: 'DATA_CERTIFICATE',
-              certificate_authorities: ['DATA_CA1', 'DATA_CA2'],
+              certificate: '/DATA_CERTIFICATE',
+              certificate_authorities: ['/DATA_CA1', '/DATA_CA2'],
             },
             secrets: {
               ssl: {
-                key: 'DATA_SECRET_KEY',
+                key: '/DATA_SECRET_KEY',
               },
             },
           })
@@ -355,12 +355,12 @@ export default function (providerContext: FtrProviderContext) {
             type: 'elasticsearch',
             hosts: ['https://monitoring-output.fr:9200'],
             ssl: {
-              certificate: 'MONITORING_CERTIFICATE',
-              certificate_authorities: ['MONITORING_CA1'],
+              certificate: '/MONITORING_CERTIFICATE',
+              certificate_authorities: ['/MONITORING_CA1'],
             },
             secrets: {
               ssl: {
-                key: 'MONITORING_SECRET_KEY',
+                key: '/MONITORING_SECRET_KEY',
               },
             },
           })
@@ -496,18 +496,18 @@ export default function (providerContext: FtrProviderContext) {
             host_urls: ['https://fleet-server-host.fr:8220'],
             is_default: false,
             ssl: {
-              certificate_authorities: ['FLEET_CA1', 'FLEET_CA2'],
-              certificate: 'FLEET_CERTIFICATE',
-              agent_certificate_authorities: ['AGENT_CA1'],
-              agent_certificate: 'AGENT_CERTIFICATE',
-              es_certificate_authorities: ['ES_CA1'],
-              es_certificate: 'ES_CERTIFICATE',
+              certificate_authorities: ['/FLEET_CA1', '/FLEET_CA2'],
+              certificate: '/FLEET_CERTIFICATE',
+              agent_certificate_authorities: ['/AGENT_CA1'],
+              agent_certificate: '/AGENT_CERTIFICATE',
+              es_certificate_authorities: ['/ES_CA1'],
+              es_certificate: '/ES_CERTIFICATE',
             },
             secrets: {
               ssl: {
-                key: 'FLEET_SECRET_KEY',
-                agent_key: 'AGENT_SECRET_KEY',
-                es_key: 'ES_SECRET_KEY',
+                key: '/FLEET_SECRET_KEY',
+                agent_key: '/AGENT_SECRET_KEY',
+                es_key: '/ES_SECRET_KEY',
               },
             },
           })

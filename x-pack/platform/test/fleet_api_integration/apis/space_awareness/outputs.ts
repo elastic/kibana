@@ -52,9 +52,9 @@ export default function (providerContext: FtrProviderContext) {
             is_default: true,
             is_default_monitoring: true,
             ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+              certificate: '/CERTIFICATE',
+              key: '/KEY',
+              certificate_authorities: ['/CA1', '/CA2'],
             },
           },
           TEST_SPACE_1
