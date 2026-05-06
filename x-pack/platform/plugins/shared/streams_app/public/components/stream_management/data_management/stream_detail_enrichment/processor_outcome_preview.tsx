@@ -110,6 +110,7 @@ export const ProcessorOutcomePreview = () => {
       )}
       <EuiSpacer size="m" />
       <FetchMoreMatchingSamples />
+      <EuiSpacer size="xxl" />
     </>
   );
 };
