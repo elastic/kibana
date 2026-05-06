@@ -44,7 +44,7 @@ Dispatch these as subagents — PR diffs and source files are large:
    (SELF-CHECK #3 questions 5–6)
 5. **Find existing tests** — copy patterns, determine test layer
 
-Read `.agents/skills/bug-fixer/references/fix-workflow.md` and answer all six
+Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/fix-workflow.md` and answer all six
 SELF-CHECK #3 questions using the gathered evidence.
 
 Present the Root Cause Analysis and Fix Plan using the template in `fix-workflow.md`.
@@ -83,7 +83,7 @@ For Scout API/UI tests: `node scripts/scout run-tests --config <config-path>`
 Keep fixes simple — prefer the smallest change that resolves the bug. More than 2–3 files
 or architectural changes means stop and ask the user before continuing.
 
-1. Consult prior fixes or `.agents/skills/bug-fixer/references/classification-guide.md`
+1. Consult prior fixes or `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/classification-guide.md`
 2. Match surrounding codebase patterns
 3. Verify:
    ```bash
@@ -151,9 +151,9 @@ Present the PR URL to the user.
 
 ## Knowledge Update
 
-After Phase 5 (or Phase 6), read `.agents/skills/bug-fixer/references/fix-workflow.md`
+After Phase 5 (or Phase 6), read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/fix-workflow.md`
 (Session Learnings Template) and present a structured summary to the user. Also read
-`.agents/skills/bug-fixer/references/knowledge-update.md` for the entry format.
+`x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/knowledge-update.md` for the entry format.
 Wait for user confirmation before writing to any file.
 
-If something goes wrong, read `.agents/skills/bug-fixer/references/troubleshooting.md`.
+If something goes wrong, read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/troubleshooting.md`.
