@@ -190,7 +190,7 @@ export class EuiComboBoxWrapper {
     options: {
       /** Use when confirming selection may lag after Enter (slow suggestions / CI). */
       settleTimeoutMs?: number;
-    } = {}
+    } & ComboBoxInputOptions = {}
   ) {
     await this.clear();
     await this.comboBoxMainInput.click();
