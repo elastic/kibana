@@ -231,29 +231,27 @@ function MetricPreview({ position }: { position: MetricStyleTemplatePresetId }) 
     </EuiFlexItem>
   );
 
-  const content: Record<MetricStyleTemplatePresetId, ReactNode> = {
-    top: (
-      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-        {value(euiTheme.size.l)}
-        {title()}
-        {secondary()}
-      </EuiFlexGroup>
-    ),
-    middle: (
-      <EuiFlexGroup direction="column" gutterSize="none" alignItems="center" responsive={false}>
-        {title()}
-        {value(euiTheme.size.l)}
-        {secondary()}
-      </EuiFlexGroup>
-    ),
-    bottom: (
-      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-        {title()}
-        {secondary('right')}
-        {value(euiTheme.size.l, 'right')}
-      </EuiFlexGroup>
-    ),
-  };
-
-  return <div data-test-subj={`lens-metric-style-preview-${position}`}>{content[position]}</div>;
+  return (
+    <div data-test-subj={`lens-metric-style-preview-${position}`}>
+      {position === 'top' ? (
+        <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+          {value(euiTheme.size.l)}
+          {title()}
+          {secondary()}
+        </EuiFlexGroup>
+      ) : position === 'middle' ? (
+        <EuiFlexGroup direction="column" gutterSize="none" alignItems="center" responsive={false}>
+          {title()}
+          {value(euiTheme.size.l)}
+          {secondary()}
+        </EuiFlexGroup>
+      ) : (
+        <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+          {title()}
+          {secondary('right')}
+          {value(euiTheme.size.l, 'right')}
+        </EuiFlexGroup>
+      )}
+    </div>
+  );
 }
