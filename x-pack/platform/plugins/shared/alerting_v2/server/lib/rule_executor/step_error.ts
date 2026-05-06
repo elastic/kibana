@@ -7,11 +7,6 @@
 
 const STEP_NAME_PROPERTY = '__alertingV2RuleExecutorStepName';
 
-/**
- * Records the failing step name on an error so the task runner can map a
- * thrown error to a `kibana.alerting_v2.rule_executor.execution.reason` code.
- * The original error reference (and message/stack) is preserved.
- */
 export function identifyErrorWithStepName(error: unknown, stepName: string): unknown {
   if (error == null || typeof error !== 'object') {
     return error;

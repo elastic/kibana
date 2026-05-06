@@ -158,7 +158,6 @@ export class RuleExecutorTaskRunner {
     const status: RuleExecutionStatus = haltReason
       ? HALT_REASON_TO_STATUS[haltReason]
       : RULE_EXECUTION_STATUSES.FAILED;
-    // HaltReason is a subset of RuleExecutionReason so it can be used directly.
     const reason: RuleExecutionReason | undefined = haltReason ?? undefined;
 
     this.eventLogger.logExecute({

@@ -56,11 +56,6 @@ export interface ExecuteSummaryInput {
   readonly cancelled?: { readonly step?: string; readonly reason: 'timeout' };
   readonly rule?: RuleExecutionRuleAttributes;
   readonly message?: string;
-  /**
-   * Step-level metrics captured during the run. The `total_run_duration_ms`
-   * field is computed inside the document builder from start/end timestamps;
-   * everything else comes from {@link RuleExecutionMetricsCollector}.
-   */
   readonly metrics?: RuleExecutionMetricsSnapshot;
 }
 
@@ -78,12 +73,6 @@ function buildTaskFields(task: ExecuteTaskAttributes, startedAt: Date) {
   };
 }
 
-/**
- * Constructs and writes the two-event-per-run pair (`execute-start` + `execute`)
- * documented in RFC rna-program#463. Documents are written via the shared
- * `EventLogService` (fire-and-forget); construction failures are swallowed so a
- * logging issue never breaks rule execution.
- */
 export class RuleExecutorEventLogger {
   constructor(private readonly eventLogService: EventLogServiceContract) {}
 
@@ -99,7 +88,7 @@ export class RuleExecutorEventLogger {
     try {
       this.eventLogService.logEvent(buildExecuteEvent(input));
     } catch {
-      // see logExecuteStart
+      // logEvent is fire-and-forget; never let a logging issue break a run
     }
   }
 }
@@ -184,7 +173,7 @@ export function buildExecuteEvent({
       outcome: statusToOutcome(status),
       start: startedAt.toISOString(),
       end: endedAt.toISOString(),
-      duration: totalRunDurationMs * NS_PER_MS, // ECS expects nanoseconds
+      duration: totalRunDurationMs * NS_PER_MS,
       ...(reason ? { reason } : {}),
     },
     ...(error
