@@ -278,6 +278,9 @@ export class AgentBuilderApp {
 
   async setEsqlQuery(query: string) {
     await this.codeEditor.setCodeEditorValue(query);
+    const editor = this.page.testSubj.locator('agentBuilderEsqlEditor');
+    await editor.click();
+    await this.page.keyboard.press('Tab');
   }
 
   async selectMcpConnector(connectorId: string) {
@@ -354,9 +357,7 @@ export class AgentBuilderApp {
   }
 
   async saveTool(closeToast: boolean = true) {
-    const saveButton = this.page.testSubj.locator('toolFormSaveButton');
-    await expect(saveButton).toBeEnabled({ timeout: 30_000 });
-    await saveButton.click();
+    await this.page.testSubj.click('toolFormSaveButton');
     if (closeToast) {
       await this.page.testSubj.click('toastCloseButton');
     }

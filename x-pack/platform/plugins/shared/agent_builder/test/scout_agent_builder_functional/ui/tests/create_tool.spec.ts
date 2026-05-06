@@ -46,36 +46,44 @@ test.describe(
       await deleteAllConversationsFromEs(esClient);
     });
 
-    test('creates esql and index search tools', async ({ page, pageObjects }) => {
-      await test.step('creates an esql tool', async () => {
-        const toolId = `scout.esql.${Date.now()}`;
-        await pageObjects.agentBuilder.navigateToNewTool();
-        await expect(page.testSubj.locator('agentBuilderToolFormPage')).toBeVisible();
-        await pageObjects.agentBuilder.setToolId(toolId);
-        await expect(page.testSubj.locator('agentBuilderToolTypeSelect')).toBeVisible();
-        await pageObjects.agentBuilder.selectToolType(ToolType.esql);
-        await pageObjects.agentBuilder.setToolDescription('Scout created ES|QL tool');
-        await expect(page.testSubj.locator('agentBuilderEsqlEditor')).toBeVisible();
-        await pageObjects.agentBuilder.setEsqlQuery('FROM .kibana | LIMIT 1');
-        await pageObjects.agentBuilder.saveTool();
-        await pageObjects.agentBuilder.toolsSearch().type(toolId);
-        await expect(page.testSubj.locator(`agentBuilderToolsTableRow-${toolId}`)).toBeVisible();
-      });
+    test('should create an esql tool', async ({ page, pageObjects }) => {
+      const toolId = `scout.esql.${Date.now()}`;
+      await pageObjects.agentBuilder.navigateToNewTool();
+      await expect(page.testSubj.locator('agentBuilderToolFormPage')).toBeVisible();
+      await pageObjects.agentBuilder.setToolId(toolId);
 
-      await test.step('creates an index search tool', async () => {
-        const toolId = `scout.index.${Date.now()}`;
-        await pageObjects.agentBuilder.navigateToNewTool();
-        await expect(page.testSubj.locator('agentBuilderToolFormPage')).toBeVisible();
-        await pageObjects.agentBuilder.setToolId(toolId);
-        await expect(page.testSubj.locator('agentBuilderToolTypeSelect')).toBeVisible();
-        await pageObjects.agentBuilder.selectToolType(ToolType.index_search);
-        await expect(page.testSubj.locator('agentBuilderIndexPatternInput')).toBeVisible();
-        await pageObjects.agentBuilder.setIndexPattern(testIndexName);
-        await pageObjects.agentBuilder.setToolDescription('Scout created Index Search tool');
-        await pageObjects.agentBuilder.saveTool();
-        await pageObjects.agentBuilder.toolsSearch().type(toolId);
-        await expect(page.testSubj.locator(`agentBuilderToolsTableRow-${toolId}`)).toBeVisible();
-      });
+      await expect(page.testSubj.locator('agentBuilderToolTypeSelect')).toBeVisible();
+      await pageObjects.agentBuilder.selectToolType(ToolType.esql);
+
+      await pageObjects.agentBuilder.setToolDescription('Scout created ES|QL tool');
+
+      await expect(page.testSubj.locator('agentBuilderEsqlEditor')).toBeVisible();
+      await pageObjects.agentBuilder.setEsqlQuery('FROM .kibana | LIMIT 1');
+
+      await pageObjects.agentBuilder.saveTool();
+
+      await pageObjects.agentBuilder.toolsSearch().type(toolId);
+      await expect(page.testSubj.locator(`agentBuilderToolsTableRow-${toolId}`)).toBeVisible();
+    });
+
+    test('should create an index search tool', async ({ page, pageObjects }) => {
+      const toolId = `scout.index.${Date.now()}`;
+      await pageObjects.agentBuilder.navigateToNewTool();
+      await expect(page.testSubj.locator('agentBuilderToolFormPage')).toBeVisible();
+      await pageObjects.agentBuilder.setToolId(toolId);
+
+      await expect(page.testSubj.locator('agentBuilderToolTypeSelect')).toBeVisible();
+      await pageObjects.agentBuilder.selectToolType(ToolType.index_search);
+
+      await expect(page.testSubj.locator('agentBuilderIndexPatternInput')).toBeVisible();
+      await pageObjects.agentBuilder.setIndexPattern(testIndexName);
+
+      await pageObjects.agentBuilder.setToolDescription('Scout created Index Search tool');
+
+      await pageObjects.agentBuilder.saveTool();
+
+      await pageObjects.agentBuilder.toolsSearch().type(toolId);
+      await expect(page.testSubj.locator(`agentBuilderToolsTableRow-${toolId}`)).toBeVisible();
     });
   }
 );
