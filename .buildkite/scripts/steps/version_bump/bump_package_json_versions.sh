@@ -85,7 +85,7 @@ git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
 head_branch="bump-versions-$(date +%F_%H-%M-%S)"
 git checkout -b "$head_branch"
-git add package.json x-pack/package.json x-pack/solutions/search/plugins/enterprise_search/common/__mocks__/initial_app_data.ts src/core/server/integration_tests/saved_objects/migrations/kibana_migrator_archive_utils.ts src/core/server/integration_tests/saved_objects/migrations/archives
+git add package.json x-pack/package.json x-pack/solutions/search/plugins/enterprise_search/common/__mocks__/initial_app_data.ts src/core/server/integration_tests/saved_objects/migrations/kibana_migrator_archive_utils.ts src/core/server/integration_tests/saved_objects/migrations/archives src/core/server/integration_tests/saved_objects/migrations/group1/__snapshots__/v2_migration.test.ts.snap
 git commit -m "[version bump] Bump version to ${NEW_VERSION}"
 git push origin "$head_branch"
 
