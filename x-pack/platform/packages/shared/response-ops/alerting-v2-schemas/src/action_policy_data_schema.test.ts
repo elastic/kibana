@@ -216,9 +216,80 @@ describe('createActionPolicyDataSchema', () => {
       ).toThrow();
     });
   });
+
+  describe('type and ruleId', () => {
+    it('defaults type to undefined when omitted (treated as global at the persistence layer)', () => {
+      const result = createActionPolicyDataSchema.parse(base);
+
+      expect(result.type).toBeUndefined();
+      expect(result.ruleId).toBeUndefined();
+    });
+
+    it('accepts explicit type "global" without ruleId', () => {
+      const result = createActionPolicyDataSchema.parse({ ...base, type: 'global' });
+
+      expect(result.type).toBe('global');
+      expect(result.ruleId).toBeUndefined();
+    });
+
+    it('accepts type "single_rule" with non-empty ruleId', () => {
+      const result = createActionPolicyDataSchema.parse({
+        ...base,
+        type: 'single_rule',
+        ruleId: 'rule-1',
+      });
+
+      expect(result.type).toBe('single_rule');
+      expect(result.ruleId).toBe('rule-1');
+    });
+
+    it('rejects type "single_rule" without ruleId', () => {
+      expect(() => createActionPolicyDataSchema.parse({ ...base, type: 'single_rule' })).toThrow(
+        /ruleId is required/
+      );
+    });
+
+    it('rejects type "single_rule" with empty ruleId', () => {
+      expect(() =>
+        createActionPolicyDataSchema.parse({ ...base, type: 'single_rule', ruleId: '' })
+      ).toThrow();
+    });
+
+    it('rejects type "global" with ruleId set', () => {
+      expect(() =>
+        createActionPolicyDataSchema.parse({ ...base, type: 'global', ruleId: 'rule-1' })
+      ).toThrow(/ruleId must not be provided/);
+    });
+
+    it('rejects ruleId provided with no type (defaults to global, so ruleId is forbidden)', () => {
+      expect(() => createActionPolicyDataSchema.parse({ ...base, ruleId: 'rule-1' })).toThrow(
+        /ruleId must not be provided/
+      );
+    });
+
+    it('rejects an unknown type value', () => {
+      expect(() => createActionPolicyDataSchema.parse({ ...base, type: 'team_rule' })).toThrow();
+    });
+  });
 });
 
 describe('updateActionPolicyDataSchema', () => {
+  describe('immutability of type and ruleId', () => {
+    it('strips `type` from the parsed update payload (immutable)', () => {
+      const result = updateActionPolicyDataSchema.parse({ name: 'New', type: 'single_rule' });
+
+      expect(result).not.toHaveProperty('type');
+      expect(result.name).toBe('New');
+    });
+
+    it('strips `ruleId` from the parsed update payload (immutable)', () => {
+      const result = updateActionPolicyDataSchema.parse({ name: 'New', ruleId: 'rule-2' });
+
+      expect(result).not.toHaveProperty('ruleId');
+      expect(result.name).toBe('New');
+    });
+  });
+
   describe('valid payloads', () => {
     it('accepts an empty partial update', () => {
       const result = updateActionPolicyDataSchema.parse({});

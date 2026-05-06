@@ -51,6 +51,8 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   version: 'v1',
   name: 'Critical alerts policy',
   description: 'Routes critical alerts to the oncall workflow',
+  type: 'global',
+  ruleId: null,
   enabled: true,
   destinations: [
     { type: 'workflow', id: 'wf-1' },

@@ -432,4 +432,95 @@ describe('EvaluateMatchersStep', () => {
       expect(matched).toHaveLength(1);
     });
   });
+
+  describe('single_rule policy filtering', () => {
+    it('matches a single_rule policy when ruleId equals the episode rule', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({ id: 'p1', type: 'single_rule', ruleId: 'r1' });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+      expect(matched[0].policy).toBe(policy);
+    });
+
+    it('skips a single_rule policy whose ruleId differs from the episode rule', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({ id: 'p1', type: 'single_rule', ruleId: 'r2' });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('skips a single_rule policy with mismatched ruleId even when matcher is absent (catch-all)', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        type: 'single_rule',
+        ruleId: 'r2',
+        matcher: undefined,
+      });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('short-circuits before matcher evaluation (no warning even with invalid KQL when ruleId mismatches)', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        type: 'single_rule',
+        ruleId: 'r2',
+        matcher: 'invalid kql (((',
+      });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('still evaluates the matcher when single_rule and ruleId matches', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        type: 'single_rule',
+        ruleId: 'r1',
+        matcher: 'episode_status: inactive',
+      });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('mixes global and single_rule policies correctly', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const globalPolicy = createActionPolicy({ id: 'g1', type: 'global' });
+      const single1 = createActionPolicy({ id: 's1', type: 'single_rule', ruleId: 'r1' });
+      const single2 = createActionPolicy({ id: 's2', type: 'single_rule', ruleId: 'r2' });
+
+      const matched = await runStep(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([
+          ['g1', globalPolicy],
+          ['s1', single1],
+          ['s2', single2],
+        ])
+      );
+
+      const matchedIds = matched.map(({ policy }) => policy.id).sort();
+      expect(matchedIds).toEqual(['g1', 's1']);
+    });
+  });
 });

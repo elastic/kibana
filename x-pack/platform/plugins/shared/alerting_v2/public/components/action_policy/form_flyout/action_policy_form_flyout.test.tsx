@@ -163,6 +163,8 @@ describe('ActionPolicyFormFlyout', () => {
       version: 'WzEsMV0=',
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
+      type: 'global',
+      ruleId: null,
       enabled: true,
       matcher: 'data.severity : "critical"',
       groupBy: ['host.name', 'service.name'],

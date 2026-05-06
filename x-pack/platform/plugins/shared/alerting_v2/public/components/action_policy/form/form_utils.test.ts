@@ -110,6 +110,8 @@ describe('action policy form utils', () => {
       version: 'WzEsMV0=',
       name: 'Test Policy',
       description: 'A test policy',
+      type: 'global',
+      ruleId: null,
       enabled: true,
       matcher: 'data.severity : "critical"',
       groupBy: ['host.name'],

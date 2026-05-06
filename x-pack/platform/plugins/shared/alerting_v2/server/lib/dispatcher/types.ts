@@ -59,11 +59,19 @@ export interface Rule {
   updatedAt: string;
 }
 
+export type ActionPolicyType = 'global' | 'single_rule';
+
 export interface ActionPolicy {
   id: ActionPolicyId;
   spaceId: string;
   name: string;
   enabled: boolean;
+  /** Discriminator controlling which alerts the policy can match.
+   *  'global' (default) matches alerts from any rule in the space; 'single_rule' only
+   *  matches alerts from `ruleId`. Always set after fetch — legacy docs default to 'global'. */
+  type: ActionPolicyType;
+  /** Linked rule id; only present when type === 'single_rule'. */
+  ruleId?: string;
   /** KQL expression evaluated against the alert episode context.
    *  An empty matcher matches all episodes (catch-all). */
   matcher?: string; // e.g. 'data.severity == "critical" AND data.env != "dev"'

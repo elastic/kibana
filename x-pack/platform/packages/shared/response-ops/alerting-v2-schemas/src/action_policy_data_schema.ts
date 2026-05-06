@@ -25,6 +25,14 @@ export const groupingModeSchema = z
 
 export type GroupingMode = z.infer<typeof groupingModeSchema>;
 
+export const actionPolicyTypeSchema = z
+  .enum(['global', 'single_rule'])
+  .describe(
+    'The action policy type. "global" matches alerts from any rule in the space (default). "single_rule" matches alerts only from the linked rule (requires ruleId).'
+  );
+
+export type ActionPolicyType = z.infer<typeof actionPolicyTypeSchema>;
+
 export const throttleStrategySchema = z
   .enum(['on_status_change', 'per_status_interval', 'time_interval', 'every_time'])
   .describe('The throttle strategy that controls how often notifications are sent.');
@@ -48,6 +56,8 @@ interface ValidationPayload {
   value: {
     groupingMode?: string | null;
     throttle?: { strategy?: string; interval?: string } | null;
+    type?: string;
+    ruleId?: string;
   };
   issues: z.core.$ZodRawIssue[];
 }
@@ -84,6 +94,37 @@ const validateGroupingModeAndStrategy = (payload: ValidationPayload) => {
   }
 
   validateStrategyInterval(payload);
+};
+
+const validateTypeAndRuleId = (payload: ValidationPayload) => {
+  const { value: data, issues } = payload;
+  const type = data.type ?? 'global';
+
+  if (type === 'single_rule') {
+    if (!data.ruleId || data.ruleId.length === 0) {
+      issues.push({
+        code: 'custom',
+        message: 'ruleId is required when type is "single_rule"',
+        path: ['ruleId'],
+        input: data,
+      });
+    }
+    return;
+  }
+
+  if (data.ruleId !== undefined) {
+    issues.push({
+      code: 'custom',
+      message: 'ruleId must not be provided when type is "global"',
+      path: ['ruleId'],
+      input: data,
+    });
+  }
+};
+
+const validateCreateActionPolicy = (payload: ValidationPayload) => {
+  validateGroupingModeAndStrategy(payload);
+  validateTypeAndRuleId(payload);
 };
 
 export type ActionPolicyDestination = z.infer<typeof actionPolicyDestinationSchema>;
@@ -155,6 +196,14 @@ export const createActionPolicyDataSchema = z
   .object({
     name: z.string().describe('The name of the action policy.'),
     description: z.string().describe('A description of the action policy.'),
+    type: actionPolicyTypeSchema
+      .optional()
+      .describe('The action policy type. Defaults to "global" when omitted.'),
+    ruleId: z
+      .string()
+      .min(1)
+      .optional()
+      .describe('The rule this policy is attached to. Required when type is "single_rule".'),
     destinations: z
       .array(actionPolicyDestinationSchema)
       .min(1, 'At least one destination must be provided')
@@ -171,10 +220,12 @@ export const createActionPolicyDataSchema = z
       .describe('The grouping mode for alert notifications.'),
     throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
   })
-  .check(validateGroupingModeAndStrategy);
+  .check(validateCreateActionPolicy);
 
 export type CreateActionPolicyData = z.infer<typeof createActionPolicyDataSchema>;
 
+// Note: `type` and `ruleId` are immutable after creation and intentionally
+// omitted from the update schema. To change them, delete and recreate the policy.
 export const updateActionPolicyDataSchema = z
   .object({
     name: z.string().optional().describe('The name of the action policy.'),

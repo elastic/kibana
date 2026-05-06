@@ -57,6 +57,9 @@ export class EvaluateMatchersStep implements DispatcherStep {
       for (const policy of spacePolicies) {
         if (!policy.enabled) continue;
         if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
+        // single_rule policies only match alerts from their linked rule.
+        // Done before matcher evaluation so it short-circuits on a cheap string equality.
+        if (policy.type === 'single_rule' && policy.ruleId !== rule.id) continue;
 
         if (!policy.matcher) {
           matched.push({ episode, policy });

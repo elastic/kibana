@@ -82,6 +82,7 @@ export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): Actio
     spaceId: 'default',
     name: 'Test policy',
     enabled: true,
+    type: 'global',
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
     tags: [],

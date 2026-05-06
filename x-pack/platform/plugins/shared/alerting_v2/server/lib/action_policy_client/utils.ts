@@ -64,9 +64,12 @@ export const buildCreateActionPolicyAttributes = ({
   updatedByUsername: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
+  const policyType = data.type ?? 'global';
   return {
     name: data.name,
     description: data.description,
+    type: policyType,
+    ruleId: policyType === 'single_rule' ? data.ruleId ?? null : null,
     enabled: true,
     destinations: data.destinations,
     matcher: data.matcher ?? null,
@@ -100,9 +103,14 @@ export const buildUpdateActionPolicyAttributes = ({
   updatedByUsername: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
+  // `type` and `ruleId` are immutable — always carried forward from the existing doc.
+  // Legacy docs without `type` are normalized to 'global' on update.
+  const existingType = existing.type ?? 'global';
   return {
     name: update.name ?? existing.name,
     description: update.description ?? existing.description,
+    type: existingType,
+    ruleId: existingType === 'single_rule' ? existing.ruleId ?? null : null,
     enabled: existing.enabled,
     destinations: update.destinations ?? existing.destinations,
     matcher: resolveNextNullableField(update.matcher, existing.matcher),
@@ -130,11 +138,14 @@ export const transformActionPolicySoAttributesToApiResponse = ({
   version?: string;
   attributes: ActionPolicySavedObjectAttributes;
 }): ActionPolicyResponse => {
+  const policyType = attributes.type ?? 'global';
   return {
     id,
     version,
     name: attributes.name,
     description: attributes.description,
+    type: policyType,
+    ruleId: policyType === 'single_rule' ? attributes.ruleId ?? null : null,
     enabled: attributes.enabled,
     destinations: attributes.destinations,
     matcher: normalizeNullableField(attributes.matcher),

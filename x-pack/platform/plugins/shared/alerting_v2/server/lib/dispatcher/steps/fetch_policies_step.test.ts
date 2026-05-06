@@ -88,6 +88,86 @@ describe('FetchPoliciesStep', () => {
     expect(result.data?.policies?.size).toBe(0);
   });
 
+  describe('type and ruleId', () => {
+    it('defaults a legacy doc without `type` to "global" and leaves ruleId undefined', async () => {
+      mockFindAllDecrypted.mockResolvedValue([
+        {
+          id: 'p-legacy',
+          attributes: {
+            name: 'Legacy',
+            destinations: [{ type: 'workflow' as const, id: 'w1' }],
+            auth: { apiKey: 'k', owner: 'elastic', createdByUser: false },
+            createdBy: null,
+            updatedBy: null,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+        },
+      ]);
+
+      const step = new FetchPoliciesStep(npSoService);
+      const result = await step.execute(createDispatcherPipelineState());
+
+      if (result.type !== 'continue') throw new Error('expected continue');
+      const policy = result.data?.policies?.get('p-legacy');
+      expect(policy?.type).toBe('global');
+      expect(policy?.ruleId).toBeUndefined();
+    });
+
+    it('maps an explicit "global" policy', async () => {
+      mockFindAllDecrypted.mockResolvedValue([
+        {
+          id: 'p-global',
+          attributes: {
+            name: 'G',
+            type: 'global',
+            destinations: [{ type: 'workflow' as const, id: 'w1' }],
+            auth: { apiKey: 'k', owner: 'elastic', createdByUser: false },
+            createdBy: null,
+            updatedBy: null,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+        },
+      ]);
+
+      const step = new FetchPoliciesStep(npSoService);
+      const result = await step.execute(createDispatcherPipelineState());
+
+      if (result.type !== 'continue') throw new Error('expected continue');
+      const policy = result.data?.policies?.get('p-global');
+      expect(policy?.type).toBe('global');
+      expect(policy?.ruleId).toBeUndefined();
+    });
+
+    it('maps a "single_rule" policy and surfaces the linked ruleId', async () => {
+      mockFindAllDecrypted.mockResolvedValue([
+        {
+          id: 'p-single',
+          attributes: {
+            name: 'S',
+            type: 'single_rule',
+            ruleId: 'rule-7',
+            destinations: [{ type: 'workflow' as const, id: 'w1' }],
+            auth: { apiKey: 'k', owner: 'elastic', createdByUser: false },
+            createdBy: null,
+            updatedBy: null,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+        },
+      ]);
+
+      const step = new FetchPoliciesStep(npSoService);
+      const result = await step.execute(createDispatcherPipelineState());
+
+      if (result.type !== 'continue') throw new Error('expected continue');
+      const policy = result.data?.policies?.get('p-single');
+      expect(policy?.type).toBe('single_rule');
+      expect(policy?.ruleId).toBe('rule-7');
+    });
+  });
+
   it('fetches multiple policies', async () => {
     mockFindAllDecrypted.mockResolvedValue([
       {

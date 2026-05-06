@@ -319,6 +319,77 @@ describe('ActionPolicyClient', () => {
 
       expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['encoded-es-api-key']);
     });
+
+    describe('type and ruleId', () => {
+      const baseData = {
+        name: 'p',
+        description: 'd',
+        destinations: [{ type: 'workflow' as const, id: 'w' }],
+      };
+
+      const mockCreateResolved = (id: string) =>
+        mockSavedObjectsClient.create.mockResolvedValueOnce({
+          id,
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzEsMV0=',
+        });
+
+      it('defaults to type "global" with null ruleId when type is omitted', async () => {
+        mockCreateResolved('p-default');
+
+        const res = await client.createActionPolicy({
+          data: baseData,
+          options: { id: 'p-default' },
+        });
+
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          expect.objectContaining({ type: 'global', ruleId: null }),
+          expect.anything()
+        );
+        expect(res.type).toBe('global');
+        expect(res.ruleId).toBeNull();
+      });
+
+      it('persists "single_rule" with the linked ruleId', async () => {
+        mockCreateResolved('p-single');
+
+        const res = await client.createActionPolicy({
+          data: { ...baseData, type: 'single_rule', ruleId: 'rule-7' },
+          options: { id: 'p-single' },
+        });
+
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          expect.objectContaining({ type: 'single_rule', ruleId: 'rule-7' }),
+          expect.anything()
+        );
+        expect(res.type).toBe('single_rule');
+        expect(res.ruleId).toBe('rule-7');
+      });
+
+      it('rejects "single_rule" without ruleId at the schema layer', async () => {
+        await expect(
+          client.createActionPolicy({
+            data: { ...baseData, type: 'single_rule' as const },
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+        expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('rejects "global" with ruleId at the schema layer', async () => {
+        await expect(
+          client.createActionPolicy({
+            data: { ...baseData, type: 'global' as const, ruleId: 'rule-7' },
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+        expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('getActionPolicy', () => {
@@ -376,6 +447,64 @@ describe('ActionPolicyClient', () => {
       await expect(client.getActionPolicy({ id: 'policy-id-get-404' })).rejects.toMatchObject({
         output: { statusCode: 404 },
       });
+    });
+
+    it('defaults legacy attributes (no type) to type "global" with null ruleId', async () => {
+      const existingAttributes = {
+        name: 'legacy',
+        description: 'd',
+        enabled: true,
+        destinations: [{ type: 'workflow' as const, id: 'w' }],
+        auth: { apiKey: 'k', owner: 'u', createdByUser: false },
+        createdBy: null,
+        createdByUsername: null,
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: null,
+        updatedByUsername: null,
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      } as ActionPolicySavedObjectAttributes;
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'p-legacy',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: existingAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      const res = await client.getActionPolicy({ id: 'p-legacy' });
+
+      expect(res.type).toBe('global');
+      expect(res.ruleId).toBeNull();
+    });
+
+    it('returns ruleId for a single_rule policy', async () => {
+      const existingAttributes = {
+        name: 's',
+        description: 'd',
+        type: 'single_rule',
+        ruleId: 'rule-7',
+        enabled: true,
+        destinations: [{ type: 'workflow' as const, id: 'w' }],
+        auth: { apiKey: 'k', owner: 'u', createdByUser: false },
+        createdBy: null,
+        createdByUsername: null,
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: null,
+        updatedByUsername: null,
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      } as ActionPolicySavedObjectAttributes;
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'p-single',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: existingAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      const res = await client.getActionPolicy({ id: 'p-single' });
+
+      expect(res.type).toBe('single_rule');
+      expect(res.ruleId).toBe('rule-7');
     });
   });
 
@@ -1327,6 +1456,75 @@ describe('ActionPolicyClient', () => {
       });
 
       expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['encoded-es-api-key']);
+    });
+
+    describe('type and ruleId immutability', () => {
+      const baseExisting: ActionPolicySavedObjectAttributes = {
+        name: 'existing',
+        description: 'd',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'w' }],
+        auth: { apiKey: 'old-key', owner: 'u', createdByUser: false },
+        createdBy: null,
+        createdByUsername: null,
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: null,
+        updatedByUsername: null,
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+
+      const setupSinglePolicyMocks = (existing: ActionPolicySavedObjectAttributes) => {
+        mockSavedObjectsClient.get.mockResolvedValueOnce({
+          id: 'p-1',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          version: 'WzEsMV0=',
+          attributes: existing,
+        });
+        mockSavedObjectsClient.update.mockResolvedValueOnce({
+          id: 'p-1',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzIsMV0=',
+        });
+      };
+
+      it('preserves type and ruleId from the existing single_rule policy on partial update', async () => {
+        setupSinglePolicyMocks({
+          ...baseExisting,
+          type: 'single_rule',
+          ruleId: 'rule-1',
+        });
+
+        await client.updateActionPolicy({
+          data: { name: 'renamed' },
+          options: { id: 'p-1', version: 'WzEsMV0=' },
+        });
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          'p-1',
+          expect.objectContaining({ type: 'single_rule', ruleId: 'rule-1', name: 'renamed' }),
+          { version: 'WzEsMV0=' }
+        );
+      });
+
+      it('normalizes a legacy attributes (no type) to "global" with null ruleId on update', async () => {
+        setupSinglePolicyMocks({ ...baseExisting });
+
+        await client.updateActionPolicy({
+          data: { name: 'renamed' },
+          options: { id: 'p-1', version: 'WzEsMV0=' },
+        });
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          'p-1',
+          expect.objectContaining({ type: 'global', ruleId: null, name: 'renamed' }),
+          { version: 'WzEsMV0=' }
+        );
+      });
     });
   });
 
