@@ -1311,6 +1311,7 @@ x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/co
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
+x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
