@@ -9,8 +9,7 @@ import { globalSetupHook } from '@kbn/scout';
 import { testData } from '../fixtures';
 
 globalSetupHook('Ingest data to Elasticsearch', async ({ apiServices, esArchiver, log }) => {
-  // Turn "isEsqlDefault" off by default for all tests
-  log.debug('[setup] turning off isEsqlDefault for all tests');
+  log.debug('[setup] set isEsqlDefault feature flag to false');
   await apiServices.core.settings({
     'feature_flags.overrides': {
       'discover.isEsqlDefault': false,
