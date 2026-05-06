@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { RequestTiming } from '@kbn/core-http-server';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
@@ -37,7 +38,7 @@ export async function update(
   );
 
   let isCreateRequest = false;
-  let existingAccessMode: 'default' | 'write_restricted' | undefined;
+  let existingAccessMode: SavedObjectAccessControl['accessMode'] | undefined;
   try {
     const resolved = await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
