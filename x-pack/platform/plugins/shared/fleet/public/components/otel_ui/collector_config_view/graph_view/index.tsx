@@ -24,16 +24,22 @@ import '@xyflow/react/dist/style.css';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { OTelCollectorConfig } from '../../../../../common/types';
+import type { OTelCollectorConfig, ComponentHealth } from '../../../../../common/types';
 
 import { OTelComponentDetail } from '../component_detail';
 
 import { configToGraph } from './config_to_graph';
+import type { OTelPipelineGroupNodeData } from './config_to_graph';
 import type { OTelGraphNodeData } from './constants';
 
 import { ComponentNode } from './component_node';
 import { PipelineGroupNode } from './pipeline_group_node';
 import { applyDagreLayout } from './layout';
+import { enrichNodesWithHealth } from './enrich_nodes_with_health';
+
+type DetailSelection =
+  | { type: 'component'; node: Node<OTelGraphNodeData> }
+  | { type: 'pipeline'; pipelineId: string };
 
 const nodeTypes: NodeTypes = {
   component: ComponentNode,
@@ -43,16 +49,19 @@ const nodeTypes: NodeTypes = {
 interface GraphViewProps {
   config: OTelCollectorConfig;
   selectedPipelineId: string;
+  health?: ComponentHealth;
 }
 
 const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
   config,
   selectedPipelineId,
+  health,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const [selectedNode, setSelectedNode] = useState<Node<OTelGraphNodeData> | null>(null);
-  const selectedNodeIdRef = useRef<string | null>(null);
-  selectedNodeIdRef.current = selectedNode?.id ?? null;
+
+  const [selection, setSelection] = useState<DetailSelection | null>(null);
+  const selectionRef = useRef<DetailSelection | null>(null);
+  selectionRef.current = selection;
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -64,20 +73,33 @@ const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
     const layoutNodes = applyDagreLayout(graph.nodes, graph.edges);
     setNodes(layoutNodes);
     setEdges(graph.edges);
-    setSelectedNode(null);
+    setSelection(null);
   }, [config, selectedPipelineId, setNodes, setEdges]);
+
+  useEffect(() => {
+    setNodes((currentNodes) => {
+      const updated = currentNodes.map((n) => ({ ...n, data: { ...n.data } }));
+      enrichNodesWithHealth(updated, health);
+
+      return updated;
+    });
+  }, [selectedPipelineId, health, setNodes, config]);
 
   useEffect(() => {
     fitView({ padding: 0.1 });
   }, [selectedPipelineId, fitView]);
 
-  const updateNodeSelection = useCallback(
-    (newSelectedId: string | null) => {
+  const updateNodesVisualState = useCallback(
+    (selectedComponentId: string | null, selectedPipelineLabel: string | null) => {
       setNodes((currentNodes) =>
-        currentNodes.map((node) => ({
-          ...node,
-          selected: node.id === newSelectedId,
-        }))
+        currentNodes.map((node) =>
+          node.type === 'pipelineGroup'
+            ? {
+                ...node,
+                data: { ...node.data, isSelected: node.data.label === selectedPipelineLabel },
+              }
+            : { ...node, selected: node.id === selectedComponentId }
+        )
       );
     },
     [setNodes]
@@ -85,20 +107,30 @@ const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
 
   const handleNodeClick: NodeMouseHandler = useCallback(
     (_, node) => {
-      if (node.type !== 'component') {
-        return;
+      if (node.type === 'component') {
+        const current = selectionRef.current;
+        const isAlreadySelected = current?.type === 'component' && current.node.id === node.id;
+        const newSelection = isAlreadySelected
+          ? null
+          : { type: 'component' as const, node: node as Node<OTelGraphNodeData> };
+        setSelection(newSelection);
+        updateNodesVisualState(newSelection?.node.id ?? null, null);
+      } else if (node.type === 'pipelineGroup') {
+        const pipelineId = (node as Node<OTelPipelineGroupNodeData>).data.label;
+        const current = selectionRef.current;
+        const isAlreadySelected = current?.type === 'pipeline' && current.pipelineId === pipelineId;
+        const newPipelineId = isAlreadySelected ? null : pipelineId;
+        setSelection(newPipelineId ? { type: 'pipeline', pipelineId: newPipelineId } : null);
+        updateNodesVisualState(null, newPipelineId);
       }
-      const newSelectedId = selectedNodeIdRef.current === node.id ? null : node.id;
-      setSelectedNode(newSelectedId ? (node as Node<OTelGraphNodeData>) : null);
-      updateNodeSelection(newSelectedId);
     },
-    [updateNodeSelection]
+    [updateNodesVisualState]
   );
 
   const handleClose = useCallback(() => {
-    setSelectedNode(null);
-    updateNodeSelection(null);
-  }, [updateNodeSelection]);
+    setSelection(null);
+    updateNodesVisualState(null, null);
+  }, [updateNodesVisualState]);
 
   const defaultEdgeOptions = useMemo(
     () => ({
@@ -119,6 +151,7 @@ const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
         css={css`
           min-width: 0;
         `}
+        grow={4}
       >
         <EuiPanel
           hasBorder
@@ -148,12 +181,17 @@ const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
           </ReactFlow>
         </EuiPanel>
       </EuiFlexItem>
-      {selectedNode && (
-        <EuiFlexItem grow={false}>
+      {selection && (
+        <EuiFlexItem grow={2}>
           <OTelComponentDetail
-            componentId={selectedNode.data.label}
-            componentType={selectedNode.data.componentType}
+            componentId={
+              selection.type === 'component' ? selection.node.data.label : selection.pipelineId
+            }
+            componentType={
+              selection.type === 'component' ? selection.node.data.componentType : 'pipeline'
+            }
             config={config}
+            health={health}
             onClose={handleClose}
           />
         </EuiFlexItem>
