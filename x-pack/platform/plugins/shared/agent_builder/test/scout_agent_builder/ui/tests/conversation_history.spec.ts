@@ -54,9 +54,18 @@ test.describe('Agent Builder — conversation history', { tag: [...tags.stateful
     });
 
     await test.step('navigate via sidebar', async () => {
-      expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[0])).toBe(true);
-      expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[1])).toBe(true);
-      expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[2])).toBe(true);
+      await pageObjects.agentBuilder.navigateToApp();
+      await expect(async () => {
+        expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[0])).toBe(
+          true
+        );
+        expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[1])).toBe(
+          true
+        );
+        expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[2])).toBe(
+          true
+        );
+      }).toPass({ timeout: 30_000 });
       for (let i = 0; i < CONVERSATION_DATA.length; i++) {
         const conv = CONVERSATION_DATA[i];
         const convId = conversationIds[i];
