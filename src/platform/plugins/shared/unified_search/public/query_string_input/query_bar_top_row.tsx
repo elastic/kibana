@@ -251,10 +251,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   enableResourceBrowser?: ESQLEditorProps['enableResourceBrowser'];
   useBackgroundSearchButton?: boolean;
   /**
-   * Opt-in to the new DateRangePicker. The new picker is shown only when both
-   * this prop is `true` and the `unifiedSearch.newDateRangePickerEnabled` feature
-   * flag is enabled. When the feature flag is disabled, the legacy
-   * EuiSuperDatePicker is always used regardless of this prop.
+   * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
+   * to opt out and keep the legacy EuiSuperDatePicker. The new picker is shown
+   * only when this resolves to `true` *and* the
+   * `unifiedSearch.newDateRangePickerEnabled` feature flag is enabled — when
+   * the flag is disabled, the legacy picker is always used.
    */
   enableDateRangePicker?: boolean;
 }
@@ -336,6 +337,7 @@ export const QueryBarTopRow = React.memo(
       showDatePicker = true,
       showAutoRefreshOnly = false,
       showSubmitButton = true,
+      enableDateRangePicker = true,
     } = props;
 
     const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
@@ -389,7 +391,7 @@ export const QueryBarTopRow = React.memo(
     } = kibana.services;
 
     const shouldUseLegacyTimePicker =
-      !props.enableDateRangePicker ||
+      !enableDateRangePicker ||
       !kibana.services.featureFlags?.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true);
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
