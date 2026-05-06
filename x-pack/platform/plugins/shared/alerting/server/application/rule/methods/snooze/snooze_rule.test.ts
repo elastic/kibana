@@ -240,9 +240,10 @@ describe('snoozeRule change tracking', () => {
 
     await trackingClient.snooze({ id: 'rule-1', snoozeSchedule });
 
-    expect(changeTrackingService.log).toHaveBeenCalledTimes(1);
-    expect(changeTrackingService.log).toHaveBeenCalledWith(
-      expect.objectContaining({ objectId: 'rule-1', module: 'stack' }),
+    expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+    // Single-rule callers omit the bulkCount metadata.
+    expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+      [expect.objectContaining({ objectId: 'rule-1', module: 'stack' })],
       { action: 'rule_snooze', spaceId: 'default' }
     );
   });
@@ -253,16 +254,18 @@ describe('snoozeRule change tracking', () => {
 
     await trackingClient.snooze({ id: 'rule-1', snoozeSchedule });
 
-    expect(changeTrackingService.log).toHaveBeenCalledWith(
-      {
-        objectId: 'rule-1',
-        objectType: RULE_SAVED_OBJECT_TYPE,
-        module: 'stack',
-        snapshot: {
-          attributes: updatedRuleSO.attributes,
-          references: updatedRuleSO.references,
+    expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+      [
+        {
+          objectId: 'rule-1',
+          objectType: RULE_SAVED_OBJECT_TYPE,
+          module: 'stack',
+          snapshot: {
+            attributes: updatedRuleSO.attributes,
+            references: updatedRuleSO.references,
+          },
         },
-      },
+      ],
       expect.any(Object)
     );
   });
@@ -281,9 +284,9 @@ describe('snoozeRule change tracking', () => {
     await trackingClient.snooze({ id: 'rule-1', snoozeSchedule });
 
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
-    expect(changeTrackingService.log).toHaveBeenCalledTimes(1);
-    expect(changeTrackingService.log).toHaveBeenCalledWith(
-      expect.objectContaining({ objectId: 'rule-1' }),
+    expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+    expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+      [expect.objectContaining({ objectId: 'rule-1' })],
       expect.objectContaining({ action: 'rule_snooze' })
     );
   });
@@ -295,7 +298,7 @@ describe('snoozeRule change tracking', () => {
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('boom'));
 
     await expect(trackingClient.snooze({ id: 'rule-1', snoozeSchedule })).rejects.toThrow('boom');
-    expect(changeTrackingService.log).not.toHaveBeenCalled();
+    expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
   });
 
   test('does not log when the rule type opts out of tracking', async () => {
@@ -305,6 +308,6 @@ describe('snoozeRule change tracking', () => {
 
     await trackingClient.snooze({ id: 'rule-1', snoozeSchedule });
 
-    expect(changeTrackingService.log).not.toHaveBeenCalled();
+    expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
   });
 });

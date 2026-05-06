@@ -46,7 +46,7 @@ import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
 import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
-import { logRuleChange } from '../common_utils/log_rule_change';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -253,9 +253,9 @@ export async function createRule<Params extends RuleParams = never>(
       })
   );
 
-  await logRuleChange({
+  await logBulkRuleChanges({
     context,
-    ruleSO: createdRuleSavedObject,
+    ruleSOs: [createdRuleSavedObject],
     action: RuleChangeTrackingAction.ruleCreate,
   });
 

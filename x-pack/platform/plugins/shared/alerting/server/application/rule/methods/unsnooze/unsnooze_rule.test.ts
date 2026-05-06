@@ -220,9 +220,10 @@ describe('unsnoozeRule change tracking', () => {
 
     await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
 
-    expect(changeTrackingService.log).toHaveBeenCalledTimes(1);
-    expect(changeTrackingService.log).toHaveBeenCalledWith(
-      expect.objectContaining({ objectId: 'rule-1', module: 'stack' }),
+    expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+    // Single-rule callers omit the bulkCount metadata.
+    expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+      [expect.objectContaining({ objectId: 'rule-1', module: 'stack' })],
       { action: 'rule_unsnooze', spaceId: 'default' }
     );
   });
@@ -233,16 +234,18 @@ describe('unsnoozeRule change tracking', () => {
 
     await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
 
-    expect(changeTrackingService.log).toHaveBeenCalledWith(
-      {
-        objectId: 'rule-1',
-        objectType: RULE_SAVED_OBJECT_TYPE,
-        module: 'stack',
-        snapshot: {
-          attributes: updatedRuleSO.attributes,
-          references: updatedRuleSO.references,
+    expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+      [
+        {
+          objectId: 'rule-1',
+          objectType: RULE_SAVED_OBJECT_TYPE,
+          module: 'stack',
+          snapshot: {
+            attributes: updatedRuleSO.attributes,
+            references: updatedRuleSO.references,
+          },
         },
-      },
+      ],
       expect.any(Object)
     );
   });
@@ -261,9 +264,9 @@ describe('unsnoozeRule change tracking', () => {
     await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
 
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
-    expect(changeTrackingService.log).toHaveBeenCalledTimes(1);
-    expect(changeTrackingService.log).toHaveBeenCalledWith(
-      expect.objectContaining({ objectId: 'rule-1' }),
+    expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+    expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+      [expect.objectContaining({ objectId: 'rule-1' })],
       expect.objectContaining({ action: 'rule_unsnooze' })
     );
   });
@@ -277,7 +280,7 @@ describe('unsnoozeRule change tracking', () => {
     await expect(
       trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] })
     ).rejects.toThrow('boom');
-    expect(changeTrackingService.log).not.toHaveBeenCalled();
+    expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
   });
 
   test('does not log when the rule type opts out of tracking', async () => {
@@ -287,6 +290,6 @@ describe('unsnoozeRule change tracking', () => {
 
     await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
 
-    expect(changeTrackingService.log).not.toHaveBeenCalled();
+    expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
   });
 });

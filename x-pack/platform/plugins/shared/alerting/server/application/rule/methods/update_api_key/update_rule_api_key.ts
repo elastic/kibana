@@ -18,7 +18,7 @@ import { createNewAPIKeySet, updateMeta } from '../../../../rules_client/lib';
 import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { logRuleChange } from '../common_utils/log_rule_change';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 import type { UpdateApiKeyParams } from './types';
 import { updateApiKeyParamsSchema } from './schemas';
 
@@ -133,9 +133,9 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
       }
     );
 
-    await logRuleChange({
+    await logBulkRuleChanges({
       context,
-      ruleSO: updatedRuleSavedObject as SavedObject<RawRule>,
+      ruleSOs: [updatedRuleSavedObject] as Array<SavedObject<RawRule>>,
       action: RuleChangeTrackingAction.ruleUpdateApiKey,
     });
   } catch (e) {

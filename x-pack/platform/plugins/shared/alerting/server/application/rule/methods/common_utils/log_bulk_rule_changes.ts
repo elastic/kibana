@@ -58,10 +58,12 @@ export async function logBulkRuleChanges({
   }
 
   try {
+    const metadata = ruleSOs.length > 1 ? { bulkCount: ruleSOs.length } : undefined;
+
     await changeTrackingService.logBulk(changes, {
       action,
       spaceId,
-      data: { metadata: { bulkCount: ruleSOs.length } },
+      ...(metadata ? { data: { metadata } } : {}),
     });
   } catch (e) {
     logger.warn(`Unable to log bulk rule changes for action "${action}": ${e}`);

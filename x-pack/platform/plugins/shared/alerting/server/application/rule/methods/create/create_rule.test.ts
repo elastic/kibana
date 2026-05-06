@@ -4991,9 +4991,10 @@ This is the type of text _investigation guides_ will contain.`;
 
       await trackingClient.create({ data: getMockData() });
 
-      expect(changeTrackingService.log).toHaveBeenCalledTimes(1);
-      expect(changeTrackingService.log).toHaveBeenCalledWith(
-        expect.objectContaining({ objectId: '1', module: 'stack' }),
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      // Single-rule callers omit the bulkCount metadata.
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [expect.objectContaining({ objectId: '1', module: 'stack' })],
         { action: 'rule_create', spaceId: 'default' }
       );
     });
@@ -5007,16 +5008,18 @@ This is the type of text _investigation guides_ will contain.`;
 
       await trackingClient.create({ data: getMockData() });
 
-      expect(changeTrackingService.log).toHaveBeenCalledWith(
-        {
-          objectId: '1',
-          objectType: RULE_SAVED_OBJECT_TYPE,
-          module: 'stack',
-          snapshot: {
-            attributes: createdRuleSO.attributes,
-            references: createdRuleSO.references,
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          {
+            objectId: '1',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            module: 'stack',
+            snapshot: {
+              attributes: createdRuleSO.attributes,
+              references: createdRuleSO.references,
+            },
           },
-        },
+        ],
         expect.any(Object)
       );
     });
@@ -5030,7 +5033,7 @@ This is the type of text _investigation guides_ will contain.`;
 
       await trackingClient.create({ data: getMockData() });
 
-      expect(changeTrackingService.log).not.toHaveBeenCalled();
+      expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
     });
 
     test('does not log when no change tracking service is configured', async () => {
@@ -5043,13 +5046,13 @@ This is the type of text _investigation guides_ will contain.`;
 
       // No service to assert against; verify the call simply did not throw.
       // The negative assertion is exercised at the helper level
-      // (see common_utils/log_rule_change.test.ts).
+      // (see common_utils/log_bulk_rule_changes.test.ts).
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
     });
 
     test('rule creation succeeds even if change tracking throws', async () => {
       const changeTrackingService = createChangeTrackingService();
-      changeTrackingService.log.mockRejectedValueOnce(new Error('boom'));
+      changeTrackingService.logBulk.mockRejectedValueOnce(new Error('boom'));
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
 
@@ -5057,7 +5060,7 @@ This is the type of text _investigation guides_ will contain.`;
 
       await expect(trackingClient.create({ data: getMockData() })).resolves.toBeDefined();
       expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Unable to log rule change for action "rule_create"')
+        expect.stringContaining('Unable to log bulk rule changes for action "rule_create"')
       );
     });
   });

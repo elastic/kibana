@@ -3484,13 +3484,10 @@ describe('bulkEdit()', () => {
       });
 
       expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      // Single-rule callers omit the bulkCount metadata.
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [expect.objectContaining({ objectId: '1' })],
-        {
-          action: 'rule_update',
-          spaceId: 'default',
-          data: { metadata: { bulkCount: 1 } },
-        }
+        { action: 'rule_update', spaceId: 'default' }
       );
     });
 
