@@ -34,6 +34,12 @@ EVAL_SUITE_INFO="$(
 )"
 EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/dev/null || true)"
 EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
+# Optional Playwright shard count (>= 1). When set, the fanout child step uses
+# Buildkite `parallelism: N` and forwards `--shard=$((BUILDKITE_PARALLEL_JOB+1))/N`.
+EVAL_SUITE_SHARDS="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.shards // empty' 2>/dev/null || true)"
+if ! [[ "${EVAL_SUITE_SHARDS}" =~ ^[0-9]+$ ]] || [[ "${EVAL_SUITE_SHARDS:-0}" -lt 1 ]]; then
+  EVAL_SUITE_SHARDS=""
+fi
 
 cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then
@@ -182,6 +188,7 @@ EOF
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
+          EVAL_SUITE_SHARDS: "${EVAL_SUITE_SHARDS:-}"
           EVAL_PROJECT: "${connector_id}"
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
@@ -189,6 +196,19 @@ EOF
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
+EOF
+
+        # Emit `parallelism: N` only when the suite declares shards (>= 2 is meaningful).
+        # Buildkite injects BUILDKITE_PARALLEL_JOB / BUILDKITE_PARALLEL_JOB_COUNT into each
+        # parallel child; the inner run_suite.sh invocation forwards them to Playwright as
+        # `--shard=$((BUILDKITE_PARALLEL_JOB+1))/$BUILDKITE_PARALLEL_JOB_COUNT`.
+        if [[ -n "${EVAL_SUITE_SHARDS:-}" ]] && [[ "${EVAL_SUITE_SHARDS}" -ge 2 ]]; then
+          cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        parallelism: ${EVAL_SUITE_SHARDS}
+EOF
+        fi
+
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -366,9 +386,22 @@ done
 # Run eval suite via @kbn/evals CLI (internal executor by default).
 # If EVAL_PROJECT is set, run a single Playwright project (used by CI fanout steps).
 # Otherwise, Playwright will run all projects defined by the suite config (useful locally).
+
+# Compute --shard=i/N from Buildkite parallelism env when present. BK sets
+# BUILDKITE_PARALLEL_JOB (zero-based) and BUILDKITE_PARALLEL_JOB_COUNT on each
+# parallel sibling. Playwright's --shard is one-based, so add 1 to the index.
+EVAL_SHARD_ARGS=()
+if [[ -n "${BUILDKITE_PARALLEL_JOB_COUNT:-}" ]] && [[ -n "${BUILDKITE_PARALLEL_JOB:-}" ]]; then
+  if [[ "${BUILDKITE_PARALLEL_JOB_COUNT}" =~ ^[0-9]+$ ]] \
+    && [[ "${BUILDKITE_PARALLEL_JOB}" =~ ^[0-9]+$ ]] \
+    && [[ "${BUILDKITE_PARALLEL_JOB_COUNT}" -ge 1 ]]; then
+    EVAL_SHARD_ARGS=(--shard "$((BUILDKITE_PARALLEL_JOB + 1))/${BUILDKITE_PARALLEL_JOB_COUNT}")
+  fi
+fi
+
 if [[ -n "${EVAL_PROJECT:-}" ]]; then
-  node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT"
+  node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" "${EVAL_SHARD_ARGS[@]}"
 else
-  node scripts/evals run --suite "$EVAL_SUITE_ID"
+  node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_SHARD_ARGS[@]}"
 fi
 
