@@ -250,6 +250,25 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.RESERVED_ESQL_PARAMS",
+        "type": "Object",
+        "tags": [],
+        "label": "RESERVED_ESQL_PARAMS",
+        "description": [
+          "\nLowercase parameter names that the alerting v2 rule executor binds at\nexecution time (see `get_query_payload.ts`)."
+        ],
+        "signature": [
+          "readonly string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/esql_params.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ]
   }

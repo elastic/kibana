@@ -1370,7 +1370,7 @@
             "label": "cases",
             "description": [],
             "signature": [
-              "{ readonly casesPermissions: string; }"
+              "{ readonly casesPermissions: string; readonly configureCaseSettings: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "lineNumber": 744,
