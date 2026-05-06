@@ -214,4 +214,61 @@ describe('usePackQueryLastResults', () => {
       expect(mockSearchSource.create).not.toHaveBeenCalled();
     });
   });
+
+  describe('id precedence', () => {
+    it('prefers scheduleId over actionId when both are provided', async () => {
+      const queryClient = createQueryClient();
+
+      mockSearchSource.fetch$.mockReturnValue(
+        of({
+          rawResponse: {
+            aggregations: {
+              per_execution: {
+                buckets: [
+                  {
+                    key: 1,
+                    doc_count: 7,
+                    max_ingested: {
+                      value: 1700000000000,
+                      value_as_string: '2023-11-14T22:13:20.000Z',
+                    },
+                    unique_agents: { value: 2 },
+                  },
+                ],
+              },
+            },
+          },
+        })
+      );
+
+      const { result } = renderHook(
+        () =>
+          usePackQueryLastResults({
+            actionId: 'action-uuid-ignored',
+            scheduleId: 'sched-wins',
+            interval: 3600,
+          }),
+        { wrapper: createWrapper(queryClient) }
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      // Schedule branch issues exactly one request; legacy actionId branch would issue two.
+      expect(mockSearchSource.create).toHaveBeenCalledTimes(1);
+      expect(mockSearchSource.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: [{ term: { schedule_id: 'sched-wins' } }],
+            }),
+          }),
+        })
+      );
+      expect(result.current.data).toEqual({
+        lastResultTime: ['2023-11-14T22:13:20.000Z'],
+        uniqueAgentsCount: 2,
+        docCount: 7,
+      });
+    });
+  });
 });

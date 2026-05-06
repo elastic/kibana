@@ -638,7 +638,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderLastResultsColumn = useCallback(
     (item: PackQueryFormData) => (
       <ScheduledQueryLastResults
-        actionId={actionIdForQuery(item.id)}
+        actionId={item.schedule_id ? undefined : actionIdForQuery(item.id)}
         interval={item.interval}
         scheduleId={item.schedule_id}
       />
@@ -648,7 +648,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderDocsColumn = useCallback(
     (item: PackQueryFormData) => (
       <DocsColumnResults
-        actionId={actionIdForQuery(item.id)}
+        actionId={item.schedule_id ? undefined : actionIdForQuery(item.id)}
         interval={item.interval}
         scheduleId={item.schedule_id}
       />
@@ -658,7 +658,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderAgentsColumn = useCallback(
     (item: PackQueryFormData) => (
       <AgentsColumnResults
-        actionId={actionIdForQuery(item.id)}
+        actionId={item.schedule_id ? undefined : actionIdForQuery(item.id)}
         interval={item.interval}
         scheduleId={item.schedule_id}
       />

@@ -12,6 +12,17 @@ import { SortDirection } from '@kbn/data-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
+interface PerExecutionBucket {
+  key: number;
+  doc_count: number;
+  max_ingested?: { value: number | null; value_as_string?: string };
+  unique_agents?: { value: number };
+}
+
+interface SchedulePerExecutionAggregations {
+  per_execution?: { buckets: PerExecutionBucket[] };
+}
+
 interface UsePackQueryLastResultsProps {
   actionId?: string;
   agentIds?: string[];
@@ -41,7 +52,9 @@ export const usePackQueryLastResults = ({
           size: 0,
           query: {
             // @ts-expect-error update types
-            term: { schedule_id: scheduleId },
+            bool: {
+              filter: [{ term: { schedule_id: scheduleId } }],
+            },
           },
         });
 
@@ -51,7 +64,10 @@ export const usePackQueryLastResults = ({
             terms: {
               field: 'osquery_meta.schedule_execution_count',
               size: 1,
-              // order by sub-agg max_ingested to get the most recent execution bucket
+              // Order by sub-agg max_ingested to get the most recent execution
+              // bucket. shard_size widens the per-shard candidate set so the
+              // ordering is accurate when results are spread across many shards.
+              shard_size: 10,
               order: { max_ingested: 'desc' },
             },
             aggs: {
@@ -62,8 +78,10 @@ export const usePackQueryLastResults = ({
         });
 
         const scheduleResponse = await lastValueFrom(scheduleSearchSource.fetch$());
-        // @ts-expect-error update types
-        const buckets = scheduleResponse?.rawResponse?.aggregations?.per_execution?.buckets;
+        const aggregations = scheduleResponse?.rawResponse?.aggregations as
+          | SchedulePerExecutionAggregations
+          | undefined;
+        const buckets = aggregations?.per_execution?.buckets;
 
         if (!buckets?.length) {
           return null;
@@ -72,7 +90,9 @@ export const usePackQueryLastResults = ({
         const bucket = buckets[0];
 
         return {
-          lastResultTime: [bucket.max_ingested?.value_as_string],
+          lastResultTime: bucket.max_ingested?.value_as_string
+            ? [bucket.max_ingested.value_as_string]
+            : undefined,
           uniqueAgentsCount: bucket.unique_agents?.value,
           docCount: bucket.doc_count,
         };
