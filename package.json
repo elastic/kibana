@@ -1313,6 +1313,7 @@
     "@opentelemetry/instrumentation-http": "0.215.0",
     "@opentelemetry/instrumentation-undici": "0.25.0",
     "@opentelemetry/otlp-exporter-base": "0.215.0",
+    "@opentelemetry/otlp-transformer": "0.215.0",
     "@opentelemetry/resources": "2.7.0",
     "@opentelemetry/sdk-logs": "0.215.0",
     "@opentelemetry/semantic-conventions": "1.40.0",
