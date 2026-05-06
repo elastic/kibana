@@ -257,6 +257,27 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(removeIfExists).not.toHaveBeenCalled();
     });
 
+    it('does not call removeIfExists or log on the initial false emission', async () => {
+      const core = coreMock.createStart();
+      core.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
+      const ensureScheduled = jest.fn().mockResolvedValue(undefined);
+      const removeIfExists = jest.fn().mockResolvedValue(undefined);
+      const taskManager = { ensureScheduled, removeIfExists } as never;
+
+      logger.info.mockClear();
+      logger.error.mockClear();
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
+      await task.start({ core, taskManager });
+
+      await new Promise<void>((resolve) => setImmediate(resolve));
+
+      expect(ensureScheduled).not.toHaveBeenCalled();
+      expect(removeIfExists).not.toHaveBeenCalled();
+      expect(logger.info).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
     it('calls removeIfExists and logs info when flag emits false after true', async () => {
       const flag$ = new Subject<boolean>();
       const core = coreMock.createStart();
