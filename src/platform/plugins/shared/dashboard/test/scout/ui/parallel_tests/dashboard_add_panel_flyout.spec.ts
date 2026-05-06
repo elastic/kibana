@@ -60,7 +60,6 @@ spaceTest.describe.only(
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
-      debugger;
       await scoutSpace.uiSettings.unset('defaultIndex');
       await scoutSpace.savedObjects.cleanStandardList();
     });
