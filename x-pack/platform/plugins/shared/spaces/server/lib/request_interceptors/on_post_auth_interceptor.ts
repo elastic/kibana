@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 
 import type { Space } from '../../../common';
 import { addSpaceIdToPath } from '../../../common';
@@ -29,7 +30,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
   log,
   http,
 }: OnPostAuthInterceptorDeps) {
-  // create pointer to the core start services promise, so we get the resolved value later
+  // create pointer to the core start services promise, so we can reuse the resolved value
   const coreStartServicesPromise = getCoreStartServices();
   const getFeatures = async () => (await coreStartServicesPromise)[1].features;
 
@@ -47,6 +48,33 @@ export function initSpacesOnPostAuthRequestInterceptor({
     const isRequestingKibanaRoot = path === '/' && spaceId === DEFAULT_SPACE_ID;
     const isRequestingSpaceRoot = path === '/' && spaceId !== DEFAULT_SPACE_ID;
     const isRequestingApplication = path.startsWith('/app');
+    const isEnteringSpace = path === '/spaces/enter';
+
+    // When the user deliberately selects a space from any entry point, they all navigate to /spaces/enter within
+    // the chosen space. Persist that choice fire-and-forget so it never blocks the response,
+    // but only when the user has opted in to remembering their selected space.
+    if (isEnteringSpace && request.auth.isAuthenticated) {
+      const [coreStart] = await coreStartServicesPromise;
+
+      // security plugin registers the user profile service as a delegate, so we can type cast it to the delegate contract
+      // so we can leverage the update method it exposes
+      const userProfileService = coreStart.userProfile as CoreUserProfileDelegateContract;
+      userProfileService
+        .getCurrent({
+          request,
+          dataPath: 'userSettings',
+        })
+        .then((profile) => {
+          if (profile?.uid && profile?.data?.userSettings?.rememberSelectedSpace) {
+            return userProfileService.update(profile.uid, {
+              userSettings: { lastSelectedSpaceId: spaceId },
+            });
+          }
+        })
+        .catch((err) => {
+          log.warn(`Failed to persist last selected space: ${err}`);
+        });
+    }
 
     // if requesting the application root, then show the Space Selector UI to allow the user to choose which space
     // they wish to visit. This is done "onPostAuth" to allow the Saved Objects Client to use the request's auth credentials,
@@ -63,6 +91,29 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
           const destination = addSpaceIdToPath(serverBasePath, space.id, ENTER_SPACE_PATH);
           return response.redirected({ headers: { location: destination } });
+        }
+
+        if (request.auth.isAuthenticated) {
+          const [coreStart] = await coreStartServicesPromise;
+          const userProfileService = coreStart.userProfile as CoreUserProfileDelegateContract;
+          const userProfile = await userProfileService.getCurrent({
+            request,
+            dataPath: 'userSettings',
+          });
+          const rememberSelectedSpace = userProfile?.data?.userSettings?.rememberSelectedSpace;
+          const lastSelectedSpaceId = userProfile?.data?.userSettings?.lastSelectedSpaceId;
+
+          if (rememberSelectedSpace && lastSelectedSpaceId) {
+            const targetSpace = spaces.find((s) => s.id === lastSelectedSpaceId);
+            if (targetSpace) {
+              return response.redirected({
+                headers: {
+                  location: addSpaceIdToPath(serverBasePath, lastSelectedSpaceId, ENTER_SPACE_PATH),
+                },
+              });
+            }
+            // space not found or no longer accessible — fall through to selector
+          }
         }
 
         if (spaces.length > 0) {
