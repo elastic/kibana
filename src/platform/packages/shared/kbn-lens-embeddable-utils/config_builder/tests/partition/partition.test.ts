@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensApiConfig } from '../../schema';
-import type { PieConfig } from '../../schema/charts/pie';
-import { mosaicConfigSchema } from '../../schema/charts/mosaic';
-import { partitionConfigSchema } from '../../schema/charts/partition';
-import { pieConfigSchema } from '../../schema/charts/pie';
-import type { TreemapConfig } from '../../schema/charts/treemap';
-import { treemapConfigSchema } from '../../schema/charts/treemap';
-import type { WaffleConfig } from '../../schema/charts/waffle';
-import { waffleConfigSchema } from '../../schema/charts/waffle';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { LensPartitionVisualizationState } from '@kbn/lens-common';
+
+import type { LensApiConfigChartType } from '../../schema';
+import type { PieConfig } from '../../schema/charts/pie';
+import type { TreemapConfig } from '../../schema/charts/treemap';
+import type { WaffleConfig } from '../../schema/charts/waffle';
 import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
-import { validateAPIConverter, validateConverter } from '../validate';
 import { esqlCharts } from './lens_api_config.mock';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -35,71 +31,76 @@ import {
   mosaicLegacyESQLState,
   waffleLegacyESQLState,
 } from './lens_state_config.mock';
-import type { LensPartitionVisualizationState } from '@kbn/lens-common';
+import { validator } from '../utils/validator';
+import type { LensAttributes } from '../../types';
 
 describe('Partition', () => {
-  describe('validateConverter', () => {
+  describe('state transform validation', () => {
     const datasets = [
-      { name: 'pie basic', config: pieLegacyBasicState, schema: pieConfigSchema },
-      { name: 'treemap basic', config: treemapLegacyBasicState, schema: treemapConfigSchema },
-      { name: 'mosaic basic', config: mosaicLegacyBasicState, schema: mosaicConfigSchema },
-      { name: 'waffle basic', config: waffleLegacyBasicState, schema: waffleConfigSchema },
+      { name: 'pie basic', type: 'pie', config: pieLegacyBasicState },
+      { name: 'treemap basic', type: 'treemap', config: treemapLegacyBasicState },
+      { name: 'mosaic basic', type: 'mosaic', config: mosaicLegacyBasicState },
+      { name: 'waffle basic', type: 'waffle', config: waffleLegacyBasicState },
       {
         name: 'pie advanced with collapsed groups',
+        type: 'pie',
         config: pieLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
-        schema: pieConfigSchema,
       },
       {
         name: 'treemap advanced with collapsed groups',
+        type: 'treemap',
         config: treemapLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
-        schema: treemapConfigSchema,
       },
       {
         name: 'mosaic advanced with collapsed groups',
+        type: 'mosaic',
         config: mosaicLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
-        schema: mosaicConfigSchema,
       },
       {
         name: 'waffle advanced with collapsed groups',
+        type: 'waffle',
         config: waffleLegacyAdvancedStateWithCollapsedGroups,
-        schema: waffleConfigSchema,
       },
       {
         name: 'pie esql basic',
+        type: 'pie',
         config: pieLegacyESQLState,
-        schema: pieConfigSchema,
       },
       {
         name: 'treemap esql basic',
+        type: 'treemap',
         config: treemapLegacyESQLState,
-        schema: treemapConfigSchema,
       },
       {
         name: 'mosaic esql basic',
+        type: 'mosaic',
         config: mosaicLegacyESQLState,
-        schema: mosaicConfigSchema,
       },
       {
         name: 'waffle esql basic',
+        type: 'waffle',
         config: waffleLegacyESQLState,
-        schema: waffleConfigSchema,
       },
-    ];
-    for (const { name, config, schema } of datasets) {
-      it(`should convert a legacy ${name} chart`, () => {
-        validateConverter(config, schema);
-        validateConverter(config, partitionConfigSchema);
+    ] satisfies {
+      name: string;
+      type: Extract<LensApiConfigChartType, 'pie' | 'treemap' | 'mosaic' | 'waffle'>;
+      config: LensAttributes;
+    }[];
+
+    for (const { name, type, config } of datasets) {
+      it(`should convert from state ${name} chart`, () => {
+        validator[type].fromState(config);
       });
     }
   });
 
-  describe('validateAPIConverter', () => {
+  describe('api transform validation', () => {
     for (const config of esqlCharts) {
       it(`should convert an API ${config.title} chart`, () => {
-        validateAPIConverter(config as LensApiConfig, partitionConfigSchema, [
-          'sampling',
-          'ignore_global_filters',
-        ]);
+        validator[config.type].fromApi(
+          config as any, // TODO fix test types here'
+          ['ignore_global_filters', 'sampling']
+        );
       });
     }
   });
