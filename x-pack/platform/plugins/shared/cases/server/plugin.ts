@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import {
-  type IContextProvider,
-  type KibanaRequest,
-  type Logger,
-  type PluginInitializerContext,
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
-  SavedObjectsClient,
+import type {
+  IContextProvider,
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
 } from '@kbn/core/server';
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -21,7 +20,7 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import { APP_ID, CASE_SAVED_OBJECT } from '../common/constants';
+import { APP_ID } from '../common/constants';
 
 import type { CasesClient } from './client';
 import type {
@@ -54,8 +53,6 @@ import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
-import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
-import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 import { registerCaseWorkflowSteps } from './workflows';
 import { initUiSettings } from './ui_settings';
 
@@ -114,12 +111,6 @@ export class CasePlugin
     );
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
-    registerCasesAnalyticsIndexesTasks({
-      taskManager: plugins.taskManager,
-      logger: this.logger,
-      core,
-      analyticsConfig: this.caseConfig.analytics,
-    });
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -244,23 +235,6 @@ export class CasePlugin
 
       if (this.caseConfig.incrementalId.enabled) {
         void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
-      }
-      if (this.caseConfig.analytics.index?.enabled) {
-        const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
-          CASE_SAVED_OBJECT,
-        ]);
-        const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
-        scheduleCAISchedulerTask({
-          taskManager: plugins.taskManager,
-          logger: this.logger,
-        }).catch(() => {}); // it shouldn't reject, but just in case
-        createCasesAnalyticsIndexes({
-          esClient: core.elasticsearch.client.asInternalUser,
-          logger: this.logger,
-          isServerless: this.isServerless,
-          taskManager: plugins.taskManager,
-          savedObjectsClient: internalSavedObjectsClient,
-        }).catch(() => {}); // it shouldn't reject, but just in case
       }
     }
 

@@ -31,7 +31,6 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
     incrementalId: { enabled: true, taskIntervalMinutes: 10, taskStartDelayMinutes: 10 },
-    analytics: { index: { enabled: true } },
     templates: { enabled: true },
     attachments: { enabled: true },
     ...overrides,
@@ -167,11 +166,6 @@ describe('Cases Plugin', () => {
       expect(pluginStart).toMatchInlineSnapshot(`
         Object {
           "config": Object {
-            "analytics": Object {
-              "index": Object {
-                "enabled": true,
-              },
-            },
             "attachments": Object {
               "enabled": true,
             },
