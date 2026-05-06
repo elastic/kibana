@@ -15,7 +15,7 @@ import type { ReactNode } from 'react';
  *
  * Single-element and empty arrays are passed through without brackets.
  *
- * This should be applied at the call site (e.g. inside reactConvert)
+ * This should be applied at the call site (e.g. inside convertToReact)
  * rather than inside individual formatter's renderConvert, so that formatters which
  * override renderConvert get correct array rendering for free.
  */

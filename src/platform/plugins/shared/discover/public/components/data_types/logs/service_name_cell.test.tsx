@@ -105,7 +105,7 @@ describe('getServiceNameCell', () => {
     const mockFieldFormats = {
       ...fieldFormatsMock,
       getDefaultInstance: jest.fn().mockReturnValue({
-        reactConvert: jest.fn().mockImplementation((value, options) => {
+        convertToReact: jest.fn().mockImplementation((value, options) => {
           if (options?.hit?.highlight?.bytes) {
             return <mark className="ffSearch__highlight">{value}</mark>;
           }

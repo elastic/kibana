@@ -289,7 +289,7 @@ export const WorkflowExecuteEventForm = ({
       name: '@timestamp',
       sortable: true,
       width: '250px',
-      render: (timestamp: string) => fmt.convert(new Date(timestamp)),
+      render: (timestamp: string) => fmt.convertToText(new Date(timestamp)),
     },
     {
       field: '_source.kibana.alert.rule.name',

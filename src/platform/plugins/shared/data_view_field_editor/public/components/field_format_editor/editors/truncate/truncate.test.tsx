@@ -17,7 +17,7 @@ import { TruncateFormatEditor } from './truncate';
 
 const fieldType = 'string';
 const format = {
-  reactConvert: jest.fn().mockImplementation((input: string) => input.substring(0, 10)),
+  convertToReact: jest.fn().mockImplementation((input: string) => input.substring(0, 10)),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { fieldLength: 10 };
   }),

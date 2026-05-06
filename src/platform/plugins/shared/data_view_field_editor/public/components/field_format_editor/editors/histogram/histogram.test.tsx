@@ -15,7 +15,7 @@ import { HistogramFormatEditor } from './histogram';
 
 const fieldType = 'histogram';
 const format = {
-  reactConvert: jest
+  convertToReact: jest
     .fn()
     .mockImplementation((input: number | Record<string, number[]>) =>
       typeof input === 'number' ? input.toFixed(2) : JSON.stringify(input)

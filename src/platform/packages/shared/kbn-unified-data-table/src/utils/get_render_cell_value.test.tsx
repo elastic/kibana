@@ -57,8 +57,8 @@ const mockServices = {
   },
   fieldFormats: {
     getDefaultInstance: jest.fn(() => ({
-      convert: (value: unknown) => (value ? value : '-'),
-      reactConvert: (value: unknown) => (value ? value : '-'),
+      convertToText: (value: unknown) => (value ? value : '-'),
+      convertToReact: (value: unknown) => (value ? value : '-'),
     })),
   },
 };

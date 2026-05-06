@@ -46,9 +46,7 @@ describe('Options List Control Api', () => {
     });
     stubDataView.getFormatterForField = jest.fn().mockImplementation(() => {
       return {
-        getConverterFor: () => {
-          return (value: string) => `${value}:formatted`;
-        },
+        convertToText: (value: string) => `${value}:formatted`,
         toJSON: (value: any) => JSON.stringify(value),
       };
     });

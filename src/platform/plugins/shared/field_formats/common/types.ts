@@ -13,12 +13,6 @@ import type { FieldFormat } from './field_format';
 import type { FieldFormatsRegistry } from './field_formats_registry';
 
 /**
- * Content type for string-based field format converters.
- * @public
- */
-export type FieldFormatsContentType = 'text';
-
-/**
  * React converter options
  */
 export interface ReactContextTypeOptions {
@@ -63,17 +57,6 @@ export interface TextContextTypeOptions {
  * @public
  */
 export type TextContextTypeConvert = (value: any, options?: TextContextTypeOptions) => string;
-
-/**
- * Converter function
- * @public
- */
-export type FieldFormatConvertFunction = TextContextTypeConvert;
-
-/** @public **/
-export interface FieldFormatConvert {
-  text: TextContextTypeConvert;
-}
 
 /** @public **/
 export enum FIELD_FORMAT_IDS {

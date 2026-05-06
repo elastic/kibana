@@ -72,7 +72,7 @@ const callCreateGridColumns = (
     params.handleTransposedColumnClick,
     params.columnConfig ?? { columns: [], sortingColumnId: undefined, sortingDirection: 'none' },
     params.visibleColumns ?? visibleColumns,
-    params.formatFactory ?? (((x: unknown) => ({ convert: () => x })) as unknown as FormatFactory),
+    params.formatFactory ?? (((x: unknown) => ({ convertToText: () => x })) as unknown as FormatFactory),
     params.onColumnResize ?? jest.fn(),
     params.onColumnHide ?? jest.fn(),
     params.alignments ?? new Map(),

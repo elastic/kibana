@@ -45,9 +45,9 @@ export const initComponent = memoize(
                 defaultMessage="Time range"
               />
             ),
-            description: `${dataFormatter.convert(
+            description: `${dataFormatter.convertToText(
               inputProps.timeRange.from
-            )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
+            )} - ${dataFormatter.convertToText(inputProps.timeRange.to)}`,
           },
         ];
 
