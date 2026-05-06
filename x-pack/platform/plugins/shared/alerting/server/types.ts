@@ -375,7 +375,7 @@ export interface RuleType<
   /**
    * When true, the alerting framework records change history events for this
    * rule type via the registered `IChangeTrackingService`. Rule types must
-   * opt in (typically gated behind a feature flag) before any history is
+   * opt in (typically gated behind a config setting) before any history is
    * tracked.
    */
   trackChanges?: boolean;
