@@ -25,7 +25,7 @@ import type { ContextMenuViewProps } from './views/context_menu';
 import { ContextSubmenuView } from './views/context_submenu';
 import type { ContextSubmenuViewProps } from './views/context_submenu';
 import { ContextSwitcherTriggerButton } from './context_switcher_trigger_button';
-import type { ActionConfig } from './types';
+import type { ActionConfig, LinksListItem } from './types';
 import { POPOVER_WIDTH, type ContextSwitcherProps, type SpaceItem } from './types';
 import type { SelectableListItem } from './selectable_list';
 
@@ -142,17 +142,31 @@ export const ContextSwitcher = ({
   );
 
   const withClosePopover = useCallback(
-    (action?: ActionConfig): ActionConfig | undefined => {
-      if (!action) return undefined;
-      return {
-        ...action,
-        onClick: () => {
-          closePopover();
-          action?.onClick?.();
-        },
-      };
+    (onClick?: () => void) => () => {
+      closePopover();
+      onClick?.();
     },
     [closePopover]
+  );
+
+  const withClosePopoverAction = useCallback(
+    (action?: ActionConfig): ActionConfig | undefined =>
+      action ? { ...action, onClick: withClosePopover(action.onClick) } : undefined,
+    [withClosePopover]
+  );
+  const withClosePopoverLink = useCallback(
+    (item: LinksListItem): LinksListItem => ({ ...item, onClick: withClosePopover(item.onClick) }),
+    [withClosePopover]
+  );
+
+  const footerLinksWithClose = useMemo(
+    () => footerLinks?.map(withClosePopoverLink),
+    [footerLinks, withClosePopoverLink]
+  );
+
+  const environmentItemsWithClose = useMemo(
+    () => environmentContext?.submenuItems.map(withClosePopoverLink) ?? [],
+    [environmentContext, withClosePopoverLink]
   );
 
   const searchConfig =
@@ -174,12 +188,12 @@ export const ContextSwitcher = ({
   const spacesViewProps = {
     id: 'contextSwitcherSpacesList',
     title: SPACES_TITLE,
-    headerAction: withClosePopover(spaces.headerAction),
+    headerAction: withClosePopoverAction(spaces.headerAction),
     items: selectableItems,
     onSelect: handleSpaceSelect,
     search: searchConfig,
     isLoading: spaces.isLoading,
-    footerAction: withClosePopover(spaces.footerAction),
+    footerAction: withClosePopoverAction(spaces.footerAction),
   };
 
   const environmentDescription = isProject
@@ -263,12 +277,12 @@ export const ContextSwitcher = ({
               ),
               value: spacesDescription,
             },
-            footerLinks,
+            footerLinks: footerLinksWithClose,
           }}
           environmentSubmenuView={{
             title: SUBMENU_TITLES[environmentContext.environmentType],
-            items: environmentContext.submenuItems,
-            footerAction: withClosePopover(environmentContext.submenuFooterAction),
+            items: environmentItemsWithClose,
+            footerAction: withClosePopoverAction(environmentContext.submenuFooterAction),
           }}
           spacesSubmenuView={spacesViewProps}
         />
