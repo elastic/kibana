@@ -24,3 +24,8 @@ export const APP_NAME = i18n.translate('links.visTypeAlias.title', {
 export const DISPLAY_NAME = i18n.translate('links.displayName', {
   defaultMessage: 'links',
 });
+
+export const DEFAULT_EXTERNAL_LINK_OPTIONS = {
+  encode_url: true,
+  open_in_new_tab: true,
+};
