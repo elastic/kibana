@@ -129,8 +129,8 @@ function convertDataLayerToAPI(
           return {
             ...apiOperation,
             ...(breakdown_by
-              ? { color: fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR }
-              : {}),
+              ? {}
+              : { color: fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR }),
             ...(onAxis !== 'y' ? { axis: onAxis } : {}),
           };
         })
