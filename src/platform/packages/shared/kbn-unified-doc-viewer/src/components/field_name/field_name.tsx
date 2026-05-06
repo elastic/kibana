@@ -70,11 +70,7 @@ export function FieldName({
             grow={false}
             data-test-subj={`tableDocViewRow-${fieldName}-name`}
           >
-            <EuiToolTip
-              position="top"
-              content={tooltip}
-              anchorClassName="eui-textBreakAll"
-            >
+            <EuiToolTip position="top" content={tooltip} anchorClassName="eui-textBreakAll">
               <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
             </EuiToolTip>
           </EuiFlexItem>

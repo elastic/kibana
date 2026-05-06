@@ -145,11 +145,7 @@ export const ColorPicker = ({
       }
     >
       {isDisabled ? (
-        <EuiToolTip
-          position="top"
-          content={disabledMessage}
-          anchorClassName="eui-displayBlock"
-        >
+        <EuiToolTip position="top" content={disabledMessage} anchorClassName="eui-displayBlock">
           {colorPicker}
         </EuiToolTip>
       ) : (
