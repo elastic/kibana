@@ -1,5 +1,5 @@
 {
-  "sha1": "cd7d6bfee9a89b059b37397d0f70fd9485d6cb41",
+  "sha1": "7f972f6609b25c7f81ccd4a70abd4eca02a0d52a",
   "tests": [
     {
       "id": "98600d12651f127-aa69b48f5334963",
@@ -320,7 +320,7 @@
     {
       "id": "423881a4b2073fc-96f9b7edc4e596f",
       "title": "Dashboard panel listing (includes observability group) renders panel groups and panel count",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -331,14 +331,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_panel_listing_obs_group.spec.ts",
-        "line": 64,
+        "line": 65,
         "column": 14
       }
     },
     {
       "id": "1ce2a7a22b5143b-7e437a63d08c8ab",
       "title": "Dashboard panel listing renders panel groups and panel count",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -349,7 +349,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_panel_listing.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 14
       }
     },
