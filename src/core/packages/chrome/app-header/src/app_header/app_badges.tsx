@@ -11,8 +11,9 @@ import React, { memo, useMemo, useState } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { AppHeaderBadge } from '../types';
 import { AppBadge } from './app_badge';
-import { useAppBadges } from './hooks/use_app_badges';
+import { useResolvedBadges } from './hooks';
 
 const MAX_VISIBLE_BADGES = 2;
 
@@ -23,10 +24,6 @@ const useBadgesStyle = () => {
     const badgesContainer = css`
       margin-left: ${euiTheme.size.s};
 
-      /* Deprecated renderCustomBadge items may return null at runtime,
-         leaving empty EuiFlexItem wrappers in the DOM. Hide the container
-         when none of its children have visible content to avoid a stale
-         margin-left gap next to the title. */
       &:not(:has(.euiFlexItem:not(:empty))) {
         display: none;
       }
@@ -36,8 +33,12 @@ const useBadgesStyle = () => {
   }, [euiTheme]);
 };
 
-export const AppBadges = memo(() => {
-  const badges = useAppBadges();
+export interface AppBadgesProps {
+  badges?: AppHeaderBadge[];
+}
+
+export const AppBadges = memo<AppBadgesProps>(({ badges: propBadges }) => {
+  const badges = useResolvedBadges(propBadges);
   const { badgesContainer } = useBadgesStyle();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

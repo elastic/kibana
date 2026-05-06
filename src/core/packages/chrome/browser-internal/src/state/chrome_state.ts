@@ -22,6 +22,7 @@ import type {
   ChromeNextAiButton,
   ChromeNextGlobalSearchConfig,
   ChromeUserBanner,
+  AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
@@ -86,6 +87,10 @@ export interface ChromeState {
 
   /** Newsfeed handler registered by the newsfeed plugin */
   newsfeedHandler: State<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
+
+  /** Whether an inline AppHeader is currently mounted by the active app */
+  inlineAppHeader: State<boolean>;
+  appHeader: State<AppHeaderConfig | undefined>;
 }
 
 export interface ChromeStateDeps {
@@ -144,6 +149,12 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     { open: () => void; hasNew$: Observable<boolean> } | undefined
   >(undefined);
 
+  // Inline AppHeader presence (managed by @kbn/app-header)
+  const inlineAppHeader = createState<boolean>(false);
+
+  // App header config (managed by chrome.next.appHeader.set)
+  const appHeader = createState<AppHeaderConfig | undefined>(undefined);
+
   return {
     visibility,
     style,
@@ -174,5 +185,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     appDocumentationLink,
     feedbackHandler,
     newsfeedHandler,
+    inlineAppHeader,
+    appHeader,
   };
 }

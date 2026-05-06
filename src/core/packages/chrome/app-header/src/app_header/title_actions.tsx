@@ -10,15 +10,15 @@
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
-import { useNextHeader } from '../../shared/chrome_hooks';
-import { useShareAction } from './hooks';
+import type { ShareAction } from './hooks';
 
-const SHARE_ARIA_LABEL = i18n.translate('core.ui.chrome.appHeader.globalShareAriaLabel', {
+const SHARE_ARIA_LABEL = i18n.translate('core.ui.chrome.appHeader.shareAriaLabel', {
   defaultMessage: 'Share',
 });
 
-const useGlobalActionsStyles = () => {
+const useTitleActionsStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
@@ -49,17 +49,13 @@ const useGlobalActionsStyles = () => {
   }, [euiTheme]);
 };
 
-/**
- * Fixed-order global object actions (editTitle, share, favorite) next to the title.
- * Share is auto-extracted from the app menu (item with id 'share') or explicitly set
- * via `chrome.next.header.set({ globalActions: { share } })`.
- * Favorite is a `ReactNode` slot so plugins own full behavior (clients, context, React Query).
- */
-export const GlobalActions = React.memo(() => {
-  const config = useNextHeader();
-  const styles = useGlobalActionsStyles();
-  const shareAction = useShareAction();
-  const favorite = config?.globalActions?.favorite;
+export interface TitleActionsProps {
+  shareAction?: ShareAction;
+  favorite?: ReactNode;
+}
+
+export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favorite }) => {
+  const styles = useTitleActionsStyles();
 
   if (!shareAction && !favorite) {
     return null;
@@ -69,7 +65,7 @@ export const GlobalActions = React.memo(() => {
   const hasCustomTooltip = !!shareAction?.tooltipContent || !!shareAction?.tooltipTitle;
 
   return (
-    <div css={styles.root} data-test-subj="chromeNextAppHeaderGlobalActions">
+    <div css={styles.root} data-test-subj="appHeaderTitleActions">
       {shareAction ? (
         <EuiToolTip
           content={shareTooltipContent}
@@ -84,13 +80,13 @@ export const GlobalActions = React.memo(() => {
             size="xs"
             css={styles.iconButton}
             aria-label={SHARE_ARIA_LABEL}
-            data-test-subj={`chromeNextAppHeaderGlobalShare ${shareAction.testId ?? ''}`.trim()}
+            data-test-subj={`appHeaderShare ${shareAction.testId ?? ''}`.trim()}
             onClick={shareAction.onClick}
           />
         </EuiToolTip>
       ) : null}
       {favorite ? (
-        <div css={styles.favoriteSlot} data-test-subj="chromeNextAppHeaderGlobalFavoriteSlot">
+        <div css={styles.favoriteSlot} data-test-subj="appHeaderFavorite">
           {favorite}
         </div>
       ) : null}
@@ -98,4 +94,4 @@ export const GlobalActions = React.memo(() => {
   );
 });
 
-GlobalActions.displayName = 'GlobalActions';
+TitleActions.displayName = 'TitleActions';

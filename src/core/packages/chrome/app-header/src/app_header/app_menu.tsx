@@ -8,8 +8,9 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { useHasLegacyActionMenu } from '../../shared/chrome_hooks';
-import { HeaderActionMenu } from '../../shared/header_action_menu';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { useHasLegacyActionMenu } from './hooks/chrome';
+import { LegacyHeaderActionMenu } from './legacy_action_menu';
 import { useAppHeaderMenu } from './hooks';
 
 const AppMenuComponent = lazy(async () => {
@@ -17,9 +18,13 @@ const AppMenuComponent = lazy(async () => {
   return { default: Component };
 });
 
-/** Fallback chain: AppMenuConfig + staticItems -> Legacy HeaderActionMenu -> nothing. */
-export const AppMenu = React.memo(() => {
-  const { config, staticItems } = useAppHeaderMenu();
+export interface AppMenuProps {
+  menu?: AppMenuConfig;
+  hasExplicitShare?: boolean;
+}
+
+export const AppMenu = React.memo<AppMenuProps>(({ menu, hasExplicitShare }) => {
+  const { config, staticItems } = useAppHeaderMenu(menu, !!hasExplicitShare);
   const hasLegacyActionMenu = useHasLegacyActionMenu();
 
   if (config) {
@@ -31,7 +36,7 @@ export const AppMenu = React.memo(() => {
   }
 
   if (hasLegacyActionMenu) {
-    return <HeaderActionMenu />;
+    return <LegacyHeaderActionMenu />;
   }
 
   return null;

@@ -9,6 +9,8 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
@@ -18,7 +20,6 @@ import type {
   ChromeBreadcrumbsBadge,
   ChromeNext,
   ChromeNextAiButton,
-  ChromeNextHeaderConfig,
   ChromeNextGlobalSearchConfig,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
@@ -28,6 +29,7 @@ import type {
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionId,
+  AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -35,6 +37,11 @@ export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
+  componentDeps: {
+    readonly basePath: IBasePath;
+    readonly legacyActionMenu$: Observable<MountPoint | undefined>;
+  };
+
   sideNav: ChromeStart['sideNav'] & {
     /**
      * Set the width of the side nav.
@@ -121,9 +128,6 @@ export interface InternalChromeStart extends ChromeStart {
 
 /** @internal */
 export interface InternalChromeNext extends ChromeNext {
-  header: ChromeNext['header'] & {
-    get$(): Observable<ChromeNextHeaderConfig | undefined>;
-  };
   aiButton: ChromeNext['aiButton'] & {
     get$(): Observable<ChromeNextAiButton[]>;
   };
@@ -135,5 +139,12 @@ export interface InternalChromeNext extends ChromeNext {
   };
   contextSwitcher: ChromeNext['contextSwitcher'] & {
     get$(): Observable<ReactNode>;
+  };
+  inlineAppHeader: {
+    get$(): Observable<boolean>;
+    set(mounted: boolean): void;
+  };
+  appHeader: ChromeNext['appHeader'] & {
+    get$(): Observable<AppHeaderConfig | undefined>;
   };
 }

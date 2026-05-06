@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { NextHeaderService } from './next_header_service';
+export { AppHeader, AppHeaderView } from './app_header';
+export type { AppHeaderProps, AppHeaderViewProps } from './app_header';
+export {
+  ChromeAppHeaderRegistration,
+  useChromeAppHeaderRegistration,
+} from './chrome_app_header_registration';

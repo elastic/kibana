@@ -13,7 +13,6 @@ import { APP_MENU_SHARE_ID, getTooltip } from '@kbn/core-chrome-app-menu-compone
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
-import { useAppMenu, useNextHeader } from '../../../shared/chrome_hooks';
 
 const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuItemType => ({
   label: i18n.translate('chrome.appHeader.feedbackMenuItemLabel', {
@@ -66,12 +65,10 @@ const useStaticItems = () => {
   }, [feedbackHandler, documentationLink, helpExtension]);
 };
 
-const useResolvedAppMenu = (): ResolvedAppMenu => {
-  const config = useNextHeader();
-  const globalAppMenu = useAppMenu();
-  const menu = config?.appMenu ?? globalAppMenu;
-  const hasExplicitShare = !!config?.globalActions?.share;
-
+const useResolvedAppMenu = (
+  menu: AppMenuConfig | undefined,
+  hasExplicitShare: boolean
+): ResolvedAppMenu => {
   return useMemo((): ResolvedAppMenu => {
     if (!menu) return { menu: undefined, shareItem: undefined };
 
@@ -88,15 +85,14 @@ const useResolvedAppMenu = (): ResolvedAppMenu => {
   }, [menu, hasExplicitShare]);
 };
 
-/**
- * Returns the resolved app menu with the `share` item stripped out.
- * The share action is auto-promoted to the global actions area by Chrome.
- */
-export function useAppHeaderMenu(): {
+export function useAppHeaderMenu(
+  pageAppMenu: AppMenuConfig | undefined,
+  hasExplicitShare: boolean
+): {
   config: AppMenuConfig | undefined;
   staticItems: AppMenuItemType[];
 } {
-  const { menu } = useResolvedAppMenu();
+  const { menu } = useResolvedAppMenu(pageAppMenu, hasExplicitShare);
   const staticItems = useStaticItems();
 
   return {
@@ -112,30 +108,28 @@ export interface ShareAction {
   testId?: string;
 }
 
-/**
- * Returns a share action auto-extracted from the app menu,
- * or built from the explicitly set `globalActions.share` if provided.
- * Includes tooltip data from the app menu item when available.
- */
-export function useShareAction(): ShareAction | undefined {
-  const config = useNextHeader();
-  const { shareItem } = useResolvedAppMenu();
-  const explicitShare = config?.globalActions?.share?.onClick;
+export function useShareAction(
+  pageAppMenu: AppMenuConfig | undefined,
+  onShare?: () => void
+): ShareAction | undefined {
+  const { shareItem } = useResolvedAppMenu(pageAppMenu, !!onShare);
 
   return useMemo(() => {
-    if (explicitShare) return { onClick: explicitShare };
-    if (!shareItem?.run) return undefined;
+    if (onShare) return { onClick: onShare };
+    if (!shareItem) return undefined;
+    const { run, tooltipContent, tooltipTitle, testId } = shareItem;
+    if (!run) return undefined;
 
     const { content, title } = getTooltip({
-      tooltipContent: shareItem.tooltipContent,
-      tooltipTitle: shareItem.tooltipTitle,
+      tooltipContent,
+      tooltipTitle,
     });
 
     return {
-      onClick: () => shareItem.run!(),
+      onClick: () => run(),
       tooltipContent: content,
       tooltipTitle: title,
-      testId: shareItem.testId,
+      testId,
     };
-  }, [explicitShare, shareItem]);
+  }, [onShare, shareItem]);
 }

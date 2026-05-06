@@ -13,18 +13,15 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import type {
-  ChromeNextHeaderBadge,
-  ChromeNextHeaderBadgeMenuItem,
-} from '@kbn/core-chrome-browser/src';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { AppHeaderBadge, AppHeaderBadgeItem } from '../types';
 
 /**
  * Recursively builds flat EuiContextMenu panels from nested badge menu items.
  */
 const buildPanels = (
-  items: ChromeNextHeaderBadgeMenuItem[],
+  items: AppHeaderBadgeItem[],
   panelId: number,
   width?: number,
   title?: string
@@ -65,16 +62,15 @@ const useBadgeStyle = () => {
   }, []);
 };
 
-export const AppBadge = ({ badge }: { badge: ChromeNextHeaderBadge }) => {
+export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
   const { badge: badgeStyle } = useBadgeStyle();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
 
-  // @ts-expect-error supported for backward compatibility. TODO: Remove it
   if (badge?.renderCustomBadge) {
-    // @ts-expect-error supported for backward compatibility. TODO: Remove it
+    // TODO: Remove custom JSX badge rendering once apps migrate custom badges to structured config.
     return badge.renderCustomBadge({ badgeText: badge.label });
   }
 
@@ -126,7 +122,7 @@ export const AppBadge = ({ badge }: { badge: ChromeNextHeaderBadge }) => {
       >
         <EuiContextMenu
           initialPanelId={0}
-          panels={buildPanels(badge.items, 0, badge.popoverWidth)}
+          panels={buildPanels(badge.items!, 0, badge.popoverWidth)}
         />
       </EuiPopover>
     );

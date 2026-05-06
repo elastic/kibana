@@ -20,14 +20,14 @@ import {
   EuiPopover,
   EuiTitle,
 } from '@elastic/eui';
-import type { ChromeNextHeaderBadge } from '@kbn/core-chrome-browser/src';
+import type { AppHeaderBadge } from '../types';
 import { AppBadge } from './app_badge';
 
 const MAX_VISIBLE_BADGES = 2;
 
 interface AppBadgeStoryProps {
   title: string;
-  badges: ChromeNextHeaderBadge[];
+  badges: AppHeaderBadge[];
 }
 
 const HeaderWithBadges = ({ title, badges }: AppBadgeStoryProps) => {

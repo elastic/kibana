@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { SingleTabView, type SingleTabViewProps } from '.';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -17,15 +17,6 @@ export const SingleTabViewWithAppMenu = (props: SingleTabViewProps) => {
   const { chrome, discoverFeatureFlags } = useDiscoverServices();
   const isNextChrome = discoverFeatureFlags.getIsNextChrome();
   const topNavMenuItems = useTopNavMenuItems();
-
-  useEffect(() => {
-    if (isNextChrome && topNavMenuItems) {
-      chrome.next.header.set({ appMenu: topNavMenuItems });
-      return () => {
-        chrome.next.header.reset('appMenu');
-      };
-    }
-  }, [isNextChrome, topNavMenuItems, chrome.next.header]);
 
   return (
     <>

@@ -8,19 +8,16 @@
  */
 
 import React from 'react';
-import { AppHeaderShell } from './app_header_shell';
-import { AppBadges } from './app_badges';
-import { TitleArea } from './title_area';
-import { GlobalActions } from './global_actions';
-import { AppMenu } from './app_menu';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { ChromeAppHeaderRegistration } from '@kbn/app-header';
+import type { AppHeaderBack } from '@kbn/app-header';
 
-export const AppHeader = React.memo(() => (
-  <AppHeaderShell
-    title={<TitleArea />}
-    badges={<AppBadges />}
-    titleActions={<GlobalActions />}
-    trailing={<AppMenu />}
-  />
-));
+export interface DiscoverAppHeaderProps {
+  title: string;
+  back?: string | AppHeaderBack;
+  appMenu?: AppMenuConfig;
+}
 
-AppHeader.displayName = 'AppHeader';
+export const DiscoverAppHeader: React.FC<DiscoverAppHeaderProps> = ({ title, back, appMenu }) => (
+  <ChromeAppHeaderRegistration title={title} back={back} menu={appMenu} />
+);

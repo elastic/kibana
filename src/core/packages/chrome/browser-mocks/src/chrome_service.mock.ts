@@ -8,13 +8,15 @@
  */
 
 import { BehaviorSubject, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ReactNode } from 'react';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
-  ChromeNextHeaderConfig,
   ChromeNextGlobalSearchConfig,
+  AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import type {
   InternalChromeSetup,
@@ -30,16 +32,28 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
 };
 
 const createStartContractMock = () => {
-  const nextHeaderState$ = new BehaviorSubject<ChromeNextHeaderConfig | undefined>(undefined);
   const nextGlobalSearchState$ = new BehaviorSubject<ChromeNextGlobalSearchConfig | undefined>(
     undefined
   );
   const nextUserMenuState$ = new BehaviorSubject<ReactNode>(null);
   const nextContextSwitcherState$ = new BehaviorSubject<ReactNode>(null);
+  const nextAppHeaderState$ = new BehaviorSubject<AppHeaderConfig | undefined>(undefined);
   const appDocumentationLinkState$ = new BehaviorSubject<string | undefined>(undefined);
 
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
     withProvider: jest.fn((children) => children),
+    componentDeps: lazyObject({
+      basePath: lazyObject({
+        get: jest.fn().mockReturnValue(''),
+        prepend: jest.fn((path: string) => path),
+        remove: jest.fn(),
+        serverBasePath: '/',
+        assetsHrefBase: '/',
+      }),
+      legacyActionMenu$: new BehaviorSubject<MountPoint | undefined>(
+        undefined
+      ) as unknown as DeeplyMockedKeys<Observable<MountPoint | undefined>>,
+    }),
     sidebar: lazyObject(sidebarServiceMock.createStartContract()),
     navLinks: lazyObject({
       getNavLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
@@ -113,31 +127,7 @@ const createStartContractMock = () => {
       getProjectHome$: jest.fn().mockReturnValue(of('/')),
     }),
     next: lazyObject({
-      header: lazyObject({
-        get$: jest.fn().mockReturnValue(nextHeaderState$),
-        set: jest.fn((config: Partial<ChromeNextHeaderConfig>) => {
-          const current = nextHeaderState$.getValue();
-          const next = { ...current, ...config };
-          nextHeaderState$.next(
-            Object.keys(next).length > 0 ? (next as ChromeNextHeaderConfig) : undefined
-          );
-        }),
-        reset: jest.fn((...keys: Array<keyof ChromeNextHeaderConfig>) => {
-          if (keys.length === 0) {
-            nextHeaderState$.next(undefined);
-            return;
-          }
-          const current = nextHeaderState$.getValue();
-          if (!current) return;
-          const next = { ...current };
-          for (const key of keys) {
-            delete next[key];
-          }
-          nextHeaderState$.next(
-            Object.keys(next).length > 0 ? (next as ChromeNextHeaderConfig) : undefined
-          );
-        }),
-      }),
+      isEnabled: false,
       aiButton: lazyObject({
         get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
         register: jest.fn().mockReturnValue(() => {}),
@@ -158,6 +148,19 @@ const createStartContractMock = () => {
         get$: jest.fn().mockReturnValue(nextContextSwitcherState$),
         set: jest.fn((content?: ReactNode) => {
           nextContextSwitcherState$.next(content ?? null);
+        }),
+      }),
+      inlineAppHeader: lazyObject({
+        get$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
+        set: jest.fn(),
+      }),
+      appHeader: lazyObject({
+        get$: jest.fn().mockReturnValue(nextAppHeaderState$),
+        set: jest.fn((config: AppHeaderConfig) => {
+          nextAppHeaderState$.next(config);
+          return () => {
+            nextAppHeaderState$.next(undefined);
+          };
         }),
       }),
     }),

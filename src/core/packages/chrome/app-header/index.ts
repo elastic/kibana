@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AppHeader } from './app_header';
-export { AppHeaderShell } from './app_header_shell';
-export type { AppHeaderShellProps } from './app_header_shell';
+export { AppHeaderWithFallback as AppHeader } from './src';
+export { AppHeaderView, ChromeAppHeaderRegistration, useChromeAppHeaderRegistration } from './src';
+export type { AppHeaderViewProps, AppHeaderConfig } from './src';
+export type {
+  AppHeaderWithFallbackProps as AppHeaderProps,
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderTab,
+  AppHeaderMenu,
+} from './src';

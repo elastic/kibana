@@ -8131,6 +8131,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/app-header@link:src/core/packages/chrome/app-header":
+  version "0.0.0"
+  uid ""
+
 "@kbn/painless-lab-plugin@link:x-pack/platform/plugins/private/painless_lab":
   version "0.0.0"
   uid ""

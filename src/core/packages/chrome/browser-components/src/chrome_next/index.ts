@@ -7,7 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AppHeader, AppHeaderShell } from './app_header';
-export type { AppHeaderShellProps } from './app_header';
 export { GlobalHeader, GlobalHeaderShell, HeaderActionButton } from './global_header';
 export type { GlobalHeaderShellProps, HeaderActionButtonProps } from './global_header';

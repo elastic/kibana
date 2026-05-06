@@ -7,9 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useNextHeader } from '../../../shared/chrome_hooks';
-
-export function useTitle(): string | undefined {
-  const config = useNextHeader();
-  return config?.title;
-}
+export { DiscoverAppHeader } from './discover_app_header';
+export type { DiscoverAppHeaderProps } from './discover_app_header';

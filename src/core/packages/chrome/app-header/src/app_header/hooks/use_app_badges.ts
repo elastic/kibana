@@ -8,41 +8,38 @@
  */
 
 import { useMemo } from 'react';
-import type { ChromeNextHeaderBadge } from '@kbn/core-chrome-browser/src';
 import type { ChromeBadge, ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import { useNextHeader } from '../../../shared/chrome_hooks';
+import type { AppHeaderBadge } from '../../types';
 
-const breadcrumbsBadgeToHeaderBadge = (badge: ChromeBreadcrumbsBadge): ChromeNextHeaderBadge => ({
+const breadcrumbsBadgeToHeaderBadge = (badge: ChromeBreadcrumbsBadge): AppHeaderBadge => ({
   label: badge.badgeText,
+  color: badge.color as AppHeaderBadge['color'],
   tooltip: badge.toolTipProps?.content as string | undefined,
-  // @ts-expect-error supported for backward compatibility. TODO: Remove it
+  'data-test-subj': badge['data-test-subj'] as string | undefined,
   renderCustomBadge: badge.renderCustomBadge,
 });
 
-const legacyBadgeToHeaderBadge = (badge: ChromeBadge): ChromeNextHeaderBadge => ({
+const legacyBadgeToHeaderBadge = (badge: ChromeBadge): AppHeaderBadge => ({
   label: badge.text,
   tooltip: badge.tooltip,
 });
 
-/**
- * Fallback: `config.badges` from `chrome.next.header.set()` ->
- * legacy `chrome.setBadge()` + `chrome.setBreadcrumbsBadges()` combined.
- */
-export function useAppBadges(): ChromeNextHeaderBadge[] | undefined {
-  const config = useNextHeader();
+export function useResolvedBadges(
+  propBadges: AppHeaderBadge[] | undefined
+): AppHeaderBadge[] | undefined {
   const chrome = useChromeService();
   const breadcrumbsBadges$ = useMemo(() => chrome.getBreadcrumbsBadges$(), [chrome]);
   const breadcrumbsBadges = useObservable(breadcrumbsBadges$, []);
   const legacyBadge$ = useMemo(() => chrome.getBadge$(), [chrome]);
   const legacyBadge = useObservable(legacyBadge$, undefined);
 
-  if (config?.badges) {
-    return config.badges;
+  if (propBadges !== undefined) {
+    return propBadges.length > 0 ? propBadges : undefined;
   }
 
-  const fallback: ChromeNextHeaderBadge[] = [];
+  const fallback: AppHeaderBadge[] = [];
 
   if (legacyBadge) {
     fallback.push(legacyBadgeToHeaderBadge(legacyBadge));

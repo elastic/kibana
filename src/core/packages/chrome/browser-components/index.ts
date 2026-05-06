@@ -11,21 +11,11 @@ export { ChromeComponentsProvider } from './src/context';
 export type { ChromeComponentsDeps } from './src/context';
 
 export { ClassicHeader } from './src/classic';
-export { ProjectHeader } from './src/project';
-export {
-  AppHeader,
-  AppHeaderShell,
-  GlobalHeader,
-  GlobalHeaderShell,
-  HeaderActionButton,
-} from './src/chrome_next';
-export type {
-  AppHeaderShellProps,
-  GlobalHeaderShellProps,
-  HeaderActionButtonProps,
-} from './src/chrome_next';
+export { ProjectHeader, ChromeAppHeaderRenderer, useHasChromeAppHeaderContent } from './src/project';
+export { GlobalHeader, GlobalHeaderShell, HeaderActionButton } from './src/chrome_next';
+export type { GlobalHeaderShellProps, HeaderActionButtonProps } from './src/chrome_next';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { Sidebar } from './src/sidebar';
 export { AppMenuBar } from './src/project/app_menu';
 export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';
-export { useHasAppMenu, useIsNextChrome } from './src/shared/chrome_hooks';
+export { useHasAppMenu, useIsNextChrome, useHasInlineAppHeader } from './src/shared/chrome_hooks';

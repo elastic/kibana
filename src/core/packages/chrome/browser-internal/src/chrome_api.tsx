@@ -9,23 +9,23 @@
 
 import React, { type ReactNode } from 'react';
 import { type Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
-import type { ChromeNextAiButton } from '@kbn/core-chrome-browser';
+import type { ChromeNextAiButton, AppHeaderConfig } from '@kbn/core-chrome-browser';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
+import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import type { InternalChromeStart } from './types';
 import type { ChromeState } from './state/chrome_state';
 import type { NavControlsService } from './services/nav_controls';
 import type { NavLinksService } from './services/nav_links';
 import type { ProjectNavigationService } from './services/project_navigation';
-import type { NextHeaderService } from './services/next_header';
 import type { DocTitleService } from './services/doc_title';
 
 type NavControlsStart = ReturnType<NavControlsService['start']>;
 type NavLinksStart = ReturnType<NavLinksService['start']>;
 type ProjectNavigationStart = ReturnType<ProjectNavigationService['start']>;
-type NextHeaderStart = ReturnType<NextHeaderService['start']>;
 type DocTitleStart = ReturnType<DocTitleService['start']>;
 type RecentlyAccessedStart = ReturnType<RecentlyAccessedService['start']>;
 
@@ -37,12 +37,19 @@ export interface ChromeApiDeps {
     recentlyAccessed: RecentlyAccessedStart;
     docTitle: DocTitleStart;
     projectNavigation: ProjectNavigationStart;
-    nextHeader: NextHeaderStart;
   };
   sidebar: SidebarStart;
+  featureFlags: FeatureFlagsStart;
+  componentDeps: InternalChromeStart['componentDeps'];
 }
 
-export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): InternalChromeStart {
+export function createChromeApi({
+  state,
+  services,
+  sidebar,
+  featureFlags,
+  componentDeps,
+}: ChromeApiDeps): InternalChromeStart {
   const { projectNavigation } = services;
 
   const validateProjectStyle = () => {
@@ -53,6 +60,8 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
       );
     }
   };
+
+  let appHeaderRegistrationId = 0;
 
   const hasHeaderBanner$ = state.headerBanner.$.pipe(
     map((banner) => Boolean(banner)),
@@ -75,6 +84,8 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
   };
 
   const chromeStart: InternalChromeStart = {
+    componentDeps,
+
     withProvider: (children: ReactNode) => {
       return (
         <ChromeServiceProvider value={{ chrome: chromeStart }}>
@@ -175,10 +186,8 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
     project,
 
     next: {
-      header: {
-        get$: services.nextHeader.get$,
-        set: services.nextHeader.set,
-        reset: services.nextHeader.reset,
+      get isEnabled() {
+        return isNextChrome(featureFlags);
       },
       aiButton: {
         get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
@@ -204,6 +213,22 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
       contextSwitcher: {
         get$: () => state.contextSwitcher.$,
         set: state.contextSwitcher.set,
+      },
+      inlineAppHeader: {
+        get$: () => state.inlineAppHeader.$,
+        set: state.inlineAppHeader.set,
+      },
+      appHeader: {
+        get$: () => state.appHeader.$,
+        set: (config: AppHeaderConfig) => {
+          const registrationId = ++appHeaderRegistrationId;
+          state.appHeader.set(config);
+          return () => {
+            if (registrationId === appHeaderRegistrationId) {
+              state.appHeader.set(undefined);
+            }
+          };
+        },
       },
     },
 

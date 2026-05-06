@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
@@ -48,15 +48,6 @@ export const TabsView = (props: SingleTabViewProps) => {
     getAdditionalTabMenuItems,
     topNavMenuItems,
   } = useAppMenuData({ currentDataView });
-
-  useEffect(() => {
-    if (isNextChrome && topNavMenuItems) {
-      services.chrome.next.header.set({ appMenu: topNavMenuItems });
-      return () => {
-        services.chrome.next.header.reset('appMenu');
-      };
-    }
-  }, [isNextChrome, topNavMenuItems, services.chrome.next.header]);
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
