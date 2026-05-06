@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+/**
+ * We are excluding the  @kbn/eslint/scout_require_api_client_in_api_test
+ * eslint rule for this file because we do not test APIs but the rule executor itself.
+ * The correctness of the rule executor relies on how it produces rule events and
+ * not on the APIs that are used to create the rule and source data.
+ */
+
+/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
+
 import { setTimeout as wait } from 'timers/promises';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
@@ -15,19 +24,8 @@ const { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } = testData;
 /**
  * Isolated cases for the alerting_v2 rule executor's persisted output.
  *
- * The executor pipeline runs:
- *   WaitForResources -> FetchRule -> ValidateRule -> ExecuteRuleQuery
- *     -> CreateAlertEvents -> CreateRecoveryEvents -> DirectorStep -> StoreAlertEvents
- *
- * These tests assert on fields the executor itself controls
- * (`rule.id`, `rule.version`, `group_hash`, `data`, `status`, `source`, `@timestamp`,
- * `scheduled_timestamp`) and intentionally ignore `episode.*`. Episode lifecycle /
- * state-machine concerns belong to the director step and live in their own spec.
- *
- * All rules use `kind: 'alert'` (the default), so persisted events carry
- * `type: 'alert'` after director processing.
  */
-apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
+apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
   const SOURCE_INDEX = 'test-alerting-v2-rule-executor-source';
   /**
    * Time we let the executor run between assertions when verifying that no new
@@ -59,9 +57,15 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       docs: [
         {
           '@timestamp': new Date().toISOString(),
-          'host.name': 'host-shape-single',
+          'host.name': 'host-breach-1',
           severity: 'high',
           value: 1,
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-breach-2',
+          severity: 'low',
+          value: 2,
         },
       ],
     });
@@ -73,7 +77,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
-            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-shape-single" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-breach-1", "host-breach-2") | STATS count = COUNT(*) BY host.name`,
           },
         },
         recovery_policy: { type: 'no_breach' },
@@ -82,14 +86,70 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       })
     );
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, { status: 'breached' });
 
     const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
       status: 'breached',
     });
-    expect(breachEvents).toHaveLength(1);
-    expect(breachEvents[0].data).toMatchObject({ 'host.name': 'host-shape-single' });
+
+    expect(breachEvents).toHaveLength(2);
   });
+
+  apiTest(
+    'writes the columns returned by the query to the data field correctly',
+    async ({ apiServices }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-data-1',
+            severity: 'high',
+            value: 1,
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-data-2',
+            severity: 'low',
+            value: 2,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-shape-single-row' },
+          time_field: '@timestamp',
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-data-1", "host-data-2") | STATS count = COUNT(*) BY host.name`,
+            },
+          },
+          recovery_policy: { type: 'no_breach' },
+          grouping: { fields: ['host.name'] },
+          state_transition: { pending_count: 0, recovering_count: 0 },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, { status: 'breached' });
+
+      const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+
+      expect(breachEvents).toHaveLength(2);
+
+      expect(breachEvents).toMatchObject([
+        {
+          data: { 'host.name': 'host-data-1', count: 1 },
+        },
+        {
+          data: { 'host.name': 'host-data-2', count: 1 },
+        },
+      ]);
+    }
+  );
 
   apiTest(
     'populates rule, source, and scheduling fields on every breach event',
@@ -128,12 +188,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         status: 'breached',
       });
 
-      expect(event.rule.id).toBe(rule.id);
-      expect(Number.isInteger(event.rule.version)).toBe(true);
-      expect(event.rule.version).toBeGreaterThan(0);
-
-      expect(event.source).toBe('internal');
-
+      // Timestamp fields
       expect(typeof event['@timestamp']).toBe('string');
       expect(typeof event.scheduled_timestamp).toBe('string');
       expect(Number.isNaN(Date.parse(event['@timestamp']))).toBe(false);
@@ -142,8 +197,18 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         Date.parse(event['@timestamp'])
       );
 
+      // Rule fields
+      expect(event.rule.id).toBe(rule.id);
+      expect(Number.isInteger(event.rule.version)).toBe(true);
+      expect(event.rule.version).toBeGreaterThan(0);
+
+      // Event fields
       expect(typeof event.group_hash).toBe('string');
       expect(event.group_hash.length).toBeGreaterThan(0);
+      expect(event.source).toBe('internal');
+      expect(event.type).toBe('alert');
+      expect(event.status).toBe('breached');
+      expect(event.space_id).toBe('default');
     }
   );
 
@@ -187,6 +252,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
       status: 'breached',
     });
+
     expect(breachEvents).toHaveLength(2);
 
     const groupHashes = new Set(breachEvents.map((e) => e.group_hash));
@@ -194,6 +260,73 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
     const hosts = breachEvents.map((e) => e.data['host.name']).sort();
     expect(hosts).toStrictEqual(['host-grouping-a', 'host-grouping-b']);
+  });
+
+  apiTest('groups multiple documents into the same group correctly', async ({ apiServices }) => {
+    await apiServices.alertingV2.sourceIndex.indexDocs({
+      index: SOURCE_INDEX,
+      docs: [
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-multi-1',
+          severity: 'high',
+          value: 1,
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-multi-1',
+          severity: 'low',
+          value: 2,
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-multi-2',
+          severity: 'medium',
+          value: 3,
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-multi-2',
+          severity: 'low',
+          value: 4,
+        },
+      ],
+    });
+
+    const rule = await apiServices.alertingV2.rules.create(
+      buildCreateRuleData({
+        metadata: { name: 'executor-shape-single-row' },
+        time_field: '@timestamp',
+        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+        evaluation: {
+          query: {
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-1", "host-multi-2") | STATS count = COUNT(*) BY host.name`,
+          },
+        },
+        recovery_policy: { type: 'no_breach' },
+        grouping: { fields: ['host.name'] },
+        state_transition: { pending_count: 0, recovering_count: 0 },
+      })
+    );
+
+    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, { status: 'breached' });
+
+    const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+      status: 'breached',
+    });
+
+    expect(breachEvents).toHaveLength(2);
+
+    expect(breachEvents[0].group_hash).not.toBe(breachEvents[1].group_hash);
+
+    expect(breachEvents).toMatchObject([
+      {
+        data: { 'host.name': 'host-multi-1', count: 2 },
+      },
+      {
+        data: { 'host.name': 'host-multi-2', count: 2 },
+      },
+    ]);
   });
 
   apiTest(
@@ -248,6 +381,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'breached',
       });
+
       expect(breachEvents).toHaveLength(2);
       expect(breachEvents[0].group_hash).toBe(firstHash);
       expect(breachEvents[1].group_hash).toBe(firstHash);
@@ -255,7 +389,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'produces a single breach event with a non-empty group_hash when grouping is omitted',
+    'produces the correct breach events for match based queries without grouping',
     async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
@@ -270,13 +404,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
             '@timestamp': new Date().toISOString(),
             'host.name': 'host-grouping-fallback-b',
             severity: 'high',
-            value: 1,
+            value: 2,
           },
         ],
       });
 
-      // Aggregating without BY collapses both rows into a single ES|QL row, so the
-      // executor sees one breach (validating the SHA-256 fallback path).
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-grouping-fallback' },
@@ -284,7 +416,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-fallback-a", "host-grouping-fallback-b") | STATS count = COUNT(*) | WHERE count >= 1`,
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-fallback-a", "host-grouping-fallback-b")`,
             },
           },
           recovery_policy: { type: 'no_breach' },
@@ -292,13 +424,14 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         })
       );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, { status: 'breached' });
 
       const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'breached',
       });
-      expect(breachEvents).toHaveLength(1);
-      expect(breachEvents[0].group_hash).toMatch(/^[0-9a-f]{64}$/);
+
+      expect(breachEvents).toHaveLength(2);
+      expect(breachEvents[0].group_hash).not.toBe(breachEvents[1].group_hash);
     }
   );
 
@@ -342,6 +475,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'breached',
       });
+
       expect(breachEvents.length).toBeGreaterThanOrEqual(1);
       expect(breachEvents[0].data).toMatchObject({ 'host.name': 'host-lookback-included' });
     }
@@ -421,6 +555,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const breachedEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'breached',
       });
+
       const breachedHash = breachedEvents[0].group_hash;
 
       await esClient.deleteByQuery({
@@ -435,6 +570,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'recovered',
       });
+
       expect(recoveredEvents.length).toBeGreaterThanOrEqual(1);
       expect(recoveredEvents[0].group_hash).toBe(breachedHash);
     }
@@ -443,8 +579,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
   apiTest(
     'uses the configured query under recovery_policy.type=query',
     async ({ apiServices, esClient }) => {
-      // severity=high docs drive the main breach query; severity=recovered docs
-      // drive the recovery query for the SAME group (host.name).
+      /**
+       * severity=high docs drive the main breach query
+       * severity=recovered docs drive the recovery query for the SAME group (host.name).
+       */
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -483,6 +621,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const breachedEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'breached',
       });
+
       const breachedHash = breachedEvents[0].group_hash;
 
       // Drop the breaching doc so the main query no longer matches, then
@@ -518,13 +657,13 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'recovered',
       });
+
       expect(recoveredEvents.length).toBeGreaterThanOrEqual(1);
       expect(recoveredEvents[0].group_hash).toBe(breachedHash);
     }
   );
 
   apiTest('writes zero events when the ES|QL query returns no rows', async ({ apiServices }) => {
-    // No source docs match the unique host filter.
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'executor-no-breach-empty-query' },
@@ -582,8 +721,20 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
     // Let any in-flight execution drain so the snapshot is stable.
     await wait(WAIT_TIME_MS);
-    const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
+    await apiServices.alertingV2.sourceIndex.indexDocs({
+      index: SOURCE_INDEX,
+      docs: [
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-halt-disabled',
+          severity: 'high',
+          value: 1,
+        },
+      ],
+    });
+
+    const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
     await wait(WAIT_TIME_MS);
     const after = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
@@ -625,8 +776,20 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
     // Let any in-flight execution drain so the snapshot is stable.
     await wait(WAIT_TIME_MS);
-    const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
+    await apiServices.alertingV2.sourceIndex.indexDocs({
+      index: SOURCE_INDEX,
+      docs: [
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-halt-deleted',
+          severity: 'high',
+          value: 1,
+        },
+      ],
+    });
+
+    const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
     await wait(WAIT_TIME_MS);
     const after = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
@@ -635,7 +798,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
   apiTest('an invalid ES|QL query writes no events', async ({ apiServices }) => {
     // Targets an index that does not exist. The ES|QL parser accepts the query
-    // (so rule creation succeeds) but execution fails at runtime; the executor
+    // (so rule creation succeeds) but execution fails at runtime. The executor
     // surfaces the failure through error middleware and writes nothing.
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
