@@ -17,39 +17,53 @@ export const searchRequestQuerySchema = schema.object({
     schema.string({
       meta: {
         description:
-          'An Elasticsearch simple_query_string query that filters markdown library items by "title" and "description"',
+          'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
       },
     })
   ),
   page: schema.maybe(
     schema.number({
       meta: {
-        description: 'The search page to return',
+        description: 'The page of results to return. Defaults to `1`.',
       },
     })
   ),
   per_page: schema.maybe(
     schema.number({
       meta: {
-        description: 'The number of items to return per page',
+        description: 'The number of results to return per page. Defaults to `20`.',
       },
-      max: MAX_PER_PAGE,
     })
   ),
 });
 
 export const searchResponseBodySchema = schema.object({
-  markdowns: schema.arrayOf(
+  data: schema.arrayOf(
     schema.object({
-      id: schema.string(),
+      id: schema.string({ meta: { description: 'The markdown library item ID.' } }),
       data: schema.object({
-        description: schema.maybe(schema.string()),
-        title: schema.string(),
+        description: schema.maybe(
+          schema.string({ meta: { description: 'The markdown library item description.' } })
+        ),
+        title: schema.string({ meta: { description: 'The markdown library item title.' } }),
       }),
       meta: asCodeMetaSchema,
     }),
-    { minSize: 0, maxSize: MAX_PER_PAGE }
+    {
+      meta: { description: 'The markdown library items matching the search query.' },
+      minSize: 0,
+      maxSize: MAX_PER_PAGE,
+    }
   ),
-  total: schema.number(),
-  page: schema.number(),
+  meta: schema.object({
+    page: schema.number({
+      meta: { description: 'The current page number.' },
+    }),
+    per_page: schema.number({
+      meta: { description: 'The number of markdown library items returned in the current page.' },
+    }),
+    total: schema.number({
+      meta: { description: 'The total number of markdown library items matching the query.' },
+    }),
+  }),
 });
