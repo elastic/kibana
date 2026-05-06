@@ -109,19 +109,28 @@ const bucketTermsRankByCustomSharedSchema = schema.object({
   }),
 });
 
-const bucketTermsRankByCustomBaseSchema = bucketTermsRankByCustomSharedSchema.extends({
-  operation: schema.oneOf([
-    schema.literal('min'),
-    schema.literal('max'),
-    schema.literal('average'),
-    schema.literal('median'),
-    schema.literal('standard_deviation'),
-    schema.literal('unique_count'),
-    schema.literal('count'),
-    schema.literal('sum'),
-    schema.literal('last_value'),
-  ]),
-});
+const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSchema.extends(
+  {
+    operation: schema.oneOf([
+      schema.literal('min'),
+      schema.literal('max'),
+      schema.literal('average'),
+      schema.literal('median'),
+      schema.literal('standard_deviation'),
+      schema.literal('unique_count'),
+      schema.literal('count'),
+      schema.literal('sum'),
+      schema.literal('last_value'),
+    ]),
+  },
+  {
+    meta: {
+      id: 'termsRankByCustomOperation',
+      title: 'Terms Rank By Custom Operation',
+      description: 'Terms ranked by custom operation.',
+    },
+  }
+);
 
 const bucketTermsRankByPercentileOperationSchema = bucketTermsRankByCustomSharedSchema.extends(
   {
@@ -258,51 +267,87 @@ export const bucketTermsOperationSchema = schema.object(
      */
     rank_by: schema.maybe(
       schema.oneOf([
-        schema.object({
-          type: schema.literal('alphabetical'),
-          /**
-           * Direction of the alphabetical order
-           */
-          direction: builderEnums.direction({
+        schema.object(
+          {
+            type: schema.literal('alphabetical'),
+            /**
+             * Direction of the alphabetical order
+             */
+            direction: builderEnums.direction({
+              meta: {
+                id: 'termsRankByAlphabeticalDirection',
+                description: 'Sort direction for alphabetical ranking.',
+              },
+            }),
+          },
+          {
             meta: {
-              id: 'termsRankByAlphabeticalDirection',
-              description: 'Sort direction for alphabetical ranking.',
+              id: 'termsRankByAlphabetical',
+              title: 'Terms Rank By Alphabetical',
+              description: 'Terms ranked alphabetically.',
             },
-          }),
-        }),
-        schema.object({
-          type: schema.literal('rare'),
-          /**
-           * Maximum number of rare terms
-           */
-          max: schema.number({
+          }
+        ),
+        schema.object(
+          {
+            type: schema.literal('rare'),
+            /**
+             * Maximum number of rare terms
+             */
+            max: schema.number({
+              meta: {
+                description: 'Maximum number of rare terms to include.',
+              },
+            }),
+          },
+          {
             meta: {
-              description: 'Number of rare terms to include.',
+              id: 'termsRankByRare',
+              title: 'Terms Rank By Rarity',
+              description: 'Terms ranked by rarity.',
             },
-          }),
-        }),
-        schema.object({
-          type: schema.literal('significant'),
-        }),
-        schema.object({
-          type: schema.literal('metric'),
-          metric_index: schema.number({
-            defaultValue: 0,
-            min: 0,
+          }
+        ),
+        schema.object(
+          {
+            type: schema.literal('significant'),
+          },
+          {
             meta: {
-              description:
-                'Zero-based index into the metrics array identifying which metric to rank by.',
+              id: 'termsRankBySignificant',
+              title: 'Terms Rank By Significance',
+              description: 'Terms ranked by significance.',
             },
-          }),
+          }
+        ),
+        schema.object(
+          {
+            type: schema.literal('metric'),
+            metric_index: schema.number({
+              defaultValue: 0,
+              min: 0,
+              meta: {
+                description:
+                  'Zero-based index into the metrics array identifying which metric to rank by.',
+              },
+            }),
 
-          direction: builderEnums.direction({
+            direction: builderEnums.direction({
+              meta: {
+                id: 'termsRankByMetricDirection',
+                description: 'Sort direction for metric-based ranking.',
+              },
+            }),
+          },
+          {
             meta: {
-              id: 'termsRankByMetricDirection',
-              description: 'Sort direction for metric-based ranking.',
+              id: 'termsRankByMetric',
+              title: 'Terms Rank By Metric',
+              description: 'Terms ranked by a linked metric.',
             },
-          }),
-        }),
-        bucketTermsRankByCustomBaseSchema,
+          }
+        ),
+        bucketTermsRankByCustomOperationSchema,
         bucketTermsRankByPercentileOperationSchema,
         bucketTermsRankByPercentileRankOperationSchema,
       ])
@@ -459,7 +504,9 @@ export const bucketOperationDefinitionSchema = schema.oneOf(
   }
 );
 
-export type TermOperationRankByCustomBaseType = TypeOf<typeof bucketTermsRankByCustomBaseSchema>;
+export type TermOperationRankByCustomOperationType = TypeOf<
+  typeof bucketTermsRankByCustomOperationSchema
+>;
 export type TermOperationRankByCustomPercentileType = TypeOf<
   typeof bucketTermsRankByPercentileOperationSchema
 >;
