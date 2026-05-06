@@ -96,9 +96,7 @@ describe('CollectorDetailHealth', () => {
       },
     };
 
-    const result = testRenderer.render(
-      <CollectorDetailHealth health={health} config={config} />
-    );
+    const result = testRenderer.render(<CollectorDetailHealth health={health} config={config} />);
     expect(result.getByText('Component health')).toBeInTheDocument();
     expect(result.getByTestId('collectorHealthPipeline-logs/default')).toBeInTheDocument();
   });

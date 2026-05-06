@@ -55,9 +55,7 @@ describe('CollectorDetailInfo', () => {
   });
 
   it('renders agent metadata fields', () => {
-    const result = testRenderer.render(
-      <CollectorDetailInfo agent={makeAgent()} config={config} />
-    );
+    const result = testRenderer.render(<CollectorDetailInfo agent={makeAgent()} config={config} />);
     const panel = result.getByTestId('collectorDetailInfo');
 
     expect(panel.textContent).toContain('prod-west-gateway');
@@ -72,9 +70,7 @@ describe('CollectorDetailInfo', () => {
   });
 
   it('renders pipeline count from config', () => {
-    const result = testRenderer.render(
-      <CollectorDetailInfo agent={makeAgent()} config={config} />
-    );
+    const result = testRenderer.render(<CollectorDetailInfo agent={makeAgent()} config={config} />);
     const panel = result.getByTestId('collectorDetailInfo');
     expect(panel.textContent).toContain('2');
   });
