@@ -176,47 +176,6 @@ const handleFlattenedOutput = (
   logFlattenedConfigs(flattenedConfigs, log);
 };
 
-// Splits 'streams_app' module by 'serverRunFlags' so CI can run each arch/domain as a
-// separate job (e.g. streams_app-stateful-classic, streams_app-serverless-search).
-const splitStreamsTestsByServerRunFlags = (
-  modules: ModuleDiscoveryInfo[]
-): ModuleDiscoveryInfo[] => {
-  return modules.flatMap((module) => {
-    // It is a temp workaround. Only split modules that include 'streams_app', 'dashboard'  in their name
-    if (!module.name.includes('streams_app') && !module.name.includes('dashboard')) {
-      return [module];
-    }
-
-    const allServerRunFlags = new Set<string>();
-    module.configs.forEach((config) => {
-      config.serverRunFlags.forEach((flag) => allServerRunFlags.add(flag));
-    });
-
-    return Array.from(allServerRunFlags).map((flag) => {
-      // transform: "--arch <arch> --domain <domain>" -> "<arch>-<domain>"
-      const archDomainMatch = flag.match(/--arch\s+(\S+)\s+--domain\s+(\S+)/);
-      const flagSuffix = archDomainMatch
-        ? `${archDomainMatch[1]}-${archDomainMatch[2]}`
-        : flag.replace(/^--/g, '').replace(/\s*--/g, '-').replace(/=/g, '-').replace(/\s+/g, '-');
-      const newModuleName = `${module.name}-${flagSuffix}`;
-
-      const filteredConfigs = module.configs
-        .filter((config) => config.serverRunFlags.includes(flag))
-        .map((config) => ({
-          ...config,
-          // Keep only the matching 'serverRunFlag' for this split module
-          serverRunFlags: [flag],
-        }));
-
-      return {
-        ...module,
-        name: newModuleName,
-        configs: filteredConfigs,
-      };
-    });
-  });
-};
-
 const handleNonFlattenedOutput = (
   filteredModules: ModuleDiscoveryInfo[],
   flagsReader: FlagsReader,
@@ -225,12 +184,10 @@ const handleNonFlattenedOutput = (
 ): void => {
   if (flagsReader.boolean('save')) {
     const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
-    // 'streams_app' tests are quite time consuming, let's split run by 'serverRunFlags' before saving
-    const splitModules = splitStreamsTestsByServerRunFlags(filteredForCiModules);
-    saveModuleDiscoveryInfo(splitModules, log);
+    saveModuleDiscoveryInfo(filteredForCiModules, log);
 
     const { plugins: savedPluginCount, packages: savedPackageCount } =
-      countModulesByType(splitModules);
+      countModulesByType(filteredForCiModules);
 
     const runScope = selectiveTesting ? 'selective' : 'full suite';
     log.info(

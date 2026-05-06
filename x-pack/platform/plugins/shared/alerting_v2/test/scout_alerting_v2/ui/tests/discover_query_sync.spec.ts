@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 const TEST_INDEX = 'test-discover-query-sync';
 const UPDATED_QUERY = `FROM ${TEST_INDEX}`;
 
-test.describe('Discover query sync — Rule flyout', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects, esClient }) => {
-    await browserAuth.loginAsAdmin();
-
+/*
+ * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
+ * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
+ * until ECH support lands.
+ */
+test.describe('Discover query sync — Rule flyout', { tag: '@local-stateful-classic' }, () => {
+  test.beforeAll(async ({ esClient }) => {
     await esClient.indices.create(
       {
         index: TEST_INDEX,
@@ -28,7 +30,10 @@ test.describe('Discover query sync — Rule flyout', { tag: tags.stateful.classi
       },
       { ignore: [400] }
     );
+  });
 
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsAlertingV2Editor();
     await pageObjects.ruleForm.gotoDiscover();
   });
 
@@ -40,11 +45,11 @@ test.describe('Discover query sync — Rule flyout', { tag: tags.stateful.classi
     await test.step('switch to ES|QL and open rule flyout', async () => {
       await pageObjects.ruleForm.switchToEsqlMode();
       await pageObjects.ruleForm.openRulesFlyoutFromDiscover();
-      await expect(pageObjects.ruleForm.flyout()).toBeVisible();
+      await expect(pageObjects.ruleForm.flyout).toBeVisible();
     });
 
     await test.step('verify flyout does not yet contain the updated query', async () => {
-      await expect(pageObjects.ruleForm.flyout()).not.toContainText(UPDATED_QUERY);
+      await expect(pageObjects.ruleForm.flyout).not.toContainText(UPDATED_QUERY);
     });
 
     await test.step('type the new query in Discover without submitting', async () => {
@@ -52,7 +57,7 @@ test.describe('Discover query sync — Rule flyout', { tag: tags.stateful.classi
     });
 
     await test.step('verify flyout still does not contain the updated query', async () => {
-      await expect(pageObjects.ruleForm.flyout()).not.toContainText(UPDATED_QUERY);
+      await expect(pageObjects.ruleForm.flyout).not.toContainText(UPDATED_QUERY);
     });
 
     await test.step('click search to submit the query', async () => {
@@ -60,7 +65,7 @@ test.describe('Discover query sync — Rule flyout', { tag: tags.stateful.classi
     });
 
     await test.step('verify flyout reflects the updated query', async () => {
-      await expect(pageObjects.ruleForm.flyout()).toContainText(UPDATED_QUERY);
+      await expect(pageObjects.ruleForm.flyout).toContainText(UPDATED_QUERY);
     });
   });
 });
