@@ -14,6 +14,8 @@ import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import {
   type GrantUiamApiKeyRequestBody,
   type GrantUiamApiKeyResponse,
+  type OAuthClientResponse,
+  type OAuthConnectionResponse,
   UiamService,
 } from './uiam_service';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
@@ -46,7 +48,10 @@ describe('UiamService', () => {
         },
         { serverless: true }
       ).uiam,
-      'https://es.example.com'
+      {
+        kibanaServerURL: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+        elasticsearchUrl: 'https://es.example.com',
+      }
     );
   });
 
@@ -60,56 +65,76 @@ describe('UiamService', () => {
     it('fails if UIAM functionality is not enabled', () => {
       expect(
         () =>
-          new UiamService(loggingSystemMock.createLogger(), {
-            enabled: false,
-            url: 'https://uiam.service',
-            sharedSecret: 'secret',
-            ssl: { verificationMode: 'none' },
-          })
+          new UiamService(
+            loggingSystemMock.createLogger(),
+            {
+              enabled: false,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: { verificationMode: 'none' },
+            },
+            { kibanaServerURL: 'https://kibana.test' }
+          )
       ).toThrowError('UIAM is not enabled.');
     });
 
     it('fails if UIAM service URL is not configured', () => {
       expect(
         () =>
-          new UiamService(loggingSystemMock.createLogger(), {
-            enabled: true,
-            sharedSecret: 'secret',
-            ssl: { verificationMode: 'none' },
-          })
+          new UiamService(
+            loggingSystemMock.createLogger(),
+            {
+              enabled: true,
+              sharedSecret: 'secret',
+              ssl: { verificationMode: 'none' },
+            },
+            { kibanaServerURL: 'https://kibana.test' }
+          )
       ).toThrowError('UIAM URL is not configured.');
     });
 
     it('fails if UIAM service shared secret is not configured', () => {
       expect(
         () =>
-          new UiamService(loggingSystemMock.createLogger(), {
-            enabled: true,
-            url: 'https://uiam.service',
-            ssl: { verificationMode: 'none' },
-          })
+          new UiamService(
+            loggingSystemMock.createLogger(),
+            {
+              enabled: true,
+              url: 'https://uiam.service',
+              ssl: { verificationMode: 'none' },
+            },
+            { kibanaServerURL: 'https://kibana.test' }
+          )
       ).toThrowError('UIAM shared secret is not configured.');
     });
 
     it('does not create custom dispatcher for `full` verification without custom TLS settings', () => {
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: { verificationMode: 'full' },
-      });
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: { verificationMode: 'full' },
+        },
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).not.toHaveBeenCalled();
     });
 
     it('creates a custom dispatcher for `full` verification when custom CAs are needed', () => {
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: { verificationMode: 'full', certificateAuthorities: '/some/ca/path' },
-      });
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: { verificationMode: 'full', certificateAuthorities: '/some/ca/path' },
+        },
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
@@ -120,15 +145,19 @@ describe('UiamService', () => {
       });
 
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: {
-          verificationMode: 'full',
-          certificateAuthorities: ['/some/ca/path-1', '/some/ca/path-2'],
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: {
+            verificationMode: 'full',
+            certificateAuthorities: ['/some/ca/path-1', '/some/ca/path-2'],
+          },
         },
-      });
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
@@ -144,12 +173,16 @@ describe('UiamService', () => {
 
     it('creates a custom dispatcher for `certificate` verification', () => {
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: { verificationMode: 'certificate', certificateAuthorities: '/some/ca/path' },
-      });
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: { verificationMode: 'certificate', certificateAuthorities: '/some/ca/path' },
+        },
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
@@ -161,12 +194,16 @@ describe('UiamService', () => {
       });
 
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: { verificationMode: 'certificate' },
-      });
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: { verificationMode: 'certificate' },
+        },
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
@@ -179,12 +216,16 @@ describe('UiamService', () => {
 
     it('creates a custom dispatcher for `none` verification', () => {
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: { verificationMode: 'none' },
-      });
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: { verificationMode: 'none' },
+        },
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
         connect: { allowPartialTrustChain: true, rejectUnauthorized: false },
@@ -193,16 +234,20 @@ describe('UiamService', () => {
 
     it('creates a custom dispatcher with client certificate and key for mTLS', () => {
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: {
-          verificationMode: 'full',
-          certificate: '/path/to/cert.pem',
-          key: '/path/to/key.pem',
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: {
+            verificationMode: 'full',
+            certificate: '/path/to/cert.pem',
+            key: '/path/to/key.pem',
+          },
         },
-      });
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
@@ -216,17 +261,21 @@ describe('UiamService', () => {
 
     it('creates a custom dispatcher with mTLS client cert and CAs', () => {
       agentSpy.mockClear();
-      new UiamService(loggingSystemMock.createLogger(), {
-        enabled: true,
-        url: 'https://uiam.service',
-        sharedSecret: 'secret',
-        ssl: {
-          verificationMode: 'full',
-          certificate: '/path/to/cert.pem',
-          key: '/path/to/key.pem',
-          certificateAuthorities: '/some/ca/path',
+      new UiamService(
+        loggingSystemMock.createLogger(),
+        {
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: {
+            verificationMode: 'full',
+            certificate: '/path/to/cert.pem',
+            key: '/path/to/key.pem',
+            certificateAuthorities: '/some/ca/path',
+          },
         },
-      });
+        { kibanaServerURL: 'https://kibana.test' }
+      );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
@@ -352,6 +401,69 @@ describe('UiamService', () => {
         body: JSON.stringify({ tokens: ['old-token', 'old-refresh'] }),
         dispatcher: AGENT_MOCK,
       });
+    });
+  });
+
+  describe('#exchangeOAuthToken', () => {
+    it('properly calls UIAM service to exchange an OAuth token for an ephemeral token', async () => {
+      const mockResponse = {
+        token: 'essu_ephemeral_token_value',
+        credentials: {
+          oauth: {
+            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243/',
+          },
+        },
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(uiamService.exchangeOAuthToken('essu_oauth_access_token')).resolves.toBe(
+        'essu_ephemeral_token_value'
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io%3A9243%2F',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer essu_oauth_access_token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws when audience in response does not match expected audience', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          token: 'essu_ephemeral_token_value',
+          credentials: {
+            oauth: { audience: 'https://wrong-kibana.example.com' },
+          },
+        }),
+      });
+
+      await expect(uiamService.exchangeOAuthToken('essu_oauth_access_token')).rejects.toThrow(
+        'OAuth token audience mismatch'
+      );
+    });
+
+    it('throws and logs error when UIAM service returns an error', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        json: async () => ({ error: { message: 'Invalid token' } }),
+        headers: new Headers(),
+      });
+
+      await expect(uiamService.exchangeOAuthToken('essu_invalid_token')).rejects.toThrow();
     });
   });
 
@@ -741,7 +853,8 @@ describe('UiamService', () => {
             },
           },
           { serverless: true }
-        ).uiam
+        ).uiam,
+        { kibanaServerURL: 'https://kibana.test' }
       );
 
       await expect(serviceWithoutUrl.convertApiKeys(['es-api-key'])).rejects.toThrowError(
@@ -775,6 +888,497 @@ describe('UiamService', () => {
         }),
         dispatcher: AGENT_MOCK,
       });
+    });
+  });
+
+  describe('#createOAuthClient', () => {
+    it('properly calls UIAM service to create an OAuth client', async () => {
+      const mockResponse: OAuthClientResponse = {
+        id: 'client-id',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        client_name: 'Test Client',
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        uiamService.createOAuthClient('access-token', {
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          client_name: 'Test Client',
+        })
+      ).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/oauth/clients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer access-token',
+        },
+        body: JSON.stringify({
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          client_name: 'Test Client',
+        }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('throws error if creation fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Bad request' } }),
+      });
+
+      await expect(
+        uiamService.createOAuthClient('access-token', {
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        })
+      ).rejects.toThrowError('Bad request');
+    });
+
+    it('forwards redirect_uris, client_logo, and client_metadata verbatim to UIAM', async () => {
+      const mockResponse: OAuthClientResponse = {
+        id: 'client-id',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        redirect_uris: ['https://example.com/cb'],
+        client_logo: { media_type: 'image/png', data: 'abc' },
+      };
+
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      const body = {
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        client_type: 'confidential' as const,
+        client_metadata: { owner: 'admin' },
+        client_logo: { media_type: 'image/png', data: 'abc' },
+        redirect_uris: ['https://example.com/cb'],
+      };
+
+      await expect(uiamService.createOAuthClient('access-token', body)).resolves.toEqual(
+        mockResponse
+      );
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients',
+        expect.objectContaining({ method: 'POST', body: JSON.stringify(body) })
+      );
+    });
+
+    it('surfaces UIAM ErrorDetails (code, type, resource) in the thrown Boom message', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'INVALID_REDIRECT_URI',
+            type: 'validation_error',
+            resource: 'redirect_uris[0]',
+            message: 'Redirect URI must not contain a fragment',
+          },
+        }),
+      });
+
+      await expect(
+        uiamService.createOAuthClient('access-token', {
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        })
+      ).rejects.toThrowError(
+        '[INVALID_REDIRECT_URI/validation_error] Redirect URI must not contain a fragment (resource: redirect_uris[0])'
+      );
+    });
+  });
+
+  describe('#listOAuthClients', () => {
+    it('properly calls UIAM service to list OAuth clients', async () => {
+      const mockResponse = { clients: [] };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(uiamService.listOAuthClients('access-token')).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/oauth/clients', {
+        method: 'GET',
+        headers: {
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer access-token',
+        },
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('includes client_id query parameter when provided', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ clients: [] }),
+      });
+
+      await uiamService.listOAuthClients('access-token', 'specific-client-id');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients?client_id=specific-client-id',
+        {
+          method: 'GET',
+          headers: {
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if listing fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Forbidden' } }),
+      });
+
+      await expect(uiamService.listOAuthClients('access-token')).rejects.toThrowError('Forbidden');
+    });
+  });
+
+  describe('#updateOAuthClient', () => {
+    it('properly calls UIAM service to update an OAuth client', async () => {
+      const mockResponse: OAuthClientResponse = {
+        id: 'client-id',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        client_name: 'Updated Name',
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        uiamService.updateOAuthClient('access-token', 'client-id', {
+          client_name: 'Updated Name',
+          client_metadata: { key: 'value' },
+        })
+      ).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id',
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          body: JSON.stringify({ client_name: 'Updated Name', client_metadata: { key: 'value' } }),
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if update fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Client not found' } }),
+      });
+
+      await expect(
+        uiamService.updateOAuthClient('access-token', 'missing-id', {
+          client_metadata: {},
+        })
+      ).rejects.toThrowError('Client not found');
+    });
+
+    it('encodes reserved characters in the client id path segment', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          id: 'weird/id?x#y',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        }),
+      });
+
+      await uiamService.updateOAuthClient('access-token', 'weird/id?x#y', {
+        client_name: 'Updated',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/weird%2Fid%3Fx%23y',
+        expect.objectContaining({ method: 'PATCH' })
+      );
+    });
+  });
+
+  describe('#revokeOAuthClient', () => {
+    it('properly calls UIAM service to revoke an OAuth client', async () => {
+      const mockResponse: OAuthClientResponse = {
+        id: 'client-id',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        revoked: true,
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        uiamService.revokeOAuthClient('access-token', 'client-id', 'no longer needed')
+      ).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id/_revoke',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          body: JSON.stringify({ reason: 'no longer needed' }),
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if revocation fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Already revoked' } }),
+      });
+
+      await expect(uiamService.revokeOAuthClient('access-token', 'client-id')).rejects.toThrowError(
+        'Already revoked'
+      );
+    });
+
+    it('encodes reserved characters in the client id path segment', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          id: 'weird/id?x#y',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          revoked: true,
+        }),
+      });
+
+      await uiamService.revokeOAuthClient('access-token', 'weird/id?x#y');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/weird%2Fid%3Fx%23y/_revoke',
+        expect.objectContaining({ method: 'POST' })
+      );
+    });
+  });
+
+  describe('#listOAuthConnections', () => {
+    it('properly calls UIAM service to list OAuth connections', async () => {
+      const mockResponse = { connections: [] };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(uiamService.listOAuthConnections('access-token')).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/oauth/connections', {
+        method: 'GET',
+        headers: {
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer access-token',
+        },
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('includes query parameters when provided', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ connections: [] }),
+      });
+
+      await uiamService.listOAuthConnections('access-token', 'cid', 'conn-id');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/connections?client_id=cid&connection_id=conn-id',
+        {
+          method: 'GET',
+          headers: {
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if listing fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 500,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Internal Server Error' } }),
+      });
+
+      await expect(uiamService.listOAuthConnections('access-token')).rejects.toThrowError(
+        'Internal Server Error'
+      );
+    });
+  });
+
+  describe('#updateOAuthConnection', () => {
+    it('properly calls UIAM service to update an OAuth connection', async () => {
+      const mockResponse: OAuthConnectionResponse = {
+        id: 'conn-id',
+        client_id: 'client-id',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        name: 'New name',
+      };
+
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await expect(
+        uiamService.updateOAuthConnection('access-token', 'client-id', 'conn-id', {
+          name: 'New name',
+        })
+      ).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id/connections/conn-id',
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          body: JSON.stringify({ name: 'New name' }),
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if update fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Connection not found' } }),
+      });
+
+      await expect(
+        uiamService.updateOAuthConnection('access-token', 'client-id', 'missing', {
+          name: 'x',
+        })
+      ).rejects.toThrowError('Connection not found');
+    });
+
+    it('encodes reserved characters in both path segments', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          id: 'conn/id?x',
+          client_id: 'client/id#y',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          name: 'n',
+        }),
+      });
+
+      await uiamService.updateOAuthConnection('access-token', 'client/id#y', 'conn/id?x', {
+        name: 'n',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client%2Fid%23y/connections/conn%2Fid%3Fx',
+        expect.objectContaining({ method: 'PATCH' })
+      );
+    });
+  });
+
+  describe('#revokeOAuthConnection', () => {
+    it('properly calls UIAM service to revoke an OAuth connection', async () => {
+      const mockResponse: OAuthConnectionResponse = {
+        id: 'conn-id',
+        client_id: 'client-id',
+        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        revoked: true,
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        uiamService.revokeOAuthConnection('access-token', 'client-id', 'conn-id', 'revoked')
+      ).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id/connections/conn-id/_revoke',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          body: JSON.stringify({ reason: 'revoked' }),
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if revocation fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Connection not found' } }),
+      });
+
+      await expect(
+        uiamService.revokeOAuthConnection('access-token', 'client-id', 'conn-id')
+      ).rejects.toThrowError('Connection not found');
+    });
+
+    it('encodes reserved characters in both path segments', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          id: 'conn/id?x',
+          client_id: 'client/id#y',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          revoked: true,
+        }),
+      });
+
+      await uiamService.revokeOAuthConnection('access-token', 'client/id#y', 'conn/id?x');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client%2Fid%23y/connections/conn%2Fid%3Fx/_revoke',
+        expect.objectContaining({ method: 'POST' })
+      );
     });
   });
 });

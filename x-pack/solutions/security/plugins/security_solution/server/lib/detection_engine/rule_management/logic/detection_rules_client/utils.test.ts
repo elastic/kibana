@@ -6,9 +6,249 @@
  */
 
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
-import { mergeExceptionLists, isKeyUpdateableWithReadPermission } from './utils';
+import { getMockRulesAuthz } from '../../__mocks__/authz';
+import {
+  mergeExceptionLists,
+  validateFieldWritePermissions,
+  hasOnlyReadAuthEditableChanges,
+  extractChangedUpdatableFields,
+} from './utils';
 
 describe('utils', () => {
+  describe('validateFieldWritePermissions', () => {
+    it('should not throw when user has all required permissions', () => {
+      const rulesAuthz = getMockRulesAuthz();
+      const ruleUpdate = {
+        exceptions_list: [],
+        investigation_fields: { field_names: ['host.name'] },
+        note: 'Investigation guide content',
+      };
+
+      expect(() => validateFieldWritePermissions(ruleUpdate, rulesAuthz)).not.toThrow();
+    });
+
+    it('should throw 403 when editing exceptions_list without canEditExceptions', () => {
+      const rulesAuthz = { ...getMockRulesAuthz(), canEditExceptions: false };
+      const ruleUpdate = { exceptions_list: [] };
+
+      expect(() => validateFieldWritePermissions(ruleUpdate, rulesAuthz)).toThrow(
+        expect.objectContaining({
+          statusCode: 403,
+          message:
+            'The current user does not have the permissions to edit the following fields: exceptions_list',
+        })
+      );
+    });
+
+    it('should throw 403 when editing investigation_fields without canEditCustomHighlightedFields', () => {
+      const rulesAuthz = { ...getMockRulesAuthz(), canEditCustomHighlightedFields: false };
+      const ruleUpdate = { investigation_fields: { field_names: ['host.name'] } };
+
+      expect(() => validateFieldWritePermissions(ruleUpdate, rulesAuthz)).toThrow(
+        expect.objectContaining({
+          statusCode: 403,
+          message:
+            'The current user does not have the permissions to edit the following fields: investigation_fields',
+        })
+      );
+    });
+
+    it('should throw 403 when editing note without canEditInvestigationGuides', () => {
+      const rulesAuthz = { ...getMockRulesAuthz(), canEditInvestigationGuides: false };
+      const ruleUpdate = { note: 'Investigation guide content' };
+
+      expect(() => validateFieldWritePermissions(ruleUpdate, rulesAuthz)).toThrow(
+        expect.objectContaining({
+          statusCode: 403,
+          message:
+            'The current user does not have the permissions to edit the following fields: note',
+        })
+      );
+    });
+
+    it('should aggregate multiple field errors into single error message', () => {
+      const rulesAuthz = {
+        ...getMockRulesAuthz(),
+        canEditExceptions: false,
+        canEditCustomHighlightedFields: false,
+        canEditInvestigationGuides: false,
+      };
+      const ruleUpdate = {
+        exceptions_list: [],
+        investigation_fields: { field_names: ['host.name'] },
+        note: 'Investigation guide',
+      };
+
+      expect(() => validateFieldWritePermissions(ruleUpdate, rulesAuthz)).toThrow(
+        expect.objectContaining({
+          statusCode: 403,
+          message:
+            'The current user does not have the permissions to edit the following fields: exceptions_list,investigation_fields,note',
+        })
+      );
+    });
+  });
+
+  describe('hasOnlyReadAuthEditableChanges', () => {
+    it('should return true when only note changed', () => {
+      const existingRule = getRulesSchemaMock();
+      const ruleUpdate = { ...getRulesSchemaMock(), note: 'Updated investigation guide' };
+
+      expect(hasOnlyReadAuthEditableChanges(ruleUpdate, existingRule)).toBe(true);
+    });
+
+    it('should return true when only investigation_fields changed', () => {
+      const existingRule = getRulesSchemaMock();
+      const ruleUpdate = {
+        ...getRulesSchemaMock(),
+        investigation_fields: { field_names: ['host.name', 'user.name'] },
+      };
+
+      expect(hasOnlyReadAuthEditableChanges(ruleUpdate, existingRule)).toBe(true);
+    });
+
+    it('should return true when only exceptions_list changed', () => {
+      const existingRule = getRulesSchemaMock();
+      const ruleUpdate = {
+        ...getRulesSchemaMock(),
+        exceptions_list: [
+          {
+            id: 'new_list',
+            list_id: 'new_list_id',
+            namespace_type: 'single' as const,
+            type: 'detection' as const,
+          },
+        ],
+      };
+
+      expect(hasOnlyReadAuthEditableChanges(ruleUpdate, existingRule)).toBe(true);
+    });
+
+    it('should return true when multiple read-auth fields changed', () => {
+      const existingRule = getRulesSchemaMock();
+      const ruleUpdate = {
+        ...getRulesSchemaMock(),
+        note: 'Updated investigation guide',
+        investigation_fields: { field_names: ['host.name'] },
+        exceptions_list: [
+          {
+            id: 'new_list',
+            list_id: 'new_list_id',
+            namespace_type: 'single' as const,
+            type: 'detection' as const,
+          },
+        ],
+      };
+
+      expect(hasOnlyReadAuthEditableChanges(ruleUpdate, existingRule)).toBe(true);
+    });
+
+    it('should return false when name changed', () => {
+      const existingRule = getRulesSchemaMock();
+      const ruleUpdate = { ...getRulesSchemaMock(), name: 'Updated Rule Name' };
+
+      expect(hasOnlyReadAuthEditableChanges(ruleUpdate, existingRule)).toBe(false);
+    });
+
+    it('should return false when description changed', () => {
+      const existingRule = getRulesSchemaMock();
+      const ruleUpdate = { ...getRulesSchemaMock(), description: 'Updated description' };
+
+      expect(hasOnlyReadAuthEditableChanges(ruleUpdate, existingRule)).toBe(false);
+    });
+
+    it('should return false when non-read-auth fields changed alongside read-auth fields', () => {
+      const existingRule = getRulesSchemaMock();
+      const ruleUpdate = {
+        ...getRulesSchemaMock(),
+        note: 'Updated investigation guide',
+        name: 'Updated Rule Name',
+      };
+
+      expect(hasOnlyReadAuthEditableChanges(ruleUpdate, existingRule)).toBe(false);
+    });
+
+    it('should return true when no fields changed', () => {
+      const existingRule = getRulesSchemaMock();
+      const ruleUpdate = getRulesSchemaMock();
+
+      expect(hasOnlyReadAuthEditableChanges(ruleUpdate, existingRule)).toBe(true);
+    });
+  });
+
+  describe('extractChangedUpdatableFields', () => {
+    it('should extract only changed note field', () => {
+      const existingRule = getRulesSchemaMock();
+      const ruleUpdate = { ...getRulesSchemaMock(), note: 'Updated investigation guide' };
+
+      const result = extractChangedUpdatableFields(ruleUpdate, existingRule);
+
+      expect(result.note).toBe('Updated investigation guide');
+      expect(result.rule_source).not.toBeUndefined();
+      expect(result.exceptions_list).toBeUndefined();
+      expect(result.investigation_fields).toBeUndefined();
+    });
+
+    it('should extract only changed investigation_fields field', () => {
+      const existingRule = getRulesSchemaMock();
+      const ruleUpdate = {
+        ...getRulesSchemaMock(),
+        investigation_fields: { field_names: ['host.name', 'user.name'] },
+      };
+
+      const result = extractChangedUpdatableFields(ruleUpdate, existingRule);
+
+      expect(result.investigation_fields).toEqual({ field_names: ['host.name', 'user.name'] });
+      expect(result.rule_source).not.toBeUndefined();
+      expect(result.note).toBeUndefined();
+      expect(result.exceptions_list).toBeUndefined();
+    });
+
+    it('should always include rule_source', () => {
+      const existingRule = getRulesSchemaMock();
+      const ruleUpdate = getRulesSchemaMock();
+
+      const result = extractChangedUpdatableFields(ruleUpdate, existingRule);
+
+      expect(result.rule_source).not.toBeUndefined();
+    });
+
+    it('should not include unchanged fields', () => {
+      const existingRule = getRulesSchemaMock();
+      existingRule.note = 'Same note';
+      const ruleUpdate = { ...getRulesSchemaMock(), note: 'Same note' };
+
+      const result = extractChangedUpdatableFields(ruleUpdate, existingRule);
+
+      expect(result.note).toBeUndefined();
+      expect(result.rule_source).not.toBeUndefined();
+    });
+
+    it('should extract multiple changed fields', () => {
+      const existingRule = getRulesSchemaMock();
+      const ruleUpdate = {
+        ...getRulesSchemaMock(),
+        note: 'Updated investigation guide',
+        investigation_fields: { field_names: ['host.name'] },
+        exceptions_list: [
+          {
+            id: 'new_list',
+            list_id: 'new_list_id',
+            namespace_type: 'single' as const,
+            type: 'detection' as const,
+          },
+        ],
+      };
+
+      const result = extractChangedUpdatableFields(ruleUpdate, existingRule);
+
+      expect(result.note).toBe('Updated investigation guide');
+      expect(result.investigation_fields).toEqual({ field_names: ['host.name'] });
+      expect(result.exceptions_list).not.toBeUndefined();
+      expect(result.rule_source).not.toBeUndefined();
+    });
+  });
+
   describe('mergeExceptionLists', () => {
     test('should add back an exception_list if it was removed by the end user on an immutable rule during an upgrade', () => {
       const ruleAsset1 = getRulesSchemaMock();
@@ -113,16 +353,6 @@ describe('utils', () => {
 
       const update = mergeExceptionLists(ruleAsset1, installedRule1);
       expect(update.exceptions_list).toEqual(installedRule1.exceptions_list);
-    });
-  });
-
-  describe('isKeyUpdateableWithReadPermission', () => {
-    it('should accept valid fields', () => {
-      expect(
-        Object.keys({ exceptions_list: 'test value' }).every((key) =>
-          isKeyUpdateableWithReadPermission(key)
-        )
-      ).toBe(true);
     });
   });
 });

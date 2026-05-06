@@ -43,6 +43,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     dateRange,
     expressions,
     esqlVariables,
+    enableFormatSelector,
   } = props;
 
   useEffect(() => {
@@ -197,16 +198,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           }}
         />
       </EuiFormRow>
-      {props.dataSectionExtra && (
-        <div
-          style={{
-            paddingLeft: euiTheme.size.base,
-            paddingRight: euiTheme.size.base,
-          }}
-        >
-          {props.dataSectionExtra}
-        </div>
-      )}
+      {props.dataSectionExtra}
       {!isFullscreen && selectedField && (
         <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
           <EuiText
@@ -236,7 +228,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             }}
           />
 
-          {isNumericColumn ? (
+          {isNumericColumn && enableFormatSelector ? (
             <FormatSelector
               selectedColumn={selectedField}
               onChange={onFormatChange}

@@ -20,7 +20,6 @@ import {
   UPDATE_PACK_BUTTON,
   TABLE_ROWS,
   formFieldInputSelector,
-  FLYOUT_SAVED_QUERY_CANCEL_BUTTON,
 } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
 import { deleteAndConfirm, inputQuery } from '../../tasks/live_query';
@@ -45,11 +44,8 @@ describe(
     let savedQueryId: string;
     let savedQueryName: string;
     let nomappingSavedQueryId: string;
-    let nomappingSavedQueryName: string;
     let oneMappingSavedQueryId: string;
-    let oneMappingSavedQueryName: string;
     let multipleMappingsSavedQueryId: string;
-    let multipleMappingsSavedQueryName: string;
 
     before(() => {
       loadSavedQuery().then((data) => {
@@ -62,7 +58,6 @@ describe(
         query: 'select * from uptime;',
       }).then((data) => {
         nomappingSavedQueryId = data.saved_object_id;
-        nomappingSavedQueryName = data.id;
       });
       loadSavedQuery({
         ecs_mapping: {
@@ -75,7 +70,6 @@ describe(
         timeout: 607,
       }).then((data) => {
         oneMappingSavedQueryId = data.saved_object_id;
-        oneMappingSavedQueryName = data.id;
       });
       loadSavedQuery({
         ecs_mapping: {
@@ -93,7 +87,6 @@ describe(
         query: 'select * from uptime;',
       }).then((data) => {
         multipleMappingsSavedQueryId = data.saved_object_id;
-        multipleMappingsSavedQueryName = data.id;
       });
     });
 
@@ -196,9 +189,7 @@ describe(
         cy.getBySel(UPDATE_PACK_BUTTON).click();
         closeModalIfVisible();
 
-        cy.contains(
-          'Create packs to organize sets of queries and to schedule queries for agent policies.'
-        );
+        cy.contains('Create pack');
         const queries = {
           Query1: {
             interval: 3600,
@@ -347,60 +338,9 @@ describe(
       });
     });
 
-    describe(
-      'should trigger validation when saved query is being chosen',
-      { tags: ['@ess', '@serverless'] },
-      () => {
-        let packId: string;
-        let packName: string;
-
-        before(() => {
-          request<{ items: PackagePolicy[] }>({
-            url: '/internal/osquery/fleet_wrapper/package_policies',
-            headers: {
-              'Elastic-Api-Version': API_VERSIONS.internal.v1,
-            },
-          })
-            .then((response) =>
-              loadPack({
-                policy_ids: response.body.items[0].policy_ids,
-                queries: {
-                  [savedQueryName]: {
-                    ecs_mapping: {},
-                    interval: 60,
-                    query: 'select * from uptime;',
-                  },
-                },
-              })
-            )
-            .then((pack) => {
-              packId = pack.saved_object_id;
-              packName = pack.name;
-            });
-        });
-
-        after(() => {
-          cleanupPack(packId);
-        });
-
-        it('', () => {
-          preparePack(packName);
-          cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
-
-          cy.getBySel(ADD_QUERY_BUTTON).click();
-
-          cy.contains('Attach next query');
-          cy.getBySel('globalLoadingIndicator').should('not.exist');
-          cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
-          cy.contains('ID must be unique').should('not.exist');
-          cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
-          cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
-
-          cy.contains('ID must be unique').should('exist');
-          cy.getBySel(FLYOUT_SAVED_QUERY_CANCEL_BUTTON).click();
-        });
-      }
-    );
+    // Removed: 'should trigger validation when saved query is being chosen'
+    // Migrated to Jest component test: public/packs/queries/query_flyout.test.tsx
+    // Phase 2 migration — ID uniqueness validation on saved query selection is a form-level assertion
 
     describe('should open lens in new tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
       let packId: string;
@@ -655,88 +595,9 @@ describe(
       });
     });
 
-    describe(
-      'enable changing saved queries and ecs_mappings',
-      { tags: ['@ess', '@serverless'] },
-      () => {
-        let packId: string;
-        let packName: string;
-
-        beforeEach(() => {
-          request<{ items: PackagePolicy[] }>({
-            url: '/internal/osquery/fleet_wrapper/package_policies',
-            headers: {
-              'Elastic-Api-Version': API_VERSIONS.internal.v1,
-            },
-          })
-            .then((response) =>
-              loadPack({
-                policy_ids: response.body.items[0].policy_ids,
-                queries: {
-                  [savedQueryName]: {
-                    ecs_mapping: {},
-                    interval: 60,
-                    query: 'select * from uptime;',
-                  },
-                },
-              })
-            )
-            .then((pack) => {
-              packId = pack.saved_object_id;
-              packName = pack.name;
-            });
-        });
-
-        afterEach(() => {
-          cleanupPack(packId);
-        });
-
-        it('', () => {
-          preparePack(packName);
-          cy.contains(/^Edit$/).click();
-
-          cy.getBySel(ADD_QUERY_BUTTON).click();
-
-          cy.getBySel('globalLoadingIndicator').should('not.exist');
-          cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
-          cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(
-            `${multipleMappingsSavedQueryName} {downArrow} {enter}`
-          );
-          cy.contains('Custom key/value pairs').should('exist');
-          cy.contains('Days of uptime').should('exist');
-          cy.contains('List of keywords used to tag each').should('exist');
-          cy.contains('Seconds of uptime').should('exist');
-          cy.contains('Client network address.').should('exist');
-          cy.contains('Total uptime seconds').should('exist');
-          cy.getBySel('ECSMappingEditorForm').should('have.length', 4);
-
-          cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(
-            `${nomappingSavedQueryName} {downArrow} {enter}`
-          );
-          cy.contains('Custom key/value pairs').should('not.exist');
-          cy.contains('Days of uptime').should('not.exist');
-          cy.contains('List of keywords used to tag each').should('not.exist');
-          cy.contains('Seconds of uptime').should('not.exist');
-          cy.contains('Client network address.').should('not.exist');
-          cy.contains('Total uptime seconds').should('not.exist');
-          cy.getBySel('ECSMappingEditorForm').should('have.length', 1);
-
-          cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(
-            `${oneMappingSavedQueryName} {downArrow} {enter}`
-          );
-          cy.contains('Name of the continent').should('exist');
-          cy.contains('Seconds of uptime').should('exist');
-          cy.getBySel('ECSMappingEditorForm').should('have.length', 2);
-
-          cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
-          cy.get(customActionEditSavedQuerySelector(oneMappingSavedQueryName)).click();
-
-          cy.contains('Name of the continent').should('exist');
-          cy.contains('Seconds of uptime').should('exist');
-          cy.getBySel('timeout-input').should('have.value', '607');
-        });
-      }
-    );
+    // Removed: 'enable changing saved queries and ecs_mappings'
+    // Migrated to Jest component test: public/packs/queries/query_flyout.test.tsx
+    // Phase 2 migration — ECS mapping visibility based on saved query selection is a form-level assertion
 
     describe('to click delete button', { tags: ['@ess', '@serverless'] }, () => {
       let packName: string;

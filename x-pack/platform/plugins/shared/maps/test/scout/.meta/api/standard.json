@@ -1,0 +1,522 @@
+{
+  "sha1": "2b3bf3b50ee69ab46cdf36d230f1326d42b750b7",
+  "tests": [
+    {
+      "id": "79abdadc4886132-c537aed5c2bba8c",
+      "title": "Maps - doc source creation should create a new index and pattern but not clobber an existing one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/create_doc_source.spec.ts",
+        "line": 23,
+        "column": 10
+      }
+    },
+    {
+      "id": "79abdadc4886132-9b12b2938a7115a",
+      "title": "Maps - doc source creation should fail to create index and pattern with invalid index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/create_doc_source.spec.ts",
+        "line": 49,
+        "column": 10
+      }
+    },
+    {
+      "id": "476158e3f2801e1-8977d3c5bc8c669",
+      "title": "Maps - doc feature deletion should delete a feature document and verify it is gone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/delete_feature.spec.ts",
+        "line": 20,
+        "column": 10
+      }
+    },
+    {
+      "id": "476158e3f2801e1-43dfa93aa2e7a0b",
+      "title": "Maps - doc feature deletion should fail if not a valid document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/delete_feature.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7fe68cdefe6fe8-290a39d2f56e2f2",
+      "title": "Maps - fonts should return fonts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/fonts_api.spec.ts",
+        "line": 19,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7fe68cdefe6fe8-1c696e360e405ee",
+      "title": "Maps - fonts should return 404 when file not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/fonts_api.spec.ts",
+        "line": 32,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7fe68cdefe6fe8-d0beae889916187",
+      "title": "Maps - fonts should return 404 when file is not in font folder (..)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/fonts_api.spec.ts",
+        "line": 44,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7fe68cdefe6fe8-644cb27eea368f1",
+      "title": "Maps - fonts should return 404 when file is not in font folder (./..)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/fonts_api.spec.ts",
+        "line": 53,
+        "column": 10
+      }
+    },
+    {
+      "id": "cdef33a0b073a7e-1f2a8b93c16905e",
+      "title": "Maps - getGridTile should return vector tile with expected headers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
+        "line": 66,
+        "column": 10
+      }
+    },
+    {
+      "id": "cdef33a0b073a7e-33b3d40c0db40b8",
+      "title": "Maps - getGridTile should return vector tile containing clusters when renderAs is \"point\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
+        "line": 82,
+        "column": 10
+      }
+    },
+    {
+      "id": "cdef33a0b073a7e-4e016c6c674f4c6",
+      "title": "Maps - getGridTile should return vector tile containing clusters with renderAs is \"heatmap\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
+        "line": 111,
+        "column": 10
+      }
+    },
+    {
+      "id": "cdef33a0b073a7e-9276f2bf571ae5d",
+      "title": "Maps - getGridTile should return vector tile containing grid features when renderAs is \"grid\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
+        "line": 141,
+        "column": 10
+      }
+    },
+    {
+      "id": "cdef33a0b073a7e-ff6f41b3d7ee4df",
+      "title": "Maps - getGridTile should return vector tile containing hexagon features when renderAs is \"hex\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
+        "line": 179,
+        "column": 10
+      }
+    },
+    {
+      "id": "cdef33a0b073a7e-ced9bf97d33a7bf",
+      "title": "Maps - getGridTile should return vector tile containing label features when hasLabels is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
+        "line": 219,
+        "column": 10
+      }
+    },
+    {
+      "id": "cdef33a0b073a7e-81547373d708835",
+      "title": "Maps - getGridTile should return vector tile with meta layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
+        "line": 257,
+        "column": 10
+      }
+    },
+    {
+      "id": "cdef33a0b073a7e-dbf94e2b8a72ed4",
+      "title": "Maps - getGridTile should return error when index does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_grid_tile.spec.ts",
+        "line": 300,
+        "column": 10
+      }
+    },
+    {
+      "id": "3f153f38d0718b1-a330d1660f33154",
+      "title": "Maps - get matching index patterns should return an array containing indexes matching pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_indexes_matching_pattern.spec.ts",
+        "line": 26,
+        "column": 10
+      }
+    },
+    {
+      "id": "3f153f38d0718b1-82adff8077c8e6c",
+      "title": "Maps - get matching index patterns should return an empty array when no indexes match pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_indexes_matching_pattern.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "5327d805141950e-224685c5dcfb8f9",
+      "title": "Maps - getTile should return ES vector tile containing documents and metadata",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_tile.spec.ts",
+        "line": 61,
+        "column": 10
+      }
+    },
+    {
+      "id": "5327d805141950e-4b6284ae210c174",
+      "title": "Maps - getTile should return ES vector tile containing label features when hasLabels is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_tile.spec.ts",
+        "line": 119,
+        "column": 10
+      }
+    },
+    {
+      "id": "5327d805141950e-661f6069d54e96a",
+      "title": "Maps - getTile should return error when index does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_tile.spec.ts",
+        "line": 160,
+        "column": 10
+      }
+    },
+    {
+      "id": "5327d805141950e-850e888535eafbe",
+      "title": "Maps - getTile should return elasticsearch error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/get_tile.spec.ts",
+        "line": 170,
+        "column": 10
+      }
+    },
+    {
+      "id": "0719e8c76ca742b-392c66c22dc43c3",
+      "title": "Maps - index feature data should add point data to an existing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/index_data.spec.ts",
+        "line": 26,
+        "column": 10
+      }
+    },
+    {
+      "id": "0719e8c76ca742b-d94b004b8f90b2c",
+      "title": "Maps - index feature data should add shape data to an existing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/index_data.spec.ts",
+        "line": 47,
+        "column": 10
+      }
+    },
+    {
+      "id": "0719e8c76ca742b-cd75230258e9197",
+      "title": "Maps - index feature data should fail if data is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/index_data.spec.ts",
+        "line": 81,
+        "column": 10
+      }
+    },
+    {
+      "id": "0719e8c76ca742b-44d62f3e0676957",
+      "title": "Maps - index feature data should fail if index does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/index_data.spec.ts",
+        "line": 101,
+        "column": 10
+      }
+    },
+    {
+      "id": "d309494869b7330-c1061e0b564aed3",
+      "title": "Maps - index settings should return default index settings when max_result_window and max_inner_result_window are not set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/index_settings.spec.ts",
+        "line": 21,
+        "column": 10
+      }
+    },
+    {
+      "id": "d309494869b7330-98d06f49d38d85f",
+      "title": "Maps - index settings should return index settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/index_settings.spec.ts",
+        "line": 37,
+        "column": 10
+      }
+    },
+    {
+      "id": "d18ba676958b096-30a9a7f54600fb8",
+      "title": "Maps - maps telemetry should return the correct telemetry values for map saved objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/maps_telemetry.spec.ts",
+        "line": 29,
+        "column": 10
+      }
+    },
+    {
+      "id": "d3c1aedbe3f74ca-6c0f69220d37e37",
+      "title": "Maps - map migrations should apply saved object reference migration when importing map saved objects prior to 7.2.0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/migrations.spec.ts",
+        "line": 30,
+        "column": 10
+      }
+    },
+    {
+      "id": "d3c1aedbe3f74ca-54297439901b0d1",
+      "title": "Maps - map migrations should not fail migration with invalid attributes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/migrations.spec.ts",
+        "line": 68,
+        "column": 10
+      }
+    },
+    {
+      "id": "d3c1aedbe3f74ca-ca814dab4bcc4ae",
+      "title": "Maps - map migrations should apply embeddable migrations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/migrations.spec.ts",
+        "line": 83,
+        "column": 10
+      }
+    },
+    {
+      "id": "30186bcf5c44660-76e35e517fb9dd0",
+      "title": "Maps - search ES|QL should return getColumns response in expected shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/search_esql.spec.ts",
+        "line": 22,
+        "column": 10
+      }
+    },
+    {
+      "id": "30186bcf5c44660-7efd2d624e6e360",
+      "title": "Maps - search ES|QL should return getValues response in expected shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/search_esql.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "21d3c6b13dcabf0-7481c0488d953b1",
+      "title": "Maps - validate drawing index confirm valid drawing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/validate_drawing_index.spec.ts",
+        "line": 26,
+        "column": 10
+      }
+    },
+    {
+      "id": "21d3c6b13dcabf0-5011034cbec9366",
+      "title": "Maps - validate drawing index confirm valid index that is not a drawing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/validate_drawing_index.spec.ts",
+        "line": 47,
+        "column": 10
+      }
+    },
+    {
+      "id": "21d3c6b13dcabf0-9bfe12127b43311",
+      "title": "Maps - validate drawing index confirm invalid index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/validate_drawing_index.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    }
+  ]
+}

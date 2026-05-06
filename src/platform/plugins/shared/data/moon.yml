@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-visualizations'
   sourceRoot: src/platform/plugins/shared/data
 dependsOn:
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
   - '@kbn/core'
   - '@kbn/ui-actions-plugin'
   - '@kbn/share-plugin'
@@ -67,8 +69,10 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/cps'
   - '@kbn/cps-utils'
+  - '@kbn/apm-utils'
   - '@kbn/std'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod
@@ -83,27 +87,9 @@ fileGroups:
     - config.mock.ts
     - common/**/*.json
     - public/**/*.json
+    - test/scout/**/*
+    - test/scout_search_sessions/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

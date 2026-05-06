@@ -78,7 +78,7 @@
           "[]>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
-        "lineNumber": 120,
+        "lineNumber": 121,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -94,9 +94,10 @@
               "BuildContextMenuParams"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
-            "lineNumber": 123,
+            "lineNumber": 124,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "BuildContextMenuParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -157,6 +158,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActionDefinition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -200,7 +202,7 @@
           "<Context>>>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-        "lineNumber": 50,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -218,7 +220,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -233,7 +235,7 @@
               "\nA unique identifier for this action instance."
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -248,7 +250,7 @@
               "\nThe action type is what determines the context shape."
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -271,10 +273,12 @@
                 "section": "def-public.ActionExecutionContext",
                 "text": "ActionExecutionContext"
               },
-              "<Context>) => string | undefined"
+              "<Context>) => ",
+              "IconType",
+              " | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 68,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -297,9 +301,10 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "lineNumber": 71,
+                "lineNumber": 72,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -327,7 +332,7 @@
               "<Context>) => string"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -350,9 +355,10 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "lineNumber": 77,
+                "lineNumber": 78,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -380,7 +386,7 @@
               "<Context>) => Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 79,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -403,9 +409,10 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "lineNumber": 83,
+                "lineNumber": 84,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -433,7 +440,7 @@
               "<Context>) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 85,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -456,9 +463,10 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "lineNumber": 88,
+                "lineNumber": 89,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -486,7 +494,7 @@
               "<Context>) => Promise<string | undefined>) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -509,9 +517,10 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "lineNumber": 95,
+                "lineNumber": 96,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -539,7 +548,7 @@
               "<Context>) => Promise<boolean>) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 97,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -562,9 +571,10 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "lineNumber": 102,
+                "lineNumber": 103,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActionExecutionContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -584,7 +594,7 @@
               "<undefined> | undefined) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 104,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -600,9 +610,10 @@
                   "Context"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "lineNumber": 107,
+                "lineNumber": 108,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -624,7 +635,7 @@
               "((context: Context) => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 109,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -640,9 +651,10 @@
                   "Context"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "lineNumber": 114,
+                "lineNumber": 115,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -662,7 +674,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 116,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -680,7 +692,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 122,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -696,7 +708,7 @@
               "ActionExtension | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 128,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -714,7 +726,7 @@
           "\nDuring action execution we can provide additional information,\nfor example, trigger, that caused the action execution"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -738,7 +750,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 19,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -756,7 +768,7 @@
               "React.MouseEvent<Element, MouseEvent> | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -782,7 +794,7 @@
           "<Context>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-        "lineNumber": 43,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -805,7 +817,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -833,7 +845,7 @@
           "<Context>"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -848,7 +860,7 @@
               "\nID that uniquely identifies this object."
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 16,
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -863,7 +875,7 @@
               "\nDetermines the display order in relation to other items. Higher numbers are\ndisplayed first."
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -881,7 +893,7 @@
               "React.FC<{ context: Context; }> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -896,10 +908,12 @@
               "\nOptional EUI icon type that can be displayed along with the title."
             ],
             "signature": [
-              "(context: Context) => string | undefined"
+              "(context: Context) => ",
+              "IconType",
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -915,9 +929,10 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-                "lineNumber": 36,
+                "lineNumber": 37,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -937,7 +952,7 @@
               "(context: Context) => string"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -953,9 +968,10 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-                "lineNumber": 41,
+                "lineNumber": 42,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -975,7 +991,7 @@
               "((context: Context) => string) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -991,9 +1007,10 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-                "lineNumber": 47,
+                "lineNumber": 48,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1013,7 +1030,7 @@
               "((context: Context) => Promise<string | undefined>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1029,9 +1046,10 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-                "lineNumber": 54,
+                "lineNumber": 55,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1051,7 +1069,7 @@
               "(context: Context) => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1067,9 +1085,10 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-                "lineNumber": 60,
+                "lineNumber": 61,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Context",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1096,7 +1115,7 @@
               "<Context> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1130,7 +1149,7 @@
           "<Context>, \"order\" | \"getIconType\" | \"getDisplayName\" | \"getDisplayNameTooltip\">>"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-        "lineNumber": 70,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1143,7 +1162,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1478,7 +1497,7 @@
           "<undefined> | undefined) | undefined; couldBecomeCompatible?: ((context: Context) => boolean) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-        "lineNumber": 131,
+        "lineNumber": 132,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1491,7 +1510,14 @@
         "tags": [],
         "label": "ActionExecutionContext",
         "description": [
-          "\nAction methods are executed with Context from trigger + {@link ActionExecutionMeta}"
+          "\nAction methods are executed with Context from trigger + ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.ActionExecutionMeta",
+            "text": "ActionExecutionMeta"
+          }
         ],
         "signature": [
           "Context & ",
@@ -1504,7 +1530,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1536,7 +1562,7 @@
           "<Context, object>, \"getCompatibilityChangesSubject\" | \"couldBecomeCompatible\">>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-        "lineNumber": 47,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1560,7 +1586,7 @@
           "<Context>[]"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-        "lineNumber": 77,
+        "lineNumber": 78,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3586,7 +3612,7 @@
       "label": "UiActionsPublicSetup",
       "description": [],
       "signature": [
-        "{ readonly registerAction: <Context extends object>(definition: ",
+        "{ readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3594,31 +3620,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<Context, {}>) => ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.Action",
-          "text": "Action"
-        },
-        "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
-        },
-        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
-        },
-        "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3652,7 +3654,7 @@
           "section": "def-public.Trigger",
           "text": "Trigger"
         },
-        "; readonly registerAction: <Context extends object>(definition: ",
+        "; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3660,31 +3662,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<Context, {}>) => ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.Action",
-          "text": "Action"
-        },
-        "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
-        },
-        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
-        },
-        "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3729,7 +3707,7 @@
         "; }"
       ],
       "path": "src/platform/plugins/shared/ui_actions/public/plugin.ts",
-      "lineNumber": 26,
+      "lineNumber": 24,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

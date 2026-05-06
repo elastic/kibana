@@ -17,7 +17,9 @@ export class OtelKubernetesFlowPage {
     this.page = page;
     this.context = context;
 
-    this.exploreLogsButton = this.page.getByText('Explore logs');
+    this.exploreLogsButton = this.page.getByTestId(
+      'observabilityOnboardingDataIngestStatusActionLink-logs'
+    );
   }
 
   public async copyHelmRepositorySnippetToClipboard() {
@@ -82,8 +84,11 @@ export class OtelKubernetesFlowPage {
     }
   }
 
-  public async assertLogsExplorationButtonVisible() {
-    await expect(this.exploreLogsButton, 'Logs exploration button should be visible').toBeVisible();
+  public async assertDataReceivedIndicator(): Promise<void> {
+    await expect(
+      this.exploreLogsButton,
+      'Explore logs action link should be visible after data is detected'
+    ).toBeVisible();
   }
 
   public async clickExploreLogsCTA() {

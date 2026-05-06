@@ -34,20 +34,5 @@ export const INSIGHTS_CORRELATIONS_TEST_ID =
 export const FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID =
   `${ATTACK_DETAILS_FLYOUT_PREFIX}-footer-take-action-button` as const;
 export const INSIGHTS_TAB_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-insights-tab` as const;
-export const NOTES_TAB_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-notes-tab` as const;
-export const NOTES_TAB_CONTENT_TEST_ID =
-  `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-notes-tab-content` as const;
-export const HEADER_NOTES_TITLE_TEST_ID =
-  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-title` as const;
-export const HEADER_NOTES_ADD_NOTE_BUTTON_TEST_ID =
-  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-add-note-button` as const;
-export const HEADER_NOTES_VIEW_NOTES_BUTTON_TEST_ID =
-  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-view-notes-button` as const;
-export const HEADER_NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID =
-  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-add-note-icon-button` as const;
-export const HEADER_NOTES_COUNT_TEST_ID =
-  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-count` as const;
-export const HEADER_NOTES_LOADING_TEST_ID =
-  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-notes-loading` as const;
 export const ATTACK_DETAILS_LEFT_INSIGHTS_CORRELATION_TABLE =
   `${ATTACK_DETAILS_FLYOUT_PREFIX}-left-insights-correlation-table` as const;

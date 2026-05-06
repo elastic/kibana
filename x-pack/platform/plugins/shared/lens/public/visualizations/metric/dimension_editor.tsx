@@ -27,7 +27,6 @@ import {
   applyPaletteParams,
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
-import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
@@ -52,6 +51,7 @@ import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { metricIconsSet } from '../../shared_components/icon_set';
 import { getColorMode, getSecondaryLabelSelected } from './helpers';
 import { getDefaultConfigForMode } from './palette_config';
+import { getColumnFromActiveData } from '../utils';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -204,9 +204,28 @@ function TrendEditor({
   setState,
   state,
   datasource,
-}: Pick<SubProps, 'accessor' | 'idPrefix' | 'setState' | 'state' | 'datasource'>) {
-  const { isNumeric: secondaryMetricCanTrend } = getAccessorType(datasource, accessor);
-  const { isNumeric: primaryMetricCanTrend } = getAccessorType(datasource, state?.metricAccessor);
+  frame,
+}: Pick<SubProps, 'accessor' | 'idPrefix' | 'setState' | 'state' | 'datasource' | 'frame'>) {
+  const secondaryMetricTypeFallback = getColumnFromActiveData({
+    accessor,
+    layerId: state.layerId,
+    activeData: frame?.activeData,
+  })?.meta?.type;
+  const primaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: state.metricAccessor,
+    layerId: state.layerId,
+    activeData: frame?.activeData,
+  })?.meta?.type;
+  const { isNumeric: secondaryMetricCanTrend } = getAccessorType(
+    datasource,
+    accessor,
+    secondaryMetricTypeFallback
+  );
+  const { isNumeric: primaryMetricCanTrend } = getAccessorType(
+    datasource,
+    state?.metricAccessor,
+    primaryMetricTypeFallback
+  );
   const { defaultPalette, allPalettes } = useTrendPalettes();
 
   // Translate palette to show it on the picker UI
@@ -433,10 +452,27 @@ function SecondaryMetricEditor({
   state,
   datasource,
 }: SubProps) {
-  const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId]?.columns)?.name;
+  const column = getColumnFromActiveData({ accessor, activeData: frame?.activeData, layerId });
+  const columnName = column?.name;
   const defaultSecondaryLabel = columnName || '';
-  const { isNumeric: isNumericType } = getAccessorType(datasource, accessor);
-  const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
+  const secondaryMetricTypeFallback = column?.meta?.type;
+
+  const primaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: state.metricAccessor,
+    activeData: frame?.activeData,
+    layerId,
+  })?.meta?.type;
+
+  const { isNumeric: isNumericType } = getAccessorType(
+    datasource,
+    accessor,
+    secondaryMetricTypeFallback
+  );
+  const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(
+    datasource,
+    state.metricAccessor,
+    primaryMetricTypeFallback
+  );
   const colorMode = getColorMode(state.secondaryTrend, isNumericType);
   const [prevColorConfig, setPrevColorConfig] = useState<{
     static: SecondaryTrendConfigByType<'static'> | undefined;
@@ -658,6 +694,7 @@ function SecondaryMetricEditor({
           setState={setState}
           state={state}
           datasource={datasource}
+          frame={frame}
         />
       ) : null}
     </div>
@@ -667,8 +704,17 @@ function SecondaryMetricEditor({
 const supportingVisualization = (state: MetricVisualizationState) =>
   state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'panel';
 
-function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps) {
-  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, accessor);
+function PrimaryMetricEditor({ state, setState, datasource, accessor, frame }: SubProps) {
+  const primaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: state.metricAccessor,
+    activeData: frame?.activeData,
+    layerId: state.layerId,
+  })?.meta?.type;
+  const { isNumeric: isMetricNumeric } = getAccessorType(
+    datasource,
+    accessor,
+    primaryMetricTypeFallback
+  );
   const setColor = useCallback(
     (color: string) => {
       setState({ ...state, color: color === '' ? undefined : color });
@@ -695,6 +741,8 @@ function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps
       {showStaticColorControl ? (
         <StaticColorControl getColor={getColor} setColor={setColor} />
       ) : null}
+
+      {/* TODO: remove this in favor of global style settings */}
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -817,7 +865,16 @@ export function DimensionEditorAdditionalSection({
 }: Props) {
   const euiThemeContext = useEuiTheme();
 
-  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, accessor);
+  const primaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: state.metricAccessor,
+    activeData: frame?.activeData,
+    layerId: state.layerId,
+  })?.meta?.type;
+  const { isNumeric: isMetricNumeric } = getAccessorType(
+    datasource,
+    accessor,
+    primaryMetricTypeFallback
+  );
 
   const setColor = useCallback(
     (color: string) => {
@@ -1214,8 +1271,20 @@ export function DimensionEditorDataExtraComponent({
   datasource,
   state,
   setState,
+  frame,
 }: Omit<Props, 'paletteService'>) {
-  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
+  const primaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: state.metricAccessor,
+    activeData: frame?.activeData,
+    layerId: state.layerId,
+  })?.meta?.type;
+
+  const { isNumeric: isMetricNumeric } = getAccessorType(
+    datasource,
+    state.metricAccessor,
+    primaryMetricTypeFallback
+  );
+
   if (!isMetricNumeric || groupId !== LENS_METRIC_GROUP_ID.BREAKDOWN_BY) {
     return null;
   }

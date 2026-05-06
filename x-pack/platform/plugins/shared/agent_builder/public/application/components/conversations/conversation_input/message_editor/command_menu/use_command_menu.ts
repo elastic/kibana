@@ -8,6 +8,7 @@
 import { useState, useCallback } from 'react';
 import type { CommandMatchResult } from './types';
 import { matchCommand } from './command_matcher';
+import { useAvailableCommandDefinitions } from './command_definitions';
 import { getTextBeforeCursor } from './utils/get_text_before_cursor';
 
 interface CommandMenuState {
@@ -37,6 +38,7 @@ const INACTIVE_MATCH: CommandMatchResult = {
  */
 export const useCommandMenu = (options: UseCommandMenuOptions = {}): CommandMenuState => {
   const { enabled = true } = options;
+  const definitions = useAvailableCommandDefinitions();
 
   const [match, setMatch] = useState<CommandMatchResult>(INACTIVE_MATCH);
 
@@ -47,10 +49,10 @@ export const useCommandMenu = (options: UseCommandMenuOptions = {}): CommandMenu
         return;
       }
       const textBeforeCursor = getTextBeforeCursor(element);
-      const nextMatch = matchCommand(textBeforeCursor);
+      const nextMatch = matchCommand(textBeforeCursor, definitions);
       setMatch(nextMatch);
     },
-    [enabled]
+    [enabled, definitions]
   );
 
   const dismiss = useCallback(() => {

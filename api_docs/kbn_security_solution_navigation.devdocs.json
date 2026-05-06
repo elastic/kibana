@@ -72,6 +72,7 @@
             "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LinkCategory",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -132,6 +133,7 @@
             "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LinkCategory",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -192,6 +194,7 @@
             "lineNumber": 59,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "LinkCategory",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -20,12 +20,14 @@ interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
   isEdit: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
+  authMode?: 'shared' | 'per-user';
 }
 
 const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   actionTypeModel,
   isEdit,
   registerPreSubmitValidator,
+  authMode,
 }) => {
   const {
     application: { capabilities },
@@ -35,7 +37,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
 
   return (
     <>
-      <ConnectorFormFieldsGlobal canSave={canSave} />
+      <ConnectorFormFieldsGlobal canSave={canSave} isEdit={isEdit} />
       <EuiSpacer size="m" />
       {FieldsComponent !== null ? (
         <>
@@ -67,6 +69,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
                 readOnly={!canSave}
                 isEdit={isEdit}
                 registerPreSubmitValidator={registerPreSubmitValidator}
+                authMode={authMode}
               />
             </Suspense>
           </EuiErrorBoundary>

@@ -39,6 +39,7 @@ describe('createSearchItems', () => {
         },
         grid: {},
         hideChart: false,
+        hideTable: false,
         isTextBasedQuery: false,
         tabs: [
           {
@@ -52,6 +53,7 @@ describe('createSearchItems', () => {
               },
               grid: {},
               hideChart: false,
+              hideTable: false,
               isTextBasedQuery: false,
             },
           },

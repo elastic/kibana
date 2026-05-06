@@ -9,15 +9,13 @@
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export const OPTIONS_LIST_DASHBOARD_NAME = 'Test Options List Control';
-
 export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
 
-  const { timePicker, dashboard } = getPageObjects(['timePicker', 'dashboard']);
+  const { dashboard } = getPageObjects(['timePicker', 'dashboard']);
 
   const setup = async () => {
     await esArchiver.loadIfNeeded(
@@ -34,14 +32,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
 
     await dashboard.navigateToApp();
     await dashboard.gotoDashboardLandingPage();
-    await dashboard.clickNewDashboard();
-    await timePicker.setDefaultDataRange();
     await elasticChart.setNewChartUiDebugFlag();
-    await dashboard.saveDashboard(OPTIONS_LIST_DASHBOARD_NAME, {
-      saveAsNew: true,
-      exitFromEditMode: false,
-      storeTimeWithDashboard: true,
-    });
   };
 
   const teardown = async () => {
@@ -58,7 +49,9 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
 
     loadTestFile(require.resolve('./options_list_creation_and_editing'));
     loadTestFile(require.resolve('./options_list_dashboard_interaction'));
+    loadTestFile(require.resolve('./options_list_runtime_fields'));
     loadTestFile(require.resolve('./options_list_suggestions'));
     loadTestFile(require.resolve('./options_list_validation'));
+    loadTestFile(require.resolve('./options_list_exists_query'));
   });
 }

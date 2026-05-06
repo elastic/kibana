@@ -137,6 +137,9 @@ export const HoverActionsPopover: React.FC<Props> = ({
           hasArrow={false}
           isOpen={showHoverContent}
           offset={0}
+          // Avoid scrolling scrollable ancestors (e.g. flyout body) when focus moves into the panel;
+          // react-focus-on maps this to focusOptions: { preventScroll: true } on react-focus-lock.
+          focusTrapProps={{ preventScrollOnFocus: true }}
           panelPaddingSize="none"
           repositionOnScroll
           panelProps={{ 'data-test-subj': 'hoverActionsPopover' }}

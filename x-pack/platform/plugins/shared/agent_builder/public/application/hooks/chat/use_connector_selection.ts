@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import { EMPTY } from 'rxjs';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import useObservable from 'react-use/lib/useObservable';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import { useKibana } from '../use_kibana';
 import { storageKeys } from '../../storage_keys';
 
@@ -15,6 +20,7 @@ export interface UseConnectorSelectionResult {
   selectedConnector?: string;
   selectConnector: (connectorId: string) => void;
   defaultConnectorId?: string;
+  defaultConnectorOnly: boolean;
 }
 
 export function useConnectorSelection(): UseConnectorSelectionResult {
@@ -26,10 +32,18 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
     storageKeys.lastUsedConnector
   );
 
-  const defaultConnectorId = settings?.client.get<string | undefined>(
-    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-    undefined
+  const defaultConnector$ = useMemo(
+    () => settings?.client.get$<string | undefined>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) ?? EMPTY,
+    [settings]
   );
+  const defaultConnectorId = useObservable(defaultConnector$);
+
+  const defaultConnectorOnly$ = useMemo(
+    () =>
+      settings?.client.get$<boolean>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) ?? EMPTY,
+    [settings]
+  );
+  const defaultConnectorOnly = useObservable(defaultConnectorOnly$, false) ?? false;
 
   const selectConnector = useCallback(
     (connectorId: string) => {
@@ -42,5 +56,6 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
     selectedConnector,
     selectConnector,
     defaultConnectorId,
+    defaultConnectorOnly,
   };
 }

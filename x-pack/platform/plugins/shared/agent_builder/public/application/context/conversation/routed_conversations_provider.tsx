@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useQueryClient } from '@kbn/react-query';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ConversationContext } from './conversation_context';
 import type { LocationState } from '../../hooks/use_navigation';
-import { newConversationId } from '../../utils/new_conversation';
 import { appPaths } from '../../utils/app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
-import { useAgentBuilderAgents } from '../../hooks/agents/use_agents';
-import { searchParamNames } from '../../search_param_names';
 import { useConversationActions } from './use_conversation_actions';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
+import { ConversationChangeNotifier } from './conversation_change_notifier';
 
 interface RoutedConversationsProviderProps {
   children: React.ReactNode;
@@ -30,57 +27,28 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
 }) => {
   const queryClient = useQueryClient();
   const { conversationsService } = useAgentBuilderServices();
-  const { conversationId: conversationIdParam } = useParams<{ conversationId?: string }>();
+  const { conversationId: conversationIdParam, agentId: agentIdParam } = useParams<{
+    conversationId?: string;
+    agentId?: string;
+  }>();
 
   const conversationId = useMemo(() => {
-    return conversationIdParam === newConversationId ? undefined : conversationIdParam;
+    return conversationIdParam === 'new' ? undefined : conversationIdParam;
   }, [conversationIdParam]);
+
+  const agentIdFromPath = agentIdParam;
 
   const location = useLocation<LocationState>();
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
   const initialMessage = location.state?.initialMessage;
 
-  // Get search params for agent ID syncing
-  const [searchParams] = useSearchParams();
-  const { agents } = useAgentBuilderAgents();
-
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const shouldAllowConversationRedirectRef = useRef(true);
-  const agentIdSyncedRef = useRef(false);
-
-  useEffect(() => {
-    return () => {
-      // On unmount disable conversation redirect
-      shouldAllowConversationRedirectRef.current = false;
-    };
-  }, []);
-
-  const navigateToConversation = useCallback(
-    ({ nextConversationId }: { nextConversationId: string }) => {
-      // Navigate to the conversation if redirect is allowed
-      if (shouldAllowConversationRedirectRef.current) {
-        const path = appPaths.chat.conversation({ conversationId: nextConversationId });
-        const params = undefined;
-        const state = { shouldStickToBottom: false };
-        navigateToAgentBuilderUrl(path, params, state);
-      }
-    },
-    [shouldAllowConversationRedirectRef, navigateToAgentBuilderUrl]
-  );
-
-  const onConversationCreated = useCallback(
-    ({ conversationId: id }: { conversationId: string }) => {
-      navigateToConversation({ nextConversationId: id });
-    },
-    [navigateToConversation]
-  );
 
   const onDeleteConversation = useCallback(
     ({ isCurrentConversation }: { isCurrentConversation: boolean }) => {
       if (isCurrentConversation) {
-        // If deleting current conversation, navigate to new conversation
-        const path = appPaths.chat.new;
-        navigateToAgentBuilderUrl(path, undefined, { shouldStickToBottom: true });
+        // If deleting current conversation, navigate to root (redirects to last used agent)
+        navigateToAgentBuilderUrl(appPaths.root, undefined, { shouldStickToBottom: true });
       }
     },
     [navigateToAgentBuilderUrl]
@@ -92,7 +60,6 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     conversationId,
     queryClient,
     conversationsService,
-    onConversationCreated,
     onDeleteConversation,
   });
 
@@ -113,23 +80,6 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     );
   }, []);
 
-  // Handle agent ID syncing from URL params (moved from useSyncAgentId)
-  useEffect(() => {
-    if (agentIdSyncedRef.current || conversationId) {
-      return;
-    }
-
-    // If we don't have a selected agent id, check for a valid agent id in the search params
-    // This is used for the "chat with agent" action on the Agent pages
-    const agentIdParam = searchParams.get(searchParamNames.agentId);
-
-    if (agentIdParam && agents.some((agent) => agent.id === agentIdParam)) {
-      // Agent id passed to sync is valid, set it and mark as synced
-      conversationActions.setAgentId(agentIdParam);
-      agentIdSyncedRef.current = true;
-    }
-  }, [searchParams, agents, conversationId, conversationActions]);
-
   const contextValue = useMemo(
     () => ({
       conversationId,
@@ -138,6 +88,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       conversationActions,
       initialMessage,
       autoSendInitialMessage: true,
+      agentId: agentIdFromPath,
       attachments,
       upsertAttachments,
       resetAttachments,
@@ -148,6 +99,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       shouldStickToBottom,
       conversationActions,
       initialMessage,
+      agentIdFromPath,
       attachments,
       upsertAttachments,
       resetAttachments,
@@ -156,6 +108,9 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   );
 
   return (
-    <ConversationContext.Provider value={contextValue}>{children}</ConversationContext.Provider>
+    <ConversationContext.Provider value={contextValue}>
+      <ConversationChangeNotifier />
+      {children}
+    </ConversationContext.Provider>
   );
 };

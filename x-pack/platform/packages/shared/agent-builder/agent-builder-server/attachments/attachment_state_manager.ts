@@ -11,7 +11,7 @@ import type {
   AttachmentVersion,
   AttachmentVersionRef,
   AttachmentDiff,
-  VersionedAttachmentInput,
+  AttachmentInput,
   AttachmentType,
   AttachmentRefActor,
   AttachmentRefOperation,
@@ -105,7 +105,7 @@ export interface AttachmentStateManager {
 
   /** Add a new attachment. If only `origin` is provided (no `data`), resolves content via the type's resolve(). */
   add<TType extends string>(
-    input: VersionedAttachmentInput<TType>,
+    input: AttachmentInput<TType>,
     actor?: AttachmentRefActor,
     resolveContext?: AttachmentResolveContext
   ): Promise<VersionedAttachment<TType>>;
@@ -290,7 +290,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   }
 
   async add<TType extends string>(
-    input: VersionedAttachmentInput<TType>,
+    input: AttachmentInput<TType>,
     actor?: AttachmentRefActor,
     resolveContext?: AttachmentResolveContext
   ): Promise<VersionedAttachment<TType>> {

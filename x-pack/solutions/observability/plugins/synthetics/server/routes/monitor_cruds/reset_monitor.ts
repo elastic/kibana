@@ -42,7 +42,8 @@ export const resetSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => 
       }
 
       if (errors && errors.length > 0) {
-        return response.ok({
+        return response.customError({
+          statusCode: 500,
           body: {
             message: 'error resetting monitor Fleet resources',
             attributes: { errors },

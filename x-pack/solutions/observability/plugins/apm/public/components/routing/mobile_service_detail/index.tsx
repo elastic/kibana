@@ -18,7 +18,11 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../../../common/latency_aggregation_types';
-import { AlertsOverview } from '../../app/alerts_overview';
+import {
+  AlertsOverview,
+  AlertsSearchBarContextProvider,
+  AlertsHeaderSearchBar,
+} from '../../app/alerts_overview';
 import { ServiceMapServiceDetail } from '../../app/service_map';
 import { MobileServiceTemplate } from '../templates/mobile_service_template';
 import { MobileServiceOverview } from '../../app/mobile/service_overview';
@@ -42,11 +46,15 @@ export function page({
   tabKey,
   element,
   searchBarOptions,
+  bottomHeaderContent,
+  contentWrapper,
 }: {
   title: string;
   tabKey: React.ComponentProps<typeof MobileServiceTemplate>['selectedTabKey'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
+  bottomHeaderContent?: React.ComponentType;
+  contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }): {
   element: React.ReactElement<any, any>;
 } {
@@ -56,6 +64,8 @@ export function page({
         title={title}
         selectedTabKey={tabKey}
         searchBarOptions={searchBarOptions}
+        bottomHeaderContent={bottomHeaderContent}
+        contentWrapper={contentWrapper}
       >
         {element}
       </MobileServiceTemplate>
@@ -256,7 +266,7 @@ export const mobileServiceDetailRoute = {
         }),
         element: <ServiceMapServiceDetail />,
         searchBarOptions: {
-          hidden: true,
+          showTimeComparison: true,
         },
       }),
       '/mobile-services/{serviceName}/logs': page({
@@ -283,6 +293,8 @@ export const mobileServiceDetailRoute = {
           searchBarOptions: {
             hidden: true,
           },
+          bottomHeaderContent: AlertsHeaderSearchBar,
+          contentWrapper: AlertsSearchBarContextProvider,
         }),
         params: t.partial({
           query: t.partial({

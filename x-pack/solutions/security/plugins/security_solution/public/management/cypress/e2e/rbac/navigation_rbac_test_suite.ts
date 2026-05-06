@@ -20,14 +20,15 @@ interface PageEntry {
 interface NavigationSelectors {
   ENDPOINTS: string;
   POLICIES: string;
-  TRUSTED_APPS: string;
-  TRUSTED_DEVICES: string;
-  EVENT_FILTERS: string;
-  BLOCKLIST: string;
-  HOST_ISOLATION_EXCEPTIONS: string;
+  ARTIFACTS: string;
   RESPONSE_ACTIONS_HISTORY: string;
 }
 
+/**
+ * Artifact types share one nav link and one Manage landing card ("Artifacts").
+ * Each privilege prefix is tested separately; visibility expectations are the same
+ * (only the Artifacts link/card vs other management areas).
+ */
 export const getNavigationPages = (selectors: NavigationSelectors): PageEntry[] => [
   {
     name: 'Endpoints',
@@ -40,30 +41,35 @@ export const getNavigationPages = (selectors: NavigationSelectors): PageEntry[] 
     selector: selectors.POLICIES,
   },
   {
-    name: 'Trusted applications',
+    name: 'Artifacts',
     privilegePrefix: 'trusted_applications_',
-    selector: selectors.TRUSTED_APPS,
+    selector: selectors.ARTIFACTS,
   },
   {
-    name: 'Trusted devices',
+    name: 'Artifacts',
     privilegePrefix: 'trusted_devices_',
-    selector: selectors.TRUSTED_DEVICES,
+    selector: selectors.ARTIFACTS,
     siemVersions: ['siemV3', 'siemV4', 'siemV5'],
   },
   {
-    name: 'Event filters',
+    name: 'Artifacts',
     privilegePrefix: 'event_filters_',
-    selector: selectors.EVENT_FILTERS,
+    selector: selectors.ARTIFACTS,
   },
   {
-    name: 'Blocklist',
+    name: 'Artifacts',
     privilegePrefix: 'blocklist_',
-    selector: selectors.BLOCKLIST,
+    selector: selectors.ARTIFACTS,
   },
   {
-    name: 'Host isolation exceptions',
+    name: 'Artifacts',
     privilegePrefix: 'host_isolation_exceptions_',
-    selector: selectors.HOST_ISOLATION_EXCEPTIONS,
+    selector: selectors.ARTIFACTS,
+  },
+  {
+    name: 'Artifacts',
+    privilegePrefix: 'endpoint_exceptions_',
+    selector: selectors.ARTIFACTS,
   },
   {
     name: 'Response actions history',
@@ -72,12 +78,21 @@ export const getNavigationPages = (selectors: NavigationSelectors): PageEntry[] 
   },
 ];
 
+const describeTitleForPage = (access: string, page: PageEntry): string => {
+  if (page.name === 'Artifacts') {
+    return `${access.toUpperCase()} access only to Artifacts (via ${page.privilegePrefix})`;
+  }
+  return `${access.toUpperCase()} access only to ${page.name}`;
+};
+
 export const createNavigationEssSuite = (siemVersion: SiemVersion) => {
   const allPages = getNavigationPages(EssHeaders);
   const pages = allPages.filter(
     (page) => !page.siemVersions || page.siemVersions.includes(siemVersion)
   );
   const MenuButtonSelector = EssHeaders.SETTINGS_PANEL_BTN;
+  const uniqueNavSelectors = [...new Set(pages.map((p) => p.selector))];
+  const uniqueLandingNames = [...new Set(pages.map((p) => p.name))];
 
   describe(siemVersion, () => {
     describe('NONE access', () => {
@@ -89,23 +104,23 @@ export const createNavigationEssSuite = (siemVersion: SiemVersion) => {
         loadPage('/app/security');
         cy.get(MenuButtonSelector).click();
 
-        for (const page of pages) {
-          cy.get(page.selector).should('not.exist');
+        for (const selector of uniqueNavSelectors) {
+          cy.get(selector).should('not.exist');
         }
       });
 
       it(`none of the cards should be visible on Management page`, () => {
         loadPage('/app/security/manage');
 
-        for (const page of pages) {
-          cy.getByTestSubj('LandingItem').should('not.contain.text', page.name);
+        for (const name of uniqueLandingNames) {
+          cy.getByTestSubj('LandingItem').should('not.contain.text', name);
         }
       });
     });
 
     for (const access of ['read', 'all']) {
       for (const page of pages) {
-        describe(`${access.toUpperCase()} access only to ${page.name}`, () => {
+        describe(describeTitleForPage(access, page), () => {
           beforeEach(() => {
             login.withCustomKibanaPrivileges({
               [siemVersion]: ['read', `${page.privilegePrefix}${access}`],
@@ -118,7 +133,7 @@ export const createNavigationEssSuite = (siemVersion: SiemVersion) => {
 
             cy.get(page.selector);
             pages
-              .filter((iterator) => iterator.name !== page.name)
+              .filter((iterator) => iterator.selector !== page.selector)
               .forEach((otherPage) => cy.get(otherPage.selector).should('not.exist'));
           });
 

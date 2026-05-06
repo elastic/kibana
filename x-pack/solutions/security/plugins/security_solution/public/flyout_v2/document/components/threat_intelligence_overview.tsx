@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
-import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
+import { useFetchThreatIntelligence } from '../../threat_intelligence/hooks/use_fetch_threat_intelligence';
 import { InsightsSummaryRow } from './insights_summary_row';
 import {
   INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID,
@@ -128,7 +128,7 @@ export const ThreatIntelligenceOverview: FC<ThreatIntelligenceOverviewProps> = (
       header={{
         title: HEADER_TITLE,
         link,
-        iconType: showIcon ? 'arrowStart' : undefined,
+        iconType: showIcon ? 'chevronLimitLeft' : undefined,
         headerContent: (
           <EuiToolTip
             content={

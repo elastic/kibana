@@ -31,7 +31,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowPreview } from '../../../../common/lib/export';
+import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import type {
   ImportWorkflowsResult,
   PreflightImportResult,
@@ -216,6 +216,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
           hasConflicts && conflictResolution === CONFLICT_RESOLUTION_GENERATE_NEW_IDS
             ? true
             : undefined,
+        conflictIds: preflightResult.conflicts,
       },
       {
         onSuccess: (result) => {

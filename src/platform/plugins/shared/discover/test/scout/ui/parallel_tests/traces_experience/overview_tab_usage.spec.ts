@@ -164,7 +164,7 @@ spaceTest.describe(
         await spaceTest.step(
           'click waterfall preview to open expanded timeline flyout',
           async () => {
-            await flyout.traceSummary.waterfallClickArea.click();
+            await flyout.traceSummary.clickWaterfallPreview();
             await expect(flyout.waterfallFlyout.container).toBeVisible();
             await flyout.waterfallFlyout.backButton.click();
             await expect(flyout.waterfallFlyout.container).toBeHidden();
@@ -189,6 +189,32 @@ spaceTest.describe(
             await pageObjects.discover.expectDocTableToContainText(RICH_TRACE.SERVICE_NAME);
           }
         );
+      }
+    );
+
+    spaceTest(
+      'Trace Summary section - service badge navigates to the APM service overview',
+      async ({ pageObjects, page }) => {
+        const { flyout } = pageObjects.tracesExperience;
+
+        await spaceTest.step('filter for transaction and open overview tab', async () => {
+          await openOverviewTab(
+            pageObjects,
+            `transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`
+          );
+        });
+
+        await spaceTest.step('click service badge in the focused waterfall', async () => {
+          const serviceBadge = flyout.traceSummary.getServiceBadge(RICH_TRACE.TRANSACTION_NAME);
+          await expect(serviceBadge).toBeVisible();
+          await serviceBadge.click();
+        });
+
+        await spaceTest.step('verify navigation to the APM service overview', async () => {
+          await expect(page).toHaveURL(
+            new RegExp(`/app/apm/services/${RICH_TRACE.SERVICE_NAME}/overview`)
+          );
+        });
       }
     );
 

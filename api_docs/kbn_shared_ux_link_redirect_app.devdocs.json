@@ -150,6 +150,18 @@
             "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
+            "plugin": "alertingVTwo",
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/application/mount.tsx"
+          },
+          {
+            "plugin": "alertingVTwo",
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/application/mount.tsx"
+          },
+          {
+            "plugin": "alertingVTwo",
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/application/mount.tsx"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -179,18 +191,6 @@
           },
           {
             "plugin": "fleet",
-            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
-          },
-          {
-            "plugin": "fleet",
             "path": "x-pack/platform/plugins/shared/fleet/public/components/custom_assets_accordion.tsx"
           },
           {
@@ -248,6 +248,18 @@
           {
             "plugin": "fleet",
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/app.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
           },
           {
             "plugin": "indexManagement",
@@ -743,6 +755,18 @@
             "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
+            "plugin": "alertingVTwo",
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/application/mount.tsx"
+          },
+          {
+            "plugin": "alertingVTwo",
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/application/mount.tsx"
+          },
+          {
+            "plugin": "alertingVTwo",
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/application/mount.tsx"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -772,18 +796,6 @@
           },
           {
             "plugin": "fleet",
-            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
-          },
-          {
-            "plugin": "fleet",
             "path": "x-pack/platform/plugins/shared/fleet/public/components/custom_assets_accordion.tsx"
           },
           {
@@ -841,6 +853,18 @@
           {
             "plugin": "fleet",
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/app.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
           },
           {
             "plugin": "indexManagement",
@@ -1336,6 +1360,18 @@
             "path": "x-pack/platform/plugins/shared/agent_builder/public/application/mount.tsx"
           },
           {
+            "plugin": "alertingVTwo",
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/application/mount.tsx"
+          },
+          {
+            "plugin": "alertingVTwo",
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/application/mount.tsx"
+          },
+          {
+            "plugin": "alertingVTwo",
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/application/mount.tsx"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
           },
@@ -1365,18 +1401,6 @@
           },
           {
             "plugin": "fleet",
-            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
-          },
-          {
-            "plugin": "fleet",
             "path": "x-pack/platform/plugins/shared/fleet/public/components/custom_assets_accordion.tsx"
           },
           {
@@ -1434,6 +1458,18 @@
           {
             "plugin": "fleet",
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/app.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
           },
           {
             "plugin": "indexManagement",

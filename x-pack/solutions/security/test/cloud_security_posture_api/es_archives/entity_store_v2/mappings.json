@@ -4,7 +4,7 @@
     "aliases": {
       "entities-generic-latest": {}
     },
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "settings": {
       "index": {
         "mode": "lookup"
@@ -419,20 +419,89 @@
             },
             "relationships": {
               "properties": {
-                "Accesses_frequently": {
-                  "type": "keyword"
+                "accesses_frequently": {
+                  "properties": {
+                    "raw_identifiers": {
+                      "type": "object",
+                      "dynamic": true
+                    },
+                    "ids": {
+                      "type": "keyword"
+                    }
+                  }
                 },
-                "Communicates_with": {
-                  "type": "keyword"
+                "accesses_infrequently": {
+                  "properties": {
+                    "raw_identifiers": {
+                      "type": "object",
+                      "dynamic": true
+                    },
+                    "ids": {
+                      "type": "keyword"
+                    }
+                  }
                 },
-                "Depends_on": {
-                  "type": "keyword"
+                "communicates_with": {
+                  "properties": {
+                    "raw_identifiers": {
+                      "type": "object",
+                      "dynamic": true
+                    },
+                    "ids": {
+                      "type": "keyword"
+                    }
+                  }
                 },
-                "Owns": {
-                  "type": "keyword"
+                "depends_on": {
+                  "properties": {
+                    "raw_identifiers": {
+                      "type": "object",
+                      "dynamic": true
+                    },
+                    "ids": {
+                      "type": "keyword"
+                    }
+                  }
                 },
-                "Supervises": {
-                  "type": "keyword"
+                "owns": {
+                  "properties": {
+                    "raw_identifiers": {
+                      "type": "object",
+                      "dynamic": true
+                    },
+                    "ids": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "owns_inferred": {
+                  "properties": {
+                    "raw_identifiers": {
+                      "type": "object",
+                      "dynamic": true
+                    },
+                    "ids": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "resolution": {
+                  "properties": {
+                    "resolved_to": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "supervises": {
+                  "properties": {
+                    "raw_identifiers": {
+                      "type": "object",
+                      "dynamic": true
+                    },
+                    "ids": {
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             }

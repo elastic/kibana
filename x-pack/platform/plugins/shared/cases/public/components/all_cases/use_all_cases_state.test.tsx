@@ -25,27 +25,52 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
-const mockLocation = { search: '' };
-const mockPush = jest.fn();
-const mockReplace = jest.fn();
-
 jest.mock('../../containers/configure/use_get_case_configuration');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn().mockImplementation(() => {
-    return mockLocation;
-  }),
-  useHistory: jest.fn().mockImplementation(() => ({
-    replace: mockReplace,
-    push: mockPush,
-    location: {
-      search: '',
-    },
-  })),
+}));
+
+jest.mock('react-router-dom-v5-compat', () => ({
+  ...(() => {
+    const ReactActual = jest.requireActual('react');
+    const mockLocation = { search: '' };
+    const mockPush = jest.fn();
+    const mockReplace = jest.fn();
+    const mockNavigationContextValue: { navigator?: unknown } = {
+      navigator: {
+        replace: mockReplace,
+        push: mockPush,
+        location: mockLocation,
+      },
+    };
+    const mockedRouterModule = {
+      ...jest.requireActual('react-router-dom-v5-compat'),
+      __mockLocation: mockLocation,
+      __mockPush: mockPush,
+      __mockReplace: mockReplace,
+      __mockNavigationContextValue: mockNavigationContextValue,
+    };
+    const unsafeNavigationContextKey = 'UNSAFE_NavigationContext';
+    (mockedRouterModule as Record<string, unknown>)[unsafeNavigationContextKey] =
+      ReactActual.createContext(mockNavigationContextValue);
+
+    return mockedRouterModule;
+  })(),
 }));
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
+const {
+  __mockLocation: mockLocation,
+  __mockPush: mockPush,
+  __mockReplace: mockReplace,
+  __mockNavigationContextValue: mockNavigationContextValue,
+} = jest.requireMock('react-router-dom-v5-compat') as {
+  __mockLocation: { search: string };
+  __mockPush: jest.Mock;
+  __mockReplace: jest.Mock;
+  __mockNavigationContextValue: { navigator?: unknown };
+};
 
 const LS_KEY = 'securitySolution.cases.list.state';
 
@@ -53,6 +78,11 @@ describe('useAllCasesQueryParams', () => {
   beforeEach(() => {
     localStorage.clear();
     mockLocation.search = '';
+    mockNavigationContextValue.navigator = {
+      replace: mockReplace,
+      push: mockPush,
+      location: mockLocation,
+    };
 
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
@@ -205,6 +235,7 @@ describe('useAllCasesQueryParams', () => {
         customFields: {
           testCustomField: { options: ['foo'], type: CustomFieldTypes.TEXT },
         },
+        extendedFieldFilters: [],
         from: DEFAULT_FROM_DATE,
         to: DEFAULT_TO_DATE,
       },
@@ -715,6 +746,30 @@ describe('useAllCasesQueryParams', () => {
   });
 
   describe('Modal', () => {
+    it('does not require router context', () => {
+      mockNavigationContextValue.navigator = undefined;
+
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
+      expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      expect(result.current.filterOptions).toStrictEqual({
+        ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+        status: [CaseStatuses.closed],
+      });
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockReplace).not.toHaveBeenCalled();
+    });
+
     it('returns default state with empty URL and local storage', () => {
       const { result } = renderHook(() => useAllCasesState(true), {
         wrapper: ({ children }: React.PropsWithChildren<{}>) => (

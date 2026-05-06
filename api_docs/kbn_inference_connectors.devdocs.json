@@ -1,0 +1,609 @@
+{
+  "id": "@kbn/inference-connectors",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/inference-connectors",
+        "id": "def-public.loadConnectors",
+        "type": "Function",
+        "tags": [],
+        "label": "loadConnectors",
+        "description": [
+          "\nFetches AI connectors for a given feature from the search_inference_endpoints backend\nand maps them to ",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.AIConnector",
+            "text": "AIConnector"
+          },
+          ". The backend route applies feature resolution,\ndefault-connector UI settings, and recommended-endpoint flagging.\n"
+        ],
+        "signature": [
+          "({ http, featureId, }: { http: ",
+          "HttpSetup",
+          "; featureId: string; settings?: ",
+          "SettingsStart",
+          " | undefined; }) => Promise<",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.AIConnector",
+            "text": "AIConnector"
+          },
+          "[]>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.loadConnectors.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  featureId,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
+            "lineNumber": 47,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-connectors",
+                "id": "def-public.loadConnectors.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  "HttpSetup"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
+                "lineNumber": 48,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-connectors",
+                "id": "def-public.loadConnectors.$1.featureId",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
+                "lineNumber": 49,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-connectors",
+                "id": "def-public.loadConnectors.$1.settings",
+                "type": "Object",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  "SettingsStart",
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
+                "lineNumber": 50,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-connectors",
+        "id": "def-public.useConnectorById",
+        "type": "Function",
+        "tags": [],
+        "label": "useConnectorById",
+        "description": [],
+        "signature": [
+          "({ http, connectorId, toasts, }: ",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.UseConnectorByIdProps",
+            "text": "UseConnectorByIdProps"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.UseConnectorByIdResult",
+            "text": "UseConnectorByIdResult"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_connector_by_id.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.useConnectorById.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  connectorId,\n  toasts,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-connectors",
+                "scope": "public",
+                "docId": "kibKbnInferenceConnectorsPluginApi",
+                "section": "def-public.UseConnectorByIdProps",
+                "text": "UseConnectorByIdProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_connector_by_id.ts",
+            "lineNumber": 26,
+            "columnNumber": 34,
+            "deprecated": false,
+            "docsReferencedTypeName": "UseConnectorByIdProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-connectors",
+        "id": "def-public.useLoadConnectors",
+        "type": "Function",
+        "tags": [],
+        "label": "useLoadConnectors",
+        "description": [],
+        "signature": [
+          "({ http, toasts, featureId, }: ",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.UseLoadConnectorsProps",
+            "text": "UseLoadConnectorsProps"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.UseLoadConnectorsResult",
+            "text": "UseLoadConnectorsResult"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.useLoadConnectors.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  toasts,\n  featureId,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-connectors",
+                "scope": "public",
+                "docId": "kibKbnInferenceConnectorsPluginApi",
+                "section": "def-public.UseLoadConnectorsProps",
+                "text": "UseLoadConnectorsProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+            "lineNumber": 48,
+            "columnNumber": 35,
+            "deprecated": false,
+            "docsReferencedTypeName": "UseLoadConnectorsProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/inference-connectors",
+        "id": "def-public.UseConnectorByIdProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseConnectorByIdProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_connector_by_id.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.UseConnectorByIdProps.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_connector_by_id.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.UseConnectorByIdProps.connectorId",
+            "type": "string",
+            "tags": [],
+            "label": "connectorId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_connector_by_id.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.UseConnectorByIdProps.toasts",
+            "type": "Object",
+            "tags": [],
+            "label": "toasts",
+            "description": [],
+            "signature": [
+              "IToasts",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_connector_by_id.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-connectors",
+        "id": "def-public.UseLoadConnectorsProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseLoadConnectorsProps",
+        "description": [
+          "\nProps for ",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.useLoadConnectors",
+            "text": "useLoadConnectors"
+          },
+          ".\n\nThe hook calls an internal HTTP route registered by the `searchInferenceEndpoints` plugin.\nAny Kibana plugin that uses this package must load that plugin (it is platform-shared and\nenabled in standard distributions)."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.UseLoadConnectorsProps.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.UseLoadConnectorsProps.toasts",
+            "type": "Object",
+            "tags": [],
+            "label": "toasts",
+            "description": [],
+            "signature": [
+              "IToasts",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.UseLoadConnectorsProps.featureId",
+            "type": "string",
+            "tags": [],
+            "label": "featureId",
+            "description": [
+              "\nFeature identifier used to scope which inference endpoints are relevant.\nPassed to the search_inference_endpoints API to resolve feature-specific endpoints."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.UseLoadConnectorsProps.settings",
+            "type": "Object",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "SettingsStart",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/conversations/conversation_input/input_actions/connector_selector/connector_selector.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/connector_selector/index.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/connector_setup/index.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/evaluation_settings/evaluation_settings.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/assistant_settings.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/index.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/conversations/conversation_settings/conversation_settings_editor.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/search_ai_lake_configurations_settings_management.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/chat_complete/use_chat_complete.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/public/common/components/connector_selector.tsx"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_genai_connectors.ts"
+              },
+              {
+                "plugin": "observabilityAgentBuilder",
+                "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/hooks/use_genai_connectors.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/common/components/start_migration_modal/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_details_flyout/components/entity_highlights.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/details/components/insights/workflow_insights_scan.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/details/components/insights/workflow_insights_scan_ab.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/settings_flyout/schedule/create_flyout/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/settings_flyout/schedule/details_flyout/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/attacks/content.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/assistant_settings_management.tsx"
+              },
+              {
+                "plugin": "workplaceAIApp",
+                "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/components/connector_selector/connector_selector.tsx"
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/inference-connectors",
+        "id": "def-public.AIConnector",
+        "type": "Type",
+        "tags": [],
+        "label": "AIConnector",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.ActionConnector",
+            "text": "ActionConnector"
+          },
+          "<Record<string, unknown>, Record<string, unknown>> & { apiProvider?: ",
+          "OpenAiProviderType",
+          " | undefined; isRecommended?: boolean | undefined; isEis?: boolean | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-connectors",
+        "id": "def-public.UseConnectorByIdResult",
+        "type": "Type",
+        "tags": [],
+        "label": "UseConnectorByIdResult",
+        "description": [],
+        "signature": [
+          "DefinedQueryObserverResult",
+          "<",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.AIConnector",
+            "text": "AIConnector"
+          },
+          " | undefined, ",
+          "IHttpFetchError",
+          "<unknown>> | ",
+          "QueryObserverLoadingErrorResult",
+          "<",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.AIConnector",
+            "text": "AIConnector"
+          },
+          " | undefined, ",
+          "IHttpFetchError",
+          "<unknown>> | ",
+          "QueryObserverLoadingResult",
+          "<",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.AIConnector",
+            "text": "AIConnector"
+          },
+          " | undefined, ",
+          "IHttpFetchError",
+          "<unknown>>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_connector_by_id.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-connectors",
+        "id": "def-public.UseLoadConnectorsResult",
+        "type": "Type",
+        "tags": [],
+        "label": "UseLoadConnectorsResult",
+        "description": [],
+        "signature": [
+          "UseQueryResult",
+          "<",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.AIConnector",
+            "text": "AIConnector"
+          },
+          "[], ",
+          "IHttpFetchError",
+          "<unknown>> & { soEntryFound: boolean; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

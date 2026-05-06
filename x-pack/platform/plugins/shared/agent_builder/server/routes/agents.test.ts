@@ -8,7 +8,6 @@
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AgentVisibility } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerAgentRoutes } from './agents';
 import type { RouteDependencies } from './types';
 import { publicApiPath } from '../../common/constants';
@@ -146,30 +145,6 @@ describe('Agent Routes - experimental visibility gate', () => {
   };
 
   describe('POST /agents (create)', () => {
-    it('rejects with badRequest when visibility is provided and experimental setting is false', async () => {
-      const handler = getCreateHandler();
-      expect(handler).toBeDefined();
-
-      const ctx = createMockContext(false);
-      const request = {
-        body: { ...createBody, visibility: AgentVisibility.Private },
-      };
-
-      const result = await handler!(ctx, request, mockResponse);
-
-      expect(result).toEqual({
-        type: 'badRequest',
-        body: {
-          message:
-            'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.',
-        },
-      });
-      expect(mockUiSettingsGet).toHaveBeenCalledWith(
-        AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-      );
-      expect(mockCreate).not.toHaveBeenCalled();
-    });
-
     it('allows create and calls service.create when experimental setting is true and visibility is provided', async () => {
       const handler = getCreateHandler();
       expect(handler).toBeDefined();
@@ -200,28 +175,6 @@ describe('Agent Routes - experimental visibility gate', () => {
   });
 
   describe('PUT /agents/{id} (update)', () => {
-    it('rejects with badRequest when visibility is provided and experimental setting is false', async () => {
-      const handler = getUpdateHandler();
-      expect(handler).toBeDefined();
-
-      const ctx = createMockContext(false);
-      const request = {
-        params: { id: 'agent-1' },
-        body: updateBodyWithVisibility,
-      };
-
-      const result = await handler!(ctx, request, mockResponse);
-
-      expect(result).toEqual({
-        type: 'badRequest',
-        body: {
-          message:
-            'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.',
-        },
-      });
-      expect(mockUpdate).not.toHaveBeenCalled();
-    });
-
     it('allows update and calls service.update when experimental setting is true and visibility is provided', async () => {
       const handler = getUpdateHandler();
       expect(handler).toBeDefined();

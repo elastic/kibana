@@ -7,14 +7,12 @@
 
 import type { ApplicationStart, HttpStart } from '@kbn/core/public';
 
-export function getConnectorsManagementHref(http: HttpStart) {
-  return http.basePath.prepend(
-    '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
-  );
+export function getModelManagementHref(http: HttpStart) {
+  return http.basePath.prepend('/app/management/modelManagement/model_settings');
 }
 
-export function navigateToConnectorsManagementApp(application: ApplicationStart) {
+export function navigateToModelManagementApp(application: ApplicationStart) {
   application.navigateToApp('management', {
-    path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+    path: '/modelManagement/model_settings',
   });
 }

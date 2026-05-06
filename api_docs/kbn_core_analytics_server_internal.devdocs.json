@@ -18,7 +18,7 @@
         "label": "AnalyticsService",
         "description": [],
         "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34,7 +34,7 @@
               "any"
             ],
             "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -50,9 +50,10 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
-                "lineNumber": 25,
+                "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -71,7 +72,7 @@
               "AnalyticsServicePreboot"
             ],
             "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -90,7 +91,7 @@
               "AnalyticsServiceSetup"
             ],
             "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -109,7 +110,7 @@
               "AnalyticsServiceStart"
             ],
             "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -127,7 +128,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

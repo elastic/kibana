@@ -110,7 +110,7 @@ describe('applyScoreModifiers', () => {
           subtype: 'privmon',
           modifier_value: 1.5,
           metadata: {
-            is_privileged_user: true,
+            watchlist_id: 'privmon',
           },
         },
       ]);
@@ -193,7 +193,7 @@ describe('applyScoreModifiers', () => {
             subtype: 'privmon',
             modifier_value: 1.5,
             contribution: 6.0483870968,
-            metadata: { is_privileged_user: true },
+            metadata: { watchlist_id: 'privmon' },
           },
         ],
 
@@ -290,7 +290,7 @@ describe('applyScoreModifiers', () => {
           subtype: 'privmon',
           modifier_value: 1.5,
           metadata: {
-            is_privileged_user: true,
+            watchlist_id: 'privmon',
           },
         },
       ]);
@@ -324,7 +324,7 @@ describe('applyScoreModifiers', () => {
             subtype: 'privmon',
             modifier_value: 1.5,
             contribution: 6.8181818182,
-            metadata: { is_privileged_user: true },
+            metadata: { watchlist_id: 'privmon' },
           },
         ],
         calculated_score_norm: 81.8181818182, // 75 + 6.8181818182
@@ -408,7 +408,7 @@ describe('applyScoreModifiers', () => {
           subtype: 'privmon',
           modifier_value: 1.5,
           metadata: {
-            is_privileged_user: true,
+            watchlist_id: 'privmon',
           },
         },
         undefined,
@@ -454,7 +454,7 @@ describe('applyScoreModifiers', () => {
             subtype: 'privmon',
             modifier_value: 1.5,
             contribution: 6.0483870968,
-            metadata: { is_privileged_user: true },
+            metadata: { watchlist_id: 'privmon' },
           },
         ],
         calculated_score_norm: 87.0967741935, // 75 + 6.0483870968 + 6.0483870968
@@ -558,7 +558,7 @@ describe('riskScoreDocFactory', () => {
   it('should normalize category_1_score by RIEMANN_ZETA_VALUE', () => {
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
 
-    const result = factory(mockBucket, undefined, undefined);
+    const result = factory(mockBucket, undefined, []);
 
     // 259.24 / 2.5924 = 100 (approximately)
     expect(result.category_1_score).toBeCloseTo(100, 0);
@@ -568,14 +568,14 @@ describe('riskScoreDocFactory', () => {
     const globalWeight = 0.8;
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight });
 
-    const result = factory(mockBucket, undefined, undefined);
+    const result = factory(mockBucket, undefined, []);
     expect(result.calculated_score).toBe(56); // 70 * 0.8
   });
 
   it('should not apply global weight when undefined', () => {
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
 
-    const result = factory(mockBucket, undefined, undefined);
+    const result = factory(mockBucket, undefined, []);
     expect(result.calculated_score).toBe(70); // original score
   });
 
@@ -594,11 +594,11 @@ describe('riskScoreDocFactory', () => {
       subtype: 'privmon',
       modifier_value: 1.5,
       metadata: {
-        is_privileged_user: true,
+        watchlist_id: 'privmon',
       },
     };
 
-    const result = factory(mockBucket, criticalityFields, privmonFields);
+    const result = factory(mockBucket, criticalityFields, [privmonFields]);
 
     expect(result.calculated_score_norm).toBe(80.6896551724); // 65 + contributions from both modifiers
 
@@ -613,13 +613,13 @@ describe('riskScoreDocFactory', () => {
     );
     expect(privmon).toBeDefined();
     expect(privmon?.contribution).toBe(7.8448275862);
-    expect(privmon?.metadata?.is_privileged_user).toBe(true);
+    expect(privmon?.metadata?.watchlist_id).toBe('privmon');
   });
 
   it('should include all risk inputs with proper formatting', () => {
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
 
-    const result = factory(mockBucket, undefined, undefined);
+    const result = factory(mockBucket, undefined, []);
 
     expect(result.inputs).toEqual([
       {
@@ -637,7 +637,7 @@ describe('riskScoreDocFactory', () => {
   it('should set correct identifier fields', () => {
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
 
-    const result = factory(mockBucket, undefined, undefined);
+    const result = factory(mockBucket, undefined, []);
 
     expect(result['@timestamp']).toBe(now);
     expect(result.id_field).toBe('user.name');
@@ -647,7 +647,7 @@ describe('riskScoreDocFactory', () => {
   it('should include notes from risk details', () => {
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
 
-    const result = factory(mockBucket, undefined, undefined);
+    const result = factory(mockBucket, undefined, []);
 
     expect(result.notes).toEqual(['Test note']);
   });

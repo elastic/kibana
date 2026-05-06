@@ -555,6 +555,7 @@ describe('Alerts Service', () => {
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
               name: '.alerts-test.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
         });
@@ -606,6 +607,7 @@ describe('Alerts Service', () => {
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
               name: '.alerts-test.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
         });
@@ -653,6 +655,7 @@ describe('Alerts Service', () => {
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
               name: '.alerts-test.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
         });
@@ -719,6 +722,7 @@ describe('Alerts Service', () => {
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
               name: '.alerts-test.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
           expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
@@ -774,6 +778,7 @@ describe('Alerts Service', () => {
                 '.reindexed-v8-internal.alerts-test.alerts-another-namespace-*',
               ],
               name: '.alerts-test.alerts-another-namespace',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
         });
@@ -811,6 +816,7 @@ describe('Alerts Service', () => {
               '.reindexed-v8-internal.alerts-test.alerts-default-*',
             ],
             name: '.alerts-test.alerts-default',
+            expand_wildcards: ['open', 'hidden'],
           });
           expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
           expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
@@ -901,6 +907,7 @@ describe('Alerts Service', () => {
                 '.reindexed-v8-internal.alerts-empty.alerts-default-*',
               ],
               name: '.alerts-empty.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
 

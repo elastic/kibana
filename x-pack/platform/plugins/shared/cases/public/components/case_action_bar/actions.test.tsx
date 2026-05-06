@@ -14,8 +14,12 @@ import { Actions } from './actions';
 import * as i18n from '../case_view/translations';
 import * as api from '../../containers/api';
 import { waitFor } from '@testing-library/react';
+import { KibanaServices } from '../../common/lib/kibana';
 
 jest.mock('../../containers/api');
+jest.mock('./apply_template_modal', () => ({
+  ApplyTemplateModal: () => <div data-test-subj="apply-template-modal" />,
+}));
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -54,7 +58,7 @@ describe('CaseView actions', () => {
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
   });
 
-  it('clicking copyClipboard icon copies case id', () => {
+  it('clicking copy icon copies case id', () => {
     const originalClipboard = global.window.navigator.clipboard;
 
     Object.defineProperty(navigator, 'clipboard', {
@@ -74,7 +78,7 @@ describe('CaseView actions', () => {
       .find('button[data-test-subj="property-actions-case-ellipses"]')
       .first()
       .simulate('click');
-    wrapper.find('button[data-test-subj="property-actions-case-copyClipboard"]').simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-case-copy"]').simulate('click');
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
 
@@ -96,9 +100,7 @@ describe('CaseView actions', () => {
       .first()
       .simulate('click');
     expect(wrapper.find('[data-test-subj="property-actions-case-trash"]').exists()).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-subj="property-actions-case-copyClipboard"]').exists()
-    ).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="property-actions-case-copy"]').exists()).toBeTruthy();
   });
 
   it('toggle delete modal and confirm', async () => {
@@ -126,6 +128,73 @@ describe('CaseView actions', () => {
     });
   });
 
+  describe('Apply template action', () => {
+    const enableTemplatesV2 = () =>
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+    it('does not show the apply template action when templates v2 is disabled', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('button[data-test-subj="property-actions-case-ellipses"]')
+        .first()
+        .simulate('click');
+
+      expect(
+        wrapper.find('button[data-test-subj="property-actions-case-indexEdit"]').exists()
+      ).toBeFalsy();
+    });
+
+    it('shows the apply template action when templates v2 is enabled', () => {
+      enableTemplatesV2();
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('button[data-test-subj="property-actions-case-ellipses"]')
+        .first()
+        .simulate('click');
+
+      expect(
+        wrapper.find('button[data-test-subj="property-actions-case-indexEdit"]').exists()
+      ).toBeTruthy();
+    });
+
+    it('clicking apply template opens the modal', () => {
+      enableTemplatesV2();
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="apply-template-modal"]').exists()).toBeFalsy();
+
+      wrapper
+        .find('button[data-test-subj="property-actions-case-ellipses"]')
+        .first()
+        .simulate('click');
+      wrapper.find('button[data-test-subj="property-actions-case-indexEdit"]').simulate('click');
+
+      expect(wrapper.find('[data-test-subj="apply-template-modal"]').exists()).toBeTruthy();
+    });
+  });
+
   it('displays active incident link', () => {
     const wrapper = mount(
       <TestProviders>
@@ -145,7 +214,7 @@ describe('CaseView actions', () => {
       .first()
       .simulate('click');
     expect(
-      wrapper.find('[data-test-subj="property-actions-case-popout"]').first().prop('aria-label')
+      wrapper.find('[data-test-subj="property-actions-case-external"]').first().prop('aria-label')
     ).toEqual(i18n.VIEW_INCIDENT(basicPush.externalTitle));
   });
 });

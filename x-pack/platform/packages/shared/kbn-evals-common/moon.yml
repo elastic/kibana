@@ -9,6 +9,8 @@ owners:
   defaultOwner: '@elastic/obs-ai-team'
 toolchains:
   default: node
+  javascript:
+    rootPackageDependenciesOnly: false
 language: typescript
 project:
   title: '@kbn/evals-common'
@@ -18,8 +20,6 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-evals-common
 dependsOn:
   - '@kbn/zod'
-  - '@kbn/zod-helpers'
-  - '@kbn/core'
 tags:
   - shared-common
   - package
@@ -32,26 +32,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

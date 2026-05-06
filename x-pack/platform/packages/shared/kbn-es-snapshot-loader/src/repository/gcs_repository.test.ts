@@ -44,17 +44,22 @@ describe('createGcsRepository', () => {
 
     await repository.register({ esClient, log, repoName: 'test-repo' });
 
-    expect(createRepository).toHaveBeenCalledWith({
-      name: 'test-repo',
-      body: {
-        type: 'gcs',
-        settings: {
-          bucket: 'snapshot-bucket',
-          base_path: 'base/path',
-          client: 'default',
+    expect(createRepository).toHaveBeenCalledWith(
+      {
+        name: 'test-repo',
+        master_timeout: '2m',
+        timeout: '2m',
+        body: {
+          type: 'gcs',
+          settings: {
+            bucket: 'snapshot-bucket',
+            base_path: 'base/path',
+            client: 'default',
+          },
         },
       },
-    });
+      expect.objectContaining({ requestTimeout: expect.any(Number) })
+    );
   });
 
   it('omits optional settings when undefined', async () => {
@@ -68,14 +73,19 @@ describe('createGcsRepository', () => {
 
     await repository.register({ esClient, log, repoName: 'test-repo' });
 
-    expect(createRepository).toHaveBeenCalledWith({
-      name: 'test-repo',
-      body: {
-        type: 'gcs',
-        settings: {
-          bucket: 'snapshot-bucket',
+    expect(createRepository).toHaveBeenCalledWith(
+      {
+        name: 'test-repo',
+        master_timeout: '2m',
+        timeout: '2m',
+        body: {
+          type: 'gcs',
+          settings: {
+            bucket: 'snapshot-bucket',
+          },
         },
       },
-    });
+      expect.objectContaining({ requestTimeout: expect.any(Number) })
+    );
   });
 });

@@ -7,7 +7,12 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import type { FramePublicAPI, XYDataLayerConfig, XYState, SeriesType } from '@kbn/lens-common';
+import type {
+  FramePublicAPI,
+  XYDataLayerConfig,
+  XYVisualizationState,
+  SeriesType,
+} from '@kbn/lens-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { render, screen } from '@testing-library/react';
 
@@ -17,7 +22,7 @@ import { XyAppearanceSettings } from './appearance_settings';
 describe('Appearance settings', () => {
   let frame: FramePublicAPI;
 
-  function testState(): XYState {
+  function testState(): XYVisualizationState {
     return {
       legend: { isVisible: true, position: Position.Right },
       valueLabels: 'hide',
@@ -44,12 +49,15 @@ describe('Appearance settings', () => {
 
   const renderComponent = (
     overrideProps?: Partial<{
-      state: XYState;
-      setState: (newState: XYState) => void;
+      state: XYVisualizationState;
+      setState: (newState: XYVisualizationState) => void;
+      frame: FramePublicAPI;
     }>
   ) => {
     const state = testState();
-    return render(<XyAppearanceSettings setState={jest.fn()} state={state} {...overrideProps} />);
+    return render(
+      <XyAppearanceSettings setState={jest.fn()} state={state} frame={frame} {...overrideProps} />
+    );
   };
 
   it.each<{
@@ -105,4 +113,17 @@ describe('Appearance settings', () => {
       }
     }
   );
+
+  it('hides missing values fitting controls for text-based (ES|QL) datasource', () => {
+    frame.datasourceLayers = {
+      first: createMockDatasource('textBased', {
+        isTextBasedLanguage: jest.fn(() => true),
+      }).publicAPIMock,
+    };
+    const state = testState();
+    (state.layers[0] as XYDataLayerConfig).seriesType = 'line';
+    renderComponent({ state });
+
+    expect(screen.queryByText('Missing values')).not.toBeInTheDocument();
+  });
 });

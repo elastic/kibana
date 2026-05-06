@@ -102,6 +102,7 @@ export const ProjectPickerContent = ({
         <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
           {error ? (
             <EuiCallOut
+              announceOnMount
               size="s"
               color="danger"
               title={strings.getProjectPickerFetchError()}

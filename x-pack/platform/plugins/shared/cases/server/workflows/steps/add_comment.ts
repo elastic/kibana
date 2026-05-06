@@ -10,11 +10,10 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   addCommentStepCommonDefinition,
   type AddCommentStepInput,
-  type AddCommentStepOutput,
 } from '../../../common/workflows/steps/add_comment';
 import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
-import { createCasesStepHandler } from './utils';
+import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
 
 export const addCommentStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -22,20 +21,20 @@ export const addCommentStepDefinition = (
   createServerStepDefinition({
     ...addCommentStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: AddCommentStepInput) => {
-      const theCase = await client.cases.get({
-        id: input.case_id,
-        includeComments: false,
-      });
+      return withCaseOwner(client, input.case_id, async (owner) => {
+        const updatedCase = await client.attachments.add({
+          caseId: input.case_id,
+          comment: {
+            type: AttachmentType.user,
+            comment: input.comment,
+            owner,
+          },
+        });
 
-      const updatedCase = await client.attachments.add({
-        caseId: input.case_id,
-        comment: {
-          type: AttachmentType.user,
-          comment: input.comment,
-          owner: theCase.owner,
-        },
+        return safeParseCaseForWorkflowOutput(
+          addCommentStepCommonDefinition.outputSchema.shape.case,
+          updatedCase
+        );
       });
-
-      return updatedCase as AddCommentStepOutput['case'];
     }),
   });

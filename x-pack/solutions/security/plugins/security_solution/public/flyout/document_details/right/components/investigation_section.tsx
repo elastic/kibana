@@ -8,10 +8,12 @@
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { buildDataTableRecord, type DataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { isNonLocalIndexName } from '@kbn/es-query';
+import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
-import { HighlightedFields } from './highlighted_fields';
+import { HighlightedFields } from '../../../../flyout_v2/document/components/highlighted_fields';
 import {
   INVESTIGATION_SECTION_TEST_ID,
   INVESTIGATION_SECTION_TITLE,
@@ -31,15 +33,23 @@ const KEY = 'investigation';
  * For generic events (event.kind is event), it shows only highlighted fields.
  */
 export const InvestigationSection = memo(() => {
-  const { getFieldsData, investigationFields, isRulePreview, scopeId, searchHit } =
+  const { getFieldsData, investigationFields, isRulePreview, scopeId, searchHit, indexName } =
     useDocumentDetailsContext();
-  const eventKind = getField(getFieldsData('event.kind'));
-  const ancestorIndex = getField(getFieldsData('signal.ancestors.index')) ?? '';
+  const isAlert = useMemo(
+    () => getField(getFieldsData('event.kind')) === EventKind.signal,
+    [getFieldsData]
+  );
+  const ancestorIndex = useMemo(
+    () => getField(getFieldsData('signal.ancestors.index')) ?? '',
+    [getFieldsData]
+  );
 
   const hit: DataTableRecord = useMemo(
     () => buildDataTableRecord(searchHit as EsHitRecord),
     [searchHit]
   );
+
+  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -60,7 +70,7 @@ export const InvestigationSection = memo(() => {
       gutterSize="none"
       data-test-subj={INVESTIGATION_SECTION_TEST_ID}
     >
-      {eventKind === EventKind.signal && (
+      {isAlert && !isRemoteDocument && (
         <>
           <InvestigationGuide
             isAvailable={!isRulePreview}
@@ -74,9 +84,10 @@ export const InvestigationSection = memo(() => {
         hit={hit}
         investigationFields={investigationFields}
         scopeId={scopeId}
-        showCellActions={true}
-        showEditButton={true}
+        renderCellActions={cellActionRenderer}
+        showPreview={true}
         ancestorsIndexName={ancestorIndex}
+        hideEditButton={isRemoteDocument}
       />
     </ExpandableSection>
   );

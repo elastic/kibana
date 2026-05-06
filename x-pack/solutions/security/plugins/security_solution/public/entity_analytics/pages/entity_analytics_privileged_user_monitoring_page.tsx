@@ -39,7 +39,6 @@ import { useEntityAnalyticsRoutes } from '../api/api';
 import { usePrivilegedMonitoringEngineStatus } from '../hooks/use_privileged_monitoring_health';
 import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
 import { UserLimitCallOut } from '../components/user_limit_callout';
-import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
@@ -116,8 +115,6 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView, status } = useDataView(PageScope.explore);
   const { dataViewSpec } = useDataViewSpec(PageScope.explore); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
-
-  const watchlistFilterFlag = useIsExperimentalFeatureEnabled('entityAnalyticsNewHomePageEnabled');
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
@@ -327,7 +324,6 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
                     defaultMessage="Manage data sources"
                   />
                 </EuiButtonEmpty>,
-                ...(watchlistFilterFlag ? [<WatchlistFilter />] : []),
               ]}
             />
             <EuiFlexGroup direction="column">

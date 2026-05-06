@@ -18,7 +18,6 @@ import {
   promptForProject,
   isTTY,
   getAllAvailableConnectors,
-  readLocalEsUrl,
   scoutEvalsArgs,
 } from '../prompts';
 import {
@@ -30,6 +29,14 @@ import {
   tailLog,
 } from '../services';
 import { safeExec, VAULT_SECRET_PATH } from '../utils';
+import {
+  defaultExportProfile,
+  envFromDatasetsProfile,
+  envFromExportProfile,
+  stripTrailingSlash,
+  probeHttp,
+  isExportProfileImplicitLocal,
+} from '../profiles';
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
@@ -76,17 +83,6 @@ const isEdotRunningViaDocker = (): boolean => {
   return result !== null && result.length > 0;
 };
 
-// Any HTTP response (including 401/503) means the service is listening.
-// We only care that the port is up, not that auth is configured yet.
-const probeHttp = async (url: string): Promise<boolean> => {
-  try {
-    await fetch(url, { signal: AbortSignal.timeout(2000) });
-    return true;
-  } catch {
-    return false;
-  }
-};
-
 const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
   const startTime = Date.now();
@@ -119,6 +115,45 @@ const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<voi
   }
 
   throw new Error(`Scout did not become ready within ${SCOUT_READY_TIMEOUT_MS / 1000}s`);
+};
+
+/**
+ * Verify the Scout-managed ES and Kibana are actually reachable, not just that
+ * the parent PID is alive. Covers the common case where ES crashes while the
+ * Scout orchestrator (and Kibana) keep running.
+ */
+const probeScoutHealth = async (repoRoot: string): Promise<{ ok: boolean; reason?: string }> => {
+  const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
+  if (!Fs.existsSync(configPath)) {
+    return { ok: false, reason: 'local config missing (.scout/servers/local.json)' };
+  }
+
+  try {
+    const raw = Fs.readFileSync(configPath, 'utf-8');
+    const parsed = JSON.parse(raw) as { hosts?: { kibana?: string; elasticsearch?: string } };
+    const esUrl = parsed.hosts?.elasticsearch;
+    const kbnUrl = parsed.hosts?.kibana;
+
+    if (!esUrl || !kbnUrl) {
+      return { ok: false, reason: 'hosts missing from local config' };
+    }
+
+    const [esOk, kbnOk] = await Promise.all([probeHttp(esUrl), probeHttp(`${kbnUrl}/api/status`)]);
+
+    if (!esOk && !kbnOk) {
+      return { ok: false, reason: `ES (${esUrl}) and Kibana (${kbnUrl}) are unreachable` };
+    }
+    if (!esOk) {
+      return { ok: false, reason: `ES is unreachable (${esUrl})` };
+    }
+    if (!kbnOk) {
+      return { ok: false, reason: `Kibana is unreachable (${kbnUrl})` };
+    }
+
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'failed to read local config' };
+  }
 };
 
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
@@ -176,6 +211,9 @@ export const startCmd: Command<void> = {
       'project',
       'repetitions',
       'grep',
+      'profile',
+      'datasets-profile',
+      'export-profile',
       'evaluations-kbn-url',
       'evaluations-kbn-api-key',
     ],
@@ -242,6 +280,48 @@ export const startCmd: Command<void> = {
         ? projects.some(isEisConnectorId)
         : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
 
+    const baseProfile = flagsReader.string('profile') ?? undefined;
+    const datasetsProfile = flagsReader.string('datasets-profile') ?? baseProfile;
+    const exportProfile =
+      flagsReader.string('export-profile') ?? baseProfile ?? defaultExportProfile(repoRoot);
+
+    const profileEnvOverrides: Record<string, string> = {
+      ...envFromDatasetsProfile(repoRoot, datasetsProfile),
+      ...envFromExportProfile(repoRoot, exportProfile, {
+        defaultTracingExporters: exportProfile === 'local',
+      }),
+    };
+
+    // Best-effort default: if we implicitly resolved an export profile, don't fail the run when the
+    // export ES isn't reachable. Instead, warn and continue without export (preflight won't run).
+    if (isExportProfileImplicitLocal(flagsReader, exportProfile)) {
+      const evaluationsEsUrl = profileEnvOverrides.EVALUATIONS_ES_URL;
+      const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
+
+      const [evalsReachable, tracingReachable] = await Promise.all([
+        evaluationsEsUrl ? probeHttp(stripTrailingSlash(evaluationsEsUrl)) : Promise.resolve(true),
+        tracingEsUrl ? probeHttp(stripTrailingSlash(tracingEsUrl)) : Promise.resolve(true),
+      ]);
+
+      if (!evalsReachable) {
+        log.warning(
+          `Export profile \"local\" was auto-selected but EVALUATIONS_ES_URL is not reachable (${evaluationsEsUrl}). ` +
+            'Continuing without exporting evaluation results. To require export, pass --export-profile local.'
+        );
+        delete profileEnvOverrides.EVALUATIONS_ES_URL;
+        delete profileEnvOverrides.EVALUATIONS_ES_API_KEY;
+      }
+
+      if (!tracingReachable) {
+        log.warning(
+          `Export profile \"local\" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
+            'Continuing without external trace queries. To require export, pass --export-profile local.'
+        );
+        delete profileEnvOverrides.TRACING_ES_URL;
+        delete profileEnvOverrides.TRACING_ES_API_KEY;
+      }
+    }
+
     log.info('');
     log.info(`Suite:     ${suiteId ?? configPath}`);
     log.info(`Judge:     ${evaluationConnectorId}`);
@@ -254,6 +334,9 @@ export const startCmd: Command<void> = {
     if (suite?.serverConfigSet) {
       log.info(`Config:    ${suite.serverConfigSet}`);
     }
+    log.info(
+      `Profiles:  datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`
+    );
     log.info('');
 
     const rerunArgs: string[] = [];
@@ -267,6 +350,19 @@ export const startCmd: Command<void> = {
 
     if (projects.length > 0) {
       rerunArgs.push('--model', projects.join(','));
+    }
+
+    const passedProfile = flagsReader.string('profile');
+    const passedDatasetsProfile = flagsReader.string('datasets-profile');
+    const passedExportProfile = flagsReader.string('export-profile');
+    if (passedProfile) {
+      rerunArgs.push('--profile', passedProfile);
+    }
+    if (passedDatasetsProfile) {
+      rerunArgs.push('--datasets-profile', passedDatasetsProfile);
+    }
+    if (passedExportProfile) {
+      rerunArgs.push('--export-profile', passedExportProfile);
     }
 
     const grep = flagsReader.string('grep');
@@ -292,13 +388,20 @@ export const startCmd: Command<void> = {
     }
 
     if (!skipServer) {
-      // --- Step 1: EDOT collector (uses kibana.dev.yml ES defaults, no dependencies) ---
+      // --- Step 1: EDOT collector (exports traces to configured ES) ---
       if (isServiceRunning(repoRoot, 'edot') || isEdotRunningViaDocker()) {
         log.info('[1/4] EDOT collector already running -- reusing');
       } else {
-        log.info('[1/4] Starting EDOT collector (backgrounded, exporting to kibana.dev.yml ES)...');
+        log.info('[1/4] Starting EDOT collector (backgrounded)...');
 
-        startService(repoRoot, 'edot', 'node', ['scripts/edot_collector.js'], log);
+        const elasticsearchHost =
+          profileEnvOverrides.TRACING_ES_URL ?? profileEnvOverrides.EVALUATIONS_ES_URL;
+        if (elasticsearchHost) {
+          log.info(`[1/4] EDOT collector will export to: ${elasticsearchHost}`);
+        }
+        startService(repoRoot, 'edot', 'node', ['scripts/edot_collector.js'], log, {
+          env: elasticsearchHost ? { ELASTICSEARCH_HOST: elasticsearchHost } : undefined,
+        });
 
         const stopTail = tailLog(repoRoot, 'edot', log, { fromStart: true });
         await new Promise((r) => setTimeout(r, 5000));
@@ -323,7 +426,18 @@ export const startCmd: Command<void> = {
         await stopService(repoRoot, 'scout', log);
       }
 
-      if (scoutAlive && !staleCheck.stale) {
+      let scoutReusable = scoutAlive && !staleCheck.stale;
+
+      if (scoutReusable) {
+        const health = await probeScoutHealth(repoRoot);
+        if (!health.ok) {
+          log.warning(`[2/4] Scout PID alive but ${health.reason}. Restarting...`);
+          await stopService(repoRoot, 'scout', log);
+          scoutReusable = false;
+        }
+      }
+
+      if (scoutReusable) {
         log.info('[2/4] Scout server already running -- reusing');
       } else {
         const scoutConfigPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
@@ -343,6 +457,9 @@ export const startCmd: Command<void> = {
           {
             connectorsHash: connectorsHash(),
             serverConfigSet,
+            env: profileEnvOverrides.GCS_CREDENTIALS
+              ? { GCS_CREDENTIALS: profileEnvOverrides.GCS_CREDENTIALS }
+              : undefined,
           }
         );
 
@@ -397,16 +514,13 @@ export const startCmd: Command<void> = {
       envOverrides.EVAL_SUITE_ID = suite.id;
     }
 
-    const localEsUrl = readLocalEsUrl(repoRoot);
+    Object.assign(envOverrides, profileEnvOverrides);
 
-    if (!process.env.TRACING_ES_URL && localEsUrl) {
-      envOverrides.TRACING_ES_URL = localEsUrl;
-      log.info(`Trace evaluators will query: ${localEsUrl}`);
+    if (envOverrides.TRACING_ES_URL) {
+      log.info(`Trace evaluators will query: ${envOverrides.TRACING_ES_URL}`);
     }
-
-    if (!process.env.EVALUATIONS_ES_URL && localEsUrl) {
-      envOverrides.EVALUATIONS_ES_URL = localEsUrl;
-      log.info(`Evaluation results will export to: ${localEsUrl}`);
+    if (envOverrides.EVALUATIONS_ES_URL) {
+      log.info(`Evaluation results will export to: ${envOverrides.EVALUATIONS_ES_URL}`);
     }
 
     if (repetitions) {
@@ -433,10 +547,15 @@ export const startCmd: Command<void> = {
     }
 
     await new Promise<void>((resolve, reject) => {
+      const childEnv: Record<string, string> = { ...process.env, ...envOverrides } as Record<
+        string,
+        string
+      >;
+      delete childEnv.NO_COLOR;
       const child = spawn('node', args, {
         cwd: repoRoot,
         stdio: 'inherit',
-        env: { ...process.env, ...envOverrides },
+        env: childEnv,
       });
 
       child.on('exit', (code) => {

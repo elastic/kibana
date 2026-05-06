@@ -13,9 +13,18 @@ import path from 'path';
 import { parse } from 'hjson';
 import _ from 'lodash';
 
-import jsYaml from 'js-yaml';
+import { Document, Scalar, visit } from 'yaml';
 
 import type { Package } from '@kbn/repo-packages';
+
+/**
+ * Characters that js-yaml treated as YAML indicator characters, causing strings
+ * starting with them to be quoted. The `yaml` library follows the YAML 1.2 spec
+ * more precisely and allows some of these (like `-` not followed by space) as
+ * plain scalars. To preserve backward-compatible quoting in generated files, we
+ * explicitly set QUOTE_SINGLE on scalar values starting with these characters.
+ */
+const YAML_INDICATOR_CHARS = `-?:#&*!|>'"@`;
 
 export function readFile(filePath: string) {
   return readFileSync(filePath, 'utf8');
@@ -56,9 +65,25 @@ export function filterPackages(allPackages: Package[], filter: string[]): Packag
 }
 
 export function writeYaml(filePath: string, obj: any, preamble: string | null = null) {
-  let fileContent = jsYaml.dump(obj, {
+  const doc = new Document(obj, { aliasDuplicateObjects: false });
+
+  // Quote string values that start with YAML indicator characters, matching the
+  // quoting behavior of the previously-used js-yaml library.
+  visit(doc, {
+    Scalar(_key, node) {
+      if (
+        typeof node.value === 'string' &&
+        node.value.length > 0 &&
+        YAML_INDICATOR_CHARS.includes(node.value.charAt(0))
+      ) {
+        node.type = Scalar.QUOTE_SINGLE;
+      }
+    },
+  });
+
+  let fileContent = doc.toString({
     lineWidth: 300,
-    noRefs: true,
+    singleQuote: true,
   });
 
   if (preamble) {

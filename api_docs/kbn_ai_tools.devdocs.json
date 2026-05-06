@@ -62,7 +62,11 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "{ create: { <TDocument = unknown>(this: That, params: ",
+                  "{ child: (opts: ",
+                  "ClientOptions",
+                  ") => ",
+                  "default",
+                  "; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
@@ -145,10 +149,6 @@
                   ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
-                  "default",
-                  "; child: (opts: ",
-                  "ClientOptions",
-                  ") => ",
                   "default",
                   "; asyncSearch: ",
                   "default",
@@ -1203,7 +1203,7 @@
             "section": "def-common.Prompt",
             "text": "Prompt"
           },
-          "<unknown, [{ system: { mustache: { template: string; }; }; template: { mustache: { template: string; }; }; temperature: number; tools: { readonly get_documentation: { readonly description: \"Get documentation about specific ES|QL commands or functions\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly commands: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; readonly functions: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"commands\", \"functions\"]; }; }; readonly validate_queries: { readonly description: \"Validate one or more ES|QL queries for syntax errors and/or mapping issues\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly queries: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"queries\"]; }; }; readonly run_queries: { readonly description: \"Run one or more validated ES|QL queries and retrieve the results\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly queries: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"queries\"]; }; }; readonly list_datasets: { readonly description: \"List datasets (index, data stream, aliases) based on a name or pattern, similar to _resolve/_index\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly name: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"name\"]; }; }; readonly describe_dataset: { readonly description: \"Get dataset description via sampling of documents\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly index: { readonly type: \"string\"; readonly description: \"Index, data stream or index pattern you want to analyze\"; }; readonly kql: { readonly type: \"string\"; readonly description: \"KQL for filtering the data\"; }; }; readonly required: readonly [\"index\"]; }; }; }; }]>> & { tools: TTools; stream: false; }>>>"
+          "<{ prompt: string; esql_system_prompt: string; }, [{ system: { mustache: { template: string; }; }; template: { mustache: { template: string; }; }; temperature: number; tools: { readonly get_documentation: { readonly description: \"Get documentation about specific ES|QL commands or functions\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly commands: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; readonly functions: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"commands\", \"functions\"]; }; }; readonly validate_queries: { readonly description: \"Validate one or more ES|QL queries for syntax errors and/or mapping issues\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly queries: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"queries\"]; }; }; readonly run_queries: { readonly description: \"Run one or more validated ES|QL queries and retrieve the results\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly queries: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"queries\"]; }; }; readonly list_datasets: { readonly description: \"List datasets (index, data stream, aliases) based on a name or pattern, similar to _resolve/_index\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly name: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"name\"]; }; }; readonly describe_dataset: { readonly description: \"Get dataset description via sampling of documents\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly index: { readonly type: \"string\"; readonly description: \"Index, data stream or index pattern you want to analyze\"; }; readonly kql: { readonly type: \"string\"; readonly description: \"KQL for filtering the data\"; }; }; readonly required: readonly [\"index\"]; }; }; }; }]>> & { tools: TTools; stream: false; }>>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
         "lineNumber": 29,
@@ -1387,7 +1387,11 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "{ create: { <TDocument = unknown>(this: That, params: ",
+                  "{ child: (opts: ",
+                  "ClientOptions",
+                  ") => ",
+                  "default",
+                  "; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
@@ -1470,10 +1474,6 @@
                   ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
-                  "default",
-                  "; child: (opts: ",
-                  "ClientOptions",
-                  ") => ",
                   "default",
                   "; asyncSearch: ",
                   "default",
@@ -2541,6 +2541,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DocumentAnalysis",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2558,8 +2559,49 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatDocumentAnalysisOptions",
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-tools",
+        "id": "def-server.getDiverseSampleDocuments",
+        "type": "Function",
+        "tags": [],
+        "label": "getDiverseSampleDocuments",
+        "description": [],
+        "signature": [
+          "({\n  esClient,\n  index,\n  start,\n  end,\n  size = 100,\n  filter,\n  runtime_mappings,\n  offset,\n  timeout = '10s',\n}: GetDiverseSampleDocumentsOptions) => Promise<{ hits: ",
+          "SearchHit",
+          "<Record<string, unknown>>[]; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_diverse_sample_documents.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-tools",
+            "id": "def-server.getDiverseSampleDocuments.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  esClient,\n  index,\n  start,\n  end,\n  size = 100,\n  filter,\n  runtime_mappings,\n  offset,\n  timeout = '10s',\n}",
+            "description": [],
+            "signature": [
+              "GetDiverseSampleDocumentsOptions"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_diverse_sample_documents.ts",
+            "lineNumber": 38,
+            "columnNumber": 49,
+            "deprecated": false,
+            "docsReferencedTypeName": "GetDiverseSampleDocumentsOptions",
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -2651,7 +2693,7 @@
         "label": "getSampleDocuments",
         "description": [],
         "signature": [
-          "({\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  filter,\n  size = 1000,\n  fields = [\n    {\n      field: '*',\n      include_unmapped: true,\n    },\n  ],\n  _source = false,\n  timeout = '5s',\n}: { esClient: ",
+          "({\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  filter,\n  size = 1000,\n  fields = [\n    {\n      field: '*',\n      include_unmapped: true,\n    },\n  ],\n  _source = false,\n  timeout = '5s',\n  runtime_mappings,\n}: { esClient: ",
           "ElasticsearchClient",
           "; index: string | string[]; start: number; end: number; kql?: string | undefined; size?: number | undefined; filter?: ",
           "QueryDslQueryContainer",
@@ -2659,12 +2701,14 @@
           "QueryDslQueryContainer",
           "[]; fields?: (string | ",
           "QueryDslFieldAndFormat",
-          ")[] | undefined; _source?: boolean | undefined; timeout?: string | undefined; }) => Promise<{ hits: ",
+          ")[] | undefined; _source?: boolean | undefined; timeout?: string | undefined; runtime_mappings?: ",
+          "MappingRuntimeFields",
+          " | undefined; }) => Promise<{ hits: ",
           "SearchHit",
           "<Record<string, any>>[]; total: number; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-        "lineNumber": 17,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2674,10 +2718,10 @@
             "id": "def-server.getSampleDocuments.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  filter,\n  size = 1000,\n  fields = [\n    {\n      field: '*',\n      include_unmapped: true,\n    },\n  ],\n  _source = false,\n  timeout = '5s',\n}",
+            "label": "{\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  filter,\n  size = 1000,\n  fields = [\n    {\n      field: '*',\n      include_unmapped: true,\n    },\n  ],\n  _source = false,\n  timeout = '5s',\n  runtime_mappings,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-            "lineNumber": 33,
+            "lineNumber": 60,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -2690,7 +2734,11 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "{ create: { <TDocument = unknown>(this: That, params: ",
+                  "{ child: (opts: ",
+                  "ClientOptions",
+                  ") => ",
+                  "default",
+                  "; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
@@ -2773,10 +2821,6 @@
                   ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
-                  "default",
-                  "; child: (opts: ",
-                  "ClientOptions",
-                  ") => ",
                   "default",
                   "; asyncSearch: ",
                   "default",
@@ -3681,7 +3725,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 34,
+                "lineNumber": 61,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3697,7 +3741,7 @@
                   "string | string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 35,
+                "lineNumber": 62,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3710,7 +3754,7 @@
                 "label": "start",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 36,
+                "lineNumber": 63,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3723,7 +3767,7 @@
                 "label": "end",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 37,
+                "lineNumber": 64,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3739,7 +3783,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 38,
+                "lineNumber": 65,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3755,7 +3799,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 39,
+                "lineNumber": 66,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3774,7 +3818,7 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 40,
+                "lineNumber": 67,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3792,7 +3836,7 @@
                   ")[] | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 41,
+                "lineNumber": 68,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3808,7 +3852,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 42,
+                "lineNumber": 69,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3824,12 +3868,69 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
-                "lineNumber": 43,
+                "lineNumber": 70,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-tools",
+                "id": "def-server.getSampleDocuments.$1.runtime_mappings",
+                "type": "Object",
+                "tags": [],
+                "label": "runtime_mappings",
+                "description": [],
+                "signature": [
+                  "MappingRuntimeFields",
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
+                "lineNumber": 71,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-tools",
+        "id": "def-server.getSampleDocumentsEsql",
+        "type": "Function",
+        "tags": [],
+        "label": "getSampleDocumentsEsql",
+        "description": [
+          "\nES|QL-native companion to `getSampleDocuments` for callers that must sample\nfrom remote clusters or external data sources where classic search APIs are\nnot available. The helper returns `_source`-backed hits instead of `fields`\nhits, which keeps downstream document formatting compatible while avoiding\nQuery DSL.\n\nWhen `sampleSize` is provided, ES|QL has no `random_score` equivalent, and\n`SAMPLE p | LIMIT n` returns sampled rows in storage order. To preserve the\nold random-sampling behavior, this first counts the matching population,\noversamples with `SAMPLE`, shuffles the returned rows client-side, then trims\nto the requested size.\n\n`loadUnmappedFields` emits `SET unmapped_fields=\"LOAD\"` so ES|QL predicates\ncan evaluate source-only fields. This replaces the older fieldCaps +\nruntime_mappings path used for entity-filtered Significant Events sampling."
+        ],
+        "signature": [
+          "({\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  size = 1000,\n  sampleSize,\n  whereCondition,\n  loadUnmappedFields = false,\n}: GetSampleDocumentsEsqlParams) => Promise<GetSampleDocumentsEsqlResponse>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-tools",
+            "id": "def-server.getSampleDocumentsEsql.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  esClient,\n  index,\n  start,\n  end,\n  kql,\n  size = 1000,\n  sampleSize,\n  whereCondition,\n  loadUnmappedFields = false,\n}",
+            "description": [],
+            "signature": [
+              "GetSampleDocumentsEsqlParams"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_sample_documents.ts",
+            "lineNumber": 130,
+            "columnNumber": 46,
+            "deprecated": false,
+            "docsReferencedTypeName": "GetSampleDocumentsEsqlParams",
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -3935,7 +4036,7 @@
         "label": "pValueToLabel",
         "description": [],
         "signature": [
-          "(pValue: number) => \"medium\" | \"high\" | \"low\""
+          "(pValue: number) => \"high\" | \"medium\" | \"low\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/utils/p_value_to_label.ts",
         "lineNumber": 11,

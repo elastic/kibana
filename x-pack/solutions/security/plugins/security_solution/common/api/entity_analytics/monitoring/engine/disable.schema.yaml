@@ -10,6 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: DisableMonitoringEngine
       summary: Disable the Privilege Monitoring Engine
+      description: Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
 
       responses:
         "200":
@@ -18,3 +19,8 @@ paths:
             application/json:
               schema:
                 $ref: "../common.schema.yaml#/components/schemas/MonitoringEngineDescriptor"
+              examples:
+                DisableMonitoringEngineResponse:
+                  summary: Engine disabled successfully
+                  value:
+                    status: disabled

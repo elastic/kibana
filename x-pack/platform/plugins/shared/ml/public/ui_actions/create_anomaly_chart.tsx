@@ -17,6 +17,7 @@ import type { AnomalyChartsEmbeddableApi } from '../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
 import type { MlCoreSetup } from '../plugin';
 import { EmbeddableAnomalyChartsUserInput } from '../embeddables/anomaly_charts/anomaly_charts_setup_flyout';
+import { isMlAvailable } from '../../common/license/ml_license';
 
 export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
 
@@ -45,7 +46,7 @@ export function createAddAnomalyChartsPanelAction(
       },
     ],
     order: 30,
-    getIconType: () => 'anomalyChart',
+    getIconType: () => 'chartAnomaly',
     getDisplayName: () =>
       i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.displayName', {
         defaultMessage: 'Anomaly chart',
@@ -55,6 +56,7 @@ export function createAddAnomalyChartsPanelAction(
         defaultMessage: 'View anomaly detection results in a chart.',
       }),
     async isCompatible(context: EmbeddableApiContext) {
+      if (!(await isMlAvailable(getStartServices))) return false;
       return Boolean(await parentApiIsCompatible(context.embeddable));
     },
     async execute(context) {

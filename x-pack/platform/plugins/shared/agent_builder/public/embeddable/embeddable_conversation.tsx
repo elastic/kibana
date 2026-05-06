@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
-import { ConversationHeader } from '../application/components/conversations/conversation_header/conversation_header';
+import { EmbeddableConversationHeader } from '../application/components/conversations/embeddable_conversation_header/embeddable_conversation_header';
 import {
   conversationBackgroundStyles,
   headerHeight,
@@ -66,7 +66,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
       <EmbeddableConversationsProvider {...props}>
         <EmbeddableAccessBoundary onClose={onClose}>
           <EuiFlyoutHeader css={headerStyles}>
-            <ConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+            <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
           </EuiFlyoutHeader>
           <EmbeddableWelcomeMessage />
           <EuiFlyoutBody css={bodyStyles}>

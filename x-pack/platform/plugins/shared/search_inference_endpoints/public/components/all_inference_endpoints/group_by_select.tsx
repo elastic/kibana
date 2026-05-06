@@ -14,16 +14,12 @@ import {
   EuiText,
   type EuiSelectableOption,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
-import {
-  EMPTY_FILTER_MESSAGE,
-  GROUP_BY_NONE,
-  GROUP_BY_MODELS,
-  GROUP_BY_SERVICE,
-} from '../../../common/translations';
 import { GroupByOptions } from '../../types';
 import { GroupByFilterButton, GroupBySelectableContainer } from './styles';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 interface GroupBySelectProps {
   value: GroupByOptions;
@@ -33,22 +29,20 @@ interface GroupBySelectProps {
 const GROUP_BY_OPTIONS = [
   {
     key: GroupByOptions.None,
-    label: GROUP_BY_NONE,
-  },
-  {
-    key: GroupByOptions.Model,
-    label: GROUP_BY_MODELS,
+    label: i18n.translate('xpack.searchInferenceEndpoints.groupBy.options.none.label', {
+      defaultMessage: 'None',
+    }),
   },
   {
     key: GroupByOptions.Service,
-    label: GROUP_BY_SERVICE,
+    label: i18n.translate('xpack.searchInferenceEndpoints.groupBy.options.service.label', {
+      defaultMessage: 'Service',
+    }),
   },
 ];
 
 function parseGroupByValue(value: string | undefined): GroupByOptions {
   switch (value) {
-    case GroupByOptions.Model:
-      return GroupByOptions.Model;
     case GroupByOptions.Service:
       return GroupByOptions.Service;
     case GroupByOptions.None:
@@ -59,13 +53,16 @@ function parseGroupByValue(value: string | undefined): GroupByOptions {
 
 export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const usageTracker = useUsageTracker();
   const handleValueChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
       const selectedOption = newOptions.find((option) => option.checked === 'on');
-      onChange(parseGroupByValue(selectedOption?.key));
+      const parsed = parseGroupByValue(selectedOption?.key);
+      usageTracker.count([EventType.GROUP_BY_CHANGED, `${EventType.GROUP_BY_CHANGED}_${parsed}`]);
+      onChange(parsed);
       setIsPopoverOpen(false);
     },
-    [onChange]
+    [onChange, usageTracker]
   );
   const { options, selectedOptionLabel } = useMemo(() => {
     let selectedOption = GROUP_BY_OPTIONS[0].label;
@@ -89,17 +86,16 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
         button={
           <EuiFilterButton
             data-test-subj="group-by-button"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             css={GroupByFilterButton}
             onClick={() => setIsPopoverOpen((prevValue) => !prevValue)}
             isSelected={isPopoverOpen}
           >
             <EuiText size="s" className="eui-textTruncate">
-              <FormattedMessage
-                id="xpack.searchInferenceEndpoints.groupBy.label"
-                defaultMessage="Group: {selectedGroup}"
-                values={{ selectedGroup: selectedOptionLabel }}
-              />
+              {i18n.translate('xpack.searchInferenceEndpoints.groupBy.label', {
+                defaultMessage: 'Group: {selectedGroup}',
+                values: { selectedGroup: selectedOptionLabel },
+              })}
             </EuiText>
           </EuiFilterButton>
         }
@@ -111,7 +107,9 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
         <EuiSelectable
           data-test-subj="group-by-selectable"
           options={options}
-          emptyMessage={EMPTY_FILTER_MESSAGE}
+          emptyMessage={i18n.translate('xpack.searchInferenceEndpoints.filter.emptyMessage', {
+            defaultMessage: 'No options',
+          })}
           onChange={handleValueChange}
           singleSelection="always"
           renderOption={(option) => (

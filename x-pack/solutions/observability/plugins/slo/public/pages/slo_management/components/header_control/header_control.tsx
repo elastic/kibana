@@ -42,7 +42,7 @@ export function HeaderControl() {
           data-test-subj="headerControlActionsButton"
           fill
           iconSide="right"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSize="s"
           onClick={handleActionsClick}
         >

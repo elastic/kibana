@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -64,6 +65,7 @@ export const getOverridenCount = (projects: Record<ProjectID, Project>) =>
 export const LabsFlyout = (props: Props) => {
   const { solutions, onEnabledCountChange = () => {}, onClose } = props;
   const labsService = useMemo(() => getPresentationLabsService(), []);
+  const flyoutTitleId = useGeneratedHtmlId();
 
   const [projects, setProjects] = useState(labsService.getProjects());
   const [overrideCount, setOverrideCount] = useState(getOverridenCount(projects));
@@ -134,13 +136,14 @@ export const LabsFlyout = (props: Props) => {
       onClose={onClose}
       hideCloseButton={true}
       maskProps={{ headerZindexLocation: 'below' }}
+      aria-labelledby={flyoutTitleId}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={flyoutTitleId}>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="beaker" size="l" />
+                <EuiIcon type="flask" size="l" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>{strings.getTitleLabel()}</EuiFlexItem>
             </EuiFlexGroup>

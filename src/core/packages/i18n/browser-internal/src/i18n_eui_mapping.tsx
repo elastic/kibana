@@ -213,6 +213,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Alpha channel (opacity) value',
       description: 'Label describing color alpha channel',
     }),
+    'euiColorPicker.ariaLabel': i18n.translate('core.euiColorPicker.ariaLabel', {
+      defaultMessage: 'Select a color',
+      description: 'ARIA label for the color picker button',
+    }),
     'euiColorPicker.colorLabel': i18n.translate('core.euiColorPicker.colorLabel', {
       defaultMessage: 'Color value',
     }),

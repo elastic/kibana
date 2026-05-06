@@ -43,7 +43,7 @@ import {
 } from '../../__mocks__/external_control_columns';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { defaultTimeColumnWidth } from '../constants';
 import { useColumns } from '../hooks/use_data_grid_columns';
@@ -503,6 +503,27 @@ describe('UnifiedDataTable', () => {
       }, {});
     };
 
+    const sortByColumn = async (name: string) => {
+      await userEvent.click(getColumnActions(name));
+      await waitForEuiPopoverOpen();
+      // Column sort button incorrectly renders as "Sort " instead
+      // of "Sort Z-A" in Jest tests, so we need to find it by index
+      await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2]);
+    };
+
+    const copySelectedDocsAsText = async () => {
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('dataGridHeaderCellActionGroup-message')
+        ).not.toBeInTheDocument();
+      });
+      await userEvent.click(screen.getByTestId('unifiedDataTableSelectionBtn'));
+      await userEvent.click(screen.getByTestId('unifiedDataTableCopyRowsAsText'), {
+        pointerEventsCheck: PointerEventsCheckLevel.Never,
+      });
+      return (navigator.clipboard.writeText as jest.Mock).mock.calls.at(-1)![0] as string;
+    };
+
     it(
       'should apply client side sorting in ES|QL mode',
       async () => {
@@ -526,11 +547,7 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
-        await userEvent.click(getColumnActions('message'));
-        await waitForEuiPopoverOpen();
-        // Column sort button incorrectly renders as "Sort " instead
-        // of "Sort Z-A" in Jest tests, so we need to find it by index
-        await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2]);
+        await sortByColumn('message');
         await waitFor(() => {
           values = getCellValuesByColumn();
           expect(values.message).toEqual([
@@ -572,11 +589,7 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
-        await userEvent.click(getColumnActions('message'));
-        await waitForEuiPopoverOpen();
-        // Column sort button incorrectly renders as "Sort " instead
-        // of "Sort Z-A" in Jest tests, so we need to find it by index
-        await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2]);
+        await sortByColumn('message');
         await waitFor(() => {
           values = getCellValuesByColumn();
           expect(values.message).toEqual([
@@ -648,6 +661,37 @@ describe('UnifiedDataTable', () => {
                     "onSort": [Function],
                   }
               `);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    test(
+      'sorting should preserve the selected documents when copying them to clipboard',
+      async () => {
+        const hits = generateEsHits(dataViewMock, 10);
+        await renderDataTable({
+          isPlainRecord: true,
+          columns: ['message'],
+          rows: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+        });
+
+        await waitFor(() => {
+          expect(getCellValuesByColumn().message?.[0]).toBe('message_0');
+        });
+
+        await userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(hits[0])}`));
+
+        const clipboardTextBeforeSorting = await copySelectedDocsAsText();
+
+        await sortByColumn('message');
+
+        await waitFor(() => {
+          expect(getCellValuesByColumn().message?.[0]).toBe('message_9');
+        });
+
+        const clipboardTextAfterSorting = await copySelectedDocsAsText();
+
+        expect(clipboardTextAfterSorting).toBe(clipboardTextBeforeSorting);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -817,7 +861,7 @@ describe('UnifiedDataTable', () => {
 
         expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
         expect(
-          findTestSubject(component, 'exampleRowControl-visBarVerticalStacked').exists()
+          findTestSubject(component, 'exampleRowControl-chartBarVerticalStack').exists()
         ).toBeTruthy();
 
         // The other actions are within the popover
@@ -917,9 +961,58 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         getProps().rows,
         ['_source'],
-        setExpandedDocMock,
         columnsMetaOverride
       );
+    },
+    EXTENDED_JEST_TIMEOUT
+  );
+
+  it(
+    'should provide, clear, and re-provide document view metadata when rendered externally',
+    async () => {
+      const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+      const [expandedDoc] = rows;
+      const setRenderDocumentViewMeta = jest.fn();
+      const component = await getComponent({
+        ...getProps(),
+        rows,
+        expandedDoc,
+        setExpandedDoc: jest.fn(),
+        renderDocumentView: 'external',
+        setRenderDocumentViewMeta,
+      });
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith({
+          displayedRows: rows,
+          displayedColumns: ['_source'],
+        });
+      });
+
+      setRenderDocumentViewMeta.mockClear();
+
+      await act(async () => {
+        component.setProps({ expandedDoc: undefined });
+        component.update();
+      });
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith(undefined);
+      });
+
+      setRenderDocumentViewMeta.mockClear();
+
+      await act(async () => {
+        component.setProps({ expandedDoc });
+        component.update();
+      });
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith({
+          displayedRows: rows,
+          displayedColumns: ['_source'],
+        });
+      });
     },
     EXTENDED_JEST_TIMEOUT
   );

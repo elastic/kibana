@@ -24,6 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       llmProxy = await createLlmProxy(log);
+      await deleteConnectors(supertest);
       await createConnector(llmProxy, supertest);
     });
 
@@ -37,11 +38,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         wait_for_completion: true,
         refresh: true,
         conflicts: 'proceed',
+        ignore_unavailable: true,
       });
     });
 
     it('navigates to new conversation page and shows initial state', async () => {
-      await agentBuilder.navigateToApp('conversations/new');
+      await agentBuilder.navigateToApp();
 
       // Assert the welcome page is displayed
       await testSubjects.existOrFail('agentBuilderWelcomePage');
@@ -49,11 +51,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Assert the text input box renders
       await testSubjects.existOrFail('agentBuilderConversationInputForm');
 
-      // Assert the default agent is "Elastic AI Agent"
-      await testSubjects.existOrFail('agentBuilderAgentSelectorButton');
-      const agentButton = await testSubjects.find('agentBuilderAgentSelectorButton');
-      const agentText = await agentButton.getVisibleText();
-      expect(agentText).to.contain('Elastic AI Agent');
+      // Assert the default agent is "Elastic AI Agent" — the agent name is fetched
+      // asynchronously after the button renders, so retry until the label is populated
+      await retry.try(async () => {
+        const agentButton = await testSubjects.find('agentBuilderAgentSelectorButton');
+        const agentText = await agentButton.getVisibleText();
+        expect(agentText).to.contain('Elastic AI Agent');
+      });
     });
 
     it('sends a message with tool call and receives response with thinking', async () => {
@@ -76,15 +80,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const responseText = await responseElement.getVisibleText();
         expect(responseText).to.contain(MOCKED_RESPONSE);
 
-        const titleElement = await testSubjects.find('agentBuilderConversationTitle');
+        const titleElement = await testSubjects.find('agentBuilderConversationTitleButton');
         const titleText = await titleElement.getVisibleText();
         expect(titleText).to.contain(MOCKED_TITLE);
 
-        await agentBuilder.openConversationsHistory();
-        // Wait for the conversation to appear in the list
+        // Wait for the conversation to appear in the sidebar
         await retry.try(async () => {
-          const conversationList = await testSubjects.find('agentBuilderConversationList');
-          const conversationText = await conversationList.getVisibleText();
+          const conversationItem = await testSubjects.find(
+            `agentBuilderSidebarConversation-${conversationId}`
+          );
+          const conversationText = await conversationItem.getVisibleText();
           expect(conversationText).to.contain(MOCKED_TITLE);
         });
       });

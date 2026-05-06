@@ -10,14 +10,10 @@ import {
   EXTENDED_TIMEOUT,
   KUBERNETES_TOUR_STORAGE_KEY,
   KUBERNETES_CARD_DISMISSED_STORAGE_KEY,
-  KUBERNETES_TOAST_STORAGE_KEY,
 } from '../constants';
 import type { SavedViews } from './saved_views';
 
 export class InventoryPage {
-  public readonly feedbackLink: Locator;
-  public readonly k8sFeedbackLink: Locator;
-
   public readonly datePickerInput: Locator;
 
   public readonly inventorySwitcherButton: Locator;
@@ -27,6 +23,8 @@ export class InventoryPage {
 
   public readonly metricSwitcherButton: Locator;
   public readonly metricsContextMenu: Locator;
+
+  public readonly schemaSelect: Locator;
 
   public readonly k8sTourText: Locator;
   public readonly k8sTourDismissButton: Locator;
@@ -67,9 +65,6 @@ export class InventoryPage {
     private readonly kbnUrl: KibanaUrl,
     private readonly savedViews: SavedViews
   ) {
-    this.feedbackLink = this.page.getByTestId('infraInventoryFeedbackLink');
-    this.k8sFeedbackLink = this.page.getByTestId('infra-kubernetes-feedback-link');
-
     this.datePickerInput = this.page.getByTestId('waffleDatePicker').getByRole('textbox');
 
     this.inventorySwitcherButton = this.page.getByTestId('openInventorySwitcher');
@@ -79,6 +74,8 @@ export class InventoryPage {
 
     this.metricSwitcherButton = this.page.getByTestId('infraInventoryMetricDropdown');
     this.metricsContextMenu = this.page.getByTestId('infraInventoryMetricsContextMenu');
+
+    this.schemaSelect = this.page.getByTestId('infraSchemaSelect');
 
     this.k8sTourText = this.page.getByTestId('infra-kubernetesTour-text');
     this.k8sTourDismissButton = this.page.getByTestId('infra-kubernetesTour-dismiss');
@@ -219,16 +216,6 @@ export class InventoryPage {
         window.localStorage.removeItem(k8sCardDismissedKey);
       },
       [KUBERNETES_CARD_DISMISSED_STORAGE_KEY]
-    );
-  }
-
-  public async addDismissK8sToastInitScript() {
-    // Dismiss k8s tour if it's present to avoid interference with other test assertions
-    await this.page.addInitScript(
-      ([k8sToastStorageKey]) => {
-        window.localStorage.setItem(k8sToastStorageKey, 'true');
-      },
-      [KUBERNETES_TOAST_STORAGE_KEY]
     );
   }
 

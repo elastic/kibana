@@ -99,6 +99,20 @@ describe('safeOutputSize', () => {
     const arr = [1, 2, 3];
     expect(safeOutputSize(arr)).toBe(Buffer.byteLength('[1,2,3]', 'utf8'));
   });
+
+  it('should return raw byteLength for Buffer without JSON amplification', () => {
+    const buf = Buffer.alloc(3000);
+    buf.fill(0xff);
+    expect(safeOutputSize(buf)).toBe(3000);
+    // JSON.stringify would produce ~12KB+ for a 3KB buffer; ensure we don't use that
+    const jsonSize = Buffer.byteLength(JSON.stringify(buf), 'utf8');
+    expect(jsonSize).toBeGreaterThan(3000);
+    expect(safeOutputSize(buf)).toBeLessThan(jsonSize);
+  });
+
+  it('should return 0 for an empty Buffer', () => {
+    expect(safeOutputSize(Buffer.alloc(0))).toBe(0);
+  });
 });
 
 describe('ResponseSizeLimitError', () => {

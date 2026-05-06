@@ -240,6 +240,179 @@ describe('AnalyticsService', () => {
     });
   });
 
+  describe.each([
+    { method: 'reportSkillCreated' as const, eventType: AGENT_BUILDER_EVENT_TYPES.SkillCreated },
+    { method: 'reportSkillUpdated' as const, eventType: AGENT_BUILDER_EVENT_TYPES.SkillUpdated },
+    { method: 'reportSkillDeleted' as const, eventType: AGENT_BUILDER_EVENT_TYPES.SkillDeleted },
+  ])('$method', ({ method, eventType }) => {
+    it('normalizes the skill_id and passes origin for custom skills', () => {
+      service[method]({ skillId: 'custom-skill-1', origin: 'custom' });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(eventType, {
+        skill_id: 'custom-a1c01b755b74d7bd',
+        origin: 'custom',
+      });
+    });
+
+    it('uses a composite `plugin-<hash>-<hash>` id when a pluginId is provided', () => {
+      service[method]({ skillId: 'plugin-skill', origin: 'plugin', pluginId: 'plugin-uuid-1' });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(eventType, {
+        skill_id: 'plugin-f3a4ba6782682a47-eabadf06389e747c',
+        origin: 'plugin',
+      });
+    });
+
+    it('does not throw when reporting throws', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      expect(() => service[method]({ skillId: 'custom-skill-1' })).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+  });
+
+  describe('reportSkillInvoked', () => {
+    it('reports the SkillInvoked event for a built-in skill (keeps original skill_id, normalizes agent_id)', () => {
+      service.reportSkillInvoked({
+        skillId: 'builtin-skill-1',
+        origin: 'builtin',
+        solutionArea: 'platform',
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conv-1',
+        executionId: 'exec-1',
+        toolCount: 3,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.SkillInvoked, {
+        skill_id: 'builtin-skill-1',
+        origin: 'builtin',
+        solution_area: 'platform',
+        plugin_id: undefined,
+        agent_id: agentBuilderDefaultAgentId,
+        conversation_id: 'conv-1',
+        execution_id: 'exec-1',
+        tool_count: 3,
+      });
+    });
+
+    it('reports the SkillInvoked event for a plugin-backed skill (composite skill_id, hashed plugin_id)', () => {
+      service.reportSkillInvoked({
+        skillId: 'plugin-skill',
+        origin: 'plugin',
+        solutionArea: 'plugin',
+        pluginId: 'plugin-uuid-1',
+        agentId: 'my_custom_agent',
+        toolCount: 0,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.SkillInvoked, {
+        skill_id: 'plugin-f3a4ba6782682a47-eabadf06389e747c',
+        origin: 'plugin',
+        solution_area: 'plugin',
+        plugin_id: 'plugin-f3a4ba6782682a47',
+        agent_id: 'custom-da3031a511e7fadf',
+        conversation_id: undefined,
+        execution_id: undefined,
+        tool_count: 0,
+      });
+    });
+
+    it('reports the SkillInvoked event for a custom skill (hashed skill_id, undefined plugin/agent)', () => {
+      service.reportSkillInvoked({
+        skillId: 'custom-skill-1',
+        origin: 'custom',
+        solutionArea: 'custom',
+        toolCount: 1,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.SkillInvoked, {
+        skill_id: 'custom-a1c01b755b74d7bd',
+        origin: 'custom',
+        solution_area: 'custom',
+        plugin_id: undefined,
+        agent_id: undefined,
+        conversation_id: undefined,
+        execution_id: undefined,
+        tool_count: 1,
+      });
+    });
+
+    it('does not throw when reporting throws', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      expect(() =>
+        service.reportSkillInvoked({
+          skillId: 'custom-skill-1',
+          origin: 'custom',
+          solutionArea: 'custom',
+          toolCount: 0,
+        })
+      ).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+  });
+
+  describe('reportPluginImported', () => {
+    it('reports source_type `url` when sourceType is "url" and hashes the plugin id', () => {
+      service.reportPluginImported({
+        pluginId: 'plugin-uuid-1',
+        sourceType: 'url',
+        skillCount: 2,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.PluginImported, {
+        plugin_id: 'plugin-f3a4ba6782682a47',
+        source_type: 'url',
+        skill_count: 2,
+      });
+    });
+
+    it('reports source_type `upload` when sourceType is "file"', () => {
+      service.reportPluginImported({
+        pluginId: 'plugin-uuid-1',
+        sourceType: 'file',
+        skillCount: 0,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.PluginImported,
+        expect.objectContaining({ source_type: 'upload' })
+      );
+    });
+
+    it('reports plugin_id as `unknown` when the input plugin id is empty', () => {
+      service.reportPluginImported({
+        pluginId: '',
+        sourceType: 'url',
+        skillCount: 0,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.PluginImported,
+        expect.objectContaining({ plugin_id: 'unknown' })
+      );
+    });
+
+    it('does not throw when reporting throws', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      expect(() =>
+        service.reportPluginImported({
+          pluginId: 'plugin-uuid-1',
+          sourceType: 'url',
+          skillCount: 1,
+        })
+      ).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+  });
+
   describe('reportRoundError', () => {
     const defaultArgs = {
       agentId: agentBuilderDefaultAgentId,

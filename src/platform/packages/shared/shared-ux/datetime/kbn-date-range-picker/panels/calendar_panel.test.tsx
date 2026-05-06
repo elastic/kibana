@@ -13,7 +13,7 @@ import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { CalendarPanel } from './calendar_panel';
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
-import { formatDateRange, toLocalPreciseString } from '../utils';
+import { formatDateRange, formatAbsoluteDate } from '../utils';
 import { textToTimeRange } from '../parse';
 
 const mockUseDateRangePickerContext = jest.fn();
@@ -92,9 +92,13 @@ jest.mock('../calendar', () => {
 const feb2026 = (day: number, h: number, m: number, s = 0, ms = 0) =>
   new Date(2026, 1, day, h, m, s, ms);
 
-/** Builds the local-precise string for a given Feb 2026 date. */
-const feb2026Local = (day: number, h: number, m: number, s = 0, ms = 0) =>
-  toLocalPreciseString(feb2026(day, h, m, s, ms));
+/** Builds the formatted display string for a given Feb 2026 date. */
+const feb2026Display = (day: number, h: number, m: number, s = 0, ms = 0) =>
+  formatAbsoluteDate(feb2026(day, h, m, s, ms));
+
+/** Builds the UTC ISO string for a given Feb 2026 date. */
+const feb2026ISO = (day: number, h: number, m: number, s = 0, ms = 0) =>
+  feb2026(day, h, m, s, ms).toISOString();
 
 /** Click a day by its number in the February 2026 calendar. */
 const clickDay = (day: number) =>
@@ -114,6 +118,8 @@ describe('CalendarPanel', () => {
     });
   });
 
+  const defaultSettings = { roundRelativeTime: true };
+
   /** Context with computed dates. */
   const makeContext = (
     type: [string, string],
@@ -123,6 +129,7 @@ describe('CalendarPanel', () => {
     applyRange,
     onPresetSave,
     setText,
+    settings: defaultSettings,
     text: formatDateRange(startDate, endDate),
     timeRange: {
       startDate,
@@ -137,6 +144,7 @@ describe('CalendarPanel', () => {
     applyRange,
     onPresetSave,
     setText,
+    settings: defaultSettings,
     text: '',
     timeRange: {
       startDate: null,
@@ -156,7 +164,7 @@ describe('CalendarPanel', () => {
   });
 
   describe('initialization', () => {
-    it('converts to absolute format on mount', () => {
+    it('converts to absolute format on mount, preserving existing times', () => {
       renderWithEuiTheme(<CalendarPanel />);
 
       expect(setText).toHaveBeenCalledWith(
@@ -172,8 +180,8 @@ describe('CalendarPanel', () => {
     });
   });
 
-  describe('time preservation', () => {
-    it('preserves original times when selecting new dates', () => {
+  describe('date normalization', () => {
+    it('always uses start/end of day when selecting new dates', () => {
       mockUseDateRangePickerContext.mockReturnValue(
         makeContext(
           [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
@@ -187,25 +195,19 @@ describe('CalendarPanel', () => {
       clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 14, 30, 45, 123), feb2026(15, 18, 15, 30, 456))
+        formatDateRange(feb2026(10, 0, 0, 0, 0), feb2026(15, 23, 59, 59, 999))
       );
     });
 
-    it('orders times correctly when selecting same day with start time > end time', () => {
-      mockUseDateRangePickerContext.mockReturnValue(
-        makeContext(
-          [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
-          new Date(2026, 1, 1, 20, 0, 0, 0),
-          new Date(2026, 1, 2, 8, 0, 0, 0)
-        )
-      );
+    it('uses start/end of day when selecting the same day twice', () => {
+      mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
       clickDay(10);
       clickDay(10);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 8, 0, 0, 0), feb2026(10, 20, 0, 0, 0))
+        formatDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
       );
     });
   });
@@ -217,10 +219,10 @@ describe('CalendarPanel', () => {
 
       clickDay(10);
 
-      expect(setText).toHaveBeenCalledWith(feb2026Local(10, 0, 0));
+      expect(setText).toHaveBeenCalledWith(feb2026Display(10, 0, 0));
     });
 
-    it('calls setText with the full local-precise range after both dates are selected', () => {
+    it('calls setText with the formatted range after both dates are selected', () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
@@ -244,7 +246,7 @@ describe('CalendarPanel', () => {
 
       clickDay(20);
 
-      expect(setText).toHaveBeenCalledWith(feb2026Local(20, 14, 30, 45, 123));
+      expect(setText).toHaveBeenCalledWith(feb2026Display(20, 0, 0, 0, 0));
     });
   });
 
@@ -277,10 +279,10 @@ describe('CalendarPanel', () => {
       ).toBeTruthy();
     });
 
-    it('is disabled when initialized with dates but no changes made', () => {
+    it('is enabled when initialized with a valid date range', () => {
       renderWithEuiTheme(<CalendarPanel />);
 
-      expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
     });
 
     it('becomes enabled after both dates are selected', () => {
@@ -296,7 +298,7 @@ describe('CalendarPanel', () => {
       expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
     });
 
-    it('calls applyRange with local precise bounds and display text', () => {
+    it('calls applyRange with UTC ISO bounds and formatted display text', () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
@@ -306,8 +308,8 @@ describe('CalendarPanel', () => {
 
       expect(applyRange).toHaveBeenCalledWith(
         {
-          start: feb2026Local(10, 0, 0),
-          end: feb2026Local(15, 23, 59, 59, 999),
+          start: feb2026ISO(10, 0, 0),
+          end: feb2026ISO(15, 23, 59, 59, 999),
         },
         formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
       );

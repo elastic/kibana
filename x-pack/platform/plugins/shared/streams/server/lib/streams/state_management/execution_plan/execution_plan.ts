@@ -29,6 +29,7 @@ import {
   deleteIngestPipeline,
   upsertIngestPipeline,
 } from '../../ingest_pipelines/manage_ingest_pipelines';
+import { ATTACHMENT_TYPES } from '../../attachments/types';
 import { getErrorMessage } from '../../errors/parse_error';
 import { upsertEsqlView, deleteEsqlView } from '../../esql_views/manage_esql_views';
 import { retryTransientEsErrors } from '../../helpers/retry';
@@ -137,6 +138,11 @@ export class ExecutionPlan {
       requiredPermissions.cluster.length === 0 &&
       Object.keys(requiredPermissions.index).length === 0
     ) {
+      return true;
+    }
+
+    // Skip permission checks when security is disabled
+    if (!this.dependencies.isSecurityEnabled) {
       return true;
     }
 
@@ -273,9 +279,12 @@ export class ExecutionPlan {
       return;
     }
 
-    return Promise.all(
-      actions.map((action) => this.dependencies.queryClient.deleteAll(action.request.definition))
-    );
+    const { getQueryClient } = this.dependencies;
+    if (!getQueryClient) {
+      throw new Error('queryClient is required for deleteQueries but was not provided');
+    }
+    const queryClient = await getQueryClient();
+    return Promise.all(actions.map((action) => queryClient.deleteAll(action.request.definition)));
   }
 
   private async unlinkAssets(actions: UnlinkAssetsAction[]) {
@@ -283,11 +292,13 @@ export class ExecutionPlan {
       return;
     }
 
-    return Promise.all(
-      actions.flatMap((action) => [
-        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'dashboard'),
-        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'rule'),
-      ])
+    // syncAttachmentList with an empty list clears all attachments of that type for the stream.
+    await Promise.all(
+      actions.flatMap((action) =>
+        ATTACHMENT_TYPES.map((type) =>
+          this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], type)
+        )
+      )
     );
   }
 
@@ -301,9 +312,12 @@ export class ExecutionPlan {
       return;
     }
 
-    return Promise.all(
-      actions.map((action) => this.dependencies.featureClient.deleteFeatures(action.request.name))
-    );
+    const { getFeatureClient } = this.dependencies;
+    if (!getFeatureClient) {
+      throw new Error('featureClient is required for unlinkFeatures but was not provided');
+    }
+    const featureClient = await getFeatureClient();
+    return Promise.all(actions.map((action) => featureClient.deleteFeatures(action.request.name)));
   }
 
   private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {
@@ -511,7 +525,10 @@ export class ExecutionPlan {
               query: action.request.query,
             }),
           { logger: this.dependencies.logger }
-        )
+        ),
+      // Sequential to avoid ConcurrentModificationException in Elasticsearch's
+      // PlanTelemetry when multiple PUT view requests arrive in parallel.
+      { sequential: true }
     );
   }
 

@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/human-readable-id",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
     "@kbn/licensing-plugin",
@@ -59,6 +60,7 @@
     "@kbn/actions-utils",
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/usage-api-plugin",
+    "@kbn/core-security-server",
   ],
   "exclude": [
     "target/**/*",

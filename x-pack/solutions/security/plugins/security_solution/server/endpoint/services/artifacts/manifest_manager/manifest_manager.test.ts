@@ -50,6 +50,14 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
 import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
+import { getIsEndpointExceptionsPerPolicyEnabled } from '../../../lib/reference_data';
+
+jest.mock('../../../lib/reference_data');
+
+const mockedGetIsEndpointExceptionsPerPolicyEnabled =
+  getIsEndpointExceptionsPerPolicyEnabled as jest.MockedFunction<
+    typeof getIsEndpointExceptionsPerPolicyEnabled
+  >;
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
@@ -129,6 +137,11 @@ describe('ManifestManager', () => {
     ARTIFACT_TRUSTED_DEVICES_MACOS = ARTIFACTS[6];
     ARTIFACT_TRUSTED_DEVICES_WINDOWS = ARTIFACTS[7];
     defaultFeatures = allowedExperimentalValues;
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedGetIsEndpointExceptionsPerPolicyEnabled.mockResolvedValue(false);
   });
 
   describe('getLastComputedManifest from Unified Manifest SO', () => {
@@ -1258,12 +1271,9 @@ describe('ManifestManager', () => {
       ]);
     });
 
-    describe('when Endpoint Exceptions can only be global - feature flag is disabled', () => {
+    describe('when Endpoint Exceptions can only be global - user has not opted in', () => {
       beforeEach(() => {
-        context.experimentalFeatures = {
-          ...context.experimentalFeatures,
-          endpointExceptionsMovedUnderManagement: false,
-        };
+        mockedGetIsEndpointExceptionsPerPolicyEnabled.mockResolvedValue(false);
 
         manifestManager = new ManifestManager(context);
       });
@@ -1290,15 +1300,14 @@ describe('ManifestManager', () => {
             defaultFeatures
           ),
         });
+
+        expect(mockedGetIsEndpointExceptionsPerPolicyEnabled).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('when Endpoint Exceptions can be per-policy - feature flag is enabled', () => {
       beforeEach(() => {
-        context.experimentalFeatures = {
-          ...context.experimentalFeatures,
-          endpointExceptionsMovedUnderManagement: true,
-        };
+        mockedGetIsEndpointExceptionsPerPolicyEnabled.mockResolvedValue(true);
 
         manifestManager = new ManifestManager(context);
       });
@@ -1336,6 +1345,8 @@ describe('ManifestManager', () => {
             defaultFeatures
           ),
         });
+
+        expect(mockedGetIsEndpointExceptionsPerPolicyEnabled).toHaveBeenCalledTimes(1);
       });
     });
 

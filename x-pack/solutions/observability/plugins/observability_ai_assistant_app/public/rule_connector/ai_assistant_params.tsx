@@ -28,9 +28,9 @@ import { MESSAGE_REQUIRED, STATUS_REQUIRED } from './translations';
 
 const ObsAIAssistantParamsFields: React.FunctionComponent<
   ActionParamsProps<ObsAIAssistantActionParams> & { service: ObservabilityAIAssistantService }
-> = ({ errors, index, messageVariables, editAction, actionParams, service }) => {
+> = ({ errors, index, messageVariables, editAction, actionParams }) => {
   const { connectors, loading, selectConnector, selectedConnector } =
-    useGenAIConnectorsWithoutContext(service);
+    useGenAIConnectorsWithoutContext();
 
   useEffect(() => {
     if (selectedConnector !== actionParams.connector) {
@@ -108,7 +108,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
           // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.connector?.length > 0}
           options={connectors?.map((connector) => {
-            return { value: connector.id, text: connector.name };
+            return { value: connector.connectorId, text: connector.name };
           })}
           onChange={(event) => {
             selectConnector(event.target.value);

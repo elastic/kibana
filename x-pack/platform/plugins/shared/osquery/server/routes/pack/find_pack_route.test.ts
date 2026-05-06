@@ -114,7 +114,7 @@ describe('findPackRoute', () => {
 
     const findArgs = mockSavedObjectsClient.find.mock.calls[0][0];
     expect(findArgs.search).toBe('monitoring');
-    expect(findArgs.searchFields).toEqual(['name']);
+    expect(findArgs.searchFields).toEqual(['name', 'description']);
   });
 
   it('does not pass search or searchFields when search param is absent', async () => {
@@ -234,6 +234,49 @@ describe('findPackRoute', () => {
     expect(findArgs.perPage).toBe(10);
     expect(findArgs.sortField).toBe('created_at');
     expect(findArgs.sortOrder).toBe('asc');
+  });
+
+  it('marks prebuilt packs as read_only', async () => {
+    mockSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          ...makePack(),
+          references: [{ type: 'osquery-pack-asset', id: 'asset-1', name: 'test-pack' }],
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 20,
+    });
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({ query: {} });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    const body = mockResponse.ok.mock.calls[0][0]?.body as any;
+    expect(body.data[0].read_only).toBe(true);
+  });
+
+  it('marks user-created packs as not read_only', async () => {
+    mockSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [makePack({ version: undefined })],
+      total: 1,
+      page: 1,
+      per_page: 20,
+    });
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({ query: {} });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    const body = mockResponse.ok.mock.calls[0][0]?.body as any;
+    expect(body.data[0].read_only).toBe(false);
   });
 
   it('does not pass filter when no filter params provided', async () => {

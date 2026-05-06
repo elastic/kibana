@@ -50,7 +50,7 @@ export function ElasticInferenceServiceCallout() {
         })}
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiButton onClick={onConnectClick} iconType="popout" iconSide="right" size="m">
+      <EuiButton onClick={onConnectClick} iconType="external" iconSide="right" size="m">
         {i18n.translate('xpack.aiAssistant.eisCallout.connectButtonLabel', {
           defaultMessage: 'Connect this cluster',
         })}

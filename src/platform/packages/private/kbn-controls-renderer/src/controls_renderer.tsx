@@ -28,7 +28,6 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { EuiFlexGroup } from '@elastic/eui';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 
 import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
@@ -130,10 +129,8 @@ export const ControlsRenderer = ({
               key={control.id}
               parentApi={parentApi}
               control={{
-                width: DEFAULT_CONTROL_WIDTH,
-                grow: DEFAULT_CONTROL_GROW,
                 ...control,
-                uid: control.id!,
+                id: control.id!,
               }}
               setControlPanelRef={setControlPanelRef}
             />

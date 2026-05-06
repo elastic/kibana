@@ -11,14 +11,17 @@ export {
   protectedNamespaces as toolReservedNamespaces,
   isInProtectedNamespace,
 } from './base/namespaces';
+export { DOT_INDEX_ALLOW_LIST_PATTERNS, isVisibleSearchSource } from './base/dot_index_allow_list';
 export {
   ToolType,
+  ToolOrigin,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,
   platformStreamsSigEventsTools,
   attachmentTools,
   filestoreTools,
+  internalTools,
   defaultAgentToolIds,
   editableToolTypes,
   isReservedToolId,
@@ -110,6 +113,7 @@ export {
   canChangeAgentVisibility,
   hasAgentReadAccess,
   hasAgentWriteAccess,
+  canCurrentUserEditAgent,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
@@ -119,6 +123,14 @@ export {
   type AgentAnswerStepConfiguration,
   type AgentResearchStepConfiguration,
   agentIdRegexp,
+  AgentExecutionMode,
+  SubagentExecutionMode,
+  ExecutionStatus,
+  type SerializedExecutionError,
+  type AgentListOptions,
+  type AgentCreateRequest,
+  type AgentUpdateRequest,
+  type AgentDeleteRequest,
 } from './agents';
 export {
   type RoundInput,
@@ -132,10 +144,19 @@ export {
   type ConversationRoundStep,
   type ReasoningStepData,
   type ReasoningStep,
+  type CompactionStepData,
+  type CompactionStep,
   type RoundModelUsageStats,
+  type CompactionSummary,
+  type CompactionStructuredData,
+  type CompactionToolCallSummary,
+  type CompactionEntity,
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,
+  isCompactionStep,
+  isBackgroundAgentCompleteStep,
+  type BackgroundAgentCompleteStep,
   ChatEventType,
   ConversationRoundStatus,
   type ChatEventBase,
@@ -182,6 +203,16 @@ export {
   isConversationUpdatedEvent,
   isToolProgressEvent,
   isPromptRequestEvent,
+  type CompactionStartedEvent,
+  type CompactionStartedEventData,
+  type CompactionCompletedEvent,
+  type CompactionCompletedEventData,
+  isCompactionStartedEvent,
+  isCompactionCompletedEvent,
+  type BackgroundAgentCompleteEvent,
+  type BackgroundAgentCompleteEventData,
+  isBackgroundAgentCompleteEvent,
+  type ConversationListOptions,
 } from './chat';
 export {
   type PublicSkillDefinition,
@@ -197,6 +228,14 @@ export {
   skillIdRegexp,
   skillNameRegexp,
   maxToolsPerSkill,
+  maxReferencedContentItems,
+  normalizeRelativePathSegments,
+  isRootRelativePath,
+  canComputeReferencedContentUniquenessKey,
+  REFERENCED_CONTENT_REFINE_ISSUE_CODE,
+  type ReferencedContentRefineIssueCode,
+  type ReferencedContentRefineIssue,
+  collectReferencedContentRefineIssues,
 } from './skills';
 export * from './telemetry';
 export {
@@ -215,3 +254,4 @@ export {
   type PluginManifestMetadata,
   type PluginDefinition,
 } from './plugins';
+export { EffortLevels, type EffortLevel } from './model_provider';

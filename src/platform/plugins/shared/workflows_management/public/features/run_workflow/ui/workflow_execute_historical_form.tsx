@@ -143,13 +143,6 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
       setSelectedExecutionId(id);
     }, []);
 
-    const handleChange = useCallback(
-      (newValue: string) => {
-        setValue(newValue);
-      },
-      [setValue]
-    );
-
     const handleMount = useCallback(
       (editor: monaco.editor.IStandaloneCodeEditor) => {
         if (!inputs) return;
@@ -176,7 +169,13 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+        css={css`
+          min-height: 0;
+        `}
+      >
         <EuiFlexItem grow={false}>
           <EuiFormRow label={translations.selectExecutionLabel} fullWidth>
             <EuiComboBox
@@ -198,30 +197,53 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
         </EuiFlexItem>
 
         {selectedExecution && (
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem
+            css={css`
+              overflow: hidden;
+            `}
+          >
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="s"
+              css={css`
+                min-height: 0;
+              `}
+            >
               {errors && errors !== NOT_READY_SENTINEL && (
                 <EuiFlexItem grow={false}>
                   <InputValidationCallout errors={errors} />
                 </EuiFlexItem>
               )}
 
-              <EuiFlexItem>
+              <EuiFlexItem
+                css={css`
+                  overflow: hidden;
+                `}
+              >
                 <EuiFormRow
                   label={translations.getInputDataLabel(
                     getTriggerTypeLabel(selectedExecution.context)
                   )}
                   fullWidth
+                  css={css`
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    min-height: 0;
+                    .euiFormRow__fieldWrapper {
+                      flex: 1;
+                      min-height: 0;
+                      display: flex;
+                      flex-direction: column;
+                    }
+                  `}
                 >
                   <CodeEditor
                     languageId="json"
                     value={value}
-                    fitToContent={{
-                      minLines: 5,
-                      maxLines: 15,
-                    }}
                     width="100%"
-                    onChange={handleChange}
+                    height="100%"
+                    onChange={setValue}
                     editorDidMount={handleMount}
                     dataTestSubj={'workflow-historical-json-editor'}
                     overflowWidgetsContainerZIndexOverride={6001}

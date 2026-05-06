@@ -13,6 +13,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { formatDuration } from '../../../shared/lib/format_duration';
@@ -26,7 +27,9 @@ interface WorkflowExecutionOverviewProps {
   showResumeUI?: boolean;
   executionId?: string;
   resumeMessage?: string;
+  resumeSchema?: JsonModelSchemaType;
   shouldAutoResume?: boolean;
+  waitingStepExecutionId?: string;
 }
 
 const formatExecutionDate = (date: string) => {
@@ -56,7 +59,9 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     showResumeUI = false,
     executionId,
     resumeMessage,
+    resumeSchema,
     shouldAutoResume = false,
+    waitingStepExecutionId,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -107,7 +112,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   {isTestRun && (
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="beaker" size="s" color="subdued" aria-hidden={true} />
+                      <EuiIcon type="flask" size="s" color="subdued" aria-hidden={true} />
                     </EuiFlexItem>
                   )}
                   {workflowExecutionDuration && (
@@ -194,7 +199,9 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
               <ResumeExecutionButton
                 executionId={executionId}
                 resumeMessage={resumeMessage}
+                resumeSchema={resumeSchema}
                 autoOpen={shouldAutoResume}
+                waitingStepExecutionId={waitingStepExecutionId}
               />
             </EuiFlexItem>
           )}

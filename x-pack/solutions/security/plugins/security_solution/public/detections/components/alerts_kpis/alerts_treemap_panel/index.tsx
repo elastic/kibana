@@ -8,6 +8,7 @@
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { EuiComboBox } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
+import styled from '@emotion/styled';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -28,6 +29,12 @@ import type { AlertsTreeMapAggregation } from './alerts_treemap/types';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px
+
+const ScrollableContent = styled.div`
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+`;
 
 const COLLAPSED_HEIGHT = 64; // px
 
@@ -162,11 +169,9 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   return (
     <InspectButtonContainer>
       <KpiPanel
-        className="eui-yScroll"
         data-test-subj="treemapPanel"
         hasBorder
         height={isPanelExpanded ? height : COLLAPSED_HEIGHT}
-        $overflowY={isPanelExpanded ? 'auto' : 'hidden'}
         $toggleStatus
       >
         <HeaderSection
@@ -203,13 +208,15 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
         ) : (
           <>
             {alertsData != null && isPanelExpanded && (
-              <AlertsTreemap
-                addFilter={addFilter}
-                data={alertsData}
-                maxBuckets={DEFAULT_STACK_BY_FIELD0_SIZE}
-                stackByField0={stackByField0}
-                stackByField1={stackByField1}
-              />
+              <ScrollableContent>
+                <AlertsTreemap
+                  addFilter={addFilter}
+                  data={alertsData}
+                  maxBuckets={DEFAULT_STACK_BY_FIELD0_SIZE}
+                  stackByField0={stackByField0}
+                  stackByField1={stackByField1}
+                />
+              </ScrollableContent>
             )}
           </>
         )}

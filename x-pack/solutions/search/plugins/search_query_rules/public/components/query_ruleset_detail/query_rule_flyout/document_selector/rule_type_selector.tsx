@@ -41,7 +41,7 @@ export const QueryRuleTypeSelector: React.FC<QueryRuleTypeSelectorProps> = ({
         id: 'exclude',
         label: (
           <>
-            <EuiIcon type="eyeClosed" size="m" />
+            <EuiIcon type="eyeSlash" size="m" />
             &nbsp;
             <FormattedMessage
               id="xpack.search.queryRulesetDetail.queryRuleFlyout.actionType.exclude"

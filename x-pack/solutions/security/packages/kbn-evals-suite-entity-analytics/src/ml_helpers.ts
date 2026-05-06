@@ -17,43 +17,43 @@ import {
 import { getCommonRequestHeader } from '@kbn/test-suites-xpack-platform/functional/services/ml/common_api';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { isJobStarted } from '@kbn/security-solution-plugin/common/machine_learning/helpers';
 
 // Security Authentication ML module
 export const securityAuthModule = 'security_auth';
 export const securityAuthJobIds = [
-  'auth_rare_source_ip_for_a_user',
-  'suspicious_login_activity',
-  'auth_rare_user',
-  'auth_rare_hour_for_a_user',
+  'auth_rare_source_ip_for_a_user_ea',
+  'suspicious_login_activity_ea',
+  'auth_rare_user_ea',
+  'auth_rare_hour_for_a_user_ea',
 ];
 
 // Privileged Access Detection (PAD) ML module
 export const padModule = 'pad-ml';
 export const padJobIds = [
-  'pad_linux_rare_process_executed_by_user',
-  'pad_linux_high_count_privileged_process_events_by_user',
+  'pad_linux_rare_process_executed_by_user_ea',
+  'pad_linux_high_count_privileged_process_events_by_user_ea',
 ];
 
 // Lateral Movement Detection (LMD) ML module
 export const lmdModule = 'lmd-ml';
 export const lmdJobIds = [
-  'lmd_high_count_remote_file_transfer',
-  'lmd_high_file_size_remote_file_transfer',
+  'lmd_high_count_remote_file_transfer_ea',
+  'lmd_high_file_size_remote_file_transfer_ea',
 ];
 
 // Security PacketBeat ML module
 export const securityPacketBeatModule = 'security_packetbeat';
-export const securityPacketBeatJobIds = ['packetbeat_rare_server_domain'];
+export const securityPacketBeatJobIds = ['packetbeat_rare_server_domain_ea'];
 
 // Data Exfiltration Detection (DED) ML module
 export const dedModule = 'ded-ml';
 export const dedJobIds = [
-  'ded_high_bytes_written_to_external_device',
-  'ded_high_bytes_written_to_external_device_airdrop',
-  'ded_high_sent_bytes_destination_geo_country_iso_code',
-  'ded_high_sent_bytes_destination_ip',
+  'ded_high_bytes_written_to_external_device_ea',
+  'ded_high_bytes_written_to_external_device_airdrop_ea',
+  'ded_high_sent_bytes_destination_geo_country_iso_code_ea',
+  'ded_high_sent_bytes_destination_ip_ea',
 ];
 
 interface ModuleJob {

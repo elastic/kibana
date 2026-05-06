@@ -1,0 +1,151 @@
+{
+  "id": "inbox",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "inbox",
+      "id": "def-public.InboxPublicSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "InboxPublicSetup",
+      "description": [],
+      "signature": [
+        "{ [x: string]: never; }"
+      ],
+      "path": "x-pack/platform/plugins/shared/inbox/public/types.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "inbox",
+      "id": "def-public.InboxPublicStart",
+      "type": "Type",
+      "tags": [],
+      "label": "InboxPublicStart",
+      "description": [],
+      "signature": [
+        "{ [x: string]: never; }"
+      ],
+      "path": "x-pack/platform/plugins/shared/inbox/public/types.ts",
+      "lineNumber": 13,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "inbox",
+      "id": "def-server.InboxPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "InboxPluginSetup",
+      "description": [],
+      "signature": [
+        "{ [x: string]: never; }"
+      ],
+      "path": "x-pack/platform/plugins/shared/inbox/server/types.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "inbox",
+      "id": "def-server.InboxPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "InboxPluginStart",
+      "description": [],
+      "signature": [
+        "{ [x: string]: never; }"
+      ],
+      "path": "x-pack/platform/plugins/shared/inbox/server/types.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "inbox",
+        "id": "def-common.APP_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "APP_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/inbox\""
+        ],
+        "path": "x-pack/platform/plugins/shared/inbox/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inbox",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"inbox\""
+        ],
+        "path": "x-pack/platform/plugins/shared/inbox/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inbox",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"Inbox\""
+        ],
+        "path": "x-pack/platform/plugins/shared/inbox/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
