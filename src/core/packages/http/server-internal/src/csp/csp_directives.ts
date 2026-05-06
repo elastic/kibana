@@ -53,6 +53,12 @@ export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>>
     'feeds.elastic.co',
     'tiles.maps.elastic.co',
     'vector.maps.elastic.co',
+    // FullStory data collection
+    'rs.fullstory.com',
+    // LaunchDarkly feature-flag streaming and event endpoints
+    'events.launchdarkly.com',
+    'clientstream.launchdarkly.com',
+    'app.launchdarkly.com',
   ],
 };
 
@@ -190,6 +196,12 @@ export class CspDirectives {
         cspDirectives.addDirectiveValue(key as CspDirectiveName, value, false);
       });
     });
+
+    const apmServerUrl = process.env.ELASTIC_APM_SERVER_URL;
+    if (apmServerUrl) {
+      const { origin } = new URL(apmServerUrl);
+      cspDirectives.addDirectiveValue('connect-src', origin, false);
+    }
 
     // combining `default` directive configurations
     Object.entries(defaultRules).forEach(([key, values]) => {

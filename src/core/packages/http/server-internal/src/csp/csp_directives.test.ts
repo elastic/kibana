@@ -59,7 +59,7 @@ describe('CspDirectives', () => {
       expect(directives.getCspHeadersByDisposition()).toMatchInlineSnapshot(`
         Object {
           "enforceHeader": "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; img-src 'self' img-src-value",
-          "reportOnlyHeader": "form-action 'report-sample' 'self'; default-src 'report-sample' 'none'; font-src 'report-sample' 'self'; img-src 'report-sample' 'self' data: tiles.maps.elastic.co img-src-value; connect-src 'report-sample' 'self' telemetry.elastic.co telemetry-staging.elastic.co feeds.elastic.co tiles.maps.elastic.co vector.maps.elastic.co; script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'",
+          "reportOnlyHeader": "form-action 'report-sample' 'self'; default-src 'report-sample' 'none'; font-src 'report-sample' 'self'; img-src 'report-sample' 'self' data: tiles.maps.elastic.co img-src-value; connect-src 'report-sample' 'self' telemetry.elastic.co telemetry-staging.elastic.co feeds.elastic.co tiles.maps.elastic.co vector.maps.elastic.co rs.fullstory.com events.launchdarkly.com clientstream.launchdarkly.com app.launchdarkly.com; script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'",
         }
       `);
     });
@@ -144,6 +144,40 @@ describe('CspDirectives', () => {
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
         `"script-src 'report-sample' 'self' 'unsafe-hashes'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'"`
       );
+    });
+
+    describe('ELASTIC_APM_SERVER_URL', () => {
+      const originalEnv = process.env.ELASTIC_APM_SERVER_URL;
+
+      afterEach(() => {
+        if (originalEnv === undefined) {
+          delete process.env.ELASTIC_APM_SERVER_URL;
+        } else {
+          process.env.ELASTIC_APM_SERVER_URL = originalEnv;
+        }
+      });
+
+      it('adds the APM server origin to report-only connect-src when env var is set', () => {
+        process.env.ELASTIC_APM_SERVER_URL = 'https://abc123.apm.us-east-1.aws.found.io';
+        const config = cspConfig.schema.validate({});
+        const directives = CspDirectives.fromConfig(config);
+        const { reportOnlyHeader } = directives.getCspHeadersByDisposition();
+        expect(reportOnlyHeader).toContain('https://abc123.apm.us-east-1.aws.found.io');
+      });
+
+      it('does not add anything to connect-src when env var is not set', () => {
+        delete process.env.ELASTIC_APM_SERVER_URL;
+        const config = cspConfig.schema.validate({});
+        const directives = CspDirectives.fromConfig(config);
+        const { reportOnlyHeader } = directives.getCspHeadersByDisposition();
+        expect(reportOnlyHeader).not.toContain('apm.us-east-1.aws.found.io');
+      });
+
+      it('ignores a malformed APM server URL', () => {
+        process.env.ELASTIC_APM_SERVER_URL = 'not-a-valid-url';
+        const config = cspConfig.schema.validate({});
+        expect(() => CspDirectives.fromConfig(config)).not.toThrow();
+      });
     });
 
     it('merges additional CSP configs as expected', () => {
