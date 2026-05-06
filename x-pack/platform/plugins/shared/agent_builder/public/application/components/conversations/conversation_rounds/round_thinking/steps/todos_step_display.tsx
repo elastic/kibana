@@ -10,11 +10,7 @@ import type { IconColor, IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type {
-  TodoItem,
-  TodoStatus,
-  TodosStep,
-} from '@kbn/agent-builder-common/chat/conversation';
+import type { TodoItem, TodoStatus, TodosStep } from '@kbn/agent-builder-common/chat/conversation';
 
 interface TodosStepDisplayProps {
   step: TodosStep;

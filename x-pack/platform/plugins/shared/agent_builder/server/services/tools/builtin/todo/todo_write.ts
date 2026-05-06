@@ -23,7 +23,9 @@ const todoItemSchema = z.object({
 const todoWriteSchema = z.object({
   todos: z
     .array(todoItemSchema)
-    .describe('Complete updated todo list. Always pass the full list — previous items are replaced.'),
+    .describe(
+      'Complete updated todo list. Always pass the full list — previous items are replaced.'
+    ),
 });
 
 export const createTodoTool = ({
@@ -40,9 +42,7 @@ export const createTodoTool = ({
   handler: async ({ todos }, context) => {
     todoStateManager.set(todos);
     context.events.sendUiEvent('todos_updated', { todos });
-    const incomplete = todos.filter(
-      (t) => t.status !== 'completed' && t.status !== 'cancelled'
-    );
+    const incomplete = todos.filter((t) => t.status !== 'completed' && t.status !== 'cancelled');
     return {
       results: [
         {

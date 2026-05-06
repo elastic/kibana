@@ -353,10 +353,8 @@ export const isBackgroundAgentCompleteEvent = (
   return event.type === ChatEventType.backgroundAgentComplete;
 };
 
-export const isTodosUpdatedEvent = (
-  event: AgentBuilderEvent<string, any>
-) => {
-  return isToolUiEvent<'todos_updated', { todos: TodoItem[] }>(event, 'todos_updated')
+export const isTodosUpdatedEvent = (event: AgentBuilderEvent<string, any>) => {
+  return isToolUiEvent<'todos_updated', { todos: TodoItem[] }>(event, 'todos_updated');
 };
 
 /**
