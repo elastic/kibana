@@ -1,0 +1,492 @@
+{
+  "id": "@kbn/data-lifecycle-phases",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/data-lifecycle-phases",
+        "id": "def-common.usePhaseColors",
+        "type": "Function",
+        "tags": [],
+        "label": "usePhaseColors",
+        "description": [
+          "\nHook that resolves EUI-theme-aware colors for each data lifecycle phase."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/data-lifecycle-phases",
+            "scope": "common",
+            "docId": "kibKbnDataLifecyclePhasesPluginApi",
+            "section": "def-common.PhaseColorMap",
+            "text": "PhaseColorMap"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+        "lineNumber": 117,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/data-lifecycle-phases",
+        "id": "def-common.IlmPhase",
+        "type": "Type",
+        "tags": [],
+        "label": "IlmPhase",
+        "description": [
+          "\nThe set of Index Lifecycle Management (ILM) phases."
+        ],
+        "signature": [
+          "\"delete\" | \"warm\" | \"hot\" | \"frozen\" | \"cold\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-lifecycle-phases",
+        "id": "def-common.PHASE_ORDER",
+        "type": "Array",
+        "tags": [],
+        "label": "PHASE_ORDER",
+        "description": [
+          "\nCanonical phase order."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/data-lifecycle-phases",
+            "scope": "common",
+            "docId": "kibKbnDataLifecyclePhasesPluginApi",
+            "section": "def-common.IlmPhase",
+            "text": "IlmPhase"
+          },
+          "[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-lifecycle-phases",
+        "id": "def-common.PhaseColorMap",
+        "type": "Type",
+        "tags": [],
+        "label": "PhaseColorMap",
+        "description": [],
+        "signature": [
+          "{ delete: string; warm: string; hot: string; frozen: string; cold: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/data-lifecycle-phases",
+        "id": "def-common.PHASE_DESCRIPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "PHASE_DESCRIPTIONS",
+        "description": [
+          "\nShort descriptions (one sentence). Used in the Streams app phase selector."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_DESCRIPTIONS.hot",
+            "type": "string",
+            "tags": [],
+            "label": "hot",
+            "description": [
+              "\nShort descriptions (one sentence). Used in the Streams app phase selector."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_DESCRIPTIONS.warm",
+            "type": "string",
+            "tags": [],
+            "label": "warm",
+            "description": [
+              "\nShort descriptions (one sentence). Used in the Streams app phase selector."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_DESCRIPTIONS.cold",
+            "type": "string",
+            "tags": [],
+            "label": "cold",
+            "description": [
+              "\nShort descriptions (one sentence). Used in the Streams app phase selector."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_DESCRIPTIONS.frozen",
+            "type": "string",
+            "tags": [],
+            "label": "frozen",
+            "description": [
+              "\nShort descriptions (one sentence). Used in the Streams app phase selector."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_DESCRIPTIONS.delete",
+            "type": "string",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "\nShort descriptions (one sentence). Used in the Streams app phase selector."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-lifecycle-phases",
+        "id": "def-common.PHASE_LONG_DESCRIPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "PHASE_LONG_DESCRIPTIONS",
+        "description": [
+          "\nLong descriptions. Used in the ILM policy editor."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+        "lineNumber": 90,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_LONG_DESCRIPTIONS.hot",
+            "type": "string",
+            "tags": [],
+            "label": "hot",
+            "description": [
+              "\nLong descriptions. Used in the ILM policy editor."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_LONG_DESCRIPTIONS.warm",
+            "type": "string",
+            "tags": [],
+            "label": "warm",
+            "description": [
+              "\nLong descriptions. Used in the ILM policy editor."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_LONG_DESCRIPTIONS.cold",
+            "type": "string",
+            "tags": [],
+            "label": "cold",
+            "description": [
+              "\nLong descriptions. Used in the ILM policy editor."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_LONG_DESCRIPTIONS.frozen",
+            "type": "string",
+            "tags": [],
+            "label": "frozen",
+            "description": [
+              "\nLong descriptions. Used in the ILM policy editor."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_LONG_DESCRIPTIONS.delete",
+            "type": "string",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "\nLong descriptions. Used in the ILM policy editor."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-lifecycle-phases",
+        "id": "def-common.PHASE_NAMES",
+        "type": "Object",
+        "tags": [],
+        "label": "PHASE_NAMES",
+        "description": [
+          "\nShort phase labels (\"Hot\", \"Warm\", …). Used in badges and summaries."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_NAMES.hot",
+            "type": "string",
+            "tags": [],
+            "label": "hot",
+            "description": [
+              "\nShort phase labels (\"Hot\", \"Warm\", …). Used in badges and summaries."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_NAMES.warm",
+            "type": "string",
+            "tags": [],
+            "label": "warm",
+            "description": [
+              "\nShort phase labels (\"Hot\", \"Warm\", …). Used in badges and summaries."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_NAMES.cold",
+            "type": "string",
+            "tags": [],
+            "label": "cold",
+            "description": [
+              "\nShort phase labels (\"Hot\", \"Warm\", …). Used in badges and summaries."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_NAMES.frozen",
+            "type": "string",
+            "tags": [],
+            "label": "frozen",
+            "description": [
+              "\nShort phase labels (\"Hot\", \"Warm\", …). Used in badges and summaries."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_NAMES.delete",
+            "type": "string",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "\nShort phase labels (\"Hot\", \"Warm\", …). Used in badges and summaries."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-lifecycle-phases",
+        "id": "def-common.PHASE_TITLES",
+        "type": "Object",
+        "tags": [],
+        "label": "PHASE_TITLES",
+        "description": [
+          "\nFull phase labels (\"Hot phase\", \"Warm phase\", …). Used in selects and the policy editor."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_TITLES.hot",
+            "type": "string",
+            "tags": [],
+            "label": "hot",
+            "description": [
+              "\nFull phase labels (\"Hot phase\", \"Warm phase\", …). Used in selects and the policy editor."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_TITLES.warm",
+            "type": "string",
+            "tags": [],
+            "label": "warm",
+            "description": [
+              "\nFull phase labels (\"Hot phase\", \"Warm phase\", …). Used in selects and the policy editor."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_TITLES.cold",
+            "type": "string",
+            "tags": [],
+            "label": "cold",
+            "description": [
+              "\nFull phase labels (\"Hot phase\", \"Warm phase\", …). Used in selects and the policy editor."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_TITLES.frozen",
+            "type": "string",
+            "tags": [],
+            "label": "frozen",
+            "description": [
+              "\nFull phase labels (\"Hot phase\", \"Warm phase\", …). Used in selects and the policy editor."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-lifecycle-phases",
+            "id": "def-common.PHASE_TITLES.delete",
+            "type": "string",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "\nFull phase labels (\"Hot phase\", \"Warm phase\", …). Used in selects and the policy editor."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}
