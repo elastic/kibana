@@ -246,6 +246,20 @@ export type LensApiAllOperations =
   | LensApiBucketOperations
   | LensApiStaticValueOperation;
 
+/**
+ * Supported chart types in the Lens API
+ *
+ * @note snake cased
+ */
+export type LensApiConfigChartType = LensApiConfig['type'];
+
+/**
+ * Map of Lens API state types to their corresponding config type
+ */
+export type LensApiConfigByType = {
+  [K in LensApiConfig['type']]: Extract<LensApiConfig, { type: K }>;
+};
+
 export {
   // Combined schemas
   metricConfigSchema,

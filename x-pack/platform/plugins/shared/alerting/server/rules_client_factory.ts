@@ -45,6 +45,16 @@ import {
   UIAM_LOGS_GRANT_TAGS,
   UIAM_LOGS_INVALIDATE_TAGS,
 } from './constants';
+
+export interface RulesClientCreateOptions {
+  /**
+   * When true, clone the request's API key for each newly created rule.
+   * The cloned key is independent, non-expiring, and managed by alerting
+   * (invalidated on rule delete/update). Only applies to rule creation.
+   */
+  cloneApiKeysOnCreate?: boolean;
+}
+
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -141,13 +151,15 @@ export class RulesClientFactory {
    */
   public async create(
     request: KibanaRequest,
-    savedObjects: SavedObjectsServiceStart
+    savedObjects: SavedObjectsServiceStart,
+    options?: RulesClientCreateOptions
   ): Promise<RulesClient> {
     return await this.createInternal({
       request,
       savedObjects,
       spaceId: this.getSpaceId(request),
       isExplicitSpaceOverride: false,
+      options,
     });
   }
 
@@ -158,13 +170,15 @@ export class RulesClientFactory {
   public async createWithSpaceId(
     request: KibanaRequest,
     savedObjects: SavedObjectsServiceStart,
-    spaceId: string
+    spaceId: string,
+    options?: RulesClientCreateOptions
   ): Promise<RulesClient> {
     return await this.createInternal({
       request,
       savedObjects,
       spaceId,
       isExplicitSpaceOverride: true,
+      options,
     });
   }
 
@@ -239,11 +253,13 @@ export class RulesClientFactory {
     savedObjects,
     spaceId,
     isExplicitSpaceOverride,
+    options,
   }: {
     request: KibanaRequest;
     savedObjects: SavedObjectsServiceStart;
     spaceId: string;
     isExplicitSpaceOverride: boolean;
+    options?: RulesClientCreateOptions;
   }): Promise<RulesClient> {
     const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
     const factory = this;
@@ -282,7 +298,7 @@ export class RulesClientFactory {
       internalSavedObjectsRepository: this.internalSavedObjectsRepository,
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
-      changeTrackingService: this.changeTrackingService,
+      changeTrackingService: this.changeTrackingService?.asScoped(request),
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
       backfillClient: this.backfillClient,
@@ -393,6 +409,20 @@ export class RulesClientFactory {
           };
         }
         return { apiKeysEnabled: false };
+      },
+      cloneApiKeysOnCreate: options?.cloneApiKeysOnCreate === true,
+      async cloneAPIKey(name: string) {
+        const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
+          name,
+          metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+        });
+        if (!cloneResult) {
+          throw new Error('API key clone returned null (security feature may be disabled)');
+        }
+        return {
+          apiKeysEnabled: true,
+          result: cloneResult,
+        };
       },
       isSystemAction(actionId: string) {
         return actions.isSystemActionConnector(actionId);

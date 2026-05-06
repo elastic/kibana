@@ -14,7 +14,7 @@ const STREAM_DESCRIPTION = 'Test stream for ES|QL autocomplete enrichment';
 
 test.describe(
   'ES|QL source enrichment - stream description in autocomplete popup',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.all] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
       // In stateful mode logs.otel has a deferred backing data stream after enable(); restore it first

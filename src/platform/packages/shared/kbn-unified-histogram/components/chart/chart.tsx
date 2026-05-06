@@ -23,6 +23,7 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
+import { useStableCallback } from '@kbn/react-hooks';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramBucketInterval,
@@ -45,7 +46,6 @@ import { useEditVisualization } from './hooks/use_edit_visualization';
 import type { LensVisService } from '../../services/lens_vis_service';
 import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table';
 import { useLensProps } from './hooks/use_lens_props';
-import { useStableCallback } from '../../hooks/use_stable_callback';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { ChartSectionTemplate } from './chart_section_template';
 

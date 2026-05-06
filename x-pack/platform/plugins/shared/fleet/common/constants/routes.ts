@@ -33,6 +33,7 @@ export const EPM_API_ROUTES = {
   BULK_UNINSTALL_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_uninstall/{taskId}`,
   BULK_ROLLBACK_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_rollback`,
   BULK_ROLLBACK_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_rollback/{taskId}`,
+  BULK_NAMESPACE_CUSTOMIZATION_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_namespace_customization`,
   LIST_PATTERN: EPM_PACKAGES_MANY,
   INSTALLED_LIST_PATTERN: EPM_PACKAGES_INSTALLED,
   LIMITED_LIST_PATTERN: `${EPM_PACKAGES_MANY}/limited`,
@@ -213,6 +214,7 @@ export const ENROLLMENT_API_KEY_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/enrollment_api_keys`,
   INFO_PATTERN: `${API_ROOT}/enrollment_api_keys/{keyId}`,
   DELETE_PATTERN: `${API_ROOT}/enrollment_api_keys/{keyId}`,
+  BULK_DELETE_PATTERN: `${API_ROOT}/enrollment_api_keys/_bulk_delete`,
 };
 
 export const UNINSTALL_TOKEN_ROUTES = {

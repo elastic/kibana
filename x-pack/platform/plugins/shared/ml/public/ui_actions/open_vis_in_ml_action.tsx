@@ -14,6 +14,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { ActionApi } from './types';
 import type { MlCoreSetup } from '../plugin';
+import { isValidLicense } from './action_license_check';
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
@@ -57,6 +58,7 @@ export function createVisToADJobAction(
       }
     },
     async isCompatible({ embeddable }: EmbeddableApiContext) {
+      if (!(await isValidLicense(getStartServices))) return false;
       if (
         !isApiCompatible(embeddable) ||
         !(apiIsOfType(embeddable, LENS_EMBEDDABLE_TYPE) || apiIsOfType(embeddable, 'map'))

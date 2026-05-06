@@ -18,6 +18,7 @@ import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';
 import type { TestGroupRunOrderResponse } from './client';
 import { CiStatsClient } from './client';
+import { getTrackedBranch } from '../utils';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import SHARDED_JEST_CONFIGS from '../../sharded_jest_configs.json';
@@ -571,23 +572,6 @@ function getRunGroup(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string
     throw new Error(`expected to find exactly 1 "${typeName}" run group`);
   }
   return groups[0];
-}
-
-function getTrackedBranch(): string {
-  let pkg;
-  try {
-    pkg = JSON.parse(Fs.readFileSync('package.json', 'utf8'));
-  } catch (_) {
-    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to read kibana's package.json file: ${error.message}`);
-  }
-
-  const branch = pkg.branch;
-  if (typeof branch !== 'string') {
-    throw new Error('missing `branch` field from package.json file');
-  }
-
-  return branch;
 }
 
 function isObj(x: unknown): x is Record<string, unknown> {
