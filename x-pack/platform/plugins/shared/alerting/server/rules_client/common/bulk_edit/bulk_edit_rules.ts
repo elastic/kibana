@@ -112,6 +112,7 @@ export async function bulkEditRules<Params extends RuleParams>(
         paramsModifier: options.paramsModifier,
         shouldIncrementRevision: options.shouldIncrementRevision,
         changeTrackingAction: options.changeTrackingAction,
+        totalNumOfRules: total,
       }),
     finalFilter
   );

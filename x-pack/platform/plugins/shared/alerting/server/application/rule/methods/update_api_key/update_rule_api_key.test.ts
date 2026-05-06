@@ -623,10 +623,14 @@ describe('updateRuleApiKey()', () => {
 
       expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
       expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
-      // Single-rule callers omit the bulkCount metadata.
+      // Single-rule callers fall back to ruleSOs.length for bulkCount.
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [expect.objectContaining({ objectId: '1', module: 'stack' })],
-        { action: 'rule_update_api_key', spaceId: 'default' }
+        {
+          action: 'rule_update_api_key',
+          spaceId: 'default',
+          data: { metadata: { bulkCount: 1 } },
+        }
       );
     });
 

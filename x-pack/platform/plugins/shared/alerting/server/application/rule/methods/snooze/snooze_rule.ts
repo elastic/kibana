@@ -121,10 +121,12 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
   });
 
   await logBulkRuleChanges({
-    context,
     ruleSOs: [updatedRuleRaw] as Array<SavedObject<RawRule>>,
-    action: RuleChangeTrackingAction.ruleSnooze,
-    timestamp: snoozeRuleTimestamp,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleSnooze,
+      timestamp: snoozeRuleTimestamp,
+    },
   });
 
   const ruleDomain = transformRuleAttributesToRuleDomain<Params>(

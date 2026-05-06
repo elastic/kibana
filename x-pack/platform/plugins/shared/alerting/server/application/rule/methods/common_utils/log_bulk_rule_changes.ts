@@ -12,26 +12,43 @@ import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 interface LogBulkRuleChanges {
-  context: RulesClientContext;
   /**
    * Rule saved objects after applying the changes
    */
   ruleSOs: Array<SavedObject<RawRule>>;
   /**
-   * Action performed on rule, e.g. rule_create or rule_update
+   * Context information describing the changes
    */
-  action: string;
-  /**
-   * Original timestamp of the change
-   */
-  timestamp: string | number | Date;
+  rulesClientContext: RulesClientContext;
+  changesContext: {
+    /**
+     * Action performed on rule, e.g. rule_create or rule_update
+     */
+    action: string;
+    /**
+     * Original timestamp of the change
+     */
+    timestamp: string | number | Date;
+    /**
+     * Change metadata object to be written to the each change history item
+     */
+    metadata?: {
+      /**
+       * Original number of rules affected by the bulk action.
+       *
+       * Driving code should provide this number for bulk actions.
+       * Due to OCC we can't capture this number deeper in the call stack.
+       *
+       * Default: ruleSOs.length when not provided
+       */ bulkCount?: number;
+    } & Record<string, number | boolean | string>;
+  };
 }
 
 export async function logBulkRuleChanges({
-  context: { changeTrackingService, ruleTypeRegistry, logger, spaceId },
   ruleSOs,
-  action,
-  timestamp,
+  rulesClientContext: { changeTrackingService, ruleTypeRegistry, logger, spaceId },
+  changesContext: { action, timestamp, metadata: extraMetadata },
 }: LogBulkRuleChanges): Promise<void> {
   if (!changeTrackingService) {
     return;
@@ -67,12 +84,13 @@ export async function logBulkRuleChanges({
   }
 
   try {
-    const metadata = ruleSOs.length > 1 ? { bulkCount: ruleSOs.length } : undefined;
+    const metadata = { ...extraMetadata, bulkCount: extraMetadata?.bulkCount ?? ruleSOs.length };
+    const hasMetadata = Boolean(Object.keys(metadata).length);
 
     await changeTrackingService.logBulk(changes, {
       action,
       spaceId,
-      ...(metadata ? { data: { metadata } } : {}),
+      ...(hasMetadata ? { data: { metadata } } : {}),
     });
   } catch (e) {
     logger.warn(`Unable to log bulk rule changes for action "${action}": ${e}`);

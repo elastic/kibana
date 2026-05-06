@@ -1040,6 +1040,63 @@ describe('bulkDelete', () => {
       );
     });
 
+    test('reports bulkCount as the original `find` total even when OCC retries shrink the batch', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      // Original operation targets 5 rules; bulkCount must reflect this even though
+      // each OCC pass operates on a smaller subset.
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        aggregations: {
+          alertTypeId: {
+            buckets: [{ key: ['myType', 'myApp'], key_as_string: 'myType|myApp', doc_count: 5 }],
+          },
+        },
+        saved_objects: [],
+        per_page: 0,
+        page: 0,
+        total: 5,
+      });
+
+      // First pass: id1 succeeds, id2 fails with a 409 conflict.
+      // Retry pass: id2 succeeds.
+      unsecuredSavedObjectsClient.bulkDelete
+        .mockResolvedValueOnce({
+          statuses: [
+            { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+            getBulkOperationStatusErrorResponse(409),
+          ],
+        })
+        .mockResolvedValueOnce({
+          statuses: [{ id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true }],
+        });
+
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2] };
+          },
+        })
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRuleForBulkOps2] };
+          },
+        });
+
+      await trackingClient.bulkDeleteRules({ ids: ['id1', 'id2'] });
+
+      // Both OCC passes log with bulkCount = 5 (the original `find` total),
+      // not the per-pass batch size (2 then 1).
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(2);
+      for (const [, opts] of changeTrackingService.logBulk.mock.calls) {
+        expect(opts.data).toEqual({ metadata: { bulkCount: 5 } });
+      }
+    });
+
     test('does not log when rule type opts out of tracking', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });

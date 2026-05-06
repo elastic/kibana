@@ -111,7 +111,7 @@ export const bulkEnableRules = async <Params extends RuleParams>(
     action: 'ENABLE',
     logger: context.logger,
     bulkOperation: (filterKueryNode: KueryNode | null) =>
-      bulkEnableRulesWithOCC(context, { filter: filterKueryNode }),
+      bulkEnableRulesWithOCC(context, { filter: filterKueryNode, totalNumOfRules: total }),
     filter: kueryNodeFilterWithAuth,
   });
 
@@ -158,7 +158,7 @@ export const bulkEnableRules = async <Params extends RuleParams>(
 
 const bulkEnableRulesWithOCC = async (
   context: RulesClientContext,
-  { filter }: { filter: KueryNode | null }
+  { filter, totalNumOfRules }: { filter: KueryNode | null; totalNumOfRules: number }
 ) => {
   const rulesFinder = await withSpan(
     {
@@ -367,10 +367,13 @@ const bulkEnableRulesWithOCC = async (
   );
 
   await logBulkRuleChanges({
-    context,
     ruleSOs: result.saved_objects,
-    action: RuleChangeTrackingAction.ruleEnable,
-    timestamp: bulkEnableTimestamp,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleEnable,
+      timestamp: bulkEnableTimestamp,
+      metadata: { bulkCount: totalNumOfRules },
+    },
   });
 
   // Get a map of all rules that failed to enable so we do not clear their flapping

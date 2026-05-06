@@ -99,9 +99,11 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
   });
 
   await logBulkRuleChanges({
-    context,
     ruleSOs: [updatedRuleRaw] as Array<SavedObject<RawRule>>,
-    action: RuleChangeTrackingAction.ruleUnsnooze,
-    timestamp: unsnoozeRuleTimestamp,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleUnsnooze,
+      timestamp: unsnoozeRuleTimestamp,
+    },
   });
 }

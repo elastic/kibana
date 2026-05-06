@@ -46,6 +46,7 @@ export interface BulkEditOccOptions<Params extends RuleParams> {
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
   changeTrackingAction?: ChangeTrackingAction;
+  totalNumOfRules?: number;
 }
 
 const isValidInterval = (interval: string | undefined): interval is string => {
@@ -164,6 +165,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
     apiKeysMap,
     shouldInvalidateApiKeys: options.shouldInvalidateApiKeys,
     changeTrackingAction: options.changeTrackingAction,
+    totalNumOfRules: options.totalNumOfRules,
   });
 
   return {
@@ -181,12 +183,14 @@ async function saveBulkUpdatedRules({
   apiKeysMap,
   shouldInvalidateApiKeys,
   changeTrackingAction,
+  totalNumOfRules,
 }: {
   context: RulesClientContext;
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   shouldInvalidateApiKeys: boolean;
   apiKeysMap: ApiKeysMap;
   changeTrackingAction?: ChangeTrackingAction;
+  totalNumOfRules?: number;
 }) {
   const apiKeysToInvalidate: string[] = [];
   let result: SavedObjectsBulkResponse<RawRule>;
@@ -203,10 +207,13 @@ async function saveBulkUpdatedRules({
     });
 
     await logBulkRuleChanges({
-      context,
       ruleSOs: result.saved_objects,
-      action: changeTrackingAction ?? RuleChangeTrackingAction.ruleUpdate,
-      timestamp: bulkEditRulesTimestamp,
+      rulesClientContext: context,
+      changesContext: {
+        action: changeTrackingAction ?? RuleChangeTrackingAction.ruleUpdate,
+        timestamp: bulkEditRulesTimestamp,
+        metadata: totalNumOfRules ? { bulkCount: totalNumOfRules } : undefined,
+      },
     });
   } catch (e) {
     // avoid unused newly generated API keys

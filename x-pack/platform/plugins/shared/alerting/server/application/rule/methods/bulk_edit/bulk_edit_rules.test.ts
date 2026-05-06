@@ -3484,10 +3484,14 @@ describe('bulkEdit()', () => {
       });
 
       expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
-      // Single-rule callers omit the bulkCount metadata.
+      // bulkCount comes from the original total returned by `find` (mocked to 1).
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [expect.objectContaining({ objectId: '1' })],
-        { action: 'rule_update', spaceId: 'default' }
+        {
+          action: 'rule_update',
+          spaceId: 'default',
+          data: { metadata: { bulkCount: 1 } },
+        }
       );
     });
 
@@ -3590,9 +3594,47 @@ describe('bulkEdit()', () => {
       expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [expect.objectContaining({ objectId: '1' }), expect.objectContaining({ objectId: '3' })],
-        // bulkCount preserves the input size (matches caller telemetry expectations).
-        expect.objectContaining({ data: { metadata: { bulkCount: 3 } } })
+        expect.any(Object)
       );
+    });
+
+    test('reports bulkCount as the original `find` total even when an OCC pass writes a subset', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      // Original operation targets 7 rules; bulkCount must reflect this even though
+      // this OCC pass only writes 2 rules.
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        aggregations: {
+          alertTypeId: {
+            buckets: [{ key: ['myType', 'myApp'], key_as_string: 'myType|myApp', doc_count: 7 }],
+          },
+        },
+        saved_objects: [],
+        per_page: 0,
+        page: 0,
+        total: 7,
+      });
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          { ...existingDecryptedRule, id: '1' },
+          { ...existingDecryptedRule, id: '2' },
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1'), updatedRuleSO('2')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      const [, opts] = changeTrackingService.logBulk.mock.calls[0];
+      // bulkCount = 7 (original total), not 2 (rules in this pass).
+      expect(opts.data).toEqual({ metadata: { bulkCount: 7 } });
     });
 
     test('does not log when rule type opts out of tracking', async () => {

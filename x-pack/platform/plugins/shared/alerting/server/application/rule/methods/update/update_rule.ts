@@ -381,10 +381,12 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     });
 
     await logBulkRuleChanges({
-      context,
       ruleSOs: [updatedRuleSavedObject],
-      action: RuleChangeTrackingAction.ruleUpdate,
-      timestamp: updateRuleTimestamp,
+      rulesClientContext: context,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleUpdate,
+        timestamp: updateRuleTimestamp,
+      },
     });
   } catch (e) {
     const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updatedRuleAttributes;

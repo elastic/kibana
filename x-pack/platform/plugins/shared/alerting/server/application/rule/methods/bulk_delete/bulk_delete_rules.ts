@@ -89,7 +89,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
         action: 'DELETE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDeleteWithOCC(context, { filter: filterKueryNode }),
+          bulkDeleteWithOCC(context, { filter: filterKueryNode, totalNumOfRules: total }),
         filter: finalFilter,
       })
   );
@@ -155,7 +155,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
 
 const bulkDeleteWithOCC = async (
   context: RulesClientContext,
-  { filter }: { filter: KueryNode | null }
+  { filter, totalNumOfRules }: { filter: KueryNode | null; totalNumOfRules: number }
 ) => {
   const rulesFinder = await withSpan(
     {
@@ -282,10 +282,13 @@ const bulkDeleteWithOCC = async (
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
 
   await logBulkRuleChanges({
-    context,
     ruleSOs: rules,
-    action: RuleChangeTrackingAction.ruleDelete,
-    timestamp: deletionTimestamp,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleDelete,
+      timestamp: deletionTimestamp,
+      metadata: { bulkCount: totalNumOfRules },
+    },
   });
 
   return {

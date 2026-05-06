@@ -76,7 +76,11 @@ export const bulkDisableRules = async <Params extends RuleParams>(
         action: 'DISABLE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDisableRulesWithOCC(context, { filter: filterKueryNode, untrack }),
+          bulkDisableRulesWithOCC(context, {
+            filter: filterKueryNode,
+            untrack,
+            totalNumOfRules: total,
+          }),
         filter: kueryNodeFilterWithAuth,
       })
   );
@@ -130,10 +134,12 @@ const bulkDisableRulesWithOCC = async (
   context: RulesClientContext,
   {
     filter,
-    untrack = false,
+    untrack,
+    totalNumOfRules,
   }: {
     filter: KueryNode | null;
     untrack: boolean;
+    totalNumOfRules: number;
   }
 ) => {
   const rulesFinder = await withSpan(
@@ -244,10 +250,13 @@ const bulkDisableRulesWithOCC = async (
   );
 
   await logBulkRuleChanges({
-    context,
     ruleSOs: result.saved_objects,
-    action: RuleChangeTrackingAction.ruleDisable,
-    timestamp: bulkDisableTimestamp,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleDisable,
+      timestamp: bulkDisableTimestamp,
+      metadata: { bulkCount: totalNumOfRules },
+    },
   });
 
   const taskIdsToDisable: string[] = [];

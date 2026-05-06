@@ -254,10 +254,12 @@ export async function createRule<Params extends RuleParams = never>(
   );
 
   await logBulkRuleChanges({
-    context,
     ruleSOs: [createdRuleSavedObject],
-    action: RuleChangeTrackingAction.ruleCreate,
-    timestamp: createTime,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleCreate,
+      timestamp: createTime,
+    },
   });
 
   // Convert ES RawRule back to domain rule object

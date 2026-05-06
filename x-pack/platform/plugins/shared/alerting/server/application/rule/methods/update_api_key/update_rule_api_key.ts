@@ -135,10 +135,12 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     );
 
     await logBulkRuleChanges({
-      context,
       ruleSOs: [updatedRuleSavedObject] as Array<SavedObject<RawRule>>,
-      action: RuleChangeTrackingAction.ruleUpdateApiKey,
-      timestamp: updateRuleApiKeyTimestamp,
+      rulesClientContext: context,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleUpdateApiKey,
+        timestamp: updateRuleApiKeyTimestamp,
+      },
     });
   } catch (e) {
     const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updateAttributes;

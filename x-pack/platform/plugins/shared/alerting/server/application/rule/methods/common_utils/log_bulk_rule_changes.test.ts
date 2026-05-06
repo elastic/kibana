@@ -30,10 +30,12 @@ describe('logBulkRuleChanges', () => {
     const ruleSOs = [buildRuleSO('rule-1'), buildRuleSO('rule-2')];
 
     await logBulkRuleChanges({
-      context,
+      rulesClientContext: context,
       ruleSOs,
-      action: RuleChangeTrackingAction.ruleDelete,
-      timestamp: REFERENCE_TIMESTAMP_MS,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleDelete,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
     });
 
     expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
@@ -70,17 +72,19 @@ describe('logBulkRuleChanges', () => {
     ];
 
     await logBulkRuleChanges({
-      context,
+      rulesClientContext: context,
       ruleSOs,
-      action: RuleChangeTrackingAction.ruleDisable,
-      timestamp: REFERENCE_TIMESTAMP_MS,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleDisable,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
     });
 
     expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
     const [changes, opts] = changeTrackingService.logBulk.mock.calls[0];
     expect(changes.map((c) => c.objectId)).toEqual(['rule-1', 'rule-3']);
-    // bulkCount reflects the number of saved objects supplied (including failures),
-    // matching the behavior callers rely on for telemetry.
+    // bulkCount defaults to ruleSOs.length when no caller override is provided,
+    // so failed SOs still count toward the operation's total.
     expect(opts.data).toEqual({ metadata: { bulkCount: 3 } });
   });
 
@@ -95,10 +99,12 @@ describe('logBulkRuleChanges', () => {
     const ruleSOs = [buildRuleSO('rule-1', '123'), buildRuleSO('rule-2', '456')];
 
     await logBulkRuleChanges({
-      context,
+      rulesClientContext: context,
       ruleSOs,
-      action: RuleChangeTrackingAction.ruleEnable,
-      timestamp: REFERENCE_TIMESTAMP_MS,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleEnable,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
     });
 
     expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
@@ -117,10 +123,12 @@ describe('logBulkRuleChanges', () => {
     const ruleSOs = [buildRuleSO('rule-stack', '123'), buildRuleSO('rule-sec', '456')];
 
     await logBulkRuleChanges({
-      context,
+      rulesClientContext: context,
       ruleSOs,
-      action: RuleChangeTrackingAction.ruleUpdate,
-      timestamp: REFERENCE_TIMESTAMP_MS,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleUpdate,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
     });
 
     const [changes] = changeTrackingService.logBulk.mock.calls[0];
@@ -135,10 +143,12 @@ describe('logBulkRuleChanges', () => {
     const ruleSOs = [buildErroredRuleSO('rule-1'), buildErroredRuleSO('rule-2')];
 
     await logBulkRuleChanges({
-      context,
+      rulesClientContext: context,
       ruleSOs,
-      action: RuleChangeTrackingAction.ruleDisable,
-      timestamp: REFERENCE_TIMESTAMP_MS,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleDisable,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
     });
 
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
@@ -152,10 +162,12 @@ describe('logBulkRuleChanges', () => {
     const ruleSOs = [buildRuleSO('rule-1'), buildRuleSO('rule-2')];
 
     await logBulkRuleChanges({
-      context,
+      rulesClientContext: context,
       ruleSOs,
-      action: RuleChangeTrackingAction.ruleDelete,
-      timestamp: REFERENCE_TIMESTAMP_MS,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleDelete,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
     });
 
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
@@ -165,10 +177,12 @@ describe('logBulkRuleChanges', () => {
     const context = buildContext({ changeTrackingService });
 
     await logBulkRuleChanges({
-      context,
+      rulesClientContext: context,
       ruleSOs: [],
-      action: RuleChangeTrackingAction.ruleEnable,
-      timestamp: REFERENCE_TIMESTAMP_MS,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleEnable,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
     });
 
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
@@ -178,10 +192,12 @@ describe('logBulkRuleChanges', () => {
     const context = buildContext({ changeTrackingService: undefined });
 
     await logBulkRuleChanges({
-      context,
+      rulesClientContext: context,
       ruleSOs: [buildRuleSO('rule-1')],
-      action: RuleChangeTrackingAction.ruleEnable,
-      timestamp: REFERENCE_TIMESTAMP_MS,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleEnable,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
     });
 
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
@@ -193,10 +209,12 @@ describe('logBulkRuleChanges', () => {
     delete (ruleSOWithoutRefs as Partial<SavedObject<RawRule>>).references;
 
     await logBulkRuleChanges({
-      context,
+      rulesClientContext: context,
       ruleSOs: [ruleSOWithoutRefs as SavedObject<RawRule>],
-      action: RuleChangeTrackingAction.ruleUpdate,
-      timestamp: REFERENCE_TIMESTAMP_MS,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleUpdate,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
     });
 
     const [changes] = changeTrackingService.logBulk.mock.calls[0];
@@ -217,10 +235,12 @@ describe('logBulkRuleChanges', () => {
 
     await expect(
       logBulkRuleChanges({
-        context,
+        rulesClientContext: context,
         ruleSOs: [buildRuleSO('rule-1')],
-        action: RuleChangeTrackingAction.ruleDelete,
-        timestamp: REFERENCE_TIMESTAMP_MS,
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleDelete,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+        },
       })
     ).resolves.toBeUndefined();
 
@@ -234,10 +254,12 @@ describe('logBulkRuleChanges', () => {
 
     await expect(
       logBulkRuleChanges({
-        context,
+        rulesClientContext: context,
         ruleSOs: [buildRuleSO('rule-1')],
-        action: RuleChangeTrackingAction.ruleEnable,
-        timestamp: REFERENCE_TIMESTAMP_MS,
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleEnable,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+        },
       })
     ).resolves.toBeUndefined();
 
@@ -254,10 +276,12 @@ describe('logBulkRuleChanges', () => {
       const ruleSOs = [buildRuleSO('rule-1'), buildRuleSO('rule-2')];
 
       await logBulkRuleChanges({
-        context,
+        rulesClientContext: context,
         ruleSOs,
-        action: RuleChangeTrackingAction.ruleUpdate,
-        timestamp: REFERENCE_TIMESTAMP_MS,
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleUpdate,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+        },
       });
 
       const [changes] = changeTrackingService.logBulk.mock.calls[0];
@@ -287,10 +311,12 @@ describe('logBulkRuleChanges', () => {
       const context = buildContext({ changeTrackingService });
 
       await logBulkRuleChanges({
-        context,
+        rulesClientContext: context,
         ruleSOs: [buildRuleSO('rule-1')],
-        action: RuleChangeTrackingAction.ruleUpdate,
-        timestamp: input,
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleUpdate,
+          timestamp: input,
+        },
       });
 
       const [changes] = changeTrackingService.logBulk.mock.calls[0];
@@ -301,15 +327,90 @@ describe('logBulkRuleChanges', () => {
       const context = buildContext({ changeTrackingService });
 
       await logBulkRuleChanges({
-        context,
+        rulesClientContext: context,
         ruleSOs: [buildRuleSO('rule-1'), buildRuleSO('rule-2'), buildRuleSO('rule-3')],
-        action: RuleChangeTrackingAction.ruleDelete,
-        timestamp: REFERENCE_TIMESTAMP_MS,
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleDelete,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+        },
       });
 
       const [changes] = changeTrackingService.logBulk.mock.calls[0];
       const distinctTimestamps = new Set(changes.map((c) => c.timestamp));
       expect(distinctTimestamps).toEqual(new Set([REFERENCE_TIMESTAMP_ISO]));
+    });
+  });
+
+  describe('metadata.bulkCount', () => {
+    it('uses the caller-supplied bulkCount even when it differs from ruleSOs.length', async () => {
+      // Bulk methods capture the original total before OCC retries shrink the input,
+      // so the helper must trust the override rather than recompute from ruleSOs.length.
+      const context = buildContext({ changeTrackingService });
+
+      await logBulkRuleChanges({
+        rulesClientContext: context,
+        ruleSOs: [buildRuleSO('rule-1'), buildRuleSO('rule-2')],
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleDelete,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+          metadata: { bulkCount: 100 },
+        },
+      });
+
+      const [, opts] = changeTrackingService.logBulk.mock.calls[0];
+      expect(opts.data).toEqual({ metadata: { bulkCount: 100 } });
+    });
+
+    it('defaults bulkCount to ruleSOs.length when caller does not provide metadata', async () => {
+      const context = buildContext({ changeTrackingService });
+
+      await logBulkRuleChanges({
+        rulesClientContext: context,
+        ruleSOs: [buildRuleSO('rule-1'), buildRuleSO('rule-2'), buildRuleSO('rule-3')],
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleUpdate,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+        },
+      });
+
+      const [, opts] = changeTrackingService.logBulk.mock.calls[0];
+      expect(opts.data).toEqual({ metadata: { bulkCount: 3 } });
+    });
+
+    it('defaults bulkCount to ruleSOs.length when caller passes metadata without bulkCount', async () => {
+      const context = buildContext({ changeTrackingService });
+
+      await logBulkRuleChanges({
+        rulesClientContext: context,
+        ruleSOs: [buildRuleSO('rule-1'), buildRuleSO('rule-2')],
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleUpdate,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+          metadata: { traceId: 'abc-123' },
+        },
+      });
+
+      const [, opts] = changeTrackingService.logBulk.mock.calls[0];
+      expect(opts.data).toEqual({ metadata: { traceId: 'abc-123', bulkCount: 2 } });
+    });
+
+    it('preserves additional caller-supplied metadata fields alongside bulkCount', async () => {
+      const context = buildContext({ changeTrackingService });
+
+      await logBulkRuleChanges({
+        rulesClientContext: context,
+        ruleSOs: [buildRuleSO('rule-1')],
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleUpdate,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+          metadata: { bulkCount: 25, traceId: 'abc-123', dryRun: true },
+        },
+      });
+
+      const [, opts] = changeTrackingService.logBulk.mock.calls[0];
+      expect(opts.data).toEqual({
+        metadata: { bulkCount: 25, traceId: 'abc-123', dryRun: true },
+      });
     });
   });
 });

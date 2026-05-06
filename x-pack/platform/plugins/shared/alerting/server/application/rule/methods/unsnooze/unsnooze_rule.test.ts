@@ -223,10 +223,14 @@ describe('unsnoozeRule change tracking', () => {
     await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
 
     expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
-    // Single-rule callers omit the bulkCount metadata.
+    // Single-rule callers fall back to ruleSOs.length for bulkCount.
     expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
       [expect.objectContaining({ objectId: 'rule-1', module: 'stack' })],
-      { action: 'rule_unsnooze', spaceId: 'default' }
+      {
+        action: 'rule_unsnooze',
+        spaceId: 'default',
+        data: { metadata: { bulkCount: 1 } },
+      }
     );
   });
 
