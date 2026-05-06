@@ -14,7 +14,11 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  createBadRequestError,
+  AgentExecutionMode,
+} from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
   AgentExecutionService,
@@ -23,8 +27,10 @@ import type {
   ExecuteAgentResult,
   FollowExecutionOptions,
   FindExecutionsOptions,
+  ConversationExecutionParams,
 } from '@kbn/agent-builder-server/execution';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
+import type { SessionsStart } from '@kbn/agent-builder-server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
@@ -43,6 +49,7 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   attachmentsService: AttachmentServiceStart;
+  sessionsService?: SessionsStart;
 }
 
 export const createAgentExecutionService = (
@@ -230,6 +237,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         execution,
         executionClient,
         abortMonitor,
+        request,
       });
 
       this.logger.debug(
@@ -255,11 +263,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     execution,
     executionClient,
     abortMonitor,
+    request,
   }: {
     events$: Observable<ChatEvent>;
     execution: AgentExecution;
     executionClient: AgentExecutionClient;
     abortMonitor: AbortMonitor;
+    request: KibanaRequest;
   }): void {
     const { executionId } = execution;
 
@@ -272,6 +282,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       .then(async () => {
         await executionClient.updateStatus(executionId, ExecutionStatus.completed);
         this.logger.debug(`Local execution ${executionId} completed`);
+        // Post-round: drain the standing session queue if applicable
+        await this.drainStandingSessionQueue(execution, request);
       })
       .catch(async (error) => {
         this.logger.error(`Local execution ${executionId} failed: ${error.message}`);
@@ -291,6 +303,28 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       .finally(() => {
         abortMonitor.stop();
       });
+  }
+
+  /**
+   * After a conversation round completes, check if it belongs to a standing session
+   * and drain the pending trigger queue if so.
+   */
+  private async drainStandingSessionQueue(
+    execution: AgentExecution,
+    request: KibanaRequest
+  ): Promise<void> {
+    const { sessionsService } = this.deps;
+    if (!sessionsService) return;
+    if (execution.executionMode !== AgentExecutionMode.conversation) return;
+    const conversationId = (execution.agentParams as ConversationExecutionParams).conversationId;
+    if (!conversationId) return;
+
+    try {
+      const client = sessionsService.getScopedClient({ request });
+      await client.drainQueue(conversationId, execution.executionId);
+    } catch (err) {
+      this.logger.debug(`[session] post-round drainQueue failed for ${conversationId}: ${err}`);
+    }
   }
 
   /**

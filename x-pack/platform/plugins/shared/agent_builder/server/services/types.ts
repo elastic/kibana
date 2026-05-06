@@ -18,8 +18,13 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-server';
+import type {
+  HooksServiceSetup,
+  HooksServiceStart,
+  SessionsStart,
+} from '@kbn/agent-builder-server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
@@ -52,6 +57,7 @@ export interface InternalStartServices {
   attachments: AttachmentServiceStart;
   skills: SkillServiceStart;
   conversations: ConversationService;
+  sessions: SessionsStart;
   runnerFactory: RunnerFactory;
   hooks: HooksServiceStart;
   auditLogService: AuditLogService;
@@ -91,4 +97,5 @@ export interface ServicesStartDeps {
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  alerting?: AlertingServerStart;
 }

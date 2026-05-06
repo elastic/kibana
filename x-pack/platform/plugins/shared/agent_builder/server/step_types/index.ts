@@ -9,3 +9,4 @@ import { getRunAgentStepDefinition } from './run_agent_step';
 import { rerankStepDefinition } from './rerank_step';
 
 export { getRunAgentStepDefinition, rerankStepDefinition };
+export { getSendSessionMessageStepDefinition } from './send_session_message_step';

@@ -138,4 +138,12 @@ export type {
   ReadOnlyConversationClient,
   ConversationsStart,
 } from './plugin_contract';
+export type {
+  CreateSessionParams,
+  EnqueueTriggerResult,
+  SendMessageResult,
+  SessionClient,
+  SessionsStart,
+} from './sessions';
+export { createSessionTools } from './tools/session_tools';
 export { describeZodSchema, formatSchemaForLlm } from './tools';

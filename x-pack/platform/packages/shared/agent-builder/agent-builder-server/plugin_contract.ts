@@ -27,6 +27,7 @@ import type {
   AgentExecution,
   FindExecutionsOptions,
 } from './execution';
+import type { SessionsStart } from './sessions';
 
 /**
  * AgentBuilder tool service's setup contract.
@@ -257,4 +258,8 @@ export interface AgentBuilderPluginStart {
    * Conversations service (read-only), to list and retrieve conversations.
    */
   conversations: ConversationsStart;
+  /**
+   * Sessions service, to create and manage long-lived standing sessions.
+   */
+  sessions: SessionsStart;
 }

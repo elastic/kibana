@@ -73,6 +73,19 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
         list: jest.fn(),
       }),
     },
+    sessions: {
+      getScopedClient: jest.fn().mockReturnValue({
+        create: jest.fn(),
+        get: jest.fn(),
+        list: jest.fn(),
+        terminate: jest.fn(),
+        enqueueTrigger: jest.fn(),
+        drainQueue: jest.fn(),
+        addSubscription: jest.fn(),
+        removeSubscription: jest.fn(),
+        setStatus: jest.fn(),
+      }),
+    },
   };
 };
 

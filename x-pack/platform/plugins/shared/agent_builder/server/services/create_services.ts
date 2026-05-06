@@ -30,6 +30,7 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
+import { SessionServiceImpl } from './sessions';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -103,6 +104,7 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
+    alerting,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -199,6 +201,18 @@ export class ServiceManager {
       spaces,
     });
 
+    const sessions = new SessionServiceImpl({
+      logger: logger.get('sessions'),
+      esClient: elasticsearch.client.asInternalUser,
+      taskManager,
+      security,
+      spaces,
+      conversationService: conversations,
+      getExecutionService,
+      getActionsStart: () => actions,
+      getAlertingStart: alerting ? () => alerting : undefined,
+    });
+
     const auditLogService = new AuditLogService({
       security,
       logger: logger.get('audit'),
@@ -218,6 +232,7 @@ export class ServiceManager {
       analyticsService,
       meteringService: this.services.metering,
       searchInferenceEndpoints,
+      sessionsService: sessions,
     });
 
     executionService = createAgentExecutionService({
@@ -236,6 +251,7 @@ export class ServiceManager {
       analyticsService,
       meteringService: this.services.metering,
       searchInferenceEndpoints,
+      sessionsService: sessions,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
@@ -246,6 +262,7 @@ export class ServiceManager {
       attachments,
       skills: skillsServiceStart,
       conversations,
+      sessions,
       runnerFactory,
       auditLogService,
       execution: executionService,

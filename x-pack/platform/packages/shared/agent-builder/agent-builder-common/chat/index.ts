@@ -9,6 +9,8 @@ export {
   ConversationRoundStatus,
   type ConversationAction,
   type RoundInput,
+  type RoundInputSource,
+  type TriggerContext,
   type ConverseInput,
   type AssistantResponse,
   type ToolCallWithResult,
@@ -38,6 +40,23 @@ export {
   isReasoningStep,
   isCompactionStep,
 } from './conversation';
+export {
+  type SessionMode,
+  type StandingSessionStatus,
+  type StandingSessionState,
+  type TriggerSubscription,
+  type AlertTriggerSubscription,
+  type ScheduleTriggerSubscription,
+  type ReminderTriggerSubscription,
+  type WebhookTriggerSubscription,
+  type PendingTriggerEvent,
+  type AlertTriggerContext,
+  type ScheduleTriggerContext,
+  type ReminderTriggerContext,
+  type WebhookTriggerContext,
+  type SessionMessageTriggerContext,
+  type SessionListOptions,
+} from './standing_session';
 export {
   ChatEventType,
   type ChatEventBase,

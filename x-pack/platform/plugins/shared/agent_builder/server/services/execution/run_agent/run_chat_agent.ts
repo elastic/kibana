@@ -331,6 +331,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const processedInput: RoundInput = {
     message: processedConversation.nextInput.message,
     attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
+    // Pass through trigger metadata for standing session rounds
+    ...(nextInput.source && { source: nextInput.source }),
+    ...(nextInput.trigger_context && { trigger_context: nextInput.trigger_context }),
   };
 
   // Use provided overrides, or fall back to pending round's overrides (for HITL resume)

@@ -23,6 +23,7 @@ const storageSettings = {
       user_name: types.keyword({}),
       agent_id: types.keyword({}),
       space: types.keyword({}),
+      session_mode: types.keyword({}),
       title: types.text({}),
       created_at: types.date({}),
       updated_at: types.date({}),
@@ -38,6 +39,7 @@ export interface ConversationProperties {
   user_name: string;
   agent_id: string;
   space: string;
+  session_mode?: string;
   title: string;
   created_at: string;
   updated_at: string;

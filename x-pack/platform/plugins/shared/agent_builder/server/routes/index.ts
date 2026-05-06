@@ -23,6 +23,7 @@ import { registerA2ARoutes } from './a2a';
 import { registerSkillsRoutes } from './skills';
 import { registerPluginsRoutes } from './plugins';
 import { registerInternalExecutionRoutes } from './internal/executions';
+import { registerInternalSessionRoutes } from './internal/sessions';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
@@ -42,4 +43,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerSkillsRoutes(dependencies);
   registerPluginsRoutes(dependencies);
   registerInternalExecutionRoutes(dependencies);
+  registerInternalSessionRoutes(dependencies);
 };

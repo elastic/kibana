@@ -13,6 +13,7 @@ import type {
   ConversationWithoutRounds,
   ToolResult,
   UserIdAndName,
+  SessionMode,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
@@ -59,6 +60,9 @@ const convertBaseFromEs = (document: Document) => {
     title: document._source.title,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
+    ...(document._source.session_mode && {
+      session_mode: document._source.session_mode as SessionMode,
+    }),
   };
 };
 
@@ -223,6 +227,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     user_id: conversation.user.id,
     user_name: conversation.user.username,
     space,
+    session_mode: conversation.session_mode,
     title: conversation.title,
     created_at: conversation.created_at,
     updated_at: conversation.updated_at,
@@ -271,6 +276,7 @@ export const createRequestToEs = ({
     user_id: currentUser.id,
     user_name: currentUser.username,
     space,
+    session_mode: conversation.session_mode,
     title: conversation.title,
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),

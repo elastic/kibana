@@ -32,6 +32,7 @@ import type {
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,
 } from '@kbn/agent-context-layer-plugin/server';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 
 export type {
   AgentBuilderPluginSetup,
@@ -79,4 +80,5 @@ export interface AgentBuilderStartDependencies {
   security?: SecurityPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   agentContextLayer: AgentContextLayerPluginStart;
+  alerting?: AlertingServerStart;
 }

@@ -133,7 +133,26 @@ export {
   type AgentDeleteRequest,
 } from './agents';
 export {
+  type SessionMode,
+  type StandingSessionStatus,
+  type StandingSessionState,
+  type TriggerSubscription,
+  type AlertTriggerSubscription,
+  type ScheduleTriggerSubscription,
+  type ReminderTriggerSubscription,
+  type WebhookTriggerSubscription,
+  type PendingTriggerEvent,
+  type AlertTriggerContext,
+  type ScheduleTriggerContext,
+  type ReminderTriggerContext,
+  type WebhookTriggerContext,
+  type SessionMessageTriggerContext,
+  type SessionListOptions,
+} from './chat';
+export {
   type RoundInput,
+  type RoundInputSource,
+  type TriggerContext,
   type ConverseInput,
   type AssistantResponse,
   type ToolCallWithResult,

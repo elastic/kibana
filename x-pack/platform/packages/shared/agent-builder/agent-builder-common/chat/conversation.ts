@@ -18,6 +18,12 @@ import type {
 import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { RoundState } from './round_state';
+import type {
+  SessionMode,
+  RoundInputSource,
+  TriggerContext,
+  StandingSessionState,
+} from './standing_session';
 
 /**
  * Represents the input that initiated a conversation round.
@@ -36,7 +42,19 @@ export interface RoundInput {
    * References to versioned conversation-level attachments.
    */
   attachment_refs?: AttachmentVersionRef[];
+  /**
+   * What initiated this round. Absent means 'human' for backwards compatibility.
+   * Only present on standing session rounds.
+   */
+  source?: RoundInputSource;
+  /**
+   * Trigger-specific context injected when source is not 'human'.
+   * Present whenever source is a trigger or session_message.
+   */
+  trigger_context?: TriggerContext;
 }
+
+export type { RoundInputSource, TriggerContext } from './standing_session';
 
 /**
  * Represents the input used to interact with an agent (new round, resume round)
@@ -60,6 +78,16 @@ export interface ConverseInput {
    * Response from the user to prompt requests.
    */
   prompts?: Record<string, PromptResponse>;
+  /**
+   * What initiated this round (for standing sessions).
+   * When set, the stored round will record source and trigger_context.
+   */
+  source?: RoundInputSource;
+  /**
+   * Trigger-specific context injected when source is not 'human'.
+   * Present whenever source is a trigger or session_message.
+   */
+  trigger_context?: TriggerContext;
 }
 
 /**
@@ -221,6 +249,11 @@ export enum ConversationRoundStatus {
   completed = 'completed',
   /** round has been interrupted and is awaiting user input */
   awaitingPrompt = 'awaiting_prompt',
+  /**
+   * Standing-session round completed with set_idle — session is dormant,
+   * waiting for the next trigger event to start a new round.
+   */
+  awaitingTrigger = 'awaiting_trigger',
 }
 
 /**
@@ -287,6 +320,11 @@ export interface Conversation {
   id: string;
   /** id of the agent this conversation is bound to */
   agent_id: string;
+  /**
+   * Whether this is a traditional interactive conversation or a long-lived standing session.
+   * Absent means 'interactive' for backwards compatibility.
+   */
+  session_mode?: SessionMode;
   /** info of the owner of the discussion */
   user: UserIdAndName;
   /** title of the conversation */
@@ -328,6 +366,10 @@ export interface ConversationInternalState {
   compaction_summary?: CompactionSummary;
   /** Background sub-agent executions keyed by execution ID. */
   background_executions?: Record<string, BackgroundExecutionState>;
+  /**
+   * Standing session lifecycle state. Only present when Conversation.session_mode === 'standing'.
+   */
+  standing_session?: StandingSessionState;
 }
 
 export interface BackgroundExecutionCompletedAt {

@@ -72,6 +72,16 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.workflow_delete_step`,
   `${internalNamespaces.workflows}.workflow_set_yaml`,
   `${internalNamespaces.workflows}.workflow_execute_step`,
+
+  // Standing session lifecycle tools
+  `${internalNamespaces.session}.set_idle`,
+  `${internalNamespaces.session}.terminate`,
+  `${internalNamespaces.session}.subscribe_to_alert`,
+  `${internalNamespaces.session}.subscribe_to_schedule`,
+  `${internalNamespaces.session}.set_reminder`,
+  `${internalNamespaces.session}.subscribe_to_webhook`,
+  `${internalNamespaces.session}.unsubscribe`,
+  `${internalNamespaces.session}.send_message`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];

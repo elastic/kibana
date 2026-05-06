@@ -41,6 +41,7 @@
       "usageCollection"
     ],
     "optionalPlugins": [
+      "alerting",
       "cloud",
       "evals",
       "licenseManagement",

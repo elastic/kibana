@@ -21,6 +21,8 @@ export const internalNamespaces = {
   security: 'security',
   streams: 'platform.streams',
   workflows: 'platform.workflows',
+  /** Reserved for built-in standing-session lifecycle tools (session.set_idle, session.terminate, etc.) */
+  session: 'session',
 } as const;
 
 /**
@@ -38,6 +40,7 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.security,
   internalNamespaces.streams,
   internalNamespaces.workflows,
+  internalNamespaces.session,
 ];
 
 /**

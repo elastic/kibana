@@ -8,7 +8,9 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
-import { ExecutionStatus } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
+import type { SessionsStart } from '@kbn/agent-builder-server';
+import type { ConversationExecutionParams } from '@kbn/agent-builder-server/execution';
 import { createAgentExecutionClient, type AgentExecutionClient } from '../persistence';
 import {
   handleAgentExecution,
@@ -20,6 +22,7 @@ import { AbortMonitor } from './abort_monitor';
 
 export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
+  sessionsService?: SessionsStart;
 }
 
 /**
@@ -88,6 +91,9 @@ class TaskHandlerImpl implements TaskHandler {
 
       // 6. Mark as completed
       await executionClient.updateStatus(executionId, ExecutionStatus.completed);
+
+      // 7. Post-round: drain the standing session queue if applicable.
+      await this.drainStandingSessionQueue(execution, executionId, fakeRequest);
     } catch (error) {
       this.logger.error(`Execution ${executionId} failed: ${error.message}`);
 
@@ -117,5 +123,24 @@ class TaskHandlerImpl implements TaskHandler {
       logger: this.logger.get('execution-client'),
       esClient: this.deps.elasticsearch.client.asInternalUser,
     });
+  }
+
+  private async drainStandingSessionQueue(
+    execution: Awaited<ReturnType<AgentExecutionClient['get']>>,
+    executionId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    const { sessionsService } = this.deps;
+    if (!sessionsService || !execution) return;
+    if (execution.executionMode !== AgentExecutionMode.conversation) return;
+    const conversationId = (execution.agentParams as ConversationExecutionParams).conversationId;
+    if (!conversationId) return;
+
+    try {
+      const client = sessionsService.getScopedClient({ request });
+      await client.drainQueue(conversationId, executionId);
+    } catch (err) {
+      this.logger.debug(`[session] TM post-round drainQueue failed for ${conversationId}: ${err}`);
+    }
   }
 }

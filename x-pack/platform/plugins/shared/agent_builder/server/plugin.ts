@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { createSessionTools } from '@kbn/agent-builder-server';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
@@ -21,7 +22,11 @@ import type {
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
-import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
+import {
+  getRunAgentStepDefinition,
+  rerankStepDefinition,
+  getSendSessionMessageStepDefinition,
+} from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
 import { registerAgentBuilderHandlerContext } from './request_handler_context';
 import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
@@ -37,6 +42,10 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import {
+  registerAgentSessionTriggerTasks,
+  registerAgentSessionAlertConnectorType,
+} from './services/sessions';
 
 export class AgentBuilderPlugin
   implements
@@ -108,6 +117,29 @@ export class AgentBuilderPlugin
       },
     });
 
+    registerAgentSessionTriggerTasks({
+      taskManager: setupDeps.taskManager,
+      logger: this.logger.get('sessions'),
+      getSessionsStart: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('getSessionsStart called before service init');
+        }
+        return services.sessions;
+      },
+    });
+
+    registerAgentSessionAlertConnectorType(setupDeps.actions, {
+      logger: this.logger.get('sessions'),
+      getSessionsStart: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('getSessionsStart called before service init');
+        }
+        return services.sessions;
+      },
+    });
+
     registerFeatures({ features: setupDeps.features });
 
     // Phantom capability: not a registered feature privilege. Used as an admin check
@@ -129,6 +161,9 @@ export class AgentBuilderPlugin
       getRunAgentStepDefinition(this.serviceManager)
     );
     setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
+    setupDeps.workflowsExtensions.registerStepDefinition(
+      getSendSessionMessageStepDefinition(this.serviceManager)
+    );
 
     registerAgentBuilderHandlerContext({ coreSetup });
 
@@ -184,6 +219,19 @@ export class AgentBuilderPlugin
       serviceSetups.tools.register(tool);
     });
 
+    const sessionTools = createSessionTools({
+      getScopedClient: ({ request }) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Session service not yet initialized');
+        }
+        return services.sessions.getScopedClient({ request });
+      },
+    });
+    sessionTools.forEach((tool) => {
+      serviceSetups.tools.register(tool);
+    });
+
     return {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
@@ -216,7 +264,8 @@ export class AgentBuilderPlugin
     }).then((teardownTracing) => {
       this.teardownTracing = teardownTracing;
     });
-    const { inference, spaces, actions, taskManager, searchInferenceEndpoints } = startDeps;
+    const { inference, spaces, actions, taskManager, searchInferenceEndpoints, alerting } =
+      startDeps;
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
 
@@ -239,9 +288,10 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
       searchInferenceEndpoints,
+      alerting,
     });
 
-    const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
+    const { tools, agents, skills, runnerFactory, execution, plugins, conversations, sessions } =
       startServices;
     const runner = runnerFactory.getRunner();
 
@@ -290,6 +340,9 @@ export class AgentBuilderPlugin
             list: client.list.bind(client),
           };
         },
+      },
+      sessions: {
+        getScopedClient: ({ request }) => sessions.getScopedClient({ request }),
       },
     };
   }
