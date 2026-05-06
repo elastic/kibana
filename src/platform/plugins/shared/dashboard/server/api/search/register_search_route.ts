@@ -11,8 +11,15 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { schema } from '@kbn/config-schema';
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG } from '@kbn/as-code-shared-schemas';
 import { getRouteConfig } from '../get_route_config';
-import { searchRequestParamsSchema, searchResponseBodySchema } from './schemas';
+import {
+  legacySearchRequestParamsSchema,
+  legacySearchResponseBodySchema,
+  searchRequestParamsSchema,
+  searchResponseBodySchema,
+} from './schemas';
 import { search } from './search';
 import { logRequest } from '../log_request';
 
@@ -35,11 +42,11 @@ export function registerSearchRoute(
       version: routeVersion,
       validate: {
         request: {
-          query: searchRequestParamsSchema,
+          query: schema.oneOf([searchRequestParamsSchema, legacySearchRequestParamsSchema]),
         },
         response: {
           200: {
-            body: () => searchResponseBodySchema,
+            body: () => schema.oneOf([searchResponseBodySchema, legacySearchResponseBodySchema]),
             description: 'success',
           },
           403: {
@@ -54,7 +61,30 @@ export function registerSearchRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
         try {
+          const {
+            core: { featureFlags },
+          } = await ctx.resolve(['core']);
+          const useAsCodeSearchSchemas = await featureFlags.getBooleanValue(
+            AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+            false
+          );
+
+          // Validate request query against the appropriate schema based on the feature flag.
+          if (useAsCodeSearchSchemas) {
+            searchRequestParamsSchema.validate(req.query);
+          } else {
+            legacySearchRequestParamsSchema.validate(req.query);
+          }
+
           const result = await search(ctx, req.query);
+
+          // // Validate response body against the appropriate schema based on the feature flag.
+          // if (useAsCodeSearchSchemas) {
+          //   searchResponseBodySchema.validate(result);
+          // } else {
+          //   legacySearchResponseBodySchema.validate(result);
+          // }
+
           return res.ok({ body: result });
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 403) {

@@ -199,7 +199,7 @@ async function getSaveAsTitle(title: string) {
 
   let saveAsTitle = `${baseTitle} (${baseCount + 1})`;
 
-  const { dashboards } = await dashboardClient.search({
+  const { data: dashboards } = await dashboardClient.search({
     query: baseTitle,
     per_page: 20,
   });

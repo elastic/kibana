@@ -9,17 +9,26 @@
 
 import { tagsToFindOptions } from '@kbn/content-management-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { getMeta } from '@kbn/as-code-shared-schemas';
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG, getMeta } from '@kbn/as-code-shared-schemas';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from './types';
+import type {
+  DashboardSearchRequestParams,
+  DashboardSearchResponseBody,
+  LegacyDashboardSearchRequestParams,
+  LegacyDashboardSearchResponseBody,
+} from './types';
 import { transformDashboardOut } from '../transforms';
 
 export async function search(
   requestCtx: RequestHandlerContext,
-  searchParams: DashboardSearchRequestParams
-): Promise<DashboardSearchResponseBody> {
+  searchParams: DashboardSearchRequestParams | LegacyDashboardSearchRequestParams
+): Promise<DashboardSearchResponseBody | LegacyDashboardSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
+  const useAsCodeSearchSchemas = await core.featureFlags.getBooleanValue(
+    AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+    false
+  );
   const normalizeToArray = (value?: string | string[]) => {
     if (value === undefined) return undefined;
     return Array.isArray(value) ? value : [value];
@@ -46,6 +55,33 @@ export async function search(
     ...tagsToFindOptions({ included: includedTags, excluded: excludedTags }),
   });
 
+  if (useAsCodeSearchSchemas) {
+    return {
+      data: soResponse.saved_objects.map((so) => {
+        const {
+          dashboardState: { description, tags, time_range, title },
+        } = transformDashboardOut(so.attributes, so.references);
+
+        return {
+          id: so.id,
+          data: {
+            ...(description && { description }),
+            ...(tags && { tags }),
+            ...(time_range && { time_range }),
+            ...(so?.accessControl && {
+              access_control: {
+                access_mode: so.accessControl.accessMode,
+              },
+            }),
+            title: title ?? '',
+          },
+          meta: getMeta(so),
+        };
+      }),
+      meta: { total: soResponse.total, page: soResponse.page, per_page: soResponse.per_page },
+    } as DashboardSearchResponseBody;
+  }
+
   return {
     dashboards: soResponse.saved_objects.map((so) => {
       const {
@@ -70,5 +106,5 @@ export async function search(
     }),
     page: soResponse.page,
     total: soResponse.total,
-  };
+  } as LegacyDashboardSearchResponseBody;
 }

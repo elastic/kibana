@@ -13,6 +13,12 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
+import {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+  PAGINATION_DEFAULT_PER_PAGE,
+} from '@kbn/as-code-shared-schemas';
+
+import type { LegacyDashboardSearchResponseBody } from '../../server/api/search/types';
 import type {
   DashboardSearchRequestParams,
   DashboardSearchResponseBody,
@@ -106,15 +112,35 @@ export const dashboardClient = {
     }
     return result;
   },
-  search: async (searchParams: DashboardSearchRequestParams) => {
+  search: async (searchParams: Partial<DashboardSearchRequestParams>) => {
     const { query, ...params } = searchParams;
-    return await coreServices.http.get<DashboardSearchResponseBody>(`${DASHBOARD_API_PATH}`, {
+
+    const useAsCodeSearchSchemas = await coreServices.featureFlags.getBooleanValue(
+      AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+      false
+    );
+
+    const response = await coreServices.http.get<DashboardSearchResponseBody>(DASHBOARD_API_PATH, {
       version: DASHBOARD_API_VERSION,
       query: {
         ...params,
         ...(query ? { query: `${query}*` } : {}),
       },
     });
+
+    if (!useAsCodeSearchSchemas) {
+      const legacyResponse = response as unknown as LegacyDashboardSearchResponseBody;
+      return {
+        data: legacyResponse.dashboards,
+        meta: {
+          page: legacyResponse.page,
+          per_page: params.per_page || PAGINATION_DEFAULT_PER_PAGE,
+          total: legacyResponse.total,
+        },
+      } as DashboardSearchResponseBody;
+    }
+
+    return response;
   },
   update: async (id: string, dashboardState: DashboardState) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
