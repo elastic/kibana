@@ -178,6 +178,7 @@ const finalize = (
     `Path=${path}`,
     `Max-Age=${COOKIE_MAX_AGE_SECONDS}`,
     'SameSite=Lax',
+    'HttpOnly',
   ];
   if (isHttps) parts.push('Secure');
   return {

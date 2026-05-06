@@ -167,11 +167,12 @@ describe('resolveLocale', () => {
       expect(result.setCookieHeader).toContain(`${KBN_LOCALE_COOKIE_NAME}=en`);
     });
 
-    it('includes Path, Max-Age, and SameSite=Lax', () => {
+    it('includes Path, Max-Age, SameSite=Lax, and HttpOnly', () => {
       const result = resolveLocale(baseArgs({ serverBasePath: '/abc' }));
       expect(result.setCookieHeader).toContain('Path=/abc');
       expect(result.setCookieHeader).toContain('Max-Age=31536000');
       expect(result.setCookieHeader).toContain('SameSite=Lax');
+      expect(result.setCookieHeader).toContain('HttpOnly');
     });
 
     it('uses Path=/ when serverBasePath is empty', () => {

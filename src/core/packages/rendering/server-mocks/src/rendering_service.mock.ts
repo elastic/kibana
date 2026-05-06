@@ -18,7 +18,7 @@ export type RenderingServiceMock = jest.Mocked<PublicMethodsOf<RenderingService>
 
 const MOCK_RENDER_RESULT = {
   body: '<body />',
-  headers: { 'set-cookie': 'KBN_LOCALE=en; Path=/; Max-Age=31536000; SameSite=Lax' },
+  headers: { 'set-cookie': 'KBN_LOCALE=en; Path=/; Max-Age=31536000; SameSite=Lax; HttpOnly' },
 };
 
 function createRenderingPreboot() {
