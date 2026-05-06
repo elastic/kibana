@@ -26,6 +26,7 @@ describe('action policy form utils', () => {
       expect(toCreatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
+        type: 'global',
         groupingMode: 'per_episode',
         throttle: { strategy: 'on_status_change' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
@@ -44,6 +45,7 @@ describe('action policy form utils', () => {
       expect(payload).toEqual({
         name: 'Policy',
         description: 'Description',
+        type: 'global',
         groupingMode: 'per_field',
         groupBy: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },

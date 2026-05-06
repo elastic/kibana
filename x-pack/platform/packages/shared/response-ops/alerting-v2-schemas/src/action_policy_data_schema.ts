@@ -98,10 +98,9 @@ const validateGroupingModeAndStrategy = (payload: ValidationPayload) => {
 
 const validateTypeAndRuleId = (payload: ValidationPayload) => {
   const { value: data, issues } = payload;
-  const type = data.type ?? 'global';
 
-  if (type === 'single_rule') {
-    if (!data.ruleId || data.ruleId.length === 0) {
+  if (data.type === 'single_rule') {
+    if (!data.ruleId) {
       issues.push({
         code: 'custom',
         message: 'ruleId is required when type is "single_rule"',
@@ -115,16 +114,11 @@ const validateTypeAndRuleId = (payload: ValidationPayload) => {
   if (data.ruleId !== undefined) {
     issues.push({
       code: 'custom',
-      message: 'ruleId must not be provided when type is "global"',
+      message: 'ruleId is only allowed when type is "single_rule"',
       path: ['ruleId'],
       input: data,
     });
   }
-};
-
-const validateCreateActionPolicy = (payload: ValidationPayload) => {
-  validateGroupingModeAndStrategy(payload);
-  validateTypeAndRuleId(payload);
 };
 
 export type ActionPolicyDestination = z.infer<typeof actionPolicyDestinationSchema>;
@@ -197,7 +191,7 @@ export const createActionPolicyDataSchema = z
     name: z.string().describe('The name of the action policy.'),
     description: z.string().describe('A description of the action policy.'),
     type: actionPolicyTypeSchema
-      .optional()
+      .default('global')
       .describe('The action policy type. Defaults to "global" when omitted.'),
     ruleId: z
       .string()
@@ -220,12 +214,16 @@ export const createActionPolicyDataSchema = z
       .describe('The grouping mode for alert notifications.'),
     throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
   })
-  .check(validateCreateActionPolicy);
+  .check(validateGroupingModeAndStrategy, validateTypeAndRuleId);
 
 export type CreateActionPolicyData = z.infer<typeof createActionPolicyDataSchema>;
+// Caller-facing shape: `type` is optional because the schema defaults it to 'global'.
+export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataSchema>;
 
-// Note: `type` and `ruleId` are immutable after creation and intentionally
-// omitted from the update schema. To change them, delete and recreate the policy.
+// Note: `type` and `ruleId` are immutable after creation. The schema is
+// strict so attempts to send them through update return 400 instead of
+// silently stripping the fields. To change either, delete and recreate the
+// policy.
 export const updateActionPolicyDataSchema = z
   .object({
     name: z.string().optional().describe('The name of the action policy.'),
@@ -252,6 +250,7 @@ export const updateActionPolicyDataSchema = z
       .nullable()
       .describe('The throttle configuration for notifications.'),
   })
+  .strict()
   .check((payload) => {
     if (payload.value.throttle === null || payload.value.throttle === undefined) return;
     if (payload.value.groupingMode === undefined) {

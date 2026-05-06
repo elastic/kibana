@@ -207,6 +207,7 @@ describe('ActionPolicyFormPage', () => {
           {
             name: 'Policy from test',
             description: 'Description from test',
+            type: 'global',
             groupingMode: 'per_episode',
             throttle: { strategy: 'on_status_change' },
             destinations: [{ type: 'workflow', id: 'workflow-1' }],

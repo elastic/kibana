@@ -15,6 +15,7 @@ import type { CreateRuleParams, UpdateRuleData } from './types';
 import type { UserService } from '../services/user_service/user_service';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import type { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from './rules_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import { createUserService } from '../services/user_service/user_service.mock';
@@ -107,7 +108,20 @@ describe('RulesClient', () => {
   });
 
   function createClient() {
-    return new RulesClient(request, http, rulesSavedObjectService, taskManager, userService);
+    const actionPolicyClient = {
+      findActionPolicies: jest
+        .fn()
+        .mockResolvedValue({ items: [], total: 0, page: 1, perPage: 20 }),
+      deleteActionPolicy: jest.fn().mockResolvedValue(undefined),
+    } as unknown as ActionPolicyClient;
+    return new RulesClient(
+      request,
+      http,
+      rulesSavedObjectService,
+      taskManager,
+      userService,
+      actionPolicyClient
+    );
   }
 
   describe('createRule', () => {

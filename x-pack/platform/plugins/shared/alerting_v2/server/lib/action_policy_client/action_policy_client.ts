@@ -27,6 +27,8 @@ import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_po
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
+import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
+import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import { ActionPolicyNamespaceToken } from './tokens';
@@ -70,6 +72,8 @@ export class ActionPolicyClient {
   constructor(
     @inject(ActionPolicySavedObjectServiceScopedToken)
     private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract,
+    @inject(RulesSavedObjectServiceScopedToken)
+    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract,
     @inject(EncryptedSavedObjectsClientToken)
@@ -84,6 +88,10 @@ export class ActionPolicyClient {
       throw Boom.badRequest(
         `Error validating create action policy data - ${stringifyZodError(parsed.error)}`
       );
+    }
+
+    if (parsed.data.type === 'single_rule' && parsed.data.ruleId) {
+      await this.assertRuleExists(parsed.data.ruleId);
     }
 
     const userProfile = await this.getUserProfile();
@@ -384,6 +392,21 @@ export class ActionPolicyClient {
     return { processed, total: actions.length, errors };
   }
 
+  // Reject single_rule policies that point at a missing rule before persistence.
+  // Without this guard the policy would be created and silently never fire.
+  private async assertRuleExists(ruleId: string): Promise<void> {
+    try {
+      await this.rulesSavedObjectService.get(ruleId, this.namespace);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw Boom.badRequest(
+          `Cannot create single_rule action policy: rule "${ruleId}" not found in this space.`
+        );
+      }
+      throw e;
+    }
+  }
+
   private buildFindFilter(params: FindActionPoliciesParams): KueryNode | undefined {
     const conditions: KueryNode[] = [];
     const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
@@ -405,6 +428,14 @@ export class ActionPolicyClient {
       conditions.push(
         tagConditions.length === 1 ? tagConditions[0] : nodeBuilder.or(tagConditions)
       );
+    }
+
+    if (params.ruleId) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.ruleId`, params.ruleId));
+    }
+
+    if (params.type) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.type`, params.type));
     }
 
     if (conditions.length === 0) {

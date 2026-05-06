@@ -9,6 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { createUserService } from '../services/user_service/user_service.mock';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from './rules_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 
@@ -21,6 +22,10 @@ export function createRulesClient(): {
   const http = httpServiceMock.createStartContract();
   const taskManager = taskManagerMock.createStart();
   const { userService } = createUserService();
+  const actionPolicyClient = {
+    findActionPolicies: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 20 }),
+    deleteActionPolicy: jest.fn().mockResolvedValue(undefined),
+  } as unknown as ActionPolicyClient;
 
   http.basePath.get.mockReturnValue('/s/default');
 
@@ -29,7 +34,8 @@ export function createRulesClient(): {
     http,
     rulesSavedObjectService,
     taskManager,
-    userService
+    userService,
+    actionPolicyClient
   );
 
   return { rulesClient, mockSavedObjectsClient };

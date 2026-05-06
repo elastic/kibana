@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import type {
   ActionPolicyResponse,
+  ActionPolicyType,
   CreateActionPolicyData,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
@@ -24,6 +25,13 @@ export function validateDateString(dateString: string): void {
 }
 
 const normalizeNullableField = <T>(value: T | null | undefined): T | null => value ?? null;
+
+// `ruleId` is only meaningful when type === 'single_rule'. Centralize the rule
+// here so create / update / response transforms can't drift.
+const resolveRuleIdForType = (
+  type: ActionPolicyType,
+  ruleId: string | null | undefined
+): string | null => (type === 'single_rule' ? ruleId ?? null : null);
 
 const resolveNextNullableField = <T>(
   value: T | null | undefined,
@@ -64,12 +72,11 @@ export const buildCreateActionPolicyAttributes = ({
   updatedByUsername: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
-  const policyType = data.type ?? 'global';
   return {
     name: data.name,
     description: data.description,
-    type: policyType,
-    ruleId: policyType === 'single_rule' ? data.ruleId ?? null : null,
+    type: data.type,
+    ruleId: resolveRuleIdForType(data.type, data.ruleId),
     enabled: true,
     destinations: data.destinations,
     matcher: data.matcher ?? null,
@@ -104,13 +111,12 @@ export const buildUpdateActionPolicyAttributes = ({
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   // `type` and `ruleId` are immutable — always carried forward from the existing doc.
-  // Legacy docs without `type` are normalized to 'global' on update.
-  const existingType = existing.type ?? 'global';
+  // The Zod update schema is `.strict()`, so callers cannot smuggle them through.
   return {
     name: update.name ?? existing.name,
     description: update.description ?? existing.description,
-    type: existingType,
-    ruleId: existingType === 'single_rule' ? existing.ruleId ?? null : null,
+    type: existing.type,
+    ruleId: resolveRuleIdForType(existing.type, existing.ruleId),
     enabled: existing.enabled,
     destinations: update.destinations ?? existing.destinations,
     matcher: resolveNextNullableField(update.matcher, existing.matcher),
@@ -138,14 +144,13 @@ export const transformActionPolicySoAttributesToApiResponse = ({
   version?: string;
   attributes: ActionPolicySavedObjectAttributes;
 }): ActionPolicyResponse => {
-  const policyType = attributes.type ?? 'global';
   return {
     id,
     version,
     name: attributes.name,
     description: attributes.description,
-    type: policyType,
-    ruleId: policyType === 'single_rule' ? attributes.ruleId ?? null : null,
+    type: attributes.type,
+    ruleId: resolveRuleIdForType(attributes.type, attributes.ruleId),
     enabled: attributes.enabled,
     destinations: attributes.destinations,
     matcher: normalizeNullableField(attributes.matcher),

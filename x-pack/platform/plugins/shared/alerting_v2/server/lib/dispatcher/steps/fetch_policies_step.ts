@@ -8,6 +8,10 @@
 import { inject, injectable } from 'inversify';
 import type { ActionPolicySavedObjectServiceContract } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import { ActionPolicySavedObjectServiceInternalToken } from '../../services/action_policy_saved_object_service/tokens';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../../services/logger_service/logger_service';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import type {
   DispatcherPipelineState,
@@ -23,7 +27,8 @@ export class FetchPoliciesStep implements DispatcherStep {
 
   constructor(
     @inject(ActionPolicySavedObjectServiceInternalToken)
-    private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract
+    private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract,
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
   public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
@@ -42,14 +47,23 @@ export class FetchPoliciesStep implements DispatcherStep {
         continue;
       }
 
-      const policyType = doc.attributes.type ?? 'global';
-      policies.set(doc.id, {
+      const { type, ruleId } = doc.attributes;
+      if (type === 'single_rule' && !ruleId) {
+        // Corrupt or partially-written doc: a single_rule policy without a
+        // ruleId can never match any alert. Warn so operators can detect and
+        // repair before debugging silent no-fire issues.
+        this.logger.warn({
+          message: () =>
+            `Skipping single_rule policy ${doc.id} with no ruleId; this policy will not match any alerts.`,
+        });
+        continue;
+      }
+
+      const base = {
         id: doc.id,
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
         name: doc.attributes.name,
         enabled: doc.attributes.enabled,
-        type: policyType,
-        ruleId: policyType === 'single_rule' ? doc.attributes.ruleId ?? undefined : undefined,
         destinations: doc.attributes.destinations ?? [],
         matcher: doc.attributes.matcher ?? undefined,
         groupBy: doc.attributes.groupBy ?? [],
@@ -58,7 +72,11 @@ export class FetchPoliciesStep implements DispatcherStep {
         throttle: doc.attributes.throttle ?? undefined,
         snoozedUntil: doc.attributes.snoozedUntil ?? null,
         apiKey: doc.attributes.auth.apiKey,
-      });
+      };
+      policies.set(
+        doc.id,
+        type === 'single_rule' ? { ...base, type, ruleId: ruleId as string } : { ...base, type }
+      );
     }
 
     return { type: 'continue', data: { policies } };

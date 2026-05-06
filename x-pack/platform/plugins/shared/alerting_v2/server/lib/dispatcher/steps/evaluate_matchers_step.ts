@@ -58,8 +58,16 @@ export class EvaluateMatchersStep implements DispatcherStep {
         if (!policy.enabled) continue;
         if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
         // single_rule policies only match alerts from their linked rule.
-        // Done before matcher evaluation so it short-circuits on a cheap string equality.
-        if (policy.type === 'single_rule' && policy.ruleId !== rule.id) continue;
+        // Done before matcher evaluation so it short-circuits on a cheap string
+        // equality (also avoids spurious KQL parse-error logs for unrelated policies).
+        if (policy.type === 'single_rule' && policy.ruleId !== rule.id) {
+          this.logger.debug({
+            message: () =>
+              `Skipping single_rule policy ${policy.id} for episode ${episode.episode_id}: ` +
+              `policy linked to rule ${policy.ruleId}, episode came from rule ${rule.id}.`,
+          });
+          continue;
+        }
 
         if (!policy.matcher) {
           matched.push({ episode, policy });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ActionPolicyType } from '@kbn/alerting-v2-schemas';
+
 export type RuleId = string;
 export type ActionPolicyId = string;
 export type ActionGroupId = string;
@@ -59,19 +61,11 @@ export interface Rule {
   updatedAt: string;
 }
 
-export type ActionPolicyType = 'global' | 'single_rule';
-
-export interface ActionPolicy {
+interface BaseActionPolicy {
   id: ActionPolicyId;
   spaceId: string;
   name: string;
   enabled: boolean;
-  /** Discriminator controlling which alerts the policy can match.
-   *  'global' (default) matches alerts from any rule in the space; 'single_rule' only
-   *  matches alerts from `ruleId`. Always set after fetch — legacy docs default to 'global'. */
-  type: ActionPolicyType;
-  /** Linked rule id; only present when type === 'single_rule'. */
-  ruleId?: string;
   /** KQL expression evaluated against the alert episode context.
    *  An empty matcher matches all episodes (catch-all). */
   matcher?: string; // e.g. 'data.severity == "critical" AND data.env != "dev"'
@@ -89,10 +83,24 @@ export interface ActionPolicy {
   snoozedUntil?: string | null;
   /** Target destinations to dispatch matched episodes to */
   destinations: ActionPolicyDestination[];
-
   /** Decrypted base64-encoded API key (id:key) for authenticated workflow dispatch */
   apiKey?: string;
 }
+
+/** A policy that can match alerts from any rule in the space. */
+export interface GlobalActionPolicy extends BaseActionPolicy {
+  type: 'global';
+}
+
+/** A policy that only matches alerts from `ruleId`. */
+export interface SingleRuleActionPolicy extends BaseActionPolicy {
+  type: 'single_rule';
+  ruleId: string;
+}
+
+export type ActionPolicy = GlobalActionPolicy | SingleRuleActionPolicy;
+
+export type { ActionPolicyType };
 
 export interface MatchedPair {
   episode: AlertEpisode;

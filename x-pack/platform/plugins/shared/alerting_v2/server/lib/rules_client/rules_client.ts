@@ -22,6 +22,7 @@ import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
+import { ActionPolicyClient } from '../action_policy_client';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
@@ -84,7 +85,8 @@ export class RulesClient {
     @inject(RulesSavedObjectServiceScopedToken)
     private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
-    @inject(UserService) private readonly userService: UserServiceContract
+    @inject(UserService) private readonly userService: UserServiceContract,
+    @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient
   ) {}
 
   private getSpaceContext(): { spaceId: string } {
@@ -260,6 +262,30 @@ export class RulesClient {
     await this.taskManager.removeIfExists(taskId);
 
     await this.rulesSavedObjectService.delete({ id });
+
+    // Cascade-delete any single_rule action policies attached to this rule.
+    // Skipping cascade would leave orphaned policies that silently never fire.
+    await this.deleteAttachedSingleRulePolicies(id);
+  }
+
+  // Best-effort cascade-delete; failures here log but never block the rule
+  // delete itself (the rule is already gone). Run inside deleteRule after the
+  // rule SO has been removed.
+  private async deleteAttachedSingleRulePolicies(ruleId: string): Promise<void> {
+    const { items } = await this.actionPolicyClient.findActionPolicies({
+      type: 'single_rule',
+      ruleId,
+      perPage: 100,
+    });
+
+    for (const policy of items) {
+      try {
+        await this.actionPolicyClient.deleteActionPolicy({ id: policy.id });
+      } catch {
+        // Swallow — caller already saw rule deletion succeed; orphaned policies
+        // can be cleaned up manually from the action-policy list UI.
+      }
+    }
   }
 
   @withApm

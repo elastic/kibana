@@ -83,6 +83,7 @@ describe('useActionPolicyForm', () => {
       expect(onSubmitCreate).toHaveBeenCalledWith({
         name: 'My policy',
         description: 'A description',
+        type: 'global',
         groupingMode: 'per_episode',
         throttle: { strategy: 'on_status_change' },
         destinations: [],

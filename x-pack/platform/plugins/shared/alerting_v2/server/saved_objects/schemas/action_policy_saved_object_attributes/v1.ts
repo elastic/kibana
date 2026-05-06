@@ -16,10 +16,7 @@ export const actionPolicySavedObjectAttributesSchema = schema.object(
   {
     name: schema.string(),
     description: schema.string(),
-    // `type` and `ruleId` are optional in the schema for forward-compatibility
-    // with legacy documents created before the discriminator existed. New
-    // documents written today always carry an explicit `type`.
-    type: schema.maybe(schema.oneOf([schema.literal('global'), schema.literal('single_rule')])),
+    type: schema.oneOf([schema.literal('global'), schema.literal('single_rule')]),
     ruleId: schema.maybe(schema.nullable(schema.string({ minLength: 1 }))),
     enabled: schema.boolean(),
     destinations: schema.arrayOf(actionPolicyDestinationSchema, { minSize: 1, maxSize: 20 }),
@@ -67,15 +64,14 @@ export const actionPolicySavedObjectAttributesSchema = schema.object(
   },
   {
     validate: (attributes) => {
-      const policyType = attributes.type ?? 'global';
-      if (policyType === 'single_rule') {
+      if (attributes.type === 'single_rule') {
         if (!attributes.ruleId) {
           return 'ruleId is required when type is "single_rule"';
         }
         return;
       }
       if (attributes.ruleId != null) {
-        return 'ruleId must not be set when type is "global"';
+        return 'ruleId is only allowed when type is "single_rule"';
       }
     },
   }

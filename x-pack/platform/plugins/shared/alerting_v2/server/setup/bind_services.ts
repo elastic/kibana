@@ -92,6 +92,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       return new ActionPolicyClient(
         get(ActionPolicySavedObjectServiceScopedToken),
+        get(RulesSavedObjectServiceScopedToken),
         get(UserService),
         get(ApiKeyService),
         get(EncryptedSavedObjectsClientToken),

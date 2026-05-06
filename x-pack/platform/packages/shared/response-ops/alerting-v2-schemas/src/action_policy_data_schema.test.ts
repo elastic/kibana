@@ -218,10 +218,10 @@ describe('createActionPolicyDataSchema', () => {
   });
 
   describe('type and ruleId', () => {
-    it('defaults type to undefined when omitted (treated as global at the persistence layer)', () => {
+    it('defaults type to "global" when omitted', () => {
       const result = createActionPolicyDataSchema.parse(base);
 
-      expect(result.type).toBeUndefined();
+      expect(result.type).toBe('global');
       expect(result.ruleId).toBeUndefined();
     });
 
@@ -258,12 +258,12 @@ describe('createActionPolicyDataSchema', () => {
     it('rejects type "global" with ruleId set', () => {
       expect(() =>
         createActionPolicyDataSchema.parse({ ...base, type: 'global', ruleId: 'rule-1' })
-      ).toThrow(/ruleId must not be provided/);
+      ).toThrow(/ruleId is only allowed/);
     });
 
     it('rejects ruleId provided with no type (defaults to global, so ruleId is forbidden)', () => {
       expect(() => createActionPolicyDataSchema.parse({ ...base, ruleId: 'rule-1' })).toThrow(
-        /ruleId must not be provided/
+        /ruleId is only allowed/
       );
     });
 
@@ -275,18 +275,18 @@ describe('createActionPolicyDataSchema', () => {
 
 describe('updateActionPolicyDataSchema', () => {
   describe('immutability of type and ruleId', () => {
-    it('strips `type` from the parsed update payload (immutable)', () => {
-      const result = updateActionPolicyDataSchema.parse({ name: 'New', type: 'single_rule' });
-
-      expect(result).not.toHaveProperty('type');
-      expect(result.name).toBe('New');
+    it('rejects `type` in the update payload (immutable)', () => {
+      expect(() =>
+        updateActionPolicyDataSchema.parse({ name: 'New', type: 'single_rule' })
+      ).toThrow();
     });
 
-    it('strips `ruleId` from the parsed update payload (immutable)', () => {
-      const result = updateActionPolicyDataSchema.parse({ name: 'New', ruleId: 'rule-2' });
+    it('rejects `ruleId` in the update payload (immutable)', () => {
+      expect(() => updateActionPolicyDataSchema.parse({ name: 'New', ruleId: 'rule-2' })).toThrow();
+    });
 
-      expect(result).not.toHaveProperty('ruleId');
-      expect(result.name).toBe('New');
+    it('rejects any unknown key (strict)', () => {
+      expect(() => updateActionPolicyDataSchema.parse({ name: 'New', futureField: 'x' })).toThrow();
     });
   });
 

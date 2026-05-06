@@ -19,6 +19,8 @@ import {
   createMockEncryptedSavedObjects,
   createActionPolicySavedObjectService,
 } from '../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
+import type { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
+import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
 import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
 import { ActionPolicyClient } from './action_policy_client';
@@ -27,6 +29,7 @@ describe('ActionPolicyClient', () => {
   let client: ActionPolicyClient;
   let actionPolicySavedObjectService: ActionPolicySavedObjectService;
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let rulesSavedObjectService: RulesSavedObjectService;
   let userService: UserService;
   let userProfileService: jest.Mocked<UserProfileServiceStart>;
   let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
@@ -42,6 +45,13 @@ describe('ActionPolicyClient', () => {
 
     ({ actionPolicySavedObjectService, mockSavedObjectsClient } =
       createActionPolicySavedObjectService());
+    ({ rulesSavedObjectService } = createRulesSavedObjectService());
+    // Default: every rule lookup succeeds so happy-path tests don't need to wire it up.
+    jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValue({
+      id: 'rule-default',
+      attributes: {} as never,
+      version: 'v1',
+    });
     ({ userService, userProfileService } = createUserService());
     apiKeyService = createMockApiKeyService();
     mockEncryptedSavedObjects = createMockEncryptedSavedObjects((id) => {
@@ -56,6 +66,7 @@ describe('ActionPolicyClient', () => {
 
     client = new ActionPolicyClient(
       actionPolicySavedObjectService,
+      rulesSavedObjectService,
       userService,
       apiKeyService,
       mockEsoClient as any,
@@ -111,6 +122,7 @@ describe('ActionPolicyClient', () => {
         expect.objectContaining({
           name: 'my-policy',
           description: 'my-policy description',
+          type: 'global',
           enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
@@ -134,6 +146,7 @@ describe('ActionPolicyClient', () => {
           version: 'WzEsMV0=',
           name: 'my-policy',
           description: 'my-policy description',
+          type: 'global',
           enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           matcher: null,
@@ -181,6 +194,7 @@ describe('ActionPolicyClient', () => {
         expect.objectContaining({
           name: 'my-policy',
           description: 'my-policy description',
+          type: 'global',
           enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
@@ -380,6 +394,22 @@ describe('ActionPolicyClient', () => {
         expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
       });
 
+      it('rejects "single_rule" when the linked rule does not exist', async () => {
+        jest
+          .spyOn(rulesSavedObjectService, 'get')
+          .mockRejectedValueOnce(
+            SavedObjectsErrorHelpers.createGenericNotFoundError('rule', 'rule-missing')
+          );
+
+        await expect(
+          client.createActionPolicy({
+            data: { ...baseData, type: 'single_rule', ruleId: 'rule-missing' },
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+        expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
       it('rejects "global" with ruleId at the schema layer', async () => {
         await expect(
           client.createActionPolicy({
@@ -397,6 +427,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'test-policy',
         description: 'test-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
         auth: {
@@ -453,6 +484,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes = {
         name: 'legacy',
         description: 'd',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow' as const, id: 'w' }],
         auth: { apiKey: 'k', owner: 'u', createdByUser: false },
@@ -513,6 +545,7 @@ describe('ActionPolicyClient', () => {
       const firstAttributes: ActionPolicySavedObjectAttributes = {
         name: 'policy-two',
         description: 'policy-two description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-two' }],
         auth: {
@@ -530,6 +563,7 @@ describe('ActionPolicyClient', () => {
       const secondAttributes: ActionPolicySavedObjectAttributes = {
         name: 'policy-one',
         description: 'policy-one description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-one' }],
         auth: {
@@ -588,6 +622,7 @@ describe('ActionPolicyClient', () => {
       const firstAttributes: ActionPolicySavedObjectAttributes = {
         name: 'policy-found-one',
         description: 'policy-found-one description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-found-one' }],
         auth: {
@@ -605,6 +640,7 @@ describe('ActionPolicyClient', () => {
       const thirdAttributes: ActionPolicySavedObjectAttributes = {
         name: 'policy-found-three',
         description: 'policy-found-three description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-found-three' }],
         auth: {
@@ -668,6 +704,7 @@ describe('ActionPolicyClient', () => {
       const validAttributes: ActionPolicySavedObjectAttributes = {
         name: 'policy-valid',
         description: 'policy-valid description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-valid' }],
         auth: {
@@ -744,6 +781,7 @@ describe('ActionPolicyClient', () => {
     const policyAttributes: ActionPolicySavedObjectAttributes = {
       name: 'find-policy',
       description: 'find-policy description',
+      type: 'global',
       enabled: true,
       destinations: [{ type: 'workflow', id: 'find-workflow' }],
       auth: {
@@ -978,6 +1016,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         matcher: 'event.severity: critical',
@@ -1046,6 +1085,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
@@ -1133,6 +1173,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'tagged-policy',
         description: 'a policy with tags',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'wf-1' }],
         tags: ['production', 'critical'],
@@ -1182,6 +1223,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'tagged-policy',
         description: 'a policy with tags',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'wf-1' }],
         tags: ['production'],
@@ -1231,6 +1273,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
@@ -1284,6 +1327,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
@@ -1333,6 +1377,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
@@ -1417,6 +1462,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
@@ -1462,6 +1508,7 @@ describe('ActionPolicyClient', () => {
       const baseExisting: ActionPolicySavedObjectAttributes = {
         name: 'existing',
         description: 'd',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'w' }],
         auth: { apiKey: 'old-key', owner: 'u', createdByUser: false },
@@ -1532,6 +1579,7 @@ describe('ActionPolicyClient', () => {
     const existingAttributes: ActionPolicySavedObjectAttributes = {
       name: 'existing-policy',
       description: 'existing-policy description',
+      type: 'global',
       enabled: true,
       destinations: [{ type: 'workflow', id: 'existing-workflow' }],
       auth: {
@@ -1671,6 +1719,7 @@ describe('ActionPolicyClient', () => {
     const updatedAttributes: ActionPolicySavedObjectAttributes = {
       name: 'snoozed-policy',
       description: 'snoozed-policy description',
+      type: 'global',
       enabled: true,
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
       auth: {
@@ -1777,6 +1826,7 @@ describe('ActionPolicyClient', () => {
       const updatedAttributes: ActionPolicySavedObjectAttributes = {
         name: 'active-policy',
         description: 'active-policy description',
+        type: 'global',
         enabled: false,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
         auth: {
@@ -1845,6 +1895,7 @@ describe('ActionPolicyClient', () => {
       const updatedAttributes: ActionPolicySavedObjectAttributes = {
         name: 'active-policy',
         description: 'active-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
         snoozedUntil: '2025-06-01T12:00:00.000Z',
@@ -2348,6 +2399,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'policy-to-delete',
         description: 'policy-to-delete description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-to-delete' }],
         auth: {
