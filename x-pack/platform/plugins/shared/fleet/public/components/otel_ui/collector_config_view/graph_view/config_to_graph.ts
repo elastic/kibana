@@ -125,7 +125,7 @@ const buildMergedGraph = (
 ): ConfigToGraphResult => {
   const nodeMap = new Map<string, Node<OTelGraphNodeData>>();
 
-  for (const [, pipeline] of pipelineEntries) {
+  for (const [pipelineId, pipeline] of pipelineEntries) {
     for (const { ids, role } of getPipelineRoleEntries(pipeline)) {
       for (const id of ids) {
         const nodeId = `${role}::${id}`;
@@ -134,7 +134,7 @@ const buildMergedGraph = (
             id: nodeId,
             type: 'component',
             position: { x: 0, y: 0 },
-            data: { label: id, componentType: getComponentType(id, role, config) },
+            data: { label: id, componentType: getComponentType(id, role, config), pipelineId },
           });
         }
       }
