@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
-import AttachmentContentEvent from './external_reference_event';
+import AttachmentContentEvent from './endpoint_event';
 import { useNavigation } from '@kbn/security-solution-navigation/src/navigation';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation', () => {
@@ -27,7 +27,7 @@ describe('AttachmentContentEvent', () => {
   });
 
   const defaultProps = {
-    externalReferenceMetadata: {
+    metadata: {
       command: 'isolate',
       comment: 'test comment',
       targets: [
@@ -51,8 +51,8 @@ describe('AttachmentContentEvent', () => {
     rerender(
       <AttachmentContentEvent
         {...defaultProps}
-        externalReferenceMetadata={{
-          ...defaultProps.externalReferenceMetadata,
+        metadata={{
+          ...defaultProps.metadata,
           command: 'unisolate',
         }}
       />
@@ -70,19 +70,62 @@ describe('AttachmentContentEvent', () => {
     expect(mockNavigateTo).toHaveBeenCalled();
   });
 
-  it('builds endpoint details URL correctly', () => {
+  it('builds the endpoint details URL when agentType is endpoint and skips the hosts URL', () => {
     const mockGetAppUrl = jest.fn().mockReturnValue('http://app.url');
     (mockUseNavigation as jest.Mock).mockReturnValue({
       getAppUrl: mockGetAppUrl,
+      navigateTo: mockNavigateTo,
     });
 
     render(<AttachmentContentEvent {...defaultProps} />);
 
-    expect(mockGetAppUrl).toHaveBeenNthCalledWith(1, {
+    expect(mockGetAppUrl).toHaveBeenCalledTimes(1);
+    expect(mockGetAppUrl).toHaveBeenCalledWith({
       path: '/administration/endpoints?selected_endpoint=endpoint-1&show=activity_log',
     });
-    expect(mockGetAppUrl).toHaveBeenNthCalledWith(2, {
-      path: '/hosts/name/host-1',
+  });
+
+  it('builds the hosts URL with an encoded hostname for non-endpoint agent types', () => {
+    const mockGetAppUrl = jest.fn().mockReturnValue('http://app.url');
+    (mockUseNavigation as jest.Mock).mockReturnValue({
+      getAppUrl: mockGetAppUrl,
+      navigateTo: mockNavigateTo,
     });
+
+    render(
+      <AttachmentContentEvent
+        metadata={{
+          command: 'isolate',
+          comment: '',
+          targets: [
+            {
+              endpointId: 'cs-1',
+              hostname: 'weird host/name with spaces',
+              agentType: 'crowdstrike' as const,
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(mockGetAppUrl).toHaveBeenCalledTimes(1);
+    expect(mockGetAppUrl).toHaveBeenCalledWith({
+      path: `/hosts/name/${encodeURIComponent('weird host/name with spaces')}`,
+    });
+  });
+
+  it('returns null when targets is empty without computing any URL', () => {
+    const mockGetAppUrl = jest.fn();
+    (mockUseNavigation as jest.Mock).mockReturnValue({
+      getAppUrl: mockGetAppUrl,
+      navigateTo: mockNavigateTo,
+    });
+
+    const { container } = render(
+      <AttachmentContentEvent metadata={{ command: 'isolate', comment: '', targets: [] }} />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+    expect(mockGetAppUrl).not.toHaveBeenCalled();
   });
 });
