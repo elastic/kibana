@@ -12,14 +12,18 @@ import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from
 
 const numericFormatSchema = schema.object(
   {
-    type: schema.oneOf([schema.literal('number'), schema.literal('percent')]),
+    type: schema.oneOf([schema.literal('number'), schema.literal('percent')], {
+      meta: {
+        description: 'Value format type: `number` for plain numbers, `percent` for percentages.',
+      },
+    }),
     /**
      * Number of decimals
      */
     decimals: schema.number({
       defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
       meta: {
-        description: 'Number of decimals',
+        description: 'Number of decimal places to display.',
       },
     }),
     /**
@@ -28,7 +32,7 @@ const numericFormatSchema = schema.object(
     suffix: schema.maybe(
       schema.string({
         meta: {
-          description: 'Suffix',
+          description: 'Suffix appended to the formatted value.',
         },
       })
     ),
@@ -38,23 +42,33 @@ const numericFormatSchema = schema.object(
     compact: schema.boolean({
       defaultValue: LENS_FORMAT_COMPACT_DEFAULT,
       meta: {
-        description: 'Whether to use compact notation',
+        description:
+          'When `true`, uses compact notation (for example, 1.2k instead of 1,200). Defaults to `false`.',
       },
     }),
   },
-  { meta: { id: 'numericFormat', title: 'Numeric Format' } }
+  {
+    meta: {
+      id: 'numericFormat',
+      title: 'Numeric Format',
+      description:
+        'Number or percentage format with optional decimal places, suffix, and compact notation.',
+    },
+  }
 );
 
 const byteFormatSchema = schema.object(
   {
-    type: schema.oneOf([schema.literal('bits'), schema.literal('bytes')]),
+    type: schema.oneOf([schema.literal('bits'), schema.literal('bytes')], {
+      meta: { description: 'Data size unit: `bits` or `bytes`.' },
+    }),
     /**
      * Number of decimals
      */
     decimals: schema.number({
       defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
       meta: {
-        description: 'Number of decimals',
+        description: 'Number of decimal places to display.',
       },
     }),
     /**
@@ -63,12 +77,18 @@ const byteFormatSchema = schema.object(
     suffix: schema.maybe(
       schema.string({
         meta: {
-          description: 'Suffix',
+          description: 'Suffix appended to the formatted value.',
         },
       })
     ),
   },
-  { meta: { id: 'byteFormat', title: 'Byte Format' } }
+  {
+    meta: {
+      id: 'byteFormat',
+      title: 'Byte Format',
+      description: 'Data size format in bits or bytes, with optional decimal places and suffix.',
+    },
+  }
 );
 
 const durationFormatSchema = schema.object(
@@ -79,7 +99,8 @@ const durationFormatSchema = schema.object(
      */
     from: schema.string({
       meta: {
-        description: 'From',
+        description:
+          'Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.',
       },
     }),
     /**
@@ -87,7 +108,8 @@ const durationFormatSchema = schema.object(
      */
     to: schema.string({
       meta: {
-        description: 'To',
+        description:
+          'Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.',
       },
     }),
     /**
@@ -96,12 +118,18 @@ const durationFormatSchema = schema.object(
     suffix: schema.maybe(
       schema.string({
         meta: {
-          description: 'Suffix',
+          description: 'Suffix appended to the formatted value.',
         },
       })
     ),
   },
-  { meta: { id: 'durationFormat', title: 'Duration Format' } }
+  {
+    meta: {
+      id: 'durationFormat',
+      title: 'Duration Format',
+      description: 'Duration format between time units.',
+    },
+  }
 );
 
 const customFormatSchema = schema.object(
@@ -112,11 +140,17 @@ const customFormatSchema = schema.object(
      */
     pattern: schema.string({
       meta: {
-        description: 'Pattern',
+        description: 'Kibana field format pattern string.',
       },
     }),
   },
-  { meta: { id: 'customFormat', title: 'Custom Format' } }
+  {
+    meta: {
+      id: 'customFormat',
+      title: 'Custom Format',
+      description: 'Custom format using a Kibana field format pattern string.',
+    },
+  }
 );
 
 /**
@@ -124,7 +158,13 @@ const customFormatSchema = schema.object(
  */
 export const formatTypeSchema = schema.oneOf(
   [numericFormatSchema, byteFormatSchema, durationFormatSchema, customFormatSchema],
-  { meta: { id: 'formatType', title: 'Format Type' } }
+  {
+    meta: {
+      id: 'formatType',
+      title: 'Format Type',
+      description: 'Number display format for the dimension value.',
+    },
+  }
 );
 
 export const formatSchema = {

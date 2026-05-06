@@ -47,6 +47,9 @@ export const EndpointsTable = ({
           },
         }}
         data-test-subj="inferenceEndpointTable"
+        rowProps={(item: InferenceAPIConfigResponse) => ({
+          'data-test-subj': `endpointRow-${item.inference_id}`,
+        })}
         tableCaption={i18n.translate('xpack.searchInferenceEndpoints.table.caption', {
           defaultMessage: 'Inference endpoints table',
         })}

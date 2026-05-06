@@ -541,8 +541,12 @@ export const MAX_NOTES_PER_DOCUMENT = 100;
 
 /**
  * Cases attachment IDs
+ *
+ * The endpoint attachment type id now lives in the cases plugin as
+ * `SECURITY_ENDPOINT_ATTACHMENT_TYPE` (see `@kbn/cases-plugin/common`).
+ * Import it from there directly so all unified attachment type ids stay in a
+ * single source of truth.
  */
-export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
 export const CASE_ATTACHMENT_INDICATOR_TYPE_ID = 'indicator' as const;
 
 /**
@@ -718,6 +722,7 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
 export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
   entity = 'security.entity',
+  entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   rule = 'security.rule',
 }
 

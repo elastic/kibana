@@ -696,6 +696,7 @@
             "lineNumber": 21,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "SearchQueryVariant",
             "trackAdoption": false,
             "isRequired": true
           }

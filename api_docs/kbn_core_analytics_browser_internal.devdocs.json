@@ -45,6 +45,7 @@
                 "lineNumber": 37,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -84,6 +85,7 @@
                 "lineNumber": 63,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnalyticsServiceSetupDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }

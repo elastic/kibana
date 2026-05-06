@@ -47,6 +47,7 @@
             "lineNumber": 18,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }

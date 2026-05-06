@@ -64,6 +64,7 @@ describe('Detections Usage and Metrics', () => {
       mlClient = mlServicesMock.createSetupContract();
       savedObjectsClient = savedObjectsClientMock.create();
       mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
+      mockPrebuiltRuleAssetsClient.fetchDeprecatedRules.mockResolvedValue([]);
     });
 
     it('returns zeroed counts if calls are empty', async () => {
@@ -110,6 +111,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -1281,6 +1283,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -1385,6 +1388,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -1598,6 +1602,78 @@ describe('Detections Usage and Metrics', () => {
         );
         expect(result).toHaveProperty(
           'detection_rules.detection_rule_usage.threat_match_custom.has_does_not_match_condition',
+          0
+        );
+      });
+    });
+
+    describe('deprecated rules', () => {
+      let detectionsMetricsParams: Parameters<typeof getDetectionsMetrics>[0];
+      beforeEach(() => {
+        esClient.search.mockResponseOnce(getEventLogAllRules());
+        esClient.search.mockResponseOnce(getEventLogElasticRules());
+        esClient.search.mockResponseOnce(getElasticLogCustomRules());
+        esClient.search.mockResponseOnce(getMockRuleAlertsResponse(0));
+        savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse());
+        savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+        savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+        mockPrebuiltRuleAssetsClient.fetchLatestVersions.mockResolvedValueOnce([]);
+
+        const logger = loggingSystemMock.createLogger();
+        detectionsMetricsParams = {
+          eventLogIndex: '',
+          signalsIndex: '',
+          esClient,
+          savedObjectsClient,
+          logger,
+          mlClient,
+          legacySignalsIndex: '',
+        };
+      });
+
+      it('counts deprecated assets that match installed Elastic rules', async () => {
+        mockPrebuiltRuleAssetsClient.fetchDeprecatedRules.mockResolvedValueOnce([
+          {
+            rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
+            version: 4,
+            deprecated: true,
+            name: 'Azure Diagnostic Settings Deletion',
+          },
+        ]);
+
+        const result = await getDetectionsMetrics(detectionsMetricsParams);
+
+        expect(result).toHaveProperty(
+          'detection_rules.elastic_detection_rule_deprecated_status.total',
+          1
+        );
+      });
+
+      it('ignores deprecated assets that are not installed', async () => {
+        mockPrebuiltRuleAssetsClient.fetchDeprecatedRules.mockResolvedValueOnce([
+          {
+            rule_id: 'not-installed-rule-id',
+            version: 1,
+            deprecated: true,
+            name: 'Some Deprecated Rule',
+          },
+        ]);
+
+        const result = await getDetectionsMetrics(detectionsMetricsParams);
+
+        expect(result).toHaveProperty(
+          'detection_rules.elastic_detection_rule_deprecated_status.total',
+          0
+        );
+      });
+
+      it('returns zero when there are no deprecated assets', async () => {
+        mockPrebuiltRuleAssetsClient.fetchDeprecatedRules.mockResolvedValueOnce([]);
+
+        const result = await getDetectionsMetrics(detectionsMetricsParams);
+
+        expect(result).toHaveProperty(
+          'detection_rules.elastic_detection_rule_deprecated_status.total',
           0
         );
       });

@@ -77,6 +77,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -135,6 +136,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -228,6 +230,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -320,6 +323,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -376,6 +380,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -432,6 +437,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -488,6 +494,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -544,6 +551,7 @@
             "lineNumber": 18,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -587,6 +595,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -647,6 +656,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1737,7 +1747,15 @@
           }
         ],
         "returnComment": [
-          "an array of {@link IndexAlias } objects"
+          "an array of ",
+          {
+            "pluginId": "@kbn/securitysolution-es-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionEsUtilsPluginApi",
+            "section": "def-common.IndexAlias",
+            "text": "IndexAlias"
+          },
+          " objects"
         ],
         "initialIsOpen": false
       },
@@ -2827,6 +2845,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2883,6 +2902,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2939,6 +2959,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2995,6 +3016,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3053,6 +3075,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3113,6 +3136,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3149,6 +3173,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3188,6 +3213,7 @@
             "lineNumber": 12,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3244,6 +3270,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3302,6 +3329,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3360,6 +3388,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3416,6 +3445,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3450,6 +3480,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3489,6 +3520,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3523,6 +3555,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3562,6 +3595,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3596,6 +3630,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
