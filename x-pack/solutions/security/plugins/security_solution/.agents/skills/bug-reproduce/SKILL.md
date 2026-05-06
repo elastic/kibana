@@ -26,7 +26,7 @@ gh issue view <NUMBER> --repo elastic/kibana \
 ```
 
 Write `analysis.json` to the Kibana repo root with these fields:
-- `classification` — bug pattern (see `.agents/skills/bug-fixer/references/classification-guide.md`)
+- `classification` — bug pattern (see `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/classification-guide.md`)
 - `confidence` — high / medium / low
 - `prerequisites` — roles, permissions, prior state required
 - `reproduction_steps` — exact steps from the issue
@@ -97,8 +97,8 @@ The `config_sets/bug_fixer/kibana.yml` file is session-specific — write it fro
 While services start, dispatch these as subagents to use the boot time:
 - Read `affected_paths` from `analysis.json`
 - Review related PR diffs: `gh pr diff <NUMBER> --repo elastic/kibana`
-- Read `.agents/skills/bug-fixer/references/classification-guide.md`
-- Read `.agents/skills/bug-fixer/KNOWLEDGE.md`
+- Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/classification-guide.md`
+- Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/KNOWLEDGE.md`
 
 Stop services: `pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'`
 
