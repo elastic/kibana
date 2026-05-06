@@ -54,6 +54,8 @@ export interface WorkflowsExecutionEnginePluginStart {
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
   bulkScheduleWorkflow: BulkScheduleWorkflow;
+  emitO11yTestErrorLog: EmitO11yTestErrorLog;
+  scheduleO11yTestFailures: ScheduleO11yTestFailures;
   triggerEvents: TriggerEventsContract;
 }
 
@@ -114,3 +116,28 @@ export type BulkScheduleWorkflow = (
   items: Array<{ workflow: WorkflowExecutionEngineModel; context: Record<string, unknown> }>,
   request: KibanaRequest
 ) => Promise<BulkScheduleWorkflowResult>;
+
+export interface O11yTestFailureCounts {
+  run: number;
+  resume: number;
+  scheduled: number;
+}
+
+export interface ScheduleO11yTestFailuresParams {
+  request: KibanaRequest;
+  spaceId: string;
+  counts: O11yTestFailureCounts;
+}
+
+export interface ScheduleO11yTestFailuresResult {
+  scheduled: Array<{
+    taskId: string;
+    taskType: string;
+  }>;
+}
+
+export type EmitO11yTestErrorLog = () => void;
+
+export type ScheduleO11yTestFailures = (
+  params: ScheduleO11yTestFailuresParams
+) => Promise<ScheduleO11yTestFailuresResult>;

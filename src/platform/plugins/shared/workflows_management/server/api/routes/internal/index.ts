@@ -9,9 +9,11 @@
 
 import { registerDisableAllWorkflowsRoute } from './disable';
 import { registerGetConfigRoute } from './get_config';
+import { registerO11yTestSignalRoutes } from './o11y_test_signals';
 import type { RouteDependencies } from '../types';
 
 export function registerInternalRoutes(deps: RouteDependencies) {
   registerGetConfigRoute(deps);
   registerDisableAllWorkflowsRoute(deps);
+  registerO11yTestSignalRoutes(deps);
 }

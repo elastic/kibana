@@ -57,6 +57,7 @@ import type {
   ExecuteWorkflow,
   ExecuteWorkflowStep,
   ResumeWorkflowExecution,
+  ScheduleO11yTestFailures,
   ScheduleWorkflow,
   TriggerEventsContract,
   WorkflowsExecutionEnginePluginSetup,
@@ -102,6 +103,11 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
+
+const O11Y_TEST_FAILURE_REASON =
+  '[WORKFLOWS_O11Y_ALERT_TEST] intentionally failing workflow task for QA alert validation';
+
+const O11Y_TEST_TASK_SCOPE = ['workflows', 'o11y-test'];
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -180,8 +186,10 @@ export class WorkflowsExecutionEnginePlugin
           const taskAbortController = new AbortController();
           return {
             run: async () => {
-              const { workflowRunId, spaceId } =
-                taskInstance.params as StartWorkflowExecutionParams;
+              const { workflowRunId, spaceId, o11yTestFailureReason } =
+                taskInstance.params as StartWorkflowExecutionParams & {
+                  o11yTestFailureReason?: string;
+                };
 
               // Add queue delay metrics to APM trace for observability
               const now = Date.now();
@@ -202,6 +210,13 @@ export class WorkflowsExecutionEnginePlugin
                 }
                 currentTransaction.setLabel('workflow_run_id', workflowRunId);
                 currentTransaction.setLabel('space_id', spaceId);
+              }
+
+              if (o11yTestFailureReason) {
+                logger.error(
+                  `[WORKFLOWS_O11Y_ALERT_TEST] ${WORKFLOW_RUN_TASK_TYPE} framework failure requested for ${workflowRunId}`
+                );
+                throw new Error(o11yTestFailureReason);
               }
 
               const [coreStart, pluginsStart, workflowsExecutionEngine] =
@@ -283,8 +298,10 @@ export class WorkflowsExecutionEnginePlugin
           const taskAbortController = new AbortController();
           return {
             run: async () => {
-              const { workflowRunId, spaceId } =
-                taskInstance.params as ResumeWorkflowExecutionParams;
+              const { workflowRunId, spaceId, o11yTestFailureReason } =
+                taskInstance.params as ResumeWorkflowExecutionParams & {
+                  o11yTestFailureReason?: string;
+                };
 
               // Add queue delay metrics to APM trace for observability
               const now = Date.now();
@@ -310,6 +327,13 @@ export class WorkflowsExecutionEnginePlugin
                 }
                 currentTransaction.setLabel('workflow_run_id', workflowRunId);
                 currentTransaction.setLabel('space_id', spaceId);
+              }
+
+              if (o11yTestFailureReason) {
+                logger.error(
+                  `[WORKFLOWS_O11Y_ALERT_TEST] ${WORKFLOW_RESUME_TASK_TYPE} framework failure requested for ${workflowRunId}`
+                );
+                throw new Error(o11yTestFailureReason);
               }
 
               const [coreStart, pluginsStart, workflowsExecutionEngine] =
@@ -390,10 +414,11 @@ export class WorkflowsExecutionEnginePlugin
           const taskAbortController = new AbortController();
           return {
             run: async () => {
-              const { workflowId, spaceId } = taskInstance.params as {
+              const { workflowId, spaceId, o11yTestFailureReason } = taskInstance.params as {
                 workflowId: string;
                 spaceId: string;
                 triggerType: string;
+                o11yTestFailureReason?: string;
               };
 
               // Add queue delay metrics to APM trace for observability
@@ -428,6 +453,13 @@ export class WorkflowsExecutionEnginePlugin
               logger.debug(
                 `Workflow ${workflowId} queue metrics: queueDelayMs=${queueDelayMs}, scheduleDelayMs=${scheduleDelayMs}`
               );
+
+              if (o11yTestFailureReason) {
+                logger.error(
+                  `[WORKFLOWS_O11Y_ALERT_TEST] ${WORKFLOW_SCHEDULED_TASK_TYPE} framework failure requested for ${workflowId}`
+                );
+                throw new Error(o11yTestFailureReason);
+              }
 
               const [coreStart, pluginsStart] = await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
@@ -1270,6 +1302,94 @@ export class WorkflowsExecutionEnginePlugin
       maxEventChainDepth: this.config.eventDriven.maxChainDepth,
     };
 
+    const emitO11yTestErrorLog = () => {
+      this.logger.error(
+        '[WORKFLOWS_O11Y_ALERT_TEST] workflowsExecutionEngine error log emitted for QA alert validation'
+      );
+    };
+
+    const scheduleO11yTestFailures: ScheduleO11yTestFailures = async ({
+      request,
+      spaceId,
+      counts,
+    }) => {
+      const scheduled: Array<{ taskId: string; taskType: string }> = [];
+      const scheduleTask = async (task: {
+        id: string;
+        taskType: string;
+        params: Record<string, string>;
+        state: Record<string, null>;
+        scope: string[];
+        enabled: boolean;
+      }) => {
+        await plugins.taskManager.schedule(task, { request });
+        scheduled.push({ taskId: task.id, taskType: task.taskType });
+      };
+
+      for (let i = 0; i < counts.run; i++) {
+        const id = generateUuid();
+        await scheduleTask({
+          id: `workflow:o11y-test:run:${id}`,
+          taskType: WORKFLOW_RUN_TASK_TYPE,
+          params: {
+            workflowRunId: `o11y-test-run-${id}`,
+            spaceId,
+            o11yTestFailureReason: O11Y_TEST_FAILURE_REASON,
+          },
+          state: {
+            lastRunAt: null,
+            lastRunStatus: null,
+            lastRunError: null,
+          },
+          scope: O11Y_TEST_TASK_SCOPE,
+          enabled: true,
+        });
+      }
+
+      for (let i = 0; i < counts.resume; i++) {
+        const id = generateUuid();
+        await scheduleTask({
+          id: `workflow:o11y-test:resume:${id}`,
+          taskType: WORKFLOW_RESUME_TASK_TYPE,
+          params: {
+            workflowRunId: `o11y-test-resume-${id}`,
+            spaceId,
+            o11yTestFailureReason: O11Y_TEST_FAILURE_REASON,
+          },
+          state: {
+            lastRunAt: null,
+            lastRunStatus: null,
+            lastRunError: null,
+          },
+          scope: O11Y_TEST_TASK_SCOPE,
+          enabled: true,
+        });
+      }
+
+      for (let i = 0; i < counts.scheduled; i++) {
+        const id = generateUuid();
+        await scheduleTask({
+          id: `workflow:o11y-test:scheduled:${id}`,
+          taskType: WORKFLOW_SCHEDULED_TASK_TYPE,
+          params: {
+            workflowId: `o11y-test-scheduled-${id}`,
+            spaceId,
+            triggerType: 'scheduled',
+            o11yTestFailureReason: O11Y_TEST_FAILURE_REASON,
+          },
+          state: {
+            lastRunAt: null,
+            lastRunStatus: null,
+            lastRunError: null,
+          },
+          scope: O11Y_TEST_TASK_SCOPE,
+          enabled: true,
+        });
+      }
+
+      return { scheduled };
+    };
+
     return {
       workflowEventLoggerService,
       executeWorkflow,
@@ -1279,6 +1399,8 @@ export class WorkflowsExecutionEnginePlugin
       cancelWorkflowExecution,
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
+      emitO11yTestErrorLog,
+      scheduleO11yTestFailures,
       triggerEvents,
     };
   }
