@@ -13,7 +13,8 @@ import type { ElasticAgentName, OpenTelemetryAgentName } from '@kbn/apm-types';
 import { ServiceNode } from '../service_node';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { ServiceNodeData } from '../../../../../common/service_map';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
+import { WithSearchHighlight } from './search_highlight_helper';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
@@ -29,9 +30,11 @@ const meta: Meta<typeof ServiceNode> = {
     (Story) => (
       <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
         <ReactFlowProvider>
-          <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
-            <Story />
-          </div>
+          <ServiceMapSearchProvider>
+            <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
+              <Story />
+            </div>
+          </ServiceMapSearchProvider>
         </ReactFlowProvider>
       </MockApmPluginStorybook>
     ),
@@ -115,34 +118,34 @@ export const NoAgentIcon: Story = {
   }),
 };
 
-export const AllHealthStatuses: StoryObj = {
+export const AllAnomalyScores: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
       <div style={{ textAlign: 'center' }}>
         <ServiceNode
           {...createNodeProps({
-            id: 'no-status',
-            label: 'No Status',
+            id: 'no-score',
+            label: 'No anomaly score',
             isService: true,
             agentName: 'java',
           })}
         />
-        <LabelText>No Status</LabelText>
+        <LabelText>No anomaly score</LabelText>
       </div>
       <div style={{ textAlign: 'center' }}>
         <ServiceNode
           {...createNodeProps({
-            id: 'healthy',
-            label: 'healthy-service',
+            id: 'low',
+            label: 'low-severity-service',
             isService: true,
             agentName: 'nodejs',
             serviceAnomalyStats: {
-              healthStatus: ServiceHealthStatus.healthy,
               transactionType: 'request',
+              anomalyScore: 1,
             },
           })}
         />
-        <LabelText>Healthy</LabelText>
+        <LabelText>LOW (0–3)</LabelText>
       </div>
       <div style={{ textAlign: 'center' }}>
         <ServiceNode
@@ -152,13 +155,42 @@ export const AllHealthStatuses: StoryObj = {
             isService: true,
             agentName: 'python',
             serviceAnomalyStats: {
-              healthStatus: ServiceHealthStatus.warning,
               transactionType: 'request',
-              anomalyScore: 50,
+              anomalyScore: 10,
             },
           })}
         />
-        <LabelText>Warning</LabelText>
+        <LabelText>WARNING (3–25)</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'minor',
+            label: 'minor-service',
+            isService: true,
+            agentName: 'go',
+            serviceAnomalyStats: {
+              transactionType: 'request',
+              anomalyScore: 35,
+            },
+          })}
+        />
+        <LabelText>MINOR (25–50)</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'major',
+            label: 'major-service',
+            isService: true,
+            agentName: 'dotnet',
+            serviceAnomalyStats: {
+              transactionType: 'request',
+              anomalyScore: 65,
+            },
+          })}
+        />
+        <LabelText>MAJOR (50–75)</LabelText>
       </div>
       <div style={{ textAlign: 'center' }}>
         <ServiceNode
@@ -168,13 +200,12 @@ export const AllHealthStatuses: StoryObj = {
             isService: true,
             agentName: 'ruby',
             serviceAnomalyStats: {
-              healthStatus: ServiceHealthStatus.critical,
               transactionType: 'request',
               anomalyScore: 85,
             },
           })}
         />
-        <LabelText>Critical</LabelText>
+        <LabelText>CRITICAL (75–100)</LabelText>
       </div>
     </div>
   ),
@@ -247,4 +278,50 @@ export const OpenTelemetryAgents: StoryObj = {
       </div>
     );
   },
+};
+
+export const HighlightStates: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'no-highlight',
+            label: 'no-highlight',
+            isService: true,
+            agentName: 'java',
+          })}
+        />
+        <LabelText>No highlight</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'context-highlight',
+            label: 'context-highlight',
+            isService: true,
+            agentName: 'nodejs',
+            contextHighlight: true,
+          })}
+        />
+        <LabelText>Context highlight</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <WithSearchHighlight
+          matchNodeIds={new Set(['search-overrides'])}
+          activeMatchNodeId="search-overrides"
+        >
+          <ServiceNode
+            {...createNodeProps({
+              id: 'search-overrides',
+              label: 'search-overrides',
+              isService: true,
+              agentName: 'go',
+            })}
+          />
+        </WithSearchHighlight>
+        <LabelText>Search overrides context</LabelText>
+      </div>
+    </div>
+  ),
 };
