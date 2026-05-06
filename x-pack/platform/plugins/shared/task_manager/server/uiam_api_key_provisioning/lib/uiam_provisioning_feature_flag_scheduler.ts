@@ -15,6 +15,7 @@ import { PROVISION_UIAM_API_KEYS_FLAG, TASK_ID, TASK_TYPE, TAGS } from '../const
 
 export class UiamProvisioningFeatureFlagScheduler {
   private featureFlagSubscription: Subscription | undefined;
+  private appliedFlagValue: boolean | undefined;
 
   constructor(private readonly logger: Logger) {}
 
@@ -37,26 +38,39 @@ export class UiamProvisioningFeatureFlagScheduler {
     }
 
     const applyFlag = async (enabled: boolean) => {
+      // Only react to real flag transitions. The initial subscription emission
+      // (previousValue === undefined) with `false` is treated as a no-op: there
+      // is nothing to unschedule, and attempting to remove a non-existent task
+      // can surface transient errors during startup.
+      const previousValue = this.appliedFlagValue;
+      this.appliedFlagValue = enabled;
+
       if (enabled) {
-        try {
-          await taskScheduling.ensureScheduled({
-            id: TASK_ID,
-            taskType: TASK_TYPE,
-            schedule,
-            state: emptyState,
-            params: {},
-          });
-          this.logger.info(
-            `${PROVISION_UIAM_API_KEYS_FLAG} enabled - Task ${TASK_TYPE} scheduled`,
-            { tags: TAGS }
-          );
-        } catch (e) {
-          this.logger.error(
-            `Error scheduling task ${TASK_TYPE}, received ${(e as Error).message}`,
-            { tags: TAGS }
-          );
+        if (previousValue !== true) {
+          try {
+            await taskScheduling.ensureScheduled({
+              id: TASK_ID,
+              taskType: TASK_TYPE,
+              schedule,
+              state: emptyState,
+              params: {},
+            });
+            this.logger.info(
+              `${PROVISION_UIAM_API_KEYS_FLAG} enabled - Task ${TASK_TYPE} scheduled`,
+              { tags: TAGS }
+            );
+          } catch (e) {
+            this.logger.error(
+              `Error scheduling task ${TASK_TYPE}, received ${(e as Error).message}`,
+              { tags: TAGS }
+            );
+          }
+        } else {
+          return;
         }
-      } else {
+      }
+
+      if (!enabled && previousValue === true) {
         try {
           await removeIfExists(TASK_ID);
           this.logger.info(`${PROVISION_UIAM_API_KEYS_FLAG} disabled - Task ${TASK_TYPE} removed`, {
