@@ -34,6 +34,10 @@ import {
 } from './attachment_filters';
 import { AttachmentsTable } from './attachment_table';
 
+const flyoutTitleLabel = i18n.translate('xpack.streams.addAttachmentFlyout.flyoutHeaderLabel', {
+  defaultMessage: 'Add attachments',
+});
+
 export function AddAttachmentFlyout({
   entityId,
   onAddAttachments,
@@ -90,10 +94,6 @@ export function AddAttachmentFlyout({
     [streamsRepositoryClient, entityId, filters.debouncedQuery, filters.types, filters.tags]
   );
 
-  const flyoutTitleLabel = i18n.translate('xpack.streams.addAttachmentFlyout.flyoutHeaderLabel', {
-    defaultMessage: 'Add attachments',
-  });
-
   const allAttachments = useMemo(() => {
     return attachmentSuggestionsFetch.value?.attachments || [];
   }, [attachmentSuggestionsFetch.value]);
@@ -119,17 +119,17 @@ export function AddAttachmentFlyout({
           />
           {attachmentSuggestionsFetch.value?.attachments.length ===
             ATTACHMENT_SUGGESTIONS_LIMIT && (
-            <EuiCallOut
-              announceOnMount
-              size="s"
-              color="primary"
-              title={i18n.translate('xpack.streams.addAttachmentFlyout.hasMoreResultsMessage', {
-                defaultMessage:
-                  'Showing first {limit} results. Use filters to narrow down your search.',
-                values: { limit: ATTACHMENT_SUGGESTIONS_LIMIT },
-              })}
-            />
-          )}
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="primary"
+                title={i18n.translate('xpack.streams.addAttachmentFlyout.hasMoreResultsMessage', {
+                  defaultMessage:
+                    'Showing first {limit} results. Use filters to narrow down your search.',
+                  values: { limit: ATTACHMENT_SUGGESTIONS_LIMIT },
+                })}
+              />
+            )}
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="s">
