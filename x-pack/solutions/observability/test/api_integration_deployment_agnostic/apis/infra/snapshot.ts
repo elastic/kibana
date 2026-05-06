@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
+import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
 import type {
   SnapshotNodeResponse,
   SnapshotMetricInput,
@@ -15,10 +16,17 @@ import type {
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './utils/constants';
+import {
+  generateSemconvHostsData,
+  SEMCONV_HOSTS,
+  SEMCONV_HOSTS_DATA_FROM,
+  SEMCONV_HOSTS_DATA_TO,
+} from './utils/semconv_hosts_data';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   describe('POST /api/metrics/snapshot', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
@@ -67,6 +75,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'container',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -150,6 +159,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'pod',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: false,
         });
@@ -185,6 +195,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'container',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: false,
         });
@@ -222,6 +233,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [{ field: 'host.name' }],
           includeTimeseries: false,
         });
@@ -264,6 +276,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: null,
           includeTimeseries: false,
         });
@@ -312,6 +325,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -380,6 +394,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -413,6 +428,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -449,6 +465,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           ] as SnapshotMetricInput[],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -514,6 +531,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [{ field: 'cloud.availability_zone' }],
           includeTimeseries: false,
         });
@@ -540,6 +558,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [{ field: 'cloud.provider' }, { field: 'cloud.availability_zone' }],
           includeTimeseries: false,
         });
@@ -567,6 +586,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
+          schema: 'ecs',
           groupBy: [{ field: 'service.type' }],
           includeTimeseries: true,
         });
@@ -631,6 +651,70 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('semconv (Otel hostmetricsreceiver)', () => {
+      let synthtraceClient: InfraSynthtraceEsClient;
+      const from = new Date(SEMCONV_HOSTS_DATA_FROM).getTime();
+      const to = new Date(SEMCONV_HOSTS_DATA_TO).getTime();
+
+      before(async () => {
+        synthtraceClient = synthtrace.createInfraSynthtraceEsClient();
+        await synthtraceClient.clean();
+        await synthtraceClient.index(
+          generateSemconvHostsData({
+            from: SEMCONV_HOSTS_DATA_FROM,
+            to: SEMCONV_HOSTS_DATA_TO,
+            hosts: SEMCONV_HOSTS,
+          })
+        );
+      });
+
+      after(async () => {
+        await synthtraceClient.clean();
+      });
+
+      it('returns Otel hosts when schema=semconv (cpu)', async () => {
+        const snapshot = await fetchSnapshot({
+          sourceId: 'default',
+          timerange: { from, to, interval: '1m' },
+          metrics: [{ type: 'cpuV2' }],
+          nodeType: 'host',
+          schema: 'semconv',
+          groupBy: [],
+          includeTimeseries: false,
+        });
+
+        expect(snapshot).to.have.property('nodes');
+        if (!snapshot) return;
+
+        const nodeNames = snapshot.nodes.map((n) => first(n.path)?.value).sort();
+        expect(nodeNames).to.eql(SEMCONV_HOSTS.map((h) => h.hostName).sort());
+
+        const firstNode = first(snapshot.nodes) as any;
+        expect(firstNode).to.have.property('metrics');
+        expect(firstNode.metrics[0]).to.have.property('name', 'cpuV2');
+        // Otel cpu utilization is non-null because semconvHost emits state-based docs.
+        expect(firstNode.metrics[0].avg).to.be.a('number');
+      });
+
+      it('returns Otel hosts when schema=semconv (memory)', async () => {
+        const snapshot = await fetchSnapshot({
+          sourceId: 'default',
+          timerange: { from, to, interval: '1m' },
+          metrics: [{ type: 'memory' }],
+          nodeType: 'host',
+          schema: 'semconv',
+          groupBy: [],
+          includeTimeseries: false,
+        });
+
+        if (!snapshot) return;
+        expect(snapshot.nodes.length).to.equal(SEMCONV_HOSTS.length);
+        const firstNode = first(snapshot.nodes) as any;
+        expect(firstNode.metrics[0]).to.have.property('name', 'memory');
+        expect(firstNode.metrics[0].avg).to.be.a('number');
+      });
+    });
+
     describe('request validation', () => {
       it('should return 400 when requesting more than 20 metrics', async () => {
         const { min, max } = DATES['8.0.0'].logs_and_metrics;
@@ -644,6 +728,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             metrics: Array(21).fill({ type: 'cpu' }),
             nodeType: 'host',
+            schema: 'ecs',
             groupBy: [{ field: 'service.type' }],
             includeTimeseries: true,
           },
