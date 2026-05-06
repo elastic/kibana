@@ -38,7 +38,8 @@ export async function createMonacoProvider<T>({
 }: CreateProviderParams<T>): Promise<T> {
   const safeModel = createDisposedSafeModel(model);
   try {
-    return await Promise.resolve(run(safeModel));
+    const result = await Promise.resolve(run(safeModel));
+    return model.isDisposed() ? emptyResult : result;
   } catch (error) {
     if (error instanceof DisposedModelAccessError) {
       return emptyResult;
