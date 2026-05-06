@@ -100,5 +100,5 @@ const getUserSettingLocale = (
 const getUserSettingRememberSelectedSpace = (
   userSettings: NonNullable<UserProfileData['userSettings']>
 ): boolean => {
-  return userSettings.rememberSelectedSpace === true;
+  return userSettings.rememberSelectedSpace !== false;
 };
