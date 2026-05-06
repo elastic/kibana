@@ -10,9 +10,7 @@
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { v4 as generateUuid } from 'uuid';
-import YAML from 'yaml';
-import type { WorkflowYaml } from '@kbn/workflows';
-import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import { extractNormalizedInputsFromYaml } from '@kbn/workflows/spec/lib/field_conversion';
 import {
   selectWorkflowDefinition,
   selectWorkflowGraph,
@@ -39,18 +37,7 @@ export function useContextOverrideData() {
         return null;
       }
 
-      let manualTrigger = workflowDefinition.triggers?.find((trigger) => isManualTrigger(trigger));
-
-      if (!manualTrigger && yamlString) {
-        try {
-          const yamlDoc = YAML.parseDocument(yamlString);
-          const parsed = yamlDoc.toJSON() as Record<string, unknown>;
-          const triggers = parsed.triggers as WorkflowYaml['triggers'] | undefined;
-          manualTrigger = triggers?.find((trigger) => isManualTrigger(trigger));
-        } catch (error) {
-          // Ignore YAML parsing errors
-        }
-      }
+      const inputs = extractNormalizedInputsFromYaml(workflowDefinition, yamlString);
 
       const stepSubGraph = workflowGraph.getStepGraph(stepId);
 
@@ -62,7 +49,7 @@ export function useContextOverrideData() {
           enabled: workflowDefinition.enabled || true,
           spaceId,
         },
-        inputsDefinition: manualTrigger?.inputs,
+        inputsDefinition: inputs,
       });
     },
     [workflowGraph, workflowDefinition, spaceId, yamlString]

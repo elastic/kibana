@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
-import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import type { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import { getNormalizedInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowTriggerTab } from './types';
 
 export type NormalizedWorkflowInputs = ReturnType<typeof normalizeFieldsToJsonSchema>;
@@ -51,46 +50,14 @@ export function isRacAlertsApiForbiddenError(error: unknown): boolean {
   );
 }
 
-export function normalizeInputsFromDefinitionOrYaml(
-  definition: WorkflowYaml | null,
-  yamlString: string | undefined
-): NormalizedWorkflowInputs {
-  const manualTriggerInDefinition = definition?.triggers?.find((trigger) =>
-    isManualTrigger(trigger)
-  );
-  const inputsInDefinition = manualTriggerInDefinition?.inputs;
-
-  if (inputsInDefinition) {
-    return normalizeFieldsToJsonSchema(inputsInDefinition);
-  }
-  if (yamlString) {
-    try {
-      const yamlJson = parseDocument(yamlString).toJSON() as WorkflowYaml;
-
-      const manualTriggerInYaml = yamlJson?.triggers?.find((trigger) => isManualTrigger(trigger));
-      const inputsInYaml = manualTriggerInYaml?.inputs;
-
-      if (inputsInYaml) {
-        return normalizeFieldsToJsonSchema(inputsInYaml);
-      }
-    } catch {
-      // ignore errors when extracting from YAML
-    }
-  }
-  return undefined;
-}
-
 export function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab {
   if (!definition) {
     return 'alert';
   }
 
-  const manualTrigger = definition.triggers?.find((trigger) => isManualTrigger(trigger));
+  const normalizedInputs = getNormalizedInputsFromDefinition(definition);
 
-  const hasManualTrigger = !!manualTrigger;
-  const normalizedInputs = normalizeFieldsToJsonSchema(manualTrigger?.inputs);
-
-  if (hasManualTrigger && hasWorkflowInputFields(normalizedInputs)) {
+  if (normalizedInputs && hasWorkflowInputFields(normalizedInputs)) {
     return 'manual';
   }
   return 'alert';

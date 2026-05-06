@@ -10,10 +10,7 @@
 import type { WorkflowYaml } from '@kbn/workflows';
 import { getSchemaAtPath, getShape } from '@kbn/workflows/common/utils/zod';
 import { z } from '@kbn/zod/v4';
-import {
-  getWorkflowContextSchema,
-  type WorkflowDefinitionForContext,
-} from './get_workflow_context_schema';
+import { getWorkflowContextSchema } from './get_workflow_context_schema';
 import { triggerSchemas } from '../../../trigger_schemas';
 
 describe('getWorkflowContextSchema - Nested Objects', () => {
@@ -234,7 +231,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
 
   describe('edge cases - defensive checks', () => {
     it('should handle properties with null schema values gracefully', () => {
-      const workflow: WorkflowDefinitionForContext = {
+      const workflow: WorkflowYaml = {
         version: '1',
         name: 'Test Workflow',
         description: undefined,
@@ -265,7 +262,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
     });
 
     it('should handle properties with undefined schema values gracefully', () => {
-      const workflow: WorkflowDefinitionForContext = {
+      const workflow: WorkflowYaml = {
         version: '1',
         name: 'Test Workflow',
         description: undefined,
@@ -295,7 +292,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
     });
 
     it('should handle properties with string schema values (invalid) gracefully', () => {
-      const workflow: WorkflowDefinitionForContext = {
+      const workflow: WorkflowYaml = {
         version: '1',
         name: 'Test Workflow',
         description: undefined,
@@ -339,7 +336,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     steps: [{ name: 'step1', type: 'console' }],
   };
 
-  function getEventKeys(workflow: WorkflowYaml | WorkflowDefinitionForContext): string[] {
+  function getEventKeys(workflow: WorkflowYaml | WorkflowYaml): string[] {
     const contextSchema = getWorkflowContextSchema(workflow);
     const eventResult = getSchemaAtPath(contextSchema, 'event');
     expect(eventResult.schema).toBeDefined();
@@ -400,7 +397,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       const workflow = {
         ...baseWorkflow,
         triggers,
-      } as WorkflowYaml | WorkflowDefinitionForContext;
+      } as WorkflowYaml | WorkflowYaml;
       const eventKeys = getEventKeys(workflow);
 
       for (const key of expectedKeys) {

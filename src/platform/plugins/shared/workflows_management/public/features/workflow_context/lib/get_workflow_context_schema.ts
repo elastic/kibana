@@ -11,16 +11,15 @@ import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicWorkflowContextSchema, EventTimestampSchema, isTriggerType } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
-import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import {
+  extractNormalizedInputsFromYaml,
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
 import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
-import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { inferZodType } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { triggerSchemas } from '../../../trigger_schemas';
-
-// Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
-export type WorkflowDefinitionForContext = WorkflowYaml;
 
 function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
   return schema instanceof z.ZodObject;
@@ -80,11 +79,11 @@ function extractFieldFromYaml<T>(
 }
 
 export function getWorkflowContextSchema(
-  definition: WorkflowDefinitionForContext,
+  definition: WorkflowYaml,
   yamlDocument?: Document | null
 ): typeof DynamicWorkflowContextSchema {
   const triggers = extractFieldFromYaml(definition.triggers, yamlDocument, 'triggers');
-  const inputs = triggers?.find((trigger) => isManualTrigger(trigger))?.inputs;
+  const inputs = extractNormalizedInputsFromYaml(definition, yamlDocument);
 
   const outputs = extractFieldFromYaml(definition.outputs, yamlDocument, 'outputs');
 

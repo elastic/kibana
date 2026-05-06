@@ -13,9 +13,11 @@ import { isPair, isScalar, visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
-import { normalizeFieldsToJsonSchema, resolveRef } from '@kbn/workflows/spec/lib/field_conversion';
-import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
-import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import {
+  extractNormalizedInputsFromYaml,
+  normalizeFieldsToJsonSchema,
+  resolveRef,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { YamlValidationResult } from '../model/types';
 
@@ -33,19 +35,8 @@ export function validateJsonSchemaDefaults(
     return errors;
   }
 
-  const manualTriggerIndex = workflowDefinition.triggers?.findIndex((trigger) =>
-    isManualTrigger(trigger)
-  );
-  const manualTrigger = workflowDefinition.triggers?.[manualTriggerIndex] as
-    | ManualTrigger
-    | undefined;
-
-  if (!manualTrigger?.inputs) {
-    return [];
-  }
-
   // Get inputs from workflowDefinition or extract from YAML as fallback
-  const inputs = manualTrigger.inputs;
+  const inputs = extractNormalizedInputsFromYaml(workflowDefinition, yamlDocument);
 
   if (!inputs) {
     return errors;

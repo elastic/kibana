@@ -9,7 +9,7 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import { monaco } from '@kbn/monaco';
-import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/utils';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 import { getInputPropertyName } from '../../context/inputs_utils';
 
@@ -23,8 +23,7 @@ function getEnumSuggestions(
   propertyName: string | null,
   workflowDefinition: ExtendedAutocompleteContext['workflowDefinition']
 ): monaco.languages.CompletionItem[] {
-  const manualTrigger = workflowDefinition?.triggers?.find((trigger) => isManualTrigger(trigger));
-  const inputs = manualTrigger?.inputs;
+  const inputs = getInputsFromDefinition(workflowDefinition);
 
   if (!propertyName || !inputs) {
     return [];

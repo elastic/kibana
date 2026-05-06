@@ -8,14 +8,17 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
+import type { Document } from 'yaml';
+import { parseDocument } from 'yaml';
 import type { z } from '@kbn/zod/v4';
-import type { WorkflowOutput } from '../schema';
+import type { WorkflowOutput, WorkflowYaml } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 import type { JsonSchema } from '../schema/common/json_model_shape_schema';
 import type {
   LegacyWorkflowInput,
   LegacyWorkflowInputSchema,
 } from '../schema/triggers/manual_trigger_schema';
+import { getInputsFromDefinition } from '../utils';
 
 export type NormalizableFieldSchema =
   | JsonModelSchemaType
@@ -123,6 +126,50 @@ export function normalizeFieldsToJsonSchema(
 
   if (Array.isArray(fields)) {
     return convertLegacyFieldsToJsonSchema(fields as LegacyWorkflowInput[]);
+  }
+
+  return undefined;
+}
+
+export function getNormalizedInputsFromDefinition(
+  definition: WorkflowYaml | null
+): Record<string, unknown> | undefined {
+  const inputsInDefinition = getInputsFromDefinition(definition);
+
+  if (inputsInDefinition) {
+    return normalizeFieldsToJsonSchema(inputsInDefinition);
+  }
+
+  return undefined;
+}
+
+export function extractNormalizedInputsFromYaml(
+  definition: WorkflowYaml | null,
+  yaml?: Document | string | null
+): Record<string, unknown> | undefined {
+  const inputsFromDefinition = getNormalizedInputsFromDefinition(definition);
+
+  if (inputsFromDefinition) {
+    return inputsFromDefinition;
+  }
+
+  if (!yaml) {
+    return undefined;
+  }
+
+  try {
+    let yamlDoc: Document;
+
+    if (typeof yaml === 'string') {
+      yamlDoc = parseDocument(yaml);
+    } else {
+      yamlDoc = yaml;
+    }
+
+    const yamlJson = yamlDoc.toJSON() as WorkflowYaml;
+    return getNormalizedInputsFromDefinition(yamlJson);
+  } catch {
+    // Ignore errors when extracting from YAML
   }
 
   return undefined;

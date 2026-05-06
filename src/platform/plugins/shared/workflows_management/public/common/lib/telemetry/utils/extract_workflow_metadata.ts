@@ -9,8 +9,7 @@
 
 import { isWellKnownWorkflowTriggerSource, WORKFLOW_EVENTS_VALUES_SET } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
-import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/utils';
 import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
 
 /**
@@ -279,10 +278,8 @@ export function extractWorkflowMetadata(
   } = extractWorkflowEventsTelemetry(triggers);
 
   // Count inputs
-  const manualTrigger = workflow.triggers?.find((trigger) => isManualTrigger(trigger)) as
-    | ManualTrigger
-    | undefined;
-  const inputs = manualTrigger?.inputs;
+  const inputs = getInputsFromDefinition(workflow);
+
   const inputCount =
     inputs == null
       ? 0

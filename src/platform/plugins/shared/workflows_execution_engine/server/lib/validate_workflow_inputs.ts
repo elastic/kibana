@@ -13,10 +13,8 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   applyInputDefaults,
-  normalizeFieldsToJsonSchema,
+  getNormalizedInputsFromDefinition,
 } from '@kbn/workflows/spec/lib/field_conversion';
-import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
-import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 /**
@@ -32,16 +30,10 @@ export const validateWorkflowInputs = async (
   workflowExecutionRepository: WorkflowExecutionRepository,
   logger: Logger
 ): Promise<boolean> => {
-  const manualTrigger = workflow.definition?.triggers?.find((trigger) =>
-    isManualTrigger(trigger as { type?: string })
-  ) as ManualTrigger | undefined;
-
-  const inputsDef = manualTrigger?.inputs;
-
-  if (!inputsDef) {
+  if (!workflow.definition) {
     return true;
   }
-  const normalizedSchema = normalizeFieldsToJsonSchema(inputsDef);
+  const normalizedSchema = getNormalizedInputsFromDefinition(workflow.definition);
   const validator = buildFieldsZodValidator(normalizedSchema);
   if (!normalizedSchema?.properties) {
     return true;
