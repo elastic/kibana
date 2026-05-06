@@ -1,5 +1,5 @@
 {
-  "sha1": "b5f8514538d46a66d195e38289382b7dcc194f92",
+  "sha1": "bbf76f77a9222da6695fef134321be2efe158876",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -2240,9 +2240,9 @@
       }
     },
     {
-      "id": "b1d9732f2022f52-1d041dd11a76a98",
-      "title": "Custom links template validation Create custom link with template URL and filters",
-      "expectedStatus": "skipped",
+      "id": "b1d9732f2022f52-21e57a8269d0449",
+      "title": "Custom links template validation template URL with filters — create from settings, verify in transaction, delete",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2251,14 +2251,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 36,
+        "line": 29,
         "column": 9
       }
     },
     {
-      "id": "b1d9732f2022f52-244e245a602c0a7",
-      "title": "Custom links template validation Verify template variables are populated correctly in custom link URLs",
-      "expectedStatus": "skipped",
+      "id": "b1d9732f2022f52-4eb454b9f6d8aaf",
+      "title": "Custom links template validation default URL flow — create link from transaction details with prefilled filters, delete",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2267,55 +2267,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 67,
-        "column": 9
-      }
-    },
-    {
-      "id": "b1d9732f2022f52-8c63ceeb998a13d",
-      "title": "Custom links template validation Delete custom link with template URL",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 95,
-        "column": 9
-      }
-    },
-    {
-      "id": "b1d9732f2022f52-ac6bad5f389c557",
-      "title": "Custom links template validation Open transaction and validate the default url when creating a custom link",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 115,
-        "column": 9
-      }
-    },
-    {
-      "id": "b1d9732f2022f52-5f08fd317b97702",
-      "title": "Custom links template validation Delete custom link created from transaction details",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 189,
+        "line": 102,
         "column": 9
       }
     },
