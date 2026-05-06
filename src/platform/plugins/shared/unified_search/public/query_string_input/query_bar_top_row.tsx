@@ -25,12 +25,7 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
-import {
-  ESQLLangEditor,
-  ESQLMenu,
-  EsqlEditorActionsProvider,
-  type ESQLEditorProps,
-} from '@kbn/esql/public';
+import { ESQLLangEditor, type ESQLEditorProps } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -1017,17 +1012,8 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem grow={false}>
           <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              {shouldRenderESQLUi ? (
-                <>
-                  {shouldRenderUpdateButton() ? button : null}
-                  {shouldRenderDatePicker() ? renderDatePicker() : null}
-                </>
-              ) : (
-                <>
-                  {shouldRenderDatePicker() ? renderDatePicker() : null}
-                  {shouldRenderUpdateButton() ? button : null}
-                </>
-              )}
+              {shouldRenderDatePicker() ? renderDatePicker() : null}
+              {shouldRenderUpdateButton() ? button : null}
             </EuiFlexGroup>
           </NoDataPopover>
         </EuiFlexItem>
@@ -1102,22 +1088,6 @@ export const QueryBarTopRow = React.memo(
             </EuiFlexGroup>
           </EuiFlexItem>
         )
-      );
-    }
-
-    function renderEsqlMenuPopover() {
-      return (
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            margin-left: auto;
-            @media (min-width: ${euiTheme.breakpoint.xl}px) {
-              order: 1;
-            }
-          `}
-        >
-          <ESQLMenu onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged} />
-        </EuiFlexItem>
       );
     }
 
@@ -1214,6 +1184,7 @@ export const QueryBarTopRow = React.memo(
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             queryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
+            onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
           />
         )
       );
@@ -1223,9 +1194,8 @@ export const QueryBarTopRow = React.memo(
 
     const flexDirection: 'column' | 'row' =
       isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row';
-    const flexJustifyContent: 'flexStart' | 'flexEnd' = shouldShowDatePickerAsBadge()
-      ? 'flexStart'
-      : 'flexEnd';
+    const flexJustifyContent: 'flexStart' | 'flexEnd' =
+      shouldShowDatePickerAsBadge() && !shouldRenderESQLUi ? 'flexStart' : 'flexEnd';
     const queryBarFlexGroupProps = {
       className: 'kbnQueryBar',
       'data-test-subj': 'kbnQueryBar',
@@ -1248,28 +1218,25 @@ export const QueryBarTopRow = React.memo(
         />
         {!isScreenshotMode &&
           (shouldRenderESQLUi ? (
-            <EsqlEditorActionsProvider>
+            <>
               <EuiFlexGroup {...queryBarFlexGroupProps}>
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
-                {renderDatePickerWithUpdateBtn()}
                 {/* Optional wrapper for the ES|QL controls elements */}
                 {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
                   <EuiFlexItem
                     grow={false}
                     css={css`
-                      @media (max-width: ${euiTheme.breakpoint.xl}px) {
-                        order: 1;
-                      }
+                      margin-right: auto;
                     `}
                   >
                     {props.esqlVariablesConfig?.controlsWrapper}
                   </EuiFlexItem>
                 )}
-                {renderEsqlMenuPopover()}
+                {renderDatePickerWithUpdateBtn()}
               </EuiFlexGroup>
               {!shouldShowDatePickerAsBadge() && props.filterBar}
               {renderESQLEditor()}
-            </EsqlEditorActionsProvider>
+            </>
           ) : (
             <>
               <EuiFlexGroup {...queryBarFlexGroupProps}>
@@ -1280,7 +1247,6 @@ export const QueryBarTopRow = React.memo(
                 {renderDatePickerWithUpdateBtn()}
               </EuiFlexGroup>
               {!shouldShowDatePickerAsBadge() && props.filterBar}
-              {renderESQLEditor()}
             </>
           ))}
       </FilterBarContextProvider>

@@ -91,6 +91,8 @@ export interface ESQLEditorProps {
   enableResourceBrowser?: boolean;
   /** Stats about the last request made */
   queryStats?: ESQLQueryStats;
+  /** Callback invoked when the ES|QL docs flyout (opened from the help menu) toggles visibility */
+  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
 }
 
 interface ESQLVariableService {

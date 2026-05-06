@@ -770,7 +770,7 @@ describe('QueryBarTopRowTopRow', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
+        expect(within(screen.getByTestId('querySubmitButton')).getByText('Search')).toBeVisible();
         expect(screen.getByTestId(pickerButtonTestSubj)).toBeInTheDocument();
         expect(
           container.querySelector('input[placeholder*="search"], textarea')
@@ -798,7 +798,7 @@ describe('QueryBarTopRowTopRow', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
+        expect(within(screen.getByTestId('querySubmitButton')).getByText('Search')).toBeVisible();
         if (useNewPicker) {
           const button = screen.getByTestId('dateRangePickerControlButton');
           expect(button).toBeDisabled();
@@ -828,7 +828,6 @@ describe('QueryBarTopRowTopRow', () => {
       );
 
       await waitFor(() => {
-        expect(screen.queryByTestId('esql-menu-button')).not.toBeInTheDocument();
         expect(screen.queryByTestId('unifiedTextLangEditor')).not.toBeInTheDocument();
         expect(screen.getByTestId(pickerButtonTestSubj)).toBeInTheDocument();
         expect(within(screen.getByTestId('querySubmitButton')).getByText('Refresh')).toBeVisible();

@@ -22,7 +22,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
@@ -317,10 +317,7 @@ describe('SearchBar', () => {
     await waitFor(() => {
       expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedQueryInput')).not.toBeInTheDocument();
-      // ES|QL menu may be lazy-loaded, so accept either the menu or help fallback
-      const menuButton = screen.queryByTestId('esql-menu-button');
-      const helpButton = screen.queryByTestId('esql-help-popover-button');
-      expect(menuButton || helpButton).not.toBeNull();
+      expect(within(screen.getByTestId('querySubmitButton')).getByText('Search')).toBeVisible();
     });
   });
 

@@ -41,7 +41,6 @@ import { useLookupIndexCommand } from './lookup_join';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
-import { ESQLMenu } from './editor_menu';
 import { getTrimmedQuery } from './history_local_storage';
 import { useEsqlEditorActions } from './hooks/use_esql_editor_actions';
 import {
@@ -74,10 +73,7 @@ import {
   type StarredQueryMetadata,
 } from './editor_footer/esql_starred_queries_service';
 import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
-import {
-  EsqlEditorActionsProvider,
-  useHasEsqlEditorActionsProvider,
-} from './editor_actions_context';
+import { EsqlEditorActionsProvider } from './editor_actions_context';
 import {
   registerCustomCommands,
   addEditorKeyBindings,
@@ -121,6 +117,7 @@ const ESQLEditorInternal = function ESQLEditor({
   hideQuickSearch,
   queryStats,
   enableResourceBrowser = false,
+  onESQLDocsFlyoutVisibilityChanged,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -632,7 +629,7 @@ const ESQLEditorInternal = function ESQLEditor({
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
-          justifyContent="spaceBetween"
+          justifyContent="flexEnd"
           alignItems="center"
           css={css`
             padding: ${theme.euiTheme.size.s};
@@ -650,9 +647,6 @@ const ESQLEditorInternal = function ESQLEditor({
             >
               {queryRunButtonProperties.label}
             </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ESQLMenu hideHistory={hideQueryHistory} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}
@@ -870,6 +864,8 @@ const ESQLEditorInternal = function ESQLEditor({
         dataErrorsControl={dataErrorsControl}
         starredQueriesService={starredQueriesService}
         queryStats={queryStats}
+        hideQueryHistory={hideQueryHistory}
+        onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         {...editorMessages}
         onErrorClick={onErrorClick}
       />
@@ -984,17 +980,9 @@ const ESQLEditorInternal = function ESQLEditor({
 
 const ESQLEditorWithState = withRestorableState(ESQLEditorInternal);
 
-export const ESQLEditor = (props: ComponentProps<typeof ESQLEditorWithState>) => {
-  const hasProvider = useHasEsqlEditorActionsProvider();
-
-  if (hasProvider) {
-    return <ESQLEditorWithState {...props} />;
-  }
-
-  return (
-    <EsqlEditorActionsProvider>
-      <ESQLEditorWithState {...props} />
-    </EsqlEditorActionsProvider>
-  );
-};
+export const ESQLEditor = (props: ComponentProps<typeof ESQLEditorWithState>) => (
+  <EsqlEditorActionsProvider>
+    <ESQLEditorWithState {...props} />
+  </EsqlEditorActionsProvider>
+);
 export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;
