@@ -7,10 +7,16 @@
 
 import type { KibanaRequest, ElasticsearchClient, Logger, IUiSettingsClient } from '@kbn/core/server';
 import type { InferenceConnector } from '@kbn/inference-common';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import type { ActionsClientProvider } from '../types';
-import { getDefaultConnector } from '../../common/utils/get_default_connector';
+import { getConnectorById } from './get_connector_by_id';
 import { getConnectorList } from './get_connector_list';
+
+const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export const loadDefaultConnector = async ({
   actions,
@@ -24,10 +30,36 @@ export const loadDefaultConnector = async ({
   esClient: ElasticsearchClient;
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
-}): Promise<InferenceConnector> => {
-  const [connectors, defaultConnectorId] = await Promise.all([
-    getConnectorList({ actions, request, esClient, logger }),
+}): Promise<InferenceConnector | undefined> => {
+  const [defaultConnectorId, defaultOnly] = await Promise.all([
     uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, { request }),
+    uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY, { request }),
   ]);
-  return getDefaultConnector({ connectors, defaultConnectorId });
+
+  if (defaultConnectorId && defaultConnectorId !== NO_DEFAULT_CONNECTOR) {
+    try {
+      return await getConnectorById({ connectorId: defaultConnectorId, actions, request, esClient, logger });
+    } catch {
+      // configured default doesn't exist, fall through
+    }
+  }
+
+  if (defaultOnly) {
+    return undefined;
+  }
+
+  try {
+    return await getConnectorById({
+      connectorId: defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
+      actions,
+      request,
+      esClient,
+      logger,
+    });
+  } catch {
+    // kibana-wide default doesn't exist, fall through
+  }
+
+  const connectors = await getConnectorList({ actions, request, esClient, logger });
+  return connectors[0];
 };
