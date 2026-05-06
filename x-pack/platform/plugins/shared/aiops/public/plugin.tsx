@@ -35,13 +35,13 @@ export class AiopsPlugin
       registerAiopsUiActions(uiActions, core.getStartServices);
     }
 
-    core.getStartServices().then(([coreStart, pluginStart]) => {
-      if (canUseAiops(coreStart)) {
-        if (cases) {
+    if (cases) {
+      core.getStartServices().then(([coreStart, pluginStart]) => {
+        if (canUseAiops(coreStart)) {
           registerCases(cases, coreStart, pluginStart);
         }
-      }
-    });
+      });
+    }
   }
 
   public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
