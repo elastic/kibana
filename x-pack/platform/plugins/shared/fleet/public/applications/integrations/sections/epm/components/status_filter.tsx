@@ -77,9 +77,8 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
           iconType="chevronSingleDown"
           onClick={togglePopover}
           isSelected={isOpen}
-          numFilters={activeCount}
           hasActiveFilters={activeCount > 0}
-          numActiveFilters={activeCount}
+          numActiveFilters={activeCount > 0 ? activeCount : undefined}
         >
           <FormattedMessage id="xpack.fleet.epm.statusFilter.label" defaultMessage="Status" />
         </EuiFilterButton>

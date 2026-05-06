@@ -10,6 +10,7 @@ import React from 'react';
 
 import {
   useEuiTheme,
+  euiCanAnimate,
   EuiIcon,
   EuiText,
   EuiTitle,
@@ -18,6 +19,7 @@ import {
   EuiPanel,
   EuiLink,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export interface LinkCardProps {
   icon: any | string;
@@ -54,6 +56,22 @@ export const LinkCard: FC<LinkCardProps> = ({
       style={{ cursor: isDisabled ? 'not-allowed' : undefined }}
       hasShadow={false}
       hasBorder
+      css={css`
+        ${euiCanAnimate} {
+          transition: transform ${euiTheme.animation.normal}
+              ${euiTheme.animation.resistance},
+            box-shadow ${euiTheme.animation.normal}
+              ${euiTheme.animation.resistance};
+        }
+
+        &:hover {
+          ${euiCanAnimate} {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08),
+              0 1px 3px rgba(0, 0, 0, 0.04);
+          }
+        }
+      `}
     >
       <EuiLink
         style={{

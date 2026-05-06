@@ -9,7 +9,7 @@ import React, { useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import type { ListRowRenderer } from 'react-virtualized';
 import { List as VirtualizedList, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiAutoSizer,
   EuiSkeletonRectangle,
+  euiCanAnimate,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WindowScroller } from 'react-virtualized';
@@ -25,6 +26,11 @@ import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants'
 import type { IntegrationCardItem } from '../../screens/home';
 
 import { PackageCard } from '../package_card';
+
+const skeletonReveal = keyframes`
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
 
 interface GridColumnProps {
   list: IntegrationCardItem[];
@@ -81,7 +87,17 @@ export const GridColumn = ({
     return (
       <EuiFlexGrid gutterSize={gutterSize} columns={columnCount} alignItems="start">
         {Array.from({ length: 12 }).map((_, index) => (
-          <EuiFlexItem key={index} grow={columnCount}>
+          <EuiFlexItem
+            key={index}
+            grow={columnCount}
+            css={css`
+              ${euiCanAnimate} {
+                opacity: 0;
+                animation: ${skeletonReveal} 400ms cubic-bezier(0.32, 0.72, 0, 1) both;
+                animation-delay: ${index * 50}ms;
+              }
+            `}
+          >
             <EuiSkeletonRectangle height="160px" width="100%" />
           </EuiFlexItem>
         ))}
