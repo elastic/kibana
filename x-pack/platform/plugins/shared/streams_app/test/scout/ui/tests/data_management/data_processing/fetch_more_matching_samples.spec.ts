@@ -47,8 +47,8 @@ test.describe(
     });
 
     test('should show fetch more button when condition match rate is below threshold, clicking it should fetch more documents until the threshold is reached', async ({
-      page,
       pageObjects,
+      logsSynthtraceEsClient,
     }) => {
       // Create a condition matching 'rare-service' (~5% of docs, below 10% threshold)
       await pageObjects.streams.clickAddCondition();
@@ -56,7 +56,24 @@ test.describe(
       await pageObjects.streams.clickSaveCondition();
 
       // Fetch more button should be visible since the condition matches below the threshold
-      await expect(page.getByTestId('streamsAppFetchMoreMatchingSamplesButton')).toBeVisible();
+      await expect(pageObjects.streams.fetchMoreMatchingSamplesButton).toBeVisible();
+
+      // Ingest additional rare-service docs so that "fetch more" can find enough
+      // matching documents to push the match rate above the 10% threshold.
+      // We need the fetched matching docs to represent >10% of the total sample
+      // after merging. Adding 100 rare docs ensures the actor finds plenty of
+      // new matching documents on each click.
+      await generateLogsData(logsSynthtraceEsClient)({
+        index: 'logs-generic-default',
+        startTime: '2025-01-01T00:20:00.000Z',
+        endTime: '2025-01-01T00:40:00.000Z',
+        docsPerMinute: 5,
+        defaults: { 'service.name': 'rare-service' },
+      });
+
+      await pageObjects.streams.clickFetchMoreUntilThresholdReached();
+
+      await expect(pageObjects.streams.fetchMoreMatchingSamplesButton).toBeHidden();
     });
   }
 );

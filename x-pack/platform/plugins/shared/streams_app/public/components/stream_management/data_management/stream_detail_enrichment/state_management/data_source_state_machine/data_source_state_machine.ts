@@ -151,6 +151,7 @@ export const dataSourceMachine = setup({
         'dataSource.refresh': { target: '.loadingData', reenter: true },
         'dataSource.fetchMore': {
           target: '.fetchingMore',
+          reenter: true,
           actions: [{ type: 'setFetchingMore' }],
         },
         'dataSource.change': [
