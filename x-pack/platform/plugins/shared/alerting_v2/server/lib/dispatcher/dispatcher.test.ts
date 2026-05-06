@@ -109,7 +109,7 @@ function buildDispatcherService(deps: {
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
     new FetchRulesStep(deps.rulesSoService),
-    new FetchPoliciesStep(deps.npSoService, loggerService),
+    new FetchPoliciesStep(deps.npSoService),
     new EvaluateMatchersStep(loggerService),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService, loggerService),

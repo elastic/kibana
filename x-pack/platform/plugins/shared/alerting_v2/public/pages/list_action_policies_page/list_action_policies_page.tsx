@@ -124,8 +124,7 @@ export const ListActionPoliciesPage = () => {
   const clonePolicy = (policy: ActionPolicyResponse) => {
     const { name, description, destinations, matcher, groupBy, throttle, tags, groupingMode } =
       policy;
-    // Cloning always produces a global policy. single_rule policies are managed
-    // from the rule form (Plan 2) and not surfaced through the clone affordance.
+
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,

@@ -87,12 +87,10 @@ interface BaseActionPolicy {
   apiKey?: string;
 }
 
-/** A policy that can match alerts from any rule in the space. */
 export interface GlobalActionPolicy extends BaseActionPolicy {
   type: 'global';
 }
 
-/** A policy that only matches alerts from `ruleId`. */
 export interface SingleRuleActionPolicy extends BaseActionPolicy {
   type: 'single_rule';
   ruleId: string;

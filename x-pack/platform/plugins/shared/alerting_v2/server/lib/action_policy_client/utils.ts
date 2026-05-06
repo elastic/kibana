@@ -26,8 +26,6 @@ export function validateDateString(dateString: string): void {
 
 const normalizeNullableField = <T>(value: T | null | undefined): T | null => value ?? null;
 
-// `ruleId` is only meaningful when type === 'single_rule'. Centralize the rule
-// here so create / update / response transforms can't drift.
 const resolveRuleIdForType = (
   type: ActionPolicyType,
   ruleId: string | null | undefined
@@ -110,8 +108,6 @@ export const buildUpdateActionPolicyAttributes = ({
   updatedByUsername: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
-  // `type` and `ruleId` are immutable — always carried forward from the existing doc.
-  // The Zod update schema is `.strict()`, so callers cannot smuggle them through.
   return {
     name: update.name ?? existing.name,
     description: update.description ?? existing.description,

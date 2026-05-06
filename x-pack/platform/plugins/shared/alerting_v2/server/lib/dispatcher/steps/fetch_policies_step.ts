@@ -8,10 +8,6 @@
 import { inject, injectable } from 'inversify';
 import type { ActionPolicySavedObjectServiceContract } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import { ActionPolicySavedObjectServiceInternalToken } from '../../services/action_policy_saved_object_service/tokens';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import type {
   DispatcherPipelineState,
@@ -27,12 +23,11 @@ export class FetchPoliciesStep implements DispatcherStep {
 
   constructor(
     @inject(ActionPolicySavedObjectServiceInternalToken)
-    private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract
   ) {}
 
   public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    // TODO: future optimization — push the single_rule filter down to the SO query
+    // TODO: future optimization: push the single_rule filter down to the SO query
     // by passing the dispatchable rule ids as a filter on `ruleId` (keyword mapping
     // already in place). This reduces decryption work for unrelated single_rule
     // policies. For now, the matcher step filters by ruleId in-memory.
@@ -48,17 +43,6 @@ export class FetchPoliciesStep implements DispatcherStep {
       }
 
       const { type, ruleId } = doc.attributes;
-      if (type === 'single_rule' && !ruleId) {
-        // Corrupt or partially-written doc: a single_rule policy without a
-        // ruleId can never match any alert. Warn so operators can detect and
-        // repair before debugging silent no-fire issues.
-        this.logger.warn({
-          message: () =>
-            `Skipping single_rule policy ${doc.id} with no ruleId; this policy will not match any alerts.`,
-        });
-        continue;
-      }
-
       const base = {
         id: doc.id,
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),

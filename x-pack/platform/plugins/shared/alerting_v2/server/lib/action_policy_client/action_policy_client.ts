@@ -392,8 +392,6 @@ export class ActionPolicyClient {
     return { processed, total: actions.length, errors };
   }
 
-  // Reject single_rule policies that point at a missing rule before persistence.
-  // Without this guard the policy would be created and silently never fire.
   private async assertRuleExists(ruleId: string): Promise<void> {
     try {
       await this.rulesSavedObjectService.get(ruleId, this.namespace);

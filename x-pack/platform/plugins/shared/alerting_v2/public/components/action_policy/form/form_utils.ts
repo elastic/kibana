@@ -42,8 +42,6 @@ export const toCreatePayload = (state: ActionPolicyFormState): CreateActionPolic
   return {
     name: state.name,
     description: state.description,
-    // Plan 2 will surface `single_rule` from the rule form. The action-policy
-    // create form only writes global policies for now.
     type: 'global',
     groupingMode: state.groupingMode,
     ...(state.tags.length > 0 ? { tags: state.tags } : {}),

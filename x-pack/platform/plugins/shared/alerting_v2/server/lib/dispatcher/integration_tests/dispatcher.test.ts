@@ -535,7 +535,7 @@ describe('DispatcherService integration tests', () => {
       new FetchSuppressionsStep(queryService),
       new ApplySuppressionStep(),
       new FetchRulesStep(rulesSoService),
-      new FetchPoliciesStep(npSoService, mockLoggerService),
+      new FetchPoliciesStep(npSoService),
       new EvaluateMatchersStep(mockLoggerService),
       new BuildGroupsStep(),
       new ApplyThrottlingStep(queryService, mockLoggerService),
