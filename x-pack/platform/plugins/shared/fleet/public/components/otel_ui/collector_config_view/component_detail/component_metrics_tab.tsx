@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Chart,
   Settings,
@@ -18,7 +18,14 @@ import {
 } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { css } from '@emotion/react';
-import { EuiLoadingChart, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiLoadingChart,
+  EuiText,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { OTelComponentType } from '../graph_view/constants';
@@ -37,6 +44,46 @@ const SUPPORTED_METRIC_TYPES: OTelComponentType[] = [
   'receiver',
   'connector',
 ];
+
+type IntervalId = '5m' | '15m' | '1h';
+
+interface IntervalOption {
+  timeRangeMs: number;
+  fixedInterval: string;
+  description: string;
+}
+
+const INTERVAL_OPTIONS: Record<IntervalId, IntervalOption> = {
+  '5m': {
+    timeRangeMs: 5 * 60 * 1000,
+    fixedInterval: '1m', // Using 1m interval for 5m range to ensure we have enough data points for the charts
+    description: i18n.translate('xpack.fleet.otelUi.componentDetail.metrics.interval5m', {
+      defaultMessage: 'Last 5 minutes',
+    }),
+  },
+  '15m': {
+    timeRangeMs: 15 * 60 * 1000,
+    fixedInterval: '1m',
+    description: i18n.translate('xpack.fleet.otelUi.componentDetail.metrics.interval15m', {
+      defaultMessage: 'Last 15 minutes',
+    }),
+  },
+  '1h': {
+    timeRangeMs: 60 * 60 * 1000,
+    fixedInterval: '2m',
+    description: i18n.translate('xpack.fleet.otelUi.componentDetail.metrics.interval1h', {
+      defaultMessage: 'Last 1 hour',
+    }),
+  },
+};
+
+const INTERVAL_BUTTON_OPTIONS = (Object.keys(INTERVAL_OPTIONS) as IntervalId[]).map((id) => ({
+  id,
+  label: id,
+  title: INTERVAL_OPTIONS[id].description,
+}));
+
+const DEFAULT_INTERVAL: IntervalId = '15m';
 
 const CHART_HEIGHT = 200;
 
@@ -82,51 +129,78 @@ const ComponentMetricsCharts: React.FunctionComponent<ComponentMetricsTabProps> 
   componentId,
   componentType,
 }) => {
-  const { groups, isLoading, error } = useComponentMetrics({ componentId, componentType });
+  const [selectedInterval, setSelectedInterval] = useState<IntervalId>(DEFAULT_INTERVAL);
+  const { timeRangeMs, fixedInterval, description } = INTERVAL_OPTIONS[selectedInterval];
+  const { groups, isLoading, error } = useComponentMetrics({
+    componentId,
+    componentType,
+    timeRangeMs,
+    fixedInterval,
+  });
   const chartBaseTheme = useElasticChartsTheme();
-
-  if (isLoading) {
-    return (
-      <EuiFlexGroup justifyContent="center" alignItems="center" css={loadingContainerStyle}>
-        <EuiFlexItem grow={false}>
-          <EuiLoadingChart size="l" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  if (error) {
-    return (
-      <EuiText size="s" color="danger" data-test-subj="otelComponentDetailMetricsError">
-        {i18n.translate('xpack.fleet.otelUi.componentDetail.metrics.error', {
-          defaultMessage: 'Failed to load metrics: {message}',
-          values: { message: error.message },
-        })}
-      </EuiText>
-    );
-  }
 
   const nonEmptyGroups = groups.filter((g) => g.series.length > 0);
 
-  if (nonEmptyGroups.length === 0) {
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center" css={loadingContainerStyle}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingChart size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (error) {
+      return (
+        <EuiText size="s" color="danger" data-test-subj="otelComponentDetailMetricsError">
+          {i18n.translate('xpack.fleet.otelUi.componentDetail.metrics.error', {
+            defaultMessage: 'Failed to load metrics: {message}',
+            values: { message: error.message },
+          })}
+        </EuiText>
+      );
+    }
+
+    if (nonEmptyGroups.length === 0) {
+      return (
+        <EuiText size="s" color="subdued" data-test-subj="otelComponentDetailMetricsNoData">
+          {i18n.translate('xpack.fleet.otelUi.componentDetail.metrics.noData', {
+            defaultMessage: 'No metrics data available for the {timeRange}.',
+            values: { timeRange: description.toLowerCase() },
+          })}
+        </EuiText>
+      );
+    }
+
     return (
-      <EuiText size="s" color="subdued" data-test-subj="otelComponentDetailMetricsNoData">
-        {i18n.translate('xpack.fleet.otelUi.componentDetail.metrics.noData', {
-          defaultMessage: 'No metrics data available for the last 15 minutes.',
-        })}
-      </EuiText>
+      <div css={scrollContainerStyle}>
+        {nonEmptyGroups.map((group, idx) => (
+          <React.Fragment key={group.id}>
+            {idx > 0 && <EuiSpacer size="l" />}
+            <MetricChart group={group} chartBaseTheme={chartBaseTheme} />
+          </React.Fragment>
+        ))}
+      </div>
     );
-  }
+  };
 
   return (
-    <div css={scrollContainerStyle}>
-      {nonEmptyGroups.map((group, idx) => (
-        <React.Fragment key={group.id}>
-          {idx > 0 && <EuiSpacer size="l" />}
-          <MetricChart group={group} chartBaseTheme={chartBaseTheme} />
-        </React.Fragment>
-      ))}
-    </div>
+    <>
+      <EuiButtonGroup
+        legend={i18n.translate('xpack.fleet.otelUi.componentDetail.metrics.intervalLegend', {
+          defaultMessage: 'Time range',
+        })}
+        options={INTERVAL_BUTTON_OPTIONS}
+        idSelected={selectedInterval}
+        onChange={(id) => setSelectedInterval(id as IntervalId)}
+        buttonSize="compressed"
+        data-test-subj="otelComponentDetailMetricsIntervalPicker"
+      />
+      <EuiSpacer size="m" />
+      {renderContent()}
+    </>
   );
 };
 

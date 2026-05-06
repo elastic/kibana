@@ -30,8 +30,6 @@ interface UseComponentMetricsResult {
 }
 
 const METRICS_INDEX = 'metrics-*';
-const TIME_RANGE_MS = 15 * 60 * 1000;
-const INTERVAL = '1m';
 
 interface MetricDefinition {
   field: string;
@@ -157,21 +155,23 @@ const buildComponentQuery = (
   serviceInstanceId: string,
   componentId: string,
   componentType: OTelComponentType,
-  now: number
+  now: number,
+  timeRangeMs: number,
+  fixedInterval: string
 ) => {
   const config = COMPONENT_METRICS[componentType];
   if (!config) {
     return undefined;
   }
 
-  const gte = now - TIME_RANGE_MS;
+  const gte = now - timeRangeMs;
   const subAggs: Record<string, unknown> = {};
   for (const group of config.metricGroups) {
     for (const { field, aggType } of group.metrics) {
       subAggs[`${field}_max`] = { max: { field } };
       if (aggType !== 'gauge') {
         subAggs[`${field}_rate`] = {
-          derivative: { buckets_path: `${field}_max`, unit: '1s' },
+          derivative: { gap_policy: 'insert_zeros', buckets_path: `${field}_max`, unit: '1s' },
         };
       }
     }
@@ -196,7 +196,7 @@ const buildComponentQuery = (
           throughput: {
             date_histogram: {
               field: '@timestamp',
-              fixed_interval: INTERVAL,
+              fixed_interval: fixedInterval,
             },
             aggs: subAggs,
           },
@@ -205,6 +205,15 @@ const buildComponentQuery = (
     },
   };
 };
+
+function readNormalizedValue(agg?: { value: number | null } | { normalized_value: number | null }) {
+  if (!agg) {
+    return 0;
+  }
+  const val = ('normalized_value' in agg ? agg.normalized_value : agg.value) ?? 0;
+
+  return parseFloat(val.toFixed(2)); // round to 2 decimals
+}
 
 const mapBucketsToSeries = (
   buckets: ThroughputAggregations['throughput']['buckets'],
@@ -216,7 +225,10 @@ const mapBucketsToSeries = (
       data: buckets.map((bucket) => {
         const aggKey = aggType === 'gauge' ? `${field}_max` : `${field}_rate`;
         const agg = bucket[aggKey] as { value: number | null } | undefined;
-        return { x: bucket.key, y: agg?.value ?? 0 };
+        return {
+          x: bucket.key,
+          y: readNormalizedValue(agg),
+        };
       }),
     }))
     .filter((s) => s.data.length > 0);
@@ -225,9 +237,13 @@ const mapBucketsToSeries = (
 export const useComponentMetrics = ({
   componentId,
   componentType,
+  timeRangeMs,
+  fixedInterval,
 }: {
   componentId: string;
   componentType: OTelComponentType;
+  timeRangeMs: number;
+  fixedInterval: string;
 }): UseComponentMetricsResult => {
   const { data } = useStartServices();
   const { serviceInstanceId } = useCollectorMetrics();
@@ -255,7 +271,9 @@ export const useComponentMetrics = ({
           serviceInstanceId,
           componentId,
           componentType,
-          now
+          now,
+          timeRangeMs,
+          fixedInterval
         );
 
         if (!searchRequest) {
@@ -296,7 +314,7 @@ export const useComponentMetrics = ({
     return () => {
       abortController.abort();
     };
-  }, [componentId, componentType, serviceInstanceId, data.search]);
+  }, [componentId, componentType, serviceInstanceId, data.search, timeRangeMs, fixedInterval]);
 
   return { groups, isLoading, error };
 };
