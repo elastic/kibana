@@ -942,8 +942,8 @@ describe('CreateConnectorFlyout', () => {
 
     beforeEach(() => {
       loadActionTypes.mockResolvedValue([specConnectorType]);
-      // Not in local registry - requires API fetch
-      actionTypeRegistry.has.mockReturnValue(false);
+      // Registered client-side (via registerConnectorTypesFromSpecs); API fetch is triggered by source==='spec'
+      actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(specActionTypeModel);
       appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue(mockSpecResponse);
       // Enable workflows UI setting so spec connectors are displayed
