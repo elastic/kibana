@@ -15,6 +15,11 @@ import {
   selectVisualization,
 } from '../../state_management';
 import { useEditorFrameService } from '../editor_frame_service_context';
+import { getLensFeatureFlags } from '../../get_feature_flags';
+import {
+  SchemaFlyoutEditor,
+  hasSchemaForVisualization,
+} from '../../shared_components/schema_flyout';
 
 export const VisualizationToolbarWrapper = memo(function VisualizationToolbar({
   framePublicAPI,
@@ -50,6 +55,16 @@ export const VisualizationToolbarWrapper = memo(function VisualizationToolbar({
 
   if (!activeVisualization || !visualizationState) {
     return null;
+  }
+
+  const { schemaFlyoutEditor: schemaFlyoutEditorEnabled } = getLensFeatureFlags();
+
+  if (schemaFlyoutEditorEnabled && hasSchemaForVisualization(activeVisualization.id)) {
+    return SchemaFlyoutEditor({
+      visualizationId: activeVisualization.id,
+      state: visualizationState.state,
+      setState: setVisualizationState,
+    });
   }
 
   const { FlyoutToolbarComponent } = activeVisualization;
