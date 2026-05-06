@@ -26,8 +26,7 @@
       "entityId": "rule-2",
       "entityType": "rule",
       "status": "failed",
-      "message": "Error generating UIAM API key for the rule with ID rule-2: boom",
-      "errorCode": "0x357391"
+      "message": "Error generating UIAM API key for the rule with ID rule-2: boom"
     }
   ]
 }
