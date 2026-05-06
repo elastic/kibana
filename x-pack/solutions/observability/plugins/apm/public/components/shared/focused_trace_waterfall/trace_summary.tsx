@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 
 type TraceSummary = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/summary'>['summary'];
 
@@ -55,7 +55,12 @@ export function TraceSummary({ summary }: Props) {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="errorFill" color={theme.euiTheme.colors.danger} size="s" />
+            <EuiIcon
+              type="errorFill"
+              color={theme.euiTheme.colors.danger}
+              size="s"
+              aria-hidden={true}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="subdued" size="s">

@@ -64,6 +64,24 @@ export interface FocusedTraceItems {
   focusedTraceTree: TraceItemChild[];
 }
 
+export interface TransactionDetailRedirectInfo {
+  '@timestamp': string;
+  trace: {
+    id: string;
+  };
+  transaction: {
+    id: string;
+    type: string;
+    name: string;
+    duration: {
+      us: number;
+    };
+  };
+  service: {
+    name: string;
+  };
+}
+
 export interface TraceRootSpan {
   duration: number;
 }

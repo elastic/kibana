@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { APIReturnType } from './create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { callApmApi } from './create_call_apm_api';
 
 type TraceRootSpan = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/root_span'>;
-
+// TODO: caue test it
 export const fetchRootSpanByTraceId = (
   {
     traceId,
