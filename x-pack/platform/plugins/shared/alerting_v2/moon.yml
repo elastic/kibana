@@ -103,6 +103,9 @@ dependsOn:
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/core-user-profile-browser'
   - '@kbn/user-profile-components'
+  - '@kbn/datemath'
+  - '@kbn/rison'
+  - '@kbn/search-types'
 tags:
   - plugin
   - prod
