@@ -1,0 +1,186 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "siem-readiness-auth-001",
+    "index": "siem-readiness-test",
+    "source": {
+      "@timestamp": "2026-01-20T12:00:00Z",
+      "event": {
+        "category": ["authentication"],
+        "kind": "event",
+        "module": "test"
+      },
+      "message": "Authentication event for SIEM Readiness test"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "siem-readiness-auth-002",
+    "index": "siem-readiness-test",
+    "source": {
+      "@timestamp": "2026-01-20T12:01:00Z",
+      "event": {
+        "category": ["authentication"],
+        "kind": "event",
+        "module": "test"
+      },
+      "message": "Authentication event 2 for SIEM Readiness test"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "siem-readiness-iam-001",
+    "index": "siem-readiness-test",
+    "source": {
+      "@timestamp": "2026-01-20T12:02:00Z",
+      "event": {
+        "category": ["iam"],
+        "kind": "event",
+        "module": "test"
+      },
+      "message": "IAM event for SIEM Readiness test"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "siem-readiness-process-001",
+    "index": "siem-readiness-test",
+    "source": {
+      "@timestamp": "2026-01-20T12:03:00Z",
+      "event": {
+        "category": ["process"],
+        "kind": "event",
+        "module": "test"
+      },
+      "message": "Process event for SIEM Readiness test"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "siem-readiness-file-001",
+    "index": "siem-readiness-test",
+    "source": {
+      "@timestamp": "2026-01-20T12:04:00Z",
+      "event": {
+        "category": ["file"],
+        "kind": "event",
+        "module": "test"
+      },
+      "message": "File event for SIEM Readiness test"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "siem-readiness-network-001",
+    "index": "siem-readiness-test",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:00Z",
+      "event": {
+        "category": ["network"],
+        "kind": "event",
+        "module": "test"
+      },
+      "message": "Network event for SIEM Readiness test"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "siem-readiness-dns-001",
+    "index": "siem-readiness-test",
+    "source": {
+      "@timestamp": "2026-01-20T12:06:00Z",
+      "event": {
+        "category": ["dns"],
+        "kind": "event",
+        "module": "test"
+      },
+      "message": "DNS event for SIEM Readiness test"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "siem-readiness-cloud-001",
+    "index": "siem-readiness-test",
+    "source": {
+      "@timestamp": "2026-01-20T12:07:00Z",
+      "event": {
+        "category": ["cloud"],
+        "kind": "event",
+        "module": "test"
+      },
+      "message": "Cloud event for SIEM Readiness test"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "siem-readiness-config-001",
+    "index": "siem-readiness-test",
+    "source": {
+      "@timestamp": "2026-01-20T12:08:00Z",
+      "event": {
+        "category": ["configuration"],
+        "kind": "event",
+        "module": "test"
+      },
+      "message": "Configuration event for SIEM Readiness test"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "siem-readiness-web-001",
+    "index": "siem-readiness-test",
+    "source": {
+      "@timestamp": "2026-01-20T12:09:00Z",
+      "event": {
+        "category": ["web"],
+        "kind": "event",
+        "module": "test"
+      },
+      "message": "Web event for SIEM Readiness test"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "siem-readiness-database-001",
+    "index": "siem-readiness-test",
+    "source": {
+      "@timestamp": "2026-01-20T12:10:00Z",
+      "event": {
+        "category": ["database"],
+        "kind": "event",
+        "module": "test"
+      },
+      "message": "Database event for SIEM Readiness test"
+    }
+  }
+}
