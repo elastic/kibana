@@ -29,3 +29,14 @@ export interface BulkIndexInsightsResult {
   indexed: number;
   failed: number;
 }
+
+export interface BulkDismissInsightsResult {
+  dismissed: number;
+  failed: number;
+}
+
+export interface PersistFindingsResult {
+  indexed: number;
+  failed: number;
+  dismissed: number;
+}

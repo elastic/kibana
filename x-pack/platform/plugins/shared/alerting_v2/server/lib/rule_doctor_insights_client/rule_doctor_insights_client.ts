@@ -7,16 +7,26 @@
 
 import Boom from '@hapi/boom';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
+import type { ResourceManagerContract } from '../services/resource_service/resource_manager';
+import { IndexInitializer } from '../services/resource_service/index_initializer';
 import {
   RULE_DOCTOR_INSIGHTS_INDEX,
+  getRuleDoctorInsightsResourceDefinition,
+  ruleDoctorInsightStatus,
   type RuleDoctorInsightDoc,
   type RuleDoctorInsightStatus,
 } from '../../resources/indices/rule_doctor_insights';
-import type { ListInsightsParams, ListInsightsResult, BulkIndexInsightsResult } from './types';
+import type {
+  ListInsightsParams,
+  ListInsightsResult,
+  BulkIndexInsightsResult,
+  BulkDismissInsightsResult,
+  PersistFindingsResult,
+} from './types';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -24,8 +34,19 @@ const DEFAULT_PAGE_SIZE = 20;
 export class RuleDoctorInsightsClient {
   constructor(
     private readonly esClient: ElasticsearchClient,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    private readonly resourceManager?: ResourceManagerContract,
+    private readonly rawLogger?: Logger
   ) {}
+
+  public async ensureIndex(): Promise<void> {
+    if (!this.resourceManager || !this.rawLogger) {
+      return;
+    }
+    const def = getRuleDoctorInsightsResourceDefinition();
+    const initializer = new IndexInitializer(this.rawLogger, this.esClient, def);
+    await this.resourceManager.ensureResourceRegistered(def.key, initializer, { optional: true });
+  }
 
   public async listInsights(params: ListInsightsParams): Promise<ListInsightsResult> {
     const { from = 0, size = DEFAULT_PAGE_SIZE } = params;
@@ -138,6 +159,58 @@ export class RuleDoctorInsightsClient {
     });
 
     return { indexed, failed };
+  }
+
+  public async bulkDismissInsights(
+    insightIds: string[],
+    spaceId: string
+  ): Promise<BulkDismissInsightsResult> {
+    if (insightIds.length === 0) {
+      return { dismissed: 0, failed: 0 };
+    }
+
+    const operations = insightIds.flatMap((insightId) => [
+      { update: { _index: RULE_DOCTOR_INSIGHTS_INDEX, _id: `${spaceId}:${insightId}` } },
+      { doc: { status: ruleDoctorInsightStatus.dismissed } },
+    ]);
+
+    const response = await this.esClient.bulk({ operations, refresh: 'wait_for' });
+
+    const failed = response.items.filter((item) => item.update?.error).length;
+    const dismissed = insightIds.length - failed;
+
+    if (response.errors) {
+      this.logger.warn({
+        message: `RuleDoctorInsightsClient: failed to dismiss ${failed} insights`,
+      });
+    }
+
+    this.logger.debug({
+      message: `RuleDoctorInsightsClient: dismissed ${dismissed} insights (${failed} failed)`,
+    });
+
+    return { dismissed, failed };
+  }
+
+  public async persistFindings(params: {
+    insights: RuleDoctorInsightDoc[];
+    dismissIds: string[];
+    spaceId: string;
+  }): Promise<PersistFindingsResult> {
+    const { insights, dismissIds, spaceId } = params;
+
+    const indexResult = await this.bulkIndexInsights(insights);
+    const dismissResult = await this.bulkDismissInsights(dismissIds, spaceId);
+
+    this.logger.debug({
+      message: `RuleDoctorInsightsClient: persisted ${indexResult.indexed} insights (${indexResult.failed} failed), dismissed ${dismissResult.dismissed}`,
+    });
+
+    return {
+      indexed: indexResult.indexed,
+      failed: indexResult.failed + dismissResult.failed,
+      dismissed: dismissResult.dismissed,
+    };
   }
 
   private buildFilterQuery(params: ListInsightsParams): QueryDslQueryContainer {

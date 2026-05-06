@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
@@ -14,6 +15,7 @@ import {
   type RuleDoctorInsightDoc,
 } from '../../resources/indices/rule_doctor_insights';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
+import { createMockResourceManager } from '../services/resource_service/resource_manager.mock';
 import { RuleDoctorInsightsClient } from './rule_doctor_insights_client';
 
 const mockLoggerService: jest.Mocked<LoggerServiceContract> = {
@@ -37,8 +39,8 @@ const makeInsight = (overrides: Partial<RuleDoctorInsightDoc> = {}): RuleDoctorI
   justification: '',
   rule_ids: ['rule-1', 'rule-2'],
   data: {},
-  current: null,
-  proposed: null,
+  current: {},
+  proposed: {},
   space_id: 'default',
   ...overrides,
 });
@@ -258,6 +260,33 @@ describe('RuleDoctorInsightsClient', () => {
           code: 'BULK_INDEX_INSIGHTS_ERROR',
         })
       );
+    });
+  });
+
+  describe('ensureIndex', () => {
+    it('calls ensureResourceRegistered when resourceManager is provided', async () => {
+      const resourceManager = createMockResourceManager();
+      resourceManager.ensureResourceRegistered.mockResolvedValue(undefined);
+      const rawLogger = loggingSystemMock.createLogger();
+
+      const clientWithRM = new RuleDoctorInsightsClient(
+        esClient,
+        mockLoggerService,
+        resourceManager,
+        rawLogger
+      );
+      await clientWithRM.ensureIndex();
+
+      expect(resourceManager.ensureResourceRegistered).toHaveBeenCalledWith(
+        `index:${RULE_DOCTOR_INSIGHTS_INDEX}`,
+        expect.objectContaining({ initialize: expect.any(Function) }),
+        { optional: true }
+      );
+    });
+
+    it('is a no-op when resourceManager is not provided', async () => {
+      const clientWithoutRM = new RuleDoctorInsightsClient(esClient, mockLoggerService);
+      await expect(clientWithoutRM.ensureIndex()).resolves.toBeUndefined();
     });
   });
 });

@@ -44,6 +44,7 @@ import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_pro
 import { ListInsightsRoute } from '../routes/rule_doctor_insights/list_insights_route';
 import { GetInsightRoute } from '../routes/rule_doctor_insights/get_insight_route';
 import { UpdateInsightStatusRoute } from '../routes/rule_doctor_insights/update_insight_status_route';
+import { RunRuleDoctorRoute } from '../routes/rule_doctor/run_rule_doctor_route';
 
 /**
  * TODO: https://github.com/elastic/rna-program/issues/426
@@ -91,6 +92,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(ListInsightsRoute);
   bind(Route).toConstantValue(GetInsightRoute);
   bind(Route).toConstantValue(UpdateInsightStatusRoute);
+  bind(Route).toConstantValue(RunRuleDoctorRoute);
   // TODO(rna-program#426): remove this binding before GA.
   bind(Route).toConstantValue(ResetResourcesRoute);
 }

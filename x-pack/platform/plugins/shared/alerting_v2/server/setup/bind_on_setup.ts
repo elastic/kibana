@@ -17,6 +17,7 @@ import { registerSavedObjects } from '../saved_objects';
 import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/advanced_settings';
 import { alertingV2UiSettings } from '../ui_settings/advanced_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
+import { registerRuleDoctorStepTypes } from '../step_types';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { buildScopedRulesClientFactory } from '../agent_builder/scoped_rules_client_factory';
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
@@ -73,6 +74,12 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
+
+    registerRuleDoctorStepTypes(
+      container.get(
+        PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
+      )
+    );
 
     const agentBuilderToken =
       PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilder']>>('agentBuilder');
