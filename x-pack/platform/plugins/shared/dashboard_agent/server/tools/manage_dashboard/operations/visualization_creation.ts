@@ -9,11 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentPanel } from '@kbn/dashboard-agent-common';
 import type { ResolveVisualizationConfig } from '../inline_visualization';
 import type { VisualizationFailure } from '../utils';
-import type {
-  CreateVisualizationPanelInput,
-  DashboardOperation,
-  VisualizationPanelInput,
-} from '../operations';
+import type { VisualizationPanelInput } from './add_section';
+import type { CreateVisualizationPanelInput } from './create_visualization_panels';
 
 type ResolvedVisualizationPanel = Awaited<ReturnType<ResolveVisualizationConfig>>;
 export type VisualizationCreationOperationType = 'add_section' | 'create_visualization_panels';
@@ -32,50 +29,6 @@ export interface ResolvedVisualizationCreationRequest {
   request: VisualizationCreationRequest;
   resolvedPanel: ResolvedVisualizationPanel;
 }
-
-/**
- * Collect inline visualization creation work by operation index so it can be
- * resolved up front in parallel and then applied later in original operation order.
- */
-export const collectVisualizationCreationRequests = (
-  operations: DashboardOperation[]
-): Map<number, VisualizationCreationRequest[]> => {
-  const requestsByOperationIndex = new Map<number, VisualizationCreationRequest[]>();
-
-  for (const [operationIndex, operation] of operations.entries()) {
-    switch (operation.operation) {
-      case 'add_section': {
-        if (!operation.panels) {
-          break;
-        }
-
-        requestsByOperationIndex.set(
-          operationIndex,
-          operation.panels.map((panelInput) => ({
-            operationType: operation.operation,
-            panelInput,
-          }))
-        );
-        break;
-      }
-      case 'create_visualization_panels': {
-        requestsByOperationIndex.set(
-          operationIndex,
-          operation.panels.map((panelInput) => ({
-            operationType: operation.operation,
-            panelInput,
-            sectionId: panelInput.sectionId,
-          }))
-        );
-        break;
-      }
-      default:
-        break;
-    }
-  }
-
-  return requestsByOperationIndex;
-};
 
 /**
  * Resolve all collected inline visualization creation requests up front while

@@ -5,37 +5,57 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { appendPanelsToDashboard } from '../dashboard_state';
+import { visualizationPanelInputSchema } from './add_section';
 import {
   getResolvedVisualizationCreationRequests,
   materializeResolvedVisualizationPanels,
 } from './visualization_creation';
-import type { OperationHandler } from './types';
+import { defineOperation } from './types';
 
-export const createVisualizationPanelsHandler: OperationHandler<'create_visualization_panels'> = ({
-  dashboardData,
-  operation,
-  operationIndex,
-  context,
-}) => {
-  let nextDashboardData = dashboardData;
-  const panelsToAdd = materializeResolvedVisualizationPanels({
-    resolvedRequests: getResolvedVisualizationCreationRequests({
-      resolvedRequestsByOperationIndex: context.resolvedVisualizationCreationRequests,
-      operationIndex,
-      operationType: operation.operation,
-    }),
-    failures: context.failures,
-  });
+export const createVisualizationPanelSchema = visualizationPanelInputSchema.extend({
+  sectionId: z
+    .string()
+    .optional()
+    .describe(
+      'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+    ),
+});
 
-  for (const { request, panel } of panelsToAdd) {
-    nextDashboardData = appendPanelsToDashboard({
-      dashboardData: nextDashboardData,
-      panelsToAdd: [panel],
-      sectionId:
-        request.operationType === 'create_visualization_panels' ? request.sectionId : undefined,
+export type CreateVisualizationPanelInput = z.infer<typeof createVisualizationPanelSchema>;
+
+export const createVisualizationPanelsOperation = defineOperation({
+  schema: z.object({
+    operation: z.literal('create_visualization_panels'),
+    panels: z.array(createVisualizationPanelSchema).min(1),
+  }),
+  handler: ({ dashboardData, operation, operationIndex, context }) => {
+    let nextDashboardData = dashboardData;
+    const panelsToAdd = materializeResolvedVisualizationPanels({
+      resolvedRequests: getResolvedVisualizationCreationRequests({
+        resolvedRequestsByOperationIndex: context.resolvedVisualizationCreationRequests,
+        operationIndex,
+        operationType: operation.operation,
+      }),
+      failures: context.failures,
     });
-  }
 
-  return nextDashboardData;
-};
+    for (const { request, panel } of panelsToAdd) {
+      nextDashboardData = appendPanelsToDashboard({
+        dashboardData: nextDashboardData,
+        panelsToAdd: [panel],
+        sectionId:
+          request.operationType === 'create_visualization_panels' ? request.sectionId : undefined,
+      });
+    }
+
+    return nextDashboardData;
+  },
+  collectVisualizationCreationRequests: (operation) =>
+    operation.panels.map((panelInput) => ({
+      operationType: operation.operation,
+      panelInput,
+      sectionId: panelInput.sectionId,
+    })),
+});

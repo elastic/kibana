@@ -5,34 +5,57 @@
  * 2.0.
  */
 
+import { panelGridSchema } from '@kbn/dashboard-agent-common';
+import { z } from '@kbn/zod/v4';
 import { appendPanelsToDashboard } from '../dashboard_state';
-import type { OperationHandler } from './types';
+import { defineOperation } from './types';
 
-export const addPanelsFromAttachmentsHandler: OperationHandler<'add_panels_from_attachments'> = ({
-  dashboardData,
-  operation,
-  context,
-}) => {
-  let nextDashboardData = dashboardData;
+const attachmentWithGridSchema = z.object({
+  attachmentId: z.string().describe('Visualization attachment ID to add as a dashboard panel.'),
+  grid: panelGridSchema.describe(
+    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
+  ),
+});
 
-  for (const item of operation.items) {
-    const result = context.resolvePanelsFromAttachments([
-      {
-        attachmentId: item.attachmentId,
-        grid: item.grid,
-      },
-    ]);
+export const addPanelsFromAttachmentsOperation = defineOperation({
+  schema: z.object({
+    operation: z.literal('add_panels_from_attachments'),
+    items: z
+      .array(
+        attachmentWithGridSchema.extend({
+          sectionId: z
+            .string()
+            .optional()
+            .describe(
+              'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+            ),
+        })
+      )
+      .min(1)
+      .describe('Visualization attachments to add, each with its dashboard grid layout.'),
+  }),
+  handler: ({ dashboardData, operation, context }) => {
+    let nextDashboardData = dashboardData;
 
-    if (result.panels.length > 0) {
-      nextDashboardData = appendPanelsToDashboard({
-        dashboardData: nextDashboardData,
-        panelsToAdd: result.panels,
-        sectionId: item.sectionId,
-      });
+    for (const item of operation.items) {
+      const result = context.resolvePanelsFromAttachments([
+        {
+          attachmentId: item.attachmentId,
+          grid: item.grid,
+        },
+      ]);
+
+      if (result.panels.length > 0) {
+        nextDashboardData = appendPanelsToDashboard({
+          dashboardData: nextDashboardData,
+          panelsToAdd: result.panels,
+          sectionId: item.sectionId,
+        });
+      }
+
+      context.failures.push(...result.failures);
     }
 
-    context.failures.push(...result.failures);
-  }
-
-  return nextDashboardData;
-};
+    return nextDashboardData;
+  },
+});

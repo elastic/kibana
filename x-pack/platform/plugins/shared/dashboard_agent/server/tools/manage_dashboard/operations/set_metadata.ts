@@ -5,25 +5,35 @@
  * 2.0.
  */
 
-import type { OperationHandler } from './types';
+import { z } from '@kbn/zod/v4';
+import { defineOperation } from './types';
 
-export const setMetadataHandler: OperationHandler<'set_metadata'> = ({
-  dashboardData,
-  operation,
-  context,
-}) => {
-  if (operation.title === undefined && operation.description === undefined) {
-    context.logger.debug('Skipping empty set_metadata operation');
-    return dashboardData;
-  }
+export const setMetadataOperation = defineOperation({
+  schema: z.object({
+    operation: z.literal('set_metadata'),
+    title: z
+      .string()
+      .min(1)
+      .optional()
+      .describe(
+        "Non-empty dashboard title. If the current title is empty, missing, or a placeholder, invent one from the dashboard's contents."
+      ),
+    description: z.string().optional(),
+  }),
+  handler: ({ dashboardData, operation, context }) => {
+    if (operation.title === undefined && operation.description === undefined) {
+      context.logger.debug('Skipping empty set_metadata operation');
+      return dashboardData;
+    }
 
-  const metadataPatch = {
-    ...(operation.title !== undefined ? { title: operation.title } : {}),
-    ...(operation.description !== undefined ? { description: operation.description } : {}),
-  };
+    const metadataPatch = {
+      ...(operation.title !== undefined ? { title: operation.title } : {}),
+      ...(operation.description !== undefined ? { description: operation.description } : {}),
+    };
 
-  return {
-    ...dashboardData,
-    ...metadataPatch,
-  };
-};
+    return {
+      ...dashboardData,
+      ...metadataPatch,
+    };
+  },
+});

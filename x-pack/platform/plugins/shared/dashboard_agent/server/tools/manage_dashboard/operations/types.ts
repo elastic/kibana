@@ -7,16 +7,13 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
+import type { z } from '@kbn/zod/v4';
 import type { ResolveVisualizationConfig } from '../inline_visualization';
-import type { DashboardOperation } from '../operations';
 import type { VisualizationFailure } from '../utils';
-import type { ResolvedVisualizationCreationRequest } from './visualization_creation';
-
-export type DashboardOperationType = DashboardOperation['operation'];
-export type DashboardOperationByType<T extends DashboardOperationType> = Extract<
-  DashboardOperation,
-  { operation: T }
->;
+import type {
+  ResolvedVisualizationCreationRequest,
+  VisualizationCreationRequest,
+} from './visualization_creation';
 
 export interface OperationExecutionContext {
   logger: Logger;
@@ -28,17 +25,27 @@ export interface OperationExecutionContext {
   resolveVisualizationConfig?: ResolveVisualizationConfig;
 }
 
-export interface OperationHandlerParams<T extends DashboardOperationType> {
+export interface OperationHandlerParams<TOperation> {
   dashboardData: DashboardAttachmentData;
-  operation: DashboardOperationByType<T>;
+  operation: TOperation;
   operationIndex: number;
   context: OperationExecutionContext;
 }
 
-export type OperationHandler<T extends DashboardOperationType> = (
-  params: OperationHandlerParams<T>
+export type OperationHandler<TOperation> = (
+  params: OperationHandlerParams<TOperation>
 ) => DashboardAttachmentData | Promise<DashboardAttachmentData>;
 
-export type OperationHandlerMap = {
-  [T in DashboardOperationType]: OperationHandler<T>;
-};
+type OperationSchema = z.ZodObject<{ operation: z.ZodLiteral<string> }>;
+
+export interface OperationDefinition<TSchema extends OperationSchema> {
+  schema: TSchema;
+  handler: OperationHandler<z.infer<TSchema>>;
+  collectVisualizationCreationRequests?: (
+    operation: z.infer<TSchema>
+  ) => VisualizationCreationRequest[];
+}
+
+export const defineOperation = <TSchema extends OperationSchema>(
+  definition: OperationDefinition<TSchema>
+) => definition;
