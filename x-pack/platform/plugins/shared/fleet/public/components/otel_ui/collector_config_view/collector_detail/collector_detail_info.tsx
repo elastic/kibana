@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiCode, EuiDescriptionList, EuiToolTip } from '@elastic/eui';
+import { EuiDescriptionList, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
 
@@ -53,20 +53,10 @@ export const CollectorDetailInfo: React.FC<CollectorDetailInfoProps> = ({ agent,
     () =>
       [
         {
-          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.instanceId', {
-            defaultMessage: 'Instance ID',
+          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.name', {
+            defaultMessage: 'Name',
           }),
-          description: identifying?.['service.instance.id'] ? (
-            <EuiCode>{identifying['service.instance.id']}</EuiCode>
-          ) : (
-            '-'
-          ),
-        },
-        {
-          title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.displayName', {
-            defaultMessage: 'Display name',
-          }),
-          description: nonIdentifying?.['elastic.display.name'] ?? '-',
+          description: nonIdentifying?.['elastic.display.name'] ?? agent.id,
         },
         {
           title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.agentId', {
