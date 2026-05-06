@@ -46,7 +46,7 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
     }
     expect([200, 201]).toContain(res.status);
 
-    await retry.waitForWithTimeout('Entity store to be running', 60_000, async () => {
+    await retry.waitForWithTimeout('Entity store to be ready', 60_000, async () => {
       const statusRes = await supertest
         .get('/api/security/entity_store/status')
         .set('kbn-xsrf', 'true')
@@ -54,7 +54,10 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
         .set('elastic-api-version', '2023-10-31')
         .expect(200);
 
-      return statusRes.body.status === 'running';
+      const { status } = statusRes.body;
+      if (status === 'error')
+        throw new Error(`Entity store install failed: ${JSON.stringify(statusRes.body)}`);
+      return status === 'running' || status === 'stopped';
     });
 
     return res;
@@ -88,7 +91,9 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
 
     if (res.status !== 200) {
       log.error(
-        `Failed to create ${entityType} entity: ${JSON.stringify(res.body)} (body: ${JSON.stringify(body)})`
+        `Failed to create ${entityType} entity: ${JSON.stringify(res.body)} (body: ${JSON.stringify(
+          body
+        )})`
       );
     }
     expect(res.status).toBe(200);
