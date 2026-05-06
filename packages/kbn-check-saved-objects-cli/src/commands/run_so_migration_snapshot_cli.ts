@@ -14,7 +14,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { takeSnapshot } from '../snapshots';
-import { startElasticsearch, setupKibana, stopElasticsearch, stopKibana } from '../util';
+import { getKibanaServer } from '../util';
 
 const DEFAULT_OUTPUT_PATH = 'target/plugin_so_types_snapshot.json';
 
@@ -28,22 +28,16 @@ export const runSoMigrationSnapshotCli = () => {
         ? outputPathArg
         : resolve(REPO_ROOT, outputPathArg);
 
-      const esServer = await startElasticsearch();
-      const kibanaServer = await setupKibana();
+      const kibanaServer = await getKibanaServer();
+      await kibanaServer.preboot();
+      const coreSetup = await kibanaServer.setup();
+      const types = coreSetup.savedObjects.getTypeRegistry().getAllTypes();
+      const snapshot = await takeSnapshot(types);
 
-      try {
-        const coreStart = await kibanaServer.start();
-        const types = coreStart.savedObjects.getTypeRegistry().getAllTypes();
-        const snapshot = await takeSnapshot(types);
+      await mkdir(dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, JSON.stringify(snapshot, null, 2), { encoding: 'utf-8' });
 
-        await mkdir(dirname(outputPath), { recursive: true });
-        await writeFile(outputPath, JSON.stringify(snapshot, null, 2), { encoding: 'utf-8' });
-
-        log.info('Snapshot successfully taken to: ' + outputPath);
-      } finally {
-        await stopKibana(kibanaServer);
-        await stopElasticsearch(esServer);
-      }
+      log.info('Snapshot successfully taken to: ' + outputPath);
     },
     {
       usage: [process.argv0, scriptName, 'snapshot', '[--outputPath <outputPath>]'].join(' '),
