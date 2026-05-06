@@ -125,6 +125,7 @@ steps:
 interface MockContextOptions {
   executionMode?: AgentExecutionMode;
   promptStatus?: ConfirmationStatus;
+  toolCallId?: string;
 }
 
 const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
@@ -155,6 +156,11 @@ const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
     // preview path) keep passing. Override with conversation mode to exercise
     // the in-handler HITL gate.
     executionMode: options.executionMode ?? AgentExecutionMode.standalone,
+    callContext: {
+      toolId: WORKFLOW_EXECUTE_STEP_TOOL_ID,
+      toolCallId: options.toolCallId ?? 'tc_default',
+      callSource: 'agent' as const,
+    },
     prompts: {
       checkConfirmationStatus,
       askForConfirmation,
@@ -658,7 +664,7 @@ describe('registerWorkflowExecuteStepTool', () => {
 
       expect(result.prompt).toBeDefined();
       expect(result.prompt.type).toBe(AgentPromptType.confirmation);
-      expect(result.prompt.id).toContain('workflow_execute_step.wf-1.send_slack');
+      expect(result.prompt.id).toContain(WORKFLOW_EXECUTE_STEP_TOOL_ID);
       // Slack is unsafe but not destructive → 'warning'
       expect((result.prompt as any).color).toBe('warning');
       expect((result.prompt as any).message).toContain('#alerts');
@@ -742,12 +748,14 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 
-    it('uses a stable promptId for identical re-invocations (so accept/execute round-trip works)', async () => {
+    it('reuses the same promptId for re-invocations within one tool call (so accept/execute round-trip works)', async () => {
       const contextA = createMockContext(VALID_WORKFLOW_YAML, {
         executionMode: AgentExecutionMode.conversation,
+        toolCallId: 'tc_round_trip',
       });
       const contextB = createMockContext(VALID_WORKFLOW_YAML, {
         executionMode: AgentExecutionMode.conversation,
+        toolCallId: 'tc_round_trip',
       });
 
       await invokePromptHandler(
@@ -764,14 +772,17 @@ describe('registerWorkflowExecuteStepTool', () => {
       const idA = (contextA.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
       const idB = (contextB.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
       expect(idA).toBe(idB);
+      expect(idA).toContain('tc_round_trip');
     });
 
-    it('produces a different promptId when confirmation_body changes (per-call freshness)', async () => {
+    it('uses a different promptId for separate tool invocations (per-call freshness)', async () => {
       const contextA = createMockContext(VALID_WORKFLOW_YAML, {
         executionMode: AgentExecutionMode.conversation,
+        toolCallId: 'tc_first',
       });
       const contextB = createMockContext(VALID_WORKFLOW_YAML, {
         executionMode: AgentExecutionMode.conversation,
+        toolCallId: 'tc_second',
       });
 
       await invokePromptHandler(
@@ -781,31 +792,7 @@ describe('registerWorkflowExecuteStepTool', () => {
       );
       await invokePromptHandler(
         registeredTool,
-        { stepName: 'send_slack', confirmation_body: 'send goodbye to #alerts' },
-        contextB
-      );
-
-      const idA = (contextA.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
-      const idB = (contextB.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
-      expect(idA).not.toBe(idB);
-    });
-
-    it('produces a different promptId when contextOverride changes', async () => {
-      const contextA = createMockContext(VALID_WORKFLOW_YAML, {
-        executionMode: AgentExecutionMode.conversation,
-      });
-      const contextB = createMockContext(VALID_WORKFLOW_YAML, {
-        executionMode: AgentExecutionMode.conversation,
-      });
-
-      await invokePromptHandler(
-        registeredTool,
-        { stepName: 'send_slack', contextOverride: { steps: { prev: { output: { id: 1 } } } } },
-        contextA
-      );
-      await invokePromptHandler(
-        registeredTool,
-        { stepName: 'send_slack', contextOverride: { steps: { prev: { output: { id: 2 } } } } },
+        { stepName: 'send_slack', confirmation_body: 'send hi to #alerts' },
         contextB
       );
 

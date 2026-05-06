@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createHash } from 'crypto';
 import YAML, { LineCounter, parseDocument } from 'yaml';
 import { AgentExecutionMode, ToolType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
@@ -410,47 +409,6 @@ const executeConditionStepWithStubs = async ({
   }
 };
 
-/**
- * Builds a prompt id that is stable for a single tool invocation (so the
- * accept -> re-enter -> execute round-trip works) but varies across separate
- * invocations of the same step in the same conversation.
- *
- * `context.prompts` does not expose `toolCallId`, so we approximate per-call
- * uniqueness by hashing the user-meaningful inputs the LLM provides:
- * `confirmationBody`, `contextOverride`, and the YAML version. When the
- * framework re-enters the handler after the user accepts the prompt, the
- * args are replayed verbatim, so the hash matches and the prior `accepted`
- * response is reused. A subsequent agent call with any different input
- * produces a different id and re-prompts the user.
- *
- * Identical-input re-calls still reuse a prior accept; that is an accepted
- * residual of not having toolCallId access. See PR #267673 discussion.
- */
-const buildPromptId = ({
-  workflowId,
-  yaml,
-  stepName,
-  contextOverride,
-  confirmationBody,
-}: {
-  workflowId?: string;
-  yaml: string;
-  stepName: string;
-  contextOverride?: Record<string, unknown>;
-  confirmationBody?: string;
-}): string => {
-  const scope = workflowId ?? createHash('sha256').update(yaml).digest('hex').slice(0, 16);
-  const callFingerprint = createHash('sha256')
-    .update(confirmationBody ?? '')
-    .update(' ')
-    .update(contextOverride ? JSON.stringify(contextOverride) : '')
-    .update(' ')
-    .update(yaml)
-    .digest('hex')
-    .slice(0, 12);
-  return `workflow_execute_step.${scope}.${stepName}.${callFingerprint}`;
-};
-
 const buildFallbackPreview = (
   stepInfo: StepInfo,
   contextOverride?: Record<string, unknown>
@@ -679,13 +637,7 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
           });
         }
 
-        const promptId = buildPromptId({
-          workflowId,
-          yaml,
-          stepName,
-          contextOverride,
-          confirmationBody,
-        });
+        const promptId = `${WORKFLOW_EXECUTE_STEP_TOOL_ID}.${context.callContext.toolCallId}`;
         const status = context.prompts.checkConfirmationStatus(promptId);
 
         if (status.status === ConfirmationStatus.rejected) {
