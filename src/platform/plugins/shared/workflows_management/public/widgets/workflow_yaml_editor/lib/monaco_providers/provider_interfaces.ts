@@ -11,7 +11,7 @@
 
 import type YAML from 'yaml';
 import type { Scalar, YAMLMap } from 'yaml';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type {
   ExecutionContext,
   StepExecutionData,

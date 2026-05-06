@@ -9,7 +9,7 @@
 
 import { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import type { LineColumnPosition } from '../../../entities/workflows/store';
 import {
   openCreateConnectorFlyout,

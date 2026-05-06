@@ -9,7 +9,7 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import { isScalar } from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { getPlaceholderForProperty } from './workflow_input_placeholder';
 import type { WorkflowsResponse } from '../../../../../../entities/workflows/model/types';
 import type { AutocompleteContext } from '../../context/autocomplete.types';

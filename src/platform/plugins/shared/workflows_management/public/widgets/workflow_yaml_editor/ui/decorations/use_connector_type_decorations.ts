@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import {
   getBuiltInStepStability,
   isBuiltInStepType,

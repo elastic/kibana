@@ -9,7 +9,7 @@
 
 import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 import { selectDetail } from '../../../../entities/workflows/store/workflow_detail/selectors';
 import { useGetPropertyHandler } from '../../../../features/validate_workflow_yaml/lib/property_handlers/use_get_property_handler';

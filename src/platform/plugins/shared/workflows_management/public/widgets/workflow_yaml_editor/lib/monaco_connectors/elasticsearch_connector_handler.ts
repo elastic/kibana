@@ -9,9 +9,9 @@
 
 import type { YAMLMap } from 'yaml';
 import { isMap, isScalar } from 'yaml';
+import type { monaco } from '@kbn/code-editor';
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { monaco } from '@kbn/monaco';
 import type { InternalConnectorContract } from '@kbn/workflows';
 import { buildElasticsearchRequest, isInternalConnector } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';

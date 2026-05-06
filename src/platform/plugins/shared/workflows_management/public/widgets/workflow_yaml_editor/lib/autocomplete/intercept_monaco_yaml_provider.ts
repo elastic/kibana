@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { WORKFLOW_COMPLETION_PROVIDER_ID } from './get_completion_item_provider';
 
 const yamlProviders: monaco.languages.CompletionItemProvider[] = [];

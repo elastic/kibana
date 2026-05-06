@@ -8,7 +8,7 @@
  */
 
 import { type Document, isSeq, parseDocument } from 'yaml';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { generateTriggerSnippet } from './generate_trigger_snippet';
 import {
   createReplacementRange,

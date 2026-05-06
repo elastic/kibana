@@ -8,8 +8,8 @@
  */
 
 import { useCallback, useRef } from 'react';
+import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
 
 interface RegisterKeyboardCommandsParams {
   editor: monaco.editor.IStandaloneCodeEditor;

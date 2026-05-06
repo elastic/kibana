@@ -8,8 +8,8 @@
  */
 
 import { diffLines } from 'diff';
-import { getUndoRedoService, monaco } from '@kbn/monaco';
-import type { UndoRedoService } from '@kbn/monaco';
+import { getUndoRedoService, monaco } from '@kbn/code-editor';
+import type { UndoRedoService } from '@kbn/code-editor';
 import { isMac } from '@kbn/shared-ux-utility';
 
 // EUI: check

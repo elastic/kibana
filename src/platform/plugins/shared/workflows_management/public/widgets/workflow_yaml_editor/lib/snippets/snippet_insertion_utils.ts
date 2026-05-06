@@ -8,7 +8,7 @@
  */
 
 import { isMap, isNode, isPair, isScalar, isSeq, type Pair, type Range } from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { getIndentLevelFromLineNumber } from '../get_indent_level';
 import { getMonacoRangeFromYamlRange } from '../utils';
 

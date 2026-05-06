@@ -14,9 +14,9 @@ import type { Change } from 'diff';
 import { diffLines } from 'diff';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import { monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
 import {
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,

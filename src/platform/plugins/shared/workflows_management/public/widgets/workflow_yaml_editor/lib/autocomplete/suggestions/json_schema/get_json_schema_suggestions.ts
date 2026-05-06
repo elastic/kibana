@@ -8,7 +8,7 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 import { getInputPropertyName } from '../../context/inputs_utils';
 

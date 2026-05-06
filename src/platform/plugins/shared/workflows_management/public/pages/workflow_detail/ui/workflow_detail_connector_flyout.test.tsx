@@ -9,7 +9,7 @@
 
 import { act, render } from '@testing-library/react';
 import React from 'react';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
 import {

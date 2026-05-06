@@ -11,7 +11,7 @@ import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import {
   selectEditorWorkflowLookup,
   selectHighlightedStepId,

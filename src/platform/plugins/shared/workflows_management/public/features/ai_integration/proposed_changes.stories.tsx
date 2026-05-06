@@ -11,7 +11,7 @@ import type { Decorator, Meta, StoryContext, StoryObj } from '@storybook/react';
 import React, { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ProposalManager } from './proposed_changes';
 import { kibanaReactDecorator } from '../../../.storybook/decorators';

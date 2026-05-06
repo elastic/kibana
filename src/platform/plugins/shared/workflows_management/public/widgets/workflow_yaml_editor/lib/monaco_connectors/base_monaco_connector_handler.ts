@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type { StepStabilityLevel } from '@kbn/workflows';
 import { getStabilityNote as getStabilityNoteFromShared } from '../get_stability_note';
 import type {

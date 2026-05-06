@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { LIQUID_BLOCK_END_REGEX, LIQUID_BLOCK_START_REGEX } from '@kbn/workflows-yaml';
 
 /**

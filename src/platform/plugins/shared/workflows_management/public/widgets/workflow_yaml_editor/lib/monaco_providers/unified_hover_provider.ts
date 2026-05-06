@@ -8,7 +8,7 @@
  */
 
 import type YAML from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import type { JsonValue } from '@kbn/utility-types';
 import { resolveKibanaStepTypeAlias } from '@kbn/workflows';
 import type {

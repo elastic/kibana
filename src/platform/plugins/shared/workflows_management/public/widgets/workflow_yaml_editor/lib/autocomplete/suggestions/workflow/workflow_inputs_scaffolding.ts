@@ -9,7 +9,7 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import YAML, { isMap, isPair, isScalar } from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { getPlaceholderForProperty } from './workflow_input_placeholder';
 import type { StepInfo } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';

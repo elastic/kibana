@@ -9,7 +9,7 @@
 
 import type { Document } from 'yaml';
 import { isScalar } from 'yaml';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';

@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 
 interface UseLineDifferencesDecorationsProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;

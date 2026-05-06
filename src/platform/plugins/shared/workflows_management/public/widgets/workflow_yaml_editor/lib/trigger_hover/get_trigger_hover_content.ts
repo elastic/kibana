@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import type { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import type { z } from '@kbn/zod/v4';

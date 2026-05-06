@@ -8,7 +8,7 @@
  */
 
 import type { Document, LineCounter, Scalar } from 'yaml';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type { ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import type { z } from '@kbn/zod/v4';

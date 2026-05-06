@@ -17,7 +17,7 @@ import {
   parseDocument,
   visit,
 } from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { isBuiltInStepType } from '@kbn/workflows';
 import { generateBuiltInStepSnippet } from './generate_builtin_step_snippet';
 import { generateConnectorSnippet } from './generate_connector_snippet';

@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/workflows-yaml'
   - '@kbn/zod'
   - '@kbn/code-editor'
-  - '@kbn/monaco'
   - '@kbn/actions-plugin'
   - '@kbn/features-plugin'
   - '@kbn/workflows-execution-engine'

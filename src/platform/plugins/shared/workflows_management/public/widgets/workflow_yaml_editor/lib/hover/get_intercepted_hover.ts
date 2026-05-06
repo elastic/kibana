@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { getAllYamlHoverProviders } from './intercept_monaco_yaml_hover_provider';
 
 export async function getInterceptedHover(
