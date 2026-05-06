@@ -169,10 +169,6 @@ export const getCommonNormalizer = <T extends LensAttributes>(
 
       // prune erroneous columns and swap ids
       for (const [id, layer] of Object.entries(dsState.layers)) {
-        // apply defaults
-        layer.ignoreGlobalFilters =
-          layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE;
-
         if (layerIdMap.has(id)) {
           const newId = layerIdMap.get(id)!;
           dsState.layers[newId] = layer;
@@ -205,6 +201,10 @@ export const getCommonNormalizer = <T extends LensAttributes>(
           ((attributes.state.datasourceStates as any).indexpattern as FormBasedPersistedState), // fallback to legacy
         (ds) => {
           for (const layer of Object.values(ds.layers)) {
+            // apply defaults (only dsl in 9.4.0)
+            layer.ignoreGlobalFilters =
+              layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE;
+
             layer.columns = columnRemapping.reduce((columns, [oldColumn, newColumn]) => {
               if (oldColumn && layer.columns[oldColumn]) {
                 columns[newColumn] = layer.columns[oldColumn];
