@@ -6,18 +6,18 @@
  */
 
 import type { ISavedObjectsRepository } from '@kbn/core/server';
-import { nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import {
   UiamApiKeyProvisioningEntityType,
   UiamApiKeyProvisioningStatus,
 } from '@kbn/uiam-api-keys-provisioning-status';
-import { GET_STATUS_BATCH_SIZE, NON_CLOUD_USER_API_KEY_CREATOR_ERROR } from '../constants';
+import { GET_STATUS_BATCH_SIZE, NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE } from '../constants';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../uiam_api_keys_provisioning_status_saved_object';
 
 /**
  * Returns task `entityId`s that already have a final UIAM provisioning status
- * (completed, skipped, or failed due to non-Cloud user API key creator) so the
- * provisioning fetch can exclude them.
+ * (completed, skipped, or failed due to non-Cloud user API key creator code) so
+ * the provisioning fetch can exclude them.
  *
  * Mirrors {@link getExcludeRulesFilter} in
  * `x-pack/.../alerting/server/provisioning/lib/get_exclude_rules_filter.ts`.
@@ -32,10 +32,7 @@ export const getExcludeTasksFilter = async (
       nodeBuilder.is(`${statusAttr}.status`, UiamApiKeyProvisioningStatus.SKIPPED),
       nodeBuilder.and([
         nodeBuilder.is(`${statusAttr}.status`, UiamApiKeyProvisioningStatus.FAILED),
-        nodeBuilder.is(
-          `${statusAttr}.message`,
-          nodeTypes.wildcard.buildNode(`*${NON_CLOUD_USER_API_KEY_CREATOR_ERROR}*`)
-        ),
+        nodeBuilder.is(`${statusAttr}.errorCode`, NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE),
       ]),
     ]),
     nodeBuilder.is(`${statusAttr}.entityType`, UiamApiKeyProvisioningEntityType.TASK),

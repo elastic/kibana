@@ -36,7 +36,8 @@ export const mapUiamConvertResponseToKeyResults = (
       provisioningStatusForFailedConversions.push(
         createFailedConversionTaskProvisioningStatus(
           taskId,
-          `Error generating UIAM API key for the task with ID ${taskId}: ${item.message}`
+          `Error generating UIAM API key for the task with ID ${taskId}: ${item.message}`,
+          item.code
         )
       );
     }

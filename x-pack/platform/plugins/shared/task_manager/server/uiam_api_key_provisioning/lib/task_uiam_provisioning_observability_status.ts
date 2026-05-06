@@ -26,6 +26,7 @@ export interface TaskUiamProvisioningStatusDoc {
       | typeof UiamApiKeyProvisioningStatus.FAILED
       | typeof UiamApiKeyProvisioningStatus.COMPLETED;
     message?: string;
+    errorCode?: string;
   };
 }
 
@@ -46,7 +47,8 @@ export const createSkippedTaskProvisioningStatus = (
 
 export const createFailedConversionTaskProvisioningStatus = (
   taskId: string,
-  message: string
+  message: string,
+  errorCode?: string
 ): TaskUiamProvisioningStatusDoc => ({
   type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
   id: taskId,
@@ -56,6 +58,7 @@ export const createFailedConversionTaskProvisioningStatus = (
     entityType: UiamApiKeyProvisioningEntityType.TASK,
     status: UiamApiKeyProvisioningStatus.FAILED,
     message,
+    ...(errorCode ? { errorCode } : {}),
   },
 });
 

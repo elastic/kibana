@@ -10,14 +10,18 @@ import {
   UiamApiKeyProvisioningEntityType,
   UiamApiKeyProvisioningStatus,
 } from '@kbn/uiam-api-keys-provisioning-status';
-import { NON_CLOUD_USER_API_KEY_CREATOR_ERROR, GET_STATUS_BATCH_SIZE } from '../constants';
+import {
+  NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE,
+  GET_STATUS_BATCH_SIZE,
+} from '../constants';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../uiam_api_keys_provisioning_status_saved_object';
 import { getExcludeTasksFilter } from './get_exclude_tasks_filter';
 
 function createStatusSavedObject(
   entityId: string,
   status: UiamApiKeyProvisioningStatus = UiamApiKeyProvisioningStatus.COMPLETED,
-  message?: string
+  message?: string,
+  errorCode?: string
 ) {
   return {
     id: entityId,
@@ -27,6 +31,7 @@ function createStatusSavedObject(
       entityType: UiamApiKeyProvisioningEntityType.TASK,
       status,
       ...(message ? { message } : {}),
+      ...(errorCode ? { errorCode } : {}),
     },
     references: [],
     score: 1,
@@ -71,7 +76,8 @@ describe('getExcludeTasksFilter', () => {
         createStatusSavedObject(
           'task-1',
           UiamApiKeyProvisioningStatus.FAILED,
-          NON_CLOUD_USER_API_KEY_CREATOR_ERROR
+          undefined,
+          NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE
         ),
       ],
       total: 1,
@@ -102,12 +108,9 @@ describe('getExcludeTasksFilter', () => {
             function: 'is',
             arguments: expect.arrayContaining([
               expect.objectContaining({
-                value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.message`,
+                value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.errorCode`,
               }),
-              expect.objectContaining({
-                type: 'wildcard',
-                value: expect.stringContaining(NON_CLOUD_USER_API_KEY_CREATOR_ERROR),
-              }),
+              expect.objectContaining({ value: NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE }),
             ]),
           }),
         ]),
