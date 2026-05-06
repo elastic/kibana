@@ -35,8 +35,6 @@ describe('CollectorDetailLogs', () => {
     const result = testRenderer.render(<CollectorDetailLogs agentId="opamp-collector-001" />);
     const searchComponent = result.getByTestId('savedSearchComponent');
     expect(searchComponent).toBeInTheDocument();
-    expect(searchComponent.getAttribute('data-query')).toBe(
-      'elastic_agent.id:opamp-collector-001'
-    );
+    expect(searchComponent.getAttribute('data-query')).toBe('elastic_agent.id:opamp-collector-001');
   });
 });

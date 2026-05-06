@@ -18,10 +18,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import otelIcon from '../../../../../assets/opentelemetry.svg';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
+import otelIcon from '../../../../../assets/opentelemetry.svg';
 
 import type { OutputsForAgentPolicy } from '../../../../../../server/types';
 
@@ -150,7 +151,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 <EuiBadge color="hollow">
                   <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type={otelIcon} size="s" />
+                      <EuiIcon type={otelIcon} size="s" aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <FormattedMessage

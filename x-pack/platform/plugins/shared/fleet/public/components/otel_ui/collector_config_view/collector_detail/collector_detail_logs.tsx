@@ -79,13 +79,7 @@ export const CollectorDetailLogs: React.FC<CollectorDetailLogsProps> = ({ agentI
                 enableDocumentViewer: true,
                 enableFilters: false,
               }}
-              columns={[
-                '@timestamp',
-                'event.dataset',
-                'component.id',
-                'message',
-                'error.message',
-              ]}
+              columns={['@timestamp', 'event.dataset', 'component.id', 'message', 'error.message']}
             />
           ) : null}
         </EuiPanel>

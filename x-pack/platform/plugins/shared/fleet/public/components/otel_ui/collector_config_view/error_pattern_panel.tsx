@@ -149,14 +149,8 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
     application: { getUrlForApp },
   } = useStartServices();
 
-  const errorPatterns = useMemo(
-    () => MOCK_PATTERNS.filter((p) => p.level === 'error'),
-    []
-  );
-  const warningPatterns = useMemo(
-    () => MOCK_PATTERNS.filter((p) => p.level === 'warning'),
-    []
-  );
+  const errorPatterns = useMemo(() => MOCK_PATTERNS.filter((p) => p.level === 'error'), []);
+  const warningPatterns = useMemo(() => MOCK_PATTERNS.filter((p) => p.level === 'warning'), []);
 
   const patterns = selectedLevel === 'error' ? errorPatterns : warningPatterns;
   const totalLogs = MOCK_PATTERNS.reduce((sum, p) => sum + p.docCount, 0);
@@ -260,22 +254,19 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
         defaultMessage: 'Component',
       }),
       width: '120px',
-      render: (component: string | null) => (
-        <EuiText size="xs">{component ?? '—'}</EuiText>
-      ),
+      render: (component: string | null) => <EuiText size="xs">{component ?? '—'}</EuiText>,
     },
     {
       name: '',
       width: '30px',
       render: (item: ErrorPattern) => (
         <EuiToolTip
-          content={i18n.translate(
-            'xpack.fleet.collectorDetail.errorPatterns.viewInDiscover',
-            { defaultMessage: 'Explore matching logs in Kibana Discover' }
-          )}
+          content={i18n.translate('xpack.fleet.collectorDetail.errorPatterns.viewInDiscover', {
+            defaultMessage: 'Explore matching logs in Kibana Discover',
+          })}
         >
           <EuiLink href={discoverUrl(item)} target="_blank">
-            <EuiIcon type="popout" size="s" />
+            <EuiIcon type="popout" size="s" aria-hidden={true} />
           </EuiLink>
         </EuiToolTip>
       ),
@@ -308,19 +299,16 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
           defaultMessage: 'No warning patterns found in the selected time range',
         });
 
-  const summaryText = i18n.translate(
-    'xpack.fleet.collectorDetail.errorPatterns.summary',
-    {
-      defaultMessage:
-        '{patternCount} {level} {patternCount, plural, one {pattern} other {patterns}} across {logCount} logs in last {timeRange}',
-      values: {
-        patternCount: patterns.length,
-        level: selectedLevel === 'error' ? 'error' : 'warning',
-        logCount: totalLogs,
-        timeRange: TIME_RANGE_LABELS[timeRange],
-      },
-    }
-  );
+  const summaryText = i18n.translate('xpack.fleet.collectorDetail.errorPatterns.summary', {
+    defaultMessage:
+      '{patternCount} {level} {patternCount, plural, one {pattern} other {patterns}} across {logCount} logs in last {timeRange}',
+    values: {
+      patternCount: patterns.length,
+      level: selectedLevel === 'error' ? 'error' : 'warning',
+      logCount: totalLogs,
+      timeRange: TIME_RANGE_LABELS[timeRange],
+    },
+  });
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="collectorErrorPatternPanel">
@@ -332,10 +320,9 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
             <EuiFlexItem grow={false}>
               <EuiText size="s">
                 <strong>
-                  {i18n.translate(
-                    'xpack.fleet.collectorDetail.errorPatterns.title',
-                    { defaultMessage: 'Error Patterns' }
-                  )}
+                  {i18n.translate('xpack.fleet.collectorDetail.errorPatterns.title', {
+                    defaultMessage: 'Error Patterns',
+                  })}
                 </strong>
               </EuiText>
             </EuiFlexItem>

@@ -6,12 +6,7 @@
  */
 
 import React, { lazy, Suspense, useMemo, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { Agent } from '../../../../../types';
@@ -23,9 +18,9 @@ import { CollectorDetailTabs } from '../../../../../../../components/otel_ui/col
 // import { ErrorPatternPanel } from '../../../../../../../components/otel_ui/collector_config_view/error_pattern_panel';
 
 const GraphView = lazy(() =>
-  import('../../../../../../../components/otel_ui/collector_config_view/graph_view/index').then(
-    (m) => ({ default: m.GraphView })
-  )
+  import('../../../../../../../components/otel_ui/collector_config_view/graph_view').then((m) => ({
+    default: m.GraphView,
+  }))
 );
 
 const ALL_PIPELINES = '__all__';
@@ -50,6 +45,7 @@ export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> 
           <Loading />
         ) : pipelineIds.length === 0 ? (
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.fleet.collectorDetail.noPipelines', {
               defaultMessage: 'No pipelines configured',
             })}

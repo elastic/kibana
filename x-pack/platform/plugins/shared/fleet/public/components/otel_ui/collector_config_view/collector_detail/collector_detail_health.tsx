@@ -198,11 +198,7 @@ const PipelineAccordion: React.FC<{
               status={comp.status}
               lastError={comp.health?.last_error}
               isSelected={selectedComponentId === comp.id}
-              onClick={
-                onComponentClick
-                  ? () => onComponentClick(comp.id, group.type)
-                  : undefined
-              }
+              onClick={onComponentClick ? () => onComponentClick(comp.id, group.type) : undefined}
             />
           ))}
           <EuiSpacer size="s" />
@@ -284,10 +280,9 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
             ),
           },
           {
-            title: i18n.translate(
-              'xpack.fleet.otelUi.collectorDetail.health.reportedStatusLabel',
-              { defaultMessage: 'Reported status' }
-            ),
+            title: i18n.translate('xpack.fleet.otelUi.collectorDetail.health.reportedStatusLabel', {
+              defaultMessage: 'Reported status',
+            }),
             description: health.status || '-',
           },
           {
@@ -307,9 +302,7 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
                     'xpack.fleet.otelUi.collectorDetail.health.lastErrorLabel',
                     { defaultMessage: 'Last error' }
                   ),
-                  description: (
-                    <EuiTextColor color="danger">{health.last_error}</EuiTextColor>
-                  ),
+                  description: <EuiTextColor color="danger">{health.last_error}</EuiTextColor>,
                 },
               ]
             : []),
@@ -323,10 +316,9 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
                 <h4>
-                  {i18n.translate(
-                    'xpack.fleet.collectorDetail.health.componentHealthTitle',
-                    { defaultMessage: 'Component Health' }
-                  )}
+                  {i18n.translate('xpack.fleet.collectorDetail.health.componentHealthTitle', {
+                    defaultMessage: 'Component Health',
+                  })}
                 </h4>
               </EuiTitle>
             </EuiFlexItem>
