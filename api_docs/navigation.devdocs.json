@@ -1418,7 +1418,31 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "navigation",
+        "id": "def-server.featureFlags",
+        "type": "Array",
+        "tags": [],
+        "label": "featureFlags",
+        "description": [],
+        "signature": [
+          "(",
+          "FeatureFlagDefinition",
+          "<\"boolean\"> | ",
+          "FeatureFlagDefinition",
+          "<\"string\"> | ",
+          "FeatureFlagDefinition",
+          "<\"number\">)[]"
+        ],
+        "path": "src/platform/plugins/shared/navigation/server/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {
@@ -1454,7 +1478,7 @@
         "label": "DEFAULT_ROUTES",
         "description": [],
         "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1467,7 +1491,7 @@
             "label": "classic",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 13,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1480,7 +1504,7 @@
             "label": "es",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 14,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1493,7 +1517,7 @@
             "label": "search",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 15,
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1508,7 +1532,7 @@
               "// O11y aliases"
             ],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 17,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1521,7 +1545,7 @@
             "label": "observability",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 18,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1534,7 +1558,7 @@
             "label": "security",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 19,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1547,7 +1571,7 @@
             "label": "workplaceai",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 20,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

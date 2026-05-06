@@ -19,14 +19,14 @@ import { TestProviders } from '../../../common/mock';
 import { useRuleIndexPattern } from '../../../detection_engine/rule_creation_ui/pages/form';
 import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
 import { useHighlightedFieldsPrivilege } from '../hooks/use_highlighted_fields_privilege';
-import { useRuleDetails } from '../../../flyout/rule_details/hooks/use_rule_details';
+import { useRuleDetails } from '../../rule/hooks/use_rule_details';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 
 jest.mock('../hooks/use_highlighted_fields');
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../../../detection_engine/rule_creation_ui/pages/form');
 jest.mock('../hooks/use_highlighted_fields_privilege');
-jest.mock('../../../flyout/rule_details/hooks/use_rule_details');
+jest.mock('../../rule/hooks/use_rule_details');
 const mockAddSuccess = jest.fn();
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
