@@ -8,17 +8,13 @@
  */
 
 import React, { useRef, type MouseEvent } from 'react';
-import { SplitButtonWithNotification } from '@kbn/split-button';
 import { upperFirst } from 'lodash';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import {
-  APP_MENU_NOTIFICATION_INDICATOR_LEFT,
-  APP_MENU_NOTIFICATION_INDICATOR_TOP,
-} from '../constants';
 import { createReturnFocus, getIsSelectedColor, getTooltip, isDisabled } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
+import { SplitButtonWithNotification } from './split_button_with_notification';
 import type { AppMenuPrimaryActionItem, AppMenuSplitButtonProps } from '../types';
 
 type AppMenuActionButtonProps = AppMenuPrimaryActionItem & {
@@ -26,6 +22,7 @@ type AppMenuActionButtonProps = AppMenuPrimaryActionItem & {
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
   onCloseOverflowButton?: () => void;
+  fullWidth?: boolean;
 };
 
 export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
@@ -51,6 +48,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     onPopoverToggle,
     onPopoverClose,
     onCloseOverflowButton,
+    fullWidth,
   } = props;
 
   const itemText = upperFirst(label);
@@ -106,23 +104,9 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     href,
     target: href ? target : undefined,
     isLoading,
-    size: 's' as const,
-    iconSize: 'm' as const,
     'aria-haspopup': (hasSplitItems ? 'menu' : undefined) as 'menu' | undefined,
+    fullWidth,
   };
-
-  // Target the split part of the button for popover behavior.
-  const splitButtonCss = css`
-    & + button {
-      background-color: ${isPopoverOpen
-        ? getIsSelectedColor({
-            color: 'text',
-            euiTheme,
-            isFilled: false,
-          })
-        : undefined};
-    }
-  `;
 
   const buttonCss = css`
     background-color: ${isPopoverOpen
@@ -139,25 +123,17 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       <SplitButtonWithNotification
         {...otherSplitButtonProps}
         {...commonProps}
-        secondaryButtonFill={false}
+        label={itemText}
         onSecondaryButtonClick={handleSecondaryButtonClick}
-        color="text"
         isSelected={isPopoverOpen}
-        css={splitButtonCss}
-        notificationIndicatorPosition={{
-          top: APP_MENU_NOTIFICATION_INDICATOR_TOP,
-          left: APP_MENU_NOTIFICATION_INDICATOR_LEFT,
-        }}
-        notificationIndicatorSize="m"
-        notificationIndicatorColor="primary"
-      >
-        {itemText}
-      </SplitButtonWithNotification>
+      />
     </EuiHideFor>
   ) : (
     <EuiHideFor sizes={hidden ?? 'none'}>
       <EuiButton
         {...commonProps}
+        size="s"
+        iconSize="m"
         iconSide="left"
         isSelected={isPopoverOpen}
         css={buttonCss}

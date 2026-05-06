@@ -49,7 +49,7 @@ dependsOn:
   - '@kbn/index-management-shared-types'
   - '@kbn/data-views-plugin'
   - '@kbn/cloud'
-  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
   - '@kbn/scout-search'
 tags:
   - plugin

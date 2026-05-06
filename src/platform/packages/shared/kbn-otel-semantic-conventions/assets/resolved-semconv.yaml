@@ -405,6 +405,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -6030,6 +6036,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -6145,6 +6157,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -8843,19 +8861,19 @@ groups:
             - id: production
               value: production
               brief: Production environment
-              stability: development
+              stability: stable
             - id: staging
               value: staging
               brief: Staging environment
-              stability: development
+              stability: stable
             - id: test
               value: test
               brief: Testing environment
-              stability: development
+              stability: stable
             - id: development
               value: development
               brief: Development environment
-              stability: development
+              stability: stable
         brief: |
           Name of the [deployment environment](https://wikipedia.org/wiki/Deployment_environment) (aka deployment tier).
         examples:
@@ -8870,7 +8888,7 @@ groups:
 
           - `service.name=frontend`, `deployment.environment.name=production`
           - `service.name=frontend`, `deployment.environment.name=staging`.
-        stability: development
+        stability: stable
     name: deployment
     lineage:
       provenance:
@@ -12181,24 +12199,6 @@ groups:
         requirement_level: required
         stability: development
         role: identifying
-      - name: process.executable.name
-        type: string
-        brief: |
-          The name of the process executable. On Linux based systems, this SHOULD be set to the base name of the target of `/proc/[pid]/exe`. On Windows, this SHOULD be set to the base name of `GetProcessImageFileNameW`.
-        examples:
-          - otelcol
-        requirement_level: opt_in
-        stability: development
-        role: descriptive
-      - name: process.executable.path
-        type: string
-        brief: |
-          The full path to the process executable. On Linux based systems, can be set to the target of `proc/[pid]/exe`. On Windows, can be set to the result of `GetProcessImageFileNameW`.
-        examples:
-          - /usr/bin/cmd/otelcol
-        requirement_level: opt_in
-        stability: development
-        role: descriptive
       - name: process.interactive
         type: boolean
         brief: |
@@ -12322,26 +12322,6 @@ groups:
           locally_overridden_fields:
             - requirement_level
             - role
-        process.executable.name:
-          source_group: registry.process
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - role
-        process.executable.path:
-          source_group: registry.process
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - role
         process.interactive:
           source_group: registry.process
           inherited_fields:
@@ -12402,6 +12382,129 @@ groups:
             - requirement_level
             - role
         process.working_directory:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+  - id: entity.process.executable
+    type: entity
+    brief: |
+      The executable of a process.
+    note: |
+      Represents the executable file associated with a process. A single executable may be run my multiple process instances.
+    stability: development
+    attributes:
+      - name: process.executable.build_id.gnu
+        type: string
+        brief: |
+          The GNU build ID as found in the `.note.gnu.build-id` ELF section (hex string).
+        examples:
+          - c89b11207f6479603b0d49bf291c092c2b719293
+        requirement_level: opt_in
+        stability: development
+        role: descriptive
+      - name: process.executable.build_id.go
+        type: string
+        brief: |
+          The Go build ID as retrieved by `go tool buildid <go executable>`.
+        examples:
+          - foh3mEXu7BLZjsN9pOwG/kATcXlYVCDEFouRMQed_/WwRFB1hPo9LBkekthSPG/x8hMC8emW2cCjXD0_1aY
+        requirement_level: opt_in
+        stability: development
+        role: descriptive
+      - name: process.executable.build_id.htlhash
+        type: string
+        brief: |
+          Deterministic build ID for executables.
+        examples:
+          - 600DCAFE4A110000F2BF38C493F5FB92
+        requirement_level: required
+        note: |
+          GNU and Go build IDs may be stripped or unavailable in some environments
+          (e.g., Alpine Linux, Docker images). This attribute provides a deterministic
+          build ID computed by hashing the first and last 4096 bytes of the file
+          along with its length:
+
+          ```
+          Input   ← Concat(File[:4096], File[-4096:], BigEndianUInt64(Len(File)))
+          Digest  ← SHA256(Input)
+          BuildID ← Digest[:16]
+          ```
+
+          The result is the first 16 bytes (128 bits) of the SHA256 digest,
+          represented as a hex string.
+        stability: development
+        role: identifying
+      - name: process.executable.name
+        type: string
+        brief: |
+          The name of the process executable. On Linux based systems, this SHOULD be set to the base name of the target of `/proc/[pid]/exe`. On Windows, this SHOULD be set to the base name of `GetProcessImageFileNameW`.
+        examples:
+          - otelcol
+        requirement_level: recommended
+        stability: development
+        role: descriptive
+      - name: process.executable.path
+        type: string
+        brief: |
+          The full path to the process executable. On Linux based systems, can be set to the target of `proc/[pid]/exe`. On Windows, can be set to the result of `GetProcessImageFileNameW`.
+        examples:
+          - /usr/bin/cmd/otelcol
+        requirement_level: opt_in
+        stability: development
+        role: descriptive
+    name: process.executable
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/process/entities.yaml
+      attributes:
+        process.executable.build_id.gnu:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        process.executable.build_id.go:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        process.executable.build_id.htlhash:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        process.executable.name:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
+        process.executable.path:
           source_group: registry.process
           inherited_fields:
             - brief
@@ -12537,7 +12640,8 @@ groups:
           - shoppingcart
         requirement_level: required
         note: |
-          MUST be the same for all instances of horizontally scaled services. If the value was not specified, SDKs MUST fallback to `unknown_service:` concatenated with [`process.executable.name`](process.md), e.g. `unknown_service:bash`. If `process.executable.name` is not available, the value MUST be set to `unknown_service`.
+          MUST be the same for all instances of horizontally scaled services. If the value was not specified, SDKs MUST fallback to `unknown_service:` concatenated with the process executable name, e.g. `unknown_service:bash`. If the process executable name is not available, the value MUST be set to `unknown_service`.
+          The process executable name is the name of the process executable, the same value as described by the [`process.executable.name`](process.md) resource attribute.
         stability: stable
         role: identifying
       - name: service.version
@@ -12685,7 +12789,7 @@ groups:
     type: entity
     brief: |
       The distribution of telemetry SDK used to capture data recorded by the instrumentation libraries.
-    stability: development
+    stability: stable
     attributes:
       - name: telemetry.distro.name
         type: string
@@ -12697,7 +12801,8 @@ groups:
         note: |
           Official auto instrumentation agents and distributions SHOULD set the `telemetry.distro.name` attribute to
           a string starting with `opentelemetry-`, e.g. `opentelemetry-java-instrumentation`.
-        stability: development
+        stability: stable
+        role: identifying
       - name: telemetry.distro.version
         type: string
         brief: |
@@ -12705,7 +12810,8 @@ groups:
         examples:
           - 1.2.3
         requirement_level: recommended
-        stability: development
+        stability: stable
+        role: descriptive
     name: telemetry.distro
     lineage:
       provenance:
@@ -12721,6 +12827,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         telemetry.distro.version:
           source_group: registry.telemetry
           inherited_fields:
@@ -12730,6 +12837,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
   - id: entity.telemetry.sdk
     type: entity
     brief: |
@@ -13696,6 +13804,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: db.client.operation.exception
     lineage:
@@ -13870,6 +13984,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: exception
     lineage:
@@ -13951,6 +14071,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: faas.invocation.exception
     lineage:
@@ -15489,6 +15615,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: gen_ai.client.operation.exception
     lineage:
@@ -16177,6 +16309,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: http.client.request.exception
     lineage:
@@ -16250,6 +16388,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: http.server.request.exception
     lineage:
@@ -16323,6 +16467,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: messaging.create.exception
     lineage:
@@ -16396,6 +16546,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: messaging.process.exception
     lineage:
@@ -16469,6 +16625,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: messaging.receive.exception
     lineage:
@@ -16542,6 +16704,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: messaging.send.exception
     lineage:
@@ -16615,6 +16783,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: messaging.settle.exception
     lineage:
@@ -16688,6 +16862,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: rpc.client.call.exception
     lineage:
@@ -16853,6 +17033,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     name: rpc.server.call.exception
     lineage:
@@ -17550,6 +17736,12 @@ groups:
           - OSError
         requirement_level:
           conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     lineage:
       provenance:
@@ -18502,6 +18694,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -18671,6 +18869,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -19219,6 +19423,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -19474,6 +19684,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -19713,6 +19929,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -20021,6 +20243,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -20353,6 +20581,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -20718,6 +20952,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -20974,6 +21214,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -21309,6 +21555,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -21758,6 +22010,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -28263,6 +28521,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -28368,6 +28632,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -28450,6 +28720,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -34192,6 +34468,22 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+  - id: metric.go.memory.gc.pause.duration
+    type: metric
+    brief: Distribution of individual GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again.
+    note: |
+      Computed from `/sched/pauses/total/gc:seconds`. Bucket boundaries are provided by the runtime, and are subject to change.
+    stability: development
+    metric_name: go.memory.gc.pause.duration
+    instrument: histogram
+    unit: s
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/go/metrics.yaml
+    annotations:
+      code_generation:
+        metric_value_type: double
   - id: metric.go.memory.limit
     type: metric
     brief: Go runtime memory limit configured by the user, if a limit exists.
@@ -43430,11 +43722,55 @@ groups:
         metric_value_type: int
   - id: metric.k8s.container.cpu.limit
     type: metric
-    brief: Maximum CPU resource limit set for the container.
-    note: |
-      See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#resourcerequirements-v1-core for details.
+    brief: Deprecated, use `k8s.container.cpu.limit.desired` and `k8s.container.cpu.limit.current` instead.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.container.cpu.limit.desired
+      note: Replaced by `k8s.container.cpu.limit.desired`.
     metric_name: k8s.container.cpu.limit
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.container.cpu.limit_utilization
+    type: metric
+    brief: Deprecated, use `k8s.container.cpu.limit.utilization` instead.
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.container.cpu.limit.utilization
+      note: Replaced by `k8s.container.cpu.limit.utilization`.
+    metric_name: k8s.container.cpu.limit_utilization
+    instrument: gauge
+    unit: '1'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.container.cpu.limit.current
+    type: metric
+    brief: Maximum CPU resource limit currently configured for a running container.
+    note: |
+      This metric aligns with the limit in the
+      [`resources`](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core) field of
+      [K8s ContainerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstatus-v1-core)
+      (status.containerStatuses[*].resources). Also see `Actual Resources` in
+      <https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/> for more details.
+    stability: development
+    metric_name: k8s.container.cpu.limit.current
     instrument: updowncounter
     unit: '{cpu}'
     lineage:
@@ -43446,13 +43782,38 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
-  - id: metric.k8s.container.cpu.limit_utilization
+  - id: metric.k8s.container.cpu.limit.desired
     type: metric
-    brief: The ratio of container CPU usage to its CPU limit.
+    brief: Maximum CPU resource limit as defined by the container spec.
     note: |
-      The value range is [0.0,1.0]. A value of 1.0 means the container is using 100% of its CPU limit. If the CPU limit is not set, this metric SHOULD NOT be emitted for that container.
+      This metric aligns with the limit in the
+      [`resources`](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core) field of
+      [K8s Container](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#container-v1-core)
+      (spec.containers[*].resources). Also see `Desired Resources` in
+      <https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/> for more details.
     stability: development
-    metric_name: k8s.container.cpu.limit_utilization
+    metric_name: k8s.container.cpu.limit.desired
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.container.cpu.limit.utilization
+    type: metric
+    brief: The ratio of container CPU usage to its current CPU limit.
+    note: |
+      The current CPU limit reflects the actual resources applied to the container, as reported by
+      [ContainerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstatus-v1-core).
+      The value range is [0.0,1.0]. A value of 1.0 means the container is using 100% of its actual CPU limit.
+      If the CPU limit is not set, this metric SHOULD NOT be emitted for that container.
+    stability: development
+    metric_name: k8s.container.cpu.limit.utilization
     instrument: gauge
     unit: '1'
     lineage:
@@ -43466,11 +43827,55 @@ groups:
         metric_value_type: double
   - id: metric.k8s.container.cpu.request
     type: metric
-    brief: CPU resource requested for the container.
-    note: |
-      See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#resourcerequirements-v1-core for details.
+    brief: Deprecated, use `k8s.container.cpu.request.desired` and `k8s.container.cpu.request.current` instead.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.container.cpu.request.desired
+      note: Replaced by `k8s.container.cpu.request.desired`.
     metric_name: k8s.container.cpu.request
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.container.cpu.request_utilization
+    type: metric
+    brief: Deprecated, use `k8s.container.cpu.request.utilization` instead.
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.container.cpu.request.utilization
+      note: Replaced by `k8s.container.cpu.request.utilization`.
+    metric_name: k8s.container.cpu.request_utilization
+    instrument: gauge
+    unit: '1'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.container.cpu.request.current
+    type: metric
+    brief: CPU resource requested currently configured for a running container.
+    note: |
+      This metric aligns with the request in the
+      [`resources`](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core) field of
+      [K8s ContainerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstatus-v1-core)
+      (status.containerStatuses[*].resources). Also see `Actual Resources` in
+      <https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/> for more details.
+    stability: development
+    metric_name: k8s.container.cpu.request.current
     instrument: updowncounter
     unit: '{cpu}'
     lineage:
@@ -43482,11 +43887,38 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
-  - id: metric.k8s.container.cpu.request_utilization
+  - id: metric.k8s.container.cpu.request.desired
     type: metric
-    brief: The ratio of container CPU usage to its CPU request.
+    brief: CPU resource requested as defined by the container spec.
+    note: |
+      This metric aligns with the request in the
+      [`resources`](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core) field of
+      [K8s Container](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#container-v1-core)
+      (spec.containers[*].resources). Also see `Desired Resources` in
+      <https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/> for more details.
     stability: development
-    metric_name: k8s.container.cpu.request_utilization
+    metric_name: k8s.container.cpu.request.desired
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.container
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.k8s.container.cpu.request.utilization
+    type: metric
+    brief: The ratio of container CPU usage to its current CPU request.
+    note: |
+      The current CPU request reflects the request applied to the running container, as reported by
+      [ContainerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstatus-v1-core).
+      The value range is [0.0,1.0]. A value of 1.0 means the container is using 100% of its actual CPU request.
+      If the CPU request is not set, this metric SHOULD NOT be emitted for that container.
+    stability: development
+    metric_name: k8s.container.cpu.request.utilization
     instrument: gauge
     unit: '1'
     lineage:
@@ -49384,6 +49816,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -50035,6 +50473,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -50206,6 +50650,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -50443,6 +50893,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -50726,6 +51182,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -51069,6 +51531,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -51311,6 +51779,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -51550,6 +52024,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -51826,6 +52306,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -52111,6 +52597,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -52235,6 +52727,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -52361,6 +52859,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -52486,6 +52990,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -52610,6 +53120,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -53191,6 +53707,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -54055,6 +54577,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -54486,6 +55014,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -54920,6 +55454,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -55199,6 +55739,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -55681,6 +56227,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -55874,6 +56426,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -56368,6 +56926,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -62614,6 +63178,58 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+  - id: metric.v8js.resource.active
+    type: metric
+    brief: Gauge of the active resources that are currently keeping the event loop alive.
+    note: |
+      The values can be retrieved from [`process.getActiveResourcesInfo()`](https://nodejs.org/api/process.html#processgetactiveresourcesinfo)
+    stability: development
+    attributes:
+      - name: v8js.resource.type
+        type:
+          members:
+            - id: immediate
+              value: Immediate
+              brief: Active `setImmediate` callbacks.
+              stability: development
+            - id: tcpserverwrap
+              value: TCPServerWrap
+              brief: Active TCP Servers.
+              stability: development
+            - id: tcpwrap
+              value: TCPWrap
+              brief: Active TCP connections.
+              stability: development
+            - id: timeout
+              value: Timeout
+              brief: Active `setTimeout` or `setInterval` timers.
+              stability: development
+            - id: ttywrap
+              value: TTYWrap
+              brief: Active Terminal I/O (stdin/stdout).
+              stability: development
+        brief: The type of resource keeping the event loop active.
+        requirement_level: required
+        stability: development
+    metric_name: v8js.resource.active
+    instrument: gauge
+    unit: '{resource}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/v8js/metrics.yaml
+      attributes:
+        v8js.resource.type:
+          source_group: registry.v8js
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    annotations:
+      code_generation:
+        metric_value_type: int
   - id: metric.vcs.change.count
     type: metric
     brief: The number of changes (pull requests/merge requests/changelists) in a repository, categorized by their state (e.g. open or merged).
@@ -67315,6 +67931,8 @@ groups:
         examples:
           - '12097'
         requirement_level: recommended
+        note: |
+          For a given pipeline run and task, the `cicd.pipeline.task.run.id` MUST be unique within that run. For the same task across different runs of the same pipeline, the `cicd.pipeline.task.run.id` MAY remain the same, enabling correlation of `cicd.pipeline.task.run.result` values across multiple pipeline runs.
         stability: development
       - name: cicd.pipeline.task.run.result
         type:
@@ -69620,19 +70238,19 @@ groups:
             - id: production
               value: production
               brief: Production environment
-              stability: development
+              stability: stable
             - id: staging
               value: staging
               brief: Staging environment
-              stability: development
+              stability: stable
             - id: test
               value: test
               brief: Testing environment
-              stability: development
+              stability: stable
             - id: development
               value: development
               brief: Development environment
-              stability: development
+              stability: stable
         brief: |
           Name of the [deployment environment](https://wikipedia.org/wiki/Deployment_environment) (aka deployment tier).
         examples:
@@ -69647,7 +70265,7 @@ groups:
 
           - `service.name=frontend`, `deployment.environment.name=production`
           - `service.name=frontend`, `deployment.environment.name=staging`.
-        stability: development
+        stability: stable
       - name: deployment.id
         type: string
         brief: |
@@ -70004,6 +70622,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -70107,6 +70731,12 @@ groups:
           - java.net.ConnectException
           - OSError
         requirement_level: recommended
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
         stability: stable
     lineage:
       provenance:
@@ -72288,7 +72918,7 @@ groups:
         brief: The GraphQL document being executed.
         examples: 'query findBookById { bookById(id: ?) { name } }'
         requirement_level: recommended
-        note: The value may be sanitized to exclude sensitive information.
+        note: If instrumentation can reliably identify and redact sensitive information it SHOULD do it.
         stability: development
       - name: graphql.operation.name
         type: string
@@ -77289,10 +77919,24 @@ groups:
       - name: process.executable.build_id.htlhash
         type: string
         brief: |
-          Profiling specific build ID for executables. See the OTel specification for Profiles for more information.
+          Deterministic build ID for executables.
         examples:
           - 600DCAFE4A110000F2BF38C493F5FB92
         requirement_level: recommended
+        note: |
+          GNU and Go build IDs may be stripped or unavailable in some environments
+          (e.g., Alpine Linux, Docker images). This attribute provides a deterministic
+          build ID computed by hashing the first and last 4096 bytes of the file
+          along with its length:
+
+          ```
+          Input   ← Concat(File[:4096], File[-4096:], BigEndianUInt64(Len(File)))
+          Digest  ← SHA256(Input)
+          BuildID ← Digest[:16]
+          ```
+
+          The result is the first 16 bytes (128 bits) of the SHA256 digest,
+          represented as a hex string.
         stability: development
       - name: process.executable.name
         type: string
@@ -78354,7 +78998,8 @@ groups:
           - shoppingcart
         requirement_level: recommended
         note: |
-          MUST be the same for all instances of horizontally scaled services. If the value was not specified, SDKs MUST fallback to `unknown_service:` concatenated with [`process.executable.name`](process.md), e.g. `unknown_service:bash`. If `process.executable.name` is not available, the value MUST be set to `unknown_service`.
+          MUST be the same for all instances of horizontally scaled services. If the value was not specified, SDKs MUST fallback to `unknown_service:` concatenated with the process executable name, e.g. `unknown_service:bash`. If the process executable name is not available, the value MUST be set to `unknown_service`.
+          The process executable name is the name of the process executable, the same value as described by the [`process.executable.name`](process.md) resource attribute.
         stability: stable
       - name: service.namespace
         type: string
@@ -78895,7 +79540,7 @@ groups:
         note: |
           Official auto instrumentation agents and distributions SHOULD set the `telemetry.distro.name` attribute to
           a string starting with `opentelemetry-`, e.g. `opentelemetry-java-instrumentation`.
-        stability: development
+        stability: stable
       - name: telemetry.distro.version
         type: string
         brief: |
@@ -78903,7 +79548,7 @@ groups:
         examples:
           - 1.2.3
         requirement_level: recommended
-        stability: development
+        stability: stable
       - name: telemetry.sdk.language
         type:
           members:
@@ -79756,6 +80401,32 @@ groups:
         requirement_level: recommended
         note: |
           Value can be retrieved from value `space_name` of [`v8.getHeapSpaceStatistics()`](https://nodejs.org/api/v8.html#v8getheapspacestatistics)
+        stability: development
+      - name: v8js.resource.type
+        type:
+          members:
+            - id: immediate
+              value: Immediate
+              brief: Active `setImmediate` callbacks.
+              stability: development
+            - id: tcpserverwrap
+              value: TCPServerWrap
+              brief: Active TCP Servers.
+              stability: development
+            - id: tcpwrap
+              value: TCPWrap
+              brief: Active TCP connections.
+              stability: development
+            - id: timeout
+              value: Timeout
+              brief: Active `setTimeout` or `setInterval` timers.
+              stability: development
+            - id: ttywrap
+              value: TTYWrap
+              brief: Active Terminal I/O (stdin/stdout).
+              stability: development
+        brief: The type of resource keeping the event loop active.
+        requirement_level: recommended
         stability: development
     lineage:
       provenance:
@@ -84211,7 +84882,7 @@ groups:
     note: |
       For all pipeline runs, a span with kind `SERVER` SHOULD be created corresponding to the execution of the pipeline run.
 
-      **Span name** MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.55.0/specification/trace/api.md#span).
+      **Span name** MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.56.0/specification/trace/api.md#span).
 
       The span name SHOULD be `{action} {pipeline}` if there is a (low-cardinality) pipeline name available.
       If the pipeline name is not available or is likely to have high cardinality, then the span name SHOULD be `{action}`.
@@ -84303,6 +84974,12 @@ groups:
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
 
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+
           Instrumentations SHOULD document the list of errors they report.
 
           The cardinality of `error.type` within one instrumentation library SHOULD be low.
@@ -84376,6 +85053,8 @@ groups:
           - '12097'
         requirement_level: required
         sampling_relevant: true
+        note: |
+          For a given pipeline run and task, the `cicd.pipeline.task.run.id` MUST be unique within that run. For the same task across different runs of the same pipeline, the `cicd.pipeline.task.run.id` MAY remain the same, enabling correlation of `cicd.pipeline.task.run.result` values across multiple pipeline runs.
         stability: development
       - name: cicd.pipeline.task.run.result
         type:
@@ -84444,6 +85123,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -84549,6 +85234,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -84701,6 +85392,12 @@ groups:
 
           When `error.type` is set to a type (e.g., an exception type), its
           canonical class name identifying the type within the artifact SHOULD be used.
+
+          If the recorded error type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          error instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
 
           Instrumentations SHOULD document the list of errors they report.
 
@@ -94234,7 +94931,7 @@ groups:
     note: |
       **Span name** SHOULD be `{gen_ai.operation.name} {gen_ai.request.model}`.
       Semantic conventions for individual GenAI systems and frameworks MAY specify different span name format
-      and MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.55.0/specification/trace/api.md#span).
+      and MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.56.0/specification/trace/api.md#span).
 
       **Span kind** SHOULD be `CLIENT` and MAY be set to `INTERNAL` on spans representing
       call to models running in the same process. It's RECOMMENDED to use `CLIENT` kind
@@ -97398,8 +98095,8 @@ groups:
         type: string
         brief: The GraphQL document being executed.
         examples: 'query findBookById { bookById(id: ?) { name } }'
-        requirement_level: recommended
-        note: The value may be sanitized to exclude sensitive information.
+        requirement_level: opt_in
+        note: If instrumentation can reliably identify and redact sensitive information it SHOULD do it.
         stability: development
       - name: graphql.operation.name
         type: string
