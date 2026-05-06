@@ -15,7 +15,6 @@ import { Loading } from '../../../../../components';
 
 import { PipelineSelector } from '../../../../../../../components/otel_ui/collector_config_view/pipeline_selector';
 import { CollectorDetailTabs } from '../../../../../../../components/otel_ui/collector_config_view/collector_detail/collector_detail_tabs';
-// import { ErrorPatternPanel } from '../../../../../../../components/otel_ui/collector_config_view/error_pattern_panel';
 
 const GraphView = lazy(() =>
   import('../../../../../../../components/otel_ui/collector_config_view/graph_view').then((m) => ({
@@ -82,9 +81,6 @@ export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> 
       </EuiPanel>
 
       <EuiSpacer size="m" />
-
-      {/* Error pattern panel — will be implemented in https://github.com/elastic/ingest-dev/issues/7074 */}
-      {/* <ErrorPatternPanel agentId={agent.id} /> */}
     </>
   );
 };
