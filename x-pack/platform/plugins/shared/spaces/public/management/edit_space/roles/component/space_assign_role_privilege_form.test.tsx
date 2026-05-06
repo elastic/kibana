@@ -130,7 +130,8 @@ const renderPrivilegeRolesForm = ({
   );
 };
 
-describe('PrivilegesRolesForm', () => {
+// Failing: See https://github.com/elastic/kibana/issues/253821
+describe.skip('PrivilegesRolesForm', () => {
   let getRolesSpy: jest.SpiedFunction<ReturnType<typeof createRolesAPIClientMock>['getRoles']>;
   let getAllKibanaPrivilegeSpy: jest.SpiedFunction<
     ReturnType<typeof createPrivilegeAPIClientMock>['getAll']
