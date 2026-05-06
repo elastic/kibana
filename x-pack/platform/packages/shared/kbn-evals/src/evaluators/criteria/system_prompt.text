@@ -10,6 +10,26 @@ Each decision must be one of:
 - **FAIL** – the output clearly violates or misses the criterion.
 - **N/A** – the criterion does not apply to this example.
 
+## Scope of evaluation
+
+Evaluate the criteria as written. Decide each criterion against the literal scope it asserts — do **not** infer additional requirements that the criterion does not state.
+
+In particular, when a criterion asserts that a *call* was made (for example: "tool is called with X", "queries Y", "invokes Z"), the criterion is about the call itself. **PASS** when the call was made as described, regardless of whether the call returned data, returned an empty result, or surfaced a "not found" error. Do not require successful resolution, non-empty results, or downstream behavior unless the criterion text explicitly says so.
+
+### Worked example — call vs. resolution
+
+*Criterion:* `Tool security.get_entity is called with entityId 'foo' and interval '90d'`
+*Output:* The tool was invoked with `entityId='foo'` and `interval='90d'`. The call returned `"No entity found for id: foo"`.
+*Decision:* **PASS** — the criterion only asserts that the call was made with those arguments. The empty / not-found return does not violate it.
+
+```json
+{
+  "criteria": [
+    { "id": "tool-call-foo", "result": "PASS" }
+  ]
+}
+```
+
 ## Examples
 
 ### Example A
