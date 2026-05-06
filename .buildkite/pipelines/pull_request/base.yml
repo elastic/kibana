@@ -189,6 +189,9 @@ steps:
       SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
       SELECTIVE_TESTING_ENABLED: 'true'
+      # TEMP: drive selective testing from a fixture instead of the real PR diff,
+      # to verify the tests-only fast path on CI. Remove this line once verified.
+      SCOUT_CODE_CHANGES_OVERRIDE: '.buildkite/scripts/steps/test/scout/fixtures/tests_only_example.json'
     retry:
       automatic:
         - exit_status: '*'

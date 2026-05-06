@@ -71,10 +71,19 @@ else
   mkdir -p .scout
   export CODE_CHANGES_FILE=".scout/code_changes.json"
 
-  # Build the generic code-changes file (changed files + affected @kbn/ modules)
-  # that the Scout CLI will use to auto-select between the tests-only fast path
-  # and the dependency-tree fallback.
-  ts-node "$(dirname "${0}")/resolve_selective_testing.ts"
+  # Debug override: when SCOUT_CODE_CHANGES_OVERRIDE points at an existing JSON
+  # file, skip the resolver and use that file as the code-changes input. Useful
+  # for verifying the tests-only / dependency-tree branches on demand without
+  # crafting a real diff. Path is repo-relative.
+  if [[ -n "${SCOUT_CODE_CHANGES_OVERRIDE:-}" && -f "${SCOUT_CODE_CHANGES_OVERRIDE}" ]]; then
+    echo "Selective testing: using override code-changes from ${SCOUT_CODE_CHANGES_OVERRIDE}"
+    cp "${SCOUT_CODE_CHANGES_OVERRIDE}" "$CODE_CHANGES_FILE"
+  else
+    # Build the generic code-changes file (changed files + affected @kbn/ modules)
+    # that the Scout CLI will use to auto-select between the tests-only fast path
+    # and the dependency-tree fallback.
+    ts-node "$(dirname "${0}")/resolve_selective_testing.ts"
+  fi
 
   echo "--- Discover Playwright Configs and upload to Buildkite artifacts"
   SELECTIVE_SCOUT_DISCOVERY_FLAG=()

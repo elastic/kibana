@@ -1,0 +1,14 @@
+{
+  "_comment": "Debug fixture for verifying the Scout tests-only fast path on CI. Targets x-pack/platform/plugins/shared/maps because it has BOTH api/ and ui/ Scout scopes — useful to verify that UI-only changes do not trigger API tests. Set SCOUT_CODE_CHANGES_OVERRIDE=.buildkite/scripts/steps/test/scout/fixtures/tests_only_example.json on a draft PR build to use this instead of the real git diff.",
+  "_expectations": [
+    "scope = tests-only (every changed file lives inside a Scout test scope)",
+    "owning configs (set-union) = x-pack/platform/plugins/shared/maps/test/scout/ui/playwright.config.ts (the helper resolves to all UI configs in the scope; the spec resolves to that single config)",
+    "x-pack/platform/plugins/shared/maps/test/scout/api/playwright.config.ts is NOT triggered (cross-scope isolation: UI changes never reach the API scope)"
+  ],
+  "mergeBase": "tests-only-debug",
+  "changedFiles": [
+    "x-pack/platform/plugins/shared/maps/test/scout/ui/fixtures/constants.ts",
+    "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/full_screen_mode.spec.ts"
+  ],
+  "affectedModules": ["@kbn/maps-plugin"]
+}
