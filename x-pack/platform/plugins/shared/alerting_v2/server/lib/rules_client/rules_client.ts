@@ -263,29 +263,20 @@ export class RulesClient {
 
     await this.rulesSavedObjectService.delete({ id });
 
-    // Cascade-delete any single_rule action policies attached to this rule.
-    // Skipping cascade would leave orphaned policies that silently never fire.
     await this.deleteAttachedSingleRulePolicies(id);
   }
 
-  // Best-effort cascade-delete; failures here log but never block the rule
-  // delete itself (the rule is already gone). Run inside deleteRule after the
-  // rule SO has been removed.
   private async deleteAttachedSingleRulePolicies(ruleId: string): Promise<void> {
     const { items } = await this.actionPolicyClient.findActionPolicies({
       type: 'single_rule',
       ruleId,
       perPage: 100,
     });
+    if (items.length === 0) return;
 
-    for (const policy of items) {
-      try {
-        await this.actionPolicyClient.deleteActionPolicy({ id: policy.id });
-      } catch {
-        // Swallow — caller already saw rule deletion succeed; orphaned policies
-        // can be cleaned up manually from the action-policy list UI.
-      }
-    }
+    await this.actionPolicyClient.bulkActionActionPolicies({
+      actions: items.map((policy) => ({ id: policy.id, action: 'delete' as const })),
+    });
   }
 
   @withApm

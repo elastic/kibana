@@ -24,7 +24,9 @@ export function createRulesClient(): {
   const { userService } = createUserService();
   const actionPolicyClient = {
     findActionPolicies: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 20 }),
-    deleteActionPolicy: jest.fn().mockResolvedValue(undefined),
+    bulkActionActionPolicies: jest
+      .fn()
+      .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
   } as unknown as ActionPolicyClient;
 
   http.basePath.get.mockReturnValue('/s/default');
