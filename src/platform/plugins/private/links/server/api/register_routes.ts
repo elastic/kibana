@@ -10,16 +10,16 @@
 import type { HttpServiceSetup, RequestHandlerContext } from '@kbn/core/server';
 
 import { registerCreateRoute } from './create';
+import { registerReadRoute } from './read';
 // import { registerUpdateRoute } from './update';
 // import { registerDeleteRoute } from './delete';
 // import { registerSearchRoute } from './search';
-// import { registerReadRoute } from './read';
 // import { registerSanitizeRoute } from './sanitize';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const { versioned: versionedRouter } = http.createRouter<RequestHandlerContext>();
   registerCreateRoute(versionedRouter);
-  // registerReadRoute(versionedRouter, usageCounter, false);
+  registerReadRoute(versionedRouter);
   // registerUpdateRoute(versionedRouter, usageCounter, false);
   // registerDeleteRoute(versionedRouter, usageCounter);
   // registerSearchRoute(versionedRouter, usageCounter);

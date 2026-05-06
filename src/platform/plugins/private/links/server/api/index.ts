@@ -10,3 +10,4 @@
 export { registerRoutes } from './register_routes';
 
 export { create } from './create/create';
+export { read } from './read/read';

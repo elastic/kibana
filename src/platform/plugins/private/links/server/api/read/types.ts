@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { linksClient } from './links_content_management_client';
+import type { TypeOf } from '@kbn/config-schema';
+import type { readResponseBodySchema } from './schemas';
 
-export async function loadFromLibrary(libraryId: string) {
-  const response = await linksClient.get(libraryId);
-  return response.data;
-}
+export type LinksReadResponseBody = TypeOf<typeof readResponseBodySchema>;

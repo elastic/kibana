@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { linksClient } from './links_content_management_client';
+import { schema } from '@kbn/config-schema';
+import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import { linksSchema } from '../schemas';
 
-export async function loadFromLibrary(libraryId: string) {
-  const response = await linksClient.get(libraryId);
-  return response.data;
-}
+export const readResponseBodySchema = schema.object({
+  id: schema.string(),
+  data: linksSchema,
+  meta: asCodeMetaSchema,
+});

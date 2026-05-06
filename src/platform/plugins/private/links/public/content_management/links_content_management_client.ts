@@ -8,15 +8,18 @@
  */
 
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
+import { buildPath } from '@kbn/core-http-browser';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type {
   SerializableAttributes,
   VisualizationClient,
 } from '@kbn/visualizations-plugin/public';
 import { CONTENT_ID } from '../../common';
+import { LINKS_API_PATH, LINKS_API_VERSION, LINKS_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { LinksCrudTypes } from '../../common/content_management';
-import { contentManagement, coreServices } from '../services/kibana_services';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from '../../server/api/create';
-import { LINKS_API_PATH, LINKS_API_VERSION } from '../../common/constants';
+import type { LinksReadResponseBody } from '../../server/api/read';
+import { contentManagement, coreServices } from '../services/kibana_services';
 
 const get = async (id: string) => {
   return contentManagement.client.get<LinksCrudTypes['GetIn'], LinksCrudTypes['GetOut']>({
@@ -54,7 +57,19 @@ const search = async (query: SearchQuery = {}, options?: LinksCrudTypes['SearchO
 };
 
 export const linksClient = {
-  get,
+  get: async (id: string): Promise<LinksReadResponseBody> => {
+    return await coreServices.http
+      .get<LinksReadResponseBody>(buildPath(`${LINKS_API_PATH}/{id}`, { id }), {
+        version: LINKS_API_VERSION,
+      })
+      .catch((e) => {
+        if (e.response?.status === 404) {
+          throw new SavedObjectNotFound({ type: LINKS_SAVED_OBJECT_TYPE, id });
+        }
+        const message = (e.body as { message?: string })?.message ?? e.message;
+        throw new Error(message);
+      });
+  },
   create: async (request: LinksCreateRequestBody) => {
     return coreServices.http.post<LinksCreateResponseBody>(LINKS_API_PATH, {
       version: LINKS_API_VERSION,
