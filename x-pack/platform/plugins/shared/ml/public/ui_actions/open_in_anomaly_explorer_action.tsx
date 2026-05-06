@@ -22,7 +22,7 @@ import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimla
 import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
 import { getEmbeddableTimeRange } from './get_embeddable_time_range';
-import { isValidLicense } from './action_license_check';
+import { isMlAvailable } from '../../common/license/ml_license';
 
 export interface OpenInAnomalyExplorerSwimLaneActionContext extends EmbeddableApiContext {
   embeddable: AnomalySwimLaneEmbeddableApi;
@@ -155,7 +155,7 @@ export function createOpenInExplorerAction(
       }
     },
     async isCompatible(context: EmbeddableApiContext) {
-      if (!(await isValidLicense(getStartServices))) return false;
+      if (!(await isMlAvailable(getStartServices))) return false;
       return isSwimLaneEmbeddableContext(context) || isAnomalyChartsEmbeddableContext(context);
     },
   };
