@@ -18,8 +18,7 @@ import { getGraphViewTab } from '../shared/components/left';
 export const useTabs = (
   name: string,
   scopeId: string,
-  entityStoreEntityId?: string,
-  subTab?: string
+  entityStoreEntityId?: string
 ): LeftPanelTabsType => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -30,7 +29,6 @@ export const useTabs = (
         entityType: EntityType.service,
         scopeId,
         entityId: entityStoreEntityId,
-        subTab,
       }),
     ];
 
@@ -50,5 +48,5 @@ export const useTabs = (
         : [];
 
     return [...riskTab, ...graphTab, ...resolutionTab];
-  }, [name, scopeId, entityStoreEntityId, hasEntityResolutionLicense, subTab]);
+  }, [name, scopeId, entityStoreEntityId, hasEntityResolutionLicense]);
 };

@@ -58,7 +58,6 @@ export const useTabs = ({
   hasVulnerabilitiesFindings,
   hasNonClosedAlerts,
   entityStoreEntityId,
-  path,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -71,7 +70,6 @@ export const useTabs = ({
             entityType: EntityType.host,
             scopeId,
             entityId: entityStoreEntityId,
-            subTab: path?.subTab,
           }),
         ]
       : [];
@@ -116,6 +114,5 @@ export const useTabs = ({
     hasNonClosedAlerts,
     entityStoreEntityId,
     hasEntityResolutionLicense,
-    path,
   ]);
 };

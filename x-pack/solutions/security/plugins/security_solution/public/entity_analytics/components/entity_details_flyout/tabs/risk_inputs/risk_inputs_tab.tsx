@@ -16,13 +16,17 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash/fp';
-import { RiskScoreLeftPanelSubTab } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
+  EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
+} from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { CriticalityLevel } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import { getWatchlistName } from '../../../../../../common/entity_analytics/watchlists/constants';
 import { ALERT_PREVIEW_BANNER } from '../../../../../flyout/document_details/preview/constants';
@@ -49,13 +53,13 @@ import { ActionColumn } from '../../components/action_column';
 import { AskAiAssistant } from './ask_ai_assistant';
 import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
 import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
+import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
   entityName: string;
   scopeId: string;
   entityId?: string;
-  subTab?: string;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -66,17 +70,46 @@ const FIRST_RECORD_PAGINATION = {
 export const EXPAND_ALERT_TEST_ID = 'risk-input-alert-preview-button';
 export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
 
-const isValidSubTab = (subTab: string | undefined): subTab is RiskScoreLeftPanelSubTab =>
-  subTab !== undefined &&
-  Object.values(RiskScoreLeftPanelSubTab).includes(subTab as RiskScoreLeftPanelSubTab);
+interface RiskScorePanelProps extends FlyoutPanelProps {
+  params: {
+    path: {
+      tab: EntityDetailsLeftPanelTab.RISK_INPUTS;
+      subTab?: RiskScoreLeftPanelSubTab;
+    };
+  };
+}
+
+function isRiskScoreFlyoutPanelProps(
+  panelLeft: FlyoutPanelProps | undefined
+): panelLeft is RiskScorePanelProps {
+  const params = panelLeft?.params;
+  if (!params || typeof params !== 'object' || !('path' in params)) {
+    return false;
+  }
+
+  const path = params.path as { tab?: unknown; subTab?: unknown };
+  if (path?.tab !== EntityDetailsLeftPanelTab.RISK_INPUTS) {
+    return false;
+  }
+
+  return (
+    path.subTab === undefined ||
+    (typeof path.subTab === 'string' &&
+      Object.values(RiskScoreLeftPanelSubTab).includes(path.subTab as RiskScoreLeftPanelSubTab))
+  );
+}
 
 export const RiskInputsTab = <T extends EntityType>({
   entityType,
   entityName,
   scopeId,
   entityId,
-  subTab,
 }: RiskInputsTabProps<T>) => {
+  const panels = useStableExpandableFlyoutState();
+  const subTab = isRiskScoreFlyoutPanelProps(panels.left)
+    ? panels.left.params.path.subTab
+    : undefined;
+
   const { data: watchlists } = useGetWatchlists();
 
   const entityFilterQuery = useMemo(
@@ -209,7 +242,7 @@ export const RiskInputsTab = <T extends EntityType>({
 RiskInputsTab.displayName = 'RiskInputsTab';
 
 interface RiskInputsTabContentProps<T extends EntityType> {
-  subTab?: string;
+  subTab?: RiskScoreLeftPanelSubTab;
   entityType: T;
   entityName: string;
   scopeId: string;
@@ -247,9 +280,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   const euidApi = useEntityStoreEuidApi();
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
-  const [userSelectedView, setUserSelectedView] = useState<RiskScoreLeftPanelSubTab | undefined>(
-    () => (isValidSubTab(subTab) ? subTab : undefined)
-  );
+  const [userSelectedView, setUserSelectedView] = useState(subTab);
 
   const defaultView =
     !loadingRiskScore && !entityRiskScore && hasResolutionScore

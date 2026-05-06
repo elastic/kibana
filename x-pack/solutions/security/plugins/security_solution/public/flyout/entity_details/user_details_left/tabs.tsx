@@ -38,8 +38,7 @@ export const useTabs = (
   hasNonClosedAlerts?: boolean,
   identityFields?: IdentityFields,
   entityId?: string,
-  entityStoreEntityId?: string,
-  subTab?: string
+  entityStoreEntityId?: string
 ): LeftPanelTabsType => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -56,7 +55,6 @@ export const useTabs = (
           entityType: EntityType.user,
           scopeId,
           entityId: entityStoreEntityId,
-          subTab,
         })
       );
     }
@@ -106,7 +104,6 @@ export const useTabs = (
     name,
     scopeId,
     entityStoreEntityId,
-    subTab,
   ]);
 };
 

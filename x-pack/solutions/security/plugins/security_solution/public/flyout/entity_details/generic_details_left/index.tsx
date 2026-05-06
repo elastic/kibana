@@ -8,11 +8,11 @@
 import React, { useMemo } from 'react';
 import { type FlyoutPanelProps, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
+import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
 import type {
   EntityDetailsPath,
-  LeftPanelHeader,
-  type EntityDetailsLeftPanelTab,
-  type LeftPanelTabsType,
+  EntityDetailsLeftPanelTab,
+  LeftPanelTabsType,
 } from '../shared/components/left_panel/left_panel_header';
 import type { UseGetGenericEntityParams } from '../generic_right/hooks/use_get_generic_entity';
 import { useGetGenericEntity } from '../generic_right/hooks/use_get_generic_entity';
