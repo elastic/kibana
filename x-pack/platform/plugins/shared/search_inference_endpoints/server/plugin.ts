@@ -75,9 +75,9 @@ export class SearchInferenceEndpointsPlugin
 
     const getForFeature = async (featureId: string, request: KibanaRequest) => {
       const [coreStart, pluginsStart] = await core.getStartServices();
-      const soClient = coreStart.savedObjects.createInternalRepository([
-        INFERENCE_SETTINGS_SO_TYPE,
-      ]);
+      const soClient = coreStart.savedObjects.getScopedClient(request, {
+        includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
+      });
       const getConnectorById = (id: string) => pluginsStart.inference.getConnectorById(id, request);
       return getForFeatureFn(featureRegistry, soClient, getConnectorById, featureId, this.logger);
     };
@@ -179,7 +179,9 @@ export class SearchInferenceEndpointsPlugin
       },
       endpoints: {
         getForFeature: async (featureId: string, request: KibanaRequest) => {
-          const soClient = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
+          const soClient = core.savedObjects.getScopedClient(request, {
+            includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
+          });
           const uiSettingsClient = core.uiSettings.asScopedToClient(
             core.savedObjects.getScopedClient(request)
           );
