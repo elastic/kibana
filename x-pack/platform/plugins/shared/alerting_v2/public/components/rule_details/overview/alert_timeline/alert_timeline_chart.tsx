@@ -63,23 +63,24 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
           </EuiFlexItem>
           {rows.map((row) => (
             <EuiFlexItem grow={false} key={row.groupHash}>
-              <div
-                css={css`
-                  height: ${ROW_HEIGHT_PX}px;
-                  display: flex;
-                  align-items: center;
-                `}
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="none"
+                responsive={false}
+                style={{ height: ROW_HEIGHT_PX }}
               >
-                <AlertTimelineSeriesLabel
-                  groupHash={row.groupHash}
-                  groupingValues={row.groupingValues}
-                  episodeCount={row.episodeCount}
-                  ruleId={ruleId}
-                  gteMs={gteMs}
-                  lteMs={lteMs}
-                  basePath={basePath}
-                />
-              </div>
+                <EuiFlexItem>
+                  <AlertTimelineSeriesLabel
+                    groupHash={row.groupHash}
+                    groupingValues={row.groupingValues}
+                    episodeCount={row.episodeCount}
+                    ruleId={ruleId}
+                    gteMs={gteMs}
+                    lteMs={lteMs}
+                    basePath={basePath}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>

@@ -97,9 +97,7 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({
       hasBorder
       hasShadow={false}
       color="plain"
-      css={css`
-        max-width: 280px;
-      `}
+      style={{ maxWidth: 280 }}
     >
       <EuiText size="xs">
         <div

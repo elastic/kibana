@@ -19,7 +19,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { OnTimeChangeProps } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import { parseDurationToMs } from '@kbn/alerting-v2-schemas';
@@ -219,16 +218,18 @@ export const AlertTimelineSection: React.FC = () => {
       <EuiSpacer size="m" />
 
       {isLoading && (
-        <div
-          css={css`
-            display: flex;
-            justify-content: center;
-            padding: 24px;
-          `}
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          responsive={false}
           data-test-subj="alertTimelineSectionLoading"
         >
-          <EuiLoadingChart size="l" />
-        </div>
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="l" />
+            <EuiLoadingChart size="l" />
+            <EuiSpacer size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
 
       {!isLoading && isError && (
