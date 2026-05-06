@@ -19,6 +19,10 @@ import { RulesClient } from '../rules_client';
 import { WorkflowsManagementApiToken } from '../dispatcher/steps/dispatch_step_tokens';
 import { EventLogServiceToken } from '../services/event_log_service/tokens';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 import type { AlertingServerStartDependencies } from '../../types';
 import { collectIdsFromEvents, denormalizeEvent, type NameMaps } from './denormalize_event';
 
@@ -57,7 +61,8 @@ export class ActionPolicyExecutionHistoryClient {
     @inject(WorkflowsManagementApiToken)
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
-    private readonly spaces: AlertingServerStartDependencies['spaces']
+    private readonly spaces: AlertingServerStartDependencies['spaces'],
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
   public async listExecutionHistory({
@@ -102,16 +107,27 @@ export class ActionPolicyExecutionHistoryClient {
   private async resolveNames(events: IValidatedEvent[], spaceId: string): Promise<NameMaps> {
     const { policyIds, ruleIds, workflowIds } = collectIdsFromEvents(events);
 
-    const [policies, rules, workflows] = await Promise.all([
+    const [policiesRes, rulesRes, workflowsRes] = await Promise.allSettled([
       this.actionPolicyClient.getActionPolicies({ ids: policyIds }),
       this.rulesClient.getRules(ruleIds),
       this.workflowsManagement.getWorkflowsByIds(workflowIds, spaceId),
     ]);
+
+    const policies = this.unwrap(policiesRes, 'EXECUTION_HISTORY_POLICY_LOOKUP_FAILED');
+    const rules = this.unwrap(rulesRes, 'EXECUTION_HISTORY_RULE_LOOKUP_FAILED');
+    const workflows = this.unwrap(workflowsRes, 'EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED');
 
     return {
       policyNames: new Map(policies.map((p) => [p.id, p.name])),
       ruleNames: new Map(rules.map((r) => [r.id, r.metadata.name])),
       workflowNames: new Map(workflows.map((w) => [w.id, w.name])),
     };
+  }
+
+  private unwrap<T>(result: PromiseSettledResult<T[]>, code: string): T[] {
+    if (result.status === 'fulfilled') return result.value;
+    const error = result.reason instanceof Error ? result.reason : new Error(String(result.reason));
+    this.logger.error({ error, code });
+    return [];
   }
 }

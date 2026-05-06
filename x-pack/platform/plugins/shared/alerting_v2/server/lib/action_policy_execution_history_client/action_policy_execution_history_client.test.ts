@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionPolicyClient } from '../action_policy_client/action_policy_client';
 import type { RulesClient } from '../rules_client';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
+import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { AlertingServerStartDependencies } from '../../types';
 import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -77,16 +78,31 @@ const createMocks = () => {
       getSpaceId: jest.fn().mockReturnValue('default'),
     },
   } as unknown as AlertingServerStartDependencies['spaces'];
+  const logger: jest.Mocked<LoggerServiceContract> = {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
 
   const client = new ActionPolicyExecutionHistoryClient(
     eventLogService,
     actionPolicyClient,
     rulesClient,
     workflowsManagement as any,
-    spaces
+    spaces,
+    logger
   );
 
-  return { client, eventLogService, actionPolicyClient, rulesClient, workflowsManagement, spaces };
+  return {
+    client,
+    eventLogService,
+    actionPolicyClient,
+    rulesClient,
+    workflowsManagement,
+    spaces,
+    logger,
+  };
 };
 
 describe('ActionPolicyExecutionHistoryClient', () => {
@@ -214,6 +230,69 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(client.listExecutionHistory({ request })).rejects.toThrow('boom');
+    });
+
+    describe('partial failures in name resolution', () => {
+      const setup = () => {
+        const mocks = createMocks();
+        mocks.eventLogService.findActionPolicyExecutionEvents.mockResolvedValue({
+          events: [buildEvent({ policyId: 'p-1', ruleIds: ['r-1'], workflowIds: ['w-1'] })],
+          page: 1,
+          perPage: 100,
+          total: 1,
+        } as any);
+        mocks.actionPolicyClient.getActionPolicies.mockResolvedValue([
+          buildPolicy('p-1', 'Policy 1'),
+        ]);
+        mocks.rulesClient.getRules.mockResolvedValue([buildRule('r-1', 'Rule 1')]);
+        mocks.workflowsManagement.getWorkflowsByIds.mockResolvedValue([
+          buildWorkflow('w-1', 'WF 1'),
+        ]);
+        return mocks;
+      };
+
+      it('falls back to null workflow names and logs error when workflows lookup rejects', async () => {
+        const mocks = setup();
+        mocks.workflowsManagement.getWorkflowsByIds.mockRejectedValue(new Error('wf down'));
+        const request = httpServerMock.createKibanaRequest();
+
+        const result = await mocks.client.listExecutionHistory({ request });
+
+        expect(result.items[0]).toMatchObject({
+          policy: { name: 'Policy 1' },
+          rule: { name: 'Rule 1' },
+          workflows: [{ id: 'w-1', name: null }],
+        });
+        expect(mocks.logger.error).toHaveBeenCalledWith(
+          expect.objectContaining({ code: 'EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED' })
+        );
+      });
+
+      it('falls back to null policy names when policy lookup rejects', async () => {
+        const mocks = setup();
+        mocks.actionPolicyClient.getActionPolicies.mockRejectedValue(new Error('so down'));
+        const request = httpServerMock.createKibanaRequest();
+
+        const result = await mocks.client.listExecutionHistory({ request });
+
+        expect(result.items[0].policy).toEqual({ id: 'p-1', name: null });
+        expect(mocks.logger.error).toHaveBeenCalledWith(
+          expect.objectContaining({ code: 'EXECUTION_HISTORY_POLICY_LOOKUP_FAILED' })
+        );
+      });
+
+      it('falls back to null rule names when rules lookup rejects', async () => {
+        const mocks = setup();
+        mocks.rulesClient.getRules.mockRejectedValue(new Error('rules down'));
+        const request = httpServerMock.createKibanaRequest();
+
+        const result = await mocks.client.listExecutionHistory({ request });
+
+        expect(result.items[0].rule).toEqual({ id: 'r-1', name: null });
+        expect(mocks.logger.error).toHaveBeenCalledWith(
+          expect.objectContaining({ code: 'EXECUTION_HISTORY_RULE_LOOKUP_FAILED' })
+        );
+      });
     });
   });
 
