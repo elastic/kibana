@@ -7,10 +7,12 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaVersionBadge } from '@kbn/search-shared-ui';
+import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
 import { CloudLinks } from './cloud_links';
@@ -23,6 +25,9 @@ export const SearchHomepagePage = () => {
   const {
     services: { console: consolePlugin, history, searchNavigation, cloud, kibanaVersion },
   } = useKibana();
+
+  const { user } = useAuthenticatedUser();
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     if (searchNavigation) {
@@ -56,6 +61,28 @@ export const SearchHomepagePage = () => {
               gutterSize="s"
               data-test-subj="searchHomepageHeaderLeftsideGroup"
             >
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    {user?.full_name
+                      ? i18n.translate('xpack.searchHomepage.welcome.title', {
+                          defaultMessage: 'Welcome, {username}',
+                          values: { username: user.full_name },
+                        })
+                      : i18n.translate('xpack.searchHomepage.welcome.title.default', {
+                          defaultMessage: 'Welcome',
+                        })}
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <span
+                  css={css`
+                    border-left: ${euiTheme.border.thin};
+                    height: ${euiTheme.size.l};
+                  `}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <CloudLinks />
               </EuiFlexItem>
