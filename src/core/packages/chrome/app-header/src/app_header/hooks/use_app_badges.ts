@@ -15,7 +15,9 @@ import type { AppHeaderBadge } from '../../types';
 
 const breadcrumbsBadgeToHeaderBadge = (badge: ChromeBreadcrumbsBadge): AppHeaderBadge => ({
   label: badge.badgeText,
+  color: badge.color as AppHeaderBadge['color'],
   tooltip: badge.toolTipProps?.content as string | undefined,
+  'data-test-subj': badge['data-test-subj'] as string | undefined,
   renderCustomBadge: badge.renderCustomBadge,
 });
 

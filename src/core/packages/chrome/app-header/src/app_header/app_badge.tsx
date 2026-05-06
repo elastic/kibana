@@ -70,6 +70,7 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
   const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
 
   if (badge?.renderCustomBadge) {
+    // TODO: Remove custom JSX badge rendering once apps migrate custom badges to structured config.
     return badge.renderCustomBadge({ badgeText: badge.label });
   }
 

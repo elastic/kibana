@@ -32,7 +32,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import { ChromeAppHeaderRegistration, type AppHeaderBadge } from '@kbn/app-header';
+import { ChromeAppHeaderRegistration } from '@kbn/app-header';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
@@ -71,22 +71,6 @@ export interface InternalDashboardTopNavProps {
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
-
-const topNavBadgeToAppHeaderBadge = ({
-  badgeText,
-  color,
-  toolTipProps,
-  renderCustomBadge,
-  onClickAriaLabel,
-  'data-test-subj': dataTestSubj,
-}: TopNavMenuBadgeProps): AppHeaderBadge => ({
-  label: badgeText,
-  color: color as AppHeaderBadge['color'],
-  tooltip: toolTipProps?.content as string | undefined,
-  onClickAriaLabel,
-  'data-test-subj': dataTestSubj as string | undefined,
-  renderCustomBadge,
-});
 
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
@@ -384,11 +368,6 @@ export function InternalDashboardTopNav({
     return allBadges;
   }, [isPopoverOpen, dashboardApi, maybeRedirect]);
 
-  const appHeaderBadges = useMemo(
-    () => (badges.length > 0 ? badges.map(topNavBadgeToAppHeaderBadge) : undefined),
-    [badges]
-  );
-
   useEffect(() => {
     coreServices.chrome.setBreadcrumbsBadges(badges);
     return () => {
@@ -417,7 +396,6 @@ export function InternalDashboardTopNav({
           // TODO: instead of hardcoding this should also be dynamic like customLeadingBreadCrumbs
           back="/app/dashboards#/list"
           menu={appMenuConfig}
-          badges={appHeaderBadges}
           favorite={chromeNextHeaderFavoriteGlobalAction}
         />
       )}

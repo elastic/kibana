@@ -7,51 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { ChromeAppHeaderRegistration } from '@kbn/app-header';
-import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
-import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getReadOnlyBadge } from '../../application/discover_router';
-
-const chromeBadgeToHeaderBadge = (badge: ChromeBreadcrumbsBadge): AppHeaderBadge => ({
-  label: badge.badgeText,
-  color: badge.color as AppHeaderBadge['color'],
-  tooltip: badge.toolTipProps?.content as string | undefined,
-  'data-test-subj': badge['data-test-subj'] as string | undefined,
-  renderCustomBadge: badge.renderCustomBadge,
-});
+import type { AppHeaderBack } from '@kbn/app-header';
 
 export interface DiscoverAppHeaderProps {
   title: string;
   back?: string | AppHeaderBack;
   appMenu?: AppMenuConfig;
-  badges?: AppHeaderBadge[];
 }
 
-export const DiscoverAppHeader: React.FC<DiscoverAppHeaderProps> = ({
-  title,
-  back,
-  appMenu,
-  badges: extraBadges,
-}) => {
-  const { capabilities } = useDiscoverServices();
-
-  const badges = useMemo(() => {
-    const result: AppHeaderBadge[] = [];
-
-    const readOnlyBadge = getReadOnlyBadge({ capabilities });
-    if (readOnlyBadge) {
-      result.push(chromeBadgeToHeaderBadge(readOnlyBadge));
-    }
-
-    if (extraBadges) {
-      result.push(...extraBadges);
-    }
-
-    return result.length > 0 ? result : undefined;
-  }, [capabilities, extraBadges]);
-
-  return <ChromeAppHeaderRegistration title={title} back={back} menu={appMenu} badges={badges} />;
-};
+export const DiscoverAppHeader: React.FC<DiscoverAppHeaderProps> = ({ title, back, appMenu }) => (
+  <ChromeAppHeaderRegistration title={title} back={back} menu={appMenu} />
+);

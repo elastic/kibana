@@ -36,6 +36,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -455,7 +456,7 @@ export function DiscoverLayout() {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            height: calc(var(--kbn-application--content-height) - 40px);
+            ${kbnFullBodyHeightCss('40px')}
           }
         `,
       ]}
