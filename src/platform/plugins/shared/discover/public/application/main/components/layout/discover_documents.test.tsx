@@ -11,6 +11,7 @@ import React from 'react';
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
@@ -19,7 +20,11 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DEFAULT_EXPANDED_DOC_OWNER, internalStateActions } from '../../state_management/redux';
+import {
+  DEFAULT_EXPANDED_DOC_OWNER,
+  internalStateActions,
+  selectTabRuntimeState,
+} from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../../../build_services';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
@@ -267,6 +272,7 @@ describe('Discover documents layout', () => {
       const tabId = toolkit.getCurrentTab().id;
       const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
       const nextExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewMock);
+      const nestedDataView = { ...dataViewMock, id: 'nested-data-view' } as DataView;
 
       toolkit.internalState.dispatch(
         internalStateActions.setExpandedDoc({
@@ -275,6 +281,10 @@ describe('Discover documents layout', () => {
           expandedDocOwner: 'nested-grid',
         })
       );
+
+      selectTabRuntimeState(toolkit.runtimeStateManager, tabId)
+        .cascadedDocumentsFetcher$.getValue()
+        .setCascadedDocumentsDataView(nestedDataView);
 
       toolkit.internalState.dispatch(
         internalStateActions.setRenderDocumentViewMeta({
@@ -320,6 +330,7 @@ describe('Discover documents layout', () => {
       expect(flyoutProps.hit).toEqual(expandedDoc);
       expect(flyoutProps.hits).toEqual([expandedDoc, nextExpandedDoc]);
       expect(flyoutProps.columns).toEqual(['bytes']);
+      expect(flyoutProps.dataView).toBe(nestedDataView);
 
       act(() => {
         flyoutProps.setExpandedDoc(nextExpandedDoc);

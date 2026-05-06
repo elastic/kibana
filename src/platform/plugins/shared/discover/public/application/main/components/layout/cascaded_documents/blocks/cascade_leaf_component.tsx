@@ -170,10 +170,13 @@ export const ESQLDataCascadeLeafCell = React.memo(
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const {
+      cascadedDocumentsFetcher,
       expandedDoc$,
       expandedDocOwner$,
       getExpandedDocSetter,
       getRenderDocumentViewMetaSetter,
+      getDataGridUiStateMap,
+      setDataGridUiState,
     } = useCascadedDocumentsContext();
     const expandedDoc = useObservable(expandedDoc$, expandedDoc$.getValue());
     const expandedDocOwner = useObservable(expandedDocOwner$, expandedDocOwner$.getValue());
@@ -189,8 +192,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
     );
-
-    const { getDataGridUiStateMap, setDataGridUiState } = useCascadedDocumentsContext();
 
     const initialGridState = useMemo(
       () => getDataGridUiStateMap()?.[cellId],
@@ -217,6 +218,12 @@ export const ESQLDataCascadeLeafCell = React.memo(
     }, [cascadeDataGridDensityState, onUpdateDataGridDensity]);
 
     const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
+
+    // dataview has the fields returned from the original query (after the aggregation)
+    // cascadedDocumentsDataView has all the fields before the aggregation
+    const cascadedDocumentsDataView = useMemo(() => {
+      return cascadedDocumentsFetcher.getCascadedDocumentsDataView() ?? dataView;
+    }, [cascadedDocumentsFetcher, dataView]);
 
     const renderCustomToolbarWithElements = useMemo(
       () =>
@@ -270,7 +277,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     return (
       <UnifiedDataTable
         isPlainRecord
-        dataView={dataView}
+        dataView={cascadedDocumentsDataView}
         showTimeCol={showTimeCol}
         services={services}
         sort={EMPTY_SORT}

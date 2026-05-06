@@ -14,6 +14,8 @@ import { apm } from '@elastic/apm-rum';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { createEsqlDataViewEnricher } from '@kbn/data-view-utils';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { ScopedProfilesManager } from '../../../context_awareness';
@@ -32,6 +34,8 @@ export interface CascadedDocumentsStateManager {
 export class CascadedDocumentsFetcher {
   private readonly abortControllers: Map<string, AbortController> = new Map();
   private readonly requestAdapter = new RequestAdapter();
+  private readonly esqlDataViewEnricher = createEsqlDataViewEnricher();
+  private cascadedDocumentsDataView: DataView | undefined;
 
   constructor(
     private readonly services: DiscoverServices,
@@ -41,6 +45,19 @@ export class CascadedDocumentsFetcher {
 
   getRequestAdapter(): RequestAdapter {
     return this.requestAdapter;
+  }
+
+  getCascadedDocumentsDataView(): DataView | undefined {
+    return this.cascadedDocumentsDataView;
+  }
+
+  clearCascadedDocumentsDataView() {
+    this.cascadedDocumentsDataView = undefined;
+    this.esqlDataViewEnricher.clear();
+  }
+
+  setCascadedDocumentsDataView(dataView: DataView | undefined) {
+    this.cascadedDocumentsDataView = dataView;
   }
 
   async fetchCascadedDocuments({
@@ -83,7 +100,7 @@ export class CascadedDocumentsFetcher {
         return [];
       }
 
-      ({ records } = await fetchEsql({
+      const response = await fetchEsql({
         query: cascadeQuery,
         esqlVariables,
         dataView,
@@ -102,8 +119,15 @@ export class CascadedDocumentsFetcher {
               'This request queries Elasticsearch to fetch the documents matching the value of the expanded cascade row.',
           }),
         },
-      }));
+      });
 
+      records = response.records;
+      const enrichedDataView = this.esqlDataViewEnricher.enrich(
+        dataView,
+        response.esqlQueryColumns
+      );
+
+      this.cascadedDocumentsDataView = enrichedDataView ?? this.cascadedDocumentsDataView;
       this.stateManager.setCascadedDocuments(nodeId, records);
     } finally {
       this.abortControllers.delete(nodeId);

@@ -490,6 +490,13 @@ function DiscoverDocumentsComponent({
   const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
     (tab) => tab.cascadedDocumentsState
   );
+  const docViewerDataView = useMemo(() => {
+    if (!expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER) {
+      return gridDataView;
+    }
+
+    return cascadedDocumentsFetcher.getCascadedDocumentsDataView() ?? gridDataView;
+  }, [cascadedDocumentsFetcher, expandedDocOwner, gridDataView]);
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
   );
@@ -640,7 +647,7 @@ function DiscoverDocumentsComponent({
       </div>
       {expandedDoc && renderDocumentViewMeta && (
         <DiscoverGridFlyout
-          dataView={gridDataView}
+          dataView={docViewerDataView}
           hit={expandedDoc}
           hits={renderDocumentViewMeta.displayedRows}
           // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
