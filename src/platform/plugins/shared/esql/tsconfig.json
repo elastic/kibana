@@ -53,6 +53,7 @@
     "@kbn/logging-mocks",
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-server",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",
