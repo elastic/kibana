@@ -89,7 +89,10 @@ const createDefaultParams = (overrides?: Record<string, unknown>) => ({
   fetchParams: getFetchParamsMock({
     query: { esql: 'TS metrics-*' },
     dataView: {
-      getFieldByName: jest.fn(),
+      // Default to "every requested field exists" so the appliedDimensions
+      // derivation in useFetchMetricsData (#264957) is a no-op for existing
+      // tests. Tests that exercise the prune behavior override this per-test.
+      getFieldByName: jest.fn((name: string) => ({ name })),
       getIndexPattern: () => 'metrics-*',
       isTimeBased: () => true,
     } as any,
@@ -498,6 +501,133 @@ describe('useFetchMetricsData', () => {
       await waitFor(() => {
         expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
       });
+    });
+  });
+
+  describe('appliedDimensions vs selectedDimensions (#264957)', () => {
+    const { buildMetricsInfoQuery: buildMetricsInfoQueryMock } = jest.requireMock(
+      '@kbn/esql-utils'
+    ) as { buildMetricsInfoQuery: jest.Mock };
+
+    it('passes no dimensions to the query when none of the selected ones exist on the current data view', async () => {
+      const params = createDefaultParams();
+      params.selectedDimensionNames = [hostDimension];
+      // Stream B does not carry `host.name` — simulate the issue scenario.
+      (params.fetchParams.dataView as any).getFieldByName = jest.fn(() => undefined);
+
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', []);
+      expect(result.current.activeDimensions).toEqual([]);
+      // Intent must not be mutated — the caller still sees the original array.
+      expect(params.selectedDimensionNames).toEqual([hostDimension]);
+    });
+
+    it('keeps only the subset of selected dimensions that exist on the current data view', async () => {
+      const params = createDefaultParams();
+      params.selectedDimensionNames = [hostDimension, serviceDimension];
+      // Only `host.name` exists on the current data view.
+      (params.fetchParams.dataView as any).getFieldByName = jest.fn((name: string) =>
+        name === 'host.name' ? { name } : undefined
+      );
+
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', ['host.name']);
+      expect(result.current.activeDimensions).toEqual([hostDimension]);
+    });
+
+    it('passes all selected dimensions when they all exist on the current data view', async () => {
+      const params = createDefaultParams();
+      params.selectedDimensionNames = [hostDimension, serviceDimension];
+      // Default mock returns a stub field for every requested name.
+
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', [
+        'host.name',
+        'service.name',
+      ]);
+      expect(result.current.activeDimensions).toEqual([hostDimension, serviceDimension]);
+    });
+
+    it('does not validate when dataView is undefined (fetch is already gated by shouldFetch)', async () => {
+      const params = createDefaultParams({ dataView: undefined });
+      params.selectedDimensionNames = [hostDimension];
+
+      renderHook(() => useFetchMetricsData(params));
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 50));
+      });
+
+      // No fetch happens because the effect bails out when dataView is missing.
+      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    });
+
+    it('does not invoke getFieldByName when there are no selected dimensions', async () => {
+      const params = createDefaultParams();
+      const getFieldByName = jest.fn((name: string) => ({ name }));
+      (params.fetchParams.dataView as any).getFieldByName = getFieldByName;
+
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      // The validation memo short-circuits when selectedDimensionNames is empty/undefined,
+      // so getFieldByName is only reached by the unrelated getFieldType helper inside the
+      // parser (which doesn't run for the empty document set used here).
+      expect(getFieldByName).not.toHaveBeenCalled();
+      expect(result.current.activeDimensions).toEqual([]);
+    });
+
+    it('refetches when the applied set changes after a data view switch', async () => {
+      const params = createDefaultParams();
+      params.selectedDimensionNames = [hostDimension];
+
+      const { rerender } = renderHook(
+        (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
+        { initialProps: params }
+      );
+
+      await waitFor(() => {
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      });
+
+      // Switch to a data view that doesn't carry `host.name` — same intent,
+      // different applied set, so we expect a refetch with the pruned dimensions.
+      const switchedParams = {
+        ...params,
+        fetchParams: {
+          ...params.fetchParams,
+          dataView: {
+            getFieldByName: jest.fn(() => undefined),
+            getIndexPattern: () => 'metrics-*',
+            isTimeBased: () => true,
+          } as any,
+        },
+      };
+      rerender(switchedParams);
+
+      await waitFor(() => {
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+      });
+
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', []);
     });
   });
 

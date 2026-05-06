@@ -265,6 +265,24 @@ export const PackagePolicyBaseSchema = {
     ])
   ),
   package_agent_version_condition: schema.maybe(schema.string()),
+  // Only available for agentless integration policies.
+  // On standard package policies this field is rejected by server-side validation.
+  global_data_tags: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(
+        schema.object({
+          name: schema.string({
+            meta: { description: 'The name of the custom field. Cannot contain spaces.' },
+          }),
+          value: schema.oneOf([schema.string(), schema.number()], {
+            meta: { description: 'The value of the custom field.' },
+          }),
+        }),
+        { maxSize: 100 }
+      ),
+    ])
+  ),
 };
 
 export const NewPackagePolicySchema = schema.object({
@@ -284,6 +302,20 @@ export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
     enabled: schema.maybe(schema.boolean()),
     inputs: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
     package: schema.maybe(schema.any()),
+    global_data_tags: undefined,
+  },
+  { unknowns: 'ignore' }
+);
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.23.0.
+ * Permissive on enabled, inputs, and package so the SO layer can store
+ * internal shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema
+ * gains new fields, create PackagePolicySchemaV{next} that extends this one.
+ */
+export const PackagePolicySchemaV23 = PackagePolicySchemaV22.extends(
+  {
+    global_data_tags: NewPackagePolicySchema.getPropSchemas().global_data_tags,
   },
   { unknowns: 'ignore' }
 );

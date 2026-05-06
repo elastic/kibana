@@ -19,7 +19,7 @@ spec:
       description: 'Builds Kibana and initiates a Kibana cloud deployment from a PR'
     spec:
       env:
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
 
       allow_rebuilds: false
       branch_configuration: main

@@ -29,12 +29,15 @@ import styled from 'styled-components';
 
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
 import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector';
+
+import { PackagePolicyCustomFields } from '../../../../../components/custom_fields';
 import type {
   PackageInfo,
   NewPackagePolicy,
   RegistryVarsEntry,
   AgentPolicy,
 } from '../../../../../types';
+
 import { Loading } from '../../../../../components';
 import {
   useGetEpmDatastreams,
@@ -601,6 +604,15 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       </EuiFlexItem>
                     );
                   })}
+                  {/* Custom fields — agentless only */}
+                  {isAgentlessSelected && (
+                    <EuiFlexItem>
+                      <PackagePolicyCustomFields
+                        packagePolicy={packagePolicy}
+                        updatePackagePolicy={updatePackagePolicy}
+                      />
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
             ) : null}

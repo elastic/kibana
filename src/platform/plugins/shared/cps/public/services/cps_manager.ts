@@ -191,12 +191,16 @@ export class CPSManager implements ICPSManager {
    * Get the current project routing value
    */
   public getProjectRouting(overrideValue?: ProjectRouting) {
+    if (overrideValue !== undefined) {
+      return overrideValue;
+    }
+
     if (this.projectPickerAccess$.value === ProjectRoutingAccess.DISABLED) {
       return undefined;
     } else if (this.projectPickerAccess$.value === ProjectRoutingAccess.READONLY) {
       return this.defaultProjectRouting;
     }
-    return overrideValue ?? this.projectRouting$.value;
+    return this.projectRouting$.value;
   }
 
   /**

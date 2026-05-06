@@ -70,6 +70,7 @@
             "lineNumber": 16,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "FsRepositoryConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -128,6 +129,7 @@
             "lineNumber": 17,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "GcsRepositoryConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -187,6 +189,7 @@
             "lineNumber": 12,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -290,6 +293,7 @@
             "lineNumber": 54,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ReplayConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -349,6 +353,7 @@
             "lineNumber": 13,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "RestoreConfig",
             "trackAdoption": false,
             "isRequired": true
           }

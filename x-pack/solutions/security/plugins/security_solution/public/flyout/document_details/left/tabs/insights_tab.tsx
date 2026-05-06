@@ -10,8 +10,9 @@ import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { useStableExpandableFlyoutState } from '../../../shared/hooks/use_stable_expandable_flyout_state';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
@@ -86,7 +87,7 @@ export const InsightsTab = memo(() => {
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const panels = useExpandableFlyoutState();
+  const panels = useStableExpandableFlyoutState();
   const activeInsightsId = panels.left?.path?.subTab ?? ENTITIES_TAB_ID;
 
   // insight tabs based on whether document is alert or non-alert

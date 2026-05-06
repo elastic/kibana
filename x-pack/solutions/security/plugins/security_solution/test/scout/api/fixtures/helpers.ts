@@ -53,10 +53,7 @@ export const cleanupTestIndices = async (esClient: Client): Promise<void> => {
 /**
  * Creates a test data stream for retention tests
  */
-export const createTestDataStream = async (
-  esClient: Client,
-  name: string
-): Promise<void> => {
+export const createTestDataStream = async (esClient: Client, name: string): Promise<void> => {
   const templateName = `${name}-template`;
 
   // Create index template for data stream
@@ -98,10 +95,7 @@ export const createTestDataStream = async (
 /**
  * Deletes a test data stream
  */
-export const deleteTestDataStream = async (
-  esClient: Client,
-  name: string
-): Promise<void> => {
+export const deleteTestDataStream = async (esClient: Client, name: string): Promise<void> => {
   const templateName = `${name}-template`;
 
   try {

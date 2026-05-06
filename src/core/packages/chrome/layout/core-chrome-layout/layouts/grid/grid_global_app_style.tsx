@@ -75,10 +75,11 @@ const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
       position: relative; // This is temporary for apps that relied on this being present on \`.application\`
     }
 
-    // make data grid full screen mode respect the header banner
+    // make data grid full screen mode respect the header banner and the sidebar
     #kibana-body .euiDataGrid--fullScreen {
       height: calc(100vh - var(--kbnHeaderBannerHeight));
       top: var(--kbnHeaderBannerHeight);
+      right: ${layoutVar('sidebar.width', '0px')};
     }
   `;
 };

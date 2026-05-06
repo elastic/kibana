@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-export const MAX_VISIBLE_TAGS = 3;
+export const MAX_VISIBLE_TAGS = 1;
 
 export const getEntityIcon = (entityType: string): string => {
   switch (entityType) {
     case 'user':
       return 'user';
     case 'host':
-      return 'desktop';
+      return 'storage';
     case 'service':
-      return 'gear';
+      return 'node';
+    case 'generic':
     default:
-      return 'questionInCircle';
+      return 'globe';
   }
 };

@@ -55,13 +55,14 @@ import type { ValidationResults } from '../agent_policy_validation';
 
 import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
 
+import { AgentPolicyCustomFields } from '../../../../components/custom_fields';
+
 import {
   useOutputOptions,
   useDownloadSourcesOptions,
   DEFAULT_SELECT_VALUE,
   useFleetServerHostsOptions,
 } from './hooks';
-import { CustomFields } from './custom_fields';
 import { SpaceSelector } from './space_selector';
 import { AgentPolicyAdvancedMonitoringOptions } from './advanced_monitoring';
 
@@ -411,7 +412,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      <CustomFields
+      <AgentPolicyCustomFields
         updateAgentPolicy={updateAgentPolicy}
         agentPolicy={agentPolicy}
         isDisabled={disabled || agentPolicy.is_managed === true}

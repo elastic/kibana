@@ -53,6 +53,14 @@ export interface CanvasRenderCallbacks {
 }
 
 /**
+ * Callbacks available to inline content renderers.
+ */
+export interface InlineRenderCallbacks {
+  /** Register action buttons to display in the inline attachment header */
+  registerActionButtons: (buttons: ActionButton[]) => void;
+}
+
+/**
  * Parameters passed when requesting action buttons for an inline-rendered attachment.
  */
 export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
@@ -126,8 +134,14 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Optional custom content renderer for inline attachment display.
    * When provided, attachments can be rendered inline in the conversation
    * using the <render_attachment> tag.
+   *
+   * The `callbacks` object provides:
+   * - `registerActionButtons`: dynamically register action buttons in the inline header
    */
-  renderInlineContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
+  renderInlineContent?: (
+    props: AttachmentRenderProps<TAttachment>,
+    callbacks?: InlineRenderCallbacks
+  ) => ReactNode;
   /**
    * Optional preferred width for the canvas flyout when opened in full-screen context.
    * Accepts any valid CSS width value (e.g. `'600px'`, `'40vw'`).
@@ -154,14 +168,6 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Buttons will appear alongside or below the rendered content.
    */
   getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
-  /**
-   * Optional lifecycle hook called when an attachment is first rendered in the conversation.
-   * Called once per attachment (not per version). Use for setting up subscriptions or
-   * other side effects that should persist across version renders.
-   *
-   * @returns Optional cleanup function called when the attachment is removed from the conversation.
-   */
-  onAttachmentMount?: (params: AttachmentLifecycleParams<TAttachment>) => void | (() => void);
 }
 
 /**

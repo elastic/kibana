@@ -45,6 +45,7 @@
                 "lineNumber": 21,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -163,6 +164,7 @@
                 "lineNumber": 32,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReindexArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -416,6 +418,7 @@
               "lineNumber": 23,
               "columnNumber": 21,
               "deprecated": false,
+              "docsReferencedTypeName": "ReindexServiceScopedClientArgs",
               "trackAdoption": false,
               "isRequired": true
             }

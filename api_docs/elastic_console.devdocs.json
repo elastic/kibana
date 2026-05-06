@@ -31,7 +31,7 @@
           "<\"number\">)[]"
         ],
         "path": "x-pack/platform/plugins/shared/elastic_console/server/index.ts",
-        "lineNumber": 15,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

@@ -102,6 +102,8 @@ apiTest.describe(
           expect(typeof result.incompatibleFieldCount).toBe('number');
           expect(result.incompatibleFieldCount).toBeGreaterThanOrEqual(0);
         });
+
+        expect(response.statusCode).toBe(200);
       }
     );
 
