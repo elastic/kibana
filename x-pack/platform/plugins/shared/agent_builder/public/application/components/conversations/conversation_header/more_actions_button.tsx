@@ -11,6 +11,7 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -54,6 +55,12 @@ const fullscreenLabels = {
   fullScreen: i18n.translate('xpack.agentBuilder.conversationActions.fullScreen', {
     defaultMessage: 'Open in full screen',
   }),
+  fullScreenDisabledTooltip: i18n.translate(
+    'xpack.agentBuilder.conversationActions.fullScreenDisabledTooltip',
+    {
+      defaultMessage: 'Full-screen mode is available once this conversation has been created.',
+    }
+  ),
   addToDataset: i18n.translate('xpack.agentBuilder.conversationActions.addToDataset', {
     defaultMessage: 'Add conversation to dataset',
   }),
@@ -147,6 +154,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   const handleOpenFullScreen = useCallback(() => {
     if (!application) return;
+    if (!conversationId) return;
 
     setIsPopoverOpen(false);
     onCloseSidebar?.();
@@ -157,6 +165,17 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
     navigateToAgentBuilderUrl(path);
   }, [application, agentId, conversationId, navigateToAgentBuilderUrl, onCloseSidebar]);
+
+  const fullScreenMenuItemLabel = useMemo(() => {
+    if (conversationId) {
+      return fullscreenLabels.fullScreen;
+    }
+    return (
+      <EuiToolTip content={fullscreenLabels.fullScreenDisabledTooltip}>
+        <span tabIndex={0}>{fullscreenLabels.fullScreen}</span>
+      </EuiToolTip>
+    );
+  }, [conversationId]);
 
   const addToDatasetMenuItem = showAddToDatasetItem
     ? [
@@ -189,10 +208,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
             key="full-screen"
             icon="fullScreen"
             size="s"
+            disabled={!conversationId}
             data-test-subj="agentBuilderFullScreenMenuItem"
             onClick={handleOpenFullScreen}
           >
-            {fullscreenLabels.fullScreen}
+            {fullScreenMenuItemLabel}
           </EuiContextMenuItem>,
         ]
       : []),

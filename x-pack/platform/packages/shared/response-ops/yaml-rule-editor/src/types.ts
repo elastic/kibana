@@ -72,6 +72,11 @@ export const DEFAULT_ESQL_PROPERTY_NAMES = ['base'];
 export interface YamlRuleEditorProps {
   value: string;
   onChange: (value: string) => void;
+  /**
+   * Called when the editor text loses focus. Useful for "user paused editing"
+   * triggers like syncing parsed YAML back into a parent form's state.
+   */
+  onBlur?: () => void;
   esqlCallbacks: ESQLCallbacks;
   /**
    * Property names in YAML that should be treated as ES|QL queries.

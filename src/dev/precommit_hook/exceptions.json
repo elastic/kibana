@@ -46,6 +46,7 @@
   },
   "@elastic/appex-sharedux": {
     "src/core/packages/chrome/app-menu": "'app-menu' should be snake_case",
+    "src/core/packages/user-storage": "'user-storage' should be snake_case",
     "src/platform/kbn-ui": "'kbn-ui' should be snake_case",
     "src/platform/kbn-ui/side-navigation/packaging/I18N.md": "'I18N.md' should be snake_case",
     "src/platform/packages/shared/content-management/access_control/access_control_public": "'access_control_public' should be kebab-case",
