@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { RuleStepDecorator } from './step_decorator';
+export { pciComplianceSkill } from './pci_compliance_skill';

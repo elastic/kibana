@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { ActionPolicyFormFlyout } from '../form_flyout/action_policy_form_flyout';
-export { toFormState, toCreatePayload, toUpdatePayload } from './form_utils';
-export { useActionPolicyForm } from './use_action_policy_form';
+import { createPlaywrightEvalsConfig } from '@kbn/evals';
+
+export default createPlaywrightEvalsConfig({
+  testDir: `${__dirname}/evals`,
+  timeout: 30 * 60_000,
+});
