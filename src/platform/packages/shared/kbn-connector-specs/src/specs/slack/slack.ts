@@ -210,7 +210,7 @@ export const Slack: ConnectorSpec = {
         defaults: {
           provider: 'slack',
           scope:
-            'channels:read chat:write files:read groups:read im:read mpim:read users:read search:read.*',
+            'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
         },
       },
     ],
