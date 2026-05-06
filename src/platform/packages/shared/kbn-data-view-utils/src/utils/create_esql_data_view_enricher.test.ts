@@ -233,19 +233,6 @@ describe('createEsqlDataViewEnricher', () => {
   });
 
   describe('time field handling', () => {
-    it('should clear timeFieldName when time field not in ES|QL columns', () => {
-      const enricher = createEsqlDataViewEnricher();
-      const mockDataView = createMockDataView('test-id', '@timestamp');
-      const columns = createColumns([{ name: 'field1', type: 'string' }]);
-
-      const result = enricher.enrich(mockDataView, columns);
-
-      expect(result?.timeFieldName).toBeUndefined();
-      expect(mockDataView.cloneWithFields).toHaveBeenCalledWith({
-        field1: expect.objectContaining({ name: 'field1' }),
-      });
-    });
-
     it('should preserve timeFieldName when keepTimeField is enabled', () => {
       const enricher = createEsqlDataViewEnricher();
       const mockDataView = createMockDataView('test-id', '@timestamp');
@@ -331,7 +318,6 @@ describe('createEsqlDataViewEnricher', () => {
       const defaultResult = enricher.enrich(mockDataView, columns);
       const keepTimeFieldResult = enricher.enrich(mockDataView, columns, { keepTimeField: true });
 
-      expect(defaultResult?.timeFieldName).toBeUndefined();
       expect(keepTimeFieldResult?.timeFieldName).toBe('@timestamp');
       expect(defaultResult).not.toBe(keepTimeFieldResult);
       expect(mockDataView.cloneWithFields).toHaveBeenCalledTimes(2);
@@ -352,7 +338,6 @@ describe('createEsqlDataViewEnricher', () => {
       ]);
       const secondResult = enricher.enrich(mockDataView, columnsWithTime);
 
-      expect(firstResult?.timeFieldName).toBeUndefined();
       expect(secondResult?.timeFieldName).toBe('@timestamp');
       expect(firstResult).not.toBe(secondResult);
       expect(mockDataView.cloneWithFields).toHaveBeenCalledTimes(2);

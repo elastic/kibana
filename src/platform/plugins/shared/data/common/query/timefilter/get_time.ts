@@ -88,7 +88,21 @@ function getTimeField(indexPattern?: DataView, fieldName?: string) {
     return;
   }
 
-  return indexPattern.fields.find((f) => f.name === (fieldName || indexPattern.timeFieldName));
+  const timeField = indexPattern.fields.find(
+    (f) => f.name === (fieldName || indexPattern.timeFieldName)
+  );
+
+  if (timeField) {
+    return timeField;
+  }
+
+  // ES|QL dataview might not have the timefield present in "fields"
+  // as it contains only the fields returned by the given query.
+  if (indexPattern.type === 'esql' && indexPattern.timeFieldName) {
+    return { name: indexPattern.timeFieldName, type: KBN_FIELD_TYPES.DATE };
+  }
+
+  return;
 }
 
 function createTimeRangeFilter(
