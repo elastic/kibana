@@ -233,4 +233,18 @@ describe('AddModelPopover', () => {
 
     expect(screen.getByTestId('add-model-search')).toBeInTheDocument();
   });
+
+  it('has an accessible name for the model selection popover', () => {
+    render(
+      <Wrapper>
+        <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('add-model-button'));
+
+    // Verify the dialog has an aria-label for screen readers
+    const dialog = screen.getByRole('dialog', { name: 'Model selection' });
+    expect(dialog).toBeInTheDocument();
+  });
 });
