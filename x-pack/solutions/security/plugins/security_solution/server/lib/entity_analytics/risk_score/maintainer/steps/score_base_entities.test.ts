@@ -9,8 +9,9 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import { calculateBaseEntityScores } from './score_base_entities';
+import { calculateBaseEntityScores, scoreBaseEntities } from './score_base_entities';
 import type { ScopedLogger } from '../utils/with_log_context';
+import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
 
 const buildLogger = (): ScopedLogger =>
   ({
@@ -171,5 +172,87 @@ describe('score_base_entities', () => {
 
     expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1);
     expect(esClient.esql.query as jest.Mock).not.toHaveBeenCalled();
+  });
+
+  describe('scoreBaseEntities not_in_store filter', () => {
+    const buildWriter = (): RiskEngineDataWriter =>
+      ({
+        bulk: jest
+          .fn<Promise<{ errors: never[]; docs_written: number; took: number }>, [unknown]>()
+          .mockImplementation(async (params) => {
+            const [scoresArr] = Object.values(params as Record<string, unknown[]>);
+            return { errors: [], docs_written: scoresArr.length, took: 1 };
+          }),
+      } as unknown as RiskEngineDataWriter);
+
+    const makeStoreEntity = (entityId: string) => ({
+      entity: {
+        id: entityId,
+        attributes: { watchlists: [] },
+        relationships: { resolution: { resolved_to: undefined } },
+      },
+      asset: { criticality: undefined },
+    });
+
+    it('drops scores whose entity_id is not in the entity store before persistence', async () => {
+      // Composite agg + ES|QL produce two scored entities; one is in store, one is not.
+      mockCompositeAggPage(esClient, ['user:in-store@okta', 'user:phantom@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:in-store@okta'), esqlRow('user:phantom@okta')],
+      });
+
+      // Entity store knows only `user:in-store@okta`. The phantom is alert-only.
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+        entities: [makeStoreEntity('user:in-store@okta')],
+        nextSearchAfter: undefined,
+      });
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: false,
+        ...baseParams,
+      });
+
+      // Only the in-store entity reached the writer.
+      expect(writer.bulk).toHaveBeenCalledTimes(1);
+      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(writtenScores).toHaveLength(1);
+      expect(writtenScores[0].id_value).toBe('user:in-store@okta');
+
+      expect(summary.scoresWritten).toBe(1);
+    });
+
+    it('writes no scores when no entity on the page is in the entity store', async () => {
+      mockCompositeAggPage(esClient, ['user:phantom-a@okta', 'user:phantom-b@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:phantom-a@okta'), esqlRow('user:phantom-b@okta')],
+      });
+
+      // Entity store has nothing for this page.
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+        entities: [],
+        nextSearchAfter: undefined,
+      });
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: false,
+        ...baseParams,
+      });
+
+      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(writtenScores).toHaveLength(0);
+      expect(summary.scoresWritten).toBe(0);
+    });
   });
 });

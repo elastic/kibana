@@ -148,17 +148,32 @@ export const scoreBaseEntities = async ({
 
   for await (const page of calculateBaseEntityScores(params)) {
     pagesProcessed += 1;
+    // Drop scores for entities that aren't in the entity store. The composite
+    // aggregation discovers EUIDs from alerts, which can include identifiers
+    // with no canonical store entity (host.id variations, synthetic identifiers,
+    // alerts that name an entity the entity store has no record of). Writing
+    // those to the risk index produces phantom score documents that have no
+    // anchor on the entity, no place on the entity flyout, and bloat trend
+    // graphs. The V1 maintainer dropped them in `categorizePhase1Entities`;
+    // do the same here.
+    const inStoreScores = page.scores.filter((score) => page.entities.has(score.id_value));
+    if (inStoreScores.length < page.scores.length) {
+      params.logger.debug(
+        `dropped ${page.scores.length - inStoreScores.length} not_in_store scores ` +
+          `from page (kept ${inStoreScores.length})`
+      );
+    }
     scoresWritten += await persistScoresToRiskIndex({
       writer,
       entityType: params.entityType,
-      scores: page.scores,
+      scores: inStoreScores,
       logger: params.logger,
     });
     await persistScoresToEntityStore({
       crudClient: params.crudClient,
       logger: params.logger,
       entityType: params.entityType,
-      scores: page.scores,
+      scores: inStoreScores,
       enabled: idBasedRiskScoringEnabled,
     });
   }
