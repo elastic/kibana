@@ -191,8 +191,9 @@ export function KnowledgeIndicatorDetailsFlyout({
       <EuiFlyout
         onClose={onClose}
         aria-labelledby={flyoutTitleId}
-        type="push"
+        type="overlay"
         ownFocus={false}
+        outsideClickCloses={false}
         size="40%"
         hideCloseButton
       >
