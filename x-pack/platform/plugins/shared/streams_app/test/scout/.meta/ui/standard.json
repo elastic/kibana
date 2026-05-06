@@ -1,5 +1,5 @@
 {
-  "sha1": "ca2ee31289c8fe014bc642d2d54ac00e897d96ef",
+  "sha1": "077aee3d1c48a4b873e3b5485ca22a75b6f9bb3c",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -528,7 +528,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
@@ -544,7 +546,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
@@ -560,7 +564,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
@@ -576,7 +582,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
@@ -592,7 +600,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
@@ -608,7 +618,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
@@ -624,7 +636,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
@@ -640,7 +654,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
@@ -656,7 +672,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
@@ -672,7 +690,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
@@ -688,7 +708,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
@@ -3150,7 +3172,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/discover_integration_classic.spec.ts",
@@ -3164,7 +3188,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/discover_integration_classic.spec.ts",
@@ -3178,7 +3204,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/discover_integration_wired.spec.ts",
@@ -3192,7 +3220,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/discover_integration_wired.spec.ts",
@@ -3320,7 +3350,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/esql_source_enrichment.spec.ts",
@@ -3574,7 +3606,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/streams_list_view/classic_stream_creation.spec.ts",
@@ -3601,7 +3635,7 @@
     {
       "id": "5cc5f39235bac27-cbc15fc0aafc245",
       "title": "Stream list view - table values should display correct doc count in the table",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -3610,14 +3644,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/streams_list_view/streams_table_values.spec.ts",
-        "line": 118,
+        "line": 117,
         "column": 9
       }
     },
     {
       "id": "5cc5f39235bac27-33b9b0d2d910060",
       "title": "Stream list view - table values should display correct data quality badge",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -3626,14 +3660,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/streams_list_view/streams_table_values.spec.ts",
-        "line": 138,
+        "line": 142,
         "column": 9
       }
     },
     {
       "id": "5cc5f39235bac27-960cbddcfc2d99e",
       "title": "Stream list view - table values should display correct retention in the table",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -3642,14 +3676,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/streams_list_view/streams_table_values.spec.ts",
-        "line": 144,
+        "line": 167,
         "column": 9
       }
     },
     {
       "id": "5cc5f39235bac27-273d9e3abd6bc69",
       "title": "Stream list view - table values should provide Discover actions with correct ESQL queries",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -3658,7 +3692,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/streams_list_view/streams_table_values.spec.ts",
-        "line": 154,
+        "line": 177,
         "column": 9
       }
     },
@@ -3670,7 +3704,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/tsdb_discover_links.spec.ts",
@@ -3686,7 +3722,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/tsdb_discover_links.spec.ts",
@@ -3702,7 +3740,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/tsdb_discover_links.spec.ts",
@@ -3718,7 +3758,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/tsdb_discover_links.spec.ts",
