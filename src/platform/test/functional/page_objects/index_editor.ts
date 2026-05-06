@@ -51,8 +51,9 @@ export class IndexEditorObject extends FtrService {
   }
 
   public async addColumn(name: string, type: string): Promise<void> {
+    await this.testSubjects.click('indexEditorAddColumnButton');
+    await this.testSubjects.exists('indexEditorColumnTypeSelect');
     await this.retry.try(async () => {
-      await this.testSubjects.click('indexEditorAddColumnButton');
       await this.comboBox.set('indexEditorColumnTypeSelect', type);
     });
     await this.testSubjects.setValue('indexEditorColumnNameInput', name);
