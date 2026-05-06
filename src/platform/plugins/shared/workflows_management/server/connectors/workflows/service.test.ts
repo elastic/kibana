@@ -10,7 +10,7 @@
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import {
   createExternalService,
   type ScheduleWorkflowServiceFunction,
