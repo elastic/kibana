@@ -24,7 +24,7 @@ export type {
   AppMenuSplitButtonProps,
 } from './src';
 
-export { APP_MENU_ITEM_LIMIT } from './src';
+export { APP_MENU_ITEM_LIMIT, APP_MENU_SHARE_ID } from './src';
 
 export {
   getDisplayedItemsAllowedAmount,
