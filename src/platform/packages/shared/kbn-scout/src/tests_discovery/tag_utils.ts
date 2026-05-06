@@ -57,7 +57,7 @@ export const getServerRunFlagsFromTags = (testTags: string[]): string[] => {
     ['stateful', 'classic'],
     ['serverless', 'search'],
     ['serverless', 'observability_complete'],
-    // ['serverless', 'observability_logs_essentials'],
+    ['serverless', 'observability_logs_essentials'],
     ['serverless', 'security_complete'],
     // ['serverless', 'security_essentials'],
     // ['serverless', 'security_ease'],
