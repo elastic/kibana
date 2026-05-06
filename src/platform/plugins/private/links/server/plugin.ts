@@ -21,6 +21,8 @@ import type { LinksState } from './content_management';
 import { LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
 import { transforms } from '../common/embeddable/transforms/transforms';
+import { linksEmbeddableSchema } from './embeddable_schemas';
+import { registerRoutes } from './api';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
@@ -36,25 +38,15 @@ export class LinksServerPlugin implements Plugin<object, object> {
       embeddable: EmbeddableSetup;
     }
   ) {
-    plugins.contentManagement.register({
-      id: CONTENT_ID,
-      storage: new LinksStorage({
-        throwOnResultValidationError: this.initializerContext.env.mode.dev,
-        logger: this.logger.get('storage'),
-      }),
-      version: {
-        latest: LATEST_VERSION,
-      },
-    });
-
     core.savedObjects.registerType<LinksState>(linksSavedObjectType);
 
     plugins.embeddable.registerEmbeddableServerDefinition(LINKS_EMBEDDABLE_TYPE, {
       title: 'Links',
       getTransforms: () => transforms,
-      // do not publish - not finalized
-      // getSchema: () => linksEmbeddableSchema,
+      getSchema: () => linksEmbeddableSchema,
     });
+
+    registerRoutes(core.http);
 
     return {};
   }

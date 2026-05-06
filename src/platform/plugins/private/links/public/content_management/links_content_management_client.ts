@@ -14,25 +14,15 @@ import type {
 } from '@kbn/visualizations-plugin/public';
 import { CONTENT_ID } from '../../common';
 import type { LinksCrudTypes } from '../../common/content_management';
-import { contentManagement } from '../services/kibana_services';
+import { contentManagement, coreServices } from '../services/kibana_services';
+import type { LinksCreateRequestBody, LinksCreateResponseBody } from '../../server/api/create';
+import { LINKS_API_PATH, LINKS_API_VERSION } from '../../common/constants';
 
 const get = async (id: string) => {
   return contentManagement.client.get<LinksCrudTypes['GetIn'], LinksCrudTypes['GetOut']>({
     contentTypeId: CONTENT_ID,
     id,
   });
-};
-
-const create = async ({ data, options }: Omit<LinksCrudTypes['CreateIn'], 'contentTypeId'>) => {
-  const res = await contentManagement.client.create<
-    LinksCrudTypes['CreateIn'],
-    LinksCrudTypes['CreateOut']
-  >({
-    contentTypeId: CONTENT_ID,
-    data,
-    options,
-  });
-  return res;
 };
 
 const update = async ({ id, data, options }: Omit<LinksCrudTypes['UpdateIn'], 'contentTypeId'>) => {
@@ -65,7 +55,12 @@ const search = async (query: SearchQuery = {}, options?: LinksCrudTypes['SearchO
 
 export const linksClient = {
   get,
-  create,
+  create: async (request: LinksCreateRequestBody) => {
+    return coreServices.http.post<LinksCreateResponseBody>(LINKS_API_PATH, {
+      version: LINKS_API_VERSION,
+      body: JSON.stringify(request),
+    });
+  },
   update,
   delete: deleteLinks,
   search,

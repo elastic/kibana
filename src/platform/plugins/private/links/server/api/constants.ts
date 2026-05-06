@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export const commonRouteConfig = {
+  access: 'internal',
+  enableQueryVersion: true,
+  description:
+    'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  options: {
+    tags: ['oas-tag:markdown'],
+    availability: {
+      stability: 'experimental',
+    },
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'Relies on Saved Objects Client for authorization',
+    },
+  },
+} as const;

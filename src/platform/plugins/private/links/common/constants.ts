@@ -15,6 +15,8 @@ export const CONTENT_ID = 'links';
 export const LINKS_EMBEDDABLE_TYPE = 'links';
 export const LINKS_SAVED_OBJECT_TYPE = 'links';
 
+export const LINKS_API_PATH = `/api/links`;
+export const LINKS_API_VERSION = '1';
 export const APP_ICON = 'link';
 
 export const APP_NAME = i18n.translate('links.visTypeAlias.title', {

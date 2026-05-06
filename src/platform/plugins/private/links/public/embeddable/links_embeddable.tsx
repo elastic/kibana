@@ -139,14 +139,11 @@ export const getLinksEmbeddableFactory = () => {
         serializeState,
         saveToLibrary: async (newTitle: string) => {
           defaultTitle$.next(newTitle);
-          const {
-            item: { id },
-          } = await linksClient.create({
-            data: {
-              layout: layout$.getValue(),
-              links: serializeResolvedLinks(resolvedLinks$.getValue()),
-              title: newTitle,
-            },
+          const { id } = await linksClient.create({
+            layout: layout$.getValue(),
+            links: serializeResolvedLinks(resolvedLinks$.getValue()),
+            title: newTitle,
+            description: titleManager.getLatestState().description,
           });
           return id;
         },
