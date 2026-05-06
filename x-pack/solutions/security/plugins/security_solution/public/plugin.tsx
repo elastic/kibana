@@ -68,8 +68,8 @@ import { LazyCustomCriblExtension } from './security_integrations/cribl/componen
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
+import { getEndpointUnifiedAttachment } from './cases/attachments/endpoint';
 import { getEventType } from './cases/attachments/event';
-import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/endpoint/external_reference';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
 import { defaultDeepLinks } from './app/links/default_deep_links';
@@ -286,10 +286,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
 
-    cases.attachmentFramework.registerExternalReference(
-      getExternalReferenceAttachmentEndpointRegular()
-    );
     cases.attachmentFramework.registerExternalReference(generateIndicatorAttachmentType());
+    cases.attachmentFramework.registerUnified(getEndpointUnifiedAttachment());
     cases.attachmentFramework.registerUnified(getEventType());
 
     this.registerDiscoverSharedFeatures(core, plugins);
@@ -452,7 +450,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const alertFlyoutOverviewTabFeature: SecuritySolutionAlertFlyoutOverviewTabFeature = {
       id: 'security-solution-alert-flyout-overview-tab',
-      render: ({ hit, onAlertUpdated }) => {
+      render: ({ hit, onAlertUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -463,6 +461,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               servicesPromise={servicesPromise}
               storePromise={storePromise}
               onAlertUpdated={onAlertUpdated}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
             />
           </React.Suspense>
         );
@@ -476,7 +478,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
     const headerTitleFeature: SecuritySolutionAlertFlyoutHeaderTitleFeature = {
       id: 'security-solution-alert-flyout-header-title',
-      renderHeader: ({ hit, onAlertUpdated }) => {
+      renderHeader: ({ hit, onAlertUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -487,6 +489,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               servicesPromise={servicesPromise}
               storePromise={storePromise}
               onAlertUpdated={onAlertUpdated}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
             />
           </React.Suspense>
         );
