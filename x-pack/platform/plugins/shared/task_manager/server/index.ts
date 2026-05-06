@@ -41,6 +41,7 @@ export {
   throwUnrecoverableError,
   throwRetryableError,
   createTaskRunError,
+  getErrorSource,
   TaskErrorSource,
 } from './task_running';
 

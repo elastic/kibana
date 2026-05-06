@@ -15,12 +15,14 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
-  response?: { data: { errors: Record<string, string>; errorMessages?: string[] } };
+  response?: {
+    status?: number;
+    data: { errors: Record<string, string>; errorMessages?: string[] };
+  };
 }
 
 jest.mock('axios');
@@ -416,9 +418,15 @@ describe('Jira service', () => {
         throw error;
       });
 
-      await expect(service.createIncident(incident)).rejects.toThrow(
-        '[Action][Jira]: Unable to create incident. Error: An error has occurred. Reason: Required field'
+      const error = await service.createIncident(incident).catch((err) => err);
+
+      expect(error).toEqual(
+        expect.objectContaining({
+          message:
+            '[Action][Jira]: Unable to create incident. Error: An error has occurred. Reason: Required field',
+        })
       );
+      expect(getErrorSource(error)).not.toBe(TaskErrorSource.USER);
     });
 
     test('it should throw if the request is not a JSON', async () => {
@@ -439,15 +447,15 @@ describe('Jira service', () => {
       );
     });
 
-    test('createIncident throws user error on 400 response', async () => {
-      const mockError = Object.assign(new Error('Request failed with status code 400'), {
-        response: { status: 400, data: { errors: {}, errorMessages: [] } },
-      });
+    test('it should throw a user error on 400 response', async () => {
+      const mockError: ResponseError = new Error('Request failed with status code 400');
+      mockError.response = { status: 400, data: { errors: {}, errorMessages: [] } };
       requestMock.mockRejectedValue(mockError);
 
       const error = await service.createIncident(incident).catch((err) => err);
 
       expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(error.message).toMatch(/Unable to create incident/);
     });
 
     describe('otherFields', () => {
@@ -568,9 +576,15 @@ describe('Jira service', () => {
         throw error;
       });
 
-      await expect(service.updateIncident(incident)).rejects.toThrow(
-        '[Action][Jira]: Unable to update incident with id 1. Error: An error has occurred. Reason: Required field'
+      const error = await service.updateIncident(incident).catch((err) => err);
+
+      expect(error).toEqual(
+        expect.objectContaining({
+          message:
+            '[Action][Jira]: Unable to update incident with id 1. Error: An error has occurred. Reason: Required field',
+        })
       );
+      expect(getErrorSource(error)).not.toBe(TaskErrorSource.USER);
     });
 
     test('it should throw if the request is not a JSON', async () => {
@@ -583,15 +597,15 @@ describe('Jira service', () => {
       );
     });
 
-    test('updateIncident throws user error on 400 response', async () => {
-      const mockError = Object.assign(new Error('Request failed with status code 400'), {
-        response: { status: 400, data: { errors: {}, errorMessages: [] } },
-      });
+    test('it should throw a user error on 400 response', async () => {
+      const mockError: ResponseError = new Error('Request failed with status code 400');
+      mockError.response = { status: 400, data: { errors: {}, errorMessages: [] } };
       requestMock.mockRejectedValue(mockError);
 
       const error = await service.updateIncident(incident).catch((err) => err);
 
       expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(error.message).toMatch(/Unable to update incident/);
     });
 
     describe('otherFields', () => {
