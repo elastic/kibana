@@ -72,7 +72,13 @@ export const EnvironmentIndicator: React.FC<EnvironmentIndicatorProps> = ({
 
   return (
     <EuiToolTip content={tooltipContent}>
-      <EuiBadge color={badgeColor} css={badgeStyles} iconType={iconType} iconSide="left">
+      <EuiBadge
+        color={badgeColor}
+        css={badgeStyles}
+        iconType={iconType}
+        iconSide="left"
+        tabIndex={0}
+      >
         {displayText}
       </EuiBadge>
     </EuiToolTip>
