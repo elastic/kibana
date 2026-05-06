@@ -1,7 +1,7 @@
 notify:
   - slack:
       channels:
-        - '#kibana-operations'
+        - '#kibana-operations-alerts'
     if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/) && (build.state == 'passed' || build.state == 'failed')
   - slack:
       channels:
