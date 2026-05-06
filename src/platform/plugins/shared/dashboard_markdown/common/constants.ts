@@ -20,10 +20,10 @@ export const MARKDOWN_API_VERSION = '1';
 
 export const APP_ICON = 'visText';
 
-export const APP_NAME = i18n.translate('markdown.title', {
+export const APP_NAME = i18n.translate('dashboardMarkdown.title', {
   defaultMessage: 'Markdown',
 });
 
-export const DISPLAY_NAME = i18n.translate('markdown.displayName', {
+export const DISPLAY_NAME = i18n.translate('dashboardMarkdown.displayName', {
   defaultMessage: 'markdown',
 });
