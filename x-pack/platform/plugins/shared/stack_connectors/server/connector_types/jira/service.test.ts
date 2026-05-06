@@ -441,7 +441,7 @@ describe('Jira service', () => {
       );
     });
 
-    test("it should throw a user error when summary exceeds 255 characters", async () => {
+    test('it should throw a user error when summary exceeds 255 characters', async () => {
       const mockError: ResponseError = new Error('Request failed with status code 400');
       mockError.response = {
         status: 400,
