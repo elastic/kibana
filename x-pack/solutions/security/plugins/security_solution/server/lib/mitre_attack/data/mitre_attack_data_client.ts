@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   MitreEntity,
   MitreEntityType,
@@ -16,7 +16,7 @@ const DEFAULT_PAGE_SIZE = 1000;
 const MAX_PAGE_SIZE = 1500;
 
 interface MitreAttackDataClientDeps {
-  esScopedClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   logger: Logger;
   /** Provides the space-scoped index name. Awaits hydration if necessary. */
   resolveIndexName: () => Promise<string>;
@@ -49,7 +49,7 @@ export class MitreAttackDataClient {
     const indexName = await this.deps.resolveIndexName();
     const docId = this.buildDocId(framework, id);
     try {
-      const response = await this.deps.esScopedClient.asInternalUser.get<MitreEntity>({
+      const response = await this.deps.esClient.get<MitreEntity>({
         index: indexName,
         id: docId,
       });
@@ -63,7 +63,7 @@ export class MitreAttackDataClient {
   async list(params: MitreAttackListParams = {}): Promise<MitreEntity[]> {
     const indexName = await this.deps.resolveIndexName();
     const filters = this.buildFilters(params);
-    const response = await this.deps.esScopedClient.asInternalUser.search<MitreEntity>({
+    const response = await this.deps.esClient.search<MitreEntity>({
       index: indexName,
       size: DEFAULT_PAGE_SIZE,
       track_total_hits: false,
@@ -83,7 +83,7 @@ export class MitreAttackDataClient {
     const filters = this.buildFilters({ framework, types });
     const size = Math.min(MAX_PAGE_SIZE, Math.max(1, limit ?? 25));
 
-    const response = await this.deps.esScopedClient.asInternalUser.search<MitreEntity>({
+    const response = await this.deps.esClient.search<MitreEntity>({
       index: indexName,
       size,
       track_total_hits: false,
@@ -119,7 +119,7 @@ export class MitreAttackDataClient {
   }
 
   private extractSources(
-    response: Awaited<ReturnType<IScopedClusterClient['asInternalUser']['search']>>
+    response: Awaited<ReturnType<ElasticsearchClient['search']>>
   ): MitreEntity[] {
     const hits = response.hits?.hits ?? [];
     return hits

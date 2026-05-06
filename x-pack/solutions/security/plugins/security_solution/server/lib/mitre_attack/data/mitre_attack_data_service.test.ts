@@ -115,14 +115,14 @@ describe('MitreAttackDataService', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     await service.setup({ esClient });
 
-    const esScopedClient = elasticsearchServiceMock.createScopedClusterClient();
-    esScopedClient.asInternalUser.search.mockResolvedValue({ hits: { hits: [] } } as never);
+    const scopedEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    scopedEsClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
 
-    const client = service.createClient({ spaceId: 'team-a', esScopedClient });
+    const client = service.createClient({ spaceId: 'team-a', esClient: scopedEsClient });
     await client.list({ types: ['tactic'] });
 
     expect(mockCreateIndex).toHaveBeenCalledTimes(1);
-    expect(esScopedClient.asInternalUser.search).toHaveBeenCalledWith(
+    expect(scopedEsClient.search).toHaveBeenCalledWith(
       expect.objectContaining({ index: '.kibana-mitre-attack-team-a' })
     );
   });

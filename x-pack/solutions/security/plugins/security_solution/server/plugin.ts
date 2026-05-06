@@ -145,7 +145,7 @@ import {
   latestRiskScoreIndexPattern,
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
-import { assistantTools } from './assistant/tools';
+import { assistantTools, buildAdditionalAssistantTools } from './assistant/tools';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
@@ -274,7 +274,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
 
-    registerTools(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
+    registerTools(agentBuilder, core, logger, experimentalFeatures, {
+      mitreAttackDataService: this.mitreAttackDataService,
+    }).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
     registerAttachments(agentBuilder).catch((error) => {
@@ -906,9 +908,16 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.anonymization.registerProfileInitializer(securityAlertsProfileInitializer);
 
     // Assistant Tool and Feature Registration
-    const filteredTools = config.experimentalFeatures.riskScoreAssistantToolDisabled
+    const baseTools = config.experimentalFeatures.riskScoreAssistantToolDisabled
       ? assistantTools.filter(({ id }) => id !== ENTITY_RISK_SCORE_TOOL_ID)
       : assistantTools;
+    const additionalTools = buildAdditionalAssistantTools({
+      mitreAttackDataService: this.mitreAttackDataService,
+      getSpaceId: (request) =>
+        plugins.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      managedMitreSourceEnabled: config.experimentalFeatures.managedMitreSourceEnabled,
+    });
+    const filteredTools = [...baseTools, ...additionalTools];
 
     plugins.elasticAssistant.registerTools(APP_UI_ID, filteredTools);
     const features = {

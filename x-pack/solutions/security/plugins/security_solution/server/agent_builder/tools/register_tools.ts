@@ -14,6 +14,11 @@ import { entityRiskScoreTool, getEntityTool, searchEntitiesTool } from './entity
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import type { MitreAttackDataService } from '../../lib/mitre_attack';
+
+interface RegisterToolsDeps {
+  mitreAttackDataService: MitreAttackDataService;
+}
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin
@@ -22,12 +27,17 @@ export const registerTools = async (
   agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  deps: RegisterToolsDeps
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core));
-  agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    createDetectionRuleTool(core, logger, experimentalFeatures, {
+      mitreAttackDataService: deps.mitreAttackDataService,
+    })
+  );
   agentBuilder.tools.register(alertsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));

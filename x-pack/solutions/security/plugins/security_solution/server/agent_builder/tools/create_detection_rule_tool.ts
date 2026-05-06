@@ -21,6 +21,7 @@ import {
   SECURITY_RULE_ATTACHMENT_ID,
 } from '../../../common/constants';
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
+import type { MitreAttackDataService } from '../../lib/mitre_attack';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
@@ -33,10 +34,15 @@ const createDetectionRuleSchema = z.object({
     ),
 });
 
+interface CreateDetectionRuleToolDeps {
+  mitreAttackDataService: MitreAttackDataService;
+}
+
 export function createDetectionRuleTool(
   core: CoreSetup<SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart>,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  deps?: CreateDetectionRuleToolDeps
 ): StaticToolRegistration<typeof createDetectionRuleSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof createDetectionRuleSchema> = {
     id: SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
@@ -94,6 +100,15 @@ The tool stores the result as an attachment (creating new or updating existing).
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
         const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+
+        const mitreAttackDataClient =
+          experimentalFeatures?.managedMitreSourceEnabled && deps?.mitreAttackDataService
+            ? deps.mitreAttackDataService.createClient({
+                spaceId: startPlugins.spaces?.spacesService?.getSpaceId(request) ?? 'default',
+                esClient: esClient.asInternalUser,
+              })
+            : undefined;
+
         const iterativeAgent = await getBuildAgent({
           model,
           logger,
@@ -104,6 +119,7 @@ The tool stores the result as an attachment (creating new or updating existing).
           savedObjectsClient,
           rulesClient,
           events,
+          mitreAttackDataClient,
         });
         const result = await iterativeAgent.invoke({ userQuery });
 

@@ -22,26 +22,26 @@ const sampleTactic = {
 
 describe('MitreAttackDataClient', () => {
   const buildClient = () => {
-    const esScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const logger = loggingSystemMock.createLogger();
     const client = new MitreAttackDataClient({
-      esScopedClient,
+      esClient,
       logger,
       resolveIndexName: async () => '.kibana-mitre-attack-default',
     });
-    return { esScopedClient, logger, client };
+    return { esClient, logger, client };
   };
 
   it('list() filters by framework + types and sorts by name', async () => {
-    const { esScopedClient, client } = buildClient();
-    esScopedClient.asInternalUser.search.mockResolvedValue({
+    const { esClient, client } = buildClient();
+    esClient.search.mockResolvedValue({
       hits: { hits: [buildHit(sampleTactic)] },
     } as never);
 
     const result = await client.list({ framework: 'enterprise', types: ['tactic'] });
 
     expect(result).toEqual([sampleTactic]);
-    const search = esScopedClient.asInternalUser.search.mock.calls[0]?.[0];
+    const search = esClient.search.mock.calls[0]?.[0];
     expect(search?.index).toBe('.kibana-mitre-attack-default');
     expect(search?.sort).toEqual([{ name: 'asc' }]);
     expect(search?.query?.bool?.filter).toEqual([
@@ -51,12 +51,12 @@ describe('MitreAttackDataClient', () => {
   });
 
   it('list() forwards the techniqueId filter onto subtechnique queries', async () => {
-    const { esScopedClient, client } = buildClient();
-    esScopedClient.asInternalUser.search.mockResolvedValue({ hits: { hits: [] } } as never);
+    const { esClient, client } = buildClient();
+    esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
 
     await client.list({ types: ['subtechnique'], techniqueId: 'T1078' });
 
-    const search = esScopedClient.asInternalUser.search.mock.calls[0]?.[0];
+    const search = esClient.search.mock.calls[0]?.[0];
     expect(search?.query?.bool?.filter).toEqual([
       { terms: { type: ['subtechnique'] } },
       { term: { techniqueId: 'T1078' } },
@@ -64,8 +64,8 @@ describe('MitreAttackDataClient', () => {
   });
 
   it('search() uses BM25 multi_match with the framework + type filters applied', async () => {
-    const { esScopedClient, client } = buildClient();
-    esScopedClient.asInternalUser.search.mockResolvedValue({
+    const { esClient, client } = buildClient();
+    esClient.search.mockResolvedValue({
       hits: { hits: [buildHit(sampleTactic)] },
     } as never);
 
@@ -76,7 +76,7 @@ describe('MitreAttackDataClient', () => {
       limit: 10,
     });
 
-    const search = esScopedClient.asInternalUser.search.mock.calls[0]?.[0];
+    const search = esClient.search.mock.calls[0]?.[0];
     expect(search?.size).toBe(10);
     expect(search?.query?.bool?.must).toEqual([
       {
@@ -94,25 +94,25 @@ describe('MitreAttackDataClient', () => {
   });
 
   it('search() clamps limit to the maximum and minimum bounds', async () => {
-    const { esScopedClient, client } = buildClient();
-    esScopedClient.asInternalUser.search.mockResolvedValue({ hits: { hits: [] } } as never);
+    const { esClient, client } = buildClient();
+    esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
 
     await client.search({ query: 'x', limit: 99999 });
-    expect(esScopedClient.asInternalUser.search.mock.calls[0]?.[0]?.size).toBe(1500);
+    expect(esClient.search.mock.calls[0]?.[0]?.size).toBe(1500);
 
     await client.search({ query: 'x', limit: 0 });
-    expect(esScopedClient.asInternalUser.search.mock.calls[1]?.[0]?.size).toBe(1);
+    expect(esClient.search.mock.calls[1]?.[0]?.size).toBe(1);
   });
 
   it('getById() builds a deterministic doc id and returns the source', async () => {
-    const { esScopedClient, client } = buildClient();
-    esScopedClient.asInternalUser.get.mockResolvedValue({
+    const { esClient, client } = buildClient();
+    esClient.get.mockResolvedValue({
       _source: sampleTactic,
     } as never);
 
     const result = await client.getById('enterprise', 'TA0006');
 
-    expect(esScopedClient.asInternalUser.get).toHaveBeenCalledWith({
+    expect(esClient.get).toHaveBeenCalledWith({
       index: '.kibana-mitre-attack-default',
       id: 'enterprise:TA0006',
     });
@@ -120,10 +120,10 @@ describe('MitreAttackDataClient', () => {
   });
 
   it('getById() returns undefined on 404', async () => {
-    const { esScopedClient, client } = buildClient();
+    const { esClient, client } = buildClient();
     const error: Error & { meta?: { statusCode: number } } = new Error('not found');
     error.meta = { statusCode: 404 };
-    esScopedClient.asInternalUser.get.mockRejectedValueOnce(error as never);
+    esClient.get.mockRejectedValueOnce(error as never);
 
     await expect(client.getById('enterprise', 'TA9999')).resolves.toBeUndefined();
   });

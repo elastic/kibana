@@ -294,7 +294,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         }
         return mitreAttackDataService.createClient({
           spaceId: getSpaceId(),
-          esScopedClient: coreContext.elasticsearch.client,
+          esClient: coreContext.elasticsearch.client.asInternalUser,
         });
       }),
 

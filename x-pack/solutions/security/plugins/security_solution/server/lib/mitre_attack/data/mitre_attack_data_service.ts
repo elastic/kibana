@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchClient,
-  IScopedClusterClient,
-  Logger,
-  LoggerFactory,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import { ReplaySubject, type Subject } from 'rxjs';
 import { IndexPatternAdapter, type InstallParams } from '@kbn/index-adapter';
 import {
@@ -37,7 +32,7 @@ export interface MitreAttackDataServiceSetupParams {
 
 export interface MitreAttackDataServiceCreateClientParams {
   spaceId: string;
-  esScopedClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
 }
 
 /**
@@ -150,10 +145,10 @@ export class MitreAttackDataService {
    */
   createClient({
     spaceId,
-    esScopedClient,
+    esClient,
   }: MitreAttackDataServiceCreateClientParams): MitreAttackDataClient {
     return new MitreAttackDataClient({
-      esScopedClient,
+      esClient,
       logger: this.logger,
       resolveIndexName: async () => {
         await this.hydrate(spaceId);
