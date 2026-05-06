@@ -17,6 +17,7 @@ import {
   ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
 } from '../embeddables';
 import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from './constants';
+import { isMlAvailable } from '../../common/license/ml_license';
 
 export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction';
 
@@ -80,6 +81,7 @@ export function createApplyEntityFieldFiltersAction(
       );
     },
     async isCompatible({ embeddable, data }) {
+      if (!(await isMlAvailable(getStartServices))) return false;
       return (
         (embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE ||
           embeddable.type === ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE) &&
