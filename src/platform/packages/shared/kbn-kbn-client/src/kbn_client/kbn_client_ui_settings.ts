@@ -22,6 +22,21 @@ interface UiSettingsApiResponse {
   };
 }
 
+interface WaitForUiSettingsPropagationOptions<T> {
+  probe: () => Promise<T>;
+  description?: string;
+  space?: string;
+  timeoutMs?: number;
+  retryIntervalMs?: number;
+}
+
+export type UiSettingsRefreshMethod = 'direct_bypass' | 'core_app_render';
+
+const DEFAULT_UI_SETTINGS_PROPAGATION_TIMEOUT_MS = 20_000;
+const DEFAULT_UI_SETTINGS_PROPAGATION_RETRY_INTERVAL_MS = 1_000;
+const DEFAULT_CORE_APP_ROUTE = '/app/home';
+const DEFAULT_UI_SETTINGS_REFRESH_ROUTE = '/internal/ftr/ui_settings/_refresh';
+
 export class KbnClientUiSettings {
   constructor(
     private readonly log: ToolingLog,
@@ -100,6 +115,80 @@ export class KbnClientUiSettings {
     });
   }
 
+  async refreshViaCoreApp({ space }: { space?: string } = {}) {
+    this.log.debug('refreshing uiSettings cache via core app render');
+
+    await this.requester.request<string>({
+      description: 'refresh uiSettings cache via core app',
+      path: getPathInSpace(DEFAULT_CORE_APP_ROUTE, space),
+      method: 'GET',
+      responseType: 'text',
+      retries: 3,
+    });
+  }
+
+  async refresh({ space }: { space?: string } = {}): Promise<UiSettingsRefreshMethod> {
+    const response = await this.requester.request<{ refreshed: boolean }>({
+      description: 'refresh uiSettings cache via direct bypass',
+      path: getPathInSpace(DEFAULT_UI_SETTINGS_REFRESH_ROUTE, space),
+      method: 'POST',
+      ignoreErrors: [404],
+    });
+
+    if (response.status !== 404) {
+      return 'direct_bypass';
+    }
+
+    this.log.debug('direct uiSettings refresh route unavailable, falling back to core app render');
+    await this.refreshViaCoreApp({ space });
+
+    return 'core_app_render';
+  }
+
+  async waitForPropagation<T>({
+    probe,
+    description = 'uiSettings propagation',
+    space,
+    timeoutMs = DEFAULT_UI_SETTINGS_PROPAGATION_TIMEOUT_MS,
+    retryIntervalMs = DEFAULT_UI_SETTINGS_PROPAGATION_RETRY_INTERVAL_MS,
+  }: WaitForUiSettingsPropagationOptions<T>) {
+    const deadline = Date.now() + timeoutMs;
+    let lastError: Error | undefined;
+
+    while (Date.now() <= deadline) {
+      try {
+        return await probe();
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+      }
+
+      await this.refresh({ space });
+
+      if (Date.now() + retryIntervalMs > deadline) {
+        break;
+      }
+
+      await delay(retryIntervalMs);
+    }
+
+    if (lastError) {
+      throw new Error(`Timed out waiting for ${description}: ${lastError.message}`, {
+        cause: lastError,
+      });
+    }
+
+    throw new Error(`Timed out waiting for ${description}`);
+  }
+
+  async updateAndWait<T>(
+    updates: UiSettingValues,
+    options: WaitForUiSettingsPropagationOptions<T>
+  ) {
+    await this.update(updates, { space: options.space });
+
+    return await this.waitForPropagation(options);
+  }
+
   /**
    * Update UI settings globally (like setting 'hideAnnouncements', 'theme:darkMode', etc)
    */
@@ -125,3 +214,17 @@ export class KbnClientUiSettings {
     return data.settings;
   }
 }
+
+const delay = async (ms: number) => {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+const getPathInSpace = (path: string, space?: string) => {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+  if (!space || space === 'default') {
+    return normalizedPath;
+  }
+
+  return `/s/${encodeURIComponent(space)}${normalizedPath}`;
+};

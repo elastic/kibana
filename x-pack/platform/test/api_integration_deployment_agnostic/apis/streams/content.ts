@@ -12,10 +12,7 @@ import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import type { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -27,6 +24,7 @@ import {
   importContent,
   putStream,
 } from './helpers/requests';
+import { updateSignificantEventsSettingAndWait } from './helpers/ui_settings';
 
 const upsertRequest = ({
   fields = {},
@@ -59,13 +57,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Content packs', () => {
     before(async () => {
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-        [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: true,
-      });
-
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
+      await updateSignificantEventsSettingAndWait({
+        kibanaServer,
+        apiClient,
+        enabled: true,
+        updates: {
+          [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: true,
+        },
+      });
 
       await putStream(
         apiClient,
@@ -143,11 +144,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await disableStreams(apiClient);
-
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
+      await updateSignificantEventsSettingAndWait({
+        kibanaServer,
+        apiClient,
+        enabled: false,
+        updates: {
+          [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: false,
+        },
       });
+      await disableStreams(apiClient);
     });
 
     describe('Export', () => {
