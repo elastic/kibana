@@ -8,7 +8,6 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { AlertEventSchema, BaseEventSchema, builtInTriggerDefinitions } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { workflowTools } from '../../../common/agent_builder/constants';
@@ -85,17 +84,7 @@ Returns built-in trigger types (manual, scheduled, alert) including the event co
         .describe('Filter by exact trigger type (e.g., "manual", "scheduled", "alert")'),
     }),
     tags: ['workflows', 'yaml', 'triggers'],
-    availability: {
-      handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        return isEnabled
-          ? { status: 'available' }
-          : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };
-      },
-      cacheMode: 'space',
-    },
+    experimental: true,
     handler: async ({ triggerType }) => {
       let definitions = builtInTriggerDefinitions.map((def) => ({
         id: def.id,

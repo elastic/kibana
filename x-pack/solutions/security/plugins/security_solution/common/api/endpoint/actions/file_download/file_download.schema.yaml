@@ -38,3 +38,7 @@ paths:
               schema:
                 type: string
                 format: binary
+              examples:
+                fileDownload:
+                  summary: Password-protected ZIP archive containing the response action file
+                  value: 'binary file content (password-protected .zip)'

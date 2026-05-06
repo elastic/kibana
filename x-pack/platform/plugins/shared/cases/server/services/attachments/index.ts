@@ -19,7 +19,6 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
 import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 import {
-  UnifiedAttachmentAttributesRt,
   AttachmentAttributesRtV2,
   AttachmentPatchAttributesRtV2,
 } from '../../../common/types/domain/attachment/v2';
@@ -70,6 +69,7 @@ import {
 } from '../../common/types/attachments_v1';
 import type {
   AttachmentAttributesV2,
+  AttachmentSavedObjectTransformedV2,
   AttachmentTransformedAttributesV2,
   UnifiedAttachmentAttributes,
   UnifiedAttachmentPersistedAttributes,
@@ -90,6 +90,36 @@ function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): 
   if (rule == null || rule.name == null) {
     throw new Error('Invalid attributes: expected attributes.rule.name for alert attachments');
   }
+}
+
+/**
+ * Unified attachment shape fields that must NOT appear on the legacy
+ * `cases-comments` SO. When a unified-shape payload (e.g.
+ * `{ type: 'security.endpoint', attachmentId, metadata }`) is written to the
+ * legacy SO type, the request attributes still carry those keys after io-ts
+ * decoding and may otherwise leak into `_source` (mapping is `dynamic: false`,
+ * so they would be stored but not indexed). Stripping here guarantees
+ * byte-for-byte equivalence with pre-migration legacy writes.
+ *
+ * Applied via {@link stripUnifiedOnlyFields} on every legacy-SO write path:
+ * `create`, `bulkCreate`, `update`, `bulkUpdate`. Regression tests for all
+ * four paths live in the "byte-for-byte legacy storage equivalence" describe
+ * block in `index.test.ts`.
+ */
+const UNIFIED_ONLY_ATTRIBUTE_KEYS = ['attachmentId', 'metadata', 'data'] as const;
+
+function stripUnifiedOnlyFields<T extends object>(attributes: T): T {
+  const asRecord = attributes as unknown as Record<string, unknown>;
+  let result: Record<string, unknown> | undefined;
+  for (const key of UNIFIED_ONLY_ATTRIBUTE_KEYS) {
+    if (key in asRecord) {
+      if (result === undefined) {
+        result = { ...asRecord };
+      }
+      delete result[key];
+    }
+  }
+  return (result ?? asRecord) as unknown as T;
 }
 
 export class AttachmentService {
@@ -290,7 +320,11 @@ export class AttachmentService {
               refresh,
             }
           );
-        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(
+        // Unified SOs may hold either unified-shape attributes (for migrated types like
+        // security.endpoint) or legacy-shape attributes (for unmigrated types that still
+        // pass through unchanged, e.g. alert, user, actions). Decode with the v2 union
+        // so both shapes round-trip without erroring.
+        const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
           unifiedAttachment.attributes
         );
         return Object.assign(unifiedAttachment, { attributes: validatedAttributes });
@@ -307,7 +341,7 @@ export class AttachmentService {
       const attachment =
         await this.context.unsecuredSavedObjectsClient.create<AttachmentPersistedAttributes>(
           CASE_COMMENT_SAVED_OBJECT,
-          extractedAttributes,
+          stripUnifiedOnlyFields(extractedAttributes),
           {
             references: extractedReferences,
             id,
@@ -386,7 +420,7 @@ export class AttachmentService {
             return {
               type: CASE_COMMENT_SAVED_OBJECT,
               ...attachment,
-              attributes: extractedAttributes,
+              attributes: stripUnifiedOnlyFields(extractedAttributes),
               references: extractedReferences,
             };
           }),
@@ -403,14 +437,20 @@ export class AttachmentService {
     res: SavedObjectsBulkResponse<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
   ): SavedObjectsBulkResponse<AttachmentAttributesV2> {
     const validatedAttachments: Array<
-      AttachmentSavedObjectTransformed | UnifiedAttachmentSavedObjectTransformed
+      | AttachmentSavedObjectTransformed
+      | UnifiedAttachmentSavedObjectTransformed
+      | AttachmentSavedObjectTransformedV2
     > = [];
 
     for (const so of res.saved_objects) {
       if (isSOError(so)) {
         validatedAttachments.push(so as AttachmentSavedObjectTransformed);
       } else if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
-        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
+        // Unified SOs may hold either unified-shape attributes (for migrated types like
+        // security.endpoint) or legacy-shape attributes (for unmigrated types that still
+        // pass through unchanged, e.g. alert, user, actions). Decode with the v2 union
+        // so both shapes round-trip without erroring.
+        const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(so.attributes);
         validatedAttachments.push(Object.assign(so, { attributes: validatedAttributes }));
       } else if (so.type === CASE_COMMENT_SAVED_OBJECT) {
         const legacySo = so as SavedObject<AttachmentPersistedAttributes>;
@@ -482,7 +522,7 @@ export class AttachmentService {
         await this.context.unsecuredSavedObjectsClient.update<AttachmentPersistedAttributes>(
           CASE_COMMENT_SAVED_OBJECT,
           savedObjectId,
-          extractedAttributes,
+          stripUnifiedOnlyFields(extractedAttributes),
           {
             ...options,
             /**
@@ -580,7 +620,7 @@ export class AttachmentService {
               ...c.options,
               type: CASE_COMMENT_SAVED_OBJECT,
               id: c.savedObjectId,
-              attributes: extractedAttributes,
+              attributes: stripUnifiedOnlyFields(extractedAttributes),
               /* If c.options?.references are undefined and there is no field to move to the refs
                * then the extractedAttributes will be an empty array. If we pass the empty array
                * on the update then all previously refs will be removed. The check below is needed

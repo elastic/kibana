@@ -7,8 +7,10 @@
 
 import React, { memo } from 'react';
 import { type NodeProps, type Node } from '@xyflow/react';
-import { useEuiTheme, EuiText } from '@elastic/eui';
+import { useEuiTheme, EuiText, EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+
+import { HEALTH_STATUS_COLORS } from '../utils';
 
 import type { OTelPipelineGroupNodeData } from './config_to_graph';
 
@@ -20,9 +22,14 @@ export const PipelineGroupNode = memo(({ data }: NodeProps<PipelineGroupNodeType
   const containerStyles = css`
     width: 100%;
     height: 100%;
-    border: 1px dashed ${euiTheme.colors.borderBasePlain};
+    border: ${data.isSelected
+      ? `2px solid ${euiTheme.colors.primary}`
+      : `1px dashed ${euiTheme.colors.borderBasePlain}`};
     border-radius: ${euiTheme.border.radius.medium};
-    background: ${euiTheme.colors.backgroundBaseSubdued};
+    background: ${data.isSelected
+      ? euiTheme.colors.backgroundBasePrimary
+      : euiTheme.colors.backgroundBaseSubdued};
+    cursor: pointer;
   `;
 
   const labelStyles = css`
@@ -34,9 +41,18 @@ export const PipelineGroupNode = memo(({ data }: NodeProps<PipelineGroupNodeType
   return (
     <div css={containerStyles} data-test-subj={`otelPipelineGroup-${data.label}`}>
       <div css={labelStyles}>
-        <EuiText size="xs" color="subdued">
-          <strong>{data.label}</strong>
-        </EuiText>
+        <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+          {data.healthStatus && (
+            <EuiFlexItem grow={false}>
+              <EuiHealth color={HEALTH_STATUS_COLORS[data.healthStatus]} />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <strong>{data.label}</strong>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
     </div>
   );
