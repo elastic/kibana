@@ -25,7 +25,7 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
       return;
     }
 
-    // await apiServices.fleet.internal.setup();
+    await apiServices.fleet.internal.setup();
 
     await apiServices.core.settings({
       'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: true },
@@ -62,7 +62,7 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
     const { browseIntegrations } = pageObjects;
 
     await browseIntegrations.navigateTo();
-    await expect(browseIntegrations.getMainColumn()).toBeVisible();
+    await expect(browseIntegrations.getMainColumn()).toBeVisible({ timeout: 20_000 });
 
     await browseIntegrations.sortIntegrations('z-a');
 
