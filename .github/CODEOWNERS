@@ -349,6 +349,11 @@ src/core/packages/user-profile/server-mocks @elastic/kibana-core
 src/core/packages/user-settings/server @elastic/kibana-security
 src/core/packages/user-settings/server-internal @elastic/kibana-security
 src/core/packages/user-settings/server-mocks @elastic/kibana-security
+src/core/packages/user-storage/common @elastic/appex-sharedux
+src/core/packages/user-storage/server @elastic/appex-sharedux
+src/core/packages/user-storage/server-internal @elastic/appex-sharedux
+src/core/packages/user-storage/server-mocks @elastic/appex-sharedux
+src/core/packages/user-storage/test/plugins/user_storage_test @elastic/appex-sharedux
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
@@ -2040,7 +2045,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/search_ai_lake/roles.yml @elastic/appex-qa
 /x-pack/platform/test/common/ftr_provider_context.ts @elastic/appex-qa
-/x-pack/platform/plugins/shared/maps/test/scout @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
 /x-pack/platform/plugins/private/painless_lab/test/scout @elastic/appex-qa # temporarily
@@ -3398,10 +3402,12 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/scripts/steps/otel_semconv_sync.sh @elastic/obs-onboarding-team
 /.buildkite/scripts/steps/esql_generate_function_metadata.sh @elastic/kibana-esql
 /.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
+/.buildkite/pipeline-utils/scout/ @elastic/appex-qa
 /.buildkite/scripts/steps/code_generation/security_solution_codegen.sh @elastic/security-detection-rule-management
 /.buildkite/scripts/steps/code_generation/cases_codegen.sh @elastic/kibana-cases
 /.buildkite/scripts/steps/security @elastic/kibana-security
 /.buildkite/scripts/steps/entity_store_performance @elastic/contextual-security
+/.buildkite/pipelines/build_pr_and_test_entity_store_performance.yml @elastic/contextual-security
 /.buildkite/scripts/steps/test/scout/ @elastic/appex-qa @elastic/kibana-operations
 /.buildkite/scout_ci_config.yml @elastic/appex-qa
 
