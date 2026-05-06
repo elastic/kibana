@@ -19,6 +19,7 @@ import {
 import type {
   ElementClickListener,
   RectAnnotationDatum,
+  Theme,
   XYChartElementEvent,
 } from '@elastic/charts';
 import { EuiHealth, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
@@ -26,9 +27,6 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { PluginStart } from '@kbn/core-di';
-import { useService } from '@kbn/core-di-browser';
 import type { AlertTimelineSegment, AlertTimelineSeries } from './types';
 import {
   alertTimelineStatusColor,
@@ -148,6 +146,7 @@ export interface AlertTimelineRowProps {
   gteMs: number;
   lteMs: number;
   height: number;
+  baseTheme: Theme;
   onEpisodeClick?: (episodeId: string) => void;
   getEpisodeHref?: (episodeId: string) => string;
 }
@@ -166,12 +165,11 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
   gteMs,
   lteMs,
   height,
+  baseTheme,
   onEpisodeClick,
   getEpisodeHref,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const charts = useService(PluginStart('charts')) as ChartsPluginStart;
-  const baseTheme = charts.theme.useChartsBaseTheme();
 
   const segmentsByStatus = useMemo(
     () => groupBy<AlertTimelineSegment, AlertEpisodeStatus>(row.segments, (s) => s.status),

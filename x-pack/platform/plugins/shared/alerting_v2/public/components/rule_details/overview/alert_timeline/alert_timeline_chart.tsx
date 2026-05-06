@@ -9,6 +9,9 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { IBasePath } from '@kbn/core-http-browser';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { PluginStart } from '@kbn/core-di';
+import { useService } from '@kbn/core-di-browser';
 import type { AlertTimelineSeries } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { AlertTimelineRow } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { AlertTimelineSeriesLabel } from './alert_timeline_series_label';
@@ -37,6 +40,8 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
   getEpisodeHref,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const charts = useService(PluginStart('charts')) as ChartsPluginStart;
+  const baseTheme = charts.theme.useChartsBaseTheme();
 
   return (
     <EuiFlexGroup
@@ -89,6 +94,7 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
             gteMs={gteMs}
             lteMs={lteMs}
             height={ROW_HEIGHT_PX}
+            baseTheme={baseTheme}
             onEpisodeClick={onEpisodeClick}
             getEpisodeHref={getEpisodeHref}
           />
