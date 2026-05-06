@@ -14396,10 +14396,6 @@
                 "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_connector_by_id.ts"
               },
               {
-                "plugin": "@kbn/inference-endpoint-ui-common",
-                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_providers.ts"
-              },
-              {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_tags.tsx"
               },
@@ -14526,6 +14522,10 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_case_metrics.tsx"
+              },
+              {
+                "plugin": "@kbn/inference-endpoint-ui-common",
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_providers.ts"
               },
               {
                 "plugin": "alertingVTwo",
@@ -14694,10 +14694,6 @@
               {
                 "plugin": "streamsApp",
                 "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_fetch_discovery_queries_occurrences.ts"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_unbacked_queries_count.ts"
               },
               {
                 "plugin": "streamsApp",
