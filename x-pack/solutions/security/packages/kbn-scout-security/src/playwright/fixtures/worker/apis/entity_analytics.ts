@@ -60,6 +60,17 @@ export const getEntityAnalyticsApiService = ({
         log,
         'security.entityAnalytics.deleteEntityStoreEngines',
         async () => {
+          // The v2 status/uninstall routes return 403 when the entity store v2
+          // feature flag is disabled. In that case there is nothing to clean
+          // up, so short-circuit instead of polling forever.
+          try {
+            await service.getEntityStoreStatus();
+          } catch (error) {
+            log.debug(
+              `Skipping entity store cleanup; status route unavailable: ${(error as Error).message}`
+            );
+            return;
+          }
           await kbnClient.request({
             method: 'POST',
             path: `${basePath}${ENTITY_STORE_UNINSTALL_URL}`,
@@ -67,7 +78,7 @@ export const getEntityAnalyticsApiService = ({
               'elastic-api-version': API_VERSIONS.public.v1,
             },
             body: {},
-            ignoreErrors: [404, 500],
+            ignoreErrors: [403, 404, 500],
           });
           // Wait for cleanup to complete - ensure server state is fully cleaned up
           await service.waitForEntityStoreCleanup();
