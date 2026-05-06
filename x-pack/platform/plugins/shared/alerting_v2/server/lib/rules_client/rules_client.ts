@@ -270,7 +270,7 @@ export class RulesClient {
     const { items } = await this.actionPolicyClient.findActionPolicies({
       type: 'single_rule',
       ruleId,
-      perPage: 100,
+      perPage: 1000,
     });
     if (items.length === 0) return;
 
