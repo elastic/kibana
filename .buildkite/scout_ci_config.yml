@@ -70,3 +70,4 @@ packages:
 excluded_configs:
   - x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
+  - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
