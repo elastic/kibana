@@ -127,7 +127,15 @@ export const announcementBannerStyles = {
   text: ({ euiTheme }: UseEuiTheme) => css`
     [data-size='s'] & {
       display: inline;
-      margin-inline-start: ${euiTheme.size.s};
+
+      /* separator dot between title and text */
+      &::before {
+        content: '·';
+        display: inline-block;
+        inline-size: calc(${euiTheme.size.s} + ${euiTheme.size.xxs});
+        text-align: center;
+        color: ${euiTheme.colors.textHeading};
+      }
     }
   `,
   actions: ({ euiTheme }: UseEuiTheme) => css`
