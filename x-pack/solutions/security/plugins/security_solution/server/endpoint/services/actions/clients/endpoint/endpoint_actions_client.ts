@@ -10,8 +10,10 @@
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
 import type { Mutable } from 'utility-types';
+import { getActionDetailsById } from '../../..';
 import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
+import type { CancelActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/cancel';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { getActionRequestExpiration } from '../../utils';
 import { ResponseActionsClientError } from '../errors';
@@ -61,6 +63,8 @@ import type {
   ResponseActionMemoryDumpParameters,
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
+  ResponseActionCancelOutputContent,
+  ResponseActionCancelParameters,
   EndpointScript,
   EndpointActionDataParameterTypes,
   ResponseActionScriptsApiResponse,
@@ -558,6 +562,20 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       MemoryDumpActionRequestBody,
       ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
     >('memory-dump', actionRequest, options);
+  }
+
+  async cancel(
+    actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>> {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsEndpointCancel) {
+      throw new ResponseActionsClientError('Elastic Defend cancel operation is not enabled', 400);
+    }
+
+    return this.handleResponseAction<
+      CancelActionRequestBody,
+      ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>
+    >('cancel', actionRequest, options);
   }
 
   async runscript(

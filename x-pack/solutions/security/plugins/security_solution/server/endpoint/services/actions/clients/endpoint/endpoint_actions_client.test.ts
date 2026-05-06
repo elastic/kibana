@@ -70,6 +70,9 @@ describe('EndpointActionsClient', () => {
     // @ts-expect-error mocking this for testing purposes
     classConstructorOptions.endpointService.experimentalFeatures.responseActionsScriptLibraryManagement =
       true;
+    // @ts-expect-error mocking this for testing purposes
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel =
+      true;
   });
 
   it('should validate endpoint ids and log those that are invalid', async () => {
@@ -402,7 +405,7 @@ describe('EndpointActionsClient', () => {
 
   type ResponseActionsMethodsOnly = keyof Omit<
     ResponseActionsClient,
-    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'getCustomScripts' | 'cancel'
+    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'getCustomScripts'
   >;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -436,6 +439,8 @@ describe('EndpointActionsClient', () => {
     ),
 
     runscript: endpointActionClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
+
+    cancel: responseActionsClientMock.createCancelActionOptions(getCommonResponseActionOptions()),
   };
 
   it.each(Object.keys(responseActionMethods) as ResponseActionsMethodsOnly[])(
@@ -638,6 +643,28 @@ describe('EndpointActionsClient', () => {
         );
       }
     );
+  });
+
+  describe('#cancel()', () => {
+    it('should error when feature flag is false', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel =
+        false;
+
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions(getCommonResponseActionOptions())
+        )
+      ).rejects.toThrow('Elastic Defend cancel operation is not enabled');
+    });
+
+    it('should process cancel action when feature flag is enabled', async () => {
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions(getCommonResponseActionOptions())
+        )
+      ).resolves.toBeDefined();
+    });
   });
 
   describe('#runscript()', () => {
