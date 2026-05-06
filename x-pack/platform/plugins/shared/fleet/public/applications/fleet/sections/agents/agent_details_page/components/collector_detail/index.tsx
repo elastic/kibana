@@ -7,24 +7,39 @@
 
 import React from 'react';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import type { Agent } from '../../../../../types';
 import { useGetAgentEffectiveConfigQuery } from '../../../../../hooks';
 import { CollectorConfigView } from '../../../../../../../components/otel_ui';
+import { CollectorDetailTabs } from '../../../../../../../components/otel_ui/collector_config_view/collector_detail/collector_detail_tabs';
 
 export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> = ({ agent }) => {
   const { data: configData, isLoading } = useGetAgentEffectiveConfigQuery(agent.id);
+  const config = configData?.effective_config ?? {};
 
   if (isLoading) {
     return <EuiLoadingSpinner />;
   }
 
   return (
-    <CollectorConfigView
-      config={configData?.effective_config ?? {}}
-      health={agent.health}
-      agents={[agent]}
-    />
+    <>
+      <EuiPanel paddingSize="m" hasBorder>
+        <CollectorConfigView config={config} health={agent.health} />
+      </EuiPanel>
+
+      <EuiSpacer size="m" />
+
+      <EuiPanel paddingSize="m" hasBorder>
+        <CollectorDetailTabs
+          agent={agent}
+          config={config}
+          health={agent.health}
+          isConfigLoading={isLoading}
+        />
+      </EuiPanel>
+
+      <EuiSpacer size="m" />
+    </>
   );
 };
