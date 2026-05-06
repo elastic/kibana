@@ -58,14 +58,15 @@ export const LENS_METRIC_STYLE_TEMPLATE: Record<
   },
 } as const;
 
-const DEFAULT_STYLE_TEMPLATE: PrimaryMetricPosition = 'bottom';
-const defaultStyleTemplate = LENS_METRIC_STYLE_TEMPLATE[DEFAULT_STYLE_TEMPLATE];
+const DEFAULT_STYLE_TEMPLATE_PRESET_ID: PrimaryMetricPosition = 'bottom';
+export const LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG =
+  LENS_METRIC_STYLE_TEMPLATE[DEFAULT_STYLE_TEMPLATE_PRESET_ID];
 
 /**
  * Defaults for select optional Metric vis state options
  */
 export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
-  ...defaultStyleTemplate,
+  ...LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
   iconAlign: 'right',
   valueFontMode: 'default',
   secondaryLabelPosition: 'before',
