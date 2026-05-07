@@ -260,7 +260,7 @@ export const createExternalService = (
 
       if (
         error?.response?.status === 400 &&
-        error.response?.data?.errors?.summary === "Summary can't exceed 255 characters"
+        error.response?.data?.errors?.summary.includes("Summary can't exceed 255 characters")
       ) {
         throw createTaskRunError(error, TaskErrorSource.USER);
       }

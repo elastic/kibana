@@ -76,7 +76,7 @@ export const createExternalService = (
       };
     } catch (error) {
       logger.error(`Error running workflow ${workflowId}: ${error?.message}`);
-      if (error?.message?.startsWith('Workflow is disabled:')) {
+      if (error?.message?.includes('Workflow is disabled:')) {
         throw createTaskRunError(
           createServiceError(error, `Unable to run workflow ${workflowId}`),
           TaskErrorSource.USER
