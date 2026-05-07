@@ -16,6 +16,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
+import type { MitreAttackDataClient } from '../../../mitre_attack';
 import type { RuleCreationState } from './state';
 import { RuleCreationAnnotation } from './state';
 import { createRuleNameAndDescriptionNode } from './nodes/create_rule_name_and_description';
@@ -50,6 +51,13 @@ export interface GetBuildAgentParams {
   savedObjectsClient: SavedObjectsClientContract;
   rulesClient: RulesClient;
   events?: ToolEventEmitter;
+  /**
+   * When provided, the MITRE mappings node uses this client to validate IDs
+   * against the managed `.kibana-mitre-attack-{space}` index instead of
+   * reading the bundled TS blob into memory. Optional so the legacy fallback
+   * remains usable while `managedMitreSourceEnabled` is off.
+   */
+  mitreAttackDataClient?: MitreAttackDataClient;
 }
 
 export const getBuildAgent = async ({
@@ -62,6 +70,7 @@ export const getBuildAgent = async ({
   savedObjectsClient,
   rulesClient,
   events,
+  mitreAttackDataClient,
 }: GetBuildAgentParams) => {
   const buildAgentGraph = new StateGraph(RuleCreationAnnotation)
     .addNode(
@@ -78,7 +87,7 @@ export const getBuildAgent = async ({
     )
     .addNode(GET_TAGS, getTagsNode({ rulesClient, savedObjectsClient, model, events }))
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model, events }))
-    .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events }))
+    .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events, mitreAttackDataClient }))
     .addNode(ADD_SCHEDULE, addScheduleNode({ model, logger, events }))
     .addEdge(START, ESQL_QUERY_CREATION)
     .addConditionalEdges(ESQL_QUERY_CREATION, shouldContinue, {

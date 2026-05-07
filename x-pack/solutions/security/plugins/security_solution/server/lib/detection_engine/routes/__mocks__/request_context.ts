@@ -212,6 +212,7 @@ const createSecuritySolutionRequestContextMock = (
       getRulesClient: jest.fn(() => clients.siemRuleMigrationsClient),
       getDashboardsClient: jest.fn(() => clients.siemDashboardMigrationsClient),
     },
+    getMitreAttackDataClient: jest.fn(() => undefined),
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
     getProductFeatureService: jest.fn(() => clients.productFeaturesService),
     getMlAuthz: jest.fn(() => ({

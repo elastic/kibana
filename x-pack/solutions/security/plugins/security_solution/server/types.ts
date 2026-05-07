@@ -52,6 +52,7 @@ import type { SiemMigrationClients } from './lib/siem_migrations/types';
 import type { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
 import type { CheckOsqueryResponseActionAuthz } from './endpoint/services/actions/utils/rule_response_actions_validators';
 import type { DetectionRulesAuthz } from '../common/detection_engine/rule_management/authz';
+import type { MitreAttackDataClient } from './lib/mitre_attack';
 
 export { AppClient };
 
@@ -89,6 +90,12 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getPrivilegedUserMonitoringApiKeyManager: () => PrivilegedUsersApiKeyManager;
   getPadPackageInstallationClient: () => PadPackageInstallationClient;
   siemMigrations: SiemMigrationClients;
+  /**
+   * Returns a scoped MITRE ATT&CK data client when the `managedMitreSourceEnabled`
+   * experimental flag is on; returns `undefined` otherwise so route handlers can
+   * fall back to a 404 (or the legacy code path).
+   */
+  getMitreAttackDataClient: () => MitreAttackDataClient | undefined;
   getInferenceClient: () => InferenceClient;
   getProductFeatureService: () => ProductFeaturesService;
   getMlAuthz: () => MlAuthz;

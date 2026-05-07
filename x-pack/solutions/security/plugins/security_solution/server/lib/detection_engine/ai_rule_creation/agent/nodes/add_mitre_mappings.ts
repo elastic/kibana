@@ -8,17 +8,24 @@
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
+import type {
+  MitreEntity,
+  MitreSubtechnique,
+  MitreTactic,
+  MitreTechnique,
+} from '@kbn/security-mitre-attack-common';
+import type { MitreAttackDataClient } from '../../../../mitre_attack';
 import type { RuleCreationState } from '../state';
 import { MITRE_MAPPING_SELECTION_PROMPT } from './prompts';
 import {
-  tactics,
-  techniques,
-  subtechniques,
+  tactics as legacyTactics,
+  techniques as legacyTechniques,
+  subtechniques as legacySubtechniques,
 } from '../../../../../../common/detection_engine/mitre/mitre_tactics_techniques';
 import type {
-  MitreTactic,
-  MitreTechnique,
-  MitreSubTechnique,
+  MitreTactic as LegacyMitreTactic,
+  MitreTechnique as LegacyMitreTechnique,
+  MitreSubTechnique as LegacyMitreSubTechnique,
 } from '../../../../../../common/detection_engine/mitre/types';
 import type {
   Threat,
@@ -36,94 +43,167 @@ interface MitreMappingSelectionResponse {
 interface AddMitreMappingsNodeParams {
   model: InferenceChatModel;
   events?: ToolEventEmitter;
+  /**
+   * When present, MITRE IDs returned by the LLM are validated against the
+   * managed index. When absent, the node falls back to in-memory lookups
+   * against the legacy hardcoded TS blob.
+   */
+  mitreAttackDataClient?: MitreAttackDataClient;
 }
 
+const FRAMEWORK = 'enterprise';
+
+interface MitreLookups {
+  getTactic: (id: string) => Promise<{ id: string; name: string; reference: string } | undefined>;
+  getTechnique: (
+    id: string
+  ) => Promise<{ id: string; name: string; reference: string; tactics: string[] } | undefined>;
+  getSubtechnique: (
+    id: string
+  ) => Promise<{ id: string; name: string; reference: string; techniqueId: string } | undefined>;
+  /** Convert a tactic id (e.g. `TA0006`) into its kill-chain shortname (e.g. `credential-access`). */
+  tacticIdToShortname: (tacticId: string) => Promise<string | undefined>;
+}
+
+const buildManagedLookups = (client: MitreAttackDataClient): MitreLookups => {
+  return {
+    async getTactic(id) {
+      const entity = await client.getById(FRAMEWORK, id);
+      if (!isTactic(entity)) return undefined;
+      return { id: entity.id, name: entity.name, reference: entity.reference };
+    },
+    async getTechnique(id) {
+      const entity = await client.getById(FRAMEWORK, id);
+      if (!isTechnique(entity)) return undefined;
+      return {
+        id: entity.id,
+        name: entity.name,
+        reference: entity.reference,
+        tactics: entity.tactics,
+      };
+    },
+    async getSubtechnique(id) {
+      const entity = await client.getById(FRAMEWORK, id);
+      if (!isSubtechnique(entity)) return undefined;
+      return {
+        id: entity.id,
+        name: entity.name,
+        reference: entity.reference,
+        techniqueId: entity.techniqueId,
+      };
+    },
+    async tacticIdToShortname(tacticId) {
+      const entity = await client.getById(FRAMEWORK, tacticId);
+      if (!isTactic(entity)) return undefined;
+      return entity.name.toLowerCase().replaceAll(' ', '-');
+    },
+  };
+};
+
+const buildLegacyLookups = (): MitreLookups => {
+  const tacticsById = new Map<string, LegacyMitreTactic>();
+  legacyTactics.forEach((tactic) => tacticsById.set(tactic.id, tactic));
+  const techniquesById = new Map<string, LegacyMitreTechnique>();
+  legacyTechniques.forEach((tech) => techniquesById.set(tech.id, tech));
+  const subtechniquesById = new Map<string, LegacyMitreSubTechnique>();
+  legacySubtechniques.forEach((sub) => subtechniquesById.set(sub.id, sub));
+
+  return {
+    async getTactic(id) {
+      const entity = tacticsById.get(id);
+      if (!entity) return undefined;
+      return { id: entity.id, name: entity.name, reference: entity.reference };
+    },
+    async getTechnique(id) {
+      const entity = techniquesById.get(id);
+      if (!entity) return undefined;
+      return {
+        id: entity.id,
+        name: entity.name,
+        reference: entity.reference,
+        tactics: entity.tactics,
+      };
+    },
+    async getSubtechnique(id) {
+      const entity = subtechniquesById.get(id);
+      if (!entity) return undefined;
+      return {
+        id: entity.id,
+        name: entity.name,
+        reference: entity.reference,
+        techniqueId: entity.techniqueId,
+      };
+    },
+    async tacticIdToShortname(tacticId) {
+      const entity = tacticsById.get(tacticId);
+      if (!entity) return undefined;
+      // Legacy data normalizes tactic shortnames into camelCase `value`. Convert
+      // back to the kebab-case form used in `technique.tactics`.
+      return entity.value
+        .replace(/([A-Z])/g, '-$1')
+        .toLowerCase()
+        .replace(/^-/, '');
+    },
+  };
+};
+
+const isTactic = (e: MitreEntity | undefined): e is MitreTactic => e?.type === 'tactic';
+const isTechnique = (e: MitreEntity | undefined): e is MitreTechnique => e?.type === 'technique';
+const isSubtechnique = (e: MitreEntity | undefined): e is MitreSubtechnique =>
+  e?.type === 'subtechnique';
+
 /**
- * Validates and formats the MITRE mapping response according to the Threat schema
+ * Validate the LLM response and shape it into the rule `threat` field, using
+ * the managed MITRE source when available.
  */
-const formatMitreMapping = (response: MitreMappingSelectionResponse): Array<Threat> => {
-  const threatMappings: Array<Threat> = [];
+const formatMitreMapping = async (
+  response: MitreMappingSelectionResponse,
+  lookups: MitreLookups
+): Promise<Threat[]> => {
+  const threatMappings: Threat[] = [];
 
-  // Group techniques by tactic
-  const tacticsMap = new Map<string, MitreTactic>();
-  tactics.forEach((tactic: MitreTactic) => {
-    tacticsMap.set(tactic.id, tactic);
-  });
+  for (const tacticId of response.tactics ?? []) {
+    const tactic = await lookups.getTactic(tacticId);
+    if (!tactic) {
+      // Skip unknown tactics returned by the LLM
+    } else {
+      const shortname = await lookups.tacticIdToShortname(tacticId);
+      const formattedTechniques: ThreatTechnique[] = [];
 
-  const techniquesMap = new Map<string, MitreTechnique>();
-  techniques.forEach((technique: MitreTechnique) => {
-    techniquesMap.set(technique.id, technique);
-  });
-
-  const subtechniquesMap = new Map<string, MitreSubTechnique>();
-  subtechniques.forEach((subTechnique: MitreSubTechnique) => {
-    subtechniquesMap.set(subTechnique.id, subTechnique);
-  });
-
-  for (const tacticId of response.tactics || []) {
-    const tacticData = tacticsMap.get(tacticId);
-    if (tacticData) {
-      // Find techniques that belong to this tactic and validate them against imported data
-      const relevantTechniques = (response.techniques || [])
-        .map((tech: MitreMappingSelectionResponse['techniques'][0]) => {
-          const techData = techniquesMap.get(tech.id);
-          if (!techData) {
-            return null;
+      for (const requested of response.techniques ?? []) {
+        const technique = await lookups.getTechnique(requested.id);
+        const matchesTactic =
+          technique != null && (!shortname || technique.tactics.includes(shortname));
+        if (!matchesTactic) {
+          // Skip techniques the LLM hallucinated or that don't belong to this tactic
+        } else {
+          const formattedSubtechniques: Array<{ id: string; name: string; reference: string }> = [];
+          for (const subId of requested.subtechnique ?? []) {
+            const sub = await lookups.getSubtechnique(subId);
+            if (sub != null && sub.techniqueId === technique.id) {
+              formattedSubtechniques.push({
+                id: sub.id,
+                name: sub.name,
+                reference: sub.reference,
+              });
+            }
           }
-          // Check if technique belongs to this tactic
-          const belongsToTactic = techData.tactics.some(
-            (t: string) => t.toLowerCase().replaceAll('-', '') === tacticData.value.toLowerCase()
-          );
-          if (!belongsToTactic) {
-            return null;
-          }
-          return { techData, subtechniqueIds: tech.subtechnique || [] };
-        })
-        .filter((item) => item !== null);
 
-      // Format techniques with subtechniques using data from imports
-      const formattedTechniques = relevantTechniques.map(({ techData, subtechniqueIds }) => {
-        const formatted: ThreatTechnique = {
-          id: techData.id,
-          name: techData.name,
-          reference: techData.reference,
-        };
-
-        // Add subtechniques if present - validate and get data from imports
-        if (subtechniqueIds.length > 0) {
-          const formattedSubtechniques = subtechniqueIds
-            .map((subId: string) => {
-              const subData = subtechniquesMap.get(subId);
-              if (!subData) {
-                return null;
-              }
-              // Verify subtechnique belongs to the parent technique
-              if (subData.techniqueId !== techData.id) {
-                return null;
-              }
-              return {
-                id: subData.id,
-                name: subData.name,
-                reference: subData.reference,
-              };
-            })
-            .filter((sub) => sub !== null);
-
+          const formatted: ThreatTechnique = {
+            id: technique.id,
+            name: technique.name,
+            reference: technique.reference,
+          };
           if (formattedSubtechniques.length > 0) {
             formatted.subtechnique = formattedSubtechniques;
           }
+          formattedTechniques.push(formatted);
         }
-
-        return formatted;
-      });
+      }
 
       threatMappings.push({
         framework: 'MITRE ATT&CK',
-        tactic: {
-          id: tacticData.id,
-          name: tacticData.name,
-          reference: tacticData.reference,
-        },
+        tactic: { id: tactic.id, name: tactic.name, reference: tactic.reference },
         technique: formattedTechniques.length > 0 ? formattedTechniques : undefined,
       });
     }
@@ -132,8 +212,15 @@ const formatMitreMapping = (response: MitreMappingSelectionResponse): Array<Thre
   return threatMappings;
 };
 
-export const addMitreMappingsNode = ({ model, events }: AddMitreMappingsNodeParams) => {
+export const addMitreMappingsNode = ({
+  model,
+  events,
+  mitreAttackDataClient,
+}: AddMitreMappingsNodeParams) => {
   const jsonParser = new JsonOutputParser<MitreMappingSelectionResponse>();
+  const lookups = mitreAttackDataClient
+    ? buildManagedLookups(mitreAttackDataClient)
+    : buildLegacyLookups();
 
   return async (state: RuleCreationState): Promise<RuleCreationState> => {
     events?.reportProgress(
@@ -151,7 +238,7 @@ export const addMitreMappingsNode = ({ model, events }: AddMitreMappingsNodePara
         rule_tags: ruleTags,
       });
 
-      const threatMappings = formatMitreMapping(mitreSelectionResult);
+      const threatMappings = await formatMitreMapping(mitreSelectionResult, lookups);
 
       events?.reportProgress(
         `Identified ${threatMappings.length} MITRE ATT&CK mapping(s) with ${threatMappings.reduce(
