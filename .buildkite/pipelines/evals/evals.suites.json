@@ -171,6 +171,13 @@
       "serverConfigSet": "evals_workflows"
     },
     {
+      "id": "pci-compliance",
+      "name": "PCI DSS v4.0.1 Compliance",
+      "slackChannel": "#security-defend-workflows-tests",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/playwright.config.ts",
+      "tags": ["security", "pci-compliance"],
+      "ciLabels": ["evals:pci-compliance"],
+      "serverConfigSet": "evals_pci_compliance"
       "id": "security-automatic-migrations",
       "name": "Security Automatic Migrations",
       "slackChannel": "#security-generative-ai-evals",
