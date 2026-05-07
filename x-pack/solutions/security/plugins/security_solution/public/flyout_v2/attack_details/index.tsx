@@ -21,7 +21,7 @@ import { Header } from './header';
 import { useTabs } from './hooks/use_tabs';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
-import { alertFlyoutHistoryKey } from '../document/constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
@@ -110,7 +110,7 @@ export const AttackDetails: FC<AttackDetailsProps> = memo(
     const store = useStore();
     const history = useHistory();
     const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     const onShowAlert = useCallback(

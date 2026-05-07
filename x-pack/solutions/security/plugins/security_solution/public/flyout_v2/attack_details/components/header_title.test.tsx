@@ -58,14 +58,15 @@ jest.mock('../../shared/components/notes', () => ({
   ),
 }));
 
-jest.mock('../../shared/components/alert_header_block', () => ({
-  AlertHeaderBlock: ({
+jest.mock('../../shared/components/flyout_header_block', () => ({
+  FlyoutHeaderBlock: ({
     children,
     'data-test-subj': dataTestSubj,
   }: {
     children: React.ReactNode;
     'data-test-subj': string;
   }) => <div data-test-subj={dataTestSubj}>{children}</div>,
+  flyoutHeaderBlockStyles: {},
 }));
 
 const mockedUseHeaderData = useHeaderData as jest.Mock;
