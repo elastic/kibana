@@ -35,7 +35,8 @@ export const mapConvertResponseToResult = (
       provisioningStatusForFailedConversions.push(
         createFailedConversionStatus(
           ruleId,
-          `Error generating UIAM API key for the rule with ID ${ruleId}: ${item.message}`
+          `Error generating UIAM API key for the rule with ID ${ruleId}: ${item.message}`,
+          item.code
         )
       );
     }
