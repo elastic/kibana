@@ -11,7 +11,6 @@ import type { DataType, LastValueIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiLastValueOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
-import { stripUndefined } from '../charts/utils';
 
 export const fromLastValueAPItoLensState = (
   options: LensApiLastValueOperation,
