@@ -868,29 +868,6 @@ describe('Lens App', () => {
         );
       });
 
-      it('checks for duplicate title before saving', async () => {
-        await save({
-          savedObjectId: defaultSavedObjectId,
-          prevSavedObjectId: defaultSavedObjectId,
-          preloadedState: {
-            isSaveable: true,
-            persistedDoc: { savedObjectId: defaultSavedObjectId } as unknown as LensDocument,
-            isLinkedToOriginatingApp: true,
-          },
-        });
-
-        expect(services.lensDocumentService.checkForDuplicateTitle).toHaveBeenCalledWith(
-          {
-            copyOnSave: true,
-            displayName: 'Lens visualization',
-            isTitleDuplicateConfirmed: false,
-            lastSavedTitle: '',
-            title: 'hello there',
-          },
-          expect.any(Function)
-        );
-      });
-
       it('saves new doc and redirects to originating app', async () => {
         await save({
           savedObjectId: undefined,

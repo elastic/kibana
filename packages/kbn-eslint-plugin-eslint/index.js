@@ -39,5 +39,6 @@ module.exports = {
     require_kbn_fs: require('./rules/require_kbn_fs'),
     require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
     no_wrapped_error_in_logger: require('./rules/no_wrapped_error_in_logger'),
+    no_sync_import_from_plugin: require('./rules/no_sync_import_from_plugin'),
   },
 };
