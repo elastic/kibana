@@ -49,12 +49,12 @@ export interface SendMessageVars {
 }
 
 export interface SendMessageMutationBindings {
-  updateActiveReasoning: (reasoning: string) => void;
+  updateActiveReasoning: (conversationId: string, reasoning: string) => void;
   setPendingMessage: (conversationId: string, message: string) => void;
   clearPendingMessage: (conversationId: string) => void;
   setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
   clearError: (conversationId: string) => void;
-  clearActiveStream: () => void;
+  clearActiveStream: (conversationId: string) => void;
 }
 
 type UseSendMessageMutationProps = SendMessageMutationBindings;
@@ -135,7 +135,9 @@ export const useSendMessageMutation = ({
   const { chatService, conversationsService } = useAgentBuilderServices();
   const { services } = useKibana();
   const queryClient = useQueryClient();
-  const abortControllerRef = useRef<AbortController | null>(null);
+  // One controller per in-flight conversation. Concurrent streams need independent cancel.
+  // `useSendMessageMutation` is called exactly once — by  the `SendMessageProvider`.
+  const controllersRef = useRef<Map<string, AbortController>>(new Map());
 
   const browserToolExecutor = useMemo(() => {
     return new BrowserToolExecutor(services.notifications?.toasts);
@@ -161,8 +163,9 @@ export const useSendMessageMutation = ({
         conversationsService,
       });
 
+      controllersRef.current.get(vars.conversationId)?.abort();
       const controller = new AbortController();
-      abortControllerRef.current = controller;
+      controllersRef.current.set(vars.conversationId, controller);
 
       if (isRegenerate) {
         // Clear the existing response immediately so UI shows empty state.
@@ -213,7 +216,7 @@ export const useSendMessageMutation = ({
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
-          setAgentReasoning: updateActiveReasoning,
+          setAgentReasoning: (reasoning) => updateActiveReasoning(vars.conversationId, reasoning),
         });
 
         if (!isRegenerate) {
@@ -243,21 +246,28 @@ export const useSendMessageMutation = ({
         if (succeeded && !endedInAwaitingPrompt) {
           streamActions.invalidateConversation();
         }
-        clearActiveStream();
-        if (abortControllerRef.current === controller) {
-          abortControllerRef.current = null;
+        clearActiveStream(vars.conversationId);
+        if (controllersRef.current.get(vars.conversationId) === controller) {
+          controllersRef.current.delete(vars.conversationId);
         }
       }
     },
   });
 
-  const cancel = useCallback(() => {
-    abortControllerRef.current?.abort();
+  const cancel = useCallback((conversationId: string) => {
+    controllersRef.current.get(conversationId)?.abort();
+  }, []);
+
+  const cancelAll = useCallback(() => {
+    for (const controller of controllersRef.current.values()) {
+      controller.abort();
+    }
   }, []);
 
   return {
     mutate,
     isLoading,
     cancel,
+    cancelAll,
   };
 };
