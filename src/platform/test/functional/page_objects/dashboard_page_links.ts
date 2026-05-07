@@ -206,9 +206,12 @@ export class DashboardPageLinks extends FtrService {
       await this.testSubjects.click('links--panelEditor--addLinkBtn');
       await this.expectLinkEditorFlyoutIsOpen();
     });
-    const option = await this.testSubjects.find('links--linkEditor--externalLink--radioBtn');
-    const label = await option.findByCssSelector('label[for="externalLink"]');
-    await label.click();
+    await this.retry.try(async () => {
+      const option = await this.testSubjects.find('links--linkEditor--externalLink--radioBtn');
+      const label = await option.findByCssSelector('label[for="externalLink"]');
+      await label.click();
+      await this.testSubjects.existOrFail('links--linkEditor--externalLink--input');
+    });
     await this.testSubjects.setValue('links--linkEditor--externalLink--input', destination);
   }
 

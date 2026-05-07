@@ -401,6 +401,46 @@ describe('Endpoint exceptions form', () => {
           expect(renderResult.getByTestId('duplicate-fields-warning-message')).toBeInTheDocument();
         });
       });
+
+      it('should show warning text when duplicate fields are added in second OR group', async () => {
+        formProps.item.entries = [
+          {
+            field: 'timestamp',
+            operator: 'included',
+            type: 'match',
+            value: '3',
+          },
+        ];
+        formProps.additionalEntries = [
+          [
+            {
+              field: 'cheese',
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+          [
+            {
+              field: 'process.name',
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+            {
+              field: 'process.name',
+              operator: 'excluded',
+              type: 'match',
+              value: 'some other value',
+            },
+          ],
+        ];
+        render();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('duplicate-fields-warning-message')).toBeInTheDocument();
+        });
+      });
     });
 
     describe('wildcard with wrong operator', () => {

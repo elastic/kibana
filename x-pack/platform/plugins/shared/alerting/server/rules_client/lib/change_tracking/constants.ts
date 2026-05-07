@@ -7,16 +7,6 @@
 
 export const ALERTING_RULE_DATASET = 'alerting-rules';
 
-export const ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS = {
-  attributes: {
-    executionStatus: true,
-    monitoring: true,
-    lastRun: true,
-    nextRun: true,
-    scheduledTaskId: true,
-  },
-} as const;
-
 export const ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS = {
   attributes: { apiKey: true, uiamApiKey: true },
 } as const;
