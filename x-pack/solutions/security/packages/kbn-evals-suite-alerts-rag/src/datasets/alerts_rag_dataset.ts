@@ -237,6 +237,38 @@ export const alertsRagDataset: AlertsRagExample[] = [
     metadata: { category: 'multi_alert_correlation', dataset_split: ['base'] },
   },
 
+  // ── Temporal queries (time-range reasoning) ───────────────────────────────
+  {
+    langsmithExampleId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    input: 'When was the first alert triggered?',
+    expected: {
+      reference:
+        'The earliest alert was triggered at 2024-08-20T00:00:00.000Z on host SRVMAC08, associated with the Malware - Malicious File Creation rule.',
+    },
+    context: SCENARIO_CONTEXT,
+    metadata: { category: 'temporal_query', dataset_split: ['base'] },
+  },
+  {
+    langsmithExampleId: 'b2c3d4e5-f6a7-8901-bcde-f01234567891',
+    input: 'What is the most recent alert?',
+    expected: {
+      reference:
+        'The most recent alert was triggered at 2024-08-20T23:30:00.000Z on host SRVNIX05, associated with the Lateral Movement - Pass the Hash rule. It has high severity.',
+    },
+    context: SCENARIO_CONTEXT,
+    metadata: { category: 'temporal_query', dataset_split: ['base'] },
+  },
+  {
+    langsmithExampleId: 'c3d4e5f6-a7b8-9012-cdef-012345678912',
+    input: 'How many alerts were triggered before 4:00 AM on 2024-08-20?',
+    expected: {
+      reference:
+        'There were 16 alerts triggered before 4:00 AM on 2024-08-20. These occurred on two hosts: SRVMAC08 (10 alerts) and SRVWIN01 (6 alerts), all with critical severity.',
+    },
+    context: SCENARIO_CONTEXT,
+    metadata: { category: 'temporal_query', dataset_split: ['base'] },
+  },
+
   // ── Field-specific lookup ─────────────────────────────────────────────────
   {
     langsmithExampleId: 'e4c66fba-0f53-43bb-b923-a11f5d39b84b',
