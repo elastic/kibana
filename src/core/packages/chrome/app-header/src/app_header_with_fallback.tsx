@@ -42,6 +42,7 @@ export const AppHeaderWithFallback: FC<AppHeaderWithFallbackProps> = ({
   fallback,
   sticky,
   padding,
+  docLink,
 }) => {
   const chrome = useChromeService();
 
@@ -72,6 +73,7 @@ export const AppHeaderWithFallback: FC<AppHeaderWithFallbackProps> = ({
       favorite={favorite}
       sticky={sticky}
       padding={padding}
+      docLink={docLink}
     />
   );
 };
