@@ -13,7 +13,6 @@ import { monaco } from '@kbn/monaco';
 import {
   applyLiquidMask,
   classifyLiquidPosition,
-  isOffsetInsideMaskedRange,
   type LiquidMaskedRange,
 } from '../../../esql_validation/classify_liquid_position';
 import type { EsqlStepRegion } from '../../../esql_validation/find_esql_step_regions';
@@ -92,8 +91,12 @@ export async function getEsqlQuerySuggestions(
   const maskedRanges: ReadonlyArray<LiquidMaskedRange> =
     liquid.kind === 'all-maskable' ? liquid.maskedRanges : [];
 
-  if (isOffsetInsideMaskedRange(padded.offset, maskedRanges)) {
-    return null;
+  const containingRange = findRangeContaining(padded.offset, maskedRanges);
+  if (containingRange !== null) {
+    // Cursor is inside a Liquid construct. Comments suppress the popup
+    // entirely (the user is writing prose); expressions and tags defer to
+    // the dispatcher so the variable / Liquid completion paths can run.
+    return containingRange.kind === 'comment' ? [] : null;
   }
 
   const masked: SuggestInput = {
@@ -154,6 +157,19 @@ function padForStructuralBoundary(input: SuggestInput): SuggestInput {
 
 function isWhitespace(ch: string): boolean {
   return ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r';
+}
+
+/** Returns the first range that contains `offset` (end-exclusive), or `null`. */
+function findRangeContaining(
+  offset: number,
+  ranges: ReadonlyArray<LiquidMaskedRange>
+): LiquidMaskedRange | null {
+  for (const range of ranges) {
+    if (offset >= range.start && offset < range.end) {
+      return range;
+    }
+  }
+  return null;
 }
 
 async function safeSuggest(

@@ -258,6 +258,62 @@ describe('getEsqlQuerySuggestions', () => {
     expect(offset).toBe(regionEsql.indexOf('STA') + 'STA'.length);
   });
 
+  it('returns [] (suppress popup) when the cursor sits inside a Liquid comment `{# … #}`', async () => {
+    // A Liquid comment is the user writing prose; surfacing variables or
+    // filters there is wrong. We return [] so the dispatcher does NOT fall
+    // through to the variable / filter paths, and the popup stays empty.
+    const queryText = 'FROM logs {# todo: filter by env #} | LIMIT 10';
+    const text = buildEsqlStep(queryText);
+    const { ctx } = buildContextAtMatch(text, 'todo: filter');
+
+    const items = await getEsqlQuerySuggestions(ctx, stubServices);
+
+    expect(items).toEqual([]);
+    expect(mockSuggest).not.toHaveBeenCalled();
+  });
+
+  it('runs ES|QL against the masked query when the cursor is outside any Liquid span', async () => {
+    // `WHERE x == "{{ inputs.host }}" | LIMIT 10`, cursor right after `LIMIT 10`.
+    // The Liquid span is masked to whitespace of the same length so offsets
+    // line up; ES|QL sees a position-equivalent query and returns next-stage
+    // suggestions for the user.
+    const queryText = 'FROM logs | WHERE host == "{{ inputs.host }}" | LIMIT 10';
+    const text = buildEsqlStep(queryText);
+    const { ctx, regionEsql } = buildContextAtMatch(text, queryText);
+    mockSuggest.mockResolvedValue([{ label: '|', text: ' | ', kind: 'Keyword' }]);
+
+    await getEsqlQuerySuggestions(ctx, stubServices);
+
+    const [maskedQuery, offset] = mockSuggest.mock.calls[0];
+    // Liquid replaced with spaces of identical length so the cursor offset
+    // and the rest of the query keep line/column parity.
+    expect(maskedQuery).not.toMatch(/\{\{/);
+    expect(maskedQuery).toHaveLength(regionEsql.length);
+    expect(offset).toBe(regionEsql.length);
+  });
+
+  it('mixes kinds correctly: cursor in `{# … #}` suppresses, cursor in `{{ … }}` defers', async () => {
+    // Same query, two cursor positions: a comment span suppresses, an
+    // expression span defers. This is the discriminator the new `kind`
+    // field on LiquidMaskedRange enables.
+    const queryText = 'FROM logs {# audit #} | WHERE host == "{{ inputs.host }}"';
+    const text = buildEsqlStep(queryText);
+
+    const inComment = await getEsqlQuerySuggestions(
+      buildContextAtMatch(text, 'audit').ctx,
+      stubServices
+    );
+    expect(inComment).toEqual([]);
+
+    const inExpression = await getEsqlQuerySuggestions(
+      buildContextAtMatch(text, 'inputs.').ctx,
+      stubServices
+    );
+    expect(inExpression).toBeNull();
+
+    expect(mockSuggest).not.toHaveBeenCalled();
+  });
+
   it('returns [] (NOT null) when suggest() throws — keeps Liquid fallthrough disabled', async () => {
     // This is the contract that prevents the user-visible regression where a
     // failed `suggest()` call let the dispatcher fall through to
