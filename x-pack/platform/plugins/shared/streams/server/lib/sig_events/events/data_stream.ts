@@ -27,24 +27,11 @@ export const eventsMappings = {
     title: mappings.text({
       fields: {
         keyword: { type: 'keyword', ignore_above: 512 },
-        semantic: { type: 'semantic_text' },
       },
     }),
-    summary: mappings.text({
-      fields: {
-        semantic: { type: 'semantic_text' },
-      },
-    }),
-    root_cause: mappings.text({
-      fields: {
-        semantic: { type: 'semantic_text' },
-      },
-    }),
-    recommendations: mappings.text({
-      fields: {
-        semantic: { type: 'semantic_text' },
-      },
-    }),
+    summary: mappings.text(),
+    root_cause: mappings.text(),
+    recommendations: mappings.text(),
   },
 } satisfies MappingsDefinition;
 
