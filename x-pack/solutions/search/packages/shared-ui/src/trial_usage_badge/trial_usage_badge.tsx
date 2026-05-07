@@ -11,116 +11,63 @@ import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopoverFooter,
+  EuiIconTip,
   EuiPopover,
+  EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiProgress,
+  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CloudHostedUsage } from './cloud_hosted_usage';
-import { ServerlessUsage } from './serverless_usage';
-
 interface TrialUsageBadgeProps {
   billingUrl?: string;
-  isServerless?: boolean;
   trialDaysLeft?: number;
-  storageUsage?: string;
-  mlNodeCount?: number;
-  mlMemoryLimit?: string;
-  llmTotalTokens?: number;
-  searchPowerMax?: number;
-  searchPowerMin?: number;
-  boostWindowHours?: number;
+  trialTotalDays?: number;
+}
+
+function getProgressColor(value: number, max: number): 'primary' | 'warning' | 'danger' {
+  const percent = (value / max) * 100;
+  if (percent > 95) return 'danger';
+  if (percent >= 80) return 'warning';
+  return 'primary';
 }
 
 export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
   billingUrl,
-  isServerless = false,
-  trialDaysLeft = 0,
-  storageUsage,
-  mlNodeCount,
-  mlMemoryLimit,
-  llmTotalTokens,
-  searchPowerMax,
-  searchPowerMin,
-  boostWindowHours,
+  trialDaysLeft,
+  trialTotalDays,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
 
-  const title = isServerless
-    ? i18n.translate('xpack.searchSharedUI.trialUsageBadge.serverlessTitle', {
-        defaultMessage: 'Elasticsearch Serverless',
-      })
-    : i18n.translate('xpack.searchSharedUI.trialUsageBadge.cloudHostedTitle', {
-        defaultMessage: 'Elastic Cloud Hosted',
-      });
-
-  const daysLabel = i18n.translate('xpack.searchSharedUI.trialUsageBadge.daysLeft', {
-    defaultMessage: '{days} days',
-    values: { days: trialDaysLeft },
-  });
+  const daysUsed =
+    trialDaysLeft !== undefined && trialTotalDays !== undefined
+      ? trialTotalDays - trialDaysLeft
+      : undefined;
 
   const button = (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
+    <EuiBadge
+      color={euiTheme.colors.primary}
       onClick={() => setIsPopoverOpen((prev) => !prev)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          setIsPopoverOpen((prev) => !prev);
-        }
-      }}
+      onClickAriaLabel="Toggle trial usage"
+      iconType="arrowDown"
+      iconSide="right"
       css={css({
-        height: 28,
-        padding: `${euiTheme.size.xxs} ${euiTheme.size.s} ${euiTheme.size.xxs} ${euiTheme.size.xs}`,
         borderRadius: euiTheme.size.l,
-        border: `1px solid ${euiTheme.colors.borderBasePrimary}`,
-        backgroundColor: euiTheme.colors.backgroundBasePrimary,
+        padding: `0 ${euiTheme.size.s}`,
         cursor: 'pointer',
       })}
       data-test-subj="trialUsageBadge"
     >
-      <EuiFlexItem grow={false}>
-        <EuiBadge
-          color={euiTheme.colors.primary}
-          css={css({
-            borderRadius: euiTheme.size.l,
-            padding: `0 ${euiTheme.size.s}`,
-          })}
-        >
-          {i18n.translate('xpack.searchSharedUI.trialUsageBadge.trialLabel', {
-            defaultMessage: 'TRIAL',
-          })}
-        </EuiBadge>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          data-test-subj="sharedUiTrialUsageBadgeViewUsageButton"
-          size="xs"
-          flush="both"
-          color="primary"
-          iconType="arrowDown"
-          iconSide="right"
-          css={css({
-            height: 'auto',
-            minHeight: 0,
-          })}
-        >
-          {i18n.translate('xpack.searchSharedUI.trialUsageBadge.usageLabel', {
-            defaultMessage: 'Usage',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      {i18n.translate('xpack.searchSharedUI.trialUsageBadge.trialLabel', {
+        defaultMessage: 'TRIAL',
+      })}
+    </EuiBadge>
   );
 
   return (
@@ -129,71 +76,89 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downLeft"
-      aria-label={title}
       data-test-subj="trialUsagePopover"
     >
       <EuiPopoverTitle>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h4>{title}</h4>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="default">{daysLabel}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="xxs">
+          <h4>
+            {i18n.translate('xpack.searchSharedUI.trialUsageBadge.serverlessTitle', {
+              defaultMessage: 'Elasticsearch Serverless',
+            })}
+          </h4>
+        </EuiTitle>
       </EuiPopoverTitle>
+
       <EuiFlexGroup direction="column" gutterSize="none" css={css({ width: 330 })}>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column">
-            {isServerless ? (
-              <ServerlessUsage
-                searchPowerMax={searchPowerMax}
-                searchPowerMin={searchPowerMin}
-                boostWindowHours={boostWindowHours}
-                llmTotalTokens={llmTotalTokens}
+        {daysUsed !== undefined && trialTotalDays !== undefined && trialDaysLeft !== undefined && (
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="xs" direction="column">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs">
+                        <strong>
+                          {i18n.translate('xpack.searchSharedUI.trialUsageBadge.trialPeriodLabel', {
+                            defaultMessage: 'Trial period',
+                          })}
+                        </strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="questionInCircle"
+                        content={i18n.translate(
+                          'xpack.searchSharedUI.trialUsageBadge.trialPeriodTooltip',
+                          {
+                            defaultMessage:
+                              'Your free trial period. After it expires, you will need to subscribe to continue using the service.',
+                          }
+                        )}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.searchSharedUI.trialUsageBadge.daysLeft', {
+                      defaultMessage: '{days} days left',
+                      values: { days: trialDaysLeft },
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiProgress
+                value={daysUsed}
+                max={trialTotalDays}
+                size="s"
+                color={getProgressColor(daysUsed, trialTotalDays)}
               />
-            ) : (
-              <CloudHostedUsage
-                storageUsage={storageUsage}
-                mlNodeCount={mlNodeCount}
-                mlMemoryLimit={mlMemoryLimit}
-                llmTotalTokens={llmTotalTokens}
-              />
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
+
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.searchSharedUI.trialUsageBadge.daysUsed', {
+                  defaultMessage: '{used} / {total} days',
+                  values: { used: daysUsed, total: trialTotalDays },
+                })}
+              </EuiText>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
 
         <EuiPopoverFooter>
-          <EuiFlexItem>
-            <EuiButton
-              data-test-subj="sharedUiTrialUsageBadgeViewSubscriptionPlansButton"
-              href={billingUrl || undefined}
-              fullWidth
-              color="text"
-              iconType="popout"
-              iconSide="right"
-            >
-              {i18n.translate('xpack.searchSharedUI.trialUsageBadge.viewSubscriptionPlans', {
-                defaultMessage: 'View subscription plans',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-
-          <EuiFlexItem css={css({ textAlign: 'center', marginTop: euiTheme.size.s })}>
-            <EuiButtonEmpty
-              data-test-subj="sharedUiTrialUsageBadgeDocumentationButton"
-              href="https://www.elastic.co/docs"
-              target="_blank"
-              size="xs"
-              iconType="documents"
-            >
-              {i18n.translate('xpack.searchSharedUI.trialUsageBadge.documentation', {
-                defaultMessage: 'Documentation',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          <EuiButton
+            data-test-subj="sharedUiTrialUsageBadgeManageSubscriptionButton"
+            href={billingUrl || undefined}
+            target="_blank"
+            fullWidth
+            color="primary"
+            iconType="popout"
+            iconSide="right"
+          >
+            {i18n.translate('xpack.searchSharedUI.trialUsageBadge.manageSubscription', {
+              defaultMessage: 'Manage subscription',
+            })}
+          </EuiButton>
         </EuiPopoverFooter>
       </EuiFlexGroup>
     </EuiPopover>
