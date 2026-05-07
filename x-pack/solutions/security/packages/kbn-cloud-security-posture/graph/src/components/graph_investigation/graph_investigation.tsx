@@ -359,6 +359,87 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       eventPopover,
     ].some(({ state: { isOpen } }) => isOpen);
 
+    // True if any dropdown overlay is currently open inside the search bar
+    // or graph: the KQL autocomplete suggestions list (portaled, has the
+    // `kbnTypeahead__items` id), any EuiPopover panel (filter chip, etc.,
+    // portaled with `.euiPopover__panel`), or a graph node popover tracked
+    // in component state.
+    const isAnyOverlayOpen = useCallback(
+      () =>
+        isPopoverOpen ||
+        document.querySelector('.euiPopover__panel') !== null ||
+        document.querySelector('#kbnTypeahead__items') !== null,
+      [isPopoverOpen]
+    );
+
+    const closeGraphNodePopovers = useCallback(() => {
+      [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover].forEach(
+        ({ actions: { closePopover } }) => closePopover()
+      );
+    }, [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover]);
+
+    // Closes any open dropdown overlay by synthesizing the mouse events that
+    // each overlay's outside-click detector listens for:
+    //   - KQL autocomplete (`SuggestionsComponent`) is wrapped in
+    //     `EuiOutsideClickDetector`, which listens for `mouseup`.
+    //   - EuiPopover (filter-chip popover, etc., with default `ownFocus=true`)
+    //     uses `react-focus-on`, which listens for `mousedown`.
+    // Dispatching on the graph container — not on `document` — keeps the
+    // event "inside" the parent EuiFlyout, so any flyout-level
+    // outside-click detection ignores it (the flyout would otherwise treat
+    // an event on `document` as outside itself).
+    const dispatchOutsideClick = useCallback((target: EventTarget) => {
+      const opts = { bubbles: true, cancelable: true, view: window, button: 0 };
+      target.dispatchEvent(new MouseEvent('mousedown', opts));
+      target.dispatchEvent(new MouseEvent('mouseup', opts));
+    }, []);
+
+    // Handle pointer events on the ReactFlow pane in the capture phase,
+    // BEFORE d3-zoom (which ReactFlow uses for pan/zoom) calls
+    // `preventDefault()` on `pointerdown`. Per the Pointer Events spec, a
+    // canceled `pointerdown` suppresses the corresponding `mousedown` /
+    // `mouseup` / `click` for the same interaction — which is why neither
+    // EuiOutsideClickDetector nor react-focus-on receives any event, and
+    // ReactFlow's `onPaneClick` never fires either, when the user clicks
+    // the pane background.
+    const handlePointerDownCapture = useCallback(
+      (event: React.PointerEvent<HTMLDivElement>) => {
+        if (!isAnyOverlayOpen()) return;
+        const eventTarget = event.target as HTMLElement | null;
+        if (!eventTarget?.closest?.('.react-flow__pane')) return;
+
+        dispatchOutsideClick(event.currentTarget);
+        closeGraphNodePopovers();
+      },
+      [isAnyOverlayOpen, dispatchOutsideClick, closeGraphNodePopovers]
+    );
+
+    // Esc on an open overlay must close just that overlay, not the parent
+    // EuiFlyout. The flyout's Esc-to-close handler is a native `keydown`
+    // listener on `document`; React's `stopPropagation` only stops React's
+    // synthetic-event bubbling, so we must also call
+    // `stopImmediatePropagation` on the native event.
+    //
+    // That same call blocks each overlay's own native listeners, so we
+    // close the overlays ourselves by synthesizing an outside-click and
+    // calling `closePopover` on the graph node popovers as a belt-and-
+    // braces fallback. Doing this in the capture phase guarantees we
+    // intercept the event before the textarea's own onKeyDown can run.
+    const handleKeyDownCapture = useCallback(
+      (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key !== 'Escape') return;
+        if (!isAnyOverlayOpen()) return;
+
+        dispatchOutsideClick(event.currentTarget);
+        closeGraphNodePopovers();
+
+        event.preventDefault();
+        event.stopPropagation();
+        event.nativeEvent.stopImmediatePropagation();
+      },
+      [isAnyOverlayOpen, dispatchOutsideClick, closeGraphNodePopovers]
+    );
+
     const { originEventIdsSet, originAlertIdsSet, originEntityIdsSet } = useMemo(() => {
       const eventIds = new Set<string>();
       const alertIds = new Set<string>();
@@ -491,6 +572,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           data-test-subj={GRAPH_INVESTIGATION_TEST_ID}
           direction="column"
           gutterSize="none"
+          onKeyDownCapture={handleKeyDownCapture}
+          onPointerDownCapture={handlePointerDownCapture}
           css={css`
             height: 100%;
 
