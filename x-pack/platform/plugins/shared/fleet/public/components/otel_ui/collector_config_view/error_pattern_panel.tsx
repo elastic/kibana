@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
@@ -27,7 +27,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
 
-import { useStartServices } from '../../../hooks';
+import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
+
+import { AGENT_LOG_INDEX_PATTERN } from '../../../../common/constants';
+import { useDiscoverLocator } from '../../../hooks/use_locator';
 
 import type { ErrorPattern, LogLevel, SortField, TimeRange } from './use_error_patterns';
 import { useErrorPatterns } from './use_error_patterns';
@@ -117,10 +120,7 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
   const [sortField, setSortField] = useState<SortField>('count');
   const { euiTheme } = useEuiTheme();
   const backgroundColors = useEuiBackgroundColorCSS();
-
-  const {
-    application: { getUrlForApp },
-  } = useStartServices();
+  const discoverLocator = useDiscoverLocator();
 
   const { errorPatterns, warningPatterns, errorCount, warningCount, totalLogCount, isLoading } =
     useErrorPatterns({ agentId, timeRange });
@@ -133,14 +133,48 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
   const rowBackgroundCss =
     selectedLevel === 'error' ? backgroundColors.danger : backgroundColors.warning;
 
-  const discoverUrl = (pattern: ErrorPattern) => {
-    const query = encodeURIComponent(
-      `elastic_agent.id:"${agentId}" AND message:"${pattern.exampleMessage.substring(0, 50)}*"`
-    );
-    return getUrlForApp('discover', {
-      path: `#/?_g=(time:(from:now-${timeRange},to:now))&_a=(query:(language:kuery,query:'${query}'))`,
-    });
-  };
+  const getDiscoverUrl = useCallback(
+    (pattern: ErrorPattern) =>
+      discoverLocator?.getRedirectUrl({
+        dataViewSpec: {
+          id: AGENT_LOG_INDEX_PATTERN,
+          name: AGENT_LOG_INDEX_PATTERN,
+          title: AGENT_LOG_INDEX_PATTERN,
+          timeFieldName: '@timestamp',
+        },
+        timeRange: { from: `now-${timeRange}`, to: 'now' },
+        filters: [
+          buildCustomFilter(
+            AGENT_LOG_INDEX_PATTERN,
+            {
+              bool: {
+                filter: [
+                  { term: { 'elastic_agent.id': agentId } },
+                  {
+                    match: {
+                      message: {
+                        query: pattern.pattern,
+                        operator: 'AND' as const,
+                        fuzziness: 0,
+                        auto_generate_synonyms_phrase_query: false,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            false,
+            false,
+            i18n.translate('xpack.fleet.collectorDetail.errorPatterns.discoverFilterName', {
+              defaultMessage: 'Error pattern: {pattern}',
+              values: { pattern: pattern.pattern },
+            }),
+            FilterStateStore.APP_STATE
+          ),
+        ],
+      }),
+    [discoverLocator, timeRange, agentId]
+  );
 
   const columns: Array<EuiBasicTableColumn<ErrorPattern>> = [
     {
@@ -218,18 +252,21 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
     },
     {
       name: '',
-      render: (item: ErrorPattern) => (
-        <EuiButtonIcon
-          iconType="productDiscover"
-          size="xs"
-          color="text"
-          href={discoverUrl(item)}
-          target="_blank"
-          aria-label={i18n.translate('xpack.fleet.collectorDetail.errorPatterns.viewInDiscover', {
-            defaultMessage: 'Explore matching logs in Kibana Discover',
-          })}
-        />
-      ),
+      render: (item: ErrorPattern) => {
+        const href = getDiscoverUrl(item);
+        return href ? (
+          <EuiButtonIcon
+            iconType="productDiscover"
+            size="xs"
+            color="text"
+            href={href}
+            target="_blank"
+            aria-label={i18n.translate('xpack.fleet.collectorDetail.errorPatterns.viewInDiscover', {
+              defaultMessage: 'Explore matching logs in Kibana Discover',
+            })}
+          />
+        ) : null;
+      },
     },
   ];
 

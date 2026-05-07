@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
 
+import { AGENT_LOG_INDEX_PATTERN } from '../../../../common/constants';
 import { useStartServices } from '../../../hooks';
 
 export type LogLevel = 'error' | 'warning';
@@ -34,8 +35,6 @@ export interface UseErrorPatternsResult {
   isLoading: boolean;
   error?: Error;
 }
-
-const AGENT_LOG_INDEX = 'logs-elastic_agent-*,logs-elastic_agent.*-*';
 
 const TIME_RANGE_TO_MS: Record<TimeRange, number> = {
   '5m': 5 * 60 * 1000,
@@ -74,7 +73,7 @@ interface ErrorPatternsAggregations {
 
 const buildQuery = (agentId: string, level: LogLevel, now: number, timeRangeMs: number) => ({
   params: {
-    index: AGENT_LOG_INDEX,
+    index: AGENT_LOG_INDEX_PATTERN,
     track_total_hits: false,
     body: {
       size: 0,
