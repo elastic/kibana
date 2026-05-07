@@ -227,5 +227,22 @@ describe('RowKebabMenu — export branch', () => {
 
       expect(defaultExportMock.exportResults).toHaveBeenCalledWith('json', undefined);
     });
+
+    it('forwards total to the modal so the button reflects unfiltered count when unchecked', () => {
+      useExportFiltersMock.mockReturnValue({
+        kuery: 'host.os:linux',
+        filteredTotal: 20,
+        total: 100,
+      });
+
+      renderKebab();
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+      fireEvent.click(screen.getByTestId('osqueryExportResultsMenuItem'));
+
+      fireEvent.click(screen.getByTestId('osqueryExportFilteredCheckbox'));
+
+      expect(screen.getByTestId('osqueryExportConfirmButton')).toHaveTextContent('Export 100');
+    });
   });
 });

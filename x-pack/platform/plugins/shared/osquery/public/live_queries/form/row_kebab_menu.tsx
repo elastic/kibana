@@ -174,6 +174,7 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
             isExporting={isExporting}
             hasActiveFilters={hasActiveFilters}
             filteredTotal={exportFilters?.filteredTotal}
+            total={exportFilters?.total}
           />
         )}
       </>

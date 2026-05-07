@@ -94,18 +94,23 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
     []
   );
 
-  const exportButtonLabel = useMemo(() => {
-    const buttonCount = exportFiltered ? filteredTotal : total ?? filteredTotal;
+  const exportCount = useMemo(
+    () => (exportFiltered ? filteredTotal : total ?? filteredTotal),
+    [exportFiltered, filteredTotal, total]
+  );
 
-    return buttonCount != null
-      ? i18n.translate('xpack.osquery.exportModal.exportWithCount', {
-          defaultMessage: 'Export {count} {count, plural, one {row} other {rows}}',
-          values: { count: buttonCount },
-        })
-      : i18n.translate('xpack.osquery.exportModal.export', {
-          defaultMessage: 'Export',
-        });
-  }, [exportFiltered, filteredTotal, total]);
+  const exportButtonLabel = useMemo(
+    () =>
+      exportCount != null
+        ? i18n.translate('xpack.osquery.exportModal.exportWithCount', {
+            defaultMessage: 'Export {count} {count, plural, one {row} other {rows}}',
+            values: { count: exportCount },
+          })
+        : i18n.translate('xpack.osquery.exportModal.export', {
+            defaultMessage: 'Export',
+          }),
+    [exportCount]
+  );
 
   return (
     <EuiModal
@@ -162,7 +167,7 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
           />
         </EuiToolTip>
 
-        {filteredTotal != null && filteredTotal >= LARGE_EXPORT_THRESHOLD && (
+        {exportCount != null && exportCount >= LARGE_EXPORT_THRESHOLD && (
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
@@ -173,7 +178,7 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
               data-test-subj="osqueryExportLargeWarning"
               title={i18n.translate('xpack.osquery.exportModal.largeExportTitle', {
                 defaultMessage: 'Large export ({count} rows)',
-                values: { count: filteredTotal },
+                values: { count: exportCount },
               })}
             >
               {i18n.translate('xpack.osquery.exportModal.largeExportText', {

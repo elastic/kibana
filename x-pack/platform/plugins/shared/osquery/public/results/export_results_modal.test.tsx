@@ -129,6 +129,16 @@ describe('ExportResultsModal', () => {
 
       expect(screen.getByTestId('osqueryExportLargeWarning')).toBeInTheDocument();
     });
+
+    it('renders the warning when unfiltered total exceeds the threshold and the box is unchecked', () => {
+      renderModal({ hasActiveFilters: true, filteredTotal: 50_000, total: 200_000 });
+
+      expect(screen.queryByTestId('osqueryExportLargeWarning')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('osqueryExportFilteredCheckbox'));
+
+      expect(screen.getByTestId('osqueryExportLargeWarning')).toBeInTheDocument();
+    });
   });
 
   describe('cancel', () => {
