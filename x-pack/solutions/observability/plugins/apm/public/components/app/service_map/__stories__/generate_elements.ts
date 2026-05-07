@@ -15,6 +15,7 @@ import type {
   GroupedNodeData,
 } from '../../../../../common/service_map';
 import type { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
+import type { SloStatus } from '../../../../../common/service_inventory';
 
 const AGENT_NAMES: AgentName[] = [
   'dotnet',
@@ -92,6 +93,14 @@ function getRandomDependency(): (typeof DEPENDENCY_TYPES)[0] {
   return DEPENDENCY_TYPES[randn(DEPENDENCY_TYPES.length)];
 }
 
+const SLO_STATUSES: Array<SloStatus | 'noSLOs'> = [
+  'violated',
+  'degrading',
+  'healthy',
+  'noData',
+  'noSLOs',
+];
+
 function createAnomalyStats(hasAnomalyData: boolean): ServiceAnomalyStats | undefined {
   if (!hasAnomalyData) {
     return undefined;
@@ -105,6 +114,25 @@ function createAnomalyStats(hasAnomalyData: boolean): ServiceAnomalyStats | unde
     actualValue: Math.random() * 2000000,
     jobId: `job-${Date.now()}`,
   };
+}
+
+function createAlertData(hasAlerts: boolean): { alertsCount?: number } {
+  if (!hasAlerts || !probability(0.4)) {
+    return {};
+  }
+  return { alertsCount: 1 + randn(10) };
+}
+
+function createSloData(hasSlos: boolean): {
+  sloStatus?: SloStatus | 'noSLOs';
+  sloCount?: number;
+} {
+  if (!hasSlos || !probability(0.5)) {
+    return {};
+  }
+  const sloStatus = SLO_STATUSES[randn(SLO_STATUSES.length)];
+  const sloCount = sloStatus === 'noSLOs' ? 0 : 1 + randn(5);
+  return { sloStatus, sloCount };
 }
 
 function createDefaultEdgeStyle(color: string = '#c8c8c8') {
@@ -130,6 +158,8 @@ export interface GenerateOptions {
   groupedResourceCount: number;
   hasAnomalies: boolean;
   includeBidirectional: boolean;
+  hasAlerts?: boolean;
+  hasSlos?: boolean;
 }
 
 export function generateServiceMapElements(options: GenerateOptions): {
@@ -143,6 +173,8 @@ export function generateServiceMapElements(options: GenerateOptions): {
     groupedResourceCount,
     hasAnomalies,
     includeBidirectional,
+    hasAlerts = false,
+    hasSlos = false,
   } = options;
 
   const nodes: ServiceMapNode[] = [];
@@ -156,6 +188,8 @@ export function generateServiceMapElements(options: GenerateOptions): {
       isService: true,
       agentName: getRandomAgent(),
       serviceAnomalyStats: createAnomalyStats(hasAnomalies),
+      ...createAlertData(hasAlerts),
+      ...createSloData(hasSlos),
     };
     nodes.push({
       id,
