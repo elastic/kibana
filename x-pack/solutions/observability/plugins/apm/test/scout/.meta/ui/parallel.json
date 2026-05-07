@@ -1,5 +1,5 @@
 {
-  "sha1": "bbf76f77a9222da6695fef134321be2efe158876",
+  "sha1": "ab77df4a05dcd50ed11882c976e8273c7ff4ceef",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -733,7 +733,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 66,
+        "line": 83,
         "column": 9
       }
     },
@@ -896,7 +896,7 @@
     {
       "id": "6ab0e55ecb54392-b5d9e6a756e8940",
       "title": "Service map embeddable adds Service map panel with service name, environment and KQL filter",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -905,7 +905,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
-        "line": 45,
+        "line": 44,
         "column": 9
       }
     },
