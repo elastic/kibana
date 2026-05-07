@@ -80,11 +80,15 @@ describe('update', () => {
       await bulkUpdate(cases, clientArgs, casesClientMock);
 
       expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledTimes(1);
-      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(clientArgs.request, {
-        caseId: mockCases[0].id,
-        owner: mockCases[0].attributes.owner,
-        updatedFields: ['assignees'],
-      });
+      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: mockCases[0].id,
+          owner: mockCases[0].attributes.owner,
+          updatedFields: ['assignees'],
+        },
+        expect.anything()
+      );
     });
 
     it('emits caseUpdated events with only fields that actually changed', async () => {
@@ -108,11 +112,15 @@ describe('update', () => {
       );
 
       expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledTimes(1);
-      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(clientArgs.request, {
-        caseId: mockCases[0].id,
-        owner: mockCases[0].attributes.owner,
-        updatedFields: ['status'],
-      });
+      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: mockCases[0].id,
+          owner: mockCases[0].attributes.owner,
+          updatedFields: ['status'],
+        },
+        expect.anything()
+      );
     });
 
     it('does not notify if the case does not exist', async () => {

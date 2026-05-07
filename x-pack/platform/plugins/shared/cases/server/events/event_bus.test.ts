@@ -40,10 +40,13 @@ describe('CasesEventBus', () => {
       { previousCase: undefined, updatedCase: undefined }
     );
 
-    expect(listener).toHaveBeenCalledWith({
-      type: 'caseUpdated',
-      request,
-      payload: { caseId: 'case-1', owner: 'securitySolution', updatedFields: ['title'] },
-    });
+    expect(listener).toHaveBeenCalledWith(
+      {
+        type: 'caseUpdated',
+        request,
+        payload: { caseId: 'case-1', owner: 'securitySolution', updatedFields: ['title'] },
+      },
+      expect.anything()
+    );
   });
 });
