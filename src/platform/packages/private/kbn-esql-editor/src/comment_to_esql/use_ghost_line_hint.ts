@@ -15,27 +15,34 @@ import type { MutableRefObject } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 
-const GHOST_HINT_CLASS = 'esqlGhostLineHint';
+const EMPTY_LINE_HINT_CLASS = 'esqlGhostLineHint';
+const COMMENT_LINE_HINT_CLASS = 'esqlGhostCommentHint';
 const CURSOR_PAUSE_MS = 400;
 
+export type GhostHintKind = 'empty' | 'comment' | null;
+
 /**
- * Returns true when the cursor is on an empty line and the editor
- * has content (so we don't clash with the empty-editor placeholder).
+ * Decides which (if any) ghost hint to show for the given line.
+ * - 'empty':   cursor is on a blank line in a non-empty editor
+ *              (the editor's own placeholder covers the entirely-empty case).
+ * - 'comment': cursor is on a `//` line — prompts the user to invoke nl-to-esql.
+ * - null:      neither.
  */
-export const shouldShowGhostHint = (
+export const getGhostHintKind = (
   model: monaco.editor.ITextModel,
   lineNumber: number
-): boolean => {
-  const lineContent = model.getLineContent(lineNumber);
-  if (lineContent.trim() !== '') {
-    return false;
+): GhostHintKind => {
+  const trimmed = model.getLineContent(lineNumber).trim();
+
+  if (trimmed.startsWith('//')) {
+    return 'comment';
   }
 
-  if (model.getValueLength() === 0) {
-    return false;
+  if (trimmed === '' && model.getValueLength() > 0) {
+    return 'empty';
   }
 
-  return true;
+  return null;
 };
 
 interface UseGhostLineHintParams {
@@ -60,22 +67,31 @@ export const useGhostLineHint = ({
   isEnabledRef.current = isEnabled;
 
   const commandKey = isMac ? '⌘' : 'Ctrl';
-  const ghostHintText = i18n.translate('esqlEditor.ghostLineHint', {
+  const emptyLineHintText = i18n.translate('esqlEditor.ghostLineHint', {
     defaultMessage: 'Type // and press {commandKey}+J to ask AI to add a step',
+    values: { commandKey },
+  });
+  const commentLineHintText = i18n.translate('esqlEditor.ghostCommentHint', {
+    defaultMessage: 'Press {commandKey}+J to generate',
     values: { commandKey },
   });
 
   const ghostLineHintStyle = useMemo(
     () => css`
-      .${GHOST_HINT_CLASS}::after {
-        content: ${JSON.stringify(ghostHintText)};
+      .${EMPTY_LINE_HINT_CLASS}::after, .${COMMENT_LINE_HINT_CLASS}::after {
         opacity: 0.4;
         font-style: italic;
         pointer-events: none;
         color: ${euiTheme.colors.textSubdued};
       }
+      .${EMPTY_LINE_HINT_CLASS}::after {
+        content: ${JSON.stringify(emptyLineHintText)};
+      }
+      .${COMMENT_LINE_HINT_CLASS}::after {
+        content: ${JSON.stringify(' ' + commentLineHintText)};
+      }
     `,
-    [euiTheme.colors.textSubdued, ghostHintText]
+    [euiTheme.colors.textSubdued, emptyLineHintText, commentLineHintText]
   );
 
   const clearDecoration = useCallback(() => {
@@ -83,23 +99,31 @@ export const useGhostLineHint = ({
   }, []);
 
   const showDecoration = useCallback(
-    (lineNumber: number) => {
+    (lineNumber: number, kind: Exclude<GhostHintKind, null>) => {
       const editor = editorRef.current;
-      if (!editor) return;
+      const model = editorModel.current;
+      if (!editor || !model) return;
 
       decorationsRef.current?.clear();
 
+      const isComment = kind === 'comment';
+      // For comments, anchor the decoration at the end of the existing text so the
+      // ::after pseudo-element renders right after the comment. For empty lines
+      // there's no content, so the decoration sits at column 1.
+      const column = isComment ? model.getLineMaxColumn(lineNumber) : 1;
+      const afterContentClassName = isComment ? COMMENT_LINE_HINT_CLASS : EMPTY_LINE_HINT_CLASS;
+
       decorationsRef.current = editor.createDecorationsCollection([
         {
-          range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+          range: new monaco.Range(lineNumber, column, lineNumber, column),
           options: {
-            isWholeLine: true,
-            className: GHOST_HINT_CLASS,
+            afterContentClassName,
+            description: 'esql-ghost-line-hint',
           },
         },
       ]);
     },
-    [editorRef]
+    [editorRef, editorModel]
   );
 
   const clearTimer = useCallback(() => {
@@ -113,32 +137,29 @@ export const useGhostLineHint = ({
     (editor: monaco.editor.IStandaloneCodeEditor): monaco.IDisposable[] => {
       const disposables: monaco.IDisposable[] = [];
 
-      disposables.push(
-        editor.onDidChangeCursorPosition(() => {
-          clearDecoration();
-          clearTimer();
+      const scheduleEvaluation = () => {
+        clearDecoration();
+        clearTimer();
 
-          debounceTimerRef.current = setTimeout(() => {
-            if (!isEnabledRef.current) return;
-            if (isReviewActiveRef.current) return;
+        debounceTimerRef.current = setTimeout(() => {
+          if (!isEnabledRef.current) return;
+          if (isReviewActiveRef.current) return;
 
-            const model = editorModel.current;
-            const position = editor.getPosition();
-            if (!model || !position) return;
+          const model = editorModel.current;
+          const position = editor.getPosition();
+          if (!model || !position) return;
 
-            if (shouldShowGhostHint(model, position.lineNumber)) {
-              showDecoration(position.lineNumber);
-            }
-          }, CURSOR_PAUSE_MS);
-        })
-      );
+          const kind = getGhostHintKind(model, position.lineNumber);
+          if (kind) {
+            showDecoration(position.lineNumber, kind);
+          }
+        }, CURSOR_PAUSE_MS);
+      };
 
-      disposables.push(
-        editor.onDidChangeModelContent(() => {
-          clearTimer();
-          clearDecoration();
-        })
-      );
+      // Both cursor moves and content edits restart the debounce so the hint
+      // shows after the user pauses — including after typing `//` on a fresh line.
+      disposables.push(editor.onDidChangeCursorPosition(scheduleEvaluation));
+      disposables.push(editor.onDidChangeModelContent(scheduleEvaluation));
 
       disposables.push({
         dispose: () => {

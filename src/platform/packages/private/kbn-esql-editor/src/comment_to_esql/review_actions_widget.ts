@@ -14,7 +14,9 @@ import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 
 const WIDGET_ID = 'ESQL_COMMENT_REVIEW_ACTIONS_WIDGET';
-const ZONE_HEIGHT_PX = 30;
+// Buttons (~30px) plus 8px breathing room above so they don't sit flush against the inserted code.
+const ZONE_HEIGHT_PX = 38;
+const ZONE_PADDING_TOP_PX = 8;
 
 interface ReviewActionsCallbacks {
   onAccept: () => void;
@@ -100,7 +102,9 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
       display: flex;
       flex-direction: row;
       align-items: center;
+      box-sizing: border-box;
       height: ${ZONE_HEIGHT_PX}px;
+      padding-top: ${ZONE_PADDING_TOP_PX}px;
       white-space: nowrap;
       width: max-content;
 
@@ -142,29 +146,31 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
   ): HTMLButtonElement {
     const colors: Record<
       typeof variant,
-      { bg: string; text: string; hoverBg: string; hoverText: string }
+      { bg: string; text: string; border: string; hoverBg: string; hoverText: string }
     > = {
       success: {
-        bg: this.euiTheme.colors.backgroundFilledSuccess,
-        text: this.euiTheme.colors.textInverse,
-        hoverBg: this.euiTheme.colors.textSuccess,
+        bg: this.euiTheme.colors.backgroundLightSuccess,
+        text: this.euiTheme.colors.textSuccess,
+        border: 'transparent',
+        hoverBg: this.euiTheme.colors.backgroundFilledSuccess,
         hoverText: this.euiTheme.colors.textInverse,
       },
       neutral: {
-        bg: this.euiTheme.colors.backgroundFilledText,
-        text: this.euiTheme.colors.textInverse,
+        bg: this.euiTheme.colors.backgroundBasePlain,
+        text: this.euiTheme.colors.textParagraph,
+        border: this.euiTheme.colors.borderBasePlain,
         hoverBg: this.euiTheme.colors.backgroundFilledText,
         hoverText: this.euiTheme.colors.textInverse,
       },
     };
 
-    const { bg, text, hoverBg, hoverText } = colors[variant];
+    const { bg, text, border, hoverBg, hoverText } = colors[variant];
 
     const btn = document.createElement('button');
     btn.textContent = label;
     btn.className = css`
       cursor: pointer;
-      border: none;
+      border: 1px solid ${border};
       border-radius: ${this.euiTheme.border.radius.small};
       padding: ${this.euiTheme.size.xxs} ${this.euiTheme.size.s};
       font-size: ${this.euiTheme.size.m};
@@ -175,6 +181,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
       &:hover {
         background-color: ${hoverBg};
         color: ${hoverText};
+        border-color: ${hoverBg};
       }
     `;
     btn.addEventListener('click', (e) => {

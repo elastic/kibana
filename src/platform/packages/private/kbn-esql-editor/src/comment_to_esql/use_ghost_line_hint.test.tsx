@@ -9,7 +9,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { monaco } from '@kbn/code-editor';
-import { shouldShowGhostHint, useGhostLineHint } from './use_ghost_line_hint';
+import { getGhostHintKind, useGhostLineHint } from './use_ghost_line_hint';
 
 const buildModel = (
   lines: string[]
@@ -20,6 +20,7 @@ const buildModel = (
   let current = lines;
   const model = {
     getLineContent: jest.fn((lineNumber: number) => current[lineNumber - 1] ?? ''),
+    getLineMaxColumn: jest.fn((lineNumber: number) => (current[lineNumber - 1] ?? '').length + 1),
     getValueLength: jest.fn(() => current.join('\n').length),
   } as unknown as monaco.editor.ITextModel;
   return {
@@ -30,20 +31,30 @@ const buildModel = (
   };
 };
 
-describe('shouldShowGhostHint', () => {
-  it('returns true on an empty line in a non-empty editor', () => {
+describe('getGhostHintKind', () => {
+  it('returns "empty" on a blank line in a non-empty editor', () => {
     const { model } = buildModel(['FROM logs', '']);
-    expect(shouldShowGhostHint(model, 2)).toBe(true);
+    expect(getGhostHintKind(model, 2)).toBe('empty');
   });
 
-  it('returns false on a non-empty line', () => {
+  it('returns "comment" when the line starts with //', () => {
+    const { model } = buildModel(['FROM logs', '// summarise per host']);
+    expect(getGhostHintKind(model, 2)).toBe('comment');
+  });
+
+  it('returns "comment" even when the // comment is preceded by whitespace', () => {
+    const { model } = buildModel(['  // indented']);
+    expect(getGhostHintKind(model, 1)).toBe('comment');
+  });
+
+  it('returns null on a non-empty, non-comment line', () => {
     const { model } = buildModel(['FROM logs']);
-    expect(shouldShowGhostHint(model, 1)).toBe(false);
+    expect(getGhostHintKind(model, 1)).toBeNull();
   });
 
-  it('returns false in an entirely empty editor (so it does not clash with the placeholder)', () => {
+  it('returns null in an entirely empty editor (so it does not clash with the placeholder)', () => {
     const { model } = buildModel(['']);
-    expect(shouldShowGhostHint(model, 1)).toBe(false);
+    expect(getGhostHintKind(model, 1)).toBeNull();
   });
 });
 
@@ -78,6 +89,12 @@ describe('useGhostLineHint', () => {
       fireCursorChange: () => cursorListeners.forEach((cb) => cb()),
       fireContentChange: () => contentListeners.forEach((cb) => cb()),
     };
+  };
+
+  const lastDecorationClassName = (editor: monaco.editor.IStandaloneCodeEditor): string => {
+    const calls = (editor.createDecorationsCollection as jest.Mock).mock.calls;
+    const lastDecoration = calls[calls.length - 1][0][0];
+    return lastDecoration.options.afterContentClassName;
   };
 
   const renderGhostHint = (
@@ -120,14 +137,12 @@ describe('useGhostLineHint', () => {
     jest.useRealTimers();
   });
 
-  it('shows the hint only after the cursor has been still for the debounce window', () => {
+  it('shows the empty-line hint after the cursor has been still for the debounce window', () => {
     const stubs = renderGhostHint();
 
     act(() => {
       stubs.fireCursorChange();
     });
-
-    // Before the debounce elapses no decoration is created.
     expect(stubs.editor.createDecorationsCollection).not.toHaveBeenCalled();
 
     act(() => {
@@ -135,20 +150,40 @@ describe('useGhostLineHint', () => {
     });
 
     expect(stubs.editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
+    expect(lastDecorationClassName(stubs.editor)).toBe('esqlGhostLineHint');
   });
 
-  it('cancels the pending hint when the model content changes during the debounce window', () => {
+  it('shows the comment-line hint when the cursor is on a // line and the user pauses', () => {
+    // Cursor is on line 2 (per the stub's getPosition); make line 2 a comment.
+    const { model } = buildModel(['FROM logs', '// summarise per host']);
+    const stubs = renderGhostHint({ model });
+
+    act(() => {
+      // Simulates the user typing the comment: a content change followed by a pause.
+      stubs.fireContentChange();
+      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+    });
+
+    expect(stubs.editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
+    expect(lastDecorationClassName(stubs.editor)).toBe('esqlGhostCommentHint');
+  });
+
+  it('resets the debounce on each subsequent edit so the hint only appears after the user pauses', () => {
     const stubs = renderGhostHint();
 
     act(() => {
       stubs.fireCursorChange();
-      // User types something before the 400ms is up.
       jest.advanceTimersByTime(CURSOR_PAUSE_MS - 100);
+      // User keeps typing before the 400ms is up — debounce restarts.
       stubs.fireContentChange();
-      jest.advanceTimersByTime(200);
+      jest.advanceTimersByTime(CURSOR_PAUSE_MS - 100);
     });
-
     expect(stubs.editor.createDecorationsCollection).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+    });
+    expect(stubs.editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
   });
 
   it('does not show the hint while a review is active', () => {
