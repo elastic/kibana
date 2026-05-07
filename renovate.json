@@ -856,12 +856,7 @@
       "matchDepNames": [
         "fastify",
         "find-my-way",
-        "@fastify/compress",
-        "@fastify/cookie",
-        "@fastify/http-proxy",
-        "@fastify/multipart",
-        "@fastify/secure-session",
-        "@fastify/static"
+        "@fastify/multipart"
       ],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],

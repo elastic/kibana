@@ -50,12 +50,7 @@ patch-package
 @opentelemetry/resources
 @opentelemetry/exporter-logs-otlp-grpc
 @opentelemetry/exporter-logs-otlp-proto
-@fastify/compress
-@fastify/cookie
-@fastify/http-proxy
 @fastify/multipart
-@fastify/secure-session
-@fastify/static
 @hapi/iron
 fastify
 find-my-way

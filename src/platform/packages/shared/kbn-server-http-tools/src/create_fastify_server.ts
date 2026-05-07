@@ -15,9 +15,8 @@ import type { FastifyInstance } from 'fastify';
  *
  * @remarks
  * This is a scaffold: {@link createServer} still returns `@hapi/hapi` until `HttpServer`
- * is ported to register routes and lifecycle hooks against Fastify. Official plugins
- * (`@fastify/static`, `@fastify/cookie`, `@fastify/secure-session`, `@fastify/compress`,
- * `@fastify/multipart`) are added at the workspace root for the migration workstream.
+ * is ported to register routes and lifecycle hooks against Fastify. Example: `@fastify/multipart`
+ * is declared at the workspace root for `@kbn/core-http-server-internal`.
  *
  * @internal
  */
