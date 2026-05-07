@@ -7,17 +7,72 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { createQueryClientWrapper } from '@kbn/react-query';
+import { I18nProvider } from '@kbn/i18n-react';
 import { CreateRulePanel } from './create_rule_panel';
 
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: (token: unknown) => {
+    if (token === 'http') {
+      return { basePath: { prepend: (p: string) => p } };
+    }
+    return {};
+  },
+  CoreStart: (key: string) => key,
+}));
+
+const renderPanel = () =>
+  render(
+    <I18nProvider>
+      <CreateRulePanel />
+    </I18nProvider>
+  );
+
 describe('CreateRulePanel', () => {
-  it('should render', () => {
-    render(<CreateRulePanel onClose={jest.fn()} />, { wrapper: createQueryClientWrapper() });
+  it('renders the welcome title', () => {
+    renderPanel();
+
     expect(
-      screen.getByRole('heading', { level: 2, name: 'Create Rule' })
-    ).toBeInTheDocument<HTMLHeadingElement>();
-    expect(
-      screen.getByText('Create a new rule to start monitoring your data.')
+      screen.getByRole('heading', { level: 2, name: /welcome to the new alerting experience/i })
     ).toBeInTheDocument();
+  });
+
+  it('renders the description text', () => {
+    renderPanel();
+
+    expect(screen.getByText(/powerful es\|ql-driven rules/i)).toBeInTheDocument();
+  });
+
+  it('renders the "Create with ES|QL" card with correct href', () => {
+    renderPanel();
+
+    const card = screen.getByRole('link', { name: /create with es\|ql/i });
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveAttribute('href', '/app/management/alertingV2/rules/create');
+  });
+
+  it('renders the "Create with AI Agent" card as disabled', () => {
+    renderPanel();
+
+    expect(screen.getByText('Create with AI Agent')).toBeInTheDocument();
+    expect(screen.getByText('Coming soon')).toBeInTheDocument();
+  });
+
+  it('renders the "Threshold Alert" card with correct href', () => {
+    renderPanel();
+
+    const card = screen.getByRole('link', { name: /threshold alert/i });
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveAttribute('href', '/app/management/alertingV2/rules/create');
+  });
+
+  it('renders the documentation link', () => {
+    renderPanel();
+
+    const link = screen.getByTestId('createRulePanelDocumentationLink');
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/guide/en/elasticsearch/reference/current/alerting-rule-types.html'
+    );
   });
 });

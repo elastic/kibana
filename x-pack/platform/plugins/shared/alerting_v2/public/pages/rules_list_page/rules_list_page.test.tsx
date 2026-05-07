@@ -620,9 +620,9 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('navigates to create page when create button is clicked', () => {
+  it('navigates to rule selector page when create button is clicked', () => {
     mockUseFetchRules.mockReturnValue({
-      data: { items: [], total: 0, page: 1, perPage: 20 },
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
       isError: false,
       error: null,
@@ -632,7 +632,7 @@ describe('RulesListPage', () => {
 
     expect(screen.getByTestId('createRuleButton')).toHaveAttribute(
       'href',
-      '/app/management/alertingV2/rules/create'
+      '/app/management/alertingV2/rules/method_selector'
     );
   });
 

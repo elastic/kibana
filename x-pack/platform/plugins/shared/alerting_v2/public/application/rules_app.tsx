@@ -9,6 +9,7 @@ import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { RuleFormPage } from '../pages/rule_form_page/rule_form_page';
 import { RulesListPage } from '../pages/rules_list_page/rules_list_page';
+import { RuleMethodSelectorPage } from '../pages/rule_method_selector/rule_method_selector_page';
 import { RuleDetailsRoute } from '../routes/rule_details_route';
 
 export const RulesApp = () => {
@@ -19,6 +20,9 @@ export const RulesApp = () => {
       </Route>
       <Route path="/create">
         <RuleFormPage />
+      </Route>
+      <Route exact path="/method_selector">
+        <RuleMethodSelectorPage />
       </Route>
       <Route exact path="/:ruleId">
         <RuleDetailsRoute />

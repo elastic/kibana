@@ -21,11 +21,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { paths } from '../../constants';
 import { RulesListTableContainer } from './rules_list_table_container';
 import type { RulesListTableSortField } from './rules_list_table';
 import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_popover';
@@ -49,6 +51,7 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
+  const basePath = useService(CoreStart('http')).basePath;
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -59,7 +62,6 @@ export const RulesListPage = () => {
   const [sortField, setSortField] = useState<FindRulesSortField>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const filter = useMemo(
     () =>
@@ -124,7 +126,7 @@ export const RulesListPage = () => {
                   key="create-rule"
                   fill
                   iconType="plusInCircle"
-                  onClick={() => setIsCreateModalOpen(true)}
+                  href={basePath.prepend(paths.ruleSelector)}
                   data-test-subj="createRuleButton"
                 >
                   <FormattedMessage
@@ -162,7 +164,7 @@ export const RulesListPage = () => {
           <EuiSpacer />
         </>
       ) : null}
-      {showEmptyState ? <CreateRulePanel onClose={() => setIsCreateModalOpen(false)} /> : null}
+      {showEmptyState ? <CreateRulePanel /> : null}
       {hasRules ? (
         <>
           <EuiFlexGroup gutterSize="s">
@@ -206,7 +208,6 @@ export const RulesListPage = () => {
           />
         </>
       ) : null}
-      {isCreateModalOpen ? <CreateRulePanel onClose={() => setIsCreateModalOpen(false)} /> : null}
     </div>
   );
 };

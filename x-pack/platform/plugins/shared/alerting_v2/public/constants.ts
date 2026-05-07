@@ -32,6 +32,7 @@ export const paths = {
   ruleEdit: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
   ruleDetails: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(id)}`,
   ruleList: ALERTING_V2_RULES_BASE_PATH,
+  ruleSelector: `${ALERTING_V2_RULES_BASE_PATH}/method_selector`,
   actionPolicyCreate: `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/create`,
   actionPolicyEdit: (id: string) =>
     `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
