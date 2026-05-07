@@ -41,7 +41,7 @@ describe('QuickActionsGrid', () => {
     onOpenLandingOverlay.mockClear();
   });
 
-  it('renders illustration hints below titles when defined', () => {
+  it('renders quick action cards without description under the title', () => {
     const caps = buildCapabilities(['management.insightsAndAlerting.reporting']);
 
     render(
@@ -54,8 +54,9 @@ describe('QuickActionsGrid', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByText(/Illustration for layout only/i)).toBeInTheDocument();
-    expect(screen.getByText(/Example: 2.6M views/i)).toBeInTheDocument();
+    expect(screen.getByTestId('managementQuickAction-reporting')).toBeInTheDocument();
+    expect(screen.queryByText(/Illustration for layout only/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Example:/i)).not.toBeInTheDocument();
   });
 
   it('renders cards for actions the user has capabilities for', () => {

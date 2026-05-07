@@ -31,11 +31,6 @@ export interface QuickActionDefinition {
   capabilityPath: string;
   /** When set, open this overlay on the landing page if a renderer was registered; else fall back to `path`. */
   overlayId?: string;
-  /**
-   * Optional wireframe-style metric shown under the title (not live telemetry).
-   * Paired with a neutral disclaimer in the grid.
-   */
-  usageHintMetric?: string;
 }
 
 export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
@@ -48,9 +43,6 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
     appId: 'management',
     path: 'data/index_management',
     capabilityPath: 'management.data.index_management',
-    usageHintMetric: i18n.translate('management.landing.quickActions.hint.indicesExampleDocCount', {
-      defaultMessage: 'Example: 1.2k docs',
-    }),
   },
   {
     id: 'alerting_rules',
@@ -61,9 +53,6 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
     appId: 'management',
     path: 'insightsAndAlerting/triggersActions',
     capabilityPath: 'management.insightsAndAlerting.triggersActions',
-    usageHintMetric: i18n.translate('management.landing.quickActions.hint.alertRulesExample', {
-      defaultMessage: 'Example: 24 active',
-    }),
   },
   {
     id: 'reporting',
@@ -74,9 +63,6 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
     appId: 'management',
     path: 'insightsAndAlerting/reporting/exports',
     capabilityPath: 'management.insightsAndAlerting.reporting',
-    usageHintMetric: i18n.translate('management.landing.quickActions.hint.reportingExampleMetric', {
-      defaultMessage: 'Example: 2.6M views',
-    }),
   },
   {
     id: 'api_keys',

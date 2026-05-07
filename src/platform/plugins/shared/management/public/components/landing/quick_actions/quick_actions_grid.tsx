@@ -37,11 +37,6 @@ export const QuickActionsGrid = ({
   onOpenLandingOverlay: (overlayId: string) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const usageHintCss = css`
-    display: block;
-    font-size: ${euiTheme.font.scale.xs};
-    color: ${euiTheme.colors.subdued};
-  `;
   const visibleActions = useMemo(
     () =>
       QUICK_ACTION_DEFINITIONS.filter((action) =>
@@ -111,19 +106,6 @@ export const QuickActionsGrid = ({
                 title={action.title}
                 titleSize="xs"
                 layout="horizontal"
-                description={
-                  action.usageHintMetric ? (
-                    <>
-                      <span css={usageHintCss}>{action.usageHintMetric}</span>
-                      <span css={usageHintCss}>
-                        <FormattedMessage
-                          id="management.landing.quickActions.usageHintNotLiveData"
-                          defaultMessage="Illustration for layout only; not your usage data."
-                        />
-                      </span>
-                    </>
-                  ) : undefined
-                }
                 onClick={() => handleClick(action)}
                 data-test-subj={`managementQuickAction-${action.id}`}
               />
