@@ -149,18 +149,29 @@ export function validateJsonSchemaDefaults(
     } else if (isLegacyArray) {
       // Legacy array format: inputs[0].default -> find the input name and map to normalized property
       const arrayIndex = path[1] as number;
+      let inputName: string | undefined;
       if (
         Array.isArray(inputs) &&
         inputs[arrayIndex] &&
         typeof inputs[arrayIndex] === 'object' &&
         'name' in inputs[arrayIndex]
       ) {
-        const inputName = String(inputs[arrayIndex].name);
-        propertyName = inputName;
-        propertyKey = `inputs.properties.${inputName}`;
-      } else {
+        inputName = String((inputs[arrayIndex] as { name: unknown }).name);
+      } else if (
+        normalizedInputs?.properties &&
+        typeof normalizedInputs.properties === 'object' &&
+        !Array.isArray(normalizedInputs.properties)
+      ) {
+        // `extractNormalizedInputsFromYaml` returns JSON Schema object form, not the legacy array.
+        // Property order matches legacy array order from `convertLegacyFieldsToJsonSchema`.
+        const orderedKeys = Object.keys(normalizedInputs.properties);
+        inputName = orderedKeys[arrayIndex];
+      }
+      if (!inputName) {
         return null;
       }
+      propertyName = inputName;
+      propertyKey = `inputs.properties.${inputName}`;
     } else {
       const definitionName = String(path[2]);
       const propertyPath = path.slice(4, -1);
