@@ -46,6 +46,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -86,6 +87,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -274,6 +276,7 @@
             "lineNumber": 33,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "EmptyPlaceholderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -507,6 +510,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -547,6 +551,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -769,6 +774,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActiveCursor",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -788,6 +794,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RefObject",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -805,6 +812,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActiveCursorSyncOption",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1833,7 +1841,7 @@
         "label": "ColorMode",
         "description": [],
         "signature": [
-          "\"Background\" | \"Labels\" | \"None\""
+          "\"Labels\" | \"Background\" | \"None\""
         ],
         "path": "src/platform/plugins/shared/charts/common/static/components/collections.ts",
         "lineNumber": 18,
@@ -3758,7 +3766,7 @@
         "label": "ColorMode",
         "description": [],
         "signature": [
-          "\"Background\" | \"Labels\" | \"None\""
+          "\"Labels\" | \"Background\" | \"None\""
         ],
         "path": "src/platform/plugins/shared/charts/common/static/components/collections.ts",
         "lineNumber": 18,

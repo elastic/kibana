@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CombinedJobWithStats } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { HttpSetup } from '@kbn/core/public';
 
 export interface GetJobsArgs {

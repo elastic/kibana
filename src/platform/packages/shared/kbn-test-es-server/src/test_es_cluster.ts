@@ -76,7 +76,15 @@ export interface CreateTestEsClusterOptions {
   esFrom?: string;
   esServerlessOptions?: Pick<
     ServerlessOptions,
-    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType' | 'dataPath' | 'uiam'
+    | 'image'
+    | 'tag'
+    | 'resources'
+    | 'host'
+    | 'kibanaUrl'
+    | 'projectType'
+    | 'dataPath'
+    | 'uiam'
+    | 'uiamOAuth'
   >;
   esJavaOpts?: string;
   /**
@@ -162,6 +170,12 @@ export interface CreateTestEsClusterOptions {
    */
   serverless?: boolean;
   /**
+   * Clean existing serverless object store data before startup.
+   *
+   * Defaults to `true` for backwards compatibility.
+   */
+  clean?: boolean;
+  /**
    * Files to mount inside ES containers
    */
   files?: string[];
@@ -210,6 +224,7 @@ export function createTestEsCluster<
     onEarlyExit,
     files,
     secureFiles,
+    clean = true,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
@@ -307,7 +322,7 @@ export function createTestEsCluster<
           dataPath: `stateless-${clusterName}`,
           ...esServerlessOptions,
           port,
-          clean: true,
+          clean,
           background: true,
           files,
           ssl,

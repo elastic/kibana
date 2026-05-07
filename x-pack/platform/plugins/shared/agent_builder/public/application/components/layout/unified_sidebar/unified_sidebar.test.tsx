@@ -28,6 +28,11 @@ jest.mock('../../../hooks/agents/use_validate_agent_id', () => ({
 
 jest.mock('../../../hooks/use_last_agent_id', () => ({
   useLastAgentId: () => 'test-agent',
+  getLastAgentId: () => 'test-agent',
+}));
+
+jest.mock('../../../context/active_space_context', () => ({
+  useActiveSpaceId: () => 'default',
 }));
 
 jest.mock('../../../hooks/use_conversation_list', () => ({
@@ -45,6 +50,10 @@ jest.mock('./shared/sidebar_header', () => ({
 jest.mock('react-use/lib/useLocalStorage', () => ({
   __esModule: true,
   default: () => [undefined, jest.fn()],
+}));
+
+jest.mock('../../../context/send_message/send_message_context', () => ({
+  useSendMessageContext: () => ({ removeAllErrors: jest.fn() }),
 }));
 
 import { UnifiedSidebar } from './unified_sidebar';

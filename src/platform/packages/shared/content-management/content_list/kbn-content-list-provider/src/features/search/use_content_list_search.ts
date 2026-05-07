@@ -8,89 +8,79 @@
  */
 
 import { useCallback } from 'react';
+import type { Query } from '@elastic/eui';
 import { useContentListState } from '../../state/use_content_list_state';
 import { useContentListConfig } from '../../context';
 import { CONTENT_LIST_ACTIONS } from '../../state/types';
-import type { ActiveFilters } from '../../datasource';
+import { useFieldDefinitions } from '../../query_model';
 
 /**
  * Return type for the {@link useContentListSearch} hook.
  */
 export interface UseContentListSearchReturn {
-  /** Current search text (empty string when no search is active). */
-  search: string;
+  /** The query text — source of truth for the search bar. */
+  queryText: string;
   /**
-   * Atomically updates the query text and parsed filters in a single dispatch.
-   * No-op if search is disabled.
-   *
-   * @param queryText - The raw `EuiSearchBar` query text (may include filter syntax).
-   * @param filters - The parsed {@link ActiveFilters} derived from `queryText`.
+   * Update query from an already-parsed EUI Query object (search bar typing).
+   * Stores `query.text` as the new queryText.
    */
-  setSearch: (queryText: string, filters: ActiveFilters) => void;
+  setQueryFromEuiQuery: (euiQuery: Query) => void;
+  /** Update query from raw text (programmatic input, URL params). */
+  setQueryFromText: (text: string) => void;
   /** Whether search is supported (enabled via features). */
   isSupported: boolean;
+  /**
+   * Registered field names from field definitions.
+   * Pass to `EuiSearchBar`'s `box.schema` so it recognizes filter fields.
+   */
+  fieldNames: string[];
 }
 
 /**
- * Hook to access and control the search query text.
+ * Hook to access and control the search query.
  *
- * Returns the raw `EuiSearchBar` query text (`search.queryText`) and a setter
- * that atomically updates both the displayed query text and the parsed filters
- * used for data fetching. When search is disabled via `features.search: false`,
- * `setSearch` becomes a no-op and `isSupported` returns `false`.
- *
- * When tag services are available, the toolbar parses tag filter syntax
- * (e.g., `tag:production`) from the query text and passes the full
- * {@link ActiveFilters} object to `setSearch`. To toggle a tag without
- * going through the search bar (e.g., a tag badge click), use
- * {@link useTagFilterToggle} — it rebuilds the query text via EUI's `Query`
- * API so the toolbar stays in sync.
- *
- * @throws Error if used outside `ContentListProvider`.
- * @returns Object containing `search` text, `setSearch` function, and `isSupported` flag.
- *
- * @example
- * ```tsx
- * const SearchInput = () => {
- *   const { search, setSearch, isSupported } = useContentListSearch();
- *
- *   if (!isSupported) return null;
- *
- *   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
- *     const text = e.target.value;
- *     setSearch(text, { search: text.trim() || undefined });
- *   };
- *
- *   return (
- *     <EuiFieldSearch
- *       value={search}
- *       onChange={handleChange}
- *       placeholder="Search..."
- *     />
- *   );
- * };
- * ```
+ * `queryText` is the source of truth — read directly from state.
+ * The structured model ({@link ContentListQueryModel}) is derived on-demand
+ * by consumers that need it (via `useQueryModel`).
  */
 export const useContentListSearch = (): UseContentListSearchReturn => {
   const { supports } = useContentListConfig();
   const { state, dispatch } = useContentListState();
+  const { fieldNames } = useFieldDefinitions();
 
-  const setSearch = useCallback(
-    (queryText: string, filters: ActiveFilters) => {
+  const queryText = state.queryText;
+
+  const setQueryFromEuiQuery = useCallback(
+    (euiQuery: Query) => {
       if (!supports.search) {
         return;
       }
       dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
-        payload: { queryText, filters },
+        type: CONTENT_LIST_ACTIONS.SET_QUERY,
+        payload: { queryText: euiQuery.text },
+      });
+    },
+    [dispatch, supports.search]
+  );
+
+  const setQueryFromText = useCallback(
+    (text: string) => {
+      if (!supports.search) {
+        return;
+      }
+      dispatch({
+        type: CONTENT_LIST_ACTIONS.SET_QUERY,
+        payload: { queryText: text },
       });
     },
     [dispatch, supports.search]
   );
 
   return {
-    search: state.search.queryText,
-    setSearch,
+    queryText,
+    setQueryFromEuiQuery,
+    setQueryFromText,
     isSupported: supports.search,
+    fieldNames,
   };
 };

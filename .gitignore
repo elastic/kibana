@@ -1,4 +1,5 @@
 .artifacts
+docs/**/.artifacts
 .aws-config.json
 .signing-config.json
 .ackrc
@@ -71,6 +72,7 @@ webpackstats.json
 !/config/serverless.yml
 !/config/serverless.es.yml
 !/config/serverless.workplaceai.yml
+!/config/serverless.vectordb.yml
 !/config/serverless.oblt.yml
 !/config/serverless.oblt.complete.yml
 !/config/serverless.oblt.logs_essentials.yml
@@ -84,6 +86,7 @@ coverage
 selenium
 .babel_register_cache.json
 .webpack.babelcache
+.swc
 *.swp
 *.swo
 *.swn

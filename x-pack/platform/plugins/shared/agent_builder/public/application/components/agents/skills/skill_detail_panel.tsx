@@ -11,17 +11,16 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
 import { useSkill } from '../../../hooks/skills/use_skills';
-import { DetailRow } from '../common/detail_row';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
-import { RenderSkillContentReadOnly } from '../common/render_skill_content_read_only';
+import { RenderMarkdownReadOnly } from '../common/render_markdown_read_only';
 import { ToolReadOnlyFlyout } from '../tools/tool_readonly_flyout';
+import { SkillTools } from './skill_tools';
 
 interface SkillDetailPanelProps {
   skillId: string;
@@ -48,14 +47,14 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
         isLoading={isLoading}
         isEmpty={!skill}
         title={skill?.name ?? skillId}
-        showAutoIcon={isAutoIncluded}
+        isReadOnly={skill?.readonly ?? false}
         headerContent={
           <>
             <EuiText
-              size="xs"
+              size="s"
               color="subdued"
               css={css`
-                margin-top: ${euiTheme.size.xs};
+                margin-top: ${euiTheme.size.s};
               `}
             >
               {skill?.id}
@@ -64,7 +63,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
               size="s"
               color="subdued"
               css={css`
-                margin-top: ${euiTheme.size.s};
+                margin-top: ${euiTheme.size.l};
               `}
             >
               {skill?.description}
@@ -90,30 +89,11 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
           onConfirm: onRemove,
         }}
       >
-        <div
-          css={css`
-            padding: ${euiTheme.size.m};
-          `}
-        >
-          <div
-            css={css`
-              padding: ${euiTheme.size.m};
-            `}
-          >
-            <RenderSkillContentReadOnly content={skill?.content ?? ''} />
-          </div>
-          {skill?.tool_ids && skill.tool_ids.length > 0 && (
-            <DetailRow label={labels.skills.toolsLabel} isLast>
-              <EuiFlexGroup direction="column" gutterSize="xs">
-                {skill.tool_ids.map((toolId) => (
-                  <EuiFlexItem key={toolId} grow={false}>
-                    <EuiLink onClick={() => setSelectedToolId(toolId)}>{toolId}</EuiLink>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </DetailRow>
-          )}
-        </div>
+        <RenderMarkdownReadOnly
+          label={labels.agentSkills.skillDetailInstructionsLabel}
+          content={skill?.content ?? ''}
+        />
+        <SkillTools skillToolIds={skill?.tool_ids ?? []} onToolClick={setSelectedToolId} />
       </DetailPanelLayout>
       {selectedToolId && (
         <ToolReadOnlyFlyout toolId={selectedToolId} onClose={() => setSelectedToolId(null)} />

@@ -8,32 +8,19 @@
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { AlertEpisodeGroupAction } from '../types/action';
-import type { GroupActionRow } from '../queries/group_actions_query';
 import { fetchGroupActions } from '../apis/fetch_group_actions';
 import { queryKeys } from '../query_keys';
-
-const tagsFromRow = (value: GroupActionRow['tags']): string[] => {
-  if (value == null) {
-    return [];
-  }
-  if (typeof value === 'string') {
-    return [value];
-  }
-  if (Array.isArray(value)) {
-    return value;
-  }
-  return [];
-};
+import { normalizeTags } from '../utils/normalize_tags';
 
 export interface UseFetchGroupActionsOptions {
   groupHashes: string[];
-  services: { expressions: ExpressionsStart };
+  expressions: ExpressionsStart;
 }
 
-export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupActionsOptions) =>
+export const useFetchGroupActions = ({ groupHashes, expressions }: UseFetchGroupActionsOptions) =>
   useQuery({
     queryKey: queryKeys.groupActions(groupHashes),
-    queryFn: ({ signal }) => fetchGroupActions({ groupHashes, abortSignal: signal, services }),
+    queryFn: ({ signal }) => fetchGroupActions({ groupHashes, abortSignal: signal, expressions }),
     enabled: groupHashes.length > 0,
     keepPreviousData: true,
     select: (rows) => {
@@ -45,7 +32,9 @@ export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupAct
           lastDeactivateAction: row.last_deactivate_action ?? null,
           lastSnoozeAction: row.last_snooze_action ?? null,
           snoozeExpiry: row.snooze_expiry ?? null,
-          tags: tagsFromRow(row.tags),
+          tags: normalizeTags(row.tags),
+          lastSnoozeActor: row.last_snooze_actor ?? null,
+          lastDeactivateActor: row.last_deactivate_actor ?? null,
         });
       }
       return map;

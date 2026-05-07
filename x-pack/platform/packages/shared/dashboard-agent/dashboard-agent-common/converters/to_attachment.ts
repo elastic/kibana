@@ -10,11 +10,7 @@ import type {
   DashboardSection,
   DashboardState,
 } from '@kbn/dashboard-plugin/server';
-import {
-  LensConfigBuilder,
-  type LensApiSchemaType,
-  type LensAttributes,
-} from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder, type LensAttributes } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { AttachmentPanel, DashboardSection as DashboardAttachmentSection } from '../types';
 import type { DashboardAttachmentData } from '../types';
@@ -23,10 +19,20 @@ import type { DashboardAttachmentData } from '../types';
  * Type guard to check if attributes are in LensAttributes format (internal).
  * LensAttributes have a `visualizationType` property, while LensApiSchemaType does not.
  */
-export const isLensAttributes = (
-  attributes: LensApiSchemaType | LensAttributes | undefined
-): attributes is LensAttributes => {
-  return Boolean(attributes && typeof attributes === 'object' && 'visualizationType' in attributes);
+export const isLensAttributesPanel = (
+  panel: DashboardPanel
+): panel is DashboardPanel & { config: { attributes: LensAttributes } } => {
+  const attributes =
+    panel.config && typeof panel.config === 'object' && 'attributes' in panel.config
+      ? panel.config.attributes
+      : undefined;
+
+  return (
+    panel.type === LENS_EMBEDDABLE_TYPE &&
+    typeof attributes === 'object' &&
+    attributes !== null &&
+    'visualizationType' in attributes
+  );
 };
 
 /**
@@ -34,37 +40,26 @@ export const isLensAttributes = (
  * For Lens panels with internal attributes format, converts to API format.
  */
 export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
-  if (panel.type === LENS_EMBEDDABLE_TYPE) {
-    const panelConfig = panel.config as
-      | { attributes?: LensApiSchemaType | LensAttributes }
-      | undefined;
-    const attributes = panelConfig?.attributes;
+  if (isLensAttributesPanel(panel)) {
+    const { attributes, ...restConfig } = panel.config;
+    try {
+      const apiFormatAttributes = new LensConfigBuilder().toAPIFormat(attributes);
 
-    if (isLensAttributes(attributes)) {
-      try {
-        const apiFormatAttributes = new LensConfigBuilder().toAPIFormat(
-          attributes
-        ) as unknown as Record<string, unknown>;
-
-        return {
-          type: 'lens',
-          id: panel.id ?? '',
-          config: {
-            ...panelConfig,
-            attributes: apiFormatAttributes,
-          },
-          grid: panel.grid,
-        };
-      } catch {
-        // fall through to generic storage when the Lens attributes cannot be converted to API format
-      }
+      return {
+        type: LENS_EMBEDDABLE_TYPE,
+        id: panel.id ?? '',
+        config: { ...restConfig, ...apiFormatAttributes },
+        grid: panel.grid,
+      };
+    } catch {
+      // fall through to generic storage when the Lens attributes cannot be converted to API format
     }
   }
 
   return {
     type: panel.type,
     id: panel.id ?? '',
-    config: (panel.config as Record<string, unknown> | undefined) ?? {},
+    config: panel.config,
     grid: panel.grid,
   };
 };

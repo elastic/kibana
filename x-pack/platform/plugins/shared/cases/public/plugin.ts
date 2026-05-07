@@ -78,7 +78,6 @@ export class CasesUiPlugin
 
     registerInternalAttachments(
       externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry
     );
 

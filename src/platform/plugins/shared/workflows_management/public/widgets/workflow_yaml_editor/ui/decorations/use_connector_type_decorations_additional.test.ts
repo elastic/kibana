@@ -17,6 +17,7 @@ const mockBuiltInStepTypes = new Set(['foreach', 'if']);
 const mockConnectorsMap = new Map<string, { stability?: string }>([
   ['elasticsearch.search', { stability: 'stable' }],
   ['tech_preview_connector', { stability: 'tech_preview' }],
+  ['kibana.createCase', { stability: 'stable' }],
 ]);
 
 jest.mock('@kbn/workflows', () => ({
@@ -25,6 +26,8 @@ jest.mock('@kbn/workflows', () => ({
     if (type === 'if') return 'tech_preview';
     return undefined;
   },
+  resolveKibanaStepTypeAlias: (type: string) =>
+    type === 'kibana.createCaseDefaultSpace' ? 'kibana.createCase' : type,
 }));
 
 jest.mock('../../../../../common/step_schemas', () => ({
@@ -140,6 +143,32 @@ describe('useConnectorTypeDecorations', () => {
       '    type: elasticsearch.search',
       '    with:',
       '      index: my-index',
+    ].join('\n');
+
+    const doc = parseDocument(yamlString, { keepSourceTokens: true });
+    const { editor } = createMockMonacoEditor(yamlString);
+
+    renderHook(() =>
+      useConnectorTypeDecorations({
+        editor,
+        yamlDocument: doc,
+        isEditorMounted: true,
+      })
+    );
+
+    jest.advanceTimersByTime(200);
+
+    expect(editor.createDecorationsCollection).toHaveBeenCalled();
+  });
+
+  it('creates decorations for deprecated aliases when their canonical type exists', () => {
+    const yamlString = [
+      'version: "1"',
+      'name: test',
+      'steps:',
+      '  - name: create_case',
+      '    type: kibana.createCaseDefaultSpace',
+      '    with: {}',
     ].join('\n');
 
     const doc = parseDocument(yamlString, { keepSourceTokens: true });

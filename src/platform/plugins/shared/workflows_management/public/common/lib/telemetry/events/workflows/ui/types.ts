@@ -24,6 +24,18 @@ export enum WorkflowUIEventTypes {
    * When the create workflow page is opened (user navigates to /create).
    */
   WorkflowCreateOpened = 'workflows_workflow_create_opened',
+  /**
+   * When the workflows UI is blocked because the user lacks read privileges.
+   */
+  WorkflowAccessDeniedPrivileges = 'workflows_workflow_access_denied_privileges',
+  /**
+   * When the workflows UI is blocked because the license does not include Workflows (stateful).
+   */
+  WorkflowAccessDeniedLicense = 'workflows_workflow_access_denied_license',
+  /**
+   * When the workflows UI is blocked because the serverless project tier is insufficient.
+   */
+  WorkflowAccessDeniedServerlessTier = 'workflows_workflow_access_denied_serverless_tier',
 }
 
 export type WorkflowDetailTab = 'workflow' | 'executions';
@@ -74,4 +86,19 @@ export interface ReportWorkflowDetailViewedActionParams {
    * Editor context if viewing the workflow/editor tab
    */
   editorType?: WorkflowEditorType;
+}
+
+/** Shown when the user cannot read workflows due to Kibana privileges. */
+export interface ReportWorkflowAccessDeniedPrivilegesActionParams {
+  eventName: string;
+}
+
+/** Shown when Workflows is not available under the current license (stateful). */
+export interface ReportWorkflowAccessDeniedLicenseActionParams {
+  eventName: string;
+}
+
+/** Shown when Workflows requires a higher serverless product tier. */
+export interface ReportWorkflowAccessDeniedServerlessTierActionParams {
+  eventName: string;
 }

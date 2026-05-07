@@ -160,6 +160,7 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           includeComments: true,
+          mode: 'legacy',
         },
         signal: abortCtrl.signal,
       });
@@ -224,6 +225,7 @@ describe('Cases API', () => {
           owner: [SECURITY_SOLUTION_OWNER],
           category: [],
           customFields: {},
+          extendedFieldFilters: [],
           from: DEFAULT_FROM_DATE,
           to: DEFAULT_TO_DATE,
         },

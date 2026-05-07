@@ -64,7 +64,7 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
           ...newState,
           title: newTitle,
           description: newDescription,
-          savedObjectId: id,
+          refId: id,
         });
         return { id };
       } catch (error) {

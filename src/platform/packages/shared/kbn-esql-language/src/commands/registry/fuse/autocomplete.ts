@@ -19,7 +19,6 @@ import {
   noneValueCompleteItem,
 } from '../complete_items';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { EDITOR_MARKER } from '../../definitions/constants';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import { columnExists, findFinalWord } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
@@ -40,6 +39,9 @@ enum FusePosition {
   WITH = 'with',
 }
 
+// After `KEY BY field,`, suggest the next KEY BY field.
+const KEY_BY_TRAILING_COMMA_REGEX = /\bkey\s+by(?:\s+\S+,)+\s*$/i;
+
 function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePosition {
   const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
 
@@ -54,7 +56,7 @@ function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePositi
   if (
     (keyBy && keyBy.incomplete) ||
     immediatelyAfterOptionFieldsList(innerText, 'key by') ||
-    keyBy?.text.includes(EDITOR_MARKER)
+    KEY_BY_TRAILING_COMMA_REGEX.test(innerText)
   ) {
     return FusePosition.KEY_BY;
   }

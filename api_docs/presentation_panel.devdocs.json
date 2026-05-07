@@ -26,7 +26,7 @@
           "<ApiType, PropsType>) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel.tsx",
-        "lineNumber": 26,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -49,9 +49,10 @@
               "<ApiType, PropsType>"
             ],
             "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel.tsx",
-            "lineNumber": 30,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PresentationPanelProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -91,6 +92,7 @@
             "lineNumber": 25,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "PresentationPanelErrorProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -163,20 +165,10 @@
         "signature": [
           "Omit<",
           "PresentationPanelInternalProps",
-          "<ApiType, PropsType>, \"Component\"> & { Component: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.MaybePromise",
-            "text": "MaybePromise"
-          },
-          "<",
-          "PanelCompatibleComponent",
-          "<ApiType, PropsType> | null>; }"
+          "<ApiType, PropsType>, \"Component\" | \"componentApi\"> & { getComponent: () => Promise<{ Component: React.FC<PropsType>; componentApi: ApiType; }>; }"
         ],
         "path": "src/platform/plugins/private/presentation_panel/public/panel_component/types.ts",
-        "lineNumber": 97,
+        "lineNumber": 92,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -58,6 +58,31 @@ export abstract class AbstractFileSystem {
    * without extracting anything. Use this to determine artifact state cheaply
    * (e.g. when artifacts already exist on disk and a full restore can be skipped).
    */
+  /**
+   * Reads prs/<prNumber>/metadata.json and returns the PR branch tip SHA that
+   * was type-checked and archived, or undefined if no archive exists for that PR.
+   */
+  public async getPrArchiveTipSha(prNumber: string): Promise<string | undefined> {
+    const metadata = await this.readMetadata(
+      this.getMetadataPath(join(PULL_REQUESTS_PATH, prNumber))
+    );
+    return metadata?.commitSha;
+  }
+
+  /**
+   * Reads prs/<prNumber>/metadata.json and returns the file hashes recorded at
+   * build time (yarn.lock, .nvmrc, .node-version). Used to verify that the PR
+   * archive was built against the same node_modules as the current checkout.
+   */
+  public async getPrArchiveFileHashes(
+    prNumber: string
+  ): Promise<Record<string, string> | undefined> {
+    const metadata = await this.readMetadata(
+      this.getMetadataPath(join(PULL_REQUESTS_PATH, prNumber))
+    );
+    return metadata?.fileHashes as Record<string, string> | undefined;
+  }
+
   public async findBestSha(shas: string[]): Promise<string | undefined> {
     for (const sha of shas) {
       const archivePath = this.getArchivePath(join(COMMITS_PATH, sha));
@@ -97,7 +122,11 @@ export abstract class AbstractFileSystem {
 
     const totalShas = options.shas.length;
 
-    this.log.info(`[Cache] Searching ${totalShas} candidate commit(s) for cached artifacts...`);
+    // Only log the search banner when we're genuinely scanning multiple candidates.
+    // When skipExistenceCheck is set the SHA is already resolved by the caller.
+    if (!options.skipExistenceCheck) {
+      this.log.info(`[Cache] Searching ${totalShas} candidate commit(s) for cached artifacts...`);
+    }
 
     for (let i = 0; i < totalShas; i++) {
       const sha = options.shas[i];
@@ -130,7 +159,11 @@ export abstract class AbstractFileSystem {
           await cleanTypeCheckArtifacts(this.log);
         }
 
-        this.log.info(`[Cache] Found archive for ${shortSha}, extracting...`);
+        if (options.skipExistenceCheck) {
+          this.log.info(`[Cache] Restoring ${shortSha}...`);
+        } else {
+          this.log.info(`[Cache] Found archive for ${shortSha}, extracting...`);
+        }
 
         await this.extract(archivePath);
 

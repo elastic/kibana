@@ -2,12 +2,13 @@
 
 ## Folder structure
 
-This library enables all the advanced features for ES|QL, as validation, autocomplete, hover, etc...
+This library enables all the advanced features for ES|QL, as validation, autocomplete, code actions, hover, etc.
 The package is structure as follow:
 
 ```
 src
  | autocomplete         // => the autocomplete/suggest service logic
+ | code_actions         // => quick fixes keyed by validation message codes
  | definitions          // => static assets to define all components behaviour of a ES|QL query: commands, functions, etc...
  | validation           // => the validation logic
 
@@ -91,6 +92,40 @@ suggestions.map( s => ({
 
 Note that the autocomplete service will work as best effort with invalid queries, trying to correct them on the fly before generating the suggestions. In case an invalid query cannot be handled an empty suggestion result set will be returned.
 
+#### Code actions
+
+Code actions are **quick fixes** tied to validation messages. Given the current query text and a message, we return a quick fix for it if exists that contains a fixed version of the query.
+
+##### Usage
+
+```js
+import { getQuickFixForMessage } from '@kbn/esql-language';
+
+const myCallbacks = {
+  getSources: async () => [
+    { name: 'my.wired.stream', hidden: false, type: 'WIRED_STREAM' },
+  ],
+  // ...other callbacks as needed; some fixes’ displayCondition requires getSources, etc.
+};
+
+const action = await getQuickFixForMessage({
+  queryString: 'FROM my.wired.stream | WHERE no_such_field > 0',
+  message: { code: 'unknownColumn' },
+  callbacks: myCallbacks,
+});
+
+if (action) {
+  console.log(action.title, action.fixedText);
+}
+```
+
+**Quick fixes registry** — Implementations live in `code_actions/fixes_by_message_code.ts`. Each entry is keyed by the **error `code` string** and may define:
+
+- `title` — user-visible label for the action
+- `fixQuery: (query: string) => string` — rewrites the full query (typically via `@elastic/esql` mutate helpers)
+- `displayCondition?` — `async (queryString, ESQLCallbacks) => boolean`. If omitted, the fix is shown whenever that message code is present. If the condition returns `false` or throws, no action is returned.
+
+`getQuickFixForMessage` resolves to `undefined` when there is no entry for the code, the display condition fails, or `fixQuery` throws (for example the query could not be rewritten safely).
 
 ### getAstContext
 

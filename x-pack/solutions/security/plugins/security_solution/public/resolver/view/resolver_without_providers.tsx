@@ -35,7 +35,6 @@ import type { State } from '../../common/store/types';
 import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { DocumentFlyoutWrapper } from '../../flyout_v2/document/document_flyout_wrapper';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 export const ANALYZER_PREVIEW_BANNER = {
@@ -66,11 +65,10 @@ export const ResolverWithoutProviders = React.memo(
       filters,
       renderCellActions,
       onAlertUpdated,
+      useLegacyExpandableFlyout = false,
     }: ResolverProps,
     refToForward
   ) {
-    const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
-
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
@@ -145,7 +143,7 @@ export const ResolverWithoutProviders = React.memo(
     const onShowEvent = useCallback<NodeEventOnClick>(
       ({ documentId, indexName }) =>
         () =>
-          overlays?.openSystemFlyout(
+          overlays.openSystemFlyout(
             flyoutProviders({
               services,
               store,
@@ -159,7 +157,10 @@ export const ResolverWithoutProviders = React.memo(
                 />
               ),
             }),
-            { ...defaultFlyoutProperties, session: 'inherit' }
+            {
+              ...defaultFlyoutProperties,
+              session: 'inherit',
+            }
           ),
       [
         defaultFlyoutProperties,
@@ -173,7 +174,9 @@ export const ResolverWithoutProviders = React.memo(
     );
 
     const onShowPanel = useCallback(() => {
-      if (newFlyoutSystemEnabled) {
+      const shouldUseSystemFlyout = !useLegacyExpandableFlyout;
+
+      if (shouldUseSystemFlyout) {
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
@@ -189,7 +192,10 @@ export const ResolverWithoutProviders = React.memo(
               </EuiPanel>
             ),
           }),
-          { ...defaultFlyoutProperties, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            session: 'inherit',
+          }
         );
       } else {
         openPreviewPanel({
@@ -203,7 +209,6 @@ export const ResolverWithoutProviders = React.memo(
     }, [
       defaultFlyoutProperties,
       history,
-      newFlyoutSystemEnabled,
       onShowEvent,
       openPreviewPanel,
       overlays,
@@ -211,6 +216,7 @@ export const ResolverWithoutProviders = React.memo(
       resolverComponentInstanceID,
       services,
       store,
+      useLegacyExpandableFlyout,
     ]);
 
     return (

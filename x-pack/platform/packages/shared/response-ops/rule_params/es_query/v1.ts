@@ -296,4 +296,9 @@ export function validateParams(anyParams: unknown): string | undefined {
 
 export const EsQueryRuleParamsSchema = schema.object(EsQueryRuleParamsSchemaProperties, {
   validate: validateParams,
+  meta: {
+    title: 'ES Query Rule Params',
+    description:
+      'The parameters for the ES query rule. These parameters are appropriate when `rule_type_id` is `.es-query`.',
+  },
 });

@@ -19,55 +19,66 @@ import {
   isThinkingCompleteEvent,
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
+  isBackgroundAgentCompleteEvent,
+  ConversationRoundStepType,
 } from '@kbn/agent-builder-common';
 import {
   createReasoningStep,
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import { i18n } from '@kbn/i18n';
-import { finalize, type Observable, type Subscription } from 'rxjs';
+import { finalize, type Observable } from 'rxjs';
 import { isBrowserToolCallEvent } from '@kbn/agent-builder-common/chat/events';
-import { useRef } from 'react';
-import { useConversationContext } from '../conversation/conversation_context';
+import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
+import type { ConversationActions } from '../conversation/use_conversation_actions';
 import type { BrowserToolExecutor } from '../../services/browser_tool_executor';
 
-export const useSubscribeToChatEvents = ({
-  setAgentReasoning,
-  setIsResponseLoading,
-  isAborted,
-  browserToolExecutor,
-}: {
-  setAgentReasoning: (agentReasoning: string) => void;
-  setIsResponseLoading: (isResponseLoading: boolean) => void;
-  isAborted: () => boolean;
+interface SubscribeOptions {
+  events$: Observable<ChatEvent>;
+  conversationActions: ConversationActions;
+  browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   browserToolExecutor?: BrowserToolExecutor;
-}) => {
-  const { conversationActions, browserApiTools } = useConversationContext();
-  const unsubscribedRef = useRef(false);
-  const subscriptionRef = useRef<Subscription | null>(null);
+  isAborted: () => boolean;
+  setAgentReasoning: (agentReasoning: string) => void;
+}
 
-  const unsubscribeFromChatEvents = () => {
-    unsubscribedRef.current = true;
-    subscriptionRef.current?.unsubscribe();
-  };
-
+/**
+ * Subscribe to a chat event stream and dispatch every event to the conversation cache via
+ * `conversationActions`. Returns a Promise that resolves when the stream completes (success
+ * or abort) and rejects on a real error.
+ *
+ * Plain function (not a hook) so mutation `mutationFn` can call it inline. Takes
+ * `conversationActions` as a parameter rather than reading from React context — each mutation
+ * builds its own actions targeting the mutation-owned conversation id, so events keep writing
+ * to the right cache regardless of where the user has navigated.
+ */
+export const subscribeToChatEvents = ({
+  events$,
+  conversationActions,
+  browserApiTools,
+  browserToolExecutor,
+  isAborted,
+  setAgentReasoning,
+}: SubscribeOptions): Promise<void> => {
   const nextChatEvent = (event: ChatEvent) => {
-    // chunk received, we append it to the chunk buffer
     if (isMessageChunkEvent(event)) {
       conversationActions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
-    }
-    // full message received, override chunk buffer
-    else if (isMessageCompleteEvent(event)) {
+    } else if (isMessageCompleteEvent(event)) {
       conversationActions.setAssistantMessage({
         assistantMessage: event.data.message_content,
       });
     } else if (isToolProgressEvent(event)) {
+      const isInternalProgress = event.data.metadata?.internal === 'true';
       conversationActions.setToolCallProgress({
-        progress: { message: event.data.message },
+        progress: {
+          message: event.data.message,
+          metadata: event.data.metadata ?? {},
+        },
         toolCallId: event.data.tool_call_id,
       });
-      // Individual tool progression message should also be displayed as reasoning
-      setAgentReasoning(event.data.message);
+      if (!isInternalProgress) {
+        setAgentReasoning(event.data.message);
+      }
     } else if (isReasoningEvent(event)) {
       conversationActions.addReasoningStep({
         step: createReasoningStep({
@@ -86,10 +97,10 @@ export const useSubscribeToChatEvents = ({
           tool_call_id: event.data.tool_call_id,
           tool_id: event.data.tool_id,
           tool_call_group_id: event.data.tool_call_group_id,
+          tool_origin: event.data.tool_origin,
         }),
       });
     } else if (isBrowserToolCallEvent(event)) {
-      // Check if this is a browser tool call and execute it immediately
       const toolId = event.data.tool_id;
       if (toolId && browserToolExecutor && browserApiTools) {
         const toolDef = browserApiTools.find((tool) => tool.id === toolId);
@@ -117,11 +128,11 @@ export const useSubscribeToChatEvents = ({
       const { tool_call_id: toolCallId, results } = event.data;
       conversationActions.setToolCallResult({ results, toolCallId });
     } else if (isRoundCompleteEvent(event)) {
-      // Now we have the full response and can stop the loading indicators
-      setIsResponseLoading(false);
+      // No-op. `isResponseLoading` is derived in `useSendMessage` from `activeStream`,
+      // and `activeStream` is cleared in the mutation's `finally` when the stream ends —
+      // so we don't need an explicit signal here.
     } else if (isConversationCreatedEvent(event)) {
-      const { conversation_id: id, title } = event.data;
-      conversationActions.onConversationCreated({ conversationId: id, title });
+      conversationActions.onConversationCreated({ title: event.data.title });
     } else if (isThinkingCompleteEvent(event)) {
       conversationActions.setTimeToFirstToken({
         timeToFirstToken: event.data.time_to_first_token,
@@ -130,8 +141,6 @@ export const useSubscribeToChatEvents = ({
       conversationActions.addPendingPrompt({
         prompt: event.data.prompt,
       });
-      // Stop loading when a prompt is requested - the round is now awaiting user input
-      setIsResponseLoading(false);
     } else if (isCompactionStartedEvent(event)) {
       conversationActions.addCompactionStep({
         tokenCountBefore: event.data.token_count_before,
@@ -146,44 +155,35 @@ export const useSubscribeToChatEvents = ({
         tokenCountAfter: event.data.token_count_after,
         summarizedRoundCount: event.data.summarized_round_count,
       });
+    } else if (isBackgroundAgentCompleteEvent(event)) {
+      conversationActions.addBackgroundExecutionCompleteStep({
+        step: {
+          type: ConversationRoundStepType.backgroundAgentComplete,
+          ...event.data.execution,
+        },
+      });
     }
   };
 
-  const subscribeToChatEvents = (events$: Observable<ChatEvent>) => {
-    return new Promise<void>((resolve, reject) => {
-      if (unsubscribedRef.current) {
-        resolve();
-        return;
-      }
-      subscriptionRef.current = events$
-        .pipe(
-          finalize(() => {
-            // When the subscription is unsubscribed from, `complete` will not be called, but the `finalize` callback will be
-            if (unsubscribedRef.current) {
-              resolve();
-            }
-          })
-        )
-        .subscribe({
-          next: nextChatEvent,
-          complete: () => {
+  return new Promise<void>((resolve, reject) => {
+    events$
+      .pipe(
+        finalize(() => {
+          if (isAborted()) {
             resolve();
-          },
-          error: (err) => {
-            // If the request is aborted, we don't want to show an error
-            if (isAborted()) {
-              resolve();
-              return;
-            }
-            reject(err);
-          },
-        });
-    }).finally(() => {
-      if (unsubscribedRef.current) {
-        unsubscribedRef.current = false;
-      }
-    });
-  };
-
-  return { subscribeToChatEvents, unsubscribeFromChatEvents };
+          }
+        })
+      )
+      .subscribe({
+        next: nextChatEvent,
+        complete: () => resolve(),
+        error: (err) => {
+          if (isAborted()) {
+            resolve();
+            return;
+          }
+          reject(err);
+        },
+      });
+  });
 };

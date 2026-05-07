@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readFileSync } from 'fs';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/kbn-client';
 import { createEsClientForTesting } from '@kbn/test-es-server';
 import type { ScoutLogger } from './logger';
@@ -92,7 +94,11 @@ export function getKbnClient(config: ScoutTestConfig, log: ScoutLogger) {
       log,
     });
 
-    kbnClientInstance = new KbnClient({ log, url: kibanaUrl });
+    kbnClientInstance = new KbnClient({
+      log,
+      url: kibanaUrl,
+      ...(config.http2 ? { certificateAuthorities: [readFileSync(CA_CERT_PATH)] } : {}),
+    });
   }
 
   return kbnClientInstance;

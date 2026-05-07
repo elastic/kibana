@@ -171,7 +171,7 @@ export function createRuleExecutionLogClientForExecutors(
 
           await Promise.all([
             writeExecutionResultToConsole(normalizedExecutionResult, logMeta),
-            writeExecutionResultToRuleObject(normalizedExecutionResult),
+            setRuleLastRun(normalizedExecutionResult),
           ]);
         } catch (e) {
           const logMessage = `Error writing execution result with status "${executionResult.status}"`;
@@ -219,7 +219,7 @@ export function createRuleExecutionLogClientForExecutors(
     writeMessageToConsole(logMessage, logLevel, logMeta);
   };
 
-  const writeExecutionResultToRuleObject = async (args: ExecutionResult): Promise<void> => {
+  const setRuleLastRun = async (args: ExecutionResult): Promise<void> => {
     const { status, message, userError } = args;
 
     if (status === RuleExecutionStatusEnum.failed) {

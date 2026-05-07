@@ -14,15 +14,19 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const SyncWatchlistRequestParams = lazySchema(() =>
+  z.object({
+    watchlist_id: z.string().min(1),
+  })
+);
 export type SyncWatchlistRequestParams = z.infer<typeof SyncWatchlistRequestParams>;
-export const SyncWatchlistRequestParams = z.object({
-  watchlist_id: z.string().min(1),
-});
 export type SyncWatchlistRequestParamsInput = z.input<typeof SyncWatchlistRequestParams>;
 
+export const SyncWatchlistResponse = lazySchema(() =>
+  z.object({
+    acknowledged: z.boolean(),
+  })
+);
 export type SyncWatchlistResponse = z.infer<typeof SyncWatchlistResponse>;
-export const SyncWatchlistResponse = z.object({
-  acknowledged: z.boolean(),
-});

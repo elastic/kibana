@@ -197,6 +197,11 @@ export interface SystemFilterOptions {
   category: string[];
 }
 
+export interface ExtendedFieldFilter {
+  label: string;
+  value: string;
+}
+
 export interface FilterOptions extends SystemFilterOptions {
   customFields: {
     [key: string]: {
@@ -204,6 +209,7 @@ export interface FilterOptions extends SystemFilterOptions {
       options: string[];
     };
   };
+  extendedFieldFilters: ExtendedFieldFilter[];
   from: string;
   to: string;
 }
@@ -371,8 +377,4 @@ export interface CasesCapabilities {
   [CASES_REOPEN_CAPABILITY]: boolean;
   [ASSIGN_CASE_CAPABILITY]: boolean;
   [MANAGE_TEMPLATES_CAPABILITY]: boolean;
-}
-
-export interface CaseViewEventsTableProps {
-  events: { eventId: string | string[]; index: string | string[] }[];
 }

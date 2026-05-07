@@ -14,20 +14,27 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { EntityType } from '../common.gen';
 
+export const StartEntityEngineRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The entity type of the engine to start.
+     */
+    entityType: EntityType,
+  })
+);
 export type StartEntityEngineRequestParams = z.infer<typeof StartEntityEngineRequestParams>;
-export const StartEntityEngineRequestParams = z.object({
-  /**
-   * The entity type of the engine
-   */
-  entityType: EntityType,
-});
 export type StartEntityEngineRequestParamsInput = z.input<typeof StartEntityEngineRequestParams>;
 
+export const StartEntityEngineResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Whether the engine was successfully started.
+     */
+    started: z.boolean().optional(),
+  })
+);
 export type StartEntityEngineResponse = z.infer<typeof StartEntityEngineResponse>;
-export const StartEntityEngineResponse = z.object({
-  started: z.boolean().optional(),
-});

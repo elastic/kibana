@@ -12,6 +12,6 @@ import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 
 export const AgentBuilderPluginsPage = () => {
-  useBreadcrumb([{ text: labels.plugins.title, path: appPaths.plugins.list }]);
+  useBreadcrumb([{ text: labels.plugins.libraryTitle, path: appPaths.plugins.list }]);
   return <AgentBuilderPlugins />;
 };

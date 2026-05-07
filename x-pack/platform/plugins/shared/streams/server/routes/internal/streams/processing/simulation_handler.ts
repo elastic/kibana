@@ -648,7 +648,7 @@ const initProcessorMetricsMap = (
   return Object.fromEntries(processorMetricsEntries);
 };
 
-const extractProcessorMetrics = ({
+export const extractProcessorMetrics = ({
   processorsMap,
   sampleSize,
 }: {
@@ -674,7 +674,7 @@ const extractProcessorMetrics = ({
   });
 };
 
-const getDocumentStatus = (
+export const getDocumentStatus = (
   doc: SuccessfulPipelineSimulateDocumentResult,
   ingestDocErrors: SimulationError[],
   conditionProcessorTags: Set<string>
@@ -882,15 +882,21 @@ const filterOutConditionNoopProcessorResults = (
   });
 };
 
-const collectConditionBlockIds = (processing: StreamlangDSL): Set<string> => {
+export const collectConditionBlockIds = (processing: StreamlangDSL): Set<string> => {
   const ids = new Set<string>();
   const traverse = (steps: StreamlangDSL['steps']) => {
     for (const step of steps) {
       if ('condition' in step && !('action' in step)) {
         if (step.customIdentifier) {
           ids.add(step.customIdentifier);
+          if (step.condition.else && step.condition.else.length > 0) {
+            ids.add(`${step.customIdentifier}:else`);
+          }
         }
         traverse(step.condition.steps);
+        if (step.condition.else) {
+          traverse(step.condition.else);
+        }
       }
     }
   };

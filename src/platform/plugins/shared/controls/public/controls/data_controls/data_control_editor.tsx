@@ -60,7 +60,6 @@ export interface ControlEditorProps<State extends DataControlEditorState = DataC
   onSave: (data_view_id?: string) => void;
   onUpdate: (newState: Partial<State>) => void;
   ariaLabelledBy: string;
-  isPinned?: boolean;
 }
 
 const FieldPicker = withSuspense(LazyFieldPicker, null);
@@ -158,7 +157,11 @@ const CompatibleControlTypesComponent = ({
               onClick={() => setSelectedAction(action.type)}
               label={action.getDisplayName(controlTypeContext)}
             >
-              <EuiIcon type={action.getIconType(controlTypeContext) ?? 'controls'} size="l" />
+              <EuiIcon
+                type={action.getIconType(controlTypeContext) ?? 'controls'}
+                size="l"
+                aria-hidden={true}
+              />
             </EuiKeyPadMenuItem>
           );
 
@@ -193,7 +196,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   onCancel,
   parentApi,
   ariaLabelledBy,
-  isPinned,
 }: ControlEditorProps<State>) => {
   const controlActionRegistry = useControlActionRegistry();
 
@@ -432,7 +434,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                       embeddable: parentApi,
                       state: transformedState ?? editorState,
                       controlId,
-                      isPinned,
                     });
                   } catch (e) {
                     coreServices.notifications.toasts.addError(e, {

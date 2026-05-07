@@ -30,6 +30,11 @@ jest.mock(
 );
 jest.mock('../../../common/hooks/is_in_security_app');
 
+const mockUseExploreActions = jest.fn().mockReturnValue({ exploreActionItems: [] });
+jest.mock('../hooks/use_explore_actions', () => ({
+  useExploreActions: (...args: unknown[]) => mockUseExploreActions(...args),
+}));
+
 const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
   runWorkflowMenuItem: [],
   runAlertWorkflowPanel: [],
@@ -57,13 +62,25 @@ const mockUseAlertsActions = useAlertsActions as jest.Mock;
 const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
 const mockUseAlertTagsActions = useAlertTagsActions as jest.Mock;
 
-const createMockHit = (flattened: Record<string, unknown> = {}): DataTableRecord =>
+const createMockHit = (
+  flattened: Record<string, unknown> = {},
+  index: string = 'test-index'
+): DataTableRecord =>
   ({
     id: 'test-id',
-    raw: { _id: 'test-id', _index: 'test-index' },
+    raw: { _id: 'test-id', _index: index },
     flattened,
     isAnchor: false,
   } as DataTableRecord);
+
+const remoteAlertHit = createMockHit(
+  { 'event.kind': 'signal' },
+  'remote-cluster:.alerts-security.alerts-default'
+);
+const remoteEventHit = createMockHit(
+  { 'event.kind': 'event' },
+  'remote-cluster:.alerts-security.alerts-default'
+);
 const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
 const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
 const mockEcsData: Ecs = { _id: 'test-id', _index: 'test-index' };
@@ -98,6 +115,7 @@ describe('<TakeActionButton />', () => {
       runWorkflowMenuItem: [],
       runAlertWorkflowPanel: [],
     });
+    mockUseExploreActions.mockReturnValue({ exploreActionItems: [] });
   });
 
   it('should render the take action button', () => {
@@ -111,6 +129,18 @@ describe('<TakeActionButton />', () => {
     const { getByTestId } = renderTakeActionButton();
 
     expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).not.toBeDisabled();
+  });
+
+  it('should be disabled when there are no action items (e.g. remote alert in Security app with no timeline items)', () => {
+    mockUseIsInSecurityApp.mockReturnValue(true);
+    mockUseInvestigateInTimeline.mockReturnValue({ investigateInTimelineActionItems: [] });
+
+    const { getByTestId } = renderTakeActionButton({
+      ...defaultProps,
+      hit: remoteAlertHit,
+    });
+
+    expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toBeDisabled();
   });
 
   it('should open the popover when the button is clicked', () => {
@@ -143,7 +173,7 @@ describe('<TakeActionButton />', () => {
 
   it('should include investigateInTimelineActionItems when in Security app', () => {
     mockUseIsInSecurityApp.mockReturnValue(true);
-    const timelineItem = { name: 'Investigate in timeline', onClick: jest.fn() };
+    const timelineItem = { name: 'Investigate in Timeline', onClick: jest.fn() };
     mockUseInvestigateInTimeline.mockReturnValue({
       investigateInTimelineActionItems: [timelineItem],
     });
@@ -157,7 +187,7 @@ describe('<TakeActionButton />', () => {
 
   it('should not include investigateInTimelineActionItems when not in Security app (e.g. Discover)', () => {
     mockUseIsInSecurityApp.mockReturnValue(false);
-    const timelineItem = { name: 'Investigate in timeline', onClick: jest.fn() };
+    const timelineItem = { name: 'Investigate in Timeline', onClick: jest.fn() };
     mockUseInvestigateInTimeline.mockReturnValue({
       investigateInTimelineActionItems: [timelineItem],
     });
@@ -166,7 +196,7 @@ describe('<TakeActionButton />', () => {
 
     fireEvent.click(queryByText('Take action')!.closest('button')!);
 
-    expect(queryByText('Investigate in timeline')).not.toBeInTheDocument();
+    expect(queryByText('Investigate in Timeline')).not.toBeInTheDocument();
   });
 
   it('should pass onAlertUpdated as refetch to useAlertsActions', () => {
@@ -240,6 +270,25 @@ describe('<TakeActionButton />', () => {
 
     expect(mockUseRunAlertWorkflowPanel).toHaveBeenCalledWith(
       expect.objectContaining({ ecsRowData: mockEcsData })
+    );
+  });
+
+  it('should call useExploreActions with the hit', () => {
+    renderTakeActionButton();
+
+    expect(mockUseExploreActions).toHaveBeenCalledWith(
+      expect.objectContaining({ hit: defaultProps.hit })
+    );
+  });
+
+  it('should call useRunDocumentWorkflowPanel with the document and closePopover', () => {
+    const hit = createMockHit({ 'event.kind': 'event' });
+    renderTakeActionButton({ ...defaultProps, hit });
+
+    expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documents: [expect.objectContaining({ _id: 'test-id', _index: 'test-index' })],
+      })
     );
   });
 
@@ -368,6 +417,119 @@ describe('<TakeActionButton />', () => {
     });
   });
 
+  describe('remote document', () => {
+    const timelineItem = { name: 'Investigate in timeline', onClick: jest.fn() };
+    const caseItem = { name: 'Add to case', onClick: jest.fn() };
+    const statusItem = { name: 'Mark as acknowledged', onClick: jest.fn() };
+    const assigneeItem = { name: 'Assign alert', onClick: jest.fn() };
+    const tagsItem = { name: 'Apply alert tags', onClick: jest.fn() };
+    const workflowItem = { name: 'Run workflow', onClick: jest.fn() };
+
+    beforeEach(() => {
+      mockUseAddToCaseActions.mockReturnValue({ addToCaseActionItems: [caseItem] });
+      mockUseAlertsActions.mockReturnValue({ actionItems: [statusItem], panels: [] });
+      mockUseAlertAssigneesActions.mockReturnValue({
+        alertAssigneesItems: [assigneeItem],
+        alertAssigneesPanels: [],
+      });
+      mockUseAlertTagsActions.mockReturnValue({
+        alertTagsItems: [tagsItem],
+        alertTagsPanels: [],
+      });
+      mockUseInvestigateInTimeline.mockReturnValue({
+        investigateInTimelineActionItems: [timelineItem],
+      });
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [workflowItem],
+        runAlertWorkflowPanel: [],
+      });
+      mockUseIsInSecurityApp.mockReturnValue(true);
+    });
+
+    it('should show only Investigate in Timeline for a remote alert', () => {
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: remoteAlertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Investigate in timeline')).toBeInTheDocument();
+      expect(queryByText('Add to case')).not.toBeInTheDocument();
+      expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
+      expect(queryByText('Assign alert')).not.toBeInTheDocument();
+      expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
+      expect(queryByText('Run workflow')).not.toBeInTheDocument();
+      expect(queryByText('Add note')).not.toBeInTheDocument();
+    });
+
+    it('should show only Investigate in Timeline for a remote event', () => {
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: remoteEventHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Investigate in timeline')).toBeInTheDocument();
+      expect(queryByText('Add to case')).not.toBeInTheDocument();
+      expect(queryByText('Add note')).not.toBeInTheDocument();
+      expect(queryByText('Run workflow')).not.toBeInTheDocument();
+    });
+
+    it('should show the explore item for a remote alert in Discover', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const exploreItem = { name: 'Explore in Alerts', onClick: jest.fn() };
+      mockUseExploreActions.mockReturnValue({ exploreActionItems: [exploreItem] });
+
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: remoteAlertHit,
+      });
+
+      expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).not.toBeDisabled();
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      expect(getByText('Explore in Alerts')).toBeInTheDocument();
+      expect(queryByText('Investigate in timeline')).not.toBeInTheDocument();
+      expect(queryByText('Add to case')).not.toBeInTheDocument();
+    });
+
+    it('should show the explore item for a remote event in Discover', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const exploreItem = { name: 'Explore in Timeline', onClick: jest.fn() };
+      mockUseExploreActions.mockReturnValue({ exploreActionItems: [exploreItem] });
+
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: remoteEventHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Explore in Timeline')).toBeInTheDocument();
+      expect(queryByText('Investigate in timeline')).not.toBeInTheDocument();
+      expect(queryByText('Add to case')).not.toBeInTheDocument();
+    });
+
+    it('should show the full menu for a local alert (regression guard)', () => {
+      const localAlertHit = createMockHit({ 'event.kind': 'signal' });
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: localAlertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Add to case')).toBeInTheDocument();
+      expect(getByText('Mark as acknowledged')).toBeInTheDocument();
+      expect(getByText('Assign alert')).toBeInTheDocument();
+      expect(getByText('Apply alert tags')).toBeInTheDocument();
+      expect(getByText('Run workflow')).toBeInTheDocument();
+      expect(getByText('Investigate in timeline')).toBeInTheDocument();
+      expect(queryByText('Add note')).not.toBeInTheDocument();
+    });
+  });
+
   it('should call onShowNotes when "Add note" is clicked', () => {
     const { getByTestId, getByText } = renderTakeActionButton({
       ...defaultProps,
@@ -378,5 +540,37 @@ describe('<TakeActionButton />', () => {
     fireEvent.click(getByText('Add note'));
 
     expect(mockOnShowNotes).toHaveBeenCalledTimes(1);
+  });
+
+  describe('Explore action (Discover context only)', () => {
+    const exploreItem = { name: 'Explore action', onClick: jest.fn() };
+
+    it('should not include explore items when in Security app', () => {
+      mockUseIsInSecurityApp.mockReturnValue(true);
+      mockUseExploreActions.mockReturnValue({ exploreActionItems: [exploreItem] });
+
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Explore action')).not.toBeInTheDocument();
+    });
+
+    it('should include explore items when not in Security app', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      mockUseExploreActions.mockReturnValue({ exploreActionItems: [exploreItem] });
+
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Explore action')).toBeInTheDocument();
+    });
   });
 });

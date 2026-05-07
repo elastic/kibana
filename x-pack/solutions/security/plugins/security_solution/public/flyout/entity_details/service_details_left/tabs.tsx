@@ -38,7 +38,13 @@ export const useTabs = (
 
     const resolutionTab =
       entityStoreEntityId && hasEntityResolutionLicense
-        ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.service })]
+        ? [
+            getResolutionGroupTab({
+              entityId: entityStoreEntityId,
+              entityType: EntityType.service,
+              scopeId,
+            }),
+          ]
         : [];
 
     return [...riskTab, ...graphTab, ...resolutionTab];

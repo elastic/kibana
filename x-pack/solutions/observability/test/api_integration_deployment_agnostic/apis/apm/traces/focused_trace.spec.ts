@@ -6,9 +6,7 @@
  */
 import { apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
-import type { Environment } from '@kbn/apm-plugin/common/environment_rt';
-import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { TraceSearchType } from '@kbn/apm-plugin/common/trace_explorer';
+import { Readable } from 'stream';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -26,29 +24,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const endWithOffset = end + 100000;
 
   describe('traces', () => {
-    async function fetchTraceSamples({
-      query,
-      type,
-      environment,
-    }: {
-      query: string;
-      type: TraceSearchType;
-      environment: Environment;
-    }) {
-      return apmApiClient.readUser({
-        endpoint: `GET /internal/apm/traces/find`,
-        params: {
-          query: {
-            query,
-            type,
-            start: new Date(start).toISOString(),
-            end: new Date(endWithOffset).toISOString(),
-            environment,
-          },
-        },
-      });
-    }
-
     async function fetchFocusedTrace({
       traceId,
       docId,
@@ -80,7 +55,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     after(() => apmSynthtraceEsClient.clean());
 
     describe('when traces exist', () => {
-      before(() => {
+      let entryTraceId: string;
+      let entryTransactionId: string;
+
+      before(async () => {
         const java = apm
           .service({ name: 'java', environment: 'production', agentName: 'java' })
           .instance('java');
@@ -93,7 +71,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           .service({ name: 'python', environment: 'production', agentName: 'python' })
           .instance('python');
 
-        return apmSynthtraceEsClient.index(
+        const events = Array.from(
           timerange(start, end)
             .interval('15m')
             .rate(1)
@@ -101,24 +79,24 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               generateTrace(timestamp, [python, node, java], 'elasticsearch')
             )
         );
+
+        const serialized = events.flatMap((event) => event.serialize());
+        const rootTransaction = serialized.find(
+          (doc) => doc['transaction.id'] && !doc['parent.id']
+        );
+        entryTraceId = rootTransaction!['trace.id']!;
+        entryTransactionId = rootTransaction!['transaction.id']!;
+
+        await apmSynthtraceEsClient.index(Readable.from(events));
       });
 
       describe('focused trace', () => {
-        let traceId: string;
         let focusedTrace: FocusedTraceResponseType | undefined;
         let rootTransactionId: string | undefined;
         before(async () => {
-          const response = await fetchTraceSamples({
-            query: '',
-            type: TraceSearchType.kql,
-            environment: ENVIRONMENT_ALL.value,
-          });
-
-          expect(response.status).to.be(200);
-          traceId = response.body.traceSamples[0].traceId;
           const focusedTraceResponse = await fetchFocusedTrace({
-            traceId,
-            docId: response.body.traceSamples[0].transactionId,
+            traceId: entryTraceId,
+            docId: entryTransactionId,
           });
           expect(focusedTraceResponse?.status).to.be(200);
           focusedTrace = focusedTraceResponse?.body;
@@ -158,7 +136,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             nodeTransactionId =
               focusedTrace?.traceItems?.focusedTraceTree?.[0]?.children?.[0]?.traceDoc?.id;
             const focusedTraceResponse = await fetchFocusedTrace({
-              traceId,
+              traceId: entryTraceId,
               docId: nodeTransactionId,
             });
             expect(focusedTraceResponse?.status).to.be(200);
@@ -186,7 +164,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         describe('focused item not found', () => {
           before(async () => {
             const focusedTraceResponse = await fetchFocusedTrace({
-              traceId,
+              traceId: entryTraceId,
               docId: 'bar',
             });
             expect(focusedTraceResponse?.status).to.be(200);

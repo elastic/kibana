@@ -94,7 +94,7 @@ describe('StatusPopoverButton (attack details)', () => {
   test('it passes the correct telemetry source', () => {
     render(
       <TestProviders>
-        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} />
+        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} disabled={false} />
       </TestProviders>
     );
 
@@ -108,7 +108,7 @@ describe('StatusPopoverButton (attack details)', () => {
   test('it renders the current status', () => {
     render(
       <TestProviders>
-        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} />
+        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} disabled={false} />
       </TestProviders>
     );
 
@@ -120,7 +120,7 @@ describe('StatusPopoverButton (attack details)', () => {
 
     render(
       <TestProviders>
-        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} />
+        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} disabled={false} />
       </TestProviders>
     );
 
@@ -137,7 +137,7 @@ describe('StatusPopoverButton (attack details)', () => {
 
     render(
       <TestProviders>
-        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} />
+        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} disabled={false} />
       </TestProviders>
     );
 
@@ -147,5 +147,40 @@ describe('StatusPopoverButton (attack details)', () => {
     await user.click(screen.getByText('Mark as acknowledged'));
 
     expect(mockCloseFlyout).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not open the popover when disabled=true', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <TestProviders>
+        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} disabled={true} />
+      </TestProviders>
+    );
+
+    await user.click(screen.getByText('open'));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByText('Change attack status')).not.toBeInTheDocument();
+  });
+
+  test('does not open the popover when there are no action items', async () => {
+    (useAttackWorkflowStatusContextMenuItems as jest.Mock).mockImplementation(() => ({
+      items: [],
+      panels: [],
+    }));
+
+    const user = userEvent.setup();
+
+    render(
+      <TestProviders>
+        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} disabled={false} />
+      </TestProviders>
+    );
+
+    await user.click(screen.getByText('open'));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByText('Change attack status')).not.toBeInTheDocument();
   });
 });

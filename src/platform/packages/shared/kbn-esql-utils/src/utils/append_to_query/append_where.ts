@@ -16,46 +16,98 @@ import {
   appendToESQLQuery,
   PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING,
   extractMatchFunctionDetails,
+  extractMvContainsFunctionDetails,
   getSupportedOperators,
   type SupportedOperators,
   type SupportedOperation,
 } from './utils';
 
+type MultiValueFilterFunction = 'match' | 'mv_contains';
+
+type FilterExpressionResult =
+  | {
+      expression: string;
+      isMultiValue: false;
+    }
+  | {
+      expression: string;
+      isMultiValue: true;
+      values: unknown[];
+      multiValueFilterFunction: MultiValueFilterFunction;
+    };
+
+/**
+ * Creates filter expression for multi-value arrays with the following logic:
+ * - When `esMappingType` is passed, it uses MV_CONTAINS
+ * - Otherwise it uses MATCH clauses combined with AND
+ * - Both cases use NOT for negation when the operation is '-'
+ */
+function buildMultiValueFilterExpression(
+  field: string,
+  values: unknown[],
+  operation: '+' | '-',
+  esMappingType?: string
+): { expression: string; multiValueFilterFunction: MultiValueFilterFunction } {
+  const fieldName = sanitazeESQLInput(field);
+  const multiValueFilterFunction = esMappingType ? 'mv_contains' : 'match';
+
+  if (!fieldName) {
+    return { expression: '', multiValueFilterFunction };
+  }
+
+  const escapedValues = values.map((val) =>
+    typeof val === 'string' ? escapeStringValue(val) : val
+  );
+
+  // If we have an ES mapping type, we can safely use MV_CONTAINS with casting
+  if (esMappingType) {
+    const mvContainsValue =
+      escapedValues.length === 1 ? escapedValues[0] : `[${escapedValues.join(', ')}]`;
+    return {
+      expression:
+        operation === '-'
+          ? `NOT MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esMappingType})`
+          : `MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esMappingType})`,
+      multiValueFilterFunction,
+    };
+  }
+
+  // Otherwise we fall back to using MATCH clauses combined with AND
+  const matchClauses = escapedValues.map((val) => `MATCH(${fieldName}, ${val})`);
+  return {
+    expression:
+      operation === '-'
+        ? matchClauses.map((clause) => `NOT ${clause}`).join(' AND ')
+        : matchClauses.join(' AND '),
+    multiValueFilterFunction,
+  };
+}
+
 /**
  * Creates filter expression for both single and multi-value cases
  * For single values, it creates standard comparison expressions
- * For multi-value arrays, it creates MATCH clauses combined with AND/NOT
+ * For multi-value arrays, it creates MV_CONTAINS or MATCH clauses
  */
 function createFilterExpression(
   field: string,
   value: unknown,
   operation: SupportedOperation,
-  fieldType?: string
-): { expression: string; isMultiValue?: boolean } {
+  kibanaFieldType?: string,
+  esMappingType?: string
+): FilterExpressionResult {
   // Handle is not null / is null operations
   if (operation === 'is_not_null' || operation === 'is_null') {
     const fieldName = sanitazeESQLInput(field);
     const operator = operation === 'is_not_null' ? 'is not null' : 'is null';
-    return { expression: `${fieldName} ${operator}` };
+    return { expression: `${fieldName} ${operator}`, isMultiValue: false };
   }
-  // Handle multi-value arrays with MATCH operator
+  // Handle multi-value arrays with MV_CONTAINS or MATCH
   if (Array.isArray(value)) {
-    const fieldName = sanitazeESQLInput(field);
-    if (!fieldName) {
-      return { expression: '', isMultiValue: true };
-    }
-    const matchClauses = value.map((val) => {
-      const escapedValue = typeof val === 'string' ? escapeStringValue(val) : val;
-      return `MATCH(${fieldName}, ${escapedValue})`;
-    });
-
-    if (operation === '-') {
-      return {
-        expression: matchClauses.map((clause) => `NOT ${clause}`).join(' AND '),
-        isMultiValue: true,
-      };
-    }
-    return { expression: matchClauses.join(' AND '), isMultiValue: true };
+    return {
+      isMultiValue: true,
+      values: value,
+      ...buildMultiValueFilterExpression(field, value, operation, esMappingType),
+    };
   }
 
   // Handle single values with standard operators
@@ -68,7 +120,10 @@ function createFilterExpression(
     return { expression: '', isMultiValue: false };
   }
 
-  if (fieldType === undefined || !PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING.includes(fieldType)) {
+  if (
+    kibanaFieldType === undefined ||
+    !PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING.includes(kibanaFieldType)
+  ) {
     fieldName = `${fieldName}::string`;
   }
 
@@ -105,76 +160,90 @@ function handleExistingFilter(
 }
 
 /**
- * Handles existing multi-value filters in the WHERE clause by checking existing MATCH functions
- * and determining whether to keep existing filters, negate them, or append new ones.
+ * Gets the original source text for a function expression so replacements preserve casts and formatting
+ */
+function getFunctionExpressionFromQuery(baseESQLQuery: string, esqlFunction: ESQLFunction) {
+  return baseESQLQuery.slice(esqlFunction.location.min, esqlFunction.location.max + 1);
+}
+
+/**
+ * Handles existing multi-value filters in the WHERE clause by checking existing MATCH or
+ * MV_CONTAINS functions and determining whether to keep existing filters, negate them,
+ * or append new ones.
  */
 function handleExistingFilterForMultiValues(
   baseESQLQuery: string,
   lastWhereCommand: any,
   field: string,
-  value: unknown,
-  operation: SupportedOperation,
-  filterExpression: string
+  values: unknown[],
+  operation: '+' | '-',
+  filterExpression: string,
+  multiValueFilterFunction: MultiValueFilterFunction
 ): string {
-  const existingMatchFunctionsList = Walker.findAll(
+  const existingMultiValueFunctions = Walker.findAll(
     lastWhereCommand,
-    (node) => node.type === 'function' && node.name === 'match'
-  );
+    (node) => node.type === 'function' && node.name === multiValueFilterFunction
+  ) as ESQLFunction[];
+  const existingFilterExpressions: string[] = [];
 
-  // Gather the values used in MATCH functions
-  const existingValues: string[] = [];
-  existingMatchFunctionsList.forEach((matchFunction) => {
-    const details = extractMatchFunctionDetails(matchFunction as ESQLFunction);
-    if (
-      details &&
-      details.columnName === field &&
-      Array.isArray(value) &&
-      value.includes(details.literalValue)
-    ) {
-      existingValues.push(details.literalValue);
+  if (multiValueFilterFunction === 'mv_contains') {
+    // Check if the MV_CONTAINS function already exists for the selected values
+    const existingMvContainsFilter = values.length
+      ? existingMultiValueFunctions.find((mvContainsFunction) => {
+          const details = extractMvContainsFunctionDetails(mvContainsFunction);
+          return (
+            details &&
+            details.columnName === field &&
+            values.every((val) =>
+              details.literalValues.some((literalValue) => literalValue === val)
+            )
+          );
+        })
+      : undefined;
+
+    if (existingMvContainsFilter) {
+      existingFilterExpressions.push(
+        getFunctionExpressionFromQuery(baseESQLQuery, existingMvContainsFilter)
+      );
     }
-  });
+  } else {
+    // Gather the values used in MATCH functions
+    const existingValues: string[] = [];
+    const matchingFilterExpressions: string[] = [];
 
-  // Check if all values in the array already exist as filters
-  const allValuesExist =
-    Array.isArray(value) &&
-    value.length > 0 &&
-    value.every((val) => existingValues.includes(String(val)));
+    existingMultiValueFunctions.forEach((matchFunction) => {
+      const details = extractMatchFunctionDetails(matchFunction);
+      if (details && details.columnName === field && values.includes(details.literalValue)) {
+        existingValues.push(details.literalValue);
+        matchingFilterExpressions.push(
+          getFunctionExpressionFromQuery(baseESQLQuery, matchFunction)
+        );
+      }
+    });
 
-  if (allValuesExist) {
-    if (operation === '+') {
-      // All positive filters already exist, no changes needed
-      return baseESQLQuery;
-    } else if (operation === '-') {
-      // All negative filters exist as positive - need to negate them
-      let updatedQuery = baseESQLQuery;
-
-      const matchesToNegate: string[] = [];
-      existingMatchFunctionsList.forEach((matchFunction) => {
-        const details = extractMatchFunctionDetails(matchFunction as ESQLFunction);
-        if (
-          details &&
-          details.columnName === field &&
-          Array.isArray(value) &&
-          value.includes(details.literalValue)
-        ) {
-          const fieldName = sanitazeESQLInput(field);
-          const escapedValue = escapeStringValue(details.literalValue);
-          const matchString = `MATCH(${fieldName}, ${escapedValue})`;
-          matchesToNegate.push(matchString);
-        }
-      });
-
-      // Replace each MATCH function with NOT MATCH
-      matchesToNegate.forEach((matchString) => {
-        updatedQuery = updatedQuery.replace(matchString, `NOT ${matchString}`);
-      });
-
-      return updatedQuery;
+    // Check if all values in the array already exist as filters
+    const allValuesExist =
+      values.length > 0 && values.every((val) => existingValues.includes(String(val)));
+    if (allValuesExist) {
+      existingFilterExpressions.push(...matchingFilterExpressions);
     }
   }
 
-  return appendToESQLQuery(baseESQLQuery, `AND ${filterExpression}`);
+  // Append a new filter when the selected values are not already present
+  if (existingFilterExpressions.length === 0) {
+    return appendToESQLQuery(baseESQLQuery, `AND ${filterExpression}`);
+  }
+
+  // All positive filters already exist, no changes needed
+  if (operation === '+') {
+    return baseESQLQuery;
+  }
+
+  // All negative filters exist as positive - need to negate them
+  return existingFilterExpressions.reduce(
+    (updatedQuery, expression) => updatedQuery.replace(expression, `NOT ${expression}`),
+    baseESQLQuery
+  );
 }
 
 /**
@@ -183,7 +252,8 @@ function handleExistingFilterForMultiValues(
  * @param field the field to filter on.
  * @param value the value to filter by.
  * @param operation the operation to perform ('+', '-', 'is_not_null', 'is_null').
- * @param fieldType the type of the field being filtered (optional).
+ * @param kibanaFieldType the type of the field being filtered (optional).
+ * @param esMappingType the ES mapping type of the field (optional, used to determine whether to use MV_CONTAINS).
  * @returns the modified ES|QL query string with the appended WHERE clause, or undefined if no changes were made.
  */
 export function appendWhereClauseToESQLQuery(
@@ -191,17 +261,19 @@ export function appendWhereClauseToESQLQuery(
   field: string,
   value: unknown,
   operation: SupportedOperation,
-  fieldType?: string
+  kibanaFieldType?: string,
+  esMappingType?: string
 ): string | undefined {
   const { root } = Parser.parse(baseESQLQuery);
   const lastCommand = root.commands[root.commands.length - 1];
   const isLastCommandWhere = lastCommand.name === 'where';
 
-  const { expression: filterExpression, isMultiValue } = createFilterExpression(
+  const { expression: filterExpression, ...filterExpressionResult } = createFilterExpression(
     field,
     value,
     operation,
-    fieldType
+    kibanaFieldType,
+    esMappingType
   );
 
   if (!filterExpression) {
@@ -227,14 +299,15 @@ export function appendWhereClauseToESQLQuery(
   }
 
   // Handles multi-value filters
-  if (isMultiValue) {
+  if (filterExpressionResult.isMultiValue) {
     return handleExistingFilterForMultiValues(
       baseESQLQuery,
       lastCommand,
       field,
-      value,
-      operation as '+' | '-',
-      filterExpression
+      filterExpressionResult.values,
+      operation,
+      filterExpression,
+      filterExpressionResult.multiValueFilterFunction
     );
   }
   // Handles single value filters

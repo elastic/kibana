@@ -155,23 +155,25 @@ toc:
       - file: test-coverage-checklist.md
       - file: scout.md
         children:
-          - file: setup-scout.md
-          - file: run-scout-tests.md
-          - file: fixtures.md
-          - file: page-objects.md
-          - file: api-services.md
-          - file: parallelism.md
-          - file: deployment-tags.md
-          - file: global-setup-hook.md
-          - file: write-ui-tests.md
-          - file: write-api-tests.md
-          - file: debugging.md
-          - file: browser-auth.md
-          - file: api-auth.md
-          - file: a11y-checks.md
-          - file: skip-tests.md
-          - file: feature-flags.md
-          - file: scout-best-practices.md
+          - file: scout/fixtures.md
+          - file: scout/page-objects.md
+          - file: scout/api-services.md
+          - file: scout/parallelism.md
+          - file: scout/global-setup-hook.md
+          - file: scout/deployment-tags.md
+          - file: scout/skip-tests.md
+          - file: scout/feature-flags.md
+          - file: scout/ui-testing.md
+            children:
+              - file: scout/write-ui-tests.md
+              - file: scout/ui-best-practices.md
+              - file: scout/browser-auth.md
+              - file: scout/a11y-checks.md
+          - file: scout/api-testing.md
+            children:
+              - file: scout/write-api-tests.md
+              - file: scout/api-best-practices.md
+              - file: scout/api-auth.md
       - file: ftr.md
   - file: plugin-list.md
   - file: dependencies-versions.md

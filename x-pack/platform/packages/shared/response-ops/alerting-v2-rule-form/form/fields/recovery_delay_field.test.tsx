@@ -47,11 +47,11 @@ describe('RecoveryDelayField', () => {
     expect(screen.getByText('No delay - Recovers on first non-breach')).toBeInTheDocument();
   });
 
-  it('shows breaches controls when recovery delay mode is breaches', () => {
+  it('shows recoveries controls when recovery delay mode is recoveries', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
-        stateTransitionRecoveryDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: { recoveringCount: 4 },
       }),
     });
@@ -71,12 +71,12 @@ describe('RecoveryDelayField', () => {
     expect(screen.getByTestId('recoveryTransitionTimeframeNumberInput')).toBeInTheDocument();
   });
 
-  it('switches to breaches mode when Breaches button is clicked', () => {
+  it('switches to recoveries mode when Recoveries button is clicked', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({ kind: 'alert' }),
     });
 
-    fireEvent.click(screen.getByText('Breaches'));
+    fireEvent.click(screen.getByText('Recoveries'));
 
     expect(screen.getByTestId('recoveryTransitionCountInput')).toBeInTheDocument();
     expect(screen.queryByTestId('recoveryDelayImmediateDescription')).not.toBeInTheDocument();
@@ -97,12 +97,12 @@ describe('RecoveryDelayField', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
-        stateTransitionRecoveryDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: { recoveringCount: 4 },
       }),
     });
 
-    // Start in breaches mode, switch to immediate
+    // Start in recoveries mode, switch to immediate
     fireEvent.click(screen.getByText('Immediate'));
 
     expect(screen.getByTestId('recoveryDelayImmediateDescription')).toBeInTheDocument();
@@ -125,6 +125,30 @@ describe('RecoveryDelayField', () => {
     expect(screen.getByTestId('recoveryDelayMode')).toBeInTheDocument();
   });
 
+  it('uses default count when switching from immediate (recoveringCount: 0) to recoveries', () => {
+    getFormValues = undefined;
+    render(
+      <>
+        <CaptureFormGetValues />
+        <RecoveryDelayField />
+      </>,
+      {
+        wrapper: createFormWrapper({
+          kind: 'alert',
+          stateTransitionRecoveryDelayMode: 'immediate',
+          stateTransition: { recoveringCount: 0 },
+        }),
+      }
+    );
+
+    const recoveryRow = screen.getByTestId('recoveryDelayFormRow');
+    fireEvent.click(within(recoveryRow).getByText('Recoveries'));
+
+    const values = getFormValues!();
+    expect(values.stateTransitionRecoveryDelayMode).toBe('recoveries');
+    expect(values.stateTransition?.recoveringCount).toBe(2);
+  });
+
   it('clears recovery delay (recovering) when switching to immediate while alert delay stays on breaches', () => {
     getFormValues = undefined;
     render(
@@ -137,7 +161,7 @@ describe('RecoveryDelayField', () => {
         wrapper: createFormWrapper({
           kind: 'alert',
           stateTransitionAlertDelayMode: 'breaches',
-          stateTransitionRecoveryDelayMode: 'breaches',
+          stateTransitionRecoveryDelayMode: 'recoveries',
           stateTransition: {
             pendingCount: 2,
             pendingTimeframe: null,
@@ -159,6 +183,7 @@ describe('RecoveryDelayField', () => {
 
     expect(mapFormValuesToUpdateRequest(values).state_transition).toEqual({
       pending_count: 2,
+      recovering_count: 0,
     });
   });
 });

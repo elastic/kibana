@@ -237,6 +237,7 @@
                 "lineNumber": 45,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "LoggerFactory",
                 "trackAdoption": false
               }
             ]
@@ -286,6 +287,7 @@
                 "lineNumber": 50,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "LoggerFactory",
                 "trackAdoption": false
               }
             ]

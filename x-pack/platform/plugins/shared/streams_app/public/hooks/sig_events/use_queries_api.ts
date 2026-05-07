@@ -6,15 +6,17 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import type { StreamQuery } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useKibana } from '../use_kibana';
 
+export interface PromoteResult {
+  promoted: number;
+  skipped_stats: number;
+}
+
 interface QueriesApi {
-  promote: ({ queryIds }: { queryIds: string[] }) => Promise<{ promoted: number }>;
+  promote: ({ queryIds }: { queryIds: string[] }) => Promise<PromoteResult>;
   demote: ({ queryIds }: { queryIds: string[] }) => Promise<{ demoted: number }>;
-  promoteAll: () => Promise<{ promoted: number }>;
-  upsertQuery: ({ query, streamName }: { query: StreamQuery; streamName: string }) => Promise<void>;
   removeQuery: ({ queryId, streamName }: { queryId: string; streamName: string }) => Promise<void>;
   deleteQueriesInBulk: ({
     queryIds,
@@ -23,7 +25,6 @@ interface QueriesApi {
     queryIds: string[];
     streamName: string;
   }) => Promise<void>;
-  getUnbackedQueriesCount: (signal?: AbortSignal | null) => Promise<{ count: number }>;
   abort: () => void;
 }
 
@@ -53,23 +54,6 @@ export function useQueriesApi(): QueriesApi {
           signal: null,
         });
       },
-      upsertQuery: async ({ query, streamName }: { query: StreamQuery; streamName: string }) => {
-        const { id, ...body } = query;
-
-        await streamsRepositoryClient.fetch(
-          'PUT /api/streams/{name}/queries/{queryId} 2023-10-31',
-          {
-            signal,
-            params: {
-              path: {
-                name: streamName,
-                queryId: id,
-              },
-              body,
-            },
-          }
-        );
-      },
       removeQuery: async ({ queryId, streamName }: { queryId: string; streamName: string }) => {
         await streamsRepositoryClient.fetch(
           'DELETE /api/streams/{name}/queries/{queryId} 2023-10-31',
@@ -92,7 +76,7 @@ export function useQueriesApi(): QueriesApi {
         streamName: string;
       }) => {
         await streamsRepositoryClient.fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
-          signal,
+          signal: null,
           params: {
             path: {
               name: streamName,
@@ -101,17 +85,6 @@ export function useQueriesApi(): QueriesApi {
               operations: queryIds.map((id) => ({ delete: { id } })),
             },
           },
-        });
-      },
-      promoteAll: async () => {
-        return streamsRepositoryClient.fetch('POST /internal/streams/queries/_promote', {
-          params: { body: {} },
-          signal: null,
-        });
-      },
-      getUnbackedQueriesCount: async (requestSignal?: AbortSignal | null) => {
-        return streamsRepositoryClient.fetch('GET /internal/streams/queries/_unbacked_count', {
-          signal: requestSignal ?? signal,
         });
       },
       abort: () => {

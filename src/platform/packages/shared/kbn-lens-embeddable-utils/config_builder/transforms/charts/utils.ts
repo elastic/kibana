@@ -21,7 +21,7 @@ import type {
 } from '@kbn/lens-common';
 
 import type { LensAttributes } from '../../types';
-import type { LensApiState } from '../../schema';
+import type { LensApiConfig } from '../../schema';
 import type { legendTruncateAfterLinesSchema } from '../../schema/shared';
 import { buildReferences, getAdhocDataviews, isTextBasedLayer, nonNullable } from '../utils';
 import { LENS_LAYER_SUFFIX } from '../constants';
@@ -31,7 +31,7 @@ import type { XScaleSchemaType } from '../../schema/charts/shared';
 
 export function getSharedChartLensStateToAPI(
   config: Pick<LensAttributes, 'title' | 'description'>
-): Pick<LensApiState, 'title' | 'description'> {
+): Pick<LensApiConfig, 'title' | 'description'> {
   return {
     // @TODO: need to make this optional in LensDocument type
     title: config.title ?? '',
@@ -222,5 +222,20 @@ export function getScaleTypeFromColumnType(columnType: string | undefined): XSca
     return 'linear';
   } else {
     return 'ordinal';
+  }
+}
+
+/**
+ * Determines the column metadata type based on the API x-axis scale type.
+ */
+export function getColumnTypeFromScaleType(
+  scaleType: XScaleSchemaType
+): 'date' | 'number' | 'string' {
+  if (scaleType === 'temporal') {
+    return 'date';
+  } else if (scaleType === 'linear') {
+    return 'number';
+  } else {
+    return 'string';
   }
 }

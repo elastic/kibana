@@ -17,6 +17,7 @@ import {
   type ServiceMapNode,
   type ServiceMapEdge,
 } from '../../../../../common/service_map';
+import { ServiceMapPopoverTitleBadges } from '../service_map_popover_title_badges';
 import { isEdge, type ServiceMapSelection } from './utils';
 import { POPOVER_WIDTH } from './constants';
 import { DependencyContents } from './dependency_contents';
@@ -43,6 +44,7 @@ export interface ContentsProps {
   onFocusClick: (event: React.MouseEvent<HTMLAnchorElement>) => void;
   showDiagnoseButton?: boolean;
   onDiagnoseClick?: () => void;
+  isEmbedded?: boolean;
 }
 
 export const ServiceContentsWithDiagnose = withDiagnoseButton(ServiceContents);
@@ -89,6 +91,8 @@ interface PopoverContentProps {
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
   /** Called when user clicks "Open diagnostic tool" – parent should open the flyout and close the popover. */
   onOpenDiagnostic?: () => void;
+  /** When true, hides navigation actions like "Focus map" that don't apply in dashboard embeds. */
+  isEmbedded?: boolean;
 }
 
 /**
@@ -103,6 +107,7 @@ export function PopoverContent({
   end,
   onFocusClick,
   onOpenDiagnostic,
+  isEmbedded,
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
   const isDiagnosticModeEnabled = core?.uiSettings?.get(enableDiagnosticMode);
@@ -125,20 +130,29 @@ export function PopoverContent({
       data-test-subj="serviceMapPopoverContent"
     >
       <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
-            {getPopoverTitle(selection)}
-            {kuery && (
-              <EuiIconTip
-                position="bottom"
-                content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
-                  defaultMessage: 'The KQL filter is not applied in the displayed stats.',
-                })}
-                type="info"
-              />
-            )}
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+          <EuiFlexItem grow style={{ minWidth: 0 }}>
+            <EuiTitle size="xxs">
+              <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
+                {getPopoverTitle(selection)}
+                {kuery && (
+                  <EuiIconTip
+                    position="bottom"
+                    content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
+                      defaultMessage: 'The KQL filter is not applied in the displayed stats.',
+                    })}
+                    type="info"
+                  />
+                )}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          {!isEdge(selection) && selection.data != null && isServiceNodeData(selection.data) && (
+            <EuiFlexItem grow={false}>
+              <ServiceMapPopoverTitleBadges nodeData={selection.data} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
       </EuiFlexItem>
       <ContentsComponent
@@ -150,6 +164,7 @@ export function PopoverContent({
         end={end}
         showDiagnoseButton={isDiagnosticModeEnabled}
         onDiagnoseClick={onOpenDiagnostic}
+        isEmbedded={isEmbedded}
       />
     </EuiFlexGroup>
   );
