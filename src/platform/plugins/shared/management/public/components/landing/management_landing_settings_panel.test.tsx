@@ -14,9 +14,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { ManagementLandingSettingsPanel } from './management_landing_settings_panel';
 
-const DISMISS_KEY = 'managementLandingSettingsPanelDismissed';
-const LEGACY_DISMISS_KEY = 'managementLandingZone3Dismissed';
-
 function buildCaps(settings: boolean, users: boolean) {
   return {
     management: {
@@ -81,16 +78,17 @@ describe('ManagementLandingSettingsPanel', () => {
   beforeEach(() => {
     navigateToApp.mockClear();
     uiSettings = createUiSettingsMock();
-    window.localStorage.removeItem(DISMISS_KEY);
-    window.localStorage.removeItem(LEGACY_DISMISS_KEY);
+    window.localStorage.removeItem('managementLandingSettingsPanelDismissed');
+    window.localStorage.removeItem('managementLandingZone3Dismissed');
   });
 
   afterEach(() => {
     cleanup();
   });
 
-  it('returns null when panel was previously dismissed', () => {
-    window.localStorage.setItem(DISMISS_KEY, 'true');
+  it('shows panel even if legacy localStorage dismiss flags are set (dismiss is not persisted)', () => {
+    window.localStorage.setItem('managementLandingSettingsPanelDismissed', 'true');
+    window.localStorage.setItem('managementLandingZone3Dismissed', 'true');
 
     render(
       <I18nProvider>
@@ -102,23 +100,7 @@ describe('ManagementLandingSettingsPanel', () => {
       </I18nProvider>
     );
 
-    expect(screen.queryByTestId('managementLandingSettingsPanel')).not.toBeInTheDocument();
-  });
-
-  it('honors legacy dismiss storage key', () => {
-    window.localStorage.setItem(LEGACY_DISMISS_KEY, 'true');
-
-    render(
-      <I18nProvider>
-        <ManagementLandingSettingsPanel
-          capabilities={buildCaps(true, true)}
-          navigateToApp={navigateToApp}
-          uiSettings={uiSettings}
-        />
-      </I18nProvider>
-    );
-
-    expect(screen.queryByTestId('managementLandingSettingsPanel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('managementLandingSettingsPanel')).toBeInTheDocument();
   });
 
   it('returns null when user has no matching capabilities', () => {
@@ -152,6 +134,7 @@ describe('ManagementLandingSettingsPanel', () => {
       </I18nProvider>
     );
 
+    fireEvent.click(screen.getByTestId('managementLandingSettingsRowEdit-dark_mode'));
     const darkModeControl = screen.getByTestId('managementLandingSettingsUiRow-dark_mode');
     fireEvent.change(darkModeControl.querySelector('select')!, {
       target: { value: 'enabled' },
@@ -176,9 +159,10 @@ describe('ManagementLandingSettingsPanel', () => {
     expect(screen.getByTestId('managementLandingSettingsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('managementLandingSettingsUiRow-time_zone')).toBeInTheDocument();
     expect(
-      screen.getByTestId('managementLandingSettingsNavigate-invite_users')
+      screen.getByTestId('managementLandingSettingsNavigateRow-invite_users')
     ).toBeInTheDocument();
 
+    fireEvent.click(screen.getByTestId('managementLandingSettingsRowEdit-dark_mode'));
     const darkModeControl = screen.getByTestId('managementLandingSettingsUiRow-dark_mode');
     fireEvent.change(darkModeControl.querySelector('select')!, {
       target: { value: 'enabled' },
@@ -201,13 +185,14 @@ describe('ManagementLandingSettingsPanel', () => {
       </I18nProvider>
     );
 
+    fireEvent.click(screen.getByTestId('managementLandingSettingsRowEdit-invite_users'));
     fireEvent.click(screen.getByTestId('managementLandingSettingsNavigate-invite_users'));
     expect(navigateToApp).toHaveBeenCalledWith('management', {
       path: 'security/users/create',
     });
   });
 
-  it('dismiss hides the panel and persists', () => {
+  it('dismiss hides the panel without writing localStorage', () => {
     render(
       <I18nProvider>
         <ManagementLandingSettingsPanel
@@ -220,6 +205,6 @@ describe('ManagementLandingSettingsPanel', () => {
 
     fireEvent.click(screen.getByTestId('managementLandingSettingsPanelDismiss'));
     expect(screen.queryByTestId('managementLandingSettingsPanel')).not.toBeInTheDocument();
-    expect(window.localStorage.getItem(DISMISS_KEY)).toBe('true');
+    expect(window.localStorage.getItem('managementLandingSettingsPanelDismissed')).not.toBe('true');
   });
 });

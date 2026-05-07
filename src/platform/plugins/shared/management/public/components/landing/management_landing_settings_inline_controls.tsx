@@ -8,19 +8,14 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormErrorText,
-  EuiIcon,
   EuiSelect,
   EuiSpacer,
   EuiSuperSelect,
   EuiText,
-  useEuiTheme,
   type EuiSuperSelectOption,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -68,6 +63,23 @@ function readUiSettingAsDisplayString(uiSettings: IUiSettingsClient, key: string
   return raw === undefined || raw === null ? '' : String(raw);
 }
 
+/** Human-readable label for the current uiSetting value (read-only display). */
+function formatUiSettingReadonlyLabel(
+  uiSettings: IUiSettingsClient,
+  key: string,
+  rawDisplay: string
+): string {
+  if (key === 'theme:darkMode') {
+    const meta = uiSettings.getAll()[key];
+    const labels =
+      meta?.optionLabels && typeof meta.optionLabels === 'object'
+        ? (meta.optionLabels as Record<string, string>)
+        : undefined;
+    return labels?.[rawDisplay] ?? rawDisplay;
+  }
+  return rawDisplay;
+}
+
 async function validateAndSet(
   uiSettings: IUiSettingsClient,
   key: string,
@@ -103,93 +115,102 @@ async function validateAndSet(
   }
 }
 
-export function ManagementLandingNavigateSettingsRow({
+export function ManagementLandingSettingsNavigateContent({
   row,
+  isEditing,
   navigateToApp,
 }: {
   row: ManagementLandingNavigateSettingsRowDefinition;
+  isEditing: boolean;
   navigateToApp: ApplicationStart['navigateToApp'];
 }) {
   const handleNavigate = useCallback(() => {
     navigateToApp('management', { path: row.managementPath });
   }, [navigateToApp, row.managementPath]);
 
+  if (!isEditing) {
+    return (
+      <EuiText
+        size="s"
+        color="subdued"
+        data-test-subj={`managementLandingSettingsNavigateSummary-${row.id}`}
+      >
+        <FormattedMessage
+          id="management.landing.settingsPanel.navigateRowSummary"
+          defaultMessage="Open user management to add people to your organization."
+        />
+      </EuiText>
+    );
+  }
+
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
-      responsive={false}
-      justifyContent="spaceBetween"
+    <EuiButtonEmpty
+      size="xs"
+      iconType="sortRight"
+      iconSide="right"
+      onClick={handleNavigate}
+      data-test-subj={`managementLandingSettingsNavigate-${row.id}`}
+      aria-label={i18n.translate('management.landing.settingsPanel.navigateRowAriaLabel', {
+        defaultMessage: 'Open {title}',
+        values: { title: row.title },
+      })}
     >
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={row.icon} size="m" aria-hidden />
-      </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <EuiText size="s">
-          <strong>{row.title}</strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="sortRight"
-          iconSide="right"
-          onClick={handleNavigate}
-          data-test-subj={`managementLandingSettingsNavigate-${row.id}`}
-          aria-label={i18n.translate('management.landing.settingsPanel.navigateRowAriaLabel', {
-            defaultMessage: 'Open {title}',
-            values: { title: row.title },
-          })}
-        >
-          <FormattedMessage id="management.landing.settingsPanel.goToSection" defaultMessage="Go" />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <FormattedMessage id="management.landing.settingsPanel.goToSection" defaultMessage="Go" />
+    </EuiButtonEmpty>
   );
 }
 
-export function ManagementLandingUiSettingRow({
+function ManagementLandingUiSettingReadonlyValue({
   row,
   uiSettings,
 }: {
   row: ManagementLandingUiSettingRowDefinition;
   uiSettings: IUiSettingsClient;
 }) {
-  const { euiTheme } = useEuiTheme();
+  const raw = useSyncedUiSettingString(uiSettings, row.uiSettingKey);
+  const label = useMemo(
+    () => formatUiSettingReadonlyLabel(uiSettings, row.uiSettingKey, raw),
+    [uiSettings, row.uiSettingKey, raw]
+  );
+
+  return (
+    <EuiText size="s" color="subdued" data-test-subj={`managementLandingSettingsUiValue-${row.id}`}>
+      {label}
+    </EuiText>
+  );
+}
+
+export function ManagementLandingSettingsUiContent({
+  row,
+  isEditing,
+  uiSettings,
+}: {
+  row: ManagementLandingUiSettingRowDefinition;
+  isEditing: boolean;
+  uiSettings: IUiSettingsClient;
+}) {
   const [error, setError] = useState<string | undefined>();
   const errorRegionId = `managementLandingSettings-row-${row.id}-error`;
 
+  if (!isEditing) {
+    return <ManagementLandingUiSettingReadonlyValue row={row} uiSettings={uiSettings} />;
+  }
+
   return (
-    <div data-test-subj={`managementLandingSettingsUiRow-${row.id}`}>
-      <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon
-            type={row.icon}
-            size="m"
-            css={css({ marginTop: euiTheme.size.xs })}
-            aria-hidden
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiText size="s">
-            <strong>{row.title}</strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <ManagementLandingUiSettingEditor
-            uiSettings={uiSettings}
-            uiSettingKey={row.uiSettingKey}
-            ariaLabel={row.title}
-            ariaDescribedBy={error ? errorRegionId : undefined}
-            onError={setError}
-          />
-          {error ? (
-            <div id={errorRegionId} role="alert" aria-live="polite">
-              <EuiFormErrorText>{error}</EuiFormErrorText>
-            </div>
-          ) : null}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+    <>
+      <ManagementLandingUiSettingEditor
+        uiSettings={uiSettings}
+        uiSettingKey={row.uiSettingKey}
+        ariaLabel={row.title}
+        ariaDescribedBy={error ? errorRegionId : undefined}
+        onError={setError}
+      />
+      {error ? (
+        <div id={errorRegionId} role="alert" aria-live="polite">
+          <EuiFormErrorText>{error}</EuiFormErrorText>
+        </div>
+      ) : null}
+    </>
   );
 }
 

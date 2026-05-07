@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -23,38 +24,14 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { MANAGEMENT_LANDING_SETTINGS_ROWS } from './management_landing_settings_definitions';
 import {
-  ManagementLandingNavigateSettingsRow,
-  ManagementLandingUiSettingRow,
+  MANAGEMENT_LANDING_SETTINGS_ROWS,
+  type ManagementLandingSettingsRowDefinition,
+} from './management_landing_settings_definitions';
+import {
+  ManagementLandingSettingsNavigateContent,
+  ManagementLandingSettingsUiContent,
 } from './management_landing_settings_inline_controls';
-
-const DISMISS_STORAGE_KEY = 'managementLandingSettingsPanelDismissed';
-/** Legacy key before the settings panel was renamed — still honored once to migrate dismiss state. */
-const LEGACY_DISMISS_STORAGE_KEY = 'managementLandingZone3Dismissed';
-
-function isSettingsPanelDismissed(): boolean {
-  try {
-    if (window.localStorage.getItem(DISMISS_STORAGE_KEY) === 'true') {
-      return true;
-    }
-    if (window.localStorage.getItem(LEGACY_DISMISS_STORAGE_KEY) === 'true') {
-      window.localStorage.setItem(DISMISS_STORAGE_KEY, 'true');
-      return true;
-    }
-    return false;
-  } catch {
-    return false;
-  }
-}
-
-function persistSettingsPanelDismissed(): void {
-  try {
-    window.localStorage.setItem(DISMISS_STORAGE_KEY, 'true');
-  } catch {
-    // no-op
-  }
-}
 
 export function ManagementLandingSettingsPanel({
   capabilities,
@@ -66,22 +43,43 @@ export function ManagementLandingSettingsPanel({
   uiSettings: IUiSettingsClient;
 }) {
   const { euiTheme } = useEuiTheme();
-  const [dismissed, setDismissed] = useState(isSettingsPanelDismissed);
+  /** Prototype: dismiss applies until navigation/refresh only; no localStorage. */
+  const [panelDismissed, setPanelDismissed] = useState(false);
+  const [dismissedRowIds, setDismissedRowIds] = useState<ReadonlySet<string>>(() => new Set());
+  const [editingRowId, setEditingRowId] = useState<string | null>(null);
 
   const visibleRows = useMemo(
     () =>
       MANAGEMENT_LANDING_SETTINGS_ROWS.filter((row) =>
         Boolean(get(capabilities, row.capabilityPath))
-      ),
-    [capabilities]
+      ).filter((row) => !dismissedRowIds.has(row.id)),
+    [capabilities, dismissedRowIds]
   );
 
-  const handleDismiss = useCallback(() => {
-    persistSettingsPanelDismissed();
-    setDismissed(true);
+  const handleDismissPanel = useCallback(() => {
+    setPanelDismissed(true);
   }, []);
 
-  if (dismissed || visibleRows.length === 0) {
+  const handleDismissRow = useCallback((rowId: string) => {
+    setDismissedRowIds((prev) => {
+      const next = new Set(prev);
+      next.add(rowId);
+      return next;
+    });
+    setEditingRowId((current) => (current === rowId ? null : current));
+  }, []);
+
+  const handleToggleEditRow = useCallback((rowId: string) => {
+    setEditingRowId((current) => (current === rowId ? null : rowId));
+  }, []);
+
+  const rowTestSubj = useCallback((row: ManagementLandingSettingsRowDefinition): string => {
+    return row.kind === 'navigate'
+      ? `managementLandingSettingsNavigateRow-${row.id}`
+      : `managementLandingSettingsUiRow-${row.id}`;
+  }, []);
+
+  if (panelDismissed || visibleRows.length === 0) {
     return null;
   }
 
@@ -120,7 +118,7 @@ export function ManagementLandingSettingsPanel({
           <EuiButtonIcon
             display="empty"
             iconType="cross"
-            onClick={handleDismiss}
+            onClick={handleDismissPanel}
             aria-label={i18n.translate('management.landing.settingsPanel.dismissAriaLabel', {
               defaultMessage: 'Dismiss settings teaser',
             })}
@@ -144,11 +142,88 @@ export function ManagementLandingSettingsPanel({
                   : undefined
               }
             >
-              {row.kind === 'navigate' ? (
-                <ManagementLandingNavigateSettingsRow row={row} navigateToApp={navigateToApp} />
-              ) : (
-                <ManagementLandingUiSettingRow row={row} uiSettings={uiSettings} />
-              )}
+              <EuiPanel
+                color="subdued"
+                paddingSize="s"
+                hasBorder
+                hasShadow={false}
+                data-test-subj={rowTestSubj(row)}
+              >
+                <EuiFlexGroup
+                  alignItems="flexStart"
+                  justifyContent="spaceBetween"
+                  responsive={false}
+                  gutterSize="s"
+                >
+                  <EuiFlexItem grow={true}>
+                    <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type={row.icon} size="m" aria-hidden />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={true}>
+                        <EuiTitle size="xxs">
+                          <h3
+                            css={css`
+                              font-weight: ${euiTheme.font.weight.semiBold};
+                            `}
+                          >
+                            {row.title}
+                          </h3>
+                        </EuiTitle>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="xs" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          display="empty"
+                          iconType="pencil"
+                          aria-pressed={editingRowId === row.id}
+                          onClick={() => handleToggleEditRow(row.id)}
+                          aria-label={i18n.translate(
+                            'management.landing.settingsPanel.rowEditAriaLabel',
+                            {
+                              defaultMessage: 'Edit {title}',
+                              values: { title: row.title },
+                            }
+                          )}
+                          data-test-subj={`managementLandingSettingsRowEdit-${row.id}`}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          display="empty"
+                          iconType="cross"
+                          onClick={() => handleDismissRow(row.id)}
+                          aria-label={i18n.translate(
+                            'management.landing.settingsPanel.rowDismissAriaLabel',
+                            {
+                              defaultMessage: 'Dismiss {title}',
+                              values: { title: row.title },
+                            }
+                          )}
+                          data-test-subj={`managementLandingSettingsRowDismiss-${row.id}`}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                {row.kind === 'navigate' ? (
+                  <ManagementLandingSettingsNavigateContent
+                    row={row}
+                    isEditing={editingRowId === row.id}
+                    navigateToApp={navigateToApp}
+                  />
+                ) : (
+                  <ManagementLandingSettingsUiContent
+                    row={row}
+                    isEditing={editingRowId === row.id}
+                    uiSettings={uiSettings}
+                  />
+                )}
+              </EuiPanel>
             </div>
           </EuiFlexItem>
         ))}

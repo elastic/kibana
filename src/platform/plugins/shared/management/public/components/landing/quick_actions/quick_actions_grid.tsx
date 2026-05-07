@@ -9,7 +9,16 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core/public';
@@ -60,18 +69,33 @@ export const QuickActionsGrid = ({
   }
 
   return (
-    <div data-test-subj="managementQuickActionsGrid">
+    <EuiPanel
+      paddingSize="m"
+      hasShadow={false}
+      hasBorder
+      data-test-subj="managementQuickActionsGrid"
+      css={css`
+        height: 100%;
+        min-height: ${euiTheme.size.xl};
+      `}
+    >
       <EuiTitle size="xs">
-        <h2>
+        <h2
+          css={css`
+            font-weight: ${euiTheme.font.weight.bold};
+          `}
+        >
           <FormattedMessage
             id="management.landing.quickActions.title"
             defaultMessage="Quick actions"
           />
         </h2>
       </EuiTitle>
+
+      <EuiSpacer size="m" />
+
       <div
         css={css`
-          margin-top: ${euiTheme.size.s};
           width: 100%;
         `}
         data-test-subj="managementQuickActionsStack"
@@ -107,6 +131,6 @@ export const QuickActionsGrid = ({
           ))}
         </EuiFlexGroup>
       </div>
-    </div>
+    </EuiPanel>
   );
 };
