@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { FieldDescriptor } from './types';
 import { SchemaFormField } from './fields';
+import { getStateAdapter } from './state_adapters';
 
 interface SchemaFlyoutEditorProps {
   visualizationId: string;
@@ -108,11 +109,17 @@ const SchemaForm: React.FC<{
   fieldDescriptors: FieldDescriptor[];
   state: unknown;
   setState: (newState: unknown) => void;
-}> = ({ fieldDescriptors, state, setState }) => {
+  visualizationId: string;
+}> = ({ fieldDescriptors, state, setState, visualizationId }) => {
+  const adapter = useMemo(() => getStateAdapter(visualizationId), [visualizationId]);
+
   const defaultValues = useMemo(
-    () => extractSettingsFromState(state, fieldDescriptors),
+    () =>
+      adapter
+        ? adapter.stateToFormValues(state)
+        : extractSettingsFromState(state, fieldDescriptors),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [fieldDescriptors]
+    [fieldDescriptors, adapter]
   );
 
   const methods = useForm({ defaultValues: defaultValues as Record<string, {}> });
@@ -130,15 +137,15 @@ const SchemaForm: React.FC<{
       const serialized = JSON.stringify(values);
       if (serialized !== lastEmittedRef.current) {
         lastEmittedRef.current = serialized;
-        const newState = mergeSettingsIntoState(
-          stateRef.current,
-          values as Record<string, unknown>
-        );
+        const formValues = values as Record<string, unknown>;
+        const newState = adapter
+          ? adapter.formValuesToState(stateRef.current, formValues)
+          : mergeSettingsIntoState(stateRef.current, formValues);
         setStateRef.current(newState);
       }
     });
     return () => subscription.unsubscribe();
-  }, [methods]);
+  }, [methods, adapter]);
 
   return (
     <FormProvider {...methods}>
@@ -181,5 +188,12 @@ export const SchemaFlyoutEditor: React.FC<SchemaFlyoutEditorProps> = ({
     return null;
   }
 
-  return <SchemaForm fieldDescriptors={fieldDescriptors} state={state} setState={setState} />;
+  return (
+    <SchemaForm
+      fieldDescriptors={fieldDescriptors}
+      state={state}
+      setState={setState}
+      visualizationId={visualizationId}
+    />
+  );
 };
