@@ -32,10 +32,11 @@ export const registerEmbeddablePublicDefinition = <
   type: string,
   getFactory: () => Promise<EmbeddableFactory<SerializedState, Api>>
 ) => {
-  if (isSetupComplete) 
+  if (isSetupComplete)
     throw new Error(
       i18n.translate('embeddableApi.reactEmbeddable.setCompleteError', {
-        defaultMessage: 'Embeddables must be registered during plugin setup phase. Do not register embeddables asynchronously',
+        defaultMessage:
+          'Embeddables must be registered during plugin setup phase. Do not register embeddables asynchronously',
       })
     );
   if (registry[type] !== undefined)
