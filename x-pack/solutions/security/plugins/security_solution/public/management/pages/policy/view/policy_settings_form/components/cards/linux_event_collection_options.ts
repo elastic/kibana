@@ -26,21 +26,21 @@ const BASE_OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
   },
   {
     name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.process',
-      {
-        defaultMessage: 'Process',
-      }
-    ),
-    protectionField: 'process',
-  },
-  {
-    name: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.network',
       {
         defaultMessage: 'Network',
       }
     ),
     protectionField: 'network',
+  },
+  {
+    name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.process',
+      {
+        defaultMessage: 'Process',
+      }
+    ),
+    protectionField: 'process',
   },
 ];
 

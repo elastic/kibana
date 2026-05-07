@@ -26,16 +26,16 @@ export const MAC_EVENT_COLLECTION_OPTIONS: ReadonlyArray<EventFormOption<Operati
     protectionField: 'file',
   },
   {
-    name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.process', {
-      defaultMessage: 'Process',
-    }),
-    protectionField: 'process',
-  },
-  {
     name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.network', {
       defaultMessage: 'Network',
     }),
     protectionField: 'network',
+  },
+  {
+    name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.process', {
+      defaultMessage: 'Process',
+    }),
+    protectionField: 'process',
   },
   {
     name: i18n.translate(

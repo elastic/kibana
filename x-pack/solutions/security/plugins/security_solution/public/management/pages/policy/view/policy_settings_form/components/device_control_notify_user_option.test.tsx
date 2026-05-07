@@ -68,25 +68,24 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
 
   it('should render with options un-checked', () => {
     formProps.policy.windows.popup.device_control!.enabled = false;
-    formProps.policy.mac.popup.device_control!.enabled = false;
+    formProps.policy.mac.popup.device_control!.enabled = true;
     render();
 
     expect(isChecked('test-checkbox')).toBe(false);
     expect(renderResult.getByTestId('test-customMessage')).toBeDisabled();
   });
 
-  it('should render checkbox disabled if device control is OFF', () => {
+  it('should render checkbox disabled if device control is OFF for this OS', () => {
     formProps.policy.windows.device_control!.enabled = false;
-    formProps.policy.mac.device_control!.enabled = false;
+    formProps.policy.mac.device_control!.enabled = true;
     render();
 
     expect(renderResult.getByTestId('test-checkbox')).toBeDisabled();
   });
 
-  it('should be able to un-check the option', async () => {
+  it('should be able to un-check the option without changing the other OS', async () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     expectedUpdatedPolicy.windows.popup.device_control!.enabled = false;
-    expectedUpdatedPolicy.mac.popup.device_control!.enabled = false;
 
     render();
     await userEvent.click(renderResult.getByTestId('test-checkbox'));
@@ -95,13 +94,13 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
       isValid: true,
       updatedPolicy: expectedUpdatedPolicy,
     });
+    expect(expectedUpdatedPolicy.mac.popup.device_control!.enabled).toBe(true);
   });
 
-  it('should be able to check the option', async () => {
+  it('should be able to check the option without changing the other OS', async () => {
     formProps.policy.windows.popup.device_control!.enabled = false;
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     expectedUpdatedPolicy.windows.popup.device_control!.enabled = true;
-    expectedUpdatedPolicy.mac.popup.device_control!.enabled = true;
 
     render();
     await userEvent.click(renderResult.getByTestId('test-checkbox'));
@@ -110,13 +109,14 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
       isValid: true,
       updatedPolicy: expectedUpdatedPolicy,
     });
+    expect(expectedUpdatedPolicy.mac.popup.device_control!.enabled).toBe(true);
   });
 
-  it('should be able to change the notification message', async () => {
+  it('should be able to change the notification message for this OS only', async () => {
     const msg = 'a';
     // Set initial value to empty to avoid concatenation
     formProps.policy.windows.popup.device_control!.message = '';
-    formProps.policy.mac.popup.device_control!.message = '';
+    formProps.policy.mac.popup.device_control!.message = 'mac only';
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
 
     render();
@@ -125,13 +125,13 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
     await userEvent.type(customMessageInput, msg);
 
     expectedUpdatedPolicy.windows.popup.device_control!.message = msg;
-    expectedUpdatedPolicy.mac.popup.device_control!.message = msg;
 
     expect(formProps.onChange).toHaveBeenCalledTimes(1);
     expect(formProps.onChange).toHaveBeenLastCalledWith({
       isValid: true,
       updatedPolicy: expectedUpdatedPolicy,
     });
+    expect(expectedUpdatedPolicy.mac.popup.device_control!.message).toBe('mac only');
   });
 
   describe('and access level is not deny_all', () => {
@@ -141,14 +141,14 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
       ['no_execute', 'Read and write'],
     ])('should NOT render when access level is %s (%s)', (accessLevel) => {
       formProps.policy.windows.device_control!.usb_storage = accessLevel;
-      formProps.policy.mac.device_control!.usb_storage = accessLevel;
+      formProps.policy.mac.device_control!.usb_storage = 'deny_all';
       render();
       expect(renderResult.queryByTestId('test')).toBeNull();
     });
 
-    it('should render when access level is deny_all (Block all)', () => {
+    it('should render when this OS access level is deny_all (Block) even if the other OS is not Block', () => {
       formProps.policy.windows.device_control!.usb_storage = 'deny_all';
-      formProps.policy.mac.device_control!.usb_storage = 'deny_all';
+      formProps.policy.mac.device_control!.usb_storage = 'audit';
       render();
       expect(renderResult.queryByTestId('test')).not.toBeNull();
     });

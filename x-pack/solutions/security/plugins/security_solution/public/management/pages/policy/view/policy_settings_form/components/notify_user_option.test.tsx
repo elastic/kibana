@@ -151,7 +151,7 @@ describe('Policy form Notify User option component', () => {
       render();
 
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText('Notify user(agent version 7.11+)Infoyou got owned')
+        exactMatchText('Notify userInfoyou got owned')
       );
     });
 
@@ -160,7 +160,7 @@ describe('Policy form Notify User option component', () => {
       render();
 
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText('Notify user(agent version 7.11+)Info—')
+        exactMatchText('Notify userInfo—')
       );
     });
 
@@ -169,7 +169,7 @@ describe('Policy form Notify User option component', () => {
       render();
 
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText('Notify user(agent version 7.11+)Infoyou got owned')
+        exactMatchText('Notify userInfoyou got owned')
       );
     });
   });

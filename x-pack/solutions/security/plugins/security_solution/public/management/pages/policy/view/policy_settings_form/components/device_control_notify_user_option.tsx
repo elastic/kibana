@@ -51,54 +51,43 @@ export const DeviceControlNotifyUserOption = React.memo(
 
     const isEditMode = mode === 'edit';
 
-    const isDeviceControlEnabled =
-      policy.windows.device_control?.enabled || policy.mac.device_control?.enabled || false;
+    const isDeviceControlEnabled = Boolean(policy[os].device_control?.enabled);
 
-    const currentAccessLevel =
-      policy.windows.device_control?.usb_storage || policy.mac.device_control?.usb_storage;
+    const currentAccessLevel = policy[os].device_control?.usb_storage;
 
-    const userNotificationSelected = policy.windows.popup.device_control?.enabled || false;
-    const userNotificationMessage = policy.windows.popup.device_control?.message || '';
+    const userNotificationSelected = policy[os].popup.device_control?.enabled || false;
+    const userNotificationMessage = policy[os].popup.device_control?.message || '';
 
     const handleUserNotificationCheckbox = useCallback<EuiCheckboxProps['onChange']>(
       (event) => {
         const newPayload = cloneDeep(policy);
+        const popup = newPayload[os].popup;
 
-        newPayload.windows.popup.device_control = newPayload.windows.popup.device_control || {
+        popup.device_control = popup.device_control || {
           enabled: event.target.checked,
           message: DefaultPolicyDeviceNotificationMessage,
         };
-        newPayload.windows.popup.device_control.enabled = event.target.checked;
-
-        newPayload.mac.popup.device_control = newPayload.mac.popup.device_control || {
-          enabled: event.target.checked,
-          message: DefaultPolicyDeviceNotificationMessage,
-        };
-        newPayload.mac.popup.device_control.enabled = event.target.checked;
+        popup.device_control.enabled = event.target.checked;
 
         onChange({ isValid: true, updatedPolicy: newPayload });
       },
-      [policy, onChange]
+      [os, policy, onChange]
     );
 
     const handleCustomUserNotification = useCallback<NonNullable<EuiFieldTextProps['onChange']>>(
       (event) => {
         const newPayload = cloneDeep(policy);
-        newPayload.windows.popup.device_control = newPayload.windows.popup.device_control || {
-          enabled: false,
-          message: event.target.value,
-        };
-        newPayload.windows.popup.device_control.message = event.target.value;
+        const popup = newPayload[os].popup;
 
-        newPayload.mac.popup.device_control = newPayload.mac.popup.device_control || {
+        popup.device_control = popup.device_control || {
           enabled: false,
           message: event.target.value,
         };
-        newPayload.mac.popup.device_control.message = event.target.value;
+        popup.device_control.message = event.target.value;
 
         onChange({ isValid: true, updatedPolicy: newPayload });
       },
-      [policy, onChange]
+      [os, policy, onChange]
     );
 
     const tooltipContent = useMemo(

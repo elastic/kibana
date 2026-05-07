@@ -122,11 +122,6 @@ export const NotifyUserOption = React.memo(
       [policy, onChange, os, protection]
     );
 
-    const version =
-      PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION[
-        protection as keyof typeof PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION
-      ];
-
     const tooltipContent = useMemo(() => {
       const protectionText =
         protection === 'memory_protection'
@@ -182,13 +177,6 @@ export const NotifyUserOption = React.memo(
       white-space: nowrap;
     `;
 
-    const versionLabel = version
-      ? i18n.translate('xpack.securitySolution.endpoint.policyDetails.notifyUser.agentVersion', {
-          defaultMessage: '(agent version {version})',
-          values: { version },
-        })
-      : null;
-
     const showCustomNotificationUpsell =
       Boolean(CustomNotificationUpsellingComponent) &&
       (!isPlatinumPlus || userNotificationSelected);
@@ -211,11 +199,6 @@ export const NotifyUserOption = React.memo(
               label={
                 <span css={checkboxLabelCss}>
                   <span>{NOTIFY_USER_CHECKBOX_LABEL}</span>
-                  {versionLabel && (
-                    <EuiText size="xs" color="subdued" component="span">
-                      {versionLabel}
-                    </EuiText>
-                  )}
                   <EuiIconTip
                     type="question"
                     position="right"

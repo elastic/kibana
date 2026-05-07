@@ -16,24 +16,6 @@ export const WINDOWS_EVENT_COLLECTION_OPTIONS: ReadonlyArray<
   EventFormOption<OperatingSystem.WINDOWS>
 > = [
   {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.credentialAccess',
-      {
-        defaultMessage: 'API',
-      }
-    ),
-    protectionField: 'credential_access',
-  },
-  {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.dllDriverLoad',
-      {
-        defaultMessage: 'DLL and Driver Load',
-      }
-    ),
-    protectionField: 'dll_and_driver_load',
-  },
-  {
     name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.dns', {
       defaultMessage: 'DNS',
     }),
@@ -65,6 +47,24 @@ export const WINDOWS_EVENT_COLLECTION_OPTIONS: ReadonlyArray<
       }
     ),
     protectionField: 'process',
+  },
+  {
+    name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.credentialAccess',
+      {
+        defaultMessage: 'API',
+      }
+    ),
+    protectionField: 'credential_access',
+  },
+  {
+    name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.dllDriverLoad',
+      {
+        defaultMessage: 'DLL and Driver Load',
+      }
+    ),
+    protectionField: 'dll_and_driver_load',
   },
   {
     name: i18n.translate(

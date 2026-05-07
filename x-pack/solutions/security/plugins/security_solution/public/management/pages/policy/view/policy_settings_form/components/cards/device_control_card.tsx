@@ -273,9 +273,6 @@ type OsDeviceControlNotifyUserProps = PolicyFormComponentCommonProps & {
 
 const OsDeviceControlNotifyUser = memo<OsDeviceControlNotifyUserProps>(
   ({ os, policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
-    // Derive a single-OS policy view for DeviceControlNotifyUserOption.
-    // The existing component reads from both windows and mac; we pass the full
-    // policy and let it render — it checks policy[os].device_control?.enabled.
     return (
       <DeviceControlNotifyUserOption
         policy={policy}
