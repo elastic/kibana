@@ -171,7 +171,8 @@ export function claimSort(
   const priorityMap: Record<string, TaskPriority> = {};
   tasks.forEach((task) => {
     const taskType = task.taskType;
-    priorityMap[taskType] = definitions.get(taskType)?.priority ?? TaskPriority.Normal;
+    const priority = getPriority(definitions, taskType);
+    priorityMap[taskType] = priority;
   });
 
   return tasks.slice().sort(compare);
@@ -193,6 +194,10 @@ export function claimSort(
 
     return 0;
   }
+}
+
+function getPriority(definitions: TaskTypeDictionary, taskType: string): TaskPriority {
+  return definitions.get(taskType)?.priority ?? TaskPriority.Normal;
 }
 
 export interface UpdateFieldsAndMarkAsFailedOpts {
