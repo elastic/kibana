@@ -114,7 +114,6 @@ describe('SigeventsOverview', () => {
   it('renders the default impacted cards between the header and the main event', () => {
     renderWithIntl(<SigeventsOverview {...defaultProps} state="critical" />);
     expect(screen.getByTestId('sigeventsOverviewImpactedCards')).toBeInTheDocument();
-    expect(screen.getByText('Impacted')).toBeInTheDocument();
     expect(screen.getAllByTestId('sigeventsOverviewImpactedCard')).toHaveLength(2);
   });
 

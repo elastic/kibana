@@ -11,7 +11,7 @@ import type { EuiAvatarProps, useEuiTheme as useEuiThemeFn } from '@elastic/eui'
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-const MAX_DESCRIPTION_WIDTH = 640;
+const MAX_DESCRIPTION_WIDTH = '33em';
 
 export type StatusHeaderVariant = 'critical' | 'noCriticalEvents';
 
@@ -163,9 +163,9 @@ export const StatusHeader = ({
         <EuiText
           size="xs"
           color="subdued"
-          textAlign="center"
+          textAlign="left"
           css={css`
-            max-width: ${MAX_DESCRIPTION_WIDTH}px;
+            max-width: ${MAX_DESCRIPTION_WIDTH};
           `}
         >
           <p>{resolvedDescription}</p>

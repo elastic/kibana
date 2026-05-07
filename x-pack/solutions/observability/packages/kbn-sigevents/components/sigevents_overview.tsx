@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { EuiAvatarProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -229,26 +229,16 @@ export function SigeventsOverview({
       {impactedCards.length > 0 && (
         <>
           <EuiFlexGroup
-            direction="column"
-            gutterSize="xs"
+            gutterSize="s"
+            responsive={false}
+            wrap
             data-test-subj="sigeventsOverviewImpactedCards"
           >
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.observability.sigeventsOverview.impactedSectionLabel', {
-                  defaultMessage: 'Impacted',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-                {impactedCards.map(({ id, ...card }) => (
-                  <EuiFlexItem key={id}>
-                    <ImpactedCard {...card} />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {impactedCards.map(({ id, ...card }) => (
+              <EuiFlexItem key={id}>
+                <ImpactedCard {...card} />
+              </EuiFlexItem>
+            ))}
           </EuiFlexGroup>
 
           <EuiSpacer size="s" />
