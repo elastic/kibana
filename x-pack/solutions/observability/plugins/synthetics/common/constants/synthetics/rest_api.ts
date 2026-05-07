@@ -22,6 +22,7 @@ export enum SYNTHETICS_API_URLS {
   // Service end points
   SYNTHETICS_MONITOR_RESET = '/internal/synthetics/monitors/{monitorId}/_reset',
   SYNTHETICS_MONITORS_BULK_RESET = '/internal/synthetics/monitors/_bulk_reset',
+  SYNTHETICS_MONITORS_BULK_UPDATE = '/internal/synthetics/monitors/_bulk_update',
   INDEX_TEMPLATES = '/internal/synthetics/service/index_templates',
   SERVICE_LOCATIONS = '/internal/uptime/service/locations',
   SYNTHETICS_MONITOR_INSPECT = '/internal/synthetics/service/monitor/inspect',

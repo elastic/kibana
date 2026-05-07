@@ -44,6 +44,9 @@ export const initSyntheticsServer = (
       case 'PUT':
         router.put(routeDefinition, handler);
         break;
+      case 'PATCH':
+        router.patch(routeDefinition, handler);
+        break;
       case 'DELETE':
         router.delete(routeDefinition, handler);
         break;

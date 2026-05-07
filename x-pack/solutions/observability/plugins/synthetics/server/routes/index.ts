@@ -14,6 +14,7 @@ import { syntheticsInspectTLSRuleRoute } from './rules/inspect_tls_rule';
 import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
 import { deleteSyntheticsParamsBulkRoute } from './settings/params/delete_params_bulk';
 import { deleteSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/delete_monitor_bulk';
+import { updateSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/update_monitor_bulk';
 import {
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
@@ -114,6 +115,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsTriggerTaskRun,
   resetSyntheticsMonitorRoute,
   resetSyntheticsMonitorBulkRoute,
+  updateSyntheticsMonitorBulkRoute,
   cleanupPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
   syncParamsSettingsParamsRoute,
