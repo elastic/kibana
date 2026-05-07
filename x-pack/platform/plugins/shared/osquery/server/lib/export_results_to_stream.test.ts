@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { Subject, of, throwError } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 
 import { exportResultsToStream } from './export_results_to_stream';
 import { createCsvFormatter } from './format_results';
 import type { ResultFormatter, ExportMetadata } from './format_results';
+import type { BaseExportRequest } from './export_results_to_stream';
+import { OsqueryQueries } from '../../common/search_strategy/osquery';
 
 /**
  * Collects all data from a stream until it ends.
@@ -37,12 +39,19 @@ const waitForStreamClose = (stream: NodeJS.ReadableStream): Promise<void> =>
     (stream as import('stream').PassThrough).resume();
   });
 
-const createMockEsClient = () =>
+const createMockSearchResponse = (hits: unknown[], total: number | { value: number }) => ({
+  rawResponse: {
+    hits: {
+      hits,
+      total,
+    },
+  },
+});
+
+const createMockSearch = () =>
   ({
-    openPointInTime: jest.fn().mockResolvedValue({ id: 'test-pit-id' }),
-    closePointInTime: jest.fn().mockResolvedValue({}),
     search: jest.fn(),
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+  } as unknown as jest.Mocked<IScopedSearchClient>);
 
 const createMockFormatter = (): ResultFormatter => ({
   contentType: 'application/ndjson',
@@ -67,13 +76,23 @@ const metadata: ExportMetadata = {
   format: 'ndjson',
 };
 
+const baseRequest: BaseExportRequest = {
+  factoryQueryType: OsqueryQueries.exportResults,
+  baseFilter: 'action_id: "test-action"',
+  size: 1_000,
+};
+
+const pit = { id: 'test-pit-id', keep_alive: '5m' };
+
 describe('exportResultsToStream', () => {
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let mockSearch: jest.Mocked<IScopedSearchClient>;
+  let closePit: jest.Mock;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let aborted$: Subject<void>;
 
   beforeEach(() => {
-    esClient = createMockEsClient() as jest.Mocked<ElasticsearchClient>;
+    mockSearch = createMockSearch();
+    closePit = jest.fn().mockResolvedValue(undefined);
     logger = loggingSystemMock.createLogger();
     aborted$ = new Subject<void>();
   });
@@ -83,39 +102,14 @@ describe('exportResultsToStream', () => {
   });
 
   describe('PIT lifecycle', () => {
-    it('should open PIT with correct index and keep_alive before searching', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
-
-      await exportResultsToStream({
-        esClient,
-        index: 'logs-osquery_manager.result-default',
-        query: { match_all: {} },
-        formatter: createMockFormatter(),
-        metadata,
-        aborted$,
-        logger,
-      });
-
-      expect(esClient.openPointInTime).toHaveBeenCalledWith(
-        {
-          index: 'logs-osquery_manager.result-default',
-          keep_alive: '5m',
-        },
-        { signal: expect.any(AbortSignal) }
-      );
-    });
-
-    it('should close PIT after stream completes', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
+    it('should call closePit after stream completes', async () => {
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -124,38 +118,38 @@ describe('exportResultsToStream', () => {
 
       await collectStream(result as NodeJS.ReadableStream);
 
-      expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
+      expect(closePit).toHaveBeenCalledWith('test-pit-id');
     });
 
-    it('should close PIT when max results limit is exceeded', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [createMockHit('1')], total: { value: 600_000 } },
-      });
+    it('should call closePit when max results limit is exceeded', async () => {
+      mockSearch.search.mockReturnValueOnce(
+        of(createMockSearchResponse([createMockHit('1')], { value: 600_000 }))
+      );
 
       await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
         logger,
       });
 
-      expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
+      expect(closePit).toHaveBeenCalledWith('test-pit-id');
     });
 
-    it('should close PIT when ES search error occurs mid-stream', async () => {
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: [createMockHit('1')], total: { value: 2 } },
-        })
-        .mockRejectedValueOnce(new Error('ES cluster unavailable'));
+    it('should call closePit when search error occurs mid-stream', async () => {
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse([createMockHit('1')], { value: 2 })))
+        .mockReturnValueOnce(throwError(() => new Error('ES cluster unavailable')));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -164,18 +158,17 @@ describe('exportResultsToStream', () => {
 
       await waitForStreamClose(result as NodeJS.ReadableStream);
 
-      expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
+      expect(closePit).toHaveBeenCalledWith('test-pit-id');
     });
 
-    it('should not close PIT twice when cleanup is called multiple times', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
+    it('should call closePit exactly once even across multiple cleanup paths', async () => {
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -184,43 +177,21 @@ describe('exportResultsToStream', () => {
 
       await collectStream(result as NodeJS.ReadableStream);
 
-      expect(esClient.closePointInTime).toHaveBeenCalledTimes(1);
-    });
-
-    it('should log debug when PIT close fails', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
-      (esClient.closePointInTime as jest.Mock).mockRejectedValueOnce(
-        new Error('PIT already expired')
-      );
-
-      const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
-        formatter: createMockFormatter(),
-        metadata,
-        aborted$,
-        logger,
-      });
-
-      await collectStream(result as NodeJS.ReadableStream);
-
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to close PIT'));
+      expect(closePit).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('max result guardrail', () => {
     it('should return error object when total exceeds 500,000', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [createMockHit('1')], total: { value: 500_001 } },
-      });
+      mockSearch.search.mockReturnValueOnce(
+        of(createMockSearchResponse([createMockHit('1')], { value: 500_001 }))
+      );
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -235,14 +206,13 @@ describe('exportResultsToStream', () => {
     });
 
     it('should include the actual count in the error message when limit exceeded', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 600_000 } },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 600_000 })));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -256,14 +226,13 @@ describe('exportResultsToStream', () => {
     });
 
     it('should return stream (not error) when total equals 500,000 exactly', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 500_000 } },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 500_000 })));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -271,19 +240,17 @@ describe('exportResultsToStream', () => {
       });
 
       expect('statusCode' in result).toBe(false);
-      // Drain the stream to clean up
       await collectStream(result as NodeJS.ReadableStream);
     });
 
     it('should handle numeric total (not object) correctly', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: 200 },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], 200)));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -295,14 +262,15 @@ describe('exportResultsToStream', () => {
     });
 
     it('should handle missing total (treats as 0) and not return error', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: undefined },
-      });
+      mockSearch.search.mockReturnValueOnce(
+        of(createMockSearchResponse([], undefined as unknown as number))
+      );
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -321,20 +289,17 @@ describe('exportResultsToStream', () => {
         createMockHit('2', { 'osquery.name': ['bob'] }),
       ];
 
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits, total: { value: 2 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [], total: { value: 2 } },
-        });
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse(hits, { value: 2 })))
+        .mockReturnValueOnce(of(createMockSearchResponse([], { value: 2 })));
 
       const formatter = createMockFormatter();
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
@@ -350,23 +315,18 @@ describe('exportResultsToStream', () => {
       const page1Hits = [createMockHit('1'), createMockHit('2')];
       const page2Hits = [createMockHit('3')];
 
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: page1Hits, total: { value: 3 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: page2Hits, total: { value: 3 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [], total: { value: 3 } },
-        });
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse(page1Hits, { value: 3 })))
+        .mockReturnValueOnce(of(createMockSearchResponse(page2Hits, { value: 3 })))
+        .mockReturnValueOnce(of(createMockSearchResponse([], { value: 3 })));
 
       const formatter = createMockFormatter();
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
@@ -378,23 +338,20 @@ describe('exportResultsToStream', () => {
       expect(formatter.row).toHaveBeenCalledTimes(3);
     });
 
-    it('should pass the sort value of the last hit as search_after for subsequent pages', async () => {
+    it('should pass the sort value of the last hit as searchAfter for subsequent pages', async () => {
       const page1Hits = [createMockHit('hit-a'), createMockHit('hit-b')];
 
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: page1Hits, total: { value: 2 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [], total: { value: 2 } },
-        });
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse(page1Hits, { value: 2 })))
+        .mockReturnValueOnce(of(createMockSearchResponse([], { value: 2 })));
 
       const formatter = createMockFormatter();
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
@@ -403,31 +360,25 @@ describe('exportResultsToStream', () => {
 
       await collectStream(result as NodeJS.ReadableStream);
 
-      // Second search call should include search_after from last hit of page1
-      expect(esClient.search).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({ search_after: ['hit-b'] }),
-        expect.anything()
-      );
+      // Second search call should include searchAfter from last hit of page1
+      const secondCallArgs = mockSearch.search.mock.calls[1][0];
+      expect(secondCallArgs).toMatchObject({ searchAfter: ['hit-b'] });
     });
 
     it('should stop pagination when an empty page is returned', async () => {
       const hits = [createMockHit('1')];
 
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits, total: { value: 1 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [], total: { value: 1 } },
-        });
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse(hits, { value: 1 })))
+        .mockReturnValueOnce(of(createMockSearchResponse([], { value: 1 })));
 
       const formatter = createMockFormatter();
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
@@ -436,74 +387,72 @@ describe('exportResultsToStream', () => {
 
       await collectStream(result as NodeJS.ReadableStream);
 
-      // First page search (synchronous in exportResultsToStream) + one pagination call that returns empty
-      expect(esClient.search).toHaveBeenCalledTimes(2);
+      // First page search + one pagination call that returns empty
+      expect(mockSearch.search).toHaveBeenCalledTimes(2);
     });
 
-    it('should request only agent source when ecsMapping is not provided', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
+    it('should call search.search with factoryQueryType exportResults and the pit', async () => {
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
-      const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+      await exportResultsToStream({
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
         logger,
       });
 
-      await collectStream(result as NodeJS.ReadableStream);
-
-      expect(esClient.search).toHaveBeenCalledWith(
+      expect(mockSearch.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          _source: ['agent'],
+          factoryQueryType: 'osquery.exportResults',
+          pit: { id: 'test-pit-id', keep_alive: '5m' },
         }),
-        expect.anything()
+        expect.objectContaining({ strategy: 'osquerySearchStrategy' })
       );
     });
 
-    it('should request full source when ecsMapping is provided', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
+    it('should request trackTotalHits on the first page only', async () => {
+      const page1Hits = [createMockHit('1')];
+
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse(page1Hits, { value: 1 })))
+        .mockReturnValueOnce(of(createMockSearchResponse([], { value: 1 })));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
         logger,
-        ecsMapping: { 'process.pid': { field: 'pid' } },
       });
 
+      // Drain the stream so the deferred setImmediate pagination loop runs
       await collectStream(result as NodeJS.ReadableStream);
 
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          _source: true,
-        }),
-        expect.anything()
-      );
+      // First call should have trackTotalHits: true
+      expect(mockSearch.search.mock.calls[0][0]).toMatchObject({ trackTotalHits: true });
+      // Subsequent calls should not have trackTotalHits
+      expect(mockSearch.search.mock.calls[1][0]).not.toMatchObject({ trackTotalHits: true });
     });
   });
 
   describe('formatter integration', () => {
     it('should call opening() with enriched metadata including total_results', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 42 } },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 42 })));
 
       const formatter = createMockFormatter();
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
@@ -525,21 +474,18 @@ describe('exportResultsToStream', () => {
         'osquery.name': ['proc'],
       });
 
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: [hitWithDuplicates], total: { value: 1 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [], total: { value: 1 } },
-        });
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse([hitWithDuplicates], { value: 1 })))
+        .mockReturnValueOnce(of(createMockSearchResponse([], { value: 1 })));
 
       const formatter = createMockFormatter();
       formatter.finalizeColumns = jest.fn();
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
@@ -564,28 +510,23 @@ describe('exportResultsToStream', () => {
         'osquery.appears_late': ['late'],
       });
 
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: [hit1], total: { value: 2 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [hit2], total: { value: 2 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [], total: { value: 2 } },
-        });
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse([hit1], { value: 2 })))
+        .mockReturnValueOnce(of(createMockSearchResponse([hit2], { value: 2 })))
+        .mockReturnValueOnce(of(createMockSearchResponse([], { value: 2 })));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createCsvFormatter(),
         metadata: { ...metadata, format: 'csv' },
         aborted$,
         logger,
       });
 
-      await collectStream(result as NodeJS.ReadableStream);
+      const output = await collectStream(result as NodeJS.ReadableStream);
 
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('first result page'),
@@ -596,25 +537,27 @@ describe('exportResultsToStream', () => {
           }),
         })
       );
+
+      // The late-arriving field must be silently dropped from the CSV output —
+      // it is not present in the header and its value does not appear in any row.
+      expect(output).not.toContain('osquery.appears_late');
+      expect(output).not.toContain('late');
     });
 
     it('should call row() with isFirst=true for the first row and isFirst=false for subsequent rows', async () => {
       const hits = [createMockHit('1'), createMockHit('2'), createMockHit('3')];
 
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits, total: { value: 3 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [], total: { value: 3 } },
-        });
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse(hits, { value: 3 })))
+        .mockReturnValueOnce(of(createMockSearchResponse([], { value: 3 })));
 
       const formatter = createMockFormatter();
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
@@ -630,21 +573,18 @@ describe('exportResultsToStream', () => {
     });
 
     it('should call closing() at the end of stream and write its output', async () => {
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: [createMockHit('1')], total: { value: 1 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [], total: { value: 1 } },
-        });
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse([createMockHit('1')], { value: 1 })))
+        .mockReturnValueOnce(of(createMockSearchResponse([], { value: 1 })));
 
       const formatter = createMockFormatter();
       (formatter.closing as jest.Mock).mockReturnValue(']}\n');
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
@@ -658,17 +598,16 @@ describe('exportResultsToStream', () => {
     });
 
     it('should write opening content to stream when opening() returns non-null', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
       const formatter = createMockFormatter();
       (formatter.opening as jest.Mock).mockReturnValue('OPENING_CONTENT\n');
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
@@ -681,18 +620,17 @@ describe('exportResultsToStream', () => {
     });
 
     it('should write nothing for opening when opening() returns null', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
       const formatter = createMockFormatter();
       (formatter.opening as jest.Mock).mockReturnValue(null);
       (formatter.closing as jest.Mock).mockReturnValue(null);
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
@@ -708,24 +646,19 @@ describe('exportResultsToStream', () => {
       const page1Hits = [createMockHit('p1-1')];
       const page2Hits = [createMockHit('p2-1'), createMockHit('p2-2')];
 
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: page1Hits, total: { value: 3 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: page2Hits, total: { value: 3 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [], total: { value: 3 } },
-        });
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse(page1Hits, { value: 3 })))
+        .mockReturnValueOnce(of(createMockSearchResponse(page2Hits, { value: 3 })))
+        .mockReturnValueOnce(of(createMockSearchResponse([], { value: 3 })));
 
       const formatter = createMockFormatter();
       (formatter.opening as jest.Mock).mockReturnValue(null);
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
@@ -744,14 +677,13 @@ describe('exportResultsToStream', () => {
 
   describe('empty results', () => {
     it('should return a stream (not error) when no results found', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -763,17 +695,16 @@ describe('exportResultsToStream', () => {
     });
 
     it('should write opening and closing but no rows when result set is empty', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
       const formatter = createMockFormatter();
       (formatter.closing as jest.Mock).mockReturnValue('CLOSING\n');
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
@@ -788,14 +719,13 @@ describe('exportResultsToStream', () => {
     });
 
     it('should produce a zero-byte body for CSV when result set is empty and no csv_columns hint', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createCsvFormatter(),
         metadata: { ...metadata, format: 'csv' },
         aborted$,
@@ -808,14 +738,13 @@ describe('exportResultsToStream', () => {
     });
 
     it('should emit CSV header only when result set is empty but csv_columns is provided', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createCsvFormatter(),
         metadata: {
           ...metadata,
@@ -832,14 +761,13 @@ describe('exportResultsToStream', () => {
     });
 
     it('should end stream cleanly when result set is empty', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0 } },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -852,14 +780,15 @@ describe('exportResultsToStream', () => {
 
   describe('abort handling', () => {
     it('should destroy the stream when aborted$ emits', async () => {
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits: [createMockHit('1')], total: { value: 1 } },
-      });
+      mockSearch.search.mockReturnValueOnce(
+        of(createMockSearchResponse([createMockHit('1')], { value: 1 }))
+      );
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -871,63 +800,57 @@ describe('exportResultsToStream', () => {
       expect((result as import('stream').PassThrough).destroyed).toBe(true);
     });
 
-    it('should close PIT after abort and stream cleanup', async () => {
+    it('should call closePit after abort and stream cleanup', async () => {
       // Hold the second search so we can abort mid-stream
-      let resolveSecondSearch!: (value: unknown) => void;
+      const secondSearchSubject = new Subject<ReturnType<typeof createMockSearchResponse>>();
 
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: [createMockHit('1')], total: { value: 2 } },
-        })
-        .mockImplementationOnce(
-          () =>
-            new Promise((resolve) => {
-              resolveSecondSearch = resolve;
-            })
-        );
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse([createMockHit('1')], { value: 2 })))
+        .mockReturnValueOnce(secondSearchSubject.asObservable());
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
         logger,
       });
 
-      // Let the stream start (setTimeout fires and first page processes)
+      // Let the stream start (setImmediate fires and first page processes)
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Abort while second search is pending
       aborted$.next();
-      resolveSecondSearch({ hits: { hits: [], total: { value: 2 } } });
+      secondSearchSubject.next(createMockSearchResponse([], { value: 2 }));
+      secondSearchSubject.complete();
 
       await waitForStreamClose(result as NodeJS.ReadableStream);
 
-      expect(esClient.closePointInTime).toHaveBeenCalled();
+      expect(closePit).toHaveBeenCalled();
     });
 
     it('should not write rows after abort', async () => {
       const hits = Array.from({ length: 5 }, (_, i) => createMockHit(String(i)));
 
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits, total: { value: 5 } },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse(hits, { value: 5 })));
 
       const formatter = createMockFormatter();
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter,
         metadata,
         aborted$,
         logger,
       });
 
-      // Abort before the deferred setTimeout fires
+      // Abort before the deferred setImmediate fires
       aborted$.next();
 
       await waitForStreamClose(result as NodeJS.ReadableStream);
@@ -936,18 +859,17 @@ describe('exportResultsToStream', () => {
     });
   });
 
-  describe('ES search error mid-stream', () => {
+  describe('search error mid-stream', () => {
     it('should destroy the stream when search throws during pagination', async () => {
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: [createMockHit('1')], total: { value: 5 } },
-        })
-        .mockRejectedValueOnce(new Error('Connection reset'));
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse([createMockHit('1')], { value: 5 })))
+        .mockReturnValueOnce(throwError(() => new Error('Connection reset')));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -960,16 +882,15 @@ describe('exportResultsToStream', () => {
     });
 
     it('should log the error when search throws during streaming', async () => {
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: [createMockHit('1')], total: { value: 5 } },
-        })
-        .mockRejectedValueOnce(new Error('Shard failure'));
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse([createMockHit('1')], { value: 5 })))
+        .mockReturnValueOnce(throwError(() => new Error('Shard failure')));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -987,16 +908,15 @@ describe('exportResultsToStream', () => {
     });
 
     it('should log structured labels (action_id, format, total_results) on stream error', async () => {
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: [createMockHit('1')], total: { value: 17 } },
-        })
-        .mockRejectedValueOnce(new Error('Connection reset'));
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse([createMockHit('1')], { value: 17 })))
+        .mockReturnValueOnce(throwError(() => new Error('Connection reset')));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata: {
           action_id: 'action-log-test',
@@ -1020,16 +940,15 @@ describe('exportResultsToStream', () => {
     });
 
     it('should include execution_count in labels for scheduled-query exports', async () => {
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: [createMockHit('1')], total: { value: 3 } },
-        })
-        .mockRejectedValueOnce(new Error('Shard unavailable'));
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse([createMockHit('1')], { value: 3 })))
+        .mockReturnValueOnce(throwError(() => new Error('Shard unavailable')));
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata: {
           action_id: 'schedule-xyz',
@@ -1055,24 +974,17 @@ describe('exportResultsToStream', () => {
     });
 
     it('should not log error when stream is destroyed due to abort', async () => {
-      // Hold the second search so we control when it resolves
-      let resolveSecondSearch!: (value: unknown) => void;
+      const secondSearchSubject = new Subject<ReturnType<typeof createMockSearchResponse>>();
 
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits: [createMockHit('1')], total: { value: 2 } },
-        })
-        .mockImplementationOnce(
-          () =>
-            new Promise((resolve) => {
-              resolveSecondSearch = resolve;
-            })
-        );
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse([createMockHit('1')], { value: 2 })))
+        .mockReturnValueOnce(secondSearchSubject.asObservable());
 
       const result = await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -1084,11 +996,48 @@ describe('exportResultsToStream', () => {
 
       // Abort while second search is pending, then resolve it
       aborted$.next();
-      resolveSecondSearch({ hits: { hits: [], total: { value: 2 } } });
+      secondSearchSubject.next(createMockSearchResponse([], { value: 2 }));
+      secondSearchSubject.complete();
 
       await waitForStreamClose(result as NodeJS.ReadableStream);
 
       expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('should throw when the first search call fails (pre-stream)', async () => {
+      mockSearch.search.mockReturnValueOnce(throwError(() => new Error('Index not found')));
+
+      await expect(
+        exportResultsToStream({
+          search: mockSearch,
+          pit,
+          closePit,
+          baseRequest,
+          formatter: createMockFormatter(),
+          metadata,
+          aborted$,
+          logger,
+        })
+      ).rejects.toThrow('Index not found');
+    });
+
+    it('should call closePit when the first search call fails', async () => {
+      mockSearch.search.mockReturnValueOnce(throwError(() => new Error('Cluster down')));
+
+      await expect(
+        exportResultsToStream({
+          search: mockSearch,
+          pit,
+          closePit,
+          baseRequest,
+          formatter: createMockFormatter(),
+          metadata,
+          aborted$,
+          logger,
+        })
+      ).rejects.toThrow();
+
+      expect(closePit).toHaveBeenCalled();
     });
   });
 
@@ -1096,18 +1045,15 @@ describe('exportResultsToStream', () => {
     it('should pause and await drain when stream.write returns false', async () => {
       const hits = [createMockHit('1'), createMockHit('2'), createMockHit('3')];
 
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits, total: { value: 3 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [], total: { value: 3 } },
-        });
+      mockSearch.search
+        .mockReturnValueOnce(of(createMockSearchResponse(hits, { value: 3 })))
+        .mockReturnValueOnce(of(createMockSearchResponse([], { value: 3 })));
 
       const result = (await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -1138,48 +1084,16 @@ describe('exportResultsToStream', () => {
       expect(writeCount).toBeGreaterThanOrEqual(4);
     });
 
-    it('should not attach a drain listener when all writes succeed (fast consumer)', async () => {
-      const hits = [createMockHit('1'), createMockHit('2')];
-
-      (esClient.search as jest.Mock)
-        .mockResolvedValueOnce({
-          hits: { hits, total: { value: 2 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [], total: { value: 2 } },
-        });
-
-      const result = (await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
-        formatter: createMockFormatter(),
-        metadata,
-        aborted$,
-        logger,
-      })) as import('stream').PassThrough;
-
-      const onceSpy = jest.spyOn(result, 'once');
-
-      await collectStream(result);
-
-      // No drain listener should have been installed because every write
-      // returned true (real PassThrough default highWaterMark).
-      const drainListens = onceSpy.mock.calls.filter((call) => call[0] === 'drain');
-      expect(drainListens).toHaveLength(0);
-    });
-
     it('should exit cleanly when abort fires while awaiting drain', async () => {
       const hits = [createMockHit('1'), createMockHit('2'), createMockHit('3')];
 
-      (esClient.search as jest.Mock).mockResolvedValueOnce({
-        hits: { hits, total: { value: 3 } },
-      });
+      mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse(hits, { value: 3 })));
 
       const result = (await exportResultsToStream({
-        esClient,
-        index: 'test-index',
-        query: { match_all: {} },
+        search: mockSearch,
+        pit,
+        closePit,
+        baseRequest,
         formatter: createMockFormatter(),
         metadata,
         aborted$,
@@ -1204,42 +1118,6 @@ describe('exportResultsToStream', () => {
 
       expect(result.destroyed).toBe(true);
       expect(logger.error).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('openPointInTime error', () => {
-    it('should throw when openPointInTime fails', async () => {
-      (esClient.openPointInTime as jest.Mock).mockRejectedValueOnce(new Error('Index not found'));
-
-      await expect(
-        exportResultsToStream({
-          esClient,
-          index: 'test-index',
-          query: { match_all: {} },
-          formatter: createMockFormatter(),
-          metadata,
-          aborted$,
-          logger,
-        })
-      ).rejects.toThrow('Index not found');
-    });
-
-    it('should not attempt to close PIT when openPointInTime fails', async () => {
-      (esClient.openPointInTime as jest.Mock).mockRejectedValueOnce(new Error('Cluster down'));
-
-      await expect(
-        exportResultsToStream({
-          esClient,
-          index: 'test-index',
-          query: { match_all: {} },
-          formatter: createMockFormatter(),
-          metadata,
-          aborted$,
-          logger,
-        })
-      ).rejects.toThrow();
-
-      expect(esClient.closePointInTime).not.toHaveBeenCalled();
     });
   });
 });

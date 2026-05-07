@@ -92,6 +92,16 @@ describe('CheckboxGroup', () => {
       expect(screen.getByLabelText('backend')).not.toBeChecked();
       expect(screen.getByLabelText('database')).not.toBeChecked();
     });
+
+    it('shows Optional label when isRequired is false', () => {
+      render(<FormWrapper isRequired={false} onSubmitResult={jest.fn()} />);
+      expect(screen.getByText('Optional')).toBeInTheDocument();
+    });
+
+    it('does not show Optional label when isRequired is true', () => {
+      render(<FormWrapper isRequired onSubmitResult={jest.fn()} />);
+      expect(screen.queryByText('Optional')).not.toBeInTheDocument();
+    });
   });
 
   describe('interaction', () => {
