@@ -43,7 +43,6 @@ const mkService = (
   },
 });
 
-
 describe('applyServiceMapVisibility', () => {
   it('hides services with no alerts in the selected alert statuses (OR across statuses)', () => {
     const nodes: ServiceMapNode[] = [

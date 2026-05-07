@@ -23,7 +23,6 @@ function mkService(id: string, sloStatus?: 'healthy' | 'violated' | 'noSLOs'): S
   };
 }
 
-
 describe('computeServiceMapFilterOptionCounts', () => {
   it('counts sloStatus noSLOs in the noData bucket', () => {
     const nodes: ServiceMapNode[] = [
