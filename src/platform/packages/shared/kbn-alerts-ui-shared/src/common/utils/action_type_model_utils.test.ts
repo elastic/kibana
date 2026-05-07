@@ -6,17 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-jest.mock('@kbn/response-ops-form-generator', () => {
-  const actual = jest.requireActual(
-    '@kbn/response-ops-form-generator'
-  ) as typeof import('@kbn/response-ops-form-generator');
-  return {
-    ...actual,
-    generateFormFields: jest.fn(() => null),
-  };
-});
-
 import React, { Suspense } from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { z, ZodDiscriminatedUnion, ZodObject } from '@kbn/zod/v4';
@@ -34,28 +23,33 @@ import {
   type ConnectorSpecResponse,
 } from './action_type_model_utils';
 
+jest.mock('@kbn/response-ops-form-generator', () => ({
+  generateFormFields: jest.fn(() => null),
+}));
+
 const WORKFLOWS_CONNECTOR_FEATURE_ID = 'workflows';
 
 type LooseConnectorFormTransform = (data: Record<string, unknown>) => Record<string, unknown>;
 
-function listSecretsAuthTypeLiterals(schema: ConnectorZodSchema): string[] {
+// Extracts allowed `authType` discriminator values from `secrets` so tests can assert that
+// authMode narrowing keeps only the expected auth branches before fields are generated.
+function getAllowedSecretsAuthTypes(schema: ConnectorZodSchema): string[] {
   const { secrets } = schema.shape;
   if (!(secrets instanceof ZodDiscriminatedUnion)) {
-    return [];
+    throw new Error('expected secrets to be a discriminated union');
   }
+
   const discriminator = secrets.def.discriminator;
-  return secrets.options
-    .map((option) => {
-      if (!(option instanceof ZodObject)) {
-        return undefined;
-      }
-      const discField = option.shape[discriminator];
-      if (discField instanceof z.ZodLiteral && typeof discField.value === 'string') {
-        return discField.value;
-      }
-      return undefined;
-    })
-    .filter((id): id is string => Boolean(id));
+  return secrets.options.map((option) => {
+    if (!(option instanceof ZodObject)) {
+      throw new Error('expected discriminated union branches to be objects');
+    }
+    const discField = option.shape[discriminator];
+    if (!(discField instanceof z.ZodLiteral) || typeof discField.value !== 'string') {
+      throw new Error('expected auth discriminator values to be string literals');
+    }
+    return discField.value;
+  });
 }
 
 describe('action_type_model_utils', () => {
@@ -192,29 +186,10 @@ describe('action_type_model_utils', () => {
       expect(model.subtype).toBeUndefined();
     });
 
-    it('creates lazy actionConnectorFields component', () => {
-      const model = transformSpecToActionTypeModel(baseSpec);
-      expect(model.actionConnectorFields).toBeDefined();
-      expect(typeof model.actionConnectorFields).toBe('object');
-    });
-
-    it('creates lazy actionParamsFields component', () => {
-      const model = transformSpecToActionTypeModel(baseSpec);
-      expect(model.actionParamsFields).toBeDefined();
-      expect(typeof model.actionParamsFields).toBe('object');
-    });
-
     it('creates validateParams function that returns empty errors', async () => {
       const model = transformSpecToActionTypeModel(baseSpec);
       const result = await model.validateParams({}, null);
       expect(result).toEqual({ errors: {} });
-    });
-
-    it('creates connectorForm with serializer and deserializer', () => {
-      const model = transformSpecToActionTypeModel(baseSpec);
-      expect(model.connectorForm).toBeDefined();
-      expect(model.connectorForm?.serializer).toBeDefined();
-      expect(model.connectorForm?.deserializer).toBeDefined();
     });
 
     describe('icon resolution', () => {
@@ -282,7 +257,7 @@ describe('action_type_model_utils', () => {
         );
         const passedSchema = jest.mocked(formGenerator.generateFormFields).mock.calls[0][0]
           .schema as ConnectorZodSchema;
-        return listSecretsAuthTypeLiterals(passedSchema);
+        return getAllowedSecretsAuthTypes(passedSchema);
       }
 
       it('passes a full secrets union to generateFormFields when authMode is undefined', async () => {

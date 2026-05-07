@@ -17,33 +17,24 @@ import {
 } from './narrow_secrets_schema_for_auth_mode';
 import { serializeConnectorSpec } from './serialize_connector_spec';
 
-function listSecretsAuthTypeLiterals(schema: ConnectorZodSchema): string[] {
+// Extracts allowed `authType` discriminator values from `secrets` so tests can assert that
+// authMode narrowing keeps only the expected auth branches.
+function getAllowedSecretsAuthTypes(schema: ConnectorZodSchema): string[] {
   const { secrets } = schema.shape;
   if (!(secrets instanceof ZodDiscriminatedUnion)) {
-    return [];
+    throw new Error('expected secrets to be a discriminated union');
   }
   const discriminator = secrets.def.discriminator;
-  return secrets.options
-    .map((option) => {
-      if (!(option instanceof ZodObject)) {
-        return undefined;
-      }
-      const discField = option.shape[discriminator];
-      if (discField instanceof z.ZodLiteral && typeof discField.value === 'string') {
-        return discField.value;
-      }
-      return undefined;
-    })
-    .filter((id): id is string => Boolean(id));
-}
-
-function wrapConnectorSchema(secrets: z.ZodType): ConnectorZodSchema {
-  return z
-    .object({
-      config: z.object({}),
-      secrets,
-    })
-    .strict() as unknown as ConnectorZodSchema;
+  return secrets.options.map((option) => {
+    if (!(option instanceof ZodObject)) {
+      throw new Error('expected discriminated union branches to be objects');
+    }
+    const discField = option.shape[discriminator];
+    if (!(discField instanceof z.ZodLiteral) || typeof discField.value !== 'string') {
+      throw new Error('expected auth discriminator values to be string literals');
+    }
+    return discField.value;
+  });
 }
 
 describe('narrowSecretsSchemaForAuthMode', () => {
@@ -65,7 +56,7 @@ describe('narrowSecretsSchemaForAuthMode', () => {
     }
     const narrowed = narrowSecretsSchemaForAuthMode(sharepointSchema, 'shared');
     expect(narrowed).not.toBe(sharepointSchema);
-    const literals = listSecretsAuthTypeLiterals(narrowed);
+    const literals = getAllowedSecretsAuthTypes(narrowed);
     expect(literals).toContain('oauth_client_credentials');
     expect(literals).not.toContain('oauth_authorization_code');
     expect(literals).not.toContain('ears');
@@ -77,15 +68,19 @@ describe('narrowSecretsSchemaForAuthMode', () => {
     }
     const narrowed = narrowSecretsSchemaForAuthMode(sharepointSchema, 'per-user');
     expect(narrowed).not.toBe(sharepointSchema);
-    const literals = listSecretsAuthTypeLiterals(narrowed);
+    const literals = getAllowedSecretsAuthTypes(narrowed);
     expect(literals.length).toBeGreaterThan(0);
     expect(literals.every((id) => AUTH_MODE_BY_AUTH_TYPE_ID[id] === 'per-user')).toBe(true);
     expect(literals).not.toContain('oauth_client_credentials');
   });
 
   it('returns the same schema reference when no branches match the requested authMode', () => {
-    const secretsOnly = generateSecretsSchemaFromSpec({ types: ['basic'] });
-    const schema = wrapConnectorSchema(secretsOnly);
+    const schema = z
+      .object({
+        config: z.object({}),
+        secrets: generateSecretsSchemaFromSpec({ types: ['basic'] }),
+      })
+      .strict() as unknown as ConnectorZodSchema;
     const narrowed = narrowSecretsSchemaForAuthMode(schema, 'per-user');
     expect(narrowed).toBe(schema);
   });

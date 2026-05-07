@@ -21,16 +21,6 @@ import {
 
 const CONNECTOR_SPEC_QUERY_KEY = 'connectorSpec';
 
-const normalizeError = (error: unknown): Error | null => {
-  if (error == null) {
-    return null;
-  }
-  if (error instanceof Error) {
-    return error;
-  }
-  return new Error(String(error));
-};
-
 export interface UseActionTypeModelResult {
   /** The action type model, either from registry or derived from spec */
   actionTypeModel: ActionTypeModel | null;
@@ -49,9 +39,6 @@ export interface UseActionTypeModelResult {
  *
  * For stack connectors (registered in the actionTypeRegistry), returns the model synchronously.
  * For spec-based connectors, fetches the spec from the API and transforms it into an ActionTypeModel.
- *
- * Uses React Query for caching - connector specs are fresh for 5 minutes, then refetched on
- * the next mount; window focus does not trigger refetches.
  */
 export function useActionTypeModel({
   actionTypeRegistry,
@@ -81,7 +68,7 @@ export function useActionTypeModel({
     isLoading,
     error,
     refetch,
-  } = useQuery({
+  } = useQuery<Awaited<ReturnType<typeof fetchConnectorSpec>>, Error>({
     queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionType?.id],
     queryFn: async ({ signal }) => {
       const spec = await fetchConnectorSpec(http, actionType!.id, signal);
@@ -93,7 +80,7 @@ export function useActionTypeModel({
       return spec;
     },
     enabled: shouldFetchSpec,
-    staleTime: 5 * 60 * 1000, // Spec responses align with config that only changes after restart; re-fetch after 5 min covers long-lived tabs
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
@@ -104,16 +91,13 @@ export function useActionTypeModel({
     return transformSpecToActionTypeModel(specData, uiSettings);
   }, [specData, uiSettings]);
 
-  return useMemo(
-    () => ({
-      actionTypeModel: shouldFetchSpec ? specBasedModel : registeredModel,
-      isLoading: shouldFetchSpec && isLoading,
-      error: normalizeError(error),
-      isFromSpec: shouldFetchSpec && specBasedModel != null,
-      refetch: () => {
-        void refetch();
-      },
-    }),
-    [registeredModel, specBasedModel, shouldFetchSpec, isLoading, error, refetch]
-  );
+  return {
+    actionTypeModel: shouldFetchSpec ? specBasedModel : registeredModel,
+    isLoading: shouldFetchSpec && isLoading,
+    error,
+    isFromSpec: shouldFetchSpec && specBasedModel != null,
+    refetch: () => {
+      void refetch();
+    },
+  };
 }

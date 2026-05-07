@@ -233,7 +233,7 @@ export const Snowflake: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.snowflake.auth.oauth.authorizationUrl.helpText',
                 {
                   defaultMessage:
-                    'Snowflake OAuth authorization URL. Replace <account> with your Snowflake account identifier.',
+                    "Snowflake OAuth authorization URL. Replace '<'account'>' with your Snowflake account identifier.",
                 }
               ),
             },
@@ -243,7 +243,7 @@ export const Snowflake: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.snowflake.auth.oauth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    'Snowflake OAuth token endpoint. Replace <account> with your Snowflake account identifier.',
+                    "Snowflake OAuth token endpoint. Replace '<'account'>' with your Snowflake account identifier.",
                 }
               ),
             },
