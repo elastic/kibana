@@ -52,7 +52,7 @@ export const Version2ApiEndpointsCreateApiKeyButton: React.FC<
           <EuiButtonIcon
             data-test-subj={dataTestSubj}
             {...API_ENDPOINT_CODE_TOOLBAR_BUTTON_PROPS}
-            iconType="key"
+            iconType="plusInCircle"
             onClick={() => setIsFlyoutOpen(true)}
             aria-label={createApiKeyLabel}
           />
