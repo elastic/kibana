@@ -41,14 +41,14 @@ export class DatePicker {
    * container (useful when the only DateRangePicker lives inside a panel).
    */
   private async isNewDateRangePicker(containerLocator?: Locator): Promise<boolean> {
-    try {
-      await this.getTestSubjLocator('dateRangePickerControlButton', containerLocator).waitFor({
-        timeout: 5000,
-      });
-      return true;
-    } catch {
-      return false;
-    }
+    const root = containerLocator ?? this.page;
+    const control = root
+      .locator(
+        '[data-test-subj="dateRangePickerControlButton"], [data-test-subj="superDatePickerToggleQuickMenuButton"]'
+      )
+      .first();
+    await control.waitFor({ timeout: 10_000 });
+    return (await control.getAttribute('data-test-subj')) === 'dateRangePickerControlButton';
   }
 
   private getTestSubjLocator(selector: string, containerLocator?: Locator) {
