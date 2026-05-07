@@ -340,7 +340,7 @@ const defaultEnrichProcessorFormState = (): EnrichFormState => ({
 
 const defaultRegisteredDomainProcessorFormState = (): RegisteredDomainFormState => ({
   action: 'registered_domain' as const,
-  prefix: 'rd',
+  prefix: 'domain',
   expression: '',
   ignore_failure: true,
   ignore_missing: true,

@@ -39,7 +39,7 @@ export const PrefixField = () => {
       <EuiFieldText
         placeholder={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.registeredDomainPrefixFieldPlaceholder',
-          { defaultMessage: 'rd' }
+          { defaultMessage: 'domain' }
         )}
         isInvalid={Boolean(errors.prefix)}
         {...inputProps}

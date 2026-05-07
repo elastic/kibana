@@ -15,12 +15,12 @@ apiTest.describe(
   'Cross-compatibility - Registered Domain Processor',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest('should extract domain parts from a FQDN', async ({ testBed, esql }) => {
+    apiTest('should extract domain parts from an FQDN', async ({ testBed, esql }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
             action: 'registered_domain',
-            prefix: 'rd',
+            prefix: 'domain',
             expression: 'expression',
           } as RegisteredDomainProcessor,
         ],
@@ -42,10 +42,10 @@ apiTest.describe(
 
       expect(esqlResult.documents).toHaveLength(1);
       expect(esqlResult.documentsWithoutKeywords[0]).toMatchObject({
-        'rd.domain': 'www.example.com',
-        'rd.registered_domain': 'example.com',
-        'rd.subdomain': 'www',
-        'rd.top_level_domain': 'com',
+        'domain.domain': 'www.example.com',
+        'domain.registered_domain': 'example.com',
+        'domain.subdomain': 'www',
+        'domain.top_level_domain': 'com',
       });
     });
 
@@ -56,7 +56,7 @@ apiTest.describe(
           steps: [
             {
               action: 'registered_domain',
-              prefix: 'rd',
+              prefix: 'domain',
               expression: 'expression',
             } as RegisteredDomainProcessor,
           ],
@@ -94,7 +94,7 @@ apiTest.describe(
           steps: [
             {
               action: 'registered_domain',
-              prefix: 'rd',
+              prefix: 'domain',
               expression: 'expression',
             } as RegisteredDomainProcessor,
           ],
@@ -114,10 +114,10 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-registered-domain-missing-part', query);
 
         expect(ingestResult).toHaveLength(1);
-        expect(ingestResult[0]['rd.subdomain']).toBeUndefined();
+        expect(ingestResult[0]['domain.subdomain']).toBeUndefined();
 
         expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documentsWithoutKeywords[0]['rd.subdomain']).toBeNull();
+        expect(esqlResult.documentsWithoutKeywords[0]['domain.subdomain']).toBeNull();
       }
     );
 
@@ -128,7 +128,7 @@ apiTest.describe(
           steps: [
             {
               action: 'registered_domain',
-              prefix: 'rd',
+              prefix: 'domain',
               expression: 'expression',
               where: {
                 field: 'expression',
@@ -151,14 +151,15 @@ apiTest.describe(
         await testBed.ingest('esql-registered-domain-conditional', docs);
         const esqlResult = await esql.queryOnIndex('esql-registered-domain-conditional', query);
 
-        // NOTE: Ingest Pipeline returns both docs but applies the processing only to the matching one
-        // while ES|QL only processes and returns the matching document
         expect(ingestResult).toHaveLength(2);
-        expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-        expect(ingestResult[1]['rd.domain']).toBeUndefined();
+        expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywordsOrdered[0]);
+        expect(ingestResult[1]['domain.domain']).toBeUndefined();
 
-        expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documentsWithoutKeywords[0]['rd.domain']).toBe('www.example.com');
+        expect(esqlResult.documents).toHaveLength(2);
+        expect(esqlResult.documentsWithoutKeywordsOrdered[0]['domain.domain']).toBe(
+          'www.example.com'
+        );
+        expect(esqlResult.documentsWithoutKeywordsOrdered[1]['domain.domain']).toBeNull();
       }
     );
 
@@ -167,7 +168,7 @@ apiTest.describe(
         steps: [
           {
             action: 'registered_domain',
-            prefix: 'rd',
+            prefix: 'domain',
             expression: 'expression',
           } as RegisteredDomainProcessor,
         ],
@@ -191,14 +192,14 @@ apiTest.describe(
       );
 
       expect(ingestResult).toHaveLength(1);
-      expect(ingestResult[0]['rd.domain']).toBeUndefined();
+      expect(ingestResult[0]['domain.domain']).toBeUndefined();
 
       const esqlDocsWithoutMapping = esqlResult.documentsWithoutKeywords.filter(
         (d: Record<string, unknown>) => d.message
       );
 
       expect(esqlDocsWithoutMapping).toHaveLength(1);
-      expect(esqlDocsWithoutMapping[0]['rd.domain']).toBeNull();
+      expect(esqlDocsWithoutMapping[0]['domain.domain']).toBeNull();
     });
 
     apiTest(
@@ -208,7 +209,7 @@ apiTest.describe(
           steps: [
             {
               action: 'registered_domain',
-              prefix: 'rd',
+              prefix: 'domain',
               expression: 'expression',
               ignore_missing: false,
             } as RegisteredDomainProcessor,
@@ -248,6 +249,96 @@ apiTest.describe(
 
         // NOTE: Ingest Pipeline returns an error while ES|QL skips processing the doc
         expect(esqlDocsWithoutMapping).toHaveLength(0);
+      }
+    );
+
+    apiTest('should handle pre-existing value', async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'registered_domain',
+            prefix: 'domain',
+            expression: 'expression',
+          } as RegisteredDomainProcessor,
+        ],
+      };
+
+      // First doc has no subdomain in result ('example.com') → pre-existing value should be preserved
+      // Second doc has a subdomain in result ('www.example.com') → pre-existing value should be overwritten
+      const docs = [
+        { expression: 'example.com', domain: { subdomain: 'test' } },
+        { expression: 'www.example.com', domain: { subdomain: 'test' } },
+      ];
+
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
+
+      await testBed.ingest('ingest-registered-domain-pre-existing', docs, processors);
+      const ingestResult = await testBed.getFlattenedDocsOrdered(
+        'ingest-registered-domain-pre-existing'
+      );
+
+      await testBed.ingest('esql-registered-domain-pre-existing', docs);
+      const esqlResult = await esql.queryOnIndex('esql-registered-domain-pre-existing', query);
+
+      expect(ingestResult).toHaveLength(2);
+      expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywordsOrdered[0]);
+      expect(ingestResult[1]).toStrictEqual(esqlResult.documentsWithoutKeywordsOrdered[1]);
+
+      expect(esqlResult.documents).toHaveLength(2);
+      expect(esqlResult.documentsWithoutKeywordsOrdered[0]['domain.subdomain']).toBe('test');
+      expect(esqlResult.documentsWithoutKeywordsOrdered[1]['domain.subdomain']).toBe('www');
+    });
+
+    apiTest(
+      'should handle pre-existing value with conditional extraction',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'registered_domain',
+              prefix: 'domain',
+              expression: 'expression',
+              where: {
+                field: 'should_process',
+                eq: true,
+              },
+            } as RegisteredDomainProcessor,
+          ],
+        };
+
+        const docs = [
+          { expression: 'www.example.com', should_process: true, domain: { subdomain: 'test' } },
+          { expression: 'www.example.com', domain: { subdomain: 'test' } },
+        ];
+
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
+
+        await testBed.ingest('ingest-registered-domain-pre-existing-conditional', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered(
+          'ingest-registered-domain-pre-existing-conditional'
+        );
+
+        await testBed.ingest('esql-registered-domain-pre-existing-conditional', docs);
+        const esqlResult = await esql.queryOnIndex(
+          'esql-registered-domain-pre-existing-conditional',
+          query
+        );
+
+        expect(ingestResult).toHaveLength(2);
+        expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywordsOrdered[0]);
+        expect(ingestResult[1]['domain.domain']).toBeUndefined();
+        expect(ingestResult[1]['domain.subdomain']).toBe(
+          esqlResult.documentsWithoutKeywordsOrdered[1]['domain.subdomain']
+        );
+
+        expect(esqlResult.documents).toHaveLength(2);
+        // Matching doc: processed, pre-existing value overwritten
+        expect(esqlResult.documentsWithoutKeywordsOrdered[0]['domain.subdomain']).toBe('www');
+        expect(esqlResult.documentsWithoutKeywordsOrdered[1]['domain.domain']).toBeNull();
+        // Non-matching doc: not processed, pre-existing value preserved
+        expect(esqlResult.documentsWithoutKeywordsOrdered[1]['domain.subdomain']).toBe('test');
       }
     );
   }
