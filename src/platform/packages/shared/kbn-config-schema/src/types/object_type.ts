@@ -79,6 +79,10 @@ type ExtendedObjectTypeOptions<P extends Props, NP extends NullableProps> = Obje
 >;
 
 interface ObjectTypeOptionsMeta {
+  /**
+   * A string that uniquely identifies this schema. Used when generating OAS
+   * to create refs instead of inline schemas.
+   */
   id?: string;
 }
 
