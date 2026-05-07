@@ -46,8 +46,10 @@ if (!outPath) {
 }
 
 (async () => {
+  // List changed files once; reused for every Scout selective-testing decision.
   const changedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
 
+  // Compute affected @kbn/ modules (replaces the legacy `list_affected` binary).
   const affectedPackages = await getAffectedPackages(mergeBase, {
     strategy: 'git',
     includeDownstream: true,
@@ -60,6 +62,7 @@ if (!outPath) {
     affectedModules: [...affectedPackages].sort(),
   };
 
+  // Write the code-changes JSON consumed by `scout resolve-testing-scope`.
   const resolvedOutPath = path.resolve(outPath);
   fs.mkdirSync(path.dirname(resolvedOutPath), { recursive: true });
   fs.writeFileSync(resolvedOutPath, JSON.stringify(codeChanges, null, 2));

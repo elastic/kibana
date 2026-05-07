@@ -25,6 +25,7 @@ import { findPackageForPath } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { TestTrackLoad } from '../execution/test_track';
 import { TestTrack } from '../execution/test_track';
+import type { SerializedScoutTestingScope } from '../tests_discovery/testing_scope';
 import { readScoutTestingScope } from '../tests_discovery/testing_scope';
 
 /**
@@ -462,25 +463,25 @@ export const createTestTracks: Command<void> = {
   },
   run: async ({ flagsReader, log }) => {
     const testingScopePath = flagsReader.string('testing-scope');
-    const scope = testingScopePath ? readScoutTestingScope(testingScopePath) : null;
+    const scope: SerializedScoutTestingScope = testingScopePath
+      ? readScoutTestingScope(testingScopePath)
+      : { kind: 'full', skipNonScoutTests: false, affectedModules: [] };
 
     let filter: TestLoadFilter = null;
-    if (scope) {
-      if (scope.kind === 'tests-only') {
-        const paths = new Set(scope.affectedConfigs ?? []);
-        filter = { kind: 'configs', paths };
-        log.info(
-          `Selective testing (tests-only): limiting distribution to ${paths.size} affected config(s)`
-        );
-      } else if (scope.kind === 'dependency-tree') {
-        const ids = new Set(scope.affectedModules);
-        filter = { kind: 'modules', ids };
-        log.info(
-          `Selective testing (dependency-tree): limiting distribution to ${ids.size} affected module(s)`
-        );
-      } else {
-        log.info('Selective testing scope is "full" — distributing all eligible configs');
-      }
+    if (scope.kind === 'tests-only') {
+      const paths = new Set(scope.affectedConfigs ?? []);
+      filter = { kind: 'configs', paths };
+      log.info(
+        `Selective testing (tests-only): limiting distribution to ${paths.size} affected config(s)`
+      );
+    } else if (scope.kind === 'dependency-tree') {
+      const ids = new Set(scope.affectedModules);
+      filter = { kind: 'modules', ids };
+      log.info(
+        `Selective testing (dependency-tree): limiting distribution to ${ids.size} affected module(s)`
+      );
+    } else {
+      log.info('Distributing all eligible configs (full scope)');
     }
 
     const selectedTestTargets: ScoutTestTarget[] = flagsReader
