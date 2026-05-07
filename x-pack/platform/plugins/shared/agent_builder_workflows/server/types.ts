@@ -5,11 +5,26 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginSetupDependencies {}
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-server';
+import type {
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+} from '@kbn/agent-context-layer-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStartDependencies {}
+export interface PluginSetupDependencies {
+  agentBuilder: AgentBuilderPluginSetup;
+  agentContextLayer: AgentContextLayerPluginSetup;
+  workflowsManagement: WorkflowsServerPluginSetup;
+}
+
+export interface PluginStartDependencies {
+  agentBuilder: AgentBuilderPluginStart;
+  agentContextLayer: AgentContextLayerPluginStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderWorkflowsPluginSetup {}

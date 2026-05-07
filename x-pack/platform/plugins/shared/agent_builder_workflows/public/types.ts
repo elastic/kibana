@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-browser';
 
+export interface PluginSetupDependencies {
+  agentBuilder: AgentBuilderPluginSetup;
+}
+
+export interface PluginStartDependencies {
+  agentBuilder: AgentBuilderPluginStart;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderWorkflowsPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderWorkflowsPluginStart {}
-
-export interface PluginSetupDependencies {}
-
-export interface PluginStartDependencies {}

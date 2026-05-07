@@ -34,6 +34,7 @@ export class AgentBuilderWorkflowsPlugin
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderWorkflowsPluginStart>,
     setupDeps: PluginSetupDependencies
   ): AgentBuilderWorkflowsPluginSetup {
+    this.logger.debug('agentBuilderWorkflows plugin setup');
     return {};
   }
 

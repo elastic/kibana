@@ -9,7 +9,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "agentBuilderWorkflows"],
-    "requiredPlugins": [],
+    "requiredPlugins": ["agentBuilder", "workflowsManagement", "agentContextLayer"],
     "requiredBundles": [],
     "optionalPlugins": [],
     "extraPublicDirs": []

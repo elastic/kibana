@@ -8,6 +8,11 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-context-layer-plugin",
+    "@kbn/workflows-management-plugin"
   ]
 }
