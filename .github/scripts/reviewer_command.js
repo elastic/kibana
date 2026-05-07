@@ -10,13 +10,13 @@ const SKIP_LABEL = 'reviewer:skip-ai';
 const REVIEWERS = Object.freeze({
   codex: Object.freeze({
     id: 'codex',
-    command: 'codex',
+    command: '@codex',
     label: 'reviewer:codex',
     workflowId: 'reviewer-codex.lock.yml',
   }),
   claude: Object.freeze({
     id: 'claude',
-    command: 'claude',
+    command: '@claude',
     label: 'reviewer:claude',
     workflowId: 'reviewer-claude.lock.yml',
   }),
@@ -28,24 +28,15 @@ const allowedRoles = new Set(['admin', 'maintain', 'write']);
 const getLabelNames = (labels = []) => labels.map((label) => label.name);
 
 const parseReviewerCommand = (body = '') => {
-  const match = body.match(/^\/([a-z][a-z0-9_-]*)(?:\s|$)/i);
-  return match ? REVIEWERS[match[1].toLowerCase()] : undefined;
+  const reviewers = Object.values(REVIEWERS);
+  return reviewers.find((reviewer) => body.includes(reviewer.command));
 };
 
 const isAllowedPermission = (permission) =>
   allowedPermissions.has(permission.permission) || allowedRoles.has(permission.role_name);
 
-const getPayloadPrNumber = (context) => {
-  if (context.eventName === 'issue_comment') {
-    return context.payload.issue?.pull_request ? context.payload.issue.number : undefined;
-  }
-
-  if (context.eventName === 'pull_request_review_comment') {
-    return context.payload.pull_request?.number;
-  }
-
-  return undefined;
-};
+const getPayloadPrNumber = (context) =>
+  context.payload.issue?.pull_request ? context.payload.issue.number : context.payload.pull_request?.number;
 
 const getPayloadComment = (context) => context.payload.comment;
 
@@ -140,18 +131,17 @@ const validatePullRequest = ({ core, pullRequest, reviewer }) => {
   return true;
 };
 
-const buildCommandArtifact = ({ context, owner, repo, reviewer, pullRequest, actor }) => {
+const buildCommandArtifact = ({ context, owner, repo, reviewer, pullNumber, actor }) => {
   const comment = getPayloadComment(context);
 
   return {
     version: 1,
     repository: `${owner}/${repo}`,
     reviewer: reviewer.id,
-    command: `/${reviewer.command}`,
+    command: reviewer.command,
     reviewer_label: reviewer.label,
     workflow_id: reviewer.workflowId,
-    pr_number: String(pullRequest.number),
-    pr_head_sha: pullRequest.head.sha,
+    pr_number: String(pullNumber),
     actor,
     comment_id: String(comment.id),
     comment_type: context.eventName,
@@ -190,32 +180,21 @@ const buildCommentContextInput = ({ artifact, liveComment, pullRequest }) =>
     comment_author: liveComment.user?.login ?? '',
   });
 
-const routeReviewerCommand = async ({ github, context, core }) => {
+const routeReviewerCommand = async ({ context, core }) => {
   const { owner, repo } = context.repo;
   const comment = getPayloadComment(context);
   const reviewer = parseReviewerCommand(comment?.body);
 
   if (!reviewer) {
-    core.info('Comment does not start with a configured reviewer command.');
+    core.info('Comment does not contain a configured reviewer mention.');
     core.setOutput('matched', 'false');
     return;
   }
 
   const pullNumber = getPayloadPrNumber(context);
-  if (!pullNumber) {
-    core.info('Reviewer command did not come from a pull request.');
-    core.setOutput('matched', 'false');
-    return;
-  }
-
-  const pullRequest = await getPullRequest({ github, owner, repo, pullNumber });
-  if (!validatePullRequest({ core, pullRequest, reviewer })) {
-    core.setOutput('matched', 'false');
-    return;
-  }
-
   const actor = context.payload.sender?.login;
-  if (!(await validateReviewerAccess({ github, core, owner, repo, actor }))) {
+  if (!pullNumber || !actor) {
+    core.info('Reviewer command is missing pull request or actor context.');
     core.setOutput('matched', 'false');
     return;
   }
@@ -223,7 +202,7 @@ const routeReviewerCommand = async ({ github, context, core }) => {
   fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
   fs.writeFileSync(
     ARTIFACT_PATH,
-    `${JSON.stringify(buildCommandArtifact({ context, owner, repo, reviewer, pullRequest, actor }), null, 2)}\n`
+    `${JSON.stringify(buildCommandArtifact({ context, owner, repo, reviewer, pullNumber, actor }), null, 2)}\n`
   );
   core.setOutput('matched', 'true');
 };
@@ -287,7 +266,7 @@ const dispatchReviewerCommand = async ({ github, context, core }) => {
 
   const liveReviewer = parseReviewerCommand(liveComment.body);
   if (!liveReviewer) {
-    core.info(`Comment ${commentId} no longer starts with a reviewer command.`);
+    core.info(`Comment ${commentId} no longer contains a reviewer mention.`);
     return;
   }
 

@@ -2,9 +2,9 @@ name: Reviewer Command Router
 
 on:
   issue_comment:
-    types: [created]
+    types: [ created ]
   pull_request_review_comment:
-    types: [created]
+    types: [ created ]
 
 permissions:
   contents: read
@@ -16,16 +16,35 @@ jobs:
     name: Route reviewer command
     if: |
       github.event.sender.type != 'Bot'
-      && startsWith(github.event.comment.body, '/')
       && (
         (
           github.event_name == 'issue_comment'
           && github.event.issue.pull_request
           && !contains(github.event.issue.labels.*.name, 'reviewer:skip-ai')
+          && (
+            (
+              contains(github.event.comment.body, '@codex')
+              && contains(github.event.issue.labels.*.name, 'reviewer:codex')
+            )
+            || (
+              contains(github.event.comment.body, '@claude')
+              && contains(github.event.issue.labels.*.name, 'reviewer:claude')
+            )
+          )
         )
         || (
           github.event_name == 'pull_request_review_comment'
           && !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai')
+          && (
+            (
+              contains(github.event.comment.body, '@codex')
+              && contains(github.event.pull_request.labels.*.name, 'reviewer:codex')
+            )
+            || (
+              contains(github.event.comment.body, '@claude')
+              && contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
+            )
+          )
         )
       )
     runs-on: ubuntu-slim
@@ -40,8 +59,8 @@ jobs:
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
           script: |
-            const { routeReviewerCommand } = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/reviewer_command`);
-            await routeReviewerCommand({ github, context, core });
+            const { routeReviewerCommand } = require('./.github/scripts/reviewer_command');
+            await routeReviewerCommand({ context, core });
 
       - name: Upload reviewer command
         if: steps.route.outputs.matched == 'true'

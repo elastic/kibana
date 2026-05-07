@@ -81,6 +81,8 @@ permissions:
 env:
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  REVIEWER_COMMENT_ID: ${{ github.event.inputs.comment_id }}
+  REVIEWER_COMMENT_CONTEXT: ${{ github.event.inputs.comment_context }}
 tools:
   github:
     toolsets: [default]
@@ -137,8 +139,8 @@ Using the imported reviewer instructions:
 - Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Command Dispatcher.
 
 For dispatched follow-up runs, use this context:
-- PR number: `${{ github.event.inputs.pr_number }}`
-- Comment id: `${{ github.event.inputs.comment_id }}`
-- Comment context JSON: `${{ github.event.inputs.comment_context }}`
+- PR number: the `PR_NUMBER` environment variable
+- Comment id: the `REVIEWER_COMMENT_ID` environment variable
+- Comment context JSON: the `REVIEWER_COMMENT_CONTEXT` environment variable
 
-When the comment id is non-empty, do not perform a full PR review. Find the triggering comment in the prefetched PR context under `/tmp/gh-aw/agent` or via GitHub tools, then answer that comment. For PR review comments, prefer `reply_to_pull_request_review_comment` with `reply_to_id` set to the triggering comment id.
+When `REVIEWER_COMMENT_ID` is non-empty, do not perform a full PR review. Find the triggering comment in the prefetched PR context under `/tmp/gh-aw/agent` or via GitHub tools, then answer that comment. For PR review comments, prefer `reply_to_pull_request_review_comment` with `reply_to_id` set to `REVIEWER_COMMENT_ID`.
