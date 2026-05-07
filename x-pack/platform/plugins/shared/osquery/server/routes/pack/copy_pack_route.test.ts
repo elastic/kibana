@@ -452,9 +452,7 @@ describe('copyPackRoute', () => {
     expect(createArgs.rrule_schedule.rrule).toBe('FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;WKST=MO');
 
     const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
-    expect(responseBody.data.rrule_schedule.rrule).toBe(
-      'FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;WKST=MO'
-    );
+    expect(responseBody.data.rrule_schedule.rrule).toBe('FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;WKST=MO');
   });
 
   it('strips version and read_only from prebuilt pack copy', async () => {

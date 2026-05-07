@@ -2415,8 +2415,8 @@ components:
           type: string
         splay:
           description: >-
-            Optional Go duration string (e.g. `30s`, `5m`, `1h`). Maximum 1
-            hour.
+            Optional Go duration string (e.g. `30s`, `5m`, `1h`). Maximum 12
+            hours.
           example: 5m
           type: string
         start_date:

@@ -213,8 +213,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       spaceId,
                       packSchedule,
                       {
-                        isRruleFeatureEnabled:
-                          osqueryContext.experimentalFeatures.rruleScheduling,
+                        isRruleFeatureEnabled: osqueryContext.experimentalFeatures.rruleScheduling,
                       }
                     );
                     set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
