@@ -19,6 +19,7 @@ import { TemplateYamlValidationAccordion } from './template_yaml_validation_acco
 import { useValidationAccordionPositioning } from '../hooks/use_validation_accordion_positioning';
 import { useFieldNameValidation } from '../hooks/use_field_name_validation';
 import { useUserPickerValidation } from '../hooks/use_user_picker_validation';
+import { useExtendsValidation } from '../hooks/use_extends_validation';
 import { useKibana } from '../../../common/lib/kibana';
 
 export interface YamlEditorFormValues {
@@ -85,6 +86,7 @@ export const TemplateYamlEditor = ({
 
   useFieldNameValidation(editorRef.current, value);
   useUserPickerValidation(editorRef.current, value, security);
+  useExtendsValidation(editorRef.current, value);
 
   const schemas = useMemo(() => {
     const jsonSchema = getTemplateDefinitionJsonSchema();

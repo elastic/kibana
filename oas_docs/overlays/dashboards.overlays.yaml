@@ -15,7 +15,7 @@ actions:
         ## When to use this API
 
         - Use this API to define a complete, self-contained dashboard in a single payload, including inline visualizations (both data view and ES|QL based), controls, and filters.
-        - Use the [Visualizations API](#operation/post-visualizations) to create reusable charts saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library). You can then embed them in dashboards as linked panels using their ID.
+        - Use the [Visualizations API](visualizations#tag/Visualizations/operation/post-visualizations) to create reusable charts saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library). You can then embed them in dashboards as linked panels using their ID.
 
         ## Get started
 
@@ -126,7 +126,7 @@ actions:
 
         `vis`, `discover_session`, and `markdown` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
 
-        For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](#operation/post-visualizations).
+        For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](visualizations#tag/Visualizations/operation/post-visualizations).
 
         - **Inline**: use when the panel is specific to this dashboard or must work across Kibana spaces. The panel configuration goes directly inside `config`:
 
@@ -158,7 +158,7 @@ actions:
           }
           ```
 
-        - **Linked from library**: references an item in your library by its ID. Use `ref_id` with any supported panel type (`vis`, `discover_session`, `markdown`). Use the [Visualizations API](#operation/post-visualizations) to create and retrieve IDs for visualization items.
+        - **Linked from library**: references an item in your library by its ID. Use `ref_id` with any supported panel type (`vis`, `discover_session`, `markdown`). Use the [Visualizations API](visualizations#tag/Visualizations/operation/post-visualizations) to create and retrieve IDs for visualization items.
 
           ```json
           {

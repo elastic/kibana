@@ -1476,10 +1476,6 @@
       }
     }
   },
-  "entity-store-ccs-state": {
-    "dynamic": false,
-    "properties": {}
-  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
@@ -1626,6 +1622,10 @@
         "type": "keyword"
       }
     }
+  },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
   },
   "entity-store-global-state": {
     "dynamic": false,
@@ -4872,6 +4872,9 @@
       "entityType": {
         "type": "keyword"
       },
+      "errorCode": {
+        "type": "keyword"
+      },
       "message": {
         "type": "text"
       },
@@ -4960,6 +4963,22 @@
     "dynamic": false,
     "properties": {
       "domainId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user-storage": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user-storage-global": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
         "type": "keyword"
       }
     }
