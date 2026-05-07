@@ -7,11 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiPopover,
+  EuiSkeletonTitle,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
+import type { ApplicationStart } from '@kbn/core/public';
 import type {
   AttentionReason,
   EnvironmentHealthResponse,
@@ -21,6 +37,9 @@ import type { EnvironmentHealthLoadState } from './use_management_environment_he
 export function dash(v: number | undefined): string {
   return v === undefined ? '—' : v.toLocaleString();
 }
+
+/** Client fallback when `pendingReportsCount` is absent from the API (older responses). */
+export const MANAGEMENT_LANDING_PENDING_REPORTS_FALLBACK_COUNT = 3;
 
 export function ManagementLandingHealthBadge({ status }: { status?: 'green' | 'yellow' | 'red' }) {
   if (!status) {
@@ -38,86 +57,40 @@ export function ManagementLandingHealthBadge({ status }: { status?: 'green' | 'y
   );
 }
 
-/** Stats (indices, data streams, placeholders) in a single horizontal row. */
-function ManagementLandingStatsDescription({ data }: { data: EnvironmentHealthResponse }) {
+/** Vertical divider between stat KPIs — matches dataset quality summary panel rhythm. */
+function ManagementLandingStatsVerticalRule(props: React.ComponentProps<'span'>) {
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" data-test-subj="managementEnvHealthIndices">
-          <strong>{dash(data.indicesCount)}</strong>{' '}
-          <FormattedMessage
-            id="management.landing.envHealth.indices"
-            defaultMessage="{count, plural, one {index} other {indices}}"
-            values={{ count: data.indicesCount ?? 0 }}
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" data-test-subj="managementEnvHealthDataStreams">
-          <strong>{dash(data.dataStreamsCount)}</strong>{' '}
-          <FormattedMessage
-            id="management.landing.envHealth.dataStreams"
-            defaultMessage="{count, plural, one {data stream} other {data streams}}"
-            values={{ count: data.dataStreamsCount ?? 0 }}
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" data-test-subj="managementEnvHealthActiveRules">
-          <strong>{dash(data.activeRulesCount)}</strong>{' '}
-          <FormattedMessage
-            id="management.landing.envHealth.activeRules"
-            defaultMessage="{count, plural, one {active rule} other {active rules}}"
-            values={{ count: data.activeRulesCount ?? 0 }}
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued" data-test-subj="managementEnvHealthPendingReports">
-          —{' '}
-          <FormattedMessage
-            id="management.landing.envHealth.pendingReports"
-            defaultMessage="pending reports (soon)"
-          />
-        </EuiText>
-      </EuiFlexItem>
-    </>
+    <span
+      css={css`
+        width: ${euiTheme.border.width.thin};
+        height: 63px;
+        align-self: center;
+        background-color: ${euiTheme.colors.borderBaseSubdued};
+      `}
+      {...props}
+    />
   );
 }
 
-export function ManagementLandingHeaderDescription({
-  loadState,
-  data,
+function ManagementLandingEnvStatColumn({
+  testSubj,
+  value,
+  label,
 }: {
-  loadState: EnvironmentHealthLoadState;
-  data: EnvironmentHealthResponse | null;
+  testSubj: string;
+  value: string;
+  label: React.ReactNode;
 }) {
-  if (loadState === 'loading' || (loadState === 'ready' && !data)) {
-    return (
-      <EuiText size="s" color="subdued" data-test-subj="managementLandingHeaderStatsLoading">
-        <FormattedMessage
-          id="management.landing.headerStatsLoading"
-          defaultMessage="Loading environment details…"
-        />
-      </EuiText>
-    );
-  }
-
-  if (!data) {
-    return null;
-  }
-
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      wrap
-      responsive={false}
-      gutterSize="l"
-      css={css`
-        max-width: 100%;
-      `}
-    >
-      <ManagementLandingStatsDescription data={data} />
+    <EuiFlexGroup direction="column" gutterSize="xs" data-test-subj={testSubj}>
+      <EuiTitle size="m">
+        <h3>{value}</h3>
+      </EuiTitle>
+      <EuiText size="s" color="subdued">
+        {label}
+      </EuiText>
     </EuiFlexGroup>
   );
 }
@@ -137,34 +110,445 @@ const ATTENTION_REASON_LABELS: Record<AttentionReason, string> = {
   }),
 };
 
-export function ManagementAttentionCallout({ reasons }: { reasons: AttentionReason[] }) {
-  if (reasons.length === 0) {
+interface AttentionNavTarget {
+  readonly appId: string;
+  readonly path?: string;
+  readonly capabilityPath: string;
+  readonly label: string;
+}
+
+const ATTENTION_ACTION_OPEN_STACK_MONITORING = i18n.translate(
+  'management.landing.envHealth.attention.action.openStackMonitoring',
+  {
+    defaultMessage: 'Open Stack Monitoring',
+  }
+);
+
+const ATTENTION_REASON_NAV: Record<AttentionReason, AttentionNavTarget> = {
+  cluster_red: {
+    appId: 'monitoring',
+    capabilityPath: 'catalogue.monitoring',
+    label: ATTENTION_ACTION_OPEN_STACK_MONITORING,
+  },
+  cluster_yellow: {
+    appId: 'monitoring',
+    capabilityPath: 'catalogue.monitoring',
+    label: ATTENTION_ACTION_OPEN_STACK_MONITORING,
+  },
+  unassigned_shards: {
+    appId: 'management',
+    path: 'data/index_management/indices',
+    capabilityPath: 'management.data.index_management',
+    label: i18n.translate('management.landing.envHealth.attention.action.unassignedShards', {
+      defaultMessage: 'Resolve unassigned shards',
+    }),
+  },
+  health_check_timed_out: {
+    appId: 'monitoring',
+    capabilityPath: 'catalogue.monitoring',
+    label: ATTENTION_ACTION_OPEN_STACK_MONITORING,
+  },
+};
+
+const ATTENTION_REASON_ORDER: AttentionReason[] = [
+  'cluster_red',
+  'cluster_yellow',
+  'unassigned_shards',
+  'health_check_timed_out',
+];
+
+function ManagementLandingAttentionIssuesStat({
+  reasons,
+  capabilities,
+  navigateToApp,
+}: {
+  reasons: AttentionReason[];
+  capabilities: ApplicationStart['capabilities'];
+  navigateToApp: ApplicationStart['navigateToApp'];
+}) {
+  const { euiTheme } = useEuiTheme();
+  const [isIssuesPopoverOpen, setIsIssuesPopoverOpen] = useState(false);
+
+  const closeIssuesPopover = useCallback(() => setIsIssuesPopoverOpen(false), []);
+  const toggleIssuesPopover = useCallback(() => {
+    setIsIssuesPopoverOpen((open) => !open);
+  }, []);
+
+  const sortedUniqueReasons = useMemo(() => {
+    const unique = [...new Set(reasons)];
+    return unique.sort(
+      (a, b) => ATTENTION_REASON_ORDER.indexOf(a) - ATTENTION_REASON_ORDER.indexOf(b)
+    );
+  }, [reasons]);
+
+  const mostSevere = reasons.includes('cluster_red') ? 'danger' : 'warning';
+  const issueCount = sortedUniqueReasons.length;
+
+  const handleNavigate = (action: AttentionNavTarget) => {
+    navigateToApp(action.appId, action.path !== undefined ? { path: action.path } : {});
+  };
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="xs"
+      data-test-subj="managementEnvHealthAttentionIssuesStat"
+    >
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon
+            type={mostSevere === 'danger' ? 'errorFilled' : 'warningFilled'}
+            size="m"
+            color={mostSevere === 'danger' ? 'danger' : 'warning'}
+            aria-hidden
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="m">
+            <h3
+              css={css`
+                margin-block: 0;
+              `}
+            >
+              {issueCount}{' '}
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiPopover
+        panelPaddingSize="m"
+        isOpen={isIssuesPopoverOpen}
+        closePopover={closeIssuesPopover}
+        button={
+          <EuiLink
+            color={mostSevere === 'danger' ? 'danger' : 'warning'}
+            onClick={(e) => {
+              e.preventDefault();
+              toggleIssuesPopover();
+            }}
+            data-test-subj="managementEnvHealthAttentionIssuesTrigger"
+            aria-label={i18n.translate(
+              'management.landing.envHealth.attention.issuesTriggerAriaLabel',
+              {
+                defaultMessage:
+                  '{count, plural, one {View issue details — # issue needs attention} other {View issue details — # issues need attention}}',
+                values: { count: issueCount },
+              }
+            )}
+            css={css`
+              font-size: ${euiTheme.font.scale.s};
+              font-weight: ${euiTheme.font.weight.regular};
+            `}
+          >
+            <FormattedMessage
+              id="management.landing.envHealth.attention.issuesSummaryLabel"
+              defaultMessage="{count, plural, one {issue needs attention} other {issues need attention}}"
+              values={{ count: issueCount }}
+            />
+          </EuiLink>
+        }
+      >
+        <div data-test-subj="managementEnvHealthAttentionIssuesPopover">
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="m"
+            data-test-subj="managementEnvHealthAttentionIssuesPopoverList"
+          >
+            {sortedUniqueReasons.map((reason) => {
+              const action = ATTENTION_REASON_NAV[reason];
+              const canAct = Boolean(get(capabilities, action.capabilityPath));
+              const reasonIsDanger = reason === 'cluster_red';
+              return (
+                <EuiFlexGroup
+                  key={reason}
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  wrap={false}
+                  data-test-subj="managementEnvHealthAttentionIssueRow"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon
+                      type={reasonIsDanger ? 'errorFilled' : 'warningFilled'}
+                      size="s"
+                      color={reasonIsDanger ? 'danger' : 'warning'}
+                      aria-hidden
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow css={{ minWidth: 0 }}>
+                    <EuiText size="s">{ATTENTION_REASON_LABELS[reason]}</EuiText>
+                  </EuiFlexItem>
+                  {canAct ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="xs"
+                        onClick={() => {
+                          handleNavigate(action);
+                          closeIssuesPopover();
+                        }}
+                        data-test-subj={`managementEnvHealthAttentionAction-${action.appId}-${(
+                          action.path ?? 'default'
+                        ).replace(/\//g, '_')}`}
+                      >
+                        {action.label}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+              );
+            })}
+          </EuiFlexGroup>
+        </div>
+      </EuiPopover>
+    </EuiFlexGroup>
+  );
+}
+
+function ManagementLandingStatsPanel({
+  data,
+  capabilities,
+  navigateToApp,
+}: {
+  data: EnvironmentHealthResponse;
+  capabilities: ApplicationStart['capabilities'];
+  navigateToApp: ApplicationStart['navigateToApp'];
+}) {
+  const pendingCount =
+    data.pendingReportsCount ?? MANAGEMENT_LANDING_PENDING_REPORTS_FALLBACK_COUNT;
+
+  const statEntries: Array<{ id: string; content: React.ReactElement }> = [
+    {
+      id: 'indices',
+      content: (
+        <ManagementLandingEnvStatColumn
+          testSubj="managementEnvHealthIndices"
+          value={dash(data.indicesCount)}
+          label={
+            <FormattedMessage
+              id="management.landing.envHealth.indices"
+              defaultMessage="{count, plural, one {index} other {indices}}"
+              values={{ count: data.indicesCount ?? 0 }}
+            />
+          }
+        />
+      ),
+    },
+    {
+      id: 'dataStreams',
+      content: (
+        <ManagementLandingEnvStatColumn
+          testSubj="managementEnvHealthDataStreams"
+          value={dash(data.dataStreamsCount)}
+          label={
+            <FormattedMessage
+              id="management.landing.envHealth.dataStreams"
+              defaultMessage="{count, plural, one {data stream} other {data streams}}"
+              values={{ count: data.dataStreamsCount ?? 0 }}
+            />
+          }
+        />
+      ),
+    },
+    {
+      id: 'activeRules',
+      content: (
+        <ManagementLandingEnvStatColumn
+          testSubj="managementEnvHealthActiveRules"
+          value={dash(data.activeRulesCount)}
+          label={
+            <FormattedMessage
+              id="management.landing.envHealth.activeRules"
+              defaultMessage="{count, plural, one {active rule} other {active rules}}"
+              values={{ count: data.activeRulesCount ?? 0 }}
+            />
+          }
+        />
+      ),
+    },
+    {
+      id: 'pendingReports',
+      content: (
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="xs"
+          data-test-subj="managementEnvHealthPendingReports"
+        >
+          <EuiTitle size="m">
+            <h3>{dash(pendingCount)}</h3>
+          </EuiTitle>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="management.landing.envHealth.pendingReports"
+              defaultMessage="{count, plural, one {pending report} other {pending reports}}"
+              values={{ count: pendingCount }}
+            />
+            {data.pendingReportsCount === undefined ? (
+              <>
+                {' '}
+                <FormattedMessage
+                  id="management.landing.envHealth.pendingReportsFallbackNote"
+                  defaultMessage="(demo count)"
+                />
+              </>
+            ) : null}
+          </EuiText>
+        </EuiFlexGroup>
+      ),
+    },
+  ];
+
+  if (data.attentionReasons.length > 0) {
+    statEntries.push({
+      id: 'attentionIssues',
+      content: (
+        <ManagementLandingAttentionIssuesStat
+          reasons={data.attentionReasons}
+          capabilities={capabilities}
+          navigateToApp={navigateToApp}
+        />
+      ),
+    });
+  }
+
+  return (
+    <EuiPanel
+      hasBorder
+      paddingSize="m"
+      data-test-subj="managementLandingStatsPanel"
+      css={css`
+        flex: 1;
+        min-height: 0;
+      `}
+    >
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <FormattedMessage
+              id="management.landing.envHealth.statsPanelTitle"
+              defaultMessage="Environment overview"
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="m"
+          alignItems="flexEnd"
+          wrap
+          responsive={true}
+          css={css`
+            width: 100%;
+          `}
+        >
+          {statEntries.map((entry, index) => (
+            <React.Fragment key={entry.id}>
+              <EuiFlexItem
+                grow
+                css={css`
+                  flex-basis: 0;
+                  min-width: 0;
+                `}
+              >
+                {entry.content}
+              </EuiFlexItem>
+              {index < statEntries.length - 1 ? (
+                <EuiFlexItem grow={false}>
+                  <ManagementLandingStatsVerticalRule aria-hidden />
+                </EuiFlexItem>
+              ) : null}
+            </React.Fragment>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+}
+
+export function ManagementLandingHeaderDescription({
+  loadState,
+  data,
+  capabilities,
+  navigateToApp,
+}: {
+  loadState: EnvironmentHealthLoadState;
+  data: EnvironmentHealthResponse | null;
+  capabilities: ApplicationStart['capabilities'];
+  navigateToApp: ApplicationStart['navigateToApp'];
+}) {
+  if (loadState === 'loading' || (loadState === 'ready' && !data)) {
+    return (
+      <EuiPanel
+        hasBorder
+        paddingSize="m"
+        data-test-subj="managementLandingHeaderStatsLoading"
+        css={css`
+          flex: 1;
+          min-height: 0;
+        `}
+      >
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiSkeletonTitle size="xs" />
+          <EuiFlexGroup
+            gutterSize="m"
+            alignItems="flexEnd"
+            wrap
+            responsive={true}
+            css={css`
+              width: 100%;
+            `}
+          >
+            {[0, 1, 2, 3].map((i) => (
+              <React.Fragment key={i}>
+                <EuiFlexItem
+                  grow
+                  css={css`
+                    flex-basis: 0;
+                    min-width: 0;
+                  `}
+                >
+                  <EuiSkeletonTitle size="m" />
+                </EuiFlexItem>
+                {i < 3 ? (
+                  <EuiFlexItem grow={false}>
+                    <ManagementLandingStatsVerticalRule aria-hidden />
+                  </EuiFlexItem>
+                ) : null}
+              </React.Fragment>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+
+  if (!data) {
     return null;
   }
 
-  const mostSevere = reasons.includes('cluster_red') ? 'danger' : 'warning';
+  return (
+    <ManagementLandingStatsPanel
+      data={data}
+      capabilities={capabilities}
+      navigateToApp={navigateToApp}
+    />
+  );
+}
 
+export function ManagementLandingHealthyReassurance() {
   return (
     <EuiCallOut
       title={
         <FormattedMessage
-          id="management.landing.envHealth.attention.title"
-          defaultMessage="Attention needed"
+          id="management.landing.envHealth.healthyTitle"
+          defaultMessage="Environment looks healthy"
         />
       }
-      color={mostSevere}
-      iconType="alert"
-      data-test-subj="managementEnvHealthAttentionCallout"
+      color="success"
+      iconType="checkInCircleFilled"
+      data-test-subj="managementEnvHealthHealthyReassurance"
     >
-      {reasons.length === 1 ? (
-        <p>{ATTENTION_REASON_LABELS[reasons[0]]}</p>
-      ) : (
-        <ul>
-          {reasons.map((reason) => (
-            <li key={reason}>{ATTENTION_REASON_LABELS[reason]}</li>
-          ))}
-        </ul>
-      )}
+      <FormattedMessage
+        id="management.landing.envHealth.healthyBody"
+        defaultMessage="No urgent cluster issues were detected. Continue monitoring alerts and data ingestion as your usage grows."
+      />
     </EuiCallOut>
   );
 }

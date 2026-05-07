@@ -10,79 +10,92 @@
 import { i18n } from '@kbn/i18n';
 import type { IconType } from '@elastic/eui';
 
-/** Ui-settings keys work well as the Advanced Settings search query (locale-agnostic match). */
-export interface ManagementLandingSettingsShortcutDefinition {
+/** Rows backed by uiSettings — edited inline on the landing page. */
+export interface ManagementLandingUiSettingRowDefinition {
+  readonly kind: 'uiSetting';
   readonly id: string;
   readonly title: string;
   readonly icon: IconType;
   readonly capabilityPath: string;
-  /**
-   * `management` app path (no leading slash). Either `kibana/settings?query=...` or a direct management path.
-   */
+  readonly uiSettingKey: string;
+  readonly sectionBreakBefore?: boolean;
+}
+
+/** Navigational shortcut rows (not uiSettings). */
+export interface ManagementLandingNavigateSettingsRowDefinition {
+  readonly kind: 'navigate';
+  readonly id: string;
+  readonly title: string;
+  readonly icon: IconType;
+  readonly capabilityPath: string;
   readonly managementPath: string;
   readonly sectionBreakBefore?: boolean;
 }
 
-const SETTINGS_BASE = 'kibana/settings';
+export type ManagementLandingSettingsRowDefinition =
+  | ManagementLandingUiSettingRowDefinition
+  | ManagementLandingNavigateSettingsRowDefinition;
 
-const advancedSettingsPath = (query: string) =>
-  `${SETTINGS_BASE}?query=${encodeURIComponent(query)}`;
-
-export const MANAGEMENT_LANDING_SETTINGS_SHORTCUTS: ManagementLandingSettingsShortcutDefinition[] =
-  [
-    {
-      id: 'time_zone',
-      title: i18n.translate('management.landing.settingsPanel.row.timeZone', {
-        defaultMessage: 'Time zone',
-      }),
-      icon: 'clock',
-      capabilityPath: 'management.kibana.settings',
-      managementPath: advancedSettingsPath('dateFormat:tz'),
-    },
-    {
-      id: 'dark_mode',
-      title: i18n.translate('management.landing.settingsPanel.row.darkMode', {
-        defaultMessage: 'Dark mode',
-      }),
-      icon: 'invert',
-      capabilityPath: 'management.kibana.settings',
-      managementPath: advancedSettingsPath('theme:darkMode'),
-    },
-    {
-      id: 'date_format',
-      title: i18n.translate('management.landing.settingsPanel.row.dateFormat', {
-        defaultMessage: 'Date format',
-      }),
-      icon: 'document',
-      capabilityPath: 'management.kibana.settings',
-      managementPath: advancedSettingsPath('dateFormat'),
-    },
-    {
-      id: 'default_route',
-      title: i18n.translate('management.landing.settingsPanel.row.defaultRoute', {
-        defaultMessage: 'Default route',
-      }),
-      icon: 'home',
-      capabilityPath: 'management.kibana.settings',
-      managementPath: advancedSettingsPath('defaultRoute'),
-    },
-    {
-      id: 'day_of_week',
-      title: i18n.translate('management.landing.settingsPanel.row.dayOfWeek', {
-        defaultMessage: 'Day of week',
-      }),
-      icon: 'calendar',
-      capabilityPath: 'management.kibana.settings',
-      managementPath: advancedSettingsPath('dateFormat:dow'),
-    },
-    {
-      id: 'invite_users',
-      title: i18n.translate('management.landing.settingsPanel.row.inviteUsers', {
-        defaultMessage: 'Invite users / team',
-      }),
-      icon: 'users',
-      capabilityPath: 'management.security.users',
-      managementPath: 'security/users/create',
-      sectionBreakBefore: true,
-    },
-  ];
+export const MANAGEMENT_LANDING_SETTINGS_ROWS: ManagementLandingSettingsRowDefinition[] = [
+  {
+    kind: 'uiSetting',
+    id: 'time_zone',
+    title: i18n.translate('management.landing.settingsPanel.row.timeZone', {
+      defaultMessage: 'Time zone',
+    }),
+    icon: 'clock',
+    capabilityPath: 'management.kibana.settings',
+    uiSettingKey: 'dateFormat:tz',
+  },
+  {
+    kind: 'uiSetting',
+    id: 'dark_mode',
+    title: i18n.translate('management.landing.settingsPanel.row.darkMode', {
+      defaultMessage: 'Dark mode',
+    }),
+    icon: 'invert',
+    capabilityPath: 'management.kibana.settings',
+    uiSettingKey: 'theme:darkMode',
+  },
+  {
+    kind: 'uiSetting',
+    id: 'date_format',
+    title: i18n.translate('management.landing.settingsPanel.row.dateFormat', {
+      defaultMessage: 'Date format',
+    }),
+    icon: 'document',
+    capabilityPath: 'management.kibana.settings',
+    uiSettingKey: 'dateFormat',
+  },
+  {
+    kind: 'uiSetting',
+    id: 'default_route',
+    title: i18n.translate('management.landing.settingsPanel.row.defaultRoute', {
+      defaultMessage: 'Default route',
+    }),
+    icon: 'home',
+    capabilityPath: 'management.kibana.settings',
+    uiSettingKey: 'defaultRoute',
+  },
+  {
+    kind: 'uiSetting',
+    id: 'day_of_week',
+    title: i18n.translate('management.landing.settingsPanel.row.dayOfWeek', {
+      defaultMessage: 'Day of week',
+    }),
+    icon: 'calendar',
+    capabilityPath: 'management.kibana.settings',
+    uiSettingKey: 'dateFormat:dow',
+  },
+  {
+    kind: 'navigate',
+    id: 'invite_users',
+    title: i18n.translate('management.landing.settingsPanel.row.inviteUsers', {
+      defaultMessage: 'Invite users / team',
+    }),
+    icon: 'users',
+    capabilityPath: 'management.security.users',
+    managementPath: 'security/users/create',
+    sectionBreakBefore: true,
+  },
+];

@@ -83,20 +83,6 @@ export function ManagementLandingWorkflowPaths({
         width: 100%;
       `}
     >
-      <EuiText
-        size="xs"
-        css={css`
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          color: ${euiTheme.colors.textSubdued};
-        `}
-      >
-        <FormattedMessage
-          id="management.landing.workflowPaths.kicker"
-          defaultMessage="Workflow paths"
-        />
-      </EuiText>
-      <EuiSpacer size="xs" />
       <EuiTitle size="xs">
         <h2
           css={css`
@@ -193,6 +179,8 @@ function WorkflowFlowRow({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
+          color="text"
+          fill={false}
           size="s"
           data-test-subj={`managementLandingWorkflowPathsStartTour-${flow.id}`}
           onClick={() => onStartTour(flow.id)}

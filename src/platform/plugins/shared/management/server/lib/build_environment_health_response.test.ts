@@ -29,9 +29,7 @@ function mockClient(handlers: {
           handlers.getDataStream ?? (() => Promise.resolve({ data_streams: [] }))
         ),
     },
-    count: jest
-      .fn()
-      .mockImplementation(handlers.count ?? (() => Promise.resolve({ count: 0 }))),
+    count: jest.fn().mockImplementation(handlers.count ?? (() => Promise.resolve({ count: 0 }))),
   } as unknown as ElasticsearchClient;
 }
 
@@ -56,6 +54,7 @@ describe('buildEnvironmentHealthResponse (prototype)', () => {
       indicesCount: 10,
       dataStreamsCount: 1,
       activeRulesCount: 5,
+      pendingReportsCount: 3,
       attentionReasons: [],
     });
   });

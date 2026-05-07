@@ -15,10 +15,13 @@ export const MANAGEMENT_LANDING_ENVIRONMENT_HEALTH_API_PATH =
  * Display label for Stack Management when Elasticsearch reports the default single-node name.
  * Keeps landing copy realistic without requiring a custom `cluster.name` in elasticsearch.yml.
  */
-export const MANAGEMENT_LANDING_DEFAULT_CLUSTER_DISPLAY_NAME =
-  'elasticsearch-production-us-east-1';
+export const MANAGEMENT_LANDING_DEFAULT_CLUSTER_DISPLAY_NAME = 'elasticsearch-production-us-east-1';
 
-export type AttentionReason = 'health_check_timed_out' | 'cluster_red' | 'cluster_yellow' | 'unassigned_shards';
+export type AttentionReason =
+  | 'health_check_timed_out'
+  | 'cluster_red'
+  | 'cluster_yellow'
+  | 'unassigned_shards';
 
 /** Minimal DTO for a landing-page health strip (prototype; not privilege-granular). */
 export interface EnvironmentHealthResponse {
@@ -27,6 +30,11 @@ export interface EnvironmentHealthResponse {
   indicesCount?: number;
   dataStreamsCount?: number;
   activeRulesCount?: number;
+  /**
+   * Placeholder count until a real pending-reports pipeline exists (optional).
+   * When omitted, the landing UI falls back to a client-side prototype constant.
+   */
+  pendingReportsCount?: number;
   /** Reasons the cluster needs attention. Empty array means everything is healthy. */
   attentionReasons: AttentionReason[];
 }

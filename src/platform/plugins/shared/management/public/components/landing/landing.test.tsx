@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, within } from '@testing-library/react';
+import { Subject } from 'rxjs';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -51,18 +52,65 @@ const mockEnvironmentHealthResponse = (): EnvironmentHealthResponse => ({
   healthStatus: 'green',
   indicesCount: 12,
   dataStreamsCount: 3,
+  pendingReportsCount: 3,
   attentionReasons: [],
 });
 
-const renderLandingPage = async (overrides: Partial<AppDependencies> = {}) => {
-  const coreStart = overrides.coreStart ?? coreMock.createStart();
-  jest.mocked(coreStart.http.get).mockImplementation((pathOrOptions: string | HttpFetchOptionsWithPath) => {
-    const path = typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;
-    if (path === MANAGEMENT_LANDING_ENVIRONMENT_HEALTH_API_PATH) {
-      return Promise.resolve(mockEnvironmentHealthResponse());
+type LandingRenderOverrides = Partial<AppDependencies> & {
+  envHealthPayload?: EnvironmentHealthResponse;
+};
+
+const renderLandingPage = async (overrides: LandingRenderOverrides = {}) => {
+  const { envHealthPayload, ...restOverrides } = overrides;
+  const coreStart = restOverrides.coreStart ?? coreMock.createStart();
+  const resolvedHealth = envHealthPayload ?? mockEnvironmentHealthResponse();
+
+  jest
+    .mocked(coreStart.http.get)
+    .mockImplementation((pathOrOptions: string | HttpFetchOptionsWithPath) => {
+      const path = typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;
+      if (path === MANAGEMENT_LANDING_ENVIRONMENT_HEALTH_API_PATH) {
+        return Promise.resolve(resolvedHealth);
+      }
+      return Promise.resolve({});
+    });
+  (
+    coreStart.application.capabilities as {
+      management: Record<string, unknown>;
     }
-    return Promise.resolve({});
+  ).management = {
+    kibana: { settings: true },
+    security: { users: true },
+  };
+  jest.mocked(coreStart.uiSettings.get).mockImplementation(
+    (key: string) =>
+      ((
+        {
+          'dateFormat:tz': 'Browser',
+          'theme:darkMode': 'disabled',
+          dateFormat: 'MMM D, YYYY',
+          defaultRoute: '/app/home',
+          'dateFormat:dow': 'Monday',
+        } as Record<string, unknown>
+      )[key])
+  );
+  jest.mocked(coreStart.uiSettings.getAll).mockReturnValue({
+    'dateFormat:tz': { options: ['Browser', 'UTC'], requiresPageReload: true },
+    'theme:darkMode': {
+      options: ['enabled', 'disabled', 'system'],
+      optionLabels: { enabled: 'Enabled', disabled: 'Disabled', system: 'Sync with system' },
+      requiresPageReload: true,
+    },
+    dateFormat: {},
+    defaultRoute: {},
+    'dateFormat:dow': { options: ['Monday', 'Tuesday'], requiresPageReload: false },
+  } as ReturnType<typeof coreStart.uiSettings.getAll>);
+  jest.mocked(coreStart.uiSettings.getUpdate$).mockReturnValue(new Subject().asObservable());
+  jest.mocked(coreStart.uiSettings.validateValue).mockResolvedValue({
+    successfulValidation: true,
+    valid: true,
   });
+  jest.mocked(coreStart.uiSettings.set).mockResolvedValue(true);
   const contextDependencies: AppDependencies = {
     appBasePath: 'http://localhost:9001',
     kibanaVersion: '8.10.0',
@@ -72,7 +120,7 @@ const renderLandingPage = async (overrides: Partial<AppDependencies> = {}) => {
     coreStart,
     isAirGapped: false,
     getAutoOpsStatusHook: () => () => ({ isCloudConnectAutoopsEnabled: false, isLoading: false }),
-    ...overrides,
+    ...restOverrides,
   };
 
   const result = render(
@@ -115,17 +163,40 @@ describe('Landing Page', () => {
   });
 
   describe('Classic header environment', () => {
-    test('Shows cluster title, status badge, and stats in page header when cards navigation is disabled', async () => {
+    test('Shows cluster title in header; stats and healthy callout align in two columns like quick actions when cards navigation is disabled', async () => {
       const coreStart = coreMock.createStart();
       await renderLandingPage({ cardsNavigationConfig: { enabled: false }, coreStart });
       expect(
         screen.getByRole('heading', {
-          level: 1,
+          level: 2,
           name: new RegExp(MANAGEMENT_LANDING_DEFAULT_CLUSTER_DISPLAY_NAME),
         })
       ).toBeInTheDocument();
       expect(screen.getByTestId('managementEnvHealthClusterStatus')).toHaveTextContent('green');
-      expect(screen.getByTestId('managementEnvHealthIndices')).toHaveTextContent('12');
+      const mainColumn = screen.getByTestId('managementLandingMainColumn');
+      const statsAndCalloutsRow = within(mainColumn).getByTestId('managementLandingStatsAndCalloutsRow');
+      expect(within(statsAndCalloutsRow).getByTestId('managementEnvHealthIndices')).toHaveTextContent(
+        '12'
+      );
+      expect(
+        within(statsAndCalloutsRow).getByTestId('managementEnvHealthPendingReports')
+      ).toHaveTextContent('3');
+      expect(screen.queryByText(/demo count/i)).not.toBeInTheDocument();
+      expect(
+        within(statsAndCalloutsRow).getByTestId('managementEnvHealthHealthyReassurance')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('managementLandingDocsLinkGuide')).toHaveAttribute(
+        'href',
+        coreStart.docLinks.links.kibana.guide
+      );
+      expect(screen.getByTestId('managementLandingDocsLinkWhatsNew')).toHaveAttribute(
+        'href',
+        coreStart.docLinks.links.releaseNotes
+      );
+      expect(screen.getByTestId('managementLandingDocsLinkBreakingChanges')).toHaveAttribute(
+        'href',
+        coreStart.docLinks.links.kibana.upgradeNotes
+      );
       expect(coreStart.chrome.docTitle.change).toHaveBeenLastCalledWith(
         MANAGEMENT_LANDING_DEFAULT_CLUSTER_DISPLAY_NAME
       );
@@ -133,41 +204,17 @@ describe('Landing Page', () => {
 
     test('Shows Stack Management in page title when cluster name is unavailable', async () => {
       const coreStart = coreMock.createStart();
-      coreStart.http.get.mockImplementation((pathOrOptions: string | HttpFetchOptionsWithPath) => {
-        const path = typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;
-        if (path === MANAGEMENT_LANDING_ENVIRONMENT_HEALTH_API_PATH) {
-          return Promise.resolve({
-            ...mockEnvironmentHealthResponse(),
-            clusterName: undefined,
-          });
-        }
-        return Promise.resolve({});
-      });
-      const contextDependencies: AppDependencies = {
-        appBasePath: 'http://localhost:9001',
-        kibanaVersion: '8.10.0',
-        cardsNavigationConfig: { enabled: false },
-        sections: sectionsMock,
-        chromeStyle: 'classic',
+      await renderLandingPage({
         coreStart,
-        isAirGapped: false,
-        getAutoOpsStatusHook: () => () => ({ isCloudConnectAutoopsEnabled: false, isLoading: false }),
-      };
-      render(
-        <I18nProvider>
-          <MemoryRouter initialEntries={['/management_landing']}>
-            <AppContextProvider value={contextDependencies}>
-              <ManagementLandingPage setBreadcrumbs={jest.fn()} onAppMounted={jest.fn()} />
-            </AppContextProvider>
-          </MemoryRouter>
-        </I18nProvider>
-      );
-      await act(async () => {
-        await jest.runAllTimersAsync();
+        cardsNavigationConfig: { enabled: false },
+        envHealthPayload: {
+          ...mockEnvironmentHealthResponse(),
+          clusterName: undefined,
+        },
       });
 
       expect(
-        screen.getByRole('heading', { level: 1, name: /stack management/i })
+        screen.getByRole('heading', { level: 2, name: /stack management/i })
       ).toBeInTheDocument();
       expect(coreStart.chrome.docTitle.change).toHaveBeenLastCalledWith('Stack Management');
     });

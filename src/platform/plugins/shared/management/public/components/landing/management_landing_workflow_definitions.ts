@@ -23,39 +23,11 @@ export interface ManagementLandingWorkflowFlowDefinition {
   readonly links: readonly ManagementLandingWorkflowLinkDefinition[];
 }
 
+/**
+ * Flow order matches Stack Management landing wireframe / product-spec getting-started priority:
+ * ingestion → alerting → access → data review → snapshots.
+ */
 export const MANAGEMENT_LANDING_WORKFLOW_PATH_FLOWS: ManagementLandingWorkflowFlowDefinition[] = [
-  {
-    id: 'review_data',
-    categoryTitle: i18n.translate('management.landing.workflowPaths.flow.reviewData.category', {
-      defaultMessage: 'Review your data',
-    }),
-    links: [
-      {
-        id: 'indices',
-        label: i18n.translate('management.landing.workflowPaths.flow.reviewData.indices', {
-          defaultMessage: 'Indices',
-        }),
-        managementPath: 'data/index_management/indices',
-        capabilityPath: 'management.data.index_management',
-      },
-      {
-        id: 'data_streams',
-        label: i18n.translate('management.landing.workflowPaths.flow.reviewData.dataStreams', {
-          defaultMessage: 'Data streams',
-        }),
-        managementPath: 'data/index_management/data_streams',
-        capabilityPath: 'management.data.index_management',
-      },
-      {
-        id: 'ilm',
-        label: i18n.translate('management.landing.workflowPaths.flow.reviewData.ilm', {
-          defaultMessage: 'ILM policies',
-        }),
-        managementPath: 'data/index_lifecycle_management/policies',
-        capabilityPath: 'management.data.index_lifecycle_management',
-      },
-    ],
-  },
   {
     id: 'setup_ingestion',
     categoryTitle: i18n.translate('management.landing.workflowPaths.flow.setupIngestion.category', {
@@ -155,6 +127,38 @@ export const MANAGEMENT_LANDING_WORKFLOW_PATH_FLOWS: ManagementLandingWorkflowFl
         }),
         managementPath: 'security/api_keys',
         capabilityPath: 'management.security.api_keys',
+      },
+    ],
+  },
+  {
+    id: 'review_data',
+    categoryTitle: i18n.translate('management.landing.workflowPaths.flow.reviewData.category', {
+      defaultMessage: 'Review your data',
+    }),
+    links: [
+      {
+        id: 'indices',
+        label: i18n.translate('management.landing.workflowPaths.flow.reviewData.indices', {
+          defaultMessage: 'Indices',
+        }),
+        managementPath: 'data/index_management/indices',
+        capabilityPath: 'management.data.index_management',
+      },
+      {
+        id: 'data_streams',
+        label: i18n.translate('management.landing.workflowPaths.flow.reviewData.dataStreams', {
+          defaultMessage: 'Data streams',
+        }),
+        managementPath: 'data/index_management/data_streams',
+        capabilityPath: 'management.data.index_management',
+      },
+      {
+        id: 'ilm',
+        label: i18n.translate('management.landing.workflowPaths.flow.reviewData.ilm', {
+          defaultMessage: 'ILM policies',
+        }),
+        managementPath: 'data/index_lifecycle_management/policies',
+        capabilityPath: 'management.data.index_lifecycle_management',
       },
     ],
   },

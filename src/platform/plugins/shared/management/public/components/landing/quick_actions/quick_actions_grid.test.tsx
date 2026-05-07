@@ -41,6 +41,23 @@ describe('QuickActionsGrid', () => {
     onOpenLandingOverlay.mockClear();
   });
 
+  it('renders illustration hints below titles when defined', () => {
+    const caps = buildCapabilities(['management.insightsAndAlerting.reporting']);
+
+    render(
+      <I18nProvider>
+        <QuickActionsGrid
+          capabilities={caps as any}
+          navigateToApp={navigateToApp}
+          onOpenLandingOverlay={onOpenLandingOverlay}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText(/Illustration for layout only/i)).toBeInTheDocument();
+    expect(screen.getByText(/Example: 2.6M views/i)).toBeInTheDocument();
+  });
+
   it('renders cards for actions the user has capabilities for', () => {
     const caps = buildCapabilities([
       'management.data.index_management',

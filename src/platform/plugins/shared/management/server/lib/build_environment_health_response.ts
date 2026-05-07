@@ -24,10 +24,7 @@ async function fetchActiveRulesCount(esClient: ElasticsearchClient): Promise<num
       index: '.kibana_alerting_cases*',
       query: {
         bool: {
-          filter: [
-            { term: { type: 'alert' } },
-            { term: { 'alert.enabled': true } },
-          ],
+          filter: [{ term: { type: 'alert' } }, { term: { 'alert.enabled': true } }],
         },
       },
     },
@@ -36,12 +33,19 @@ async function fetchActiveRulesCount(esClient: ElasticsearchClient): Promise<num
   return result.count;
 }
 
+/** Stub pending-report jobs until reporting exposes a real count via API (landing prototype). */
+const STUB_PENDING_REPORTS_COUNT = 3;
+
 /** Best-effort ES snapshot for the management landing prototype. */
 export async function buildEnvironmentHealthResponse(
   esClient: ElasticsearchClient
 ): Promise<EnvironmentHealthResponse> {
   const reasons: AttentionReason[] = [];
-  const out: EnvironmentHealthResponse = { attentionReasons: reasons };
+  const out: EnvironmentHealthResponse = {
+    attentionReasons: reasons,
+    // Reporting pipeline does not expose this yet — ship a stable placeholder for the strip.
+    pendingReportsCount: STUB_PENDING_REPORTS_COUNT,
+  };
 
   const [healthR, statsR, streamsR, rulesR] = await Promise.allSettled([
     esClient.cluster.health(

@@ -34,7 +34,7 @@ describe('ManagementLandingWorkflowPaths', () => {
     navigateToApp.mockClear();
   });
 
-  it('renders workflow rows and tour buttons when capabilities allow', () => {
+  it('renders workflow rows when capabilities allow', () => {
     render(
       <I18nProvider>
         <ManagementLandingWorkflowPaths
@@ -46,10 +46,7 @@ describe('ManagementLandingWorkflowPaths', () => {
 
     expect(screen.getByTestId('managementLandingWorkflowPaths')).toBeInTheDocument();
     expect(
-      screen.getByTestId('managementLandingWorkflowPathsFlow-review_data')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId('managementLandingWorkflowPathsStartTour-review_data')
+      screen.getByTestId('managementLandingWorkflowPathsFlow-setup_ingestion')
     ).toBeInTheDocument();
   });
 
@@ -63,9 +60,11 @@ describe('ManagementLandingWorkflowPaths', () => {
       </I18nProvider>
     );
 
-    fireEvent.click(screen.getByTestId('managementLandingWorkflowPathsLink-review_data-indices'));
+    fireEvent.click(
+      screen.getByTestId('managementLandingWorkflowPathsLink-setup_ingestion-ingest_pipelines')
+    );
     expect(navigateToApp).toHaveBeenCalledWith('management', {
-      path: 'data/index_management/indices',
+      path: 'ingest/ingest_pipelines',
     });
   });
 

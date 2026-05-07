@@ -8,8 +8,10 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { Subject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { ManagementLandingSettingsPanel } from './management_landing_settings_panel';
 
 const DISMISS_KEY = 'managementLandingSettingsPanelDismissed';
@@ -24,13 +26,67 @@ function buildCaps(settings: boolean, users: boolean) {
   } as any;
 }
 
+function createUiSettingsMock(): jest.Mocked<IUiSettingsClient> {
+  const updates = new Subject<{ key: string; newValue: unknown; oldValue: unknown }>();
+  const values: Record<string, unknown> = {
+    'dateFormat:tz': 'Browser',
+    'theme:darkMode': 'disabled',
+    dateFormat: 'MMM D, YYYY',
+    defaultRoute: '/app/home',
+    'dateFormat:dow': 'Monday',
+  };
+
+  const meta: Record<string, Record<string, unknown>> = {
+    'dateFormat:tz': { options: ['Browser', 'UTC'], requiresPageReload: true },
+    'theme:darkMode': {
+      options: ['enabled', 'disabled', 'system'],
+      optionLabels: {
+        enabled: 'Enabled',
+        disabled: 'Disabled',
+        system: 'Sync with system',
+      },
+      requiresPageReload: true,
+    },
+    dateFormat: {},
+    defaultRoute: {},
+    'dateFormat:dow': { options: ['Monday', 'Tuesday'], requiresPageReload: false },
+  };
+
+  return {
+    get: jest.fn((key: string) => values[key]),
+    get$: jest.fn(),
+    getAll: jest.fn(() => meta as any),
+    set: jest.fn(async (key: string, value: unknown) => {
+      const oldValue = values[key];
+      values[key] = value;
+      updates.next({ key, newValue: value, oldValue });
+      return true;
+    }),
+    remove: jest.fn(),
+    isDeclared: jest.fn(() => true),
+    isDefault: jest.fn(),
+    isCustom: jest.fn(),
+    isOverridden: jest.fn(),
+    isStrictReadonly: jest.fn(),
+    getUpdate$: jest.fn(() => updates.asObservable()),
+    getUpdateErrors$: jest.fn(() => new Subject().asObservable()),
+    validateValue: jest.fn(async () => ({ successfulValidation: true, valid: true })),
+  } as unknown as jest.Mocked<IUiSettingsClient>;
+}
+
 describe('ManagementLandingSettingsPanel', () => {
   const navigateToApp = jest.fn();
+  let uiSettings: jest.Mocked<IUiSettingsClient>;
 
   beforeEach(() => {
     navigateToApp.mockClear();
+    uiSettings = createUiSettingsMock();
     window.localStorage.removeItem(DISMISS_KEY);
     window.localStorage.removeItem(LEGACY_DISMISS_KEY);
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   it('returns null when panel was previously dismissed', () => {
@@ -41,6 +97,7 @@ describe('ManagementLandingSettingsPanel', () => {
         <ManagementLandingSettingsPanel
           capabilities={buildCaps(true, true)}
           navigateToApp={navigateToApp}
+          uiSettings={uiSettings}
         />
       </I18nProvider>
     );
@@ -56,6 +113,7 @@ describe('ManagementLandingSettingsPanel', () => {
         <ManagementLandingSettingsPanel
           capabilities={buildCaps(true, true)}
           navigateToApp={navigateToApp}
+          uiSettings={uiSettings}
         />
       </I18nProvider>
     );
@@ -69,6 +127,7 @@ describe('ManagementLandingSettingsPanel', () => {
         <ManagementLandingSettingsPanel
           capabilities={buildCaps(false, false)}
           navigateToApp={navigateToApp}
+          uiSettings={uiSettings}
         />
       </I18nProvider>
     );
@@ -76,41 +135,73 @@ describe('ManagementLandingSettingsPanel', () => {
     expect(screen.queryByTestId('managementLandingSettingsPanel')).not.toBeInTheDocument();
   });
 
-  it('shows rows the user can access and navigates to advanced settings with query for time zone', () => {
+  it('announces validation errors for inline ui settings', async () => {
+    uiSettings.validateValue.mockResolvedValueOnce({
+      successfulValidation: true,
+      valid: false,
+      errorMessage: 'Not a valid value',
+    });
+
     render(
       <I18nProvider>
         <ManagementLandingSettingsPanel
           capabilities={buildCaps(true, true)}
           navigateToApp={navigateToApp}
+          uiSettings={uiSettings}
+        />
+      </I18nProvider>
+    );
+
+    const darkModeControl = screen.getByTestId('managementLandingSettingsUiRow-dark_mode');
+    fireEvent.change(darkModeControl.querySelector('select')!, {
+      target: { value: 'enabled' },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Not a valid value');
+    });
+  });
+
+  it('shows ui setting rows and validates before saving dark mode', async () => {
+    render(
+      <I18nProvider>
+        <ManagementLandingSettingsPanel
+          capabilities={buildCaps(true, true)}
+          navigateToApp={navigateToApp}
+          uiSettings={uiSettings}
         />
       </I18nProvider>
     );
 
     expect(screen.getByTestId('managementLandingSettingsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('managementLandingSettingsUiRow-time_zone')).toBeInTheDocument();
     expect(
-      screen.getByTestId('managementLandingSettingsPanelShortcut-time_zone')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId('managementLandingSettingsPanelShortcut-invite_users')
+      screen.getByTestId('managementLandingSettingsNavigate-invite_users')
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('managementLandingSettingsPanelShortcut-time_zone'));
-    expect(navigateToApp).toHaveBeenCalledWith('management', {
-      path: 'kibana/settings?query=dateFormat%3Atz',
+    const darkModeControl = screen.getByTestId('managementLandingSettingsUiRow-dark_mode');
+    fireEvent.change(darkModeControl.querySelector('select')!, {
+      target: { value: 'enabled' },
+    });
+
+    await waitFor(() => {
+      expect(uiSettings.validateValue).toHaveBeenCalledWith('theme:darkMode', 'enabled');
+      expect(uiSettings.set).toHaveBeenCalledWith('theme:darkMode', 'enabled');
     });
   });
 
-  it('navigates invite users to user creation when clicked', () => {
+  it('navigates invite users when Go is clicked', () => {
     render(
       <I18nProvider>
         <ManagementLandingSettingsPanel
           capabilities={buildCaps(false, true)}
           navigateToApp={navigateToApp}
+          uiSettings={uiSettings}
         />
       </I18nProvider>
     );
 
-    fireEvent.click(screen.getByTestId('managementLandingSettingsPanelShortcut-invite_users'));
+    fireEvent.click(screen.getByTestId('managementLandingSettingsNavigate-invite_users'));
     expect(navigateToApp).toHaveBeenCalledWith('management', {
       path: 'security/users/create',
     });
@@ -122,6 +213,7 @@ describe('ManagementLandingSettingsPanel', () => {
         <ManagementLandingSettingsPanel
           capabilities={buildCaps(true, true)}
           navigateToApp={navigateToApp}
+          uiSettings={uiSettings}
         />
       </I18nProvider>
     );
