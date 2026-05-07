@@ -171,7 +171,7 @@ describe('ruleSourceImporter', () => {
       };
 
       ruleAssetsClientMock.fetchLatestVersions.mockReset().mockResolvedValue([]);
-      ruleAssetsClientMock.fetchAssetsByVersion.mockReset().mockResolvedValue([]);
+      ruleAssetsClientMock.fetchAssetsByVersion.mockReset().mockResolvedValue({ assets: [] });
       ruleAssetsClientMock.fetchDeprecatedRules.mockReset().mockResolvedValue([
         {
           rule_id: deprecatedRuleToImport.rule_id,
