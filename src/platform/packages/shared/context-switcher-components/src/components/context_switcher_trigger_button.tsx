@@ -43,7 +43,7 @@ export const ContextSwitcherTriggerButton = ({
   return (
     <EuiButtonEmpty
       color="text"
-      size="m"
+      size="s"
       onClick={onClick}
       iconType="arrowDown"
       iconSide="right"
