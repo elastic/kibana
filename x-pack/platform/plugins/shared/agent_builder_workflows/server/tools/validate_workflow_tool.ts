@@ -16,7 +16,7 @@ import {
   formatConnectorStep,
   resolveConnectors,
 } from './get_step_definitions_tool';
-import { workflowTools } from '@kbn/workflows/common/constants';
+import { workflowTools } from '../../common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';

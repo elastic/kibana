@@ -10,8 +10,8 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
-  workflowTools,
 } from '@kbn/workflows/common/constants';
+import { workflowTools } from '../../common/constants';
 
 export const workflowAuthoringSkill = defineSkillType({
   id: 'workflow-authoring',

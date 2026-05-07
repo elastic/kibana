@@ -45,30 +45,3 @@ export const WORKFLOW_SML_TYPE = 'workflow';
  * attachment is created or modified by an agent tool.
  */
 export const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
-
-/**
- * Namespace under which workflow agent builder tools are registered.
- * Must match `internalNamespaces.workflows` in @kbn/agent-builder-common.
- */
-const WORKFLOW_TOOLS_NAMESPACE = 'platform.workflows';
-
-const workflowTool = <TName extends string>(
-  toolName: TName
-): `${typeof WORKFLOW_TOOLS_NAMESPACE}.${TName}` => {
-  return `${WORKFLOW_TOOLS_NAMESPACE}.${toolName}`;
-};
-
-export const workflowTools = {
-  insertStep: workflowTool('workflow_insert_step'),
-  modifyStep: workflowTool('workflow_modify_step'),
-  modifyStepProperty: workflowTool('workflow_modify_step_property'),
-  modifyProperty: workflowTool('workflow_modify_property'),
-  deleteStep: workflowTool('workflow_delete_step'),
-  setYaml: workflowTool('workflow_set_yaml'),
-  getStepDefinitions: workflowTool('get_step_definitions'),
-  getTriggerDefinitions: workflowTool('get_trigger_definitions'),
-  validateWorkflow: workflowTool('validate_workflow'),
-  getExamples: workflowTool('get_examples'),
-  getConnectors: workflowTool('get_connectors'),
-  executeStep: workflowTool('workflow_execute_step'),
-} as const;

@@ -8,7 +8,7 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import { AlertEventSchema, BaseEventSchema, builtInTriggerDefinitions } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { workflowTools } from '@kbn/workflows/common/constants';
+import { workflowTools } from '../../common/constants';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 
 const LARGE_ENUM_THRESHOLD = 20;

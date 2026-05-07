@@ -22,8 +22,8 @@ import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   WORKFLOW_YAML_CHANGED_EVENT,
   WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
-  workflowTools,
 } from '@kbn/workflows/common/constants';
+import { workflowTools } from '../../common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
