@@ -35,6 +35,7 @@
  * both consumers share.
  */
 import { constants, createHash, createSign, randomUUID } from 'crypto';
+import type { BuildClientAssertionOpts } from '@kbn/connector-specs';
 import { CLIENT_ASSERTION_TYPE } from '@kbn/connector-specs';
 
 const JWT_LIFETIME_SEC = 600; // 10 minutes
@@ -82,14 +83,6 @@ export function computeCertificateThumbprint(pemCert: string): string {
   const der = Buffer.from(matches[1].replace(/\s+/g, ''), 'base64');
   const thumbprint = createHash('sha256').update(der).digest();
   return base64UrlEncode(thumbprint);
-}
-
-export interface BuildClientAssertionOpts {
-  tokenUrl: string;
-  clientId: string;
-  certificate: string;
-  privateKey: string;
-  passphrase?: string;
 }
 
 /**
