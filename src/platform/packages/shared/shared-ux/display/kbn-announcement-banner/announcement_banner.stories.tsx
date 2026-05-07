@@ -105,7 +105,7 @@ export const Playground: Story = {};
 
 const ContainerSizesRender = (args: StoryArgs) => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-    {[500, 1000, 1800].map((width) => (
+    {[360, 500, 1000, 1800].map((width) => (
       <div key={width}>
         <div style={{ fontSize: 12, marginBottom: 4 }}>{width}px</div>
         <div style={{ width }}>
