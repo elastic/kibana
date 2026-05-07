@@ -64,3 +64,9 @@ it('prevents reassigning items in a frozen array', () => {
     frozen.foo[0] = 2;
   }).toThrowError(`read only property '0'`);
 });
+
+it('does not recurse into Zod-like schema objects (proxy / describe trap)', () => {
+  const zodV3Like = { _def: { typeName: 'object' } };
+  const zodV4Like = { _zod: { def: {} } };
+  expect(() => deepFreeze({ a: zodV3Like, b: zodV4Like })).not.toThrow();
+});

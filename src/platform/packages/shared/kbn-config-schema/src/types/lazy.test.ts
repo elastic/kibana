@@ -15,6 +15,16 @@ interface RecursiveType {
   self: undefined | RecursiveType;
 }
 
+/** Joi-compat `{ value, error }` shim on proxied `ObjectType.getSchema()` */
+function joiValidate<T>(
+  zodSchema: unknown,
+  data: unknown
+): { value?: T; error?: { message?: string } } {
+  return (
+    zodSchema as { validate(data: unknown): { value?: T; error?: { message?: string } } }
+  ).validate(data);
+}
+
 // Test our recursive type inference
 {
   const id = 'recursive';
@@ -52,7 +62,7 @@ describe('lazy', () => {
         },
       },
     };
-    const { value, error } = object.getSchema().validate(self);
+    const { value, error } = joiValidate<RecursiveType>(object.getSchema(), self);
     expect(error).toBeUndefined();
     expect(value).toEqual(self);
   });
@@ -66,7 +76,7 @@ describe('lazy', () => {
       },
     };
 
-    const { error, value } = object.getSchema().validate(invalidSelf);
+    const { error, value } = joiValidate<RecursiveType>(object.getSchema(), invalidSelf);
     expect(value).toEqual(invalidSelf);
     expect(error?.message).toBe('[self.name]: expected value of type [string] but got [number]');
   });

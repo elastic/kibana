@@ -140,7 +140,10 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
   public getSchema(): z.ZodType<ObjectResultType<P>> {
     const schema = super.getSchema();
     const id = this.typeOptions.meta?.id;
-    const describe = schema.describe.bind(schema);
+    const snapshotDescribe = schema.describe.bind(schema) as unknown as () => Record<
+      string,
+      unknown
+    >;
     const self = this;
     return new Proxy(schema, {
       get(target, prop, receiver) {
@@ -162,7 +165,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
         }
         if (prop === 'describe') {
           return () => {
-            const base = describe();
+            const base = snapshotDescribe();
             if (!id) {
               return base;
             }
@@ -316,9 +319,10 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
 
     const output: Record<string, unknown> = {};
     const frame = getValidationFrame();
-    // Validate keys in deterministic order so sibling defaults (e.g. `sibling` before `value`) resolve
-    // when defaults reference other keys in the same object.
-    const keys = Object.keys(this.props).sort((a, b) => a.localeCompare(b));
+    // Validate in schema declaration order so `schema.siblingRef` / conditionals see earlier keys
+    // (e.g. `server.rateLimiter.enabled` before `elu`). Alphabetical order breaks when dependent keys
+    // sort before their references (`elu` < `enabled`).
+    const keys = Object.keys(this.props);
 
     for (const key of keys) {
       const propType = this.props[key];

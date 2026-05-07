@@ -62,15 +62,21 @@ export class DurationType extends Type<Duration> {
 
     if (options.min !== undefined) {
       const limit = ensureDuration(options.min);
-      schema = schema.refine((v) => v.asMilliseconds() >= limit.asMilliseconds(), {
-        message: `Value must be equal to or greater than [${limit.toString()}]`,
-      });
+      schema = schema.refine(
+        (v: unknown) => (v as Duration).asMilliseconds() >= limit.asMilliseconds(),
+        {
+          message: `Value must be equal to or greater than [${limit.toString()}]`,
+        }
+      );
     }
     if (options.max !== undefined) {
       const limit = ensureDuration(options.max);
-      schema = schema.refine((v) => v.asMilliseconds() <= limit.asMilliseconds(), {
-        message: `Value must be equal to or less than [${limit.toString()}]`,
-      });
+      schema = schema.refine(
+        (v: unknown) => (v as Duration).asMilliseconds() <= limit.asMilliseconds(),
+        {
+          message: `Value must be equal to or less than [${limit.toString()}]`,
+        }
+      );
     }
 
     super(schema, { validate: options.validate, defaultValue } as TypeOptions<Duration>);

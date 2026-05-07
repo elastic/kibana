@@ -8,6 +8,7 @@
  */
 
 import type { z } from '@kbn/zod';
+import type { $ZodRawIssue } from '@kbn/zod';
 
 import { SchemaTypeError, ValidationError } from '../errors';
 import {
@@ -31,6 +32,7 @@ export type {
   TypeMeta,
   TypeMetaAvailability,
   TypeOptions,
+  TypeOptionsValidate,
   UnknownOptions,
 } from './interfaces';
 
@@ -38,7 +40,7 @@ export type {
  * @deprecated Inline `superRefine` / refinements on Zod schemas instead.
  */
 export const convertValidationFunction = <T = unknown>(validate: (value: T) => string | void) => {
-  return (val: T, ctx: { addIssue: (i: z.ZodCustomIssue) => void }) => {
+  return (val: T, ctx: { addIssue: (i: string | $ZodRawIssue) => void }) => {
     let msg: string | void;
     try {
       msg = validate(val);
@@ -46,7 +48,7 @@ export const convertValidationFunction = <T = unknown>(validate: (value: T) => s
       msg = e?.message ?? String(e);
     }
     if (typeof msg === 'string') {
-      ctx.addIssue({ code: 'custom', message: msg, input: val } as z.ZodCustomIssue);
+      ctx.addIssue({ code: 'custom', message: msg, input: val } as $ZodRawIssue);
     }
   };
 };
@@ -165,7 +167,7 @@ export abstract class Type<V> {
       if (typeof customHandled === 'string') {
         return new SchemaTypeError(customHandled, path);
       }
-      return new SchemaTypeError((issue as z.ZodCustomIssue).message, path);
+      return new SchemaTypeError(String(issue?.message ?? 'Validation failed'), path);
     }
 
     const mappedCode = mapZodIssueCode(issue);

@@ -43,12 +43,15 @@ export class AnyType extends Type<any> {
   /** Joi exposed meta via `describe().metas`; Zod keeps meta on `.meta()` only — shim for introspection tests. */
   public getSchema(): z.ZodType<any> {
     const schema = super.getSchema();
-    const describe = schema.describe.bind(schema);
+    const snapshotDescribe = schema.describe.bind(schema) as unknown as () => Record<
+      string,
+      unknown
+    >;
     return new Proxy(schema, {
       get(target, prop, receiver) {
         if (prop === 'describe') {
           return () =>
-            Object.assign(describe(), {
+            Object.assign(snapshotDescribe(), {
               metas: [{ [META_FIELD_X_OAS_ANY]: true }],
             });
         }

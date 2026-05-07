@@ -28,6 +28,9 @@ export function deepFreeze<T extends Freezable>(object: T) {
         // Skip moment.Locale instances, moment should not be frozen
         continue;
       }
+      if (isZodSchemaLike(value)) {
+        continue;
+      }
       deepFreeze(value);
     }
   }
@@ -36,4 +39,26 @@ export function deepFreeze<T extends Freezable>(object: T) {
 
 function isMomentLocale(obj: unknown): obj is moment.Locale {
   return obj !== null && typeof obj === 'object' && '_longDateFormat' in obj;
+}
+
+/**
+ * Zod schema instances are Proxy-wrapped; walking them with `Object.values` for
+ * deep-freeze can throw (e.g. `describe` on the proxy target). Treat as a leaf.
+ *
+ * Zod v4 marks instances with `_zod`; v3 used `_def.typeName`.
+ */
+function isZodSchemaLike(obj: unknown): boolean {
+  if (obj === null || typeof obj !== 'object') {
+    return false;
+  }
+  if ('_zod' in obj) {
+    return true;
+  }
+  const def = (obj as { _def?: unknown })._def;
+  return (
+    typeof def === 'object' &&
+    def !== null &&
+    'typeName' in def &&
+    typeof (def as { typeName: unknown }).typeName === 'string'
+  );
 }

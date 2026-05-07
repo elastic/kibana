@@ -10,6 +10,10 @@
 import { schema } from '../..';
 import { META_FIELD_X_OAS_MAX_LENGTH, META_FIELD_X_OAS_MIN_LENGTH } from '../oas_meta_fields';
 
+function legacyDescribe(zh: unknown): Record<string, unknown> & { metas?: unknown[] } {
+  return (zh as { describe(): Record<string, unknown> & { metas?: unknown[] } }).describe();
+}
+
 test('returns value is string and defined', () => {
   expect(schema.string().validate('test')).toBe('test');
 });
@@ -170,7 +174,7 @@ describe('#defaultValue', () => {
 
 test('meta', () => {
   const string = schema.string({ minLength: 1, maxLength: 3 });
-  const [meta1, meta2] = string.getSchema().describe().metas ?? [];
+  const [meta1, meta2] = legacyDescribe(string.getSchema()).metas ?? [];
   expect(meta1).toEqual({
     [META_FIELD_X_OAS_MIN_LENGTH]: 1,
   });

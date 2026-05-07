@@ -23,9 +23,17 @@ export interface TypeMeta {
   availability?: TypeMetaAvailability;
 }
 
+/**
+ * Callback parameter position is bivariant so literal-valued types (e.g. `Type<'foo'>`, `Type<false>`)
+ * remain assignable where wider parameter types are declared — mirroring typical schema DSL ergonomics.
+ */
+export type TypeOptionsValidate<T> = {
+  hack?(value: T): string | void;
+}['hack'];
+
 export interface TypeOptions<T> {
   defaultValue?: T | Reference<T> | (() => T);
-  validate?: (value: T) => string | void;
+  validate?: TypeOptionsValidate<T>;
   meta?: TypeMeta;
 }
 

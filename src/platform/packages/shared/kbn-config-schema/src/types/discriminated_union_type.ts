@@ -25,7 +25,8 @@ export type PropsWithDiscriminator<Discriminator extends string, T extends Props
   T,
   Discriminator
 > & {
-  [Key in Discriminator]: Type<string>;
+  /** Literal discriminators use `Type<'a'>` etc.; widen so branches remain assignable. */
+  [Key in Discriminator]: Type<any>;
 };
 
 export class DiscriminatedUnionType<

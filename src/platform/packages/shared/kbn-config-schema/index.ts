@@ -31,6 +31,7 @@ import type {
   StringOptions,
   TypeOf,
   TypeOptions,
+  TypeOptionsValidate,
   URIOptions,
   UnionTypeOptions,
   PropsWithDiscriminator,
@@ -72,6 +73,7 @@ export type {
   NullableProps,
   ObjectResultType,
   TypeOptions,
+  TypeOptionsValidate,
   UnionTypeOptions,
 };
 export { ObjectType, Type, UnionType };

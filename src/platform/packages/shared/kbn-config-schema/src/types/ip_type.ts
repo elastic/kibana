@@ -34,7 +34,8 @@ export class IpType extends Type<string> {
         ? parts[0]!
         : zod.union(parts as [zod.ZodTypeAny, zod.ZodTypeAny, ...zod.ZodTypeAny[]]);
 
-    super(zod.string().pipe(union as zod.ZodType<string>), options);
+    // `union` is ipv4|ipv6; Zod v4's `pipe` input/output generics are stricter than our union construction.
+    super(zod.string().pipe(union as any) as zod.ZodType<string>, options);
     this.ipVersions = options.versions;
   }
 

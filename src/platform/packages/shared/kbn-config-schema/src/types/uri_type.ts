@@ -8,6 +8,7 @@
  */
 
 import typeDetect from 'type-detect';
+import type { $ZodRawIssue } from '@kbn/zod';
 import { z as zod } from '@kbn/zod';
 
 import type { SchemaValidationOptions, TypeOptions } from './interfaces';
@@ -28,7 +29,7 @@ export class URIType extends Type<string> {
           code: 'custom',
           message: 'value must be a valid URI (see RFC 3986).',
           input: val,
-        } as zod.ZodCustomIssue);
+        } as $ZodRawIssue);
         return;
       }
       // WHATWG URL accepts `[]` in query strings; legacy Joi rejected them (RFC 3986 parity tests).
@@ -37,7 +38,7 @@ export class URIType extends Type<string> {
           code: 'custom',
           message: 'value must be a valid URI (see RFC 3986).',
           input: val,
-        } as zod.ZodCustomIssue);
+        } as $ZodRawIssue);
         return;
       }
       // WHATWG allows arbitrarily long registered names; legacy Joi capped host length (see uri tests).
@@ -46,7 +47,7 @@ export class URIType extends Type<string> {
           code: 'custom',
           message: 'value must be a valid URI (see RFC 3986).',
           input: val,
-        } as zod.ZodCustomIssue);
+        } as $ZodRawIssue);
       }
     });
 
@@ -65,7 +66,7 @@ export class URIType extends Type<string> {
             code: 'custom',
             message: `expected URI with scheme [${schemes.join('|')}].`,
             input: val,
-          } as zod.ZodCustomIssue);
+          } as $ZodRawIssue);
         }
       });
     }

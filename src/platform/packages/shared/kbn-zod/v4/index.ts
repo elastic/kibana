@@ -8,5 +8,7 @@
  */
 
 export * from 'zod/v4';
+/** Core issue shapes for libraries wrapping Zod `superRefine` / refinements (not re-exported from `zod/v4` classic). */
+export type { $ZodRawIssue } from 'zod/v4/core';
 export { isZod } from './util';
 export { lazySchema, setLazySchemaDisabled } from './lazy_schema';

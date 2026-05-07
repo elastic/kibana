@@ -9,6 +9,7 @@
 
 import type { z } from '@kbn/zod';
 import { z as zod } from '@kbn/zod';
+import type { $ZodRawIssue } from '@kbn/zod';
 
 import {
   META_FIELD_X_OAS_AVAILABILITY,
@@ -47,10 +48,10 @@ export function wrapWithTypeOptions<V>(
 
   if (options.validate) {
     const validate = options.validate;
-    s = s.superRefine((val: V, ctx) => {
+    s = s.superRefine((val: unknown, ctx) => {
       let msg: string | void;
       try {
-        msg = validate(val);
+        msg = validate(val as V);
       } catch (e: any) {
         msg = e?.message ?? String(e);
       }
@@ -59,7 +60,7 @@ export function wrapWithTypeOptions<V>(
           code: 'custom',
           message: msg,
           input: val,
-        } as z.ZodCustomIssue);
+        } as $ZodRawIssue);
       }
     });
   }

@@ -9,6 +9,7 @@
 
 import typeDetect from 'type-detect';
 import { z as zod } from '@kbn/zod';
+import type { $ZodRawIssue } from '@kbn/zod';
 
 import { SchemaTypeError, ValidationError } from '../errors';
 import type { SchemaValidationOptions, TypeOptions } from './interfaces';
@@ -51,7 +52,7 @@ export class NumberType extends Type<number> {
             code: 'custom',
             message: `"value" must be a safe number`,
             input: val,
-          } as zod.ZodCustomIssue);
+          } as $ZodRawIssue);
         }
       });
     }

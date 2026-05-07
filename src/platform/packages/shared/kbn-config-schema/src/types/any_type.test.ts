@@ -11,6 +11,11 @@ import { get } from 'lodash';
 import { schema } from '../..';
 import { META_FIELD_X_OAS_ANY } from '../oas_meta_fields';
 
+/** Joi-compat introspection shim on proxied `getSchema()` (Zod v4 `describe` sets human text, not a snapshot). */
+function legacyDescribe(zh: unknown): Record<string, unknown> {
+  return (zh as { describe(): Record<string, unknown> }).describe();
+}
+
 test('works for any value', () => {
   expect(schema.any().validate(true)).toBe(true);
   expect(schema.any().validate(100)).toBe(100);
@@ -34,7 +39,7 @@ test('includes namespace in failure', () => {
 });
 
 test('meta', () => {
-  expect(get(schema.any().getSchema().describe(), 'metas[0]')).toEqual({
+  expect(get(legacyDescribe(schema.any().getSchema()), 'metas[0]')).toEqual({
     [META_FIELD_X_OAS_ANY]: true,
   });
 });
