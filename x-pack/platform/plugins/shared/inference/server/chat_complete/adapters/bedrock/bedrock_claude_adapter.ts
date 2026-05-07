@@ -150,7 +150,7 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
               image: {
                 format,
                 source: {
-                  bytes: new TextEncoder().encode(contentPart.source.data),
+                  bytes: imageDataToBytes(contentPart.source.data),
                 },
               },
             });
@@ -254,4 +254,9 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
   }, []);
 
   return combinedConverseMessages;
+};
+
+const imageDataToBytes = (data: string): Uint8Array => {
+  const base64 = data.startsWith('data:') ? data.replace(/^data:[^;]+;base64,/, '') : data;
+  return new Uint8Array(Buffer.from(base64, 'base64'));
 };

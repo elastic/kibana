@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 
 export interface DashboardAgentSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -16,6 +17,7 @@ export interface DashboardAgentSetupDependencies {
 
 export interface DashboardAgentStartDependencies {
   dashboard: DashboardPluginStart;
+  screenshotting: ScreenshottingStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

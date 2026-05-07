@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { manageDashboardTool } from './manage_dashboard';
 export { inspectDashboardTool, type InspectDashboardToolDeps } from './inspect_dashboard';

@@ -14,6 +14,7 @@ import type {
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
 import { registerDashboardAttachmentUiDefinition } from './attachment_types';
+import { DASHBOARD_SCREENSHOT_APP_ID } from '../common';
 
 export class DashboardAgentPlugin
   implements
@@ -29,9 +30,28 @@ export class DashboardAgentPlugin
   constructor(_initContext: PluginInitializerContext) {}
 
   public setup(
-    _core: CoreSetup<DashboardAgentPluginPublicStartDependencies, DashboardAgentPluginPublicStart>,
+    core: CoreSetup<DashboardAgentPluginPublicStartDependencies, DashboardAgentPluginPublicStart>,
     _plugins: DashboardAgentPluginPublicSetupDependencies
   ): DashboardAgentPluginPublicSetup {
+    core.application.register({
+      id: DASHBOARD_SCREENSHOT_APP_ID,
+      title: 'Dashboard screenshot',
+      visibleIn: [],
+      chromeless: true,
+      async mount(params) {
+        const { renderDashboardScreenshotApp } = await import(
+          './screenshot_app/dashboard_screenshot_app'
+        );
+        const [coreStart, pluginsStart] = await core.getStartServices();
+
+        return renderDashboardScreenshotApp({
+          coreStart,
+          pluginsStart,
+          params,
+        });
+      },
+    });
+
     return {};
   }
 

@@ -70,6 +70,15 @@ interface SignedRequest {
   path: string;
 }
 
+const stringifyConverseRequest = (request: ConverseRequest | ConverseStreamRequest): string =>
+  JSON.stringify(request, (_key: string, value: unknown) => {
+    if (value instanceof Uint8Array) {
+      return Buffer.from(value).toString('base64');
+    }
+
+    return value;
+  });
+
 export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   private url;
   private model;
@@ -561,7 +570,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       system,
       modelId,
     };
-    const requestBody = JSON.stringify(request);
+    const requestBody = stringifyConverseRequest(request);
 
     const signed = this.signRequest(requestBody, path, true);
     const requestArgs = {
@@ -616,7 +625,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       system,
       modelId,
     };
-    const requestBody = JSON.stringify(request);
+    const requestBody = stringifyConverseRequest(request);
 
     const signed = this.signRequest(requestBody, path, true);
 

@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
@@ -24,6 +25,7 @@ export interface DashboardAgentPluginPublicStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   data: DataPublicPluginStart;
   dashboard: DashboardStart;
+  screenshotMode: ScreenshotModePluginStart;
   share: SharePluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }

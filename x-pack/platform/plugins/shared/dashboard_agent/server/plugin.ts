@@ -45,6 +45,15 @@ export class DashboardAgentPlugin
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.dashboard.client;
     };
+    const getScreenshotting = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.screenshotting;
+    };
+    const getServerBaseUrl = async () => {
+      const [coreStart] = await coreSetup.getStartServices();
+      const serverInfo = coreStart.http.getServerInfo();
+      return `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}${coreSetup.http.basePath.serverBasePath}`;
+    };
 
     setupDeps.agentBuilder.attachments.registerType(
       createDashboardAttachmentType({
@@ -53,7 +62,7 @@ export class DashboardAgentPlugin
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
     );
     setupDeps.agentContextLayer.registerType(createDashboardSmlType({ getDashboardClient }));
-    registerSkills(setupDeps.agentBuilder);
+    registerSkills(setupDeps.agentBuilder, { getScreenshotting, getServerBaseUrl });
     return {};
   }
 
