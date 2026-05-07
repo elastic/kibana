@@ -43,10 +43,8 @@ export class DatePicker {
   private async isNewDateRangePicker(containerLocator?: Locator): Promise<boolean> {
     const root = containerLocator ?? this.page;
     const control = root
-      .locator(
-        '[data-test-subj="dateRangePickerControlButton"], [data-test-subj="superDatePickerToggleQuickMenuButton"]'
-      )
-      .first();
+      .getByTestId('dateRangePickerControlButton')
+      .or(root.getByTestId('superDatePickerToggleQuickMenuButton'));
     await control.waitFor({ timeout: 10_000 });
     return (await control.getAttribute('data-test-subj')) === 'dateRangePickerControlButton';
   }

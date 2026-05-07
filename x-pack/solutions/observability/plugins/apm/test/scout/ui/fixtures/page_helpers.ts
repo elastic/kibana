@@ -34,10 +34,8 @@ export async function waitForApmMainContainer(page: ScoutPage): Promise<void> {
  */
 export async function waitForSearchBarReady(page: ScoutPage): Promise<void> {
   await page
-    .locator(
-      '[data-test-subj="dateRangePickerControlButton"], [data-test-subj="superDatePickerToggleQuickMenuButton"]'
-    )
-    .first()
+    .getByTestId('dateRangePickerControlButton')
+    .or(page.getByTestId('superDatePickerToggleQuickMenuButton'))
     .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 }
 
