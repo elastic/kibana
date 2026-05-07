@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,72 +14,25 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
-  type CriteriaWithPagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useCountNewExecutionHistoryEvents } from '../../hooks/use_count_new_execution_history_events';
-import { useFetchExecutionHistory } from '../../hooks/use_fetch_execution_history';
-import type { PolicyExecutionHistoryItem } from '../../services/execution_history_api';
-import { NewEventsBanner, PoliciesTabContent, RulesPlaceholder } from './components';
+import { PoliciesTabContent, RulesPlaceholder } from './components';
 
 const POLICIES_TAB_ID = 'policies';
 const RULES_TAB_ID = 'rules';
 
 type TabId = typeof POLICIES_TAB_ID | typeof RULES_TAB_ID;
 
-const DEFAULT_PER_PAGE = 100;
-
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
 
   const [selectedTabId, setSelectedTabId] = useState<TabId>(POLICIES_TAB_ID);
-  const [page, setPage] = useState(0);
-  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
-  const [lastSeenAt, setLastSeenAt] = useState(() => new Date().toISOString());
-  const [isLoadingNewEvents, setIsLoadingNewEvents] = useState(false);
-
-  const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
-    page: page + 1,
-    perPage,
-  });
-
-  const items = data?.items ?? [];
-  const totalEvents = data?.totalEvents ?? 0;
-
-  const { data: newCountData } = useCountNewExecutionHistoryEvents({
-    since: lastSeenAt,
-    enabled: !isError && selectedTabId === POLICIES_TAB_ID,
-  });
-  const newEventsCount = newCountData?.count ?? 0;
-
-  const onLoadNewEvents = () => {
-    setIsLoadingNewEvents(true);
-    setPage(0);
-    refetch();
-  };
-
-  // Once the list refetch settles, hide the banner by advancing the lastSeenAt anchor.
-  useEffect(() => {
-    if (isLoadingNewEvents && !isFetching) {
-      setLastSeenAt(new Date().toISOString());
-      setIsLoadingNewEvents(false);
-    }
-  }, [isLoadingNewEvents, isFetching]);
-
-  const onTableChange = ({
-    page: tablePage,
-  }: CriteriaWithPagination<PolicyExecutionHistoryItem>) => {
-    if (tablePage) {
-      setPage(tablePage.index);
-      setPerPage(tablePage.size);
-    }
-  };
 
   const tabs: Array<{ id: TabId; label: string }> = [
     {
@@ -95,8 +48,6 @@ export const ExecutionHistoryPage = () => {
     //   }),
     // },
   ];
-
-  const showBanner = selectedTabId === POLICIES_TAB_ID && newEventsCount > 0 && !isError;
 
   return (
     <>
@@ -142,29 +93,8 @@ export const ExecutionHistoryPage = () => {
         ))}
       </EuiTabs>
       <EuiSpacer size="m" />
-      {showBanner && (
-        <>
-          <NewEventsBanner
-            count={newEventsCount}
-            isLoading={isLoadingNewEvents}
-            onLoad={onLoadNewEvents}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
       {selectedTabId === POLICIES_TAB_ID ? (
-        <PoliciesTabContent
-          items={items}
-          isFetching={isFetching}
-          isError={isError}
-          page={page}
-          perPage={perPage}
-          totalEvents={totalEvents}
-          onTableChange={onTableChange}
-          onRetry={() => refetch()}
-          onPolicyClick={setPolicyToViewId}
-          onRuleClick={setRuleToViewId}
-        />
+        <PoliciesTabContent onPolicyClick={setPolicyToViewId} onRuleClick={setRuleToViewId} />
       ) : (
         <RulesPlaceholder />
       )}
