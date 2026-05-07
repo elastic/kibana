@@ -316,8 +316,11 @@ const SML_SEARCH_AS_YOU_TYPE_FIELDS = [
 ] as const;
 
 /**
- * Build the search query from a single string. Only `type` and `title` (search_as_you_type + bool_prefix) are searched.
- * After trim: empty string or `*` → `match_all` (return everything)
+ * Build the search query from a single string. `type` and `title` use search_as_you_type + bool_prefix
+ * for autocomplete-style matching, while `content` and `description` (semantic_text fields) are
+ * matched with standard `match` queries so longer-form text is also retrievable.
+ *
+ * After trim: empty string or `*` → `match_all` (return everything).
  */
 const buildSmlSearchQuery = (query: string): Record<string, unknown> => {
   const trimmed = query.trim();
@@ -325,10 +328,19 @@ const buildSmlSearchQuery = (query: string): Record<string, unknown> => {
     return { match_all: {} };
   }
   return {
-    multi_match: {
-      query: trimmed,
-      type: 'bool_prefix',
-      fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
+    bool: {
+      should: [
+        {
+          multi_match: {
+            query: trimmed,
+            type: 'bool_prefix',
+            fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
+          },
+        },
+        { match: { content: trimmed } },
+        { match: { description: trimmed } },
+      ],
+      minimum_should_match: 1,
     },
   };
 };
@@ -379,7 +391,7 @@ const searchSml = async ({
           ],
         },
       },
-      _source: skipContent ? { excludes: ['content'] } : true,
+      _source: skipContent ? { excludes: ['content', 'description'] } : true,
     });
 
     const total =
@@ -397,10 +409,13 @@ const searchSml = async ({
           title: source.title ?? '',
           origin_id: source.origin_id ?? '',
           content: source.content,
+          description: source.description,
+          references: source.references,
           created_at: source.created_at ?? '',
           updated_at: source.updated_at ?? '',
           spaces: source.spaces ?? [],
           permissions: source.permissions ?? [],
+          user_id: source.user_id,
           score: hit._score ?? 0,
         };
       });
@@ -470,6 +485,15 @@ const getDocumentsByIds = async ({
         spaces: source.spaces ?? [],
         permissions: source.permissions ?? [],
       };
+      if (source.description !== undefined) {
+        doc.description = source.description;
+      }
+      if (source.user_id !== undefined) {
+        doc.user_id = source.user_id;
+      }
+      if (source.references !== undefined) {
+        doc.references = source.references;
+      }
       docMap.set(doc.id, doc);
     }
   } catch (error) {
