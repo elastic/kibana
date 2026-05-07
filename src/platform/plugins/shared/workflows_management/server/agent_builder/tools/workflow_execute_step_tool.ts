@@ -10,7 +10,6 @@
 import YAML, { LineCounter, parseDocument } from 'yaml';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import {
   buildWorkflowLookup,
@@ -23,7 +22,7 @@ import {
 import { z } from '@kbn/zod/v4';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../common/agent_builder/constants';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
-import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { AgentBuilderPluginSetup } from '../../types';
 
 export const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
 
@@ -474,7 +473,7 @@ const pollExecution = async (
 };
 
 export function registerWorkflowExecuteStepTool(
-  agentBuilder: AgentBuilderPluginSetupContract,
+  agentBuilder: AgentBuilderPluginSetup,
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
@@ -502,17 +501,7 @@ Provide yaml to execute a step without needing a workflow.yaml attachment (usefu
         ),
     }),
     tags: ['workflows', 'yaml', 'execution', 'testing'],
-    availability: {
-      handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        return isEnabled
-          ? { status: 'available' }
-          : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };
-      },
-      cacheMode: 'space',
-    },
+    experimental: true,
     handler: async ({ stepName, yaml: inlineYaml, contextOverride }, context) => {
       const attachment = inlineYaml ? null : findWorkflowYamlAttachment(context);
       if (!inlineYaml && !attachment) {
