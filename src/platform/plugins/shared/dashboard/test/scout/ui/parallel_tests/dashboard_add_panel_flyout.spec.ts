@@ -50,9 +50,7 @@ const getExpected = (config: ScoutTestConfig) => {
 spaceTest.describe(
   'Dashboard add panel flyout',
   {
-    tag: [
-      ...tags.serverless.search,
-    ],
+    tag: [...tags.serverless.search],
   },
   () => {
     let expectedGroups: string[];
