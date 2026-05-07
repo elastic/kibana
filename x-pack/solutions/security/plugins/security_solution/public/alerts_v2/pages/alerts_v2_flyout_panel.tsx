@@ -144,12 +144,10 @@ type FlyoutTab = 'overview' | 'metadata' | 'json' | 'events_log';
 const ACTION_TYPE_LABELS: Record<string, string> = {
   ack: 'Acknowledged',
   unack: 'Unacknowledged',
-  closed: 'Closed',
-  open: 'Opened',
   snooze: 'Snoozed',
   unsnooze: 'Unsnoozed',
-  deactivate: 'Deactivated',
-  activate: 'Activated',
+  deactivate: 'Closed',
+  activate: 'Re-opened',
   tag: 'Tags updated',
   assign: 'Assignee changed',
 };
@@ -157,12 +155,10 @@ const ACTION_TYPE_LABELS: Record<string, string> = {
 const ACTION_TYPE_ICONS: Record<string, string> = {
   ack: 'check',
   unack: 'cross',
-  closed: 'lock',
-  open: 'lockOpen',
   snooze: 'bellSlash',
   unsnooze: 'bell',
-  deactivate: 'minusInCircle',
-  activate: 'plusInCircle',
+  deactivate: 'securitySignalResolved',
+  activate: 'securitySignal',
   tag: 'tag',
   assign: 'user',
 };
@@ -338,11 +334,10 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
   );
 
   const derivedWorkflowStatus = useMemo(() => {
-    const lastAction = episodeAction?.lastAckAction;
-    if (lastAction === 'ack') return 'acknowledged' as const;
-    if (lastAction === 'closed') return 'closed' as const;
+    if (groupAction?.lastDeactivateAction === 'deactivate') return 'closed' as const;
+    if (episodeAction?.lastAckAction === 'ack') return 'acknowledged' as const;
     return 'open' as const;
-  }, [episodeAction]);
+  }, [episodeAction, groupAction]);
 
   const syntheticEpisode = useMemo(() => {
     if (!episodeId || !lastStatus) return undefined;
@@ -364,7 +359,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
         (groupAction?.lastDeactivateAction as 'activate' | 'deactivate' | undefined) ?? undefined,
       last_tags: groupAction?.tags,
     };
-  }, [episodeId, lastStatus, ruleId, groupHash, eventRows, durationMs, episodeAction, groupAction]);
+  }, [episodeId, lastStatus, ruleId, groupHash, eventRows, durationMs, derivedWorkflowStatus, episodeAction, groupAction]);
 
   const latestEventRow = eventRows.length > 0 ? eventRows[eventRows.length - 1] : null;
 
@@ -488,7 +483,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
 
     if (groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE) {
       items.push({
-        title: i18n.FLYOUT_RESOLVED_BY_LABEL,
+        title: i18n.FLYOUT_CLOSED_BY_LABEL,
         description: groupAction.lastDeactivateActor ?? '\u2014',
       });
     }

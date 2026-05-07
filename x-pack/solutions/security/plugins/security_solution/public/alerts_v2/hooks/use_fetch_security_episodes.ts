@@ -59,7 +59,7 @@ const SECURITY_EPISODE_FIELDS = [
 ] as const;
 
 const ACTION_TYPES_FILTER =
-  '("deactivate", "activate", "snooze", "unsnooze", "tag", "ack", "unack", "assign", "closed", "open")';
+  '("deactivate", "activate", "snooze", "unsnooze", "tag", "ack", "unack", "assign")';
 
 export interface SecurityEpisodesFilterState {
   queryString?: string | null;
@@ -116,15 +116,16 @@ const buildSecurityEpisodesQuery = (
           BY group_hash`;
 
   // Episode-level action stats (episode-scoped) — includes workflow status derivation
+  // workflow_status uses platform primitives: ack for acknowledged, deactivate for closed
   // prettier-ignore
   query
     .pipe`EVAL episode_id = COALESCE(\`episode.id\`, episode_id)`
-    .pipe`INLINE STATS last_workflow_action = LAST(action_type,  @timestamp) WHERE action_type IN ("ack", "unack", "closed", "open"),
+    .pipe`INLINE STATS last_ack_action      = LAST(action_type,  @timestamp) WHERE action_type IN ("ack", "unack"),
                        last_assignee_uid    = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"
           BY episode_id`
     .pipe`EVAL workflow_status = CASE(
-            last_workflow_action == "ack",    "acknowledged",
-            last_workflow_action == "closed", "closed",
+            last_deactivate_action == "deactivate", "closed",
+            last_ack_action == "ack",               "acknowledged",
             "open"
           )`;
 

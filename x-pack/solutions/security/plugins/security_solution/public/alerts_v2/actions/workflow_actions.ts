@@ -27,10 +27,13 @@ interface WorkflowActionDeps {
 }
 
 /**
- * Workflow state machine:
- *   open  ──► ack (Acknowledge)
- *   ack   ──► unack (Unacknowledge)  or  closed (Close)
- *   closed ──► open (Re-open)
+ * Workflow state machine (aligned with platform primitives):
+ *   open  ──► ack (Acknowledge)  or  deactivate (Close)
+ *   ack   ──► unack (Unacknowledge)  or  deactivate (Close)
+ *   closed ──► activate (Re-open)
+ *
+ * "Close" maps to platform DEACTIVATE (suppresses notifications, shows as inactive).
+ * "Re-open" maps to platform ACTIVATE (reverses deactivation).
  */
 export const createWorkflowActions = (deps: WorkflowActionDeps): SecurityEpisodeAction[] => [
   {
@@ -115,14 +118,15 @@ export const createWorkflowActions = (deps: WorkflowActionDeps): SecurityEpisode
     }),
     iconType: 'securitySignalResolved',
     isCompatible: ({ episodes }) =>
-      episodes.length > 0 && episodes.some((ep) => ep.workflow_status === 'acknowledged'),
+      episodes.length > 0 &&
+      episodes.some((ep) => ep.workflow_status === 'open' || ep.workflow_status === 'acknowledged'),
     execute: async ({ episodes, onSuccess }) => {
       const items = episodes
-        .filter((ep) => ep.workflow_status === 'acknowledged')
+        .filter((ep) => ep.workflow_status === 'open' || ep.workflow_status === 'acknowledged')
         .map((ep) => ({
           group_hash: ep.group_hash,
-          action_type: ALERT_EPISODE_ACTION_TYPE.CLOSED as const,
-          episode_id: ep['episode.id'],
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE as const,
+          reason: 'Closed by user',
         }));
       if (!items.length) return;
       try {
@@ -158,8 +162,8 @@ export const createWorkflowActions = (deps: WorkflowActionDeps): SecurityEpisode
         .filter((ep) => ep.workflow_status === 'closed')
         .map((ep) => ({
           group_hash: ep.group_hash,
-          action_type: ALERT_EPISODE_ACTION_TYPE.OPEN as const,
-          episode_id: ep['episode.id'],
+          action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE as const,
+          reason: 'Re-opened by user',
         }));
       if (!items.length) return;
       try {

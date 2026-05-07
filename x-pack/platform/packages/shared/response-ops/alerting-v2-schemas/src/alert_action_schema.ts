@@ -25,8 +25,6 @@ export enum ALERT_EPISODE_ACTION_TYPE {
   UNSNOOZE = 'unsnooze',
   ACTIVATE = 'activate',
   DEACTIVATE = 'deactivate',
-  CLOSED = 'closed',
-  OPEN = 'open',
 }
 
 export type AlertEpisodeActionType =
@@ -81,19 +79,6 @@ const deactivateActionSchema = z.object({
   reason: z.string().describe('Reason for deactivating the alert.'),
 });
 
-const closedActionSchema = z.object({
-  action_type: z
-    .literal(ALERT_EPISODE_ACTION_TYPE.CLOSED)
-    .describe('Closes an alert episode (workflow status).'),
-  episode_id: z.string().describe('The episode identifier for the alert to close.'),
-});
-
-const openActionSchema = z.object({
-  action_type: z
-    .literal(ALERT_EPISODE_ACTION_TYPE.OPEN)
-    .describe('Re-opens a closed alert episode (workflow status).'),
-  episode_id: z.string().describe('The episode identifier for the alert to re-open.'),
-});
 
 export const createAckAlertActionBodySchema = ackActionSchema.omit({ action_type: true }).strict();
 export type CreateAckAlertActionBody = z.infer<typeof createAckAlertActionBodySchema>;
@@ -133,16 +118,6 @@ export const createDeactivateAlertActionBodySchema = deactivateActionSchema
   .strict();
 export type CreateDeactivateAlertActionBody = z.infer<typeof createDeactivateAlertActionBodySchema>;
 
-export const createClosedAlertActionBodySchema = closedActionSchema
-  .omit({ action_type: true })
-  .strict();
-export type CreateClosedAlertActionBody = z.infer<typeof createClosedAlertActionBodySchema>;
-
-export const createOpenAlertActionBodySchema = openActionSchema
-  .omit({ action_type: true })
-  .strict();
-export type CreateOpenAlertActionBody = z.infer<typeof createOpenAlertActionBodySchema>;
-
 export const createAlertActionBodySchema = z
   .discriminatedUnion('action_type', [
     ackActionSchema,
@@ -153,11 +128,9 @@ export const createAlertActionBodySchema = z
     unsnoozeActionSchema,
     activateActionSchema,
     deactivateActionSchema,
-    closedActionSchema,
-    openActionSchema,
   ])
   .describe(
-    'Request body for creating a single alert action. One of: ack, unack, assign, tag, snooze, unsnooze, activate, deactivate, closed, open.'
+    'Request body for creating a single alert action. One of: ack, unack, assign, tag, snooze, unsnooze, activate, deactivate.'
   );
 
 export type CreateAlertActionBody = z.infer<typeof createAlertActionBodySchema>;

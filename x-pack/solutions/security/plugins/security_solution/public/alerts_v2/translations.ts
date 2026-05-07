@@ -141,6 +141,11 @@ export const FLYOUT_RESOLVED_BY_LABEL = i18n.translate(
   { defaultMessage: 'Resolved by' }
 );
 
+export const FLYOUT_CLOSED_BY_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.closedByLabel',
+  { defaultMessage: 'Closed by' }
+);
+
 export const FLYOUT_SNOOZED_BY_LABEL = i18n.translate(
   'xpack.securitySolution.alertsV2.flyout.snoozedByLabel',
   { defaultMessage: 'Snoozed by' }
