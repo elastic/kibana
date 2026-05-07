@@ -62,9 +62,7 @@ export const CRITICAL_FILES_SCOUT = [
   'src/platform/packages/shared/kbn-scout/**/*',
   'src/platform/packages/private/kbn-scout-reporting/**/*',
   'scripts/scout.js',
-  // TEMP: disabled to validate scout_implicit_consumers.ts overlay end-to-end on CI.
-  // Restore both lines below before merging.
-  // '.buildkite/scripts/steps/test/scout/**/*',
-  // '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
+  '.buildkite/scripts/steps/test/scout/**/*',
+  '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
   '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
 ];
