@@ -173,7 +173,7 @@ function convertDataLayerToAPI(
     const axis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
     return {
       ...getValueApiColumn(accessor, layer),
-      color: breakdown_by ? undefined : fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR,
+      ...(breakdown_by ? {} : { color: fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR }),
       ...(axis !== 'y' ? { axis } : {}),
     };
   });

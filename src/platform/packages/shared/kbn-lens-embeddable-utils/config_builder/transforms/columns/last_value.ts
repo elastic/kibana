@@ -11,6 +11,7 @@ import type { DataType, LastValueIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiLastValueOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
+import { stripUndefined } from '../charts/utils';
 
 export const fromLastValueAPItoLensState = (
   options: LensApiLastValueOperation,
@@ -37,7 +38,9 @@ export const fromLastValueLensStateToAPI = (
     operation: 'last_value',
     field: options.sourceField,
     time_field: options.params.sortField,
-    multi_value: options.params.showArrayValues,
+    // when undefined, we default to true to match the behavior of the Lens 8.2 migration
+    multi_value:
+      options.params.showArrayValues === undefined ? true : options.params.showArrayValues,
     ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };
