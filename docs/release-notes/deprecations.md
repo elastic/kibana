@@ -34,6 +34,30 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+## 9.4.0 [kibana-9.4.0-deprecations]
+
+$$$kibana-263694$$$
+::::{dropdown} Direct AI connector step types deprecated in favor of `ai.prompt`
+**Details**<br> All direct AI connector workflow step types (`inference.*`, `bedrock.*`, `gen-ai.*`, `gemini.*`) are now deprecated. These steps are hidden from autocomplete suggestions and the **Add Action** menu in the workflow editor. Existing workflows using these step types continue to work but display a deprecation warning.
+
+**Impact**<br> New workflows cannot easily discover or add direct AI connector steps. Existing workflows remain functional but show deprecation warnings in the editor.
+
+**Action**<br> Migrate workflows to use the purpose-built `ai.prompt` step instead of direct AI connector steps. The `ai.prompt` step provides a consistent interface for AI operations regardless of the underlying connector type.
+
+View [#263694]({{kib-pull}}263694).
+::::
+
+$$$kibana-242972$$$
+::::{dropdown} Deprecated `state:storeInSessionStorage` advanced setting
+**Details**<br> The artificial URL length limit has been removed from Kibana, and the `state:storeInSessionStorage` advanced setting is now deprecated. This setting was originally provided as a workaround for URL length limits in older browsers. Modern browsers no longer have these limits, and using this setting can prevent copying and pasting URLs directly between tabs.
+
+**Impact**<br> The `state:storeInSessionStorage` setting will be removed in a future version. Enabling this setting may cause issues with URL sharing in Discover and Dashboards.
+
+**Action**<br> Disable the `state:storeInSessionStorage` setting if it is currently enabled. Go to **Stack Management** > **Advanced Settings** and set `state:storeInSessionStorage` to `false`.
+
+View [#242972]({{kib-pull}}242972).
+::::
+
 ## 9.3.0 [kibana-9.3.0-deprecations]
 
 There are no deprecations in this version.
