@@ -548,6 +548,7 @@ src/platform/packages/shared/kbn-discover-contextual-components @elastic/obs-exp
 src/platform/packages/shared/kbn-discover-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-ebt-click @elastic/obs-exploration
 src/platform/packages/shared/kbn-ebt-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-edot-collector @elastic/obs-ai-team
 src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-exploration-team
@@ -733,6 +734,7 @@ src/platform/packages/shared/serverless/settings/common @elastic/appex-sharedux 
 src/platform/packages/shared/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/obs-presentation-team
 src/platform/packages/shared/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
+src/platform/packages/shared/serverless/settings/vectordb_project @elastic/search-kibana
 src/platform/packages/shared/serverless/settings/workplace_ai_project @elastic/search-kibana
 src/platform/packages/shared/serverless/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/ai-components @elastic/appex-sharedux
@@ -803,7 +805,6 @@ src/platform/plugins/private/links @elastic/kibana-presentation
 src/platform/plugins/private/maps_ems @elastic/kibana-presentation
 src/platform/plugins/private/url_forwarding @elastic/kibana-visualizations
 src/platform/plugins/private/vis_default_editor @elastic/kibana-visualizations
-src/platform/plugins/private/vis_type_markdown @elastic/kibana-presentation
 src/platform/plugins/private/vis_types/gauge @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/heatmap @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/metric @elastic/kibana-visualizations
@@ -1311,6 +1312,7 @@ x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/co
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
+x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
@@ -1353,6 +1355,7 @@ x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/
 x-pack/solutions/security/test/security_solution_api_integration @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_endpoint @elastic/security-defend-workflows
+x-pack/solutions/vectordb/plugins/serverless_vectordb @elastic/search-kibana
 x-pack/solutions/workplaceai/plugins/serverless_workplace_ai @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/plugins/workplace_ai_app @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/test @elastic/workchat-eng
@@ -3354,7 +3357,6 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.agents/skills/scout-best-practices-reviewer/** @elastic/appex-qa
 /.agents/skills/scout-create-scaffold/** @elastic/appex-qa
 /.agents/skills/scout-migrate-from-ftr/** @elastic/appex-qa
-/.agents/skills/scout-migration-planner/** @elastic/appex-qa
 /.agents/skills/scout-ui-testing/** @elastic/appex-qa
 /.agents/skills/enzyme-to-rtl/** @elastic/appex-qa
 /.agents/skills/buildkite-logs @elastic/appex-qa
@@ -3366,6 +3368,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.agents/skills/codeql/** @elastic/kibana-security
 /.agents/skills/kibana-privilege-deprecation/** @elastic/kibana-security
 /.agents/skills/encrypted-saved-objects/** @elastic/kibana-security
+
+# Kibana accessibility
+/.agents/skills/accessibility/** @elastic/kibana-accessibility
 
 # No owner - generated files covered by CI checks
 **/moon.yml
