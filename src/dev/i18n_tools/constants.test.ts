@@ -16,6 +16,7 @@ describe('I18N_CALL_PATTERN', () => {
     ["i18n.translate('id', { defaultMessage: 'msg' })"],
     ["I18n.translate('id', { defaultMessage: 'msg' })"],
     ["intl.formatMessage({ id: 'id', defaultMessage: 'msg' })"],
+    ["const { formatMessage } = intl;\nformatMessage({ id: 'id', defaultMessage: 'msg' })"],
     ['defineMessages({ id: { defaultMessage: "msg" } })'],
     ["<FormattedMessage id='id' defaultMessage='msg' />"],
     ["const { translate } = i18n;\ntranslate('id', { defaultMessage: 'msg' })"],
