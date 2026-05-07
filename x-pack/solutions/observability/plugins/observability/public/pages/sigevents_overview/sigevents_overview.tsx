@@ -298,6 +298,23 @@ export function SigeventsOverviewPage() {
     }
   }, [eventData?.raw.event_id, services.http]);
 
+  useEffect(() => {
+    if (
+      isDetailFlyoutOpen &&
+      eventData?.raw.event_id &&
+      !remediationStatus &&
+      !isCheckingRemediation
+    ) {
+      runEvidenceReview();
+    }
+  }, [
+    isDetailFlyoutOpen,
+    eventData?.raw.event_id,
+    remediationStatus,
+    isCheckingRemediation,
+    runEvidenceReview,
+  ]);
+
   const lastUpdatedLabel = useMemo(() => {
     if (!eventData?.timestamp) {
       return undefined;
@@ -589,7 +606,7 @@ export function SigeventsOverviewPage() {
               </div>
             </EuiFlexItem>
 
-            {EmbeddableConversation && !loading && !overviewLoading && (
+            {EmbeddableConversation && (
               <EuiFlexItem
                 grow={true}
                 css={embeddableConversationWrapperStyles}
