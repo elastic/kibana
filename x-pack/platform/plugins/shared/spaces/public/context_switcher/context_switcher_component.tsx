@@ -13,7 +13,7 @@ import {
   type ContextSwitcherSpacesConfig,
 } from '@kbn/context-switcher-components';
 import type { CoreStart } from '@kbn/core/public';
-import { useQueryClient } from '@kbn/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { useFooterLinks } from './hooks';
 import { useActiveSpace } from './hooks/use_active_space';
@@ -32,15 +32,27 @@ interface ContextSwitcherComponentProps {
   allowSolutionVisibility: boolean;
 }
 
-export const ContextSwitcherComponent = ({
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { staleTime: 0, networkMode: 'always' },
+  },
+});
+
+export const ContextSwitcherComponent = (props: ContextSwitcherComponentProps) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ContextSwitcherInner {...props} />
+    </QueryClientProvider>
+  );
+};
+
+const ContextSwitcherInner = ({
   spacesManager,
   core,
   cloud,
   isServerless,
   allowSolutionVisibility,
 }: ContextSwitcherComponentProps) => {
-  const queryClient = useQueryClient();
-
   const { data: spaces, isLoading } = useSpaces(spacesManager);
   const activeSpace = useActiveSpace(spacesManager);
 
@@ -80,7 +92,7 @@ export const ContextSwitcherComponent = ({
 
   const handleOpen = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: SPACES_QUERY_KEY });
-  }, [queryClient]);
+  }, []);
 
   const spacesConfig = useMemo((): ContextSwitcherSpacesConfig | undefined => {
     if (!activeSpaceItem) return undefined;
