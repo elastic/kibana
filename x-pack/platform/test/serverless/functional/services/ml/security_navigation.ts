@@ -17,7 +17,7 @@ export function MachineLearningNavigationProviderSecurity({
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
 
-  async function navigateToStackManagement(id: string) {
+  async function navigateToStackManagement() {
     await retry.tryForTime(20 * 1000, async () => {
       await svlCommonNavigation.sidenav.clickLink({ navId: 'stack_management' });
       // ensure the side panel is visible
@@ -30,7 +30,7 @@ export function MachineLearningNavigationProviderSecurity({
 
   async function navigateToArea(id: string, expectedTestSubject: string) {
     await retry.tryForTime(20 * 1000, async () => {
-      await navigateToStackManagement(id);
+      await navigateToStackManagement();
       await svlCommonNavigation.sidenav.clickPanelLink(id);
       await testSubjects.existOrFail(expectedTestSubject, { timeout: 2500 });
     });
