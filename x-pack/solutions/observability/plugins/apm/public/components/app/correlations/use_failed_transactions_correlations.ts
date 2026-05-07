@@ -31,6 +31,7 @@ import {
   getReducer,
 } from './utils/analysis_hook_utils';
 import { useFetchParams } from './use_fetch_params';
+import { getApmInternalServices } from '../../../plugin';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_OVERALL_HISTOGRAM = 0.05;
@@ -40,6 +41,7 @@ const LOADED_DONE = 1;
 const PROGRESS_STEP_P_VALUES = 0.9 - LOADED_FIELD_CANDIDATES;
 
 export function useFailedTransactionsCorrelations() {
+  const { callApmApi: callApmApiV2 } = getApmInternalServices();
   const fetchParams = useFetchParams();
 
   // This use of useReducer (the dispatch function won't get reinstantiated
@@ -152,7 +154,7 @@ export function useFailedTransactionsCorrelations() {
       });
       setResponse.flush();
 
-      const { fieldCandidates: candidates } = await callApmApi(
+      const { fieldCandidates: candidates } = await callApmApiV2(
         'GET /internal/apm/correlations/field_candidates/transactions',
         {
           signal: abortCtrl.current.signal,
@@ -182,17 +184,20 @@ export function useFailedTransactionsCorrelations() {
       const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
 
       for (const fieldCandidatesChunk of fieldCandidatesChunks) {
-        const pValues = await callApmApi('POST /internal/apm/correlations/p_values/transactions', {
-          signal: abortCtrl.current.signal,
-          params: {
-            body: {
-              ...fetchParams,
-              fieldCandidates: fieldCandidatesChunk,
-              durationMin,
-              durationMax,
+        const pValues = await callApmApiV2(
+          'POST /internal/apm/correlations/p_values/transactions',
+          {
+            signal: abortCtrl.current.signal,
+            params: {
+              body: {
+                ...fetchParams,
+                fieldCandidates: fieldCandidatesChunk,
+                durationMin,
+                durationMax,
+              },
             },
-          },
-        });
+          }
+        );
 
         if (pValues.failedTransactionsCorrelations.length > 0) {
           pValues.failedTransactionsCorrelations.forEach((d) => {
@@ -245,7 +250,7 @@ export function useFailedTransactionsCorrelations() {
         setResponse.flush();
       }
     }
-  }, [fetchParams, setResponse]);
+  }, [fetchParams, setResponse, callApmApiV2]);
 
   const cancelFetch = useCallback(() => {
     abortCtrl.current.abort();

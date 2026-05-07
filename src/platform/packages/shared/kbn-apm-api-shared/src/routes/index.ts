@@ -15,6 +15,7 @@ import { observabilityOverviewRouteDefinitions } from './observability_overview'
 import { agentExplorerRouteDefinitions } from './agent_explorer';
 import { alertsRouteDefinitions } from './alerts';
 import { assistantFunctionsRouteDefinitions } from './assistant_functions';
+import { correlationsRouteDefinitions } from './correlations';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -27,6 +28,7 @@ export const routeDefinitions = {
   agentExplorer: agentExplorerRouteDefinitions,
   alerts: alertsRouteDefinitions,
   assistantFunctions: assistantFunctionsRouteDefinitions,
+  correlations: correlationsRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;

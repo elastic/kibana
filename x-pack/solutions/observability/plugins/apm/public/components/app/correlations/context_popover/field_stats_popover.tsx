@@ -116,7 +116,8 @@ export function FieldStatsPopoverContent({
         });
       }
     },
-    [params, fieldName, fieldValue, needToFetchIndividualStat]
+    [params, fieldName, fieldValue, needToFetchIndividualStat],
+    { useCallApmApiV2: true }
   );
   const progressBarMax = fieldValueStats?.topValuesSampleSize;
   const formatter = dataView.getFormatterForField(field);

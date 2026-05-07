@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import type { DurationFieldCandidatesResponse } from '@kbn/apm-api-shared';
 import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import {
   FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,
@@ -21,10 +22,6 @@ const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.IP,
   ES_FIELD_TYPES.BOOLEAN,
 ];
-
-export interface DurationFieldCandidatesResponse {
-  fieldCandidates: string[];
-}
 
 export async function fetchDurationFieldCandidates({
   apmEventClient,
