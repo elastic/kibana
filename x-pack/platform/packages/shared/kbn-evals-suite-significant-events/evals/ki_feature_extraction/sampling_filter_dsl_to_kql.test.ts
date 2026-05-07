@@ -40,9 +40,9 @@ describe('samplingFilterDslToKql', () => {
   });
 
   it('translates exists clauses to KQL field-presence checks', () => {
-    expect(
-      samplingFilterDslToKql({ exists: { field: 'resource.attributes.k8s.pod.name' } })
-    ).toBe('resource.attributes.k8s.pod.name: *');
+    expect(samplingFilterDslToKql({ exists: { field: 'resource.attributes.k8s.pod.name' } })).toBe(
+      'resource.attributes.k8s.pod.name: *'
+    );
     expect(
       samplingFilterDslToKql({
         bool: {

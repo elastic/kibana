@@ -192,9 +192,7 @@ describe('getSigEventsLogPatternsEsql', () => {
 
   it('drops patterns whose composite key is missing from pass 2', async () => {
     const { esClient, esql, rawEsqlQuery } = createEsClient();
-    esql
-      .mockResolvedValueOnce(countResponse(10))
-      .mockResolvedValueOnce(pass1Response());
+    esql.mockResolvedValueOnce(countResponse(10)).mockResolvedValueOnce(pass1Response());
     rawEsqlQuery.mockResolvedValueOnce(
       pass2Response([['logs-a', 'doc-1', { message: 'error one' }]])
     );
