@@ -229,7 +229,7 @@ export async function getIncomingDataByAgentsId({
                 },
                 {
                   range: {
-                    '@timestamp': {
+                    'event.ingested': {
                       gte: 'now-5m',
                       lte: 'now',
                     },
