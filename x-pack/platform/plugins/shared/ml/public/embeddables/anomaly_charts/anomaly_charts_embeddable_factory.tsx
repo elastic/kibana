@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// TEMP: trigger scout_implicit_consumers.ts on CI (publisher pattern: **/plugins/**/public/embeddables/**). Revert before merge.
+
 import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
