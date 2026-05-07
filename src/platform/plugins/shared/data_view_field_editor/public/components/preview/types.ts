@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import type {
   RuntimeType,
@@ -104,7 +105,7 @@ export interface Params {
 export interface FieldPreview {
   key: string;
   value: unknown;
-  formattedValue?: string;
+  formattedValue?: ReactNode;
   type?: string;
 }
 

@@ -43,13 +43,15 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   interceptedWarnings?: SearchResponseWarning[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
+  onRefreshData?: () => void;
   savedSearchId?: string;
   enableDocumentViewer: boolean;
   inlineEditing: InlineEditing;
 }
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const { enableDocumentViewer, inlineEditing, interceptedWarnings, ...gridProps } = props;
+  const { enableDocumentViewer, inlineEditing, interceptedWarnings, onRefreshData, ...gridProps } =
+    props;
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [initialTabId, setInitialTabId] = useState<string | undefined>(undefined);
@@ -66,6 +68,10 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       }
     },
     []
+  );
+  const docViewerExtensionActions = useMemo(
+    () => ({ refreshData: onRefreshData }),
+    [onRefreshData]
   );
 
   const renderDocumentView = useCallback(
@@ -89,6 +95,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDocWithInitialTab}
         initialTabId={initialTabId}
+        docViewerExtensionActions={docViewerExtensionActions}
         query={props.query}
         filters={props.filters}
         docViewerRef={docViewerRef}
@@ -105,6 +112,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.filters,
       setExpandedDocWithInitialTab,
       initialTabId,
+      docViewerExtensionActions,
     ]
   );
 

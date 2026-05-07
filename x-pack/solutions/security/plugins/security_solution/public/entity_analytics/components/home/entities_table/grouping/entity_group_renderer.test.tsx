@@ -71,7 +71,15 @@ describe('createGroupPanelRenderer', () => {
   describe('RESOLUTION group', () => {
     it('renders target entity name from metadata', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['target-entity-id', { name: 'bernicehuel', type: EntityType.user, riskScore: null }],
+        [
+          'target-entity-id',
+          {
+            name: 'bernicehuel',
+            type: EntityType.user,
+            riskScore: null,
+            individualRiskScore: null,
+          },
+        ],
       ]);
       const bucket = createMockBucket({ key: 'target-entity-id' });
       const renderer = createGroupPanelRenderer(metadata);
@@ -84,7 +92,10 @@ describe('createGroupPanelRenderer', () => {
 
     it('renders entity id subtitle when metadata has target name', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['user:james@example.com', { name: 'james-hue', type: EntityType.user, riskScore: null }],
+        [
+          'user:james@example.com',
+          { name: 'james-hue', type: EntityType.user, riskScore: null, individualRiskScore: null },
+        ],
       ]);
       const bucket = createMockBucket({
         key: 'user:james@example.com',
@@ -128,7 +139,15 @@ describe('createGroupPanelRenderer', () => {
 
     it('renders expand button when metadata has name and type', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'test-entity', type: EntityType.user, riskScore: null }],
+        [
+          'target-id',
+          {
+            name: 'test-entity',
+            type: EntityType.user,
+            riskScore: null,
+            individualRiskScore: null,
+          },
+        ],
       ]);
       const bucket = createMockBucket({ key: 'target-id' });
       const renderer = createGroupPanelRenderer(metadata);
@@ -165,7 +184,15 @@ describe('createGroupPanelRenderer', () => {
 
       // Phase 2: metadata arrived — new renderer shows target name + flyout button
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'alice-target', type: EntityType.user, riskScore: 85.0 }],
+        [
+          'target-id',
+          {
+            name: 'alice-target',
+            type: EntityType.user,
+            riskScore: 85.0,
+            individualRiskScore: null,
+          },
+        ],
       ]);
       const rendererAfter = createGroupPanelRenderer(metadata);
       rerender(<>{rendererAfter(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket)}</>);
@@ -208,7 +235,10 @@ describe('createGroupStatsRenderer', () => {
   describe('RESOLUTION group', () => {
     it('returns entities count + risk score stats (2 items)', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'test', type: EntityType.user, riskScore: 85.42 }],
+        [
+          'target-id',
+          { name: 'test', type: EntityType.user, riskScore: 85.42, individualRiskScore: null },
+        ],
       ]);
       const bucket = createMockBucket({ key: 'target-id', doc_count: 4 });
       const renderer = createGroupStatsRenderer(metadata);
@@ -221,7 +251,10 @@ describe('createGroupStatsRenderer', () => {
 
     it('risk score badge shows value from metadata', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'test', type: EntityType.user, riskScore: 73.1829 }],
+        [
+          'target-id',
+          { name: 'test', type: EntityType.user, riskScore: 73.1829, individualRiskScore: null },
+        ],
       ]);
       const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
       const renderer = createGroupStatsRenderer(metadata);
@@ -248,7 +281,10 @@ describe('createGroupStatsRenderer', () => {
 
     it('risk score badge shows N/A when both metadata and bucket score are null', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'test', type: EntityType.user, riskScore: null }],
+        [
+          'target-id',
+          { name: 'test', type: EntityType.user, riskScore: null, individualRiskScore: null },
+        ],
       ]);
       const bucket = createMockBucket({ key: 'target-id', doc_count: 1 });
       const renderer = createGroupStatsRenderer(metadata);
@@ -282,12 +318,81 @@ describe('createGroupStatsRenderer', () => {
 
       // Phase 2: metadata arrived — shows actual risk score
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'test', type: EntityType.user, riskScore: 92.5 }],
+        [
+          'target-id',
+          { name: 'test', type: EntityType.user, riskScore: 92.5, individualRiskScore: null },
+        ],
       ]);
       const rendererAfter = createGroupStatsRenderer(metadata);
       const statsAfter = rendererAfter(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
       rerender(<TestProviders>{statsAfter[1].component}</TestProviders>);
       expect(screen.getByText('92.50')).toBeInTheDocument();
+    });
+
+    it('solo entity falls back to individual risk score when group score is null', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'solo-id',
+          { name: 'solo', type: EntityType.user, riskScore: null, individualRiskScore: 42.5 },
+        ],
+      ]);
+      const bucket = createMockBucket({ key: 'solo-id', doc_count: 1 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<TestProviders>{stats[1].component}</TestProviders>);
+
+      expect(screen.getByText('42.50')).toBeInTheDocument();
+    });
+
+    it('solo entity with no group or individual score shows N/A', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'solo-id',
+          { name: 'solo', type: EntityType.user, riskScore: null, individualRiskScore: null },
+        ],
+      ]);
+      const bucket = createMockBucket({ key: 'solo-id', doc_count: 1 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<TestProviders>{stats[1].component}</TestProviders>);
+
+      expect(screen.getByText('N/A')).toBeInTheDocument();
+    });
+
+    it('multi-entity group with no group score does NOT fall back to individual score', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'target-id',
+          { name: 'target', type: EntityType.user, riskScore: null, individualRiskScore: 42.5 },
+        ],
+      ]);
+      const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<TestProviders>{stats[1].component}</TestProviders>);
+
+      expect(screen.getByText('N/A')).toBeInTheDocument();
+      expect(screen.queryByText('42.50')).not.toBeInTheDocument();
+    });
+
+    it('group score wins when both group and individual scores are present', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'target-id',
+          { name: 'test', type: EntityType.user, riskScore: 90.0, individualRiskScore: 10.0 },
+        ],
+      ]);
+      const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<TestProviders>{stats[1].component}</TestProviders>);
+
+      expect(screen.getByText('90.00')).toBeInTheDocument();
+      expect(screen.queryByText('10.00')).not.toBeInTheDocument();
     });
   });
 

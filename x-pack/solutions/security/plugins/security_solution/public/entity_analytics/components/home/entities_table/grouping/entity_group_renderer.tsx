@@ -199,7 +199,10 @@ export const createGroupStatsRenderer = (targetMetadata: TargetMetadataMap) => {
     if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
       const entityId = String(bucket.key_as_string ?? bucket.key);
       const metadata = targetMetadata.get(entityId);
-      const riskScore = metadata?.riskScore ?? bucket.resolutionRiskScore?.value ?? null;
+      const groupScore = metadata?.riskScore ?? bucket.resolutionRiskScore?.value;
+      const isSoloGroup = bucket.doc_count === 1;
+      const individualScore = isSoloGroup ? metadata?.individualRiskScore : undefined;
+      const riskScore = groupScore ?? individualScore ?? null;
 
       stats.push({
         title: riskScoreLabel,
