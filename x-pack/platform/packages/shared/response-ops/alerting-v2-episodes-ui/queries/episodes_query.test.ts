@@ -18,10 +18,17 @@ describe('buildEpisodesBaseQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM}`);
+    expect(queryString).toContain('METADATA');
+    expect(queryString).toContain('_source');
     expect(queryString).toContain('type == "alert"');
     expect(queryString).toContain('INLINE STATS');
     expect(queryString).toContain('first_timestamp = MIN(@timestamp)');
     expect(queryString).toContain('last_timestamp = MAX(@timestamp)');
+    expect(queryString).toContain('episode_data');
+    expect(queryString).toContain('extracted_data = JSON_EXTRACT(_source, "data")');
+    expect(queryString).toContain(
+      'episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}"'
+    );
     expect(queryString).toContain('BY episode.id');
     expect(queryString).toContain('EVAL duration = DATE_DIFF');
     expect(queryString).toContain('"ms"');
@@ -38,6 +45,7 @@ describe('buildEpisodesQuery', () => {
 
     expect(queryString).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM}`);
     expect(queryString).toContain(ALERT_ACTIONS_DATA_STREAM);
+    expect(queryString).toContain('episode_data');
   });
 
   it('should compute effective_status from deactivation actions', () => {
