@@ -19,6 +19,7 @@ import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { lazy } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { ExperimentalFeatures, SLOConfig } from '../common/config';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
@@ -36,6 +37,13 @@ import type {
 } from './types';
 import { SloTelemetryService } from './services/telemetry';
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../common/embeddables/overview/constants';
+import type {
+  GroupOverviewCustomState,
+  OverviewEmbeddableState,
+  SingleOverviewCustomState,
+} from '../server/lib/embeddables/schema';
+import { SLO_BURN_RATE_EMBEDDABLE_ID } from '../common/embeddables/burn_rate/constants';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
@@ -171,6 +179,24 @@ export class SLOPlugin
     plugins.discoverShared.features.registry.register({
       id: 'observability-create-slo',
       createSLOFlyout: getCreateSLOFormFlyout,
+    });
+
+    // TODO move to registerEmbeddables when PresentationUtilPluginSetup exposes registerPanelPlacementSettings
+    // https://github.com/elastic/kibana/issues/268287
+    plugins.presentationUtil.registerPanelPlacementSettings(
+      SLO_OVERVIEW_EMBEDDABLE_ID,
+      (serializedState?: OverviewEmbeddableState) => {
+        if (
+          (serializedState as SingleOverviewCustomState)?.slo_instance_id === ALL_VALUE ||
+          (serializedState as GroupOverviewCustomState)?.group_filters
+        ) {
+          return { placementSettings: { width: 24, height: 8 } };
+        }
+        return { placementSettings: { width: 12, height: 8 } };
+      }
+    );
+    plugins.presentationUtil.registerPanelPlacementSettings(SLO_BURN_RATE_EMBEDDABLE_ID, () => {
+      return { placementSettings: { width: 14, height: 7 } };
     });
 
     return {
