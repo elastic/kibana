@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, isPlainObject, isString } from 'lodash';
 
 /** Resolve a dot-path against nested objects or a single top-level key (e.g. flattened `host.name`). */
 export const getValueByFieldPath = (data: Record<string, unknown>, field: string): unknown => {
@@ -38,15 +38,14 @@ export const getNonEmptyGroupingFields = (
   );
 
 export const parseEpisodeDataJson = (raw: unknown): Record<string, unknown> => {
-  if (raw == null || raw === '') {
+  if (!isString(raw) || raw.length === 0) {
     return {};
   }
-  if (typeof raw !== 'string') {
-    return {};
-  }
+
   try {
     const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+
+    if (isPlainObject(parsed)) {
       return parsed as Record<string, unknown>;
     }
   } catch {
