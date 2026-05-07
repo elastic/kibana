@@ -1,6 +1,7 @@
 ---
 name: flaky-test-resolver
 description: "Automates the end-to-end pipeline for resolving Kibana flaky test issues: accepts a GitHub issue number/URL or a Buildkite build URL, extracts test metadata, fixes the root cause, validates locally with --repeatEach 50 (Scout only), creates a draft PR, and triggers the CI flaky test runner. Works for both Scout (Playwright) and FTR tests."
+disable-model-invocation: true
 ---
 
 # Flaky Test Resolver
