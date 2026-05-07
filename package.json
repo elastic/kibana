@@ -1709,6 +1709,7 @@
     "@kbn/core-ui-settings-server-mocks": "link:src/core/packages/ui-settings/server-mocks",
     "@kbn/core-usage-data-server-mocks": "link:src/core/packages/usage-data/server-mocks",
     "@kbn/core-user-activity-server-mocks": "link:src/core/packages/user-activity/server-mocks",
+    "@kbn/core-user-storage-browser-mocks": "link:src/core/packages/user-storage/browser-mocks",
     "@kbn/cypress-config": "link:src/platform/packages/shared/kbn-cypress-config",
     "@kbn/cypress-test-helper": "link:src/platform/packages/shared/kbn-cypress-test-helper",
     "@kbn/dependency-ownership": "link:packages/kbn-dependency-ownership",

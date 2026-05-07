@@ -6287,6 +6287,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-storage-browser-mocks@link:src/core/packages/user-storage/browser-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-storage-browser@link:src/core/packages/user-storage/browser":
   version "0.0.0"
   uid ""
