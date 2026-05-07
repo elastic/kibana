@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import * as t from 'io-ts';
-import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
+import { toBooleanRt } from '@kbn/io-ts-utils';
+import { environmentRt } from '@kbn/apm-types';
+import { kueryRt, rangeRt, offsetRt } from '../../default_api_types';
 
-export const rangeRt = t.type({
-  start: isoToEpochRt,
-  end: isoToEpochRt,
-});
-
-export const kueryRt = t.type({ kuery: t.string });
-
-export const probabilityRt = t.type({
-  probability: toNumberRt,
-});
-
-export const offsetRt = t.partial({
-  offset: t.string,
-});
+export const dependencyChartQueryRt = t.intersection([
+  t.type({
+    dependencyName: t.string,
+    spanName: t.string,
+    searchServiceDestinationMetrics: toBooleanRt,
+  }),
+  rangeRt,
+  kueryRt,
+  environmentRt,
+  offsetRt,
+]);

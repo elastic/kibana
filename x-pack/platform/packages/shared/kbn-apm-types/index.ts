@@ -6,7 +6,7 @@
  */
 
 export * from './es_fields';
-export type * from './es_schemas_raw';
+export * from './es_schemas_raw';
 export type * from './es_schemas_ui';
 export type * from './src/span_links';
 export type * from './src/errors';
@@ -24,3 +24,5 @@ export * from './src/latency_aggregation_types';
 export * from './src/apm_timeseries';
 export type * from './src/correlations';
 export * from './src/custom_dashboards';
+export * from './src/connections';
+export type * from './src/latency_distribution';

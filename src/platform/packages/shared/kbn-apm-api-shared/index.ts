@@ -26,6 +26,7 @@ export type * from './src/routes/alerts';
 export type * from './src/routes/assistant_functions';
 export type * from './src/routes/correlations';
 export type * from './src/routes/custom_dashboards';
+export type * from './src/routes/dependencies';
 export {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,

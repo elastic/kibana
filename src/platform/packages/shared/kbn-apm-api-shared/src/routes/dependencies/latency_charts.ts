@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import * as t from 'io-ts';
-import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
+import { defineRoute } from '../types';
+import { dependencyChartQueryRt } from './types';
 
-export const rangeRt = t.type({
-  start: isoToEpochRt,
-  end: isoToEpochRt,
-});
+export interface LatencyChartsDependencyResponse {
+  currentTimeseries: Array<{ x: number; y: number }>;
+  comparisonTimeseries: Array<{ x: number; y: number }> | null;
+}
 
-export const kueryRt = t.type({ kuery: t.string });
-
-export const probabilityRt = t.type({
-  probability: toNumberRt,
-});
-
-export const offsetRt = t.partial({
-  offset: t.string,
+export const dependencyLatencyChartsRoute = defineRoute<LatencyChartsDependencyResponse>()({
+  endpoint: 'GET /internal/apm/dependencies/charts/latency',
+  params: t.type({ query: dependencyChartQueryRt }),
 });

@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import * as t from 'io-ts';
-import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
+import { defineRoute } from '../types';
+import { dependencyChartQueryRt } from './types';
 
-export const rangeRt = t.type({
-  start: isoToEpochRt,
-  end: isoToEpochRt,
-});
+export interface DependencyErrorRateChartsResponse {
+  currentTimeseries: Array<{ x: number; y: number }>;
+  comparisonTimeseries: Array<{ x: number; y: number }> | null;
+}
 
-export const kueryRt = t.type({ kuery: t.string });
-
-export const probabilityRt = t.type({
-  probability: toNumberRt,
-});
-
-export const offsetRt = t.partial({
-  offset: t.string,
+export const dependencyErrorRateChartsRoute = defineRoute<DependencyErrorRateChartsResponse>()({
+  endpoint: 'GET /internal/apm/dependencies/charts/error_rate',
+  params: t.type({ query: dependencyChartQueryRt }),
 });
