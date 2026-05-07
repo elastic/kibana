@@ -49,7 +49,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Wired streams update', function () {
       // Flaky on ECH: unskip when https://github.com/elastic/kibana/issues/265720 is fixed.
-      this.tags(['skipStateful']);
+      this.tags(['skipCloud']);
 
       const STREAM_NAME = 'logs.otel.queries-test';
       const stream: Streams.WiredStream.UpsertRequest['stream'] = {

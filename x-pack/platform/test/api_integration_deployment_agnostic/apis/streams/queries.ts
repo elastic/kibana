@@ -54,7 +54,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Queries API', function () {
     // Flaky on ECH: unskip when https://github.com/elastic/kibana/issues/265720 is fixed.
-    this.tags(['skipStateful']);
+    this.tags(['skipCloud']);
 
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
