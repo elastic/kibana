@@ -41,31 +41,11 @@ export const FilterBarToggleButton: React.FC<{}> = () => {
   const themeContext = useEuiTheme();
   const styles = toggleStyles(themeContext);
 
-  // TODO Workaround for https://github.com/elastic/eui/issues/9520
-  const expandTooltipRef = useRef<EuiToolTip>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const [buttonInFocusNotVisible, setButtonInFocusNotVisible] = useState(false);
-  const onTooltipMouseOut = useCallback(() => {
-    if (buttonInFocusNotVisible) {
-      expandTooltipRef.current?.hideToolTip();
-    }
-  }, [buttonInFocusNotVisible]);
-  const onButtonFocus = useCallback(() => {
-    if (document.querySelector('button:focus-visible') !== buttonRef.current) {
-      setButtonInFocusNotVisible(true);
-    }
-  }, []);
-  const onButtonBlur = useCallback(() => setButtonInFocusNotVisible(false), []);
-  // TODO End workaround, delete above block when EUI fixes this issue
-
   return (
     <EuiToolTip
       ref={expandTooltipRef}
       content={isCollapsed ? expandLabel : collapseLabel}
       disableScreenReaderOutput
-      onMouseOut={
-        /*  TODO Workaround for https://github.com/elastic/eui/issues/9520 */ onTooltipMouseOut
-      }
     >
       <EuiButtonEmpty
         buttonRef={buttonRef}
@@ -77,8 +57,6 @@ export const FilterBarToggleButton: React.FC<{}> = () => {
         css={styles.filterButtonStyle}
         size="s"
         data-test-subj="filterBarToggleButton"
-        onFocus={/* TODO Workaround for https://github.com/elastic/eui/issues/9520 */ onButtonFocus}
-        onBlur={/* TODO Workaround for https://github.com/elastic/eui/issues/9520 */ onButtonBlur}
       >
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem>
