@@ -248,9 +248,11 @@ export class WorkflowSearchService {
         const termsAggregation = (responseAggs as WorkflowAggsResponse)[field];
         if (termsAggregation && Array.isArray(termsAggregation.buckets)) {
           result[field] = termsAggregation.buckets.map((bucket) => {
-            const key = String(bucket.key);
+            // Prefer `key_as_string` so non-string ES keys (booleans, numbers, dates)
+            // round-trip back to the matching schema values used by the workflow filters.
+            const key = bucket.key_as_string ?? String(bucket.key);
             return {
-              label: bucket.key_as_string ?? key,
+              label: key,
               key,
               doc_count: bucket.doc_count,
             };

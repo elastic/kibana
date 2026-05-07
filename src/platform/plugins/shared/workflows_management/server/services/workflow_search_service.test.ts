@@ -326,7 +326,7 @@ describe('WorkflowSearchService', () => {
         { label: 'First', key: 'First', doc_count: 2 },
         { label: 'Second', key: 'Second', doc_count: 1 },
       ]);
-      expect(result.enabled).toEqual([{ label: 'true', key: '1', doc_count: 3 }]);
+      expect(result.enabled).toEqual([{ label: 'true', key: 'true', doc_count: 3 }]);
 
       const requestedAggs = storageClient.search.mock.calls[0][0].aggs;
       // name → name.keyword, other fields pass through verbatim
