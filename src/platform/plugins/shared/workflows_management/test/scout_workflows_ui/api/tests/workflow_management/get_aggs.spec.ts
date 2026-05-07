@@ -131,6 +131,6 @@ spaceTest.describe('GET /api/workflows/aggs', { tag: tags.deploymentAgnostic }, 
     const { status, data } = await workflowsApi.rawGetAggs('');
 
     expect(status).toBe(400);
-    expect(data?.message).toContain('At least one aggregation field is required.');
+    expect(data?.message).toContain('Aggregation field cannot be empty.');
   });
 });

@@ -33,7 +33,7 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 import { workflowIndexName } from '../storage/workflow_storage';
 
 interface WorkflowAggBucket {
-  key: string;
+  key: string | number | boolean;
   key_as_string?: string;
   doc_count: number;
 }
@@ -247,11 +247,14 @@ export class WorkflowSearchService {
       fields.forEach((field) => {
         const termsAggregation = (responseAggs as WorkflowAggsResponse)[field];
         if (termsAggregation && Array.isArray(termsAggregation.buckets)) {
-          result[field] = termsAggregation.buckets.map((bucket) => ({
-            label: bucket.key_as_string ?? bucket.key,
-            key: bucket.key,
-            doc_count: bucket.doc_count,
-          }));
+          result[field] = termsAggregation.buckets.map((bucket) => {
+            const key = String(bucket.key);
+            return {
+              label: bucket.key_as_string ?? key,
+              key,
+              doc_count: bucket.doc_count,
+            };
+          });
         }
       });
 
