@@ -1121,10 +1121,7 @@ const ALIASES: Record<string, string> = {
   'exporter:otlphttp': 'exporter:otlp_http',
 };
 
-export const getComponentDocUrl = (
-  type: string,
-  name: string
-): ComponentDocLink | null => {
+export const getComponentDocUrl = (type: string, name: string): ComponentDocLink | null => {
   const baseName = name.split('/')[0];
   const key = `${type}:${baseName}`;
   return COMPONENT_DOC_LINKS[key] ?? COMPONENT_DOC_LINKS[ALIASES[key] ?? ''] ?? null;
