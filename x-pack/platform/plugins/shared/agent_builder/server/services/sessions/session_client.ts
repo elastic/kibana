@@ -28,7 +28,7 @@ import type {
   WebhookTriggerSubscription,
   StandingSessionState,
 } from '@kbn/agent-builder-common';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type {
   SessionClient,
@@ -208,6 +208,11 @@ export class SessionClientImpl implements SessionClient {
     conversationId: string,
     context: TriggerContext
   ): Promise<EnqueueTriggerResult> {
+    // Pre-flight: if the session appears active but the execution that "owns" that
+    // active status is already done, reset to idle so the trigger starts immediately
+    // instead of being queued behind a ghost execution.
+    await this.resetIfDeadActive(conversationId);
+
     let resultStatus: 'injected' | 'queued' = 'queued';
     let triggerToStart: TriggerContext | undefined;
     let agentId: string | undefined;
@@ -747,6 +752,50 @@ export class SessionClientImpl implements SessionClient {
   // ---------------------------------------------------------------------------
   // Private — round execution
   // ---------------------------------------------------------------------------
+
+  /**
+   * If the session is `active` but the execution that set that status is no longer
+   * running (completed, failed, or gone), reset the session to `idle`.
+   * This recovers sessions that got stuck when the post-round drainQueue hook
+   * wasn't reached (e.g. server restart, hook not yet deployed).
+   */
+  private async resetIfDeadActive(conversationId: string): Promise<void> {
+    const doc = await this.esClient
+      .get<ConversationProperties>({
+        index: conversationIndexName,
+        id: conversationId,
+      })
+      .catch(() => null);
+
+    const ss = doc?._source?.state?.standing_session;
+    if (!ss || ss.status !== 'active' || !ss.active_execution_id) return;
+
+    const execution = await this.getExecutionService()
+      .getExecution(ss.active_execution_id)
+      .catch(() => undefined);
+
+    const isAlive =
+      execution?.status === ExecutionStatus.running ||
+      execution?.status === ExecutionStatus.scheduled;
+
+    if (!isAlive) {
+      this.logger.debug(
+        `[session] ${conversationId} stuck active (execution ${ss.active_execution_id} is ${
+          execution?.status ?? 'not found'
+        }); resetting to idle`
+      );
+      await this.withOCC(conversationId, (source) => {
+        const standingSession = source.state?.standing_session;
+        if (!standingSession || standingSession.status !== 'active') return source;
+        if (standingSession.active_execution_id !== ss.active_execution_id) return source;
+        return updateStandingSession(source, {
+          ...standingSession,
+          status: 'idle',
+          active_execution_id: undefined,
+        });
+      });
+    }
+  }
 
   private async startRound(
     conversationId: string,
