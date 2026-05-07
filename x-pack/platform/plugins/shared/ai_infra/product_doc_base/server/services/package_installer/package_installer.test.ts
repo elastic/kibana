@@ -69,6 +69,8 @@ describe('PackageInstaller', () => {
       productName: 'kibana',
       productVersion: '8.17',
     });
+
+    validateArtifactArchiveMock.mockReturnValue({ valid: true });
   });
 
   afterEach(() => {
