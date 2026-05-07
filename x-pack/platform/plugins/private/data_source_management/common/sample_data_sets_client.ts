@@ -151,7 +151,7 @@ export class SampleDataSetsClient {
     if (this.rows.some((row) => row.sourceName === sourceName && row.name === datasetId)) {
       throw new Error(
         i18n.translate('dataSourceManagement.errors.duplicateDataSetId', {
-          defaultMessage: 'A data set with this ID already exists for this source.',
+          defaultMessage: 'An external data set with this ID already exists for this source.',
         })
       );
     }
@@ -173,7 +173,7 @@ export class SampleDataSetsClient {
     if (idx === -1) {
       throw new Error(
         i18n.translate('dataSourceManagement.errors.dataSetNotFound', {
-          defaultMessage: 'Data set not found.',
+          defaultMessage: 'External data set not found.',
         })
       );
     }

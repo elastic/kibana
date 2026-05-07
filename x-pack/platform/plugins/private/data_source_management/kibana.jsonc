@@ -6,7 +6,7 @@
   ],
   "group": "platform",
   "visibility": "private",
-  "description": "Data sets and connectors (data sources) in Stack Management",
+  "description": "External data sets and connectors (data sources) in Stack Management",
   "plugin": {
     "id": "data_source_management",
     "browser": true,

@@ -116,10 +116,14 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
   const createConnectorFlyoutMenuHeader = useMemo(
     () => (
       <>
-        <EuiText size="s" color="subdued" data-test-subj="addDataSetFlyoutCreateConnectorRestrictedNotice">
+        <EuiText
+          size="s"
+          color="subdued"
+          data-test-subj="addDataSetFlyoutCreateConnectorRestrictedNotice"
+        >
           <FormattedMessage
             id="dataSourceManagement.addDataSetFlyout.createConnectorRestrictedListNotice"
-            defaultMessage="Only connectors suitable as data set sources are listed. {connectorsPageLink} to create one from the full catalog."
+            defaultMessage="Only connectors suitable as sources for external data sets are listed. {connectorsPageLink} to create one from the full catalog."
             values={{
               connectorsPageLink: (
                 <EuiLink
@@ -242,15 +246,7 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
     } finally {
       setIsSaving(false);
     }
-  }, [
-    datasetId,
-    description,
-    onSave,
-    partitionDetection,
-    resource,
-    selectedSourceName,
-    sources,
-  ]);
+  }, [datasetId, description, onSave, partitionDetection, resource, selectedSourceName, sources]);
 
   const hasSources = sources.length > 0;
   const hasValidSelectedSource = Boolean(

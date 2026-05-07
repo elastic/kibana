@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const addDataSetFlyoutStrings = {
   title: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.title', {
-      defaultMessage: 'Add data set',
+      defaultMessage: 'Add external data set',
     }),
 
   sourceLabel: () =>
@@ -46,7 +46,7 @@ export const addDataSetFlyoutStrings = {
   noSourcesCallout: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.noSourcesCallout', {
       defaultMessage:
-        'Use “Create new connector” in Source below, or connect a data source from the data sets page.',
+        'Use “Create new connector” in Source below, or connect a data source from the External data sets page.',
     }),
 
   datasetIdLabel: () =>
@@ -56,7 +56,8 @@ export const addDataSetFlyoutStrings = {
 
   datasetIdHelp: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.datasetIdHelp', {
-      defaultMessage: 'Unique name for this data set within the source (e.g. access_logs).',
+      defaultMessage:
+        'Unique name for this external data set within the source (e.g. access_logs).',
     }),
 
   resourceLabel: () =>
@@ -107,7 +108,7 @@ export const addDataSetFlyoutStrings = {
 
   saveButton: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.saveButton', {
-      defaultMessage: 'Add data set',
+      defaultMessage: 'Add external data set',
     }),
 
   datasetIdRequired: () =>

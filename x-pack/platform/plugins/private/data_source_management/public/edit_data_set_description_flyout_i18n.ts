@@ -16,7 +16,7 @@ export const editDataSetDescriptionFlyoutStrings = {
 
   editActionDescription: () =>
     i18n.translate('dataSourceManagement.editDataSetDescriptionFlyout.editActionDescription', {
-      defaultMessage: 'Edit this data set description',
+      defaultMessage: 'Edit this external data set description',
     }),
 
   editTableActionName: () =>

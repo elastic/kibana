@@ -46,14 +46,9 @@ export interface DataSourcePreviewTitleWithTypeProps {
   titleTestSubj?: string;
 }
 
-export const DataSourcePreviewTitleWithType: FunctionComponent<DataSourcePreviewTitleWithTypeProps> = ({
-  title,
-  source,
-  titleSize,
-  heading,
-  titleId,
-  titleTestSubj,
-}) => (
+export const DataSourcePreviewTitleWithType: FunctionComponent<
+  DataSourcePreviewTitleWithTypeProps
+> = ({ title, source, titleSize, heading, titleId, titleTestSubj }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
     <EuiFlexItem grow={false}>
       <EuiTitle size={titleSize}>
@@ -173,7 +168,7 @@ export const DataSourcePreviewDetails: FunctionComponent<DataSourcePreviewDetail
       {
         field: 'name',
         name: i18n.translate('dataSourceManagement.previewFlyout.setsColumnDataSet', {
-          defaultMessage: 'Data set',
+          defaultMessage: 'External data set',
         }),
         sortable: true,
         width: '22%',
@@ -238,55 +233,55 @@ export const DataSourcePreviewDetails: FunctionComponent<DataSourcePreviewDetail
   return (
     <>
       <EuiInMemoryTable<DataSetListItem>
-      items={sets}
-      itemId="id"
-      columns={columns}
-      search={{
-        box: {
-          incremental: true,
-          placeholder: dataSourcePreviewFlyoutStrings.setsSearchPlaceholder(),
-          'data-test-subj': 'dataSourcePreviewSetsSearch',
-          schema: {
-            fields: {
-              name: { type: 'string' },
-              resource: { type: 'string' },
-              description: { type: 'string' },
+        items={sets}
+        itemId="id"
+        columns={columns}
+        search={{
+          box: {
+            incremental: true,
+            placeholder: dataSourcePreviewFlyoutStrings.setsSearchPlaceholder(),
+            'data-test-subj': 'dataSourcePreviewSetsSearch',
+            schema: {
+              fields: {
+                name: { type: 'string' },
+                resource: { type: 'string' },
+                description: { type: 'string' },
+              },
             },
           },
-        },
-        toolsLeft:
-          selectedItems.length > 0 ? (
-            <EuiButton
-              color="danger"
-              data-test-subj="dataSourcePreviewSetsBulkDeleteButton"
-              iconType="trash"
-              onClick={() => {
-                void deleteByIds(selectedItems.map((item) => item.id));
-              }}
-            >
-              {i18n.translate('dataSourceManagement.deleteButtonLabel', {
-                defaultMessage: 'Delete',
-              })}
-            </EuiButton>
-          ) : undefined,
-      }}
-      rowHeader="name"
-      selection={{
-        selected: selectedItems,
-        onSelectionChange: setSelectedItems,
-      }}
-      sorting
-      pagination={{
-        pageSizeOptions: [5, 10, 20],
-        initialPageSize: 10,
-      }}
-      data-test-subj="dataSourcePreviewFlyoutSetsTable"
-      tableCaption={dataSourcePreviewFlyoutStrings.setsTableCaption()}
-      noItemsMessage={dataSourcePreviewFlyoutStrings.emptySets()}
-      tableLayout="auto"
-      responsiveBreakpoint={false}
-      scrollableInline
-    />
+          toolsLeft:
+            selectedItems.length > 0 ? (
+              <EuiButton
+                color="danger"
+                data-test-subj="dataSourcePreviewSetsBulkDeleteButton"
+                iconType="trash"
+                onClick={() => {
+                  void deleteByIds(selectedItems.map((item) => item.id));
+                }}
+              >
+                {i18n.translate('dataSourceManagement.deleteButtonLabel', {
+                  defaultMessage: 'Delete',
+                })}
+              </EuiButton>
+            ) : undefined,
+        }}
+        rowHeader="name"
+        selection={{
+          selected: selectedItems,
+          onSelectionChange: setSelectedItems,
+        }}
+        sorting
+        pagination={{
+          pageSizeOptions: [5, 10, 20],
+          initialPageSize: 10,
+        }}
+        data-test-subj="dataSourcePreviewFlyoutSetsTable"
+        tableCaption={dataSourcePreviewFlyoutStrings.setsTableCaption()}
+        noItemsMessage={dataSourcePreviewFlyoutStrings.emptySets()}
+        tableLayout="auto"
+        responsiveBreakpoint={false}
+        scrollableInline
+      />
       {editingDataSet ? (
         <EditDataSetDescriptionFlyout
           key={editingDataSet.id}
@@ -317,7 +312,9 @@ export interface DataSourcePreviewFooterActionsProps {
   closeButtonDataTestSubj?: string;
 }
 
-export const DataSourcePreviewFooterActions: FunctionComponent<DataSourcePreviewFooterActionsProps> = ({
+export const DataSourcePreviewFooterActions: FunctionComponent<
+  DataSourcePreviewFooterActionsProps
+> = ({
   closeLabel,
   onClose,
   onManageDataSets = () => {},
@@ -326,11 +323,7 @@ export const DataSourcePreviewFooterActions: FunctionComponent<DataSourcePreview
   closeButtonDataTestSubj = 'dataSourcePreviewFlyoutClose',
 }) => {
   const manageButton = (
-    <EuiButton
-      fill
-      data-test-subj="dataSourcePreviewAddDataSet"
-      onClick={onManageDataSets}
-    >
+    <EuiButton fill data-test-subj="dataSourcePreviewAddDataSet" onClick={onManageDataSets}>
       {dataSourcePreviewFlyoutStrings.addDataSetButton()}
     </EuiButton>
   );
@@ -347,11 +340,7 @@ export const DataSourcePreviewFooterActions: FunctionComponent<DataSourcePreview
     return (
       <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            flush="left"
-            data-test-subj={closeButtonDataTestSubj}
-            onClick={onClose}
-          >
+          <EuiButtonEmpty flush="left" data-test-subj={closeButtonDataTestSubj} onClick={onClose}>
             {closeLabel}
           </EuiButtonEmpty>
         </EuiFlexItem>

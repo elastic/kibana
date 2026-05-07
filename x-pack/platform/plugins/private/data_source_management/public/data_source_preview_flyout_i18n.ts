@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const dataSourcePreviewFlyoutStrings = {
   emptySets: () =>
     i18n.translate('dataSourceManagement.previewFlyout.emptySets', {
-      defaultMessage: 'No data sets reference this source.',
+      defaultMessage: 'No external data sets reference this source.',
     }),
 
   noDescription: () =>
@@ -26,22 +26,22 @@ export const dataSourcePreviewFlyoutStrings = {
 
   addDataSetButton: () =>
     i18n.translate('dataSourceManagement.previewFlyout.addDataSetButton', {
-      defaultMessage: 'Add data set',
+      defaultMessage: 'Add external data set',
     }),
 
   setsTableCaption: () =>
     i18n.translate('dataSourceManagement.previewFlyout.setsTableCaption', {
-      defaultMessage: 'Data sets for this source',
+      defaultMessage: 'External data sets for this source',
     }),
 
   setsSearchPlaceholder: () =>
     i18n.translate('dataSourceManagement.previewFlyout.setsSearchPlaceholder', {
-      defaultMessage: 'Search data sets…',
+      defaultMessage: 'Search external data sets…',
     }),
 
   deleteDataSetDescription: () =>
     i18n.translate('dataSourceManagement.previewFlyout.deleteDataSetDescription', {
-      defaultMessage: 'Delete this data set',
+      defaultMessage: 'Delete this external data set',
     }),
 
   setsColumnResource: () =>
@@ -75,7 +75,7 @@ export const dataSourcePreviewPageStrings = {
   deleteSourceConfirmMessage: (sourceName: string) =>
     i18n.translate('dataSourceManagement.previewPage.deleteSourceConfirmMessage', {
       defaultMessage:
-        'You cannot undo this. Associated data sets in this prototype are removed with the source. Delete “{sourceName}”?',
+        'You cannot undo this. Associated external data sets in this prototype are removed with the source. Delete “{sourceName}”?',
       values: { sourceName },
     }),
 

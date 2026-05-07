@@ -136,10 +136,7 @@ export const DataSetsPage: FunctionComponent<DataSetsPageProps> = ({
   }, [items]);
 
   useEffect(() => {
-    if (
-      connectorSettingsSourceId &&
-      !sources.some((row) => row.id === connectorSettingsSourceId)
-    ) {
+    if (connectorSettingsSourceId && !sources.some((row) => row.id === connectorSettingsSourceId)) {
       setConnectorSettingsSourceId(null);
     }
   }, [connectorSettingsSourceId, sources]);
@@ -172,7 +169,7 @@ export const DataSetsPage: FunctionComponent<DataSetsPageProps> = ({
           }),
           {
             title: i18n.translate('dataSourceManagement.dataSetsPage.deleteDataSetConfirmTitle', {
-              defaultMessage: 'Delete this data set?',
+              defaultMessage: 'Delete this external data set?',
             }),
             confirmButtonText: i18n.translate(
               'dataSourceManagement.dataSetsPage.deleteDataSetConfirmButton',
@@ -248,10 +245,7 @@ export const DataSetsPage: FunctionComponent<DataSetsPageProps> = ({
         await dataSourcesClient.addFromKibanaConnector(connector.name);
         await refreshAll();
       } catch (e) {
-        const message =
-          e instanceof Error
-            ? e.message
-            : registerConnectorFailedMessage();
+        const message = e instanceof Error ? e.message : registerConnectorFailedMessage();
         coreStart.notifications.toasts.addDanger(message);
         throw e;
       }
@@ -264,7 +258,7 @@ export const DataSetsPage: FunctionComponent<DataSetsPageProps> = ({
       {
         field: 'name',
         name: i18n.translate('dataSourceManagement.dataSetsPage.columnDataSet', {
-          defaultMessage: 'Data set',
+          defaultMessage: 'External data set',
         }),
         sortable: true,
         width: '22%',
@@ -361,25 +355,25 @@ export const DataSetsPage: FunctionComponent<DataSetsPageProps> = ({
   const bulkDeleteLabel =
     selectedItems.length > 1
       ? i18n.translate('dataSourceManagement.dataSetsPage.bulkDeleteDataSetsTitle', {
-          defaultMessage: 'Delete these data sets?',
+          defaultMessage: 'Delete these external data sets?',
         })
       : i18n.translate('dataSourceManagement.dataSetsPage.deleteDataSetConfirmTitle', {
-          defaultMessage: 'Delete this data set?',
+          defaultMessage: 'Delete this external data set?',
         });
 
   const bulkDeleteMessage =
     selectedItems.length > 1
       ? i18n.translate('dataSourceManagement.dataSetsPage.bulkDeleteDataSetsMessage', {
           defaultMessage:
-            'Delete {count} data sets? Associated catalog entries in this prototype will be removed. You cannot undo this.',
+            'Delete {count} external data sets? Associated catalog entries in this prototype will be removed. You cannot undo this.',
           values: { count: selectedItems.length },
         })
       : selectedItems[0]
-        ? i18n.translate('dataSourceManagement.dataSetsPage.deleteDataSetConfirmMessage', {
-            defaultMessage: 'Delete “{name}”? You cannot undo this.',
-            values: { name: selectedItems[0].name },
-          })
-        : '';
+      ? i18n.translate('dataSourceManagement.dataSetsPage.deleteDataSetConfirmMessage', {
+          defaultMessage: 'Delete “{name}”? You cannot undo this.',
+          values: { name: selectedItems[0].name },
+        })
+      : '';
 
   return (
     <>
@@ -414,7 +408,7 @@ export const DataSetsPage: FunctionComponent<DataSetsPageProps> = ({
             box: {
               incremental: true,
               placeholder: i18n.translate('dataSourceManagement.dataSetsPage.searchPlaceholder', {
-                defaultMessage: 'Search data sets…',
+                defaultMessage: 'Search external data sets…',
               }),
               'data-test-subj': 'dataSetsPageSearch',
               schema: {
@@ -474,10 +468,10 @@ export const DataSetsPage: FunctionComponent<DataSetsPageProps> = ({
           }}
           data-test-subj="dataSetsPageTable"
           tableCaption={i18n.translate('dataSourceManagement.dataSetsPage.tableCaption', {
-            defaultMessage: 'Data sets',
+            defaultMessage: 'External data sets',
           })}
           noItemsMessage={i18n.translate('dataSourceManagement.dataSetsPage.noItems', {
-            defaultMessage: 'No data sets found',
+            defaultMessage: 'No external data sets found',
           })}
           tableLayout="auto"
           responsiveBreakpoint={false}
