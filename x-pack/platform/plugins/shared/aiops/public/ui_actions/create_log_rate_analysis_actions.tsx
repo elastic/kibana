@@ -22,6 +22,7 @@ import type { AiopsPluginStartDeps } from '../types';
 
 import type { LogRateAnalysisActionContext } from './log_rate_analysis_action_context';
 import { EmbeddableLogRateAnalysisUserInput } from '../embeddables/log_rate_analysis/log_rate_analysis_config_input';
+import { hasCapabilities } from './has_capabilities';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -44,7 +45,7 @@ export function createAddLogRateAnalysisEmbeddableAction(
         defaultMessage: 'Log rate analysis',
       }),
     async isCompatible(context: EmbeddableApiContext) {
-      return Boolean(await parentApiIsCompatible(context.embeddable));
+      return hasCapabilities(coreStart) && Boolean(await parentApiIsCompatible(context.embeddable));
     },
     async execute(context) {
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
