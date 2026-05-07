@@ -182,6 +182,27 @@ describe('COMMUNICATES_WITH_ENGINE_CONFIGS', () => {
       expect(query).toContain('targetEntityId != "user:@entra_id"');
       expect(query).toContain('targetEntityId != "host:"');
     });
+
+    // Regression: every config — including `kind: 'override'` — runs through
+    // Step 1 actor discovery. Before the fix, Step 1 hardcoded an ECS
+    // user-EUID-exists base filter, so Azure auditlogs documents (which have
+    // only `azure.auditlogs.properties.initiated_by.user.userPrincipalName`
+    // and no ECS `user.*` fields) were silently dropped at Step 1, and the
+    // override Step 2 never executed. This test locks in the fix: Step 1
+    // must use the customActor field as the actor-presence gate, not ECS
+    // user.*.
+    it('actor-discovery (Step 1) uses customActor.fields — not ECS user.* — as the actor-presence gate', () => {
+      const query = JSON.stringify(buildActorDiscoveryQuery(azure!, undefined));
+      // The Azure UPN field is required to be non-empty (composite source +
+      // base presence filter both reference it).
+      expect(query).toContain('azure.auditlogs.properties.initiated_by.user.userPrincipalName');
+      // The base filter does NOT depend on ECS user.* fields. (We assert via
+      // exact field-name strings rather than a snapshot to keep the test
+      // resilient to unrelated DSL formatting changes.)
+      expect(query).not.toContain('"user.email"');
+      expect(query).not.toContain('"user.id"');
+      expect(query).not.toContain('"user.name"');
+    });
   });
 
   describe('non-override configs share the COALESCE empty-guard form', () => {
