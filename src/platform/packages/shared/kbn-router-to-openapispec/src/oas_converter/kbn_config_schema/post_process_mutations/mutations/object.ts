@@ -29,6 +29,8 @@ const populateRequiredFields = (schema: OpenAPIV3.SchemaObject): void => {
   for (const [key, value] of entries) {
     if (META_FIELD_X_OAS_OPTIONAL in value) {
       deleteField(value, META_FIELD_X_OAS_OPTIONAL);
+      // `schema.maybe()` → omit from `required` only. Do not set `nullable` — that documents JSON
+      // `null` as a valid value, which `maybe` does not imply.
     } else if (
       hasDefault(value) ||
       Boolean(value.anyOf && value.anyOf.some((v) => isNullable(v as OpenAPIV3.SchemaObject)))

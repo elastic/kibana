@@ -36,6 +36,16 @@ test.each([
       required: ['key1'],
     },
   ],
+  [
+    schema.object({ opt: schema.maybe(schema.string()) }),
+    {
+      type: 'object',
+      properties: {
+        opt: { type: 'string' },
+      },
+      additionalProperties: false,
+    },
+  ],
 ])('processObject %#', (input, result) => {
   const parsed = joi2JsonInternal(input.getInternalSchema());
   processObject(parsed);

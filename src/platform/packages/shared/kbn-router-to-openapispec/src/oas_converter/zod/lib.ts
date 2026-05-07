@@ -1031,6 +1031,27 @@ function materializeMapRecordForOas(root: z.ZodTypeAny): z.ZodTypeAny {
       return t;
     }
 
+    // Preserve `z.optional()` wrappers (e.g. `schema.maybe(...)`) when materializing inner `z.any()`
+    // record placeholders. `unwrapZodType` would strip optional before we see `any`, which drops
+    // registry/meta such as `x-oas-optional` and breaks OpenAPI `required` computation downstream.
+    if (getDefType(t) === 'optional') {
+      const inner = (t as any)._zod.def.innerType as z.ZodTypeAny;
+      const materializedInner = visit(inner);
+      if (materializedInner === inner) {
+        return t;
+      }
+      let rebuilt = materializedInner.optional();
+      const optionalMeta = z.globalRegistry.get(t as z.ZodTypeAny);
+      if (
+        optionalMeta &&
+        typeof optionalMeta === 'object' &&
+        Object.keys(optionalMeta).length > 0
+      ) {
+        rebuilt = rebuilt.meta(optionalMeta as Record<string, unknown>);
+      }
+      return rebuilt;
+    }
+
     const u = unwrapZodType(t, true);
     if (getDefType(u) === 'lazy') {
       return t;

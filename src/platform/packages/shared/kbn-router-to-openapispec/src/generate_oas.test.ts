@@ -33,6 +33,7 @@ import type { CreateTestRouterArgs } from './generate_oas.test.util';
 import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
 import {
   sharedOas,
+  sharedOasZodRoutes,
   createSharedZodSchema,
   createSharedConfigSchema,
 } from './generate_oas.test.fixture';
@@ -359,7 +360,7 @@ describe('generateOpenApiDocument', () => {
             version: '99.99.99',
           }
         )
-      ).toMatchObject(sharedOas);
+      ).toMatchObject(sharedOasZodRoutes);
     });
   });
 
