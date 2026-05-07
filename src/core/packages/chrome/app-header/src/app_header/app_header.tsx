@@ -55,8 +55,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
         badges={<AppBadges badges={badges} />}
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
         trailing={<AppMenu menu={menu} hasExplicitShare={!!onShare} />}
-        tabs={<AppTabs tabs={tabs} />}
-        hasTabs={!!tabs?.length}
+        tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
         sticky={sticky}
         padding={padding}
       />

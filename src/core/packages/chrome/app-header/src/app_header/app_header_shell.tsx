@@ -21,7 +21,6 @@ export interface AppHeaderShellProps {
   titleActions?: ReactNode;
   trailing?: ReactNode;
   tabs?: ReactNode;
-  hasTabs?: boolean;
   sticky?: boolean;
   padding?: AppHeaderPadding;
 }
@@ -171,8 +170,8 @@ const useHeaderStyles = (
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
-  ({ title, badges, titleActions, trailing, tabs, hasTabs = false, sticky = true, padding }) => {
-    const styles = useHeaderStyles(sticky, padding, hasTabs);
+  ({ title, badges, titleActions, trailing, tabs, sticky = true, padding }) => {
+    const styles = useHeaderStyles(sticky, padding, !!tabs);
 
     return (
       <div css={styles.root} data-test-subj="appHeader">
