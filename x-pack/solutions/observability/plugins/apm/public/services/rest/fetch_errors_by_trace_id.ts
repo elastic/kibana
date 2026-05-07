@@ -6,10 +6,8 @@
  */
 
 import type { APIReturnType } from '@kbn/apm-api-shared';
-import { callApmApi } from './create_call_apm_api';
-
+import { getApmInternalServices } from '../../plugin';
 type ErrorsByTraceId = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/errors'>;
-// TODO: caue test  it
 export const fetchErrorsByTraceId = (
   {
     traceId,
@@ -23,8 +21,9 @@ export const fetchErrorsByTraceId = (
     end: string;
   },
   signal: AbortSignal
-): Promise<ErrorsByTraceId> =>
-  callApmApi('GET /internal/apm/unified_traces/{traceId}/errors', {
+): Promise<ErrorsByTraceId> => {
+  const { callApmApi } = getApmInternalServices();
+  return callApmApi('GET /internal/apm/unified_traces/{traceId}/errors', {
     params: {
       path: { traceId },
       query: {
@@ -35,3 +34,4 @@ export const fetchErrorsByTraceId = (
     },
     signal,
   });
+};

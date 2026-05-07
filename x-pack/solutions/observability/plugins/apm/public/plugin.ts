@@ -310,11 +310,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         './services/rest/apm_observability_overview_fetchers'
       );
       const { fetchSpanLinks } = await import('./services/rest/span_links');
-      const { fetchErrorsByTraceId } = await import('./services/rest/fetch_errors_by_trace_id');
-      const { fetchRootSpanByTraceId } = await import(
-        './services/rest/fetch_trace_root_span_by_trace_id'
-      );
-      const { fetchSpan } = await import('./services/rest/fetch_span');
       const { fetchLatencyOverallTransactionDistribution } = await import(
         './services/rest/fetch_latency_overall_transaction_distribution'
       );
@@ -333,9 +328,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         getHasData,
         hasFleetApmIntegrations,
         fetchSpanLinks,
-        fetchErrorsByTraceId,
-        fetchRootSpanByTraceId,
-        fetchSpan,
         fetchLatencyOverallTransactionDistribution,
         fetchLatencyOverallSpanDistribution,
       };
@@ -400,7 +392,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-errors',
       fetchErrorsByTraceId: async (params, signal) => {
-        const { fetchErrorsByTraceId } = await getApmDataHelper();
+        const { fetchErrorsByTraceId } = await import('./services/rest/fetch_errors_by_trace_id');
         return fetchErrorsByTraceId(params, signal);
       },
     });
@@ -408,7 +400,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-root-span-by-trace-id',
       fetchRootSpanByTraceId: async (params, signal) => {
-        const { fetchRootSpanByTraceId } = await getApmDataHelper();
+        const { fetchRootSpanByTraceId } = await import(
+          './services/rest/fetch_trace_root_span_by_trace_id'
+        );
         return fetchRootSpanByTraceId(params, signal);
       },
     });
@@ -416,7 +410,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-span',
       fetchSpan: async (params, signal) => {
-        const { fetchSpan } = await getApmDataHelper();
+        const { fetchSpan } = await import('./services/rest/fetch_span');
         return fetchSpan(params, signal);
       },
     });
@@ -543,7 +537,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     const callApmApi = createCallApmApiV2(core, { cpsManager: plugins.cps?.cpsManager });
-
     const ApmInternalServices: ApmInternalServices = {
       callApmApi,
     };

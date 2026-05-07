@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { callApmApi } from './create_call_apm_api';
-// TODO: caue test  it
+import { getApmInternalServices } from '../../plugin';
+
 export const fetchSpan = (
   {
     traceId,
@@ -20,8 +20,10 @@ export const fetchSpan = (
     end: string;
   },
   signal: AbortSignal
-) =>
-  callApmApi('GET /internal/apm/unified_traces/{traceId}/spans/{spanId}', {
+) => {
+  const { callApmApi } = getApmInternalServices();
+  return callApmApi('GET /internal/apm/unified_traces/{traceId}/spans/{spanId}', {
     params: { path: { traceId, spanId }, query: { start, end } },
     signal,
   });
+};

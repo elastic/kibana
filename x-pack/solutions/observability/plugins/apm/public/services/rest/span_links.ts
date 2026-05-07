@@ -23,8 +23,9 @@ export const fetchSpanLinks = (
     processorEvent?: ProcessorEvent;
   },
   signal: AbortSignal
-) =>
-  callApmApi('GET /internal/apm/traces/{traceId}/span_links/{spanId}', {
+) => {
+  return callApmApi('GET /internal/apm/traces/{traceId}/span_links/{spanId}', {
     params: { path: { traceId, spanId: docId }, query: { kuery: '', start, end, processorEvent } },
     signal,
   });
+};
