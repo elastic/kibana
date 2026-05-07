@@ -15,7 +15,6 @@ import type {
   registerPanelPlacementSettings,
 } from './registries/panel_placement';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {
   registerPanelPlacementSettings: typeof registerPanelPlacementSettings;
 }
