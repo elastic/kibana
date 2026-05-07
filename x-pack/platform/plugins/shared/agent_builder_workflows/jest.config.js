@@ -8,7 +8,10 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/agent_builder_workflows/server'],
+  roots: [
+    '<rootDir>/x-pack/platform/plugins/shared/agent_builder_workflows/server',
+    '<rootDir>/x-pack/platform/plugins/shared/agent_builder_workflows/public',
+  ],
   setupFiles: [],
   collectCoverage: true,
   collectCoverageFrom: [
