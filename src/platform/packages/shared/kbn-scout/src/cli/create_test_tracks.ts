@@ -25,6 +25,19 @@ import { findPackageForPath } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { TestTrackLoad } from '../execution/test_track';
 import { TestTrack } from '../execution/test_track';
+import { readScoutTestingScope } from '../tests_discovery/testing_scope';
+
+/**
+ * Selects which Scout test configs are eligible for distribution into lanes.
+ *
+ * - `null`            → no filter (full suite)
+ * - `kind: 'modules'` → keep configs whose owning @kbn/ module ID is in `ids`
+ * - `kind: 'configs'` → keep configs whose repo-relative path is in `paths`
+ */
+export type TestLoadFilter =
+  | { kind: 'modules'; ids: ReadonlySet<string> }
+  | { kind: 'configs'; paths: ReadonlySet<string> }
+  | null;
 
 export interface ScoutCIConfig {
   plugins: {
@@ -66,7 +79,7 @@ export function identifyTestLoads(
   scoutCIConfig: ScoutCIConfig,
   testConfigStats: ScoutTestConfigStats,
   testTarget: ScoutTestTarget,
-  moduleIDs: Set<string>,
+  filter: TestLoadFilter,
   log: ToolingLog
 ): ScoutCITestLoad[] {
   const testLoads = testConfigs.all
@@ -77,9 +90,14 @@ export function identifyTestLoads(
       })
     )
     .filter((config) => {
-      if (moduleIDs.size === 0) return true;
+      if (!filter) return true;
+      if (filter.kind === 'configs') {
+        return filter.paths.has(config.path);
+      }
+      // kind === 'modules'
+      if (filter.ids.size === 0) return true;
       const resolvedModuleID = findPackageForPath(REPO_ROOT, config.path)?.id;
-      return resolvedModuleID ? moduleIDs.has(resolvedModuleID) : false;
+      return resolvedModuleID ? filter.ids.has(resolvedModuleID) : false;
     })
     .map((config) => {
       let enabled: boolean;
@@ -421,7 +439,7 @@ export const createTestTracks: Command<void> = {
       'targetRuntimeMinutes',
       'minRuntimeMinutes',
       'estimatedLaneSetupMinutes',
-      'moduleFilterPath',
+      'testing-scope',
     ],
     boolean: ['showIndividualTrackSummaries', 'showMultiTrackSummary'],
     default: {
@@ -435,33 +453,34 @@ export const createTestTracks: Command<void> = {
     --estimatedLaneSetupMinutes     (optional)  How long a lane setup is expected to take
     --showIndividualTrackSummaries  (optional)  Display individual test track summaries
     --showMultiTrackSummary         (optional)  Display multi-track summary
-    --moduleFilterPath              (optional)  Path to a JSON file of @kbn/ module IDs; only configs belonging to those modules will be distributed
+    --testing-scope                 (optional)  Path to a 'testing_scope.json' produced by 'scout resolve-testing-scope'.
+                                                Distribution is restricted to:
+                                                  - tests-only      → only Playwright configs touched by the diff
+                                                  - dependency-tree → only configs whose @kbn/ module is affected
+                                                  - full            → no filter (all configs are distributed)
     `,
   },
   run: async ({ flagsReader, log }) => {
-    const moduleIds: Set<string> = new Set();
-    const moduleFilterPath = flagsReader.string('moduleFilterPath');
+    const testingScopePath = flagsReader.string('testing-scope');
+    const scope = testingScopePath ? readScoutTestingScope(testingScopePath) : null;
 
-    if (moduleFilterPath) {
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(readFileSync(moduleFilterPath, 'utf-8'));
-      } catch (e) {
-        const message = e instanceof Error ? e.message : String(e);
-        throw createFlagError(
-          `Failed to read '${moduleFilterPath}': ${message}. ` +
-            `Ensure the file exists and is a valid JSON array of @kbn/ module IDs.`
+    let filter: TestLoadFilter = null;
+    if (scope) {
+      if (scope.kind === 'tests-only') {
+        const paths = new Set(scope.affectedConfigs ?? []);
+        filter = { kind: 'configs', paths };
+        log.info(
+          `Selective testing (tests-only): limiting distribution to ${paths.size} affected config(s)`
         );
+      } else if (scope.kind === 'dependency-tree') {
+        const ids = new Set(scope.affectedModules);
+        filter = { kind: 'modules', ids };
+        log.info(
+          `Selective testing (dependency-tree): limiting distribution to ${ids.size} affected module(s)`
+        );
+      } else {
+        log.info('Selective testing scope is "full" — distributing all eligible configs');
       }
-
-      if (!Array.isArray(parsed)) {
-        throw createFlagError(`Expected '${moduleFilterPath}' to contain a JSON array.`);
-      }
-
-      parsed.forEach((id) => moduleIds.add(id));
-      log.info(
-        `Limiting test load selection to the following modules: ${Array.from(moduleIds).join(', ')}`
-      );
     }
 
     const selectedTestTargets: ScoutTestTarget[] = flagsReader
@@ -489,7 +508,7 @@ export const createTestTracks: Command<void> = {
     const testLoadsByTarget = selectedTestTargets.reduce((loadsByTarget, target) => {
       loadsByTarget.set(
         target,
-        identifyTestLoads(scoutCIConfig, testConfigStats, target, moduleIds, log)
+        identifyTestLoads(scoutCIConfig, testConfigStats, target, filter, log)
       );
       return loadsByTarget;
     }, new Map<ScoutTestTarget, ScoutCITestLoad[]>());
