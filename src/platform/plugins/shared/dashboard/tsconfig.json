@@ -125,7 +125,6 @@
     "@kbn/dashboard-navigation-options-components",
     "@kbn/dashboard-navigation-options-schema",
     "@kbn/as-code-shared-telemetry",
-    "@kbn/core-chrome-browser"
   ],
   "exclude": [
     "target/**/*"

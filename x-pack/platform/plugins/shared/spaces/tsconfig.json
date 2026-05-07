@@ -65,6 +65,12 @@
     "@kbn/cps-utils",
     "@kbn/tour-queue",
     "@kbn/context-switcher-components",
+    "@kbn/cloud",
+    "@kbn/deeplinks-observability",
+    "@kbn/deeplinks-search",
+    "@kbn/deeplinks-security",
+    "@kbn/deeplinks-shared",
+    "@kbn/deeplinks-workplace-ai",
   ],
   "exclude": ["target/**/*"]
 }
