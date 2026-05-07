@@ -6,7 +6,7 @@
  */
 
 // Observability-specific test framework
-export { test, apiTest, spaceTest } from './src/playwright';
+export { test, apiTest, spaceTest, OBSERVABILITY_SPA_SHELL_TIMEOUT_MS } from './src/playwright';
 
 // Worker fixtures for observability tests (e.g. sloData for API tests)
 export { sloDataFixture } from './src/playwright/fixtures/worker';

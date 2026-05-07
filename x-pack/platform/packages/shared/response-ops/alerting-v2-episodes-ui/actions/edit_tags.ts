@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-// currentTags starts as [] for bulk selection, matching BulkTagsModal which always starts empty
-// (the user is replacing tags across multiple episodes, so no single "current" set exists).
+// For a single episode, seed the flyout from `last_tags`. For multiple selections, start empty
+// (no single "current" set when replacing tags across groups).
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -37,7 +37,8 @@ export const createEditTagsAction = (deps: EditTagsActionDeps): EpisodeAction =>
   iconType: 'tag',
   isCompatible: ({ episodes }: EpisodeActionContext) => episodes.length > 0,
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const tags = await openTagsFlyout(deps.overlays, deps.rendering, [], {
+    const currentTags = episodes.length === 1 ? episodes[0].last_tags ?? [] : [];
+    const tags = await openTagsFlyout(deps.overlays, deps.rendering, currentTags, {
       http: deps.http,
       expressions: deps.expressions,
       queryClient: deps.queryClient,

@@ -85,6 +85,9 @@ const ALERT_UPDATED_BY_USER_ID = `${ALERT_NAMESPACE}.updated_by.user.id` as cons
 // kibana.alert.updated_by.user.name - user name of the user that last updated the alert
 const ALERT_UPDATED_BY_USER_NAME = `${ALERT_NAMESPACE}.updated_by.user.name` as const;
 
+// kibana.alert.severity - severity level of the alert
+const ALERT_SEVERITY = `${ALERT_NAMESPACE}.severity` as const;
+
 // kibana.alert.status - active/recovered status of alert
 const ALERT_STATUS = `${ALERT_NAMESPACE}.status` as const;
 
@@ -187,6 +190,7 @@ export const fields = {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_UPDATED_AT,
@@ -244,6 +248,7 @@ export {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_UPDATED_AT,
