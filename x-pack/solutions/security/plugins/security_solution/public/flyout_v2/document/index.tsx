@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
@@ -28,6 +29,18 @@ import { flyoutProviders } from '../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
+
+const footerStyles = css`
+  @media (max-width: 767px) {
+    overflow: auto;
+  }
+`;
+
+const headerStyles = css`
+  @media (max-width: 767px) {
+    overflow: auto;
+  }
+`;
 
 export interface DocumentFlyoutProps {
   /**
@@ -88,7 +101,7 @@ export const DocumentFlyout = memo(
     return (
       <>
         <RemoteDocumentCallout hit={hit} />
-        <EuiFlyoutHeader>
+        <EuiFlyoutHeader css={headerStyles}>
           <Header
             hit={hit}
             renderCellActions={renderCellActions}
@@ -103,7 +116,7 @@ export const DocumentFlyout = memo(
             onAlertUpdated={onAlertUpdated}
           />
         </EuiFlyoutBody>
-        <EuiFlyoutFooter>
+        <EuiFlyoutFooter css={footerStyles}>
           <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotes} />
         </EuiFlyoutFooter>
       </>
