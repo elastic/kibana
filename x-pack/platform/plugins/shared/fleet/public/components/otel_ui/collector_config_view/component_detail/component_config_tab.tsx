@@ -11,6 +11,7 @@ import { dump } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 
 import type { OTelComponentType } from '../graph_view/constants';
+import { DETAIL_PANEL_CONTENT_MAX_HEIGHT } from '../graph_view/constants';
 
 import { getComponentDocUrl } from './component_doc_links';
 
@@ -64,7 +65,13 @@ export const ComponentConfigTab: React.FunctionComponent<ComponentConfigTabProps
           <EuiSpacer size="m" />
         </>
       )}
-      <EuiCodeBlock overflowHeight="390px" language="yaml" isCopyable fontSize="m" paddingSize="s">
+      <EuiCodeBlock
+        overflowHeight={`${DETAIL_PANEL_CONTENT_MAX_HEIGHT}px`}
+        language="yaml"
+        isCopyable
+        fontSize="m"
+        paddingSize="s"
+      >
         {yamlContent}
       </EuiCodeBlock>
     </>

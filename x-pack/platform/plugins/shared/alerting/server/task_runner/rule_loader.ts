@@ -57,7 +57,14 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     spaceId,
   } = params;
 
-  const { enabled, apiKey, uiamApiKey, apiKeyCreatedByUser, alertTypeId: ruleTypeId } = rawRule;
+  const {
+    enabled,
+    apiKey,
+    uiamApiKey,
+    apiKeyCreatedByUser,
+    apiKeyOwner,
+    alertTypeId: ruleTypeId,
+  } = rawRule;
 
   if (!enabled) {
     throw createTaskRunError(
@@ -74,7 +81,8 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     spaceId,
     apiKey,
     uiamApiKey,
-    apiKeyCreatedByUser
+    apiKeyCreatedByUser,
+    apiKeyOwner
   );
   const rule = getAlertFromRaw({
     id: ruleId,
@@ -162,7 +170,8 @@ export function getFakeKibanaRequest(
   spaceId: string,
   apiKey: RawRule['apiKey'],
   uiamApiKey?: RawRule['uiamApiKey'],
-  apiKeyCreatedByUser?: RawRule['apiKeyCreatedByUser']
+  apiKeyCreatedByUser?: RawRule['apiKeyCreatedByUser'],
+  apiKeyOwner?: RawRule['apiKeyOwner']
 ) {
   const requestHeaders: Headers = {};
 
@@ -174,6 +183,13 @@ export function getFakeKibanaRequest(
       if (apiKeyCreatedByUser && apiKey) {
         context.logger.debug(
           'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
+          {
+            tags: UIAM_LOGS_USAGE_TAGS,
+          }
+        );
+      } else if (isLikelyNonCloudUserApiKeyOwner(apiKeyOwner)) {
+        context.logger.debug(
+          'UIAM API key is not provided because the Elasticsearch API key creator is likely a non-Cloud user, falling back to regular API key.',
           {
             tags: UIAM_LOGS_USAGE_TAGS,
           }
@@ -207,3 +223,12 @@ export function getFakeKibanaRequest(
 
   return fakeRequest;
 }
+
+const isLikelyNonCloudUserApiKeyOwner = (apiKeyOwner?: string | null): boolean => {
+  if (typeof apiKeyOwner !== 'string') {
+    return false;
+  }
+
+  const trimmedApiKeyOwner = apiKeyOwner.trim();
+  return trimmedApiKeyOwner.length > 0 && !/^\d+$/.test(trimmedApiKeyOwner);
+};

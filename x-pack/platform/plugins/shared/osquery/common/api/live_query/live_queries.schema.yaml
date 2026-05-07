@@ -48,6 +48,30 @@ paths:
             application/json:
               schema:
                 $ref: './find_live_query.schema.yaml#/components/schemas/FindLiveQueryResponse'
+              examples:
+                liveQueriesList:
+                  summary: A list of recent live queries
+                  value:
+                    data:
+                      total: 1
+                      items:
+                        - _source:
+                            action_id: '3c42c847-eb30-4452-80e0-728584042334'
+                            expiration: '2023-10-31T00:00:00Z'
+                            '@timestamp': '2023-10-31T00:00:00Z'
+                            agents:
+                              - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                            user_id: 'elastic'
+                            queries:
+                              - action_id: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+                                id: '6724a474-cbba-41ef-a1aa-66aebf0879e2'
+                                query: 'select * from uptime;'
+                                saved_query_id: '42ba9c50-0cc5-11ed-aa1d-2b27890bc90d'
+                                ecs_mapping:
+                                  host.uptime:
+                                    field: 'total_seconds'
+                                agents:
+                                  - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
 
     post:
       summary: Create a live query
@@ -61,6 +85,21 @@ paths:
           application/json:
             schema:
               $ref: './create_live_query.schema.yaml#/components/schemas/CreateLiveQueryRequestBody'
+            examples:
+              singleQueryAllAgents:
+                summary: Run a single query on all agents
+                value:
+                  query: 'select * from uptime;'
+                  agent_all: true
+                  ecs_mapping:
+                    host.uptime:
+                      field: 'total_seconds'
+              targetedQuery:
+                summary: Run a query against specific agents
+                value:
+                  query: 'select * from processes;'
+                  agent_ids:
+                    - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
       responses:
         '200':
           description: Indicates a successful call.
@@ -68,6 +107,27 @@ paths:
             application/json:
               schema:
                 $ref: './create_live_query.schema.yaml#/components/schemas/CreateLiveQueryResponse'
+              examples:
+                liveQueryCreated:
+                  summary: Live query created
+                  value:
+                    data:
+                      action_id: '3c42c847-eb30-4452-80e0-728584042334'
+                      '@timestamp': '2022-07-26T09:59:32.220Z'
+                      expiration: '2022-07-26T10:04:32.220Z'
+                      type: 'INPUT_ACTION'
+                      input_type: 'osquery'
+                      agent_all: true
+                      agents:
+                        - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                      user_id: 'elastic'
+                      queries:
+                        - action_id: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+                          id: '6724a474-cbba-41ef-a1aa-66aebf0879e2'
+                          query: 'select * from uptime;'
+                          timeout: 120
+                          agents:
+                            - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
 
   /api/osquery/live_queries/{id}:
     get:
@@ -92,6 +152,30 @@ paths:
             application/json:
               schema:
                 $ref: './find_live_query.schema.yaml#/components/schemas/FindLiveQueryDetailsResponse'
+              examples:
+                liveQueryDetails:
+                  summary: Live query details with execution status
+                  value:
+                    data:
+                      action_id: '3c42c847-eb30-4452-80e0-728584042334'
+                      expiration: '2022-07-26T10:04:32.220Z'
+                      '@timestamp': '2022-07-26T09:59:32.220Z'
+                      agents:
+                        - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                      user_id: 'elastic'
+                      status: 'completed'
+                      queries:
+                        - action_id: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+                          id: '6724a474-cbba-41ef-a1aa-66aebf0879e2'
+                          query: 'select * from uptime;'
+                          agents:
+                            - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                          docs: 1
+                          failed: 0
+                          pending: 0
+                          responded: 1
+                          successful: 1
+                          status: 'completed'
 
   /api/osquery/live_queries/{id}/results/{actionId}/_export:
     post:
@@ -275,3 +359,24 @@ paths:
             application/json:
               schema:
                 $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsResponse'
+              examples:
+                liveQueryResults:
+                  summary: Result rows from a live query execution
+                  value:
+                    data:
+                      total: 2
+                      edges:
+                        - _id: 'doc1'
+                          _source:
+                            action_id: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+                            agent:
+                              id: '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                            osquery:
+                              total_seconds: '12345'
+                        - _id: 'doc2'
+                          _source:
+                            action_id: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+                            agent:
+                              id: '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                            osquery:
+                              total_seconds: '67890'
