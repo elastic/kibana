@@ -42,6 +42,7 @@ import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server'
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
@@ -67,6 +68,7 @@ export interface CasesServerSetupDependencies {
 
 export interface CasesServerStartDependencies {
   actions: ActionsPluginStart;
+  dataViews: DataViewsServerPluginStart;
   features: FeaturesPluginStart;
   files: FilesStart;
   licensing: LicensingPluginStart;

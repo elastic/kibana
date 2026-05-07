@@ -27,6 +27,7 @@ import type {
   TemplatesFindRequest,
   TemplatesFindResponse,
 } from '../../../common/types/api/template/v1';
+import type { CasesAnalyticsTemplateHookContract } from '../../cases_analytics';
 
 export class TemplatesService {
   constructor(
@@ -35,6 +36,13 @@ export class TemplatesService {
       savedObjectsSerializer: ISavedObjectsSerializer;
       esClient: ElasticsearchClient;
       namespace: string;
+      /**
+       * Cases-as-data hook. Invoked post-success on createTemplate /
+       * updateTemplate so the data view sync service can refresh extended-field
+       * runtime mappings. Optional — when omitted (e.g. unit tests, or when the
+       * analytics feature is disabled), the hook is a no-op.
+       */
+      analyticsTemplateHook?: CasesAnalyticsTemplateHookContract;
     }
   ) {}
 
@@ -279,6 +287,11 @@ export class TemplatesService {
       { refresh: true, id }
     );
 
+    // Cases-as-data: notify the data view sync service so the new template's
+    // extended fields get runtime field mappings on the managed data views.
+    // Fire-and-forget; failures are logged inside the hook.
+    this.dependencies.analyticsTemplateHook?.onTemplateChanged(templateSavedObject);
+
     return templateSavedObject;
   }
 
@@ -330,6 +343,11 @@ export class TemplatesService {
       ],
       { refresh: true }
     );
+
+    // Cases-as-data: same hook as createTemplate. Updates that add new
+    // typed extended fields (or rename existing ones) need a corresponding
+    // runtime field refresh on the managed data views.
+    this.dependencies.analyticsTemplateHook?.onTemplateChanged(templateSavedObject);
 
     return templateSavedObject;
   }

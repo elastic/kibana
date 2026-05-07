@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { CasesAnalyticsService, type CasesAnalyticsConfig } from './service';
+export {
+  CasesAnalyticsService,
+  type CasesAnalyticsConfig,
+  type CasesAnalyticsTemplateHookContract,
+} from './service';
 export { CasesAnalyticsWriter, NOOP_WRITER, type CasesAnalyticsWriterContract } from './writer';
 export { casesAnalyticsStateSavedObjectType } from './reconciliation';

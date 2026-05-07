@@ -102,19 +102,26 @@ describe('buildCaseDoc', () => {
     expect(doc.cases.duration_ms).toBe(12345);
   });
 
-  it('projects extended_fields conservatively as value_keyword', () => {
+  it('passes extended_fields through verbatim using snake-key field names', () => {
     const doc = buildCaseDoc(
       baseSO({
         attributes: {
           ...baseSO().attributes,
-          extended_fields: { riskScore: 42, playbook: 'compromised-credentials' },
+          extended_fields: {
+            riskScore_as_long: '42',
+            incidentDate_as_date: '2026-04-27T00:00:00Z',
+            playbook_as_keyword: 'compromised-credentials',
+          },
         },
       }),
       fixedNow
     );
+    // Stored as keyword in the index; the data view layer handles type-aware
+    // querying via runtime fields shadowing the indexed paths.
     expect(doc.cases.extended_fields).toEqual({
-      riskScore: { value_keyword: '42' },
-      playbook: { value_keyword: 'compromised-credentials' },
+      riskScore_as_long: '42',
+      incidentDate_as_date: '2026-04-27T00:00:00Z',
+      playbook_as_keyword: 'compromised-credentials',
     });
   });
 
@@ -123,11 +130,32 @@ describe('buildCaseDoc', () => {
       baseSO({
         attributes: {
           ...baseSO().attributes,
-          extended_fields: { riskScore: null, playbook: 'x' },
+          extended_fields: { riskScore_as_long: null, playbook_as_keyword: 'x' },
         },
       }),
       fixedNow
     );
-    expect(doc.cases.extended_fields).toEqual({ playbook: { value_keyword: 'x' } });
+    expect(doc.cases.extended_fields).toEqual({ playbook_as_keyword: 'x' });
+  });
+
+  it('coerces non-string extended-field values to strings (defensive)', () => {
+    // SO contract is `Record<string, string>`; this guards against upstream
+    // code accidentally passing a number / boolean. Storage stays keyword.
+    const doc = buildCaseDoc(
+      baseSO({
+        attributes: {
+          ...baseSO().attributes,
+          extended_fields: { count_as_long: 5, flag_as_boolean: true } as unknown as Record<
+            string,
+            string
+          >,
+        },
+      }),
+      fixedNow
+    );
+    expect(doc.cases.extended_fields).toEqual({
+      count_as_long: '5',
+      flag_as_boolean: 'true',
+    });
   });
 });

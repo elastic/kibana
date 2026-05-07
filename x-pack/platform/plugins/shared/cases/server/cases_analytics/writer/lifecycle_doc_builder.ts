@@ -29,7 +29,7 @@ export interface CaseLifecycleAnalyticsDoc {
   cases: {
     owner: string;
     id: string;
-    extended_fields?: Record<string, { value_keyword: string }>;
+    extended_fields?: Record<string, string>;
   };
   case_lifecycle: {
     final_status: string;
@@ -75,7 +75,7 @@ export const buildLifecycleDoc = (
       owner: attributes.owner,
       id: caseSO.id,
       ...(attributes.extended_fields != null
-        ? { extended_fields: projectExtendedFields(attributes.extended_fields) }
+        ? { extended_fields: passthroughExtendedFields(attributes.extended_fields) }
         : {}),
     },
     case_lifecycle: {
@@ -134,13 +134,17 @@ const computeStats = (
   };
 };
 
-const projectExtendedFields = (
-  raw: Record<string, unknown>
-): Record<string, { value_keyword: string }> => {
-  const out: Record<string, { value_keyword: string }> = {};
+/**
+ * Pass-through projection for extended fields. See
+ * `case_doc_builder.ts#passthroughExtendedFields` for rationale — same
+ * design at this surface (keyword-only storage, runtime fields layered on
+ * top at the data view).
+ */
+const passthroughExtendedFields = (raw: Record<string, unknown>): Record<string, string> => {
+  const out: Record<string, string> = {};
   for (const [key, value] of Object.entries(raw)) {
     if (value == null) continue;
-    out[key] = { value_keyword: String(value) };
+    out[key] = String(value);
   }
   return out;
 };

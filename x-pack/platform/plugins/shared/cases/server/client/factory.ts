@@ -60,7 +60,10 @@ import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
-import type { CasesAnalyticsWriterContract } from '../cases_analytics';
+import type {
+  CasesAnalyticsTemplateHookContract,
+  CasesAnalyticsWriterContract,
+} from '../cases_analytics';
 import { getSavedObjectsTypes } from '../../common';
 
 interface CasesClientFactoryArgs {
@@ -87,6 +90,12 @@ interface CasesClientFactoryArgs {
    * SO writes produce analytics docs as a post-success side effect.
    */
   analyticsWriter: CasesAnalyticsWriterContract;
+  /**
+   * Cases-as-data template-write hook. Wired into the templates service so
+   * create/update operations notify the data view sync service. NOOP-backed
+   * when the analytics feature is disabled.
+   */
+  analyticsTemplateHook: CasesAnalyticsTemplateHookContract;
   closeReasonValidator?: (
     closeReason: string,
     owner: string,
@@ -239,6 +248,7 @@ export class CasesClientFactory {
       savedObjectsSerializer,
       esClient,
       namespace,
+      analyticsTemplateHook: this.options.analyticsTemplateHook,
     });
 
     const caseService = new CasesService({

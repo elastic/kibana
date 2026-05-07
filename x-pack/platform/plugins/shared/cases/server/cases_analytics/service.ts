@@ -5,18 +5,30 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Logger, SavedObject } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+} from '../../common/constants';
+import type { Template } from '../../common/types/domain/template/latest';
 import type { CasePersistedAttributes } from '../common/types/case';
 import type { UserActionPersistedAttributes } from '../common/types/user_actions';
+import { CasesAnalyticsDataViewService } from './data_view/service';
 import { ensureCasesDataIndices } from './ensure_indices';
 import { ensureCasesDataIlmPolicy } from './ilm/ensure_policy';
 import { registerReconciliationTask, scheduleReconciliationTask } from './reconciliation';
-import { CasesTemplateFieldsSyncService } from './template_fields_sync';
 import { CasesAnalyticsWriter, NOOP_WRITER, type CasesAnalyticsWriterContract } from './writer';
 
 export interface CasesAnalyticsConfig {
@@ -40,8 +52,24 @@ interface SetupArgs {
 interface StartArgs {
   core: CoreStart;
   taskManager: TaskManagerStartContract;
+  dataViews: DataViewsServerPluginStart;
   isServerless: boolean;
 }
+
+/**
+ * Hook surface exposed to the templates service (via CasesClientFactory) so
+ * template create/update/delete events feed the data view sync. Stable proxy
+ * pattern matches the writer — the real implementation is wired in `start()`,
+ * but the contract object is constructed in the service constructor so call
+ * sites can cache it without race conditions.
+ */
+export interface CasesAnalyticsTemplateHookContract {
+  onTemplateChanged: (template: SavedObject<Template>) => void;
+}
+
+const NOOP_TEMPLATE_HOOK: CasesAnalyticsTemplateHookContract = {
+  onTemplateChanged: () => {},
+};
 
 /**
  * Top-level orchestrator for the cases-as-data subsystem.
@@ -74,7 +102,13 @@ export class CasesAnalyticsService {
    * initialization. Constructed once in the constructor; identity never changes.
    */
   private readonly writerProxy: CasesAnalyticsWriterContract;
-  private templateFieldsSync?: CasesTemplateFieldsSyncService;
+  /**
+   * Live data view service. Replaces the NOOP_TEMPLATE_HOOK once `start()`
+   * runs. Same proxy pattern as the writer: callers cache the proxy and the
+   * proxy delegates to whatever the live service is at call time.
+   */
+  private dataViewService?: CasesAnalyticsDataViewService;
+  private readonly templateHookProxy: CasesAnalyticsTemplateHookContract;
   /** Resolved on `start()`; reconciliation task uses this to look up dependencies. */
   private startResolvers?: {
     coreStart: CoreStart;
@@ -89,6 +123,11 @@ export class CasesAnalyticsService {
       deleteCase: (id) => this.writer.deleteCase(id),
       appendActivity: (so) => this.writer.appendActivity(so),
       recomputeLifecycle: (id) => this.writer.recomputeLifecycle(id),
+    };
+    this.templateHookProxy = {
+      onTemplateChanged: (template) => {
+        (this.dataViewService ?? NOOP_TEMPLATE_HOOK).onTemplateChanged(template);
+      },
     };
   }
 
@@ -115,7 +154,7 @@ export class CasesAnalyticsService {
     });
   }
 
-  async start({ core, taskManager, isServerless }: StartArgs): Promise<void> {
+  async start({ core, taskManager, dataViews, isServerless }: StartArgs): Promise<void> {
     if (!this.config.enabled) {
       this.logger.info(
         'cases-as-data: disabled (xpack.cases.analytics.enabled=false); skipping start'
@@ -134,7 +173,10 @@ export class CasesAnalyticsService {
     const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
       CASE_SAVED_OBJECT,
       CASE_USER_ACTION_SAVED_OBJECT,
+      CASE_TEMPLATE_SAVED_OBJECT,
     ]);
+    const internalSavedObjectsClient =
+      internalSavedObjectsRepository as unknown as SavedObjectsClientContract;
 
     const realWriter = new CasesAnalyticsWriter({
       esClient,
@@ -178,8 +220,15 @@ export class CasesAnalyticsService {
     await ensureCasesDataIlmPolicy({ esClient, logger: this.logger });
     await ensureCasesDataIndices({ esClient, logger: this.logger, isServerless });
 
-    this.templateFieldsSync = new CasesTemplateFieldsSyncService({ esClient, logger: this.logger });
-    this.templateFieldsSync.start();
+    this.dataViewService = new CasesAnalyticsDataViewService({
+      logger: this.logger,
+      dataViewsService: dataViews,
+      internalSavedObjectsClient,
+      esClient,
+    });
+    // Bootstrap views + run an initial reconcile from existing templates.
+    // Fire-and-forget; failures are logged inside the service.
+    void this.dataViewService.start();
 
     await scheduleReconciliationTask({
       taskManager,
@@ -191,7 +240,7 @@ export class CasesAnalyticsService {
   }
 
   stop(): void {
-    this.templateFieldsSync?.stop();
+    // No long-lived resources held by data view service yet.
   }
 
   /**
@@ -202,5 +251,14 @@ export class CasesAnalyticsService {
    */
   getWriter(): CasesAnalyticsWriterContract {
     return this.writerProxy;
+  }
+
+  /**
+   * Returns the template-write hook. Same stable-proxy pattern as `getWriter()` —
+   * the templates service captures this reference at start time, and the proxy
+   * delegates to the live data view service once `start()` has wired it up.
+   */
+  getTemplateHook(): CasesAnalyticsTemplateHookContract {
+    return this.templateHookProxy;
   }
 }

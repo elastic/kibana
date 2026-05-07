@@ -253,7 +253,12 @@ export class CasePlugin
       // Bootstrap cases-as-data writer + reconciliation. Best-effort: failures here
       // log but do not block plugin start.
       void this.casesAnalyticsService
-        .start({ core, taskManager: plugins.taskManager, isServerless: this.isServerless })
+        .start({
+          core,
+          taskManager: plugins.taskManager,
+          dataViews: plugins.dataViews,
+          isServerless: this.isServerless,
+        })
         .catch((err) => {
           this.logger.warn(`cases.analytics: start failed: ${err.message}`);
         });
@@ -296,6 +301,7 @@ export class CasePlugin
       usageCounter: this.usageCounter!,
       config: this.caseConfig,
       analyticsWriter: this.casesAnalyticsService.getWriter(),
+      analyticsTemplateHook: this.casesAnalyticsService.getTemplateHook(),
       closeReasonValidator:
         this.closeReasonValidators.size > 0
           ? (closeReason, owner, request) => {

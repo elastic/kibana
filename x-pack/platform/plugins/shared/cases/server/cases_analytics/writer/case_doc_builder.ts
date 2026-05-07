@@ -49,15 +49,14 @@ export interface CaseAnalyticsDoc {
     total_comments: number;
     observables?: unknown;
     custom_fields?: unknown;
-    extended_fields?: Record<string, ExtendedFieldValue>;
+    /**
+     * Extended template fields, copied verbatim from the SO. Keys are
+     * `<name>_as_<type>` snake-keys (see `common/utils/template_fields.ts`).
+     * Stored as keyword in the index; the data view layer adds runtime fields
+     * per non-keyword suffix to expose properly typed query semantics.
+     */
+    extended_fields?: Record<string, string>;
   };
-}
-
-interface ExtendedFieldValue {
-  value_keyword?: string;
-  value_long?: number;
-  value_double?: number;
-  value_date?: string;
 }
 
 /**
@@ -74,10 +73,9 @@ interface ExtendedFieldValue {
  *   their human-readable labels. Lens / Discover users don't see numbers.
  * - `duration_ms` is the SO's `duration` field, which is already in milliseconds.
  *   Renamed to be explicit about units.
- * - `extended_fields` is projected per-type into `value_<type>` sub-fields. The
- *   builder doesn't know declared types — for now, keyword is the conservative
- *   default. The template-fields sync service is responsible for the type-aware
- *   projection in a follow-up; this stub keeps the doc shape forward-compatible.
+ * - `extended_fields` is passed through verbatim. SO storage is already
+ *   `Record<string, string>` with snake-key field names that encode declared
+ *   type; type-aware querying is layered on at the data view via runtime fields.
  */
 export const buildCaseDoc = (
   so: SavedObject<CasePersistedAttributes>,
@@ -116,24 +114,26 @@ export const buildCaseDoc = (
       ...(attributes.observables != null ? { observables: attributes.observables } : {}),
       ...(attributes.customFields != null ? { custom_fields: attributes.customFields } : {}),
       ...(attributes.extended_fields != null
-        ? { extended_fields: projectExtendedFields(attributes.extended_fields) }
+        ? { extended_fields: passthroughExtendedFields(attributes.extended_fields) }
         : {}),
     },
   };
 };
 
 /**
- * Conservative extended-fields projection — every value goes into `value_keyword` so
- * mappings always succeed. The template-fields sync service will replace this with a
- * type-aware projection once it lands.
+ * Pass-through projection for extended fields: SO storage is already typed as
+ * `Record<string, string>` with snake-key names that encode declared type
+ * (see `common/utils/template_fields.ts#getFieldSnakeKey`). We drop nullish
+ * values so they don't materialize as `null` in the index, but otherwise the
+ * map is verbatim — every value is keyword-typed in the index, regardless of
+ * what the suffix says. The data view layer is responsible for applying
+ * type-aware runtime fields on top.
  */
-const projectExtendedFields = (
-  raw: Record<string, unknown>
-): Record<string, ExtendedFieldValue> => {
-  const out: Record<string, ExtendedFieldValue> = {};
+const passthroughExtendedFields = (raw: Record<string, unknown>): Record<string, string> => {
+  const out: Record<string, string> = {};
   for (const [key, value] of Object.entries(raw)) {
     if (value == null) continue;
-    out[key] = { value_keyword: String(value) };
+    out[key] = String(value);
   }
   return out;
 };
