@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IOCRightPanelKey } from '../../../../../flyout/ioc_details/constants/panel_keys';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { IOCDetails } from '../../../../../flyout_v2/ioc';
+import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
+import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
 import { BUTTON_TEST_ID } from './test_ids';
 import { VIEW_DETAILS_BUTTON_LABEL } from './translations';
 
@@ -25,9 +35,38 @@ export interface OpenIndicatorFlyoutButtonProps {
  */
 export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyoutButtonProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const { services } = useKibana();
+  const { overlays } = services;
+  const store = useStore();
+  const history = useHistory();
+  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
-  const open = useCallback(
-    () =>
+  const hit = useMemo<DataTableRecord>(
+    () => ({
+      id: indicator._id as string,
+      raw: { _id: indicator._id as string, fields: indicator.fields },
+      flattened: indicator.fields as Record<string, unknown>,
+    }),
+    [indicator]
+  );
+
+  const open = useCallback(() => {
+    if (newFlyoutSystemEnabled) {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: <IOCDetails hit={hit} renderCellActions={cellActionRenderer} />,
+        }),
+        {
+          ...defaultFlyoutProperties,
+          historyKey: documentFlyoutHistoryKey,
+          session: 'start',
+        }
+      );
+    } else {
       openFlyout({
         right: {
           id: IOCRightPanelKey,
@@ -35,9 +74,19 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
             id: indicator._id,
           },
         },
-      }),
-    [indicator._id, openFlyout]
-  );
+      });
+    }
+  }, [
+    newFlyoutSystemEnabled,
+    overlays,
+    services,
+    store,
+    history,
+    hit,
+    indicator._id,
+    defaultFlyoutProperties,
+    openFlyout,
+  ]);
 
   return (
     <EuiToolTip content={VIEW_DETAILS_BUTTON_LABEL} disableScreenReaderOutput>

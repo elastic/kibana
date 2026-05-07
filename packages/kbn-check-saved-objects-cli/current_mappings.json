@@ -4875,6 +4875,9 @@
       "entityType": {
         "type": "keyword"
       },
+      "errorCode": {
+        "type": "keyword"
+      },
       "message": {
         "type": "text"
       },
