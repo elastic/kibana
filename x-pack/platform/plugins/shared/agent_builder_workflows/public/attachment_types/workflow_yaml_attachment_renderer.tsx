@@ -16,7 +16,7 @@ import type {
 } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { CodeEditor } from '@kbn/code-editor';
-import type { AnalyticsServiceStart, ApplicationStart, CoreStart } from '@kbn/core/public';
+import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -28,8 +28,7 @@ import {
 } from '@kbn/workflows-ui';
 import {
   PLUGIN_ID,
-  queryClient,
-  WorkflowsBaseTelemetry,
+  type WorkflowsPublicPluginStart,
 } from '@kbn/workflows-management-plugin/public';
 
 interface WorkflowYamlData {
@@ -55,7 +54,8 @@ interface SaveWorkflowParams {
   yaml: string;
   workflowId?: string;
   updateOrigin: CanvasRenderCallbacks['updateOrigin'];
-  telemetry: WorkflowsBaseTelemetry;
+  telemetry: WorkflowsPublicPluginStart['telemetry'];
+  queryClient: WorkflowsPublicPluginStart['queryClient'];
 }
 
 const saveWorkflow = async ({
@@ -65,6 +65,7 @@ const saveWorkflow = async ({
   workflowId,
   updateOrigin,
   telemetry,
+  queryClient,
 }: SaveWorkflowParams): Promise<string | undefined> => {
   try {
     let savedId = workflowId;
@@ -132,7 +133,8 @@ const WorkflowYamlCanvasContent: React.FC<{
   updateOrigin: CanvasRenderCallbacks['updateOrigin'];
   application: ApplicationStart;
   isOnWorkflowPage: (workflowId: string) => boolean;
-  telemetry: WorkflowsBaseTelemetry;
+  telemetry: WorkflowsPublicPluginStart['telemetry'];
+  queryClient: WorkflowsPublicPluginStart['queryClient'];
 }> = ({
   attachment,
   isSidebar,
@@ -141,6 +143,7 @@ const WorkflowYamlCanvasContent: React.FC<{
   application,
   isOnWorkflowPage,
   telemetry,
+  queryClient,
 }) => {
   useWorkflowsMonacoTheme();
 
@@ -170,11 +173,20 @@ const WorkflowYamlCanvasContent: React.FC<{
       workflowId,
       updateOrigin,
       telemetry,
+      queryClient,
     });
     if (id && !workflowId) {
       setSavedWorkflowId(id);
     }
-  }, [workflowApi, notifications, attachment.data.yaml, workflowId, updateOrigin, telemetry]);
+  }, [
+    workflowApi,
+    notifications,
+    attachment.data.yaml,
+    workflowId,
+    updateOrigin,
+    telemetry,
+    queryClient,
+  ]);
 
   const handleSaveAsNew = useCallback(async () => {
     try {
@@ -200,7 +212,7 @@ const WorkflowYamlCanvasContent: React.FC<{
         text: extractErrorMessage(error),
       });
     }
-  }, [workflowApi, notifications, application, attachment.data.yaml, telemetry]);
+  }, [workflowApi, notifications, application, attachment.data.yaml, telemetry, queryClient]);
 
   useEffect(() => {
     if (!ready) {
@@ -288,17 +300,14 @@ const WorkflowYamlCanvasContent: React.FC<{
 
 export const createWorkflowYamlAttachmentUiDefinition = ({
   core,
-  analytics,
+  telemetry,
+  queryClient,
 }: {
   core: CoreStart;
-  analytics: AnalyticsServiceStart;
+  telemetry: WorkflowsPublicPluginStart['telemetry'];
+  queryClient: WorkflowsPublicPluginStart['queryClient'];
 }): AttachmentUIDefinition<WorkflowYamlAttachment> => {
   const { application } = core;
-  // Minimal adapter matching the shape WorkflowsBaseTelemetry accepts —
-  // duplicated here to avoid importing the internal TelemetryServiceClient type.
-  const telemetry = new WorkflowsBaseTelemetry({
-    reportEvent: analytics.reportEvent.bind(analytics),
-  });
   let currentAppId: string | undefined;
   let currentLocation = '';
   let appContextSub: Subscription | undefined;
@@ -367,6 +376,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
           application={application}
           isOnWorkflowPage={isOnWorkflowPage}
           telemetry={telemetry}
+          queryClient={queryClient}
         />
       </KibanaContextProvider>
     ),

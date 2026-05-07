@@ -19,5 +19,3 @@ export type { WorkflowsPublicPluginSetup, WorkflowsPublicPluginStart } from './t
 
 // Used by the agent-builder-workflows plugin
 export { PLUGIN_ID } from '../common';
-export { WorkflowsBaseTelemetry } from './common/service/telemetry';
-export { queryClient } from './shared/lib/query_client';

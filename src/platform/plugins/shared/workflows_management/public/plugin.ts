@@ -25,6 +25,8 @@ import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { AvailabilityService } from './common/lib/availability';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
+import { WorkflowsBaseTelemetry } from './common/service/telemetry';
+import { queryClient } from './shared/lib/query_client';
 import { triggerSchemas } from './trigger_schemas';
 import type {
   WorkflowsPublicPluginSetup,
@@ -49,6 +51,7 @@ export class WorkflowsPlugin
   private logger: Logger;
   private appUpdater$: Subject<AppUpdater>;
   private telemetryService: TelemetryService;
+  private workflowsTelemetry!: WorkflowsBaseTelemetry;
   private availabilityService: AvailabilityService;
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
   private settingsSubscription?: Subscription;
@@ -67,6 +70,7 @@ export class WorkflowsPlugin
   ): WorkflowsPublicPluginSetup {
     // Initialize telemetry service
     this.telemetryService.setup({ analytics: core.analytics });
+    this.workflowsTelemetry = new WorkflowsBaseTelemetry(this.telemetryService.getClient());
 
     // Check if workflows UI is enabled
     const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, true);
@@ -128,6 +132,8 @@ export class WorkflowsPlugin
       setUnavailableInServerlessTier: (options) => {
         this.availabilityService.setUnavailableInServerlessTier(options.requiredProducts);
       },
+      telemetry: this.workflowsTelemetry,
+      queryClient,
     };
   }
 

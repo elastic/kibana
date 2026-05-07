@@ -17,6 +17,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { QueryClient } from '@kbn/react-query';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -30,6 +31,7 @@ import type {
   ServerlessTierRequiredProducts,
 } from './common/lib/availability';
 import type { TelemetryServiceClient } from './common/lib/telemetry/types';
+import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPublicPluginSetup {}
@@ -48,6 +50,17 @@ export interface WorkflowsPublicPluginStart {
   setUnavailableInServerlessTier: (options: {
     requiredProducts: ServerlessTierRequiredProducts;
   }) => void;
+  /**
+   * Shared workflow-domain telemetry. Sibling plugins that emit workflow-related
+   * EBT events should use this instance so events are reported by a single owner.
+   */
+  telemetry: WorkflowsBaseTelemetry;
+  /**
+   * Shared React Query client used by the workflows UI. Sibling plugins that
+   * mutate workflows from outside the workflows app must use this client so
+   * workflows_management's cached queries get invalidated.
+   */
+  queryClient: QueryClient;
 }
 
 export interface WorkflowsPublicPluginStartDependencies {

@@ -9,6 +9,7 @@ import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-browser';
+import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -16,6 +17,7 @@ export interface PluginSetupDependencies {
 
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
+  workflowsManagement: WorkflowsPublicPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

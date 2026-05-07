@@ -36,7 +36,8 @@ export class AgentBuilderWorkflowsPlugin
         const [coreStart, depsStart] = await coreSetup.getStartServices();
         registerWorkflowAttachmentRenderers(depsStart.agentBuilder.attachments, {
           core: coreStart,
-          analytics: coreStart.analytics,
+          telemetry: depsStart.workflowsManagement.telemetry,
+          queryClient: depsStart.workflowsManagement.queryClient,
         });
       });
 

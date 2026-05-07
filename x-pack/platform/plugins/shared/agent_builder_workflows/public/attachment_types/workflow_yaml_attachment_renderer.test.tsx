@@ -8,20 +8,19 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { QueryClient } from '@kbn/react-query';
 import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
-import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
+import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 
-jest.mock(
-  '@kbn/workflows-management-plugin/public/widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme',
-  () => ({
-    useWorkflowsMonacoTheme: jest.fn(),
-    WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-  })
-);
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsMonacoTheme: jest.fn(),
+  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
+}));
 
 const mockWorkflowApi = createMockWorkflowApi();
 
@@ -55,9 +54,14 @@ const createMockServices = ({
   const core = coreLifecycleMock.createCoreStart();
   core.application.currentAppId$ = new BehaviorSubject<string | undefined>(currentAppId);
   core.application.currentLocation$ = new BehaviorSubject<string>(currentLocation);
+  const telemetry = {
+    reportWorkflowCreated: jest.fn(),
+    reportWorkflowUpdated: jest.fn(),
+  } as unknown as WorkflowsPublicPluginStart['telemetry'];
   return {
     core,
-    analytics: { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart,
+    telemetry,
+    queryClient: new QueryClient(),
   };
 };
 
