@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/scout-oblt';
+import type { KbnClient, ApiServicesFixture } from '@kbn/scout-oblt';
 
 export const DEFAULT_SYNTHETICS_VERSION = '1.5.0';
 const FLEET_API_VERSION = '2023-10-31';
@@ -44,7 +44,8 @@ export interface SyntheticsPrivateLocationApi {
 }
 
 export function createSyntheticsPrivateLocationApi(
-  kbnClient: KbnClient
+  kbnClient: KbnClient,
+  fleetApi: ApiServicesFixture['fleet']
 ): SyntheticsPrivateLocationApi {
   let cachedInstalledVersion: string | null = null;
   let cachedSharedLocation: ScoutPrivateLocation | null = null;
@@ -67,11 +68,7 @@ export function createSyntheticsPrivateLocationApi(
       return;
     }
 
-    await kbnClient.request({
-      path: '/api/fleet/setup',
-      method: 'POST',
-      headers: fleetHeaders,
-    });
+    await fleetApi.internal.setup();
 
     try {
       await kbnClient.request({
@@ -109,17 +106,14 @@ export function createSyntheticsPrivateLocationApi(
   };
 
   const addFleetPolicy = async (name: string, spaceIds: string[] = ['default']) => {
-    const prefix = spaceIds[0] !== 'default' ? `/s/${spaceIds[0]}` : '';
-    const { data } = await kbnClient.request<{ item: { id: string } }>({
-      path: `${prefix}/api/fleet/agent_policies?sys_monitoring=true`,
-      method: 'POST',
-      headers: fleetHeaders,
-      body: {
-        name,
+    const { data } = await fleetApi.agent_policies.create({
+      policyName: name,
+      policyNamespace: 'default',
+      sysMonitoring: true,
+      params: {
         description: '',
-        namespace: 'default',
         monitoring_enabled: [],
-        space_ids: spaceIds.length > 1 ? spaceIds : undefined,
+        space_ids: spaceIds,
       },
     });
     return { id: data.item.id };

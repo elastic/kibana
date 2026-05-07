@@ -28,7 +28,10 @@ export type SyntheticsApiServicesFixture = ApiServicesFixture & {
 export const apiTest = baseApiTest.extend<{}, { apiServices: SyntheticsApiServicesFixture }>({
   apiServices: [
     async ({ apiServices, kbnClient }, use) => {
-      const syntheticsPrivateLocations = createSyntheticsPrivateLocationApi(kbnClient);
+      const syntheticsPrivateLocations = createSyntheticsPrivateLocationApi(
+        kbnClient,
+        apiServices.fleet
+      );
       const extended: SyntheticsApiServicesFixture = {
         ...apiServices,
         syntheticsPrivateLocations,
