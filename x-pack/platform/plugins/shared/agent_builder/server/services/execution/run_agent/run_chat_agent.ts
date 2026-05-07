@@ -357,6 +357,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           toolManager,
           compactionSummary: compactionResult.summary,
           backgroundExecutionService,
+          standing_session: conversation?.state?.standing_session,
         }),
       pendingRound,
       startTime,
@@ -389,11 +390,13 @@ const getConversationState = ({
   toolManager,
   backgroundExecutionService,
   compactionSummary,
+  standing_session,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
+  standing_session?: ConversationInternalState['standing_session'];
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
   return {
@@ -401,6 +404,7 @@ const getConversationState = ({
     dynamic_tool_ids: toolManager.getDynamicToolIds(),
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
+    ...(standing_session ? { standing_session } : {}),
   };
 };
 
