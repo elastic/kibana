@@ -7,7 +7,7 @@
 
 import { diffLines } from 'diff';
 import { z } from '@kbn/zod/v4';
-import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '../../common/constants';
+import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 
 const workflowYamlDiffStatusSchema = z.enum(['pending', 'accepted', 'declined']);

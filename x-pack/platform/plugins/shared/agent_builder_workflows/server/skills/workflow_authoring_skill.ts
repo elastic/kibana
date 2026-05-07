@@ -11,7 +11,7 @@ import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
   workflowTools,
-} from '../../common/constants';
+} from '@kbn/workflows/common/constants';
 
 export const workflowAuthoringSkill = defineSkillType({
   id: 'workflow-authoring',

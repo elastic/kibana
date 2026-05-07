@@ -9,7 +9,7 @@ import { EuiSplitPanel } from '@elastic/eui';
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { workflowYamlDiffAttachmentUiDefinition } from './workflow_yaml_diff_attachment_renderer';
-import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '../../common/constants';
+import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 
 const BEFORE_YAML = `name: Open PRs Report for Team One Workflow
 description: Daily report of team "TeamOne Workflow" PRs from elastic/kibana.

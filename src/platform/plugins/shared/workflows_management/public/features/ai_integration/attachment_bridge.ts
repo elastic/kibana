@@ -13,7 +13,7 @@ import { isToolUiEvent } from '@kbn/agent-builder-common';
 import type { monaco } from '@kbn/monaco';
 import type { ProposalTracker } from './proposal_tracker';
 import type { ProposalManager } from './proposed_changes';
-import { WORKFLOW_YAML_CHANGED_EVENT } from '../../../common/agent_builder/constants';
+import { WORKFLOW_YAML_CHANGED_EVENT } from '@kbn/workflows/common/constants';
 
 export interface WorkflowYamlChangedPayload {
   proposalId: string;

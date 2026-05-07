@@ -18,7 +18,7 @@ import {
   type WorkflowLookup,
 } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../common/constants';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';

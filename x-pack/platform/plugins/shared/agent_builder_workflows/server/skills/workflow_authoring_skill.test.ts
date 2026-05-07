@@ -10,7 +10,7 @@ import { workflowAuthoringSkill } from './workflow_authoring_skill';
 import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   workflowTools,
-} from '../../common/constants';
+} from '@kbn/workflows/common/constants';
 
 describe('workflowAuthoringSkill', () => {
   it('passes agent-builder validation', async () => {

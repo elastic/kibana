@@ -23,7 +23,7 @@ import {
   StepCategory,
 } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { workflowTools } from '../../common/constants';
+import { workflowTools } from '@kbn/workflows/common/constants';
 import {
   addDynamicConnectorsToCache,
   getAllConnectors,

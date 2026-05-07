@@ -20,10 +20,10 @@ import {
 } from './yaml_edit_utils';
 import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
+  WORKFLOW_YAML_CHANGED_EVENT,
   WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
   workflowTools,
-} from '../../common/constants';
-import { WORKFLOW_YAML_CHANGED_EVENT } from '@kbn/workflows-management-plugin/common/agent_builder/constants';
+} from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';

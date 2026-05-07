@@ -9,7 +9,7 @@ import { registerWorkflowYamlAttachment } from './workflow_yaml_attachment';
 import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   workflowTools,
-} from '../../common/constants';
+} from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 

@@ -16,7 +16,7 @@ import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/se
 import { z } from '@kbn/zod/v4';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
-import { WORKFLOW_SML_TYPE } from '../../common/agent_builder/constants';
+import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 
 describe('WorkflowsManagementApi', () => {
   let api: WorkflowsManagementApi;

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["../../../../../typings/**/*", "public/**/*", "server/**/*"],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/core",
@@ -13,6 +13,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/agent-context-layer-plugin",
+    "@kbn/workflows",
     "@kbn/workflows-management-plugin",
     "@kbn/zod",
     "@kbn/agent-builder-genai-utils",

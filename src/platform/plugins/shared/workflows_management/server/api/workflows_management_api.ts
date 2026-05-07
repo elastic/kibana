@@ -51,7 +51,7 @@ import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
 } from './workflows_management_service';
-import { WORKFLOW_SML_TYPE } from '../../common/agent_builder/constants';
+import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;

@@ -12,7 +12,7 @@ import { workflowYamlDiffAttachmentUiDefinition } from './workflow_yaml_diff_att
 import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
-} from '../../common/constants';
+} from '@kbn/workflows/common/constants';
 
 export const registerWorkflowAttachmentRenderers = (
   attachments: AttachmentServiceStartContract,

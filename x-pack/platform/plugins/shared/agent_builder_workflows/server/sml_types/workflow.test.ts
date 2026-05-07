@@ -9,7 +9,7 @@ import type { SmlDocument } from '@kbn/agent-context-layer-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createWorkflowSmlType } from './workflow';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../common/constants';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { workflowIndexName } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
 

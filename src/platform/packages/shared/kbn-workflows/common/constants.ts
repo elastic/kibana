@@ -32,3 +32,43 @@ export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStats
  * - System connectors have empty config/secrets schemas. Make sure these system connectors are able to execute by receiving params alone.
  */
 export const SystemConnectorsMap = new Map<string, string>([['.http', '.http-system']]);
+
+/**
+ * Workflow attachment and SML types used by the agent builder integration.
+ */
+export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
+export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
+export const WORKFLOW_SML_TYPE = 'workflow';
+
+/**
+ * UI event broadcast on the agent builder events bus when a workflow YAML
+ * attachment is created or modified by an agent tool.
+ */
+export const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
+
+/**
+ * Namespace under which workflow agent builder tools are registered.
+ * Must match `internalNamespaces.workflows` in @kbn/agent-builder-common.
+ */
+const WORKFLOW_TOOLS_NAMESPACE = 'platform.workflows';
+
+const workflowTool = <TName extends string>(
+  toolName: TName
+): `${typeof WORKFLOW_TOOLS_NAMESPACE}.${TName}` => {
+  return `${WORKFLOW_TOOLS_NAMESPACE}.${toolName}`;
+};
+
+export const workflowTools = {
+  insertStep: workflowTool('workflow_insert_step'),
+  modifyStep: workflowTool('workflow_modify_step'),
+  modifyStepProperty: workflowTool('workflow_modify_step_property'),
+  modifyProperty: workflowTool('workflow_modify_property'),
+  deleteStep: workflowTool('workflow_delete_step'),
+  setYaml: workflowTool('workflow_set_yaml'),
+  getStepDefinitions: workflowTool('get_step_definitions'),
+  getTriggerDefinitions: workflowTool('get_trigger_definitions'),
+  validateWorkflow: workflowTool('validate_workflow'),
+  getExamples: workflowTool('get_examples'),
+  getConnectors: workflowTool('get_connectors'),
+  executeStep: workflowTool('workflow_execute_step'),
+} as const;

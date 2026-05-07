@@ -13,7 +13,7 @@ import { ChatEventType } from '@kbn/agent-builder-common';
 import { AttachmentBridge, baseProposalId } from './attachment_bridge';
 import { ProposalTracker } from './proposal_tracker';
 import type { ProposalManager } from './proposed_changes';
-import { WORKFLOW_YAML_CHANGED_EVENT } from '../../../common/agent_builder/constants';
+import { WORKFLOW_YAML_CHANGED_EVENT } from '@kbn/workflows/common/constants';
 
 describe('baseProposalId', () => {
   it('strips the hunk suffix from a suffixed ID', () => {

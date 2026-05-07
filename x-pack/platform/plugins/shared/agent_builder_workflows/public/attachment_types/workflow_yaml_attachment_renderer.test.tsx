@@ -13,7 +13,7 @@ import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../common/constants';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 
 jest.mock(
   '@kbn/workflows-management-plugin/public/widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme',
