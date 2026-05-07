@@ -4823,6 +4823,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/app-header@link:src/core/packages/chrome/app-header":
+  version "0.0.0"
+  uid ""
+
 "@kbn/app-link-test-plugin@link:src/platform/test/plugin_functional/plugins/app_link_test":
   version "0.0.0"
   uid ""
@@ -8136,10 +8140,6 @@
   uid ""
 
 "@kbn/paertial-results-example-plugin@link:examples/partial_results_example":
-  version "0.0.0"
-  uid ""
-
-"@kbn/app-header@link:src/core/packages/chrome/app-header":
   version "0.0.0"
   uid ""
 
