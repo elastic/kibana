@@ -22,6 +22,7 @@ export type {
   AppMenuPrimaryActionItem,
   AppMenuPopoverItem,
   AppMenuSplitButtonProps,
+  AppMenuStaticItem,
 } from './src';
 
 export { APP_MENU_ITEM_LIMIT, APP_MENU_SHARE_ID } from './src';
