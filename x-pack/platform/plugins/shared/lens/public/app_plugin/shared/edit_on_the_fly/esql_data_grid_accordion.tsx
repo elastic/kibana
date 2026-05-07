@@ -53,17 +53,19 @@ export const ESQLDataGridAccordion = ({
         .euiAccordion__childWrapper {
           flex: ${isAccordionOpen ? 1 : 'none'};
         }
-        padding: 0 ${euiTheme.size.base};
-        border-bottom: ${euiTheme.border.thin};
       `}
     >
       <EuiAccordion
         id="esql-results"
         css={css`
+          .euiAccordion__triggerWrapper {
+            padding-inline: ${euiTheme.size.base};
+          }
           .euiAccordion__children {
             display: flex;
             flex-direction: column;
             height: 100%;
+            padding-inline: ${euiTheme.size.base};
           }
         `}
         buttonContent={
@@ -76,7 +78,7 @@ export const ESQLDataGridAccordion = ({
           >
             <h5>
               {i18n.translate('xpack.lens.config.ESQLQueryResultsTitle', {
-                defaultMessage: 'ES|QL Query Results',
+                defaultMessage: 'Query results',
               })}
             </h5>
           </EuiTitle>

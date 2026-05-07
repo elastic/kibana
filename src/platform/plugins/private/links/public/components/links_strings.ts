@@ -77,6 +77,10 @@ export const LinksStrings = {
         i18n.translate('links.panelEditor.titleInputLabel', {
           defaultMessage: 'Title',
         }),
+      getPanelDescriptionLabel: () =>
+        i18n.translate('links.panelEditor.panelDescriptionLabel', {
+          defaultMessage: 'Description',
+        }),
       getBrokenDashboardLinkAriaLabel: () =>
         i18n.translate('links.panelEditor.brokenDashboardLinkAriaLabel', {
           defaultMessage: 'Broken dashboard link',
@@ -92,6 +96,50 @@ export const LinksStrings = {
       getLayoutSettingsLegend: () =>
         i18n.translate('links.panelEditor.layoutSettingsLegend', {
           defaultMessage: 'Choose how to display your links.',
+        }),
+      getGeneralSettingsAccordionTitle: () =>
+        i18n.translate('links.panelEditor.generalSettingsAccordionTitle', {
+          defaultMessage: 'General settings',
+        }),
+      getLinksSettingsAccordionTitle: () =>
+        i18n.translate('links.panelEditor.linksSettingsAccordionTitle', {
+          defaultMessage: 'Links settings',
+        }),
+      getShowTitleLabel: () =>
+        i18n.translate('links.panelEditor.showTitleLabel', {
+          defaultMessage: 'Show title',
+        }),
+      getShowBorderLabel: () =>
+        i18n.translate('links.panelEditor.showBorderLabel', {
+          defaultMessage: 'Show panel border',
+        }),
+      getResetTitleButtonLabel: () =>
+        i18n.translate('links.panelEditor.resetTitleButtonLabel', {
+          defaultMessage: 'Reset to default',
+        }),
+      getResetTitleAriaLabel: () =>
+        i18n.translate('links.panelEditor.resetTitleAriaLabel', {
+          defaultMessage: 'Reset title to default',
+        }),
+      getResetDescriptionButtonLabel: () =>
+        i18n.translate('links.panelEditor.resetDescriptionButtonLabel', {
+          defaultMessage: 'Reset to default',
+        }),
+      getResetDescriptionAriaLabel: () =>
+        i18n.translate('links.panelEditor.resetDescriptionAriaLabel', {
+          defaultMessage: 'Reset description to default',
+        }),
+      getDescriptionPlaceholder: () =>
+        i18n.translate('links.panelEditor.descriptionPlaceholder', {
+          defaultMessage: 'Optional',
+        }),
+      getDescriptionInputAriaLabel: () =>
+        i18n.translate('links.panelEditor.descriptionInputAriaLabel', {
+          defaultMessage: 'Enter a custom description for your panel',
+        }),
+      getTitleInputAriaLabel: () =>
+        i18n.translate('links.panelEditor.titleInputAriaLabel', {
+          defaultMessage: 'Enter a custom title for your panel',
         }),
       getHorizontalLayoutLabel: () =>
         i18n.translate('links.editor.horizontalLayout', {

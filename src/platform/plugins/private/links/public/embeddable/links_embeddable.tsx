@@ -132,6 +132,7 @@ export const getLinksEmbeddableFactory = () => {
         ...titleManager.api,
         ...unsavedChangesApi,
         blockingError$,
+        isCustomizable: false,
         defaultTitle$,
         defaultDescription$,
         isEditingEnabled: () => Boolean(blockingError$.value === undefined),
@@ -180,6 +181,10 @@ export const getLinksEmbeddableFactory = () => {
                   layout: layout$.getValue(),
                   links: resolvedLinks$.getValue(),
                   title: titleManager.api.title$.getValue() ?? defaultTitle$.getValue(),
+                  hideTitle: titleManager.api.hideTitle$.getValue(),
+                  hideBorder: titleManager.api.hideBorder$.getValue(),
+                  panelDefaultTitle: defaultTitle$.getValue(),
+                  panelDefaultDescription: defaultDescription$.getValue(),
                   refId,
                 },
                 parentDashboard: parentApi,
@@ -197,6 +202,9 @@ export const getLinksEmbeddableFactory = () => {
                       ? serializeByReference(nextRefId)
                       : serializeByValue();
                     (serializedState as SerializedTitles).title = newState.title;
+                    (serializedState as SerializedTitles).description = newState.description;
+                    (serializedState as SerializedTitles).hide_title = newState.hideTitle;
+                    (serializedState as SerializedTitles).hide_border = newState.hideBorder;
 
                     api.parentApi.replacePanel<LinksEmbeddableState>(api.uuid, {
                       serializedState,
@@ -207,6 +215,10 @@ export const getLinksEmbeddableFactory = () => {
 
                   defaultDescription$.next(newState.description);
                   defaultTitle$.next(newState.title);
+                  titleManager.api.setTitle?.(newState.title);
+                  titleManager.api.setDescription?.(newState.description);
+                  titleManager.api.setHideTitle?.(newState.hideTitle);
+                  titleManager.api.setHideBorder?.(newState.hideBorder);
                   layout$.next(newState.layout);
                   resolvedLinks$.next(newState.links ?? []);
                 },

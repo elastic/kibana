@@ -19,6 +19,13 @@ import type { ResolvedLink } from '../../types';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
 
+const defaultGeneralSettings = {
+  title: undefined,
+  description: undefined,
+  hideTitle: false,
+  hideBorder: false,
+};
+
 describe('LinksEditor', () => {
   const someLinks: ResolvedLink[] = [
     {
@@ -106,7 +113,9 @@ describe('LinksEditor', () => {
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     await waitFor(() => expect(onSaveToLibrary).toHaveBeenCalledTimes(1));
-    expect(onSaveToLibrary).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT);
+    expect(onSaveToLibrary).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT, {
+      ...defaultGeneralSettings,
+    });
   });
 
   test('saving by value panel calls onAddToDashboard', async () => {
@@ -116,6 +125,8 @@ describe('LinksEditor', () => {
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     expect(onAddToDashboard).toHaveBeenCalledTimes(1);
-    expect(onAddToDashboard).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT);
+    expect(onAddToDashboard).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT, {
+      ...defaultGeneralSettings,
+    });
   });
 });

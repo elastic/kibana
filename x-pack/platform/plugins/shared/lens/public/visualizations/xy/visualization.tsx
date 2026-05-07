@@ -830,13 +830,16 @@ export const getXyVisualization = ({
     return undefined;
   },
 
+  FlyoutLegendComponent(props) {
+    return <XyLegendSettings {...props} />;
+  },
+
   FlyoutToolbarComponent(props) {
     return (
       <FlyoutToolbar
         {...props}
         contentMap={{
           style: XyStyleSettings,
-          legend: XyLegendSettings,
         }}
       />
     );

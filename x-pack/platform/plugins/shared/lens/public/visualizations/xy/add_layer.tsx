@@ -129,11 +129,9 @@ export function AddLayerButton({
             <EuiButtonIcon
               data-test-subj="lnsLayerAddButton"
               aria-label={buttonLabel}
-              size="s"
               onClick={() => toggleLayersChoice(!showLayersChoice)}
               iconType="plus"
               color="text"
-              display="base"
             />
           </EuiToolTip>
         }

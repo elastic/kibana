@@ -348,7 +348,6 @@ export function initializeEditApi(
         );
       },
       isReadOnlyEnabled: () => {
-        // Check if user can actually edit this specific dashboard (considering access control)
         const isEditableByUser = apiPublishesIsEditableByUser(parentApi)
           ? parentApi.isEditableByUser
           : true;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { createPortal } from 'react-dom';
-import { css } from '@emotion/react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -373,11 +372,7 @@ function InnerESQLEditor({
 
   return (
     <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
-      <div
-        css={css`
-          border-top: ${euiTheme.border.thin};
-        `}
-      >
+      <div>
         <ESQLLangEditor
           query={query}
           onTextLangQueryChange={setQuery}

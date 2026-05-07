@@ -380,6 +380,13 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   ) => null | ReactElement<VisualizationToolbarProps<T> & { isInlineEditing: boolean }>;
 
   /**
+   * Legend settings for inline editing flyout accordion (separate from {@link FlyoutToolbarComponent}).
+   */
+  FlyoutLegendComponent?: (
+    props: VisualizationToolbarProps<T> & { isInlineEditing?: boolean }
+  ) => null | ReactElement<VisualizationToolbarProps<T> & { isInlineEditing?: boolean }>;
+
+  /**
    * The frame is telling the visualization to update or set a dimension based on user interaction
    * groupId is coming from the groupId provided in getConfiguration
    */
