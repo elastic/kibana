@@ -88,9 +88,10 @@ export class TemplatesService {
 
   async getTemplate(
     templateId: string,
-    version?: string
+    version?: string,
+    { includeDeleted = false }: { includeDeleted?: boolean } = {}
   ): Promise<SavedObject<Template> | undefined> {
-    return this._getTemplate(templateId, version);
+    return this._getTemplate(templateId, version, { includeDeleted });
   }
 
   /**
@@ -132,7 +133,8 @@ export class TemplatesService {
 
   private async _getTemplate(
     templateId: string,
-    version?: string
+    version?: string,
+    { includeDeleted = false }: { includeDeleted?: boolean } = {}
   ): Promise<SavedObject<Template> | undefined> {
     if (version !== undefined) {
       const parsedVersion = parseInt(version, 10);
@@ -149,6 +151,7 @@ export class TemplatesService {
       templateId,
       version,
       ...(version === undefined ? { isLatest: true } : {}),
+      ...(includeDeleted ? { isDeleted: true } : {}),
     });
 
     return templates[0];
