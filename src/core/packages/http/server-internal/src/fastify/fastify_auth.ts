@@ -18,6 +18,7 @@ import type { AuthStateStorage } from '../auth_state_storage';
 import type { AuthHeadersStorage } from '../auth_headers_storage';
 import type { FastifyResponseAdapter } from './fastify_response_adapter';
 import { buildHapiCompatRequestFromFastify } from './fastify_to_hapi_request';
+import { isReplyCommitted } from './fastify_reply_utils';
 
 const authToolkit: AuthToolkit = {
   authenticated: (data = {}) => ({
@@ -132,6 +133,9 @@ export function registerFastifyAuthentication(params: {
       throw new Error(`Unexpected authentication result: ${JSON.stringify(result)}`);
     } catch (error) {
       log.error(error);
+      if (isReplyCommitted(reply)) {
+        return;
+      }
       await responseAdapter.handle(
         lifecycleResponseFactory.customError({
           statusCode: 500,
@@ -144,7 +148,7 @@ export function registerFastifyAuthentication(params: {
   });
 
   fastify.addHook('onSend', async (req: FastifyRequest, reply: FastifyReply, payload) => {
-    if ((reply as { sent?: boolean }).sent || reply.raw.headersSent) {
+    if (isReplyCommitted(reply)) {
       return payload;
     }
     const app = (req as any).app;

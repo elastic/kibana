@@ -8,7 +8,7 @@
  */
 
 import { finished } from 'node:stream/promises';
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import fastifyMultipart from '@fastify/multipart';
 import type { RouterRoute } from '@kbn/core-http-server';
 
@@ -16,6 +16,13 @@ import { KIBANA_HAPI_COMPAT_REQUEST } from './fastify_auth';
 
 /** Matches the default `parts` limit in `@fastify/multipart` unless overridden at register time. */
 const MULTIPART_MAX_PARTS = 1000;
+
+/**
+ * `@fastify/multipart` merges plugin defaults with per-`req.parts({ limits })` options.
+ * Keep the plugin baseline high enough that saved-objects `_import` (often tens of MB via
+ * `savedObjects.maxImportPayloadBytes`) is not capped by `server.maxPayload` (~1–2MB in tests).
+ */
+const MULTIPART_PLUGIN_MIN_FILE_SIZE_BYTES = 32 * 1024 * 1024;
 
 function acceptsMultipartRoute(accepts: string | readonly string[] | undefined): boolean {
   if (accepts == null) {
@@ -61,22 +68,33 @@ export async function registerFastifyMultipartAndKibanaBodyHook(params: {
 
   await fastify.register(fastifyMultipart, {
     limits: {
-      fileSize: maxPayloadBytes,
+      fileSize: Math.max(maxPayloadBytes, MULTIPART_PLUGIN_MIN_FILE_SIZE_BYTES),
       parts: MULTIPART_MAX_PARTS,
     },
   });
 
-  fastify.addHook('preValidation', async (req: FastifyRequest) => {
+  fastify.addHook('preValidation', async (req: FastifyRequest, reply: FastifyReply) => {
+    const app = (req as FastifyRequest & { app?: Record<string | symbol, unknown> }).app;
+    const route = app?.matchedRoute as RouterRoute | undefined;
+    const accepts = route?.options?.body?.accepts as string | readonly string[] | undefined;
+    const needsMultipart = acceptsMultipartRoute(accepts);
     const isMultipart = (req as FastifyRequest & { isMultipart?: () => boolean }).isMultipart?.();
+
+    // Hapi returns 415 before schema validation when a route declares multipart-only payload
+    // but the client did not send multipart/form-data (saved_objects `_import`, etc.).
+    if (needsMultipart && !isMultipart) {
+      return reply.code(415).send({
+        statusCode: 415,
+        error: 'Unsupported Media Type',
+        message: 'Unsupported Media Type',
+      });
+    }
+
     if (!isMultipart) {
       return;
     }
 
-    const app = (req as FastifyRequest & { app?: Record<string | symbol, unknown> }).app;
-    const route = app?.matchedRoute as RouterRoute | undefined;
-    const accepts = route?.options?.body?.accepts as string | readonly string[] | undefined;
-
-    if (!acceptsMultipartRoute(accepts)) {
+    if (!needsMultipart) {
       await drainMultipartBody(req, maxPayloadBytes);
       return;
     }

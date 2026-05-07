@@ -35,7 +35,12 @@ import { deepFreeze } from '@kbn/std';
 import type { Request as HapiRequest } from '@hapi/hapi';
 import { FastifyResponseAdapter } from './fastify_response_adapter';
 import { KIBANA_HAPI_COMPAT_REQUEST } from './fastify_auth';
-import { mapRouteSecurityToHapiAuthSettings, toPlainRouteParams } from './fastify_to_hapi_request';
+import {
+  getKibanaCompatRequestUrl,
+  mapRouteSecurityToHapiAuthSettings,
+  toPlainRouteParams,
+} from './fastify_to_hapi_request';
+import { isReplyCommitted } from './fastify_reply_utils';
 
 const preRoutingToolkit: OnPreRoutingToolkit = {
   next: () => ({ type: OnPreRoutingResultType.next }),
@@ -77,19 +82,11 @@ const buildKibanaRequest = (req: FastifyRequest): HapiRequest => {
     return existingCompat;
   }
 
-  const protocol =
-    (req.headers[':scheme'] as string | undefined) ??
-    ((req.raw.socket as { encrypted?: boolean })?.encrypted ? 'https' : 'http');
   const hostHeader =
     (req.headers.host as string | undefined) ??
     (req.headers[':authority'] as string | undefined) ??
     'localhost';
-  let url: URL;
-  try {
-    url = new URL(req.url, `${protocol}://${hostHeader}`);
-  } catch {
-    url = new URL(`${protocol}://${hostHeader}/`);
-  }
+  const url = getKibanaCompatRequestUrl(req);
   // Reuse the per-request `app` slot if a previous hook (e.g. the route handler's
   // own builder) populated it; otherwise initialize it once.
   const app = ((req as any).app = (req as any).app ?? { requestId: req.id ?? '', requestUuid: '' });
@@ -149,12 +146,17 @@ const buildKibanaRequest = (req: FastifyRequest): HapiRequest => {
 
 const adapter = new FastifyResponseAdapter();
 
-const sendInternalError = (reply: FastifyReply): FastifyReply =>
-  reply.code(500).send({
+const sendInternalError = (reply: FastifyReply, log: Logger): FastifyReply | void => {
+  if (isReplyCommitted(reply)) {
+    log.error(new Error('HTTP lifecycle handler failed after the response was already committed'));
+    return;
+  }
+  return reply.code(500).send({
     statusCode: 500,
     error: 'Internal Server Error',
     message: 'An internal server error occurred. Check Kibana server logs for details.',
   });
+};
 
 /** @internal */
 export function adoptToFastifyOnPreRouting(fn: OnPreRoutingHandler, log: Logger) {
@@ -176,17 +178,21 @@ export function adoptToFastifyOnPreRouting(fn: OnPreRoutingHandler, log: Logger)
         return reply;
       }
       if (result.type === OnPreRoutingResultType.rewriteUrl) {
-        const appState = (req as any).app as KibanaRequestState | undefined;
-        if (appState) {
-          appState.rewrittenUrl = appState.rewrittenUrl ?? new URL(req.url, 'http://internal/');
-        }
         // Fastify exposes the underlying Node IncomingMessage on `req.raw`; updating its
         // url before the framework picks a route is the analogue of Hapi's `request.setUrl`.
         req.raw.url = result.url;
+        const appState = (req as any).app as KibanaRequestState | undefined;
+        if (appState) {
+          try {
+            appState.rewrittenUrl = new URL(result.url, 'http://internal/');
+          } catch {
+            appState.rewrittenUrl = appState.rewrittenUrl ?? new URL(req.url, 'http://internal/');
+          }
+        }
       }
     } catch (error) {
       log.error(error);
-      return sendInternalError(reply);
+      return sendInternalError(reply, log);
     }
   };
 }
@@ -209,7 +215,7 @@ export function adoptToFastifyOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
       }
     } catch (error) {
       log.error(error);
-      return sendInternalError(reply);
+      return sendInternalError(reply, log);
     }
   };
 }
@@ -241,7 +247,7 @@ export function adoptToFastifyOnPostAuth(fn: OnPostAuthHandler, log: Logger) {
       }
     } catch (error) {
       log.error(error);
-      return sendInternalError(reply);
+      return sendInternalError(reply, log);
     }
   };
 }

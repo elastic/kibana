@@ -220,6 +220,49 @@ describe('FastifyHttpServer', () => {
       });
     }, 15000);
 
+    it('returns 500 when the route handler throws without crashing the server', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      router.get(
+        {
+          path: '/throws',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: false,
+        },
+        async () => {
+          throw new Error('intentional test throw');
+        }
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+      expect(listenPort).toBeGreaterThan(0);
+
+      const res = await httpRequest(listenPort, '/api/fastify-mvp/throws');
+      expect(res.statusCode).toBe(500);
+      const body = JSON.parse(res.body);
+      expect(body.statusCode).toBe(500);
+      expect(body.error).toBe('Internal Server Error');
+
+      const okAfter = await httpRequest(listenPort, '/api/fastify-mvp/hello');
+      expect(okAfter.statusCode).toBe(404);
+    }, 15000);
+
     it('accepts POST with Content-Type application/json and an empty body (Hapi parity)', async () => {
       const ctx = createCoreContext();
       const config = createHttpConfig(PORT);
@@ -464,6 +507,30 @@ describe('FastifyHttpServer', () => {
       expect(res.body).toBe('static-from-fastify');
       expect(res.headers['content-length']).toBe('19');
       expect(res.headers['content-type']).toMatch(/^text\/plain/);
+
+      fs.rmSync(dir, { recursive: true, force: true });
+    }, 15000);
+
+    it('serves single-segment static routes registered with {file} (@elastic/charts CSS)', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      const dir = fs.mkdtempSync(nodePath.join(os.tmpdir(), 'fastify-static-named-file-'));
+      fs.writeFileSync(nodePath.join(dir, 'theme_only_light.css'), 'body{}');
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+      setup.registerStaticDir('/ui/charts/{file}', dir);
+
+      await server.start();
+      const address = (setup.server as any).server.address();
+      const port = typeof address === 'object' && address ? address.port : 0;
+
+      const res = await httpRequest(port, '/ui/charts/theme_only_light.css');
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toBe('body{}');
+      expect(String(res.headers['content-type'] ?? '')).toMatch(/css|octet-stream/);
 
       fs.rmSync(dir, { recursive: true, force: true });
     }, 15000);

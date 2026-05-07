@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Socket } from 'net';
+import { hapiMocks } from '@kbn/hapi-mocks';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { BasePath } from './base_path_service';
 
@@ -51,6 +54,25 @@ describe('BasePath', () => {
       basePath.set(request, '/baz/');
       expect(basePath.get(request)).toBe('/foo/bar/baz/');
     });
+
+    it('resolves the same base path for distinct framework requests sharing one Node IncomingMessage', () => {
+      const sharedIncoming = {
+        socket: new Socket(),
+        on: jest.fn(),
+        off: jest.fn(),
+        httpVersion: '1.1',
+      };
+      const hapiReqA = hapiMocks.createRequest();
+      const hapiReqB = hapiMocks.createRequest();
+      (hapiReqA as { raw: { req: unknown } }).raw.req = sharedIncoming as any;
+      (hapiReqB as { raw: { req: unknown } }).raw.req = sharedIncoming as any;
+      const kibanaA = CoreKibanaRequest.from(hapiReqA, undefined, false);
+      const kibanaB = CoreKibanaRequest.from(hapiReqB, undefined, false);
+      const basePath = new BasePath('/srv');
+
+      basePath.set(kibanaA, '/s/space-a');
+      expect(basePath.get(kibanaB)).toBe('/srv/s/space-a');
+    });
   });
 
   describe('#set()', () => {
@@ -62,6 +84,27 @@ describe('BasePath', () => {
       setPath();
 
       expect(setPath).toThrowErrorMatchingInlineSnapshot(
+        `"Request basePath was previously set. Setting multiple times is not supported."`
+      );
+    });
+
+    it('#set() cannot be set twice across distinct wrappers of the same Node IncomingMessage', () => {
+      const sharedIncoming = {
+        socket: new Socket(),
+        on: jest.fn(),
+        off: jest.fn(),
+        httpVersion: '1.1',
+      };
+      const hapiReqA = hapiMocks.createRequest();
+      const hapiReqB = hapiMocks.createRequest();
+      (hapiReqA as { raw: { req: unknown } }).raw.req = sharedIncoming as any;
+      (hapiReqB as { raw: { req: unknown } }).raw.req = sharedIncoming as any;
+      const kibanaA = CoreKibanaRequest.from(hapiReqA, undefined, false);
+      const kibanaB = CoreKibanaRequest.from(hapiReqB, undefined, false);
+      const basePath = new BasePath('/foo/bar');
+
+      basePath.set(kibanaA, '/s/a');
+      expect(() => basePath.set(kibanaB, '/s/b')).toThrowErrorMatchingInlineSnapshot(
         `"Request basePath was previously set. Setting multiple times is not supported."`
       );
     });

@@ -19,9 +19,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.be(400);
       expect(response.body.statusCode).to.be(400);
-      expect(response.body.message).to.be(
-        '[request body]: expected a plain object value, but found [null] instead.'
-      );
+      // Hapi reports a null body; Fastify's JSON parser may coerce an empty JSON body to `{}`,
+      // producing a field-level validation message instead.
+      const message = response.body.message as string;
+      expect(
+        message === '[request body]: expected a plain object value, but found [null] instead.' ||
+          message ===
+            '[request body.locatorId]: expected value of type [string] but got [undefined]'
+      ).to.be(true);
     });
 
     it('returns error when locator ID is not provided', async () => {

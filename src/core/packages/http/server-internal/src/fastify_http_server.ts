@@ -60,7 +60,9 @@ import { HapiCompatServer } from './fastify/hapi_compat_server';
 import { createFastifyCookieSessionStorageFactory } from './fastify/fastify_cookie_session_storage';
 import { KIBANA_HAPI_COMPAT_REQUEST, registerFastifyAuthentication } from './fastify/fastify_auth';
 import { installHapiCompatibleJsonBodyParser } from './fastify/install_hapi_compatible_json_body_parser';
+import { installFastifyGlobalErrorHandler } from './fastify/fastify_global_error_handler';
 import { registerFastifyMultipartAndKibanaBodyHook } from './fastify/fastify_multipart_kibana_body';
+import { isReplyCommitted } from './fastify/fastify_reply_utils';
 
 const isSafeMethod = (method: string) => method === 'get' || method === 'options';
 
@@ -134,6 +136,37 @@ function barePrefixPathFromFindMyWayWildcard(url: string): string | undefined {
     return undefined;
   }
   return prefix;
+}
+
+/**
+ * Resolves the relative path under a static root from find-my-way params. Supports splat
+ * routes (`{path*}` → `params['*']`) and named single segments (`{file}` → `params.file`).
+ *
+ * @internal
+ */
+function staticRelativePathFromParams(
+  routePath: string,
+  params: Record<string, string | undefined>
+): string {
+  const wildcardName = extractHapiWildcardName(routePath);
+  if (wildcardName !== undefined) {
+    const raw = params['*'] ?? params[wildcardName];
+    return String(raw ?? '').replace(/^\/+/, '');
+  }
+
+  const braceMatches = routePath.match(/\{([a-zA-Z0-9_]+)\}/g) ?? [];
+  const parts: string[] = [];
+  for (const brace of braceMatches) {
+    const inner = brace.slice(1, -1);
+    if (inner.endsWith('*')) {
+      continue;
+    }
+    const value = params[inner];
+    if (typeof value === 'string' && value.length > 0) {
+      parts.push(value);
+    }
+  }
+  return parts.join('/');
 }
 
 /**
@@ -229,6 +262,29 @@ export class FastifyHttpServer {
       forceCloseConnections: true,
     }) as unknown as FastifyInstance;
 
+    installFastifyGlobalErrorHandler(this.fastify, this.log);
+
+    // Mirror @hapi/hapi: reject malformed `Cookie` headers before auth redirects (GET `/` would
+    // otherwise respond with 302). Bare cookie segments without `=` must yield 400 + message.
+    this.fastify.addHook('onRequest', (req, reply, done) => {
+      const raw = req.headers.cookie;
+      if (typeof raw !== 'string' || raw.length === 0) {
+        done();
+        return;
+      }
+      for (const part of raw.split(';')) {
+        const trimmed = part.trim();
+        if (trimmed.length === 0) {
+          continue;
+        }
+        if (!trimmed.includes('=')) {
+          reply.code(400).type('text/plain; charset=utf-8').send('Invalid cookie header');
+          return;
+        }
+      }
+      done();
+    });
+
     await this.installFastifyRequestBodyAdapters(this.fastify, config);
 
     (this.fastify as any).getKibanaAuthRegistered = () => this.authRegistered;
@@ -242,6 +298,9 @@ export class FastifyHttpServer {
     this.fmw = FindMyWay({
       ignoreTrailingSlash: false,
       caseSensitive: true,
+      // Match Hapi: long dynamic segments (e.g. index pattern ids in APIs) must still hit route
+      // validation instead of failing route lookup (find-my-way defaults to 100 otherwise).
+      maxParamLength: 8192,
       defaultRoute: (_req: any, _res: any) => {
         // No-op here: dispatch happens via `find()`, not `lookup()`.
       },
@@ -771,8 +830,7 @@ export class FastifyHttpServer {
             route.path
           }: ${error?.message ?? error}`
         );
-        const res = reply.raw;
-        if (!reply.sent && !res.headersSent) {
+        if (!isReplyCommitted(reply)) {
           reply.code(500).send({
             statusCode: 500,
             error: 'Internal Server Error',
@@ -794,13 +852,17 @@ export class FastifyHttpServer {
     const resolvedRoot = nodePath.resolve(dirPath);
     // Hapi paths such as `/assets/{any*}` translate to Fastify-style `/assets/*`. The
     // captured wildcard is exposed by find-my-way as the `*` named param.
+    // Paths such as `/ui/charts/{file}` become `/ui/charts/:file` — they must not get an
+    // extra `/*` suffix (that breaks matching and leaves only `params['*']`, ignoring `:file`).
     const fastifyPath = translateHapiPathToFastify(routePath);
-    const url = fastifyPath.endsWith('*')
-      ? fastifyPath
-      : `${fastifyPath.endsWith('/') ? fastifyPath : `${fastifyPath}/`}*`;
+    const hasBraceWildcard = /\{[a-zA-Z0-9_]+\*\}/.test(routePath);
+    const url =
+      fastifyPath.endsWith('*') || hasBraceWildcard || fastifyPath.includes(':')
+        ? fastifyPath
+        : `${fastifyPath.endsWith('/') ? fastifyPath : `${fastifyPath}/`}*`;
 
     const handler: FmwHandler = async (_req, reply, params) => {
-      const wildcardValue = (params['*'] ?? '').replace(/^\/+/, '');
+      const wildcardValue = staticRelativePathFromParams(routePath, params);
       const requested = nodePath.normalize(nodePath.join(resolvedRoot, wildcardValue));
       // Containment check: prevent traversal escapes via `..`.
       if (requested !== resolvedRoot && !requested.startsWith(resolvedRoot + nodePath.sep)) {
@@ -839,6 +901,12 @@ export class FastifyHttpServer {
     this.registerFindMyWayRoute('HEAD', url, handler as unknown as any);
     const wildName = extractHapiWildcardName(routePath);
     this.staticDirectoryRouteInfo.set(url, wildName);
+    // Named-param static routes (e.g. `/sha/ui/charts/:file`) need a splat-style prefix for
+    // {@link pathnameMatchesFastifyWildcardPattern} during early route lookup / auth.
+    if (!url.endsWith('*') && fastifyPath.includes(':')) {
+      const prefixStar = `${fastifyPath.slice(0, fastifyPath.lastIndexOf('/'))}/*`;
+      this.staticDirectoryRouteInfo.set(prefixStar, wildName);
+    }
     const bareForStatic = barePrefixPathFromFindMyWayWildcard(url);
     if (bareForStatic !== undefined) {
       this.staticDirectoryRouteInfo.set(bareForStatic, wildName);

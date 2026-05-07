@@ -35,6 +35,35 @@ export function toPlainRouteParams(input: unknown): Record<string, string | unde
 }
 
 /**
+ * Prefer {@link IncomingMessage.url} (`fastifyReq.raw.url`) when building the WHATWG URL:
+ * `registerOnPreRouting` handlers (notably Spaces) rewrite it via `rewriteUrl`, but Fastify's
+ * `req.url` may remain the pre-rewrite value — {@link CoreKibanaRequest} must see the same
+ * pathname/search as Hapi after `setUrl`.
+ *
+ * @internal
+ */
+export function getKibanaCompatRequestUrl(fastifyReq: FastifyRequest): URL {
+  const protocol =
+    (fastifyReq.headers[':scheme'] as string | undefined) ??
+    ((fastifyReq.raw.socket as { encrypted?: boolean })?.encrypted ? 'https' : 'http');
+  const hostHeader =
+    (fastifyReq.headers.host as string | undefined) ??
+    (fastifyReq.headers[':authority'] as string | undefined) ??
+    'localhost';
+
+  const relative =
+    typeof fastifyReq.raw.url === 'string' && fastifyReq.raw.url.length > 0
+      ? fastifyReq.raw.url
+      : fastifyReq.url;
+
+  try {
+    return new URL(relative, `${protocol}://${hostHeader}`);
+  } catch {
+    return new URL(`${protocol}://${hostHeader}/`);
+  }
+}
+
+/**
  * Maps Kibana route security to Hapi `route.settings.auth`, matching
  * {@link HttpServer}'s `getAuthOption(this.getSecurity(route)?.authc?.enabled)` +
  * `registerAuth` semantics. When `authc` is omitted, returns `undefined` (same as
@@ -87,22 +116,11 @@ export function buildHapiCompatRequestFromFastify(
   routeApp: KibanaRouteOptions,
   authRegistered: boolean
 ): HapiRequest {
-  const protocol =
-    (fastifyReq.headers[':scheme'] as string | undefined) ??
-    ((fastifyReq.raw.socket as { encrypted?: boolean })?.encrypted ? 'https' : 'http');
   const hostHeader =
     (fastifyReq.headers.host as string | undefined) ??
     (fastifyReq.headers[':authority'] as string | undefined) ??
     'localhost';
-
-  // Fastify's `url` is "/path?qs"; build a full URL so consumers (CoreKibanaRequest)
-  // can read pathname/searchParams without further normalization.
-  let url: URL;
-  try {
-    url = new URL(fastifyReq.url, `${protocol}://${hostHeader}`);
-  } catch {
-    url = new URL(`${protocol}://${hostHeader}/`);
-  }
+  const url = getKibanaCompatRequestUrl(fastifyReq);
 
   const app = ((fastifyReq as any).app = (fastifyReq as any).app ?? {});
   app.requestId = app.requestId ?? fastifyReq.id ?? '';
@@ -121,7 +139,7 @@ export function buildHapiCompatRequestFromFastify(
     headers: fastifyReq.headers,
     method: String(fastifyReq.method ?? '').toLowerCase(),
     params: toPlainRouteParams(fastifyReq.params),
-    query: fastifyReq.query ?? {},
+    query: (fastifyReq as { query?: Record<string, unknown> }).query ?? {},
     payload: fastifyReq.body,
     path: url.pathname,
     raw: {
