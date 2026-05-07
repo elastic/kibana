@@ -36,6 +36,14 @@ jest.mock('./utils/get_esql_single_column_values', () => {
   };
 });
 
+const mockExecuteTriggerActions = jest.fn();
+jest.mock('../../services/kibana_services', () => ({
+  ...jest.requireActual('../../services/kibana_services'),
+  uiActionsService: {
+    executeTriggerActions: (...args: unknown[]) => mockExecuteTriggerActions(...args),
+  },
+}));
+
 describe('ESQLControlApi', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -97,6 +105,37 @@ describe('ESQLControlApi', () => {
       variable_name: 'variable1',
       variable_type: 'values',
       single_select: true,
+    });
+  });
+
+  describe('editing a STATIC fields control', () => {
+    test('onEdit forwards the persisted source_esql_query as queryString', async () => {
+      const sourceQuery = 'FROM logs | KEEP ';
+      const initialState: OptionsListESQLControlState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        selected_options: ['column1'],
+        available_options: ['column1'],
+        variable_name: 'myField',
+        variable_type: ESQLVariableType.FIELDS,
+        control_type: EsqlControlType.STATIC_VALUES,
+        source_esql_query: sourceQuery,
+      };
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: dashboardApi,
+      });
+      await api.onEdit();
+      expect(mockExecuteTriggerActions).toHaveBeenCalledWith(
+        'ESQL_CONTROL_TRIGGER',
+        expect.objectContaining({
+          queryString: sourceQuery,
+          controlType: EsqlControlType.STATIC_VALUES,
+          variableType: ESQLVariableType.FIELDS,
+        })
+      );
     });
   });
 
