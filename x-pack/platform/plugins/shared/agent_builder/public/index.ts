@@ -17,6 +17,7 @@ import type {
 } from './types';
 import { AgentBuilderPlugin } from './plugin';
 import { AGENTBUILDER_FEATURE_ID, uiPrivileges } from '../common/features';
+import { VisualizeLens } from './application/components/tools/esql/visualize_lens';
 
 export type {
   AgentBuilderPluginSetup,
@@ -24,7 +25,7 @@ export type {
   EmbeddableConversationProps,
   EmbeddableConversationComponent,
 };
-export { AGENTBUILDER_FEATURE_ID, uiPrivileges };
+export { AGENTBUILDER_FEATURE_ID, uiPrivileges, VisualizeLens };
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,

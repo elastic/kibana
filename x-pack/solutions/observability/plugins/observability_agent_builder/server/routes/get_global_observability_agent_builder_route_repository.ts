@@ -7,10 +7,12 @@
 
 import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import { getObservabilityAgentBuilderAiInsightsRouteRepository } from './ai_insights/route';
+import { getSignificantEventEvidenceReviewRouteRepository } from './significant_event/route';
 
 export function getGlobalObservabilityAgentBuilderServerRouteRepository(): ServerRouteRepository {
   return {
     ...getObservabilityAgentBuilderAiInsightsRouteRepository(),
+    ...getSignificantEventEvidenceReviewRouteRepository(),
   };
 }
 

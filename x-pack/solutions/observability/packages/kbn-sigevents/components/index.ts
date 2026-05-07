@@ -57,6 +57,8 @@ export { SignificantEventDetailBody } from './significant_event_detail_body';
 export type {
   SignificantEventDetailBodyProps,
   SignificantEventDetailFields,
+  SignificantEventDetailEvidenceReviewProps,
+  SigEventEvidenceReviewResponse,
   EvidenceItem,
   DependencyEdgeItem,
   CauseKiItem,

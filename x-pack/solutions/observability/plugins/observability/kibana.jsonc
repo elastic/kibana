@@ -69,7 +69,8 @@
       "kibanaUtils",
       "stackAlerts",
       "spaces",
-      "observabilityAgentBuilder"
+      "observabilityAgentBuilder",
+      "agentBuilder"
     ],
     "extraPublicDirs": ["common"]
   }

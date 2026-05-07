@@ -66,4 +66,5 @@ export interface SignificantEventDocument {
   recommendations: string[];
   verdict_id: string;
   last_reviewed_at: string;
+  workflow_execution_id?: string;
 }

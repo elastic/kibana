@@ -78,6 +78,29 @@ const embeddableConversationWrapperStyles = css`
   }
 `;
 
+interface EvidenceReviewResponse {
+  status: 'healthy' | 'failing' | 'resolved';
+  recommendation: string;
+  significantEventId: string;
+  trendRange: {
+    from: string;
+    to: string;
+    bucketMinutes: number;
+  };
+  evidenceItems: ReadonlyArray<{
+    ruleName: string;
+    lastSeen: string | null;
+    trend:
+      | { success: true; lensVisualization: Record<string, unknown> }
+      | { success: false; error: string };
+  }>;
+  signals: {
+    evidenceRowHits: number;
+    eligibleEvidenceCount: number;
+    evidenceQueriesWithMatches: number;
+  };
+}
+
 export function SigeventsOverviewPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { services } = useKibana();
@@ -115,6 +138,9 @@ export function SigeventsOverviewPage() {
   const [conversationKey, setConversationKey] = useState(0);
   const [attachments, setAttachments] = useState<EmbeddableConversationProps['attachments']>([]);
   const [isBannerVisible, setIsBannerVisible] = useState(false);
+  const [remediationStatus, setRemediationStatus] = useState<EvidenceReviewResponse | undefined>();
+  const [isCheckingRemediation, setIsCheckingRemediation] = useState(false);
+  const [remediationError, setRemediationError] = useState<string | undefined>();
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigeventsDetailFlyout' });
   const overviewRef = useRef<HTMLDivElement | null>(null);
 
@@ -136,7 +162,7 @@ export function SigeventsOverviewPage() {
   const buildRemediationPrompt = useCallback((eventTitle: string) => {
     return i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
       defaultMessage:
-        'Help me remediate: {eventTitle}. Anchor on the significant event attachment, validate and extend it with live telemetry, then give an updated root cause narrative and prioritized remediation steps.',
+        'Help me with: {eventTitle}. Use the significant event attachment, validate with live telemetry, and use Review evidence on the overview when you need to re-run ES|QL checks and load trend charts for every rule in one step.',
       values: { eventTitle },
     });
   }, []);
@@ -230,7 +256,37 @@ export function SigeventsOverviewPage() {
     [agentBuilder]
   );
 
+  useEffect(() => {
+    setRemediationStatus(undefined);
+    setRemediationError(undefined);
+  }, [eventData?.raw.event_id]);
+
   const detailFields = eventData?.detailFields;
+
+  const runEvidenceReview = useCallback(async () => {
+    if (!eventData?.raw.event_id) {
+      return;
+    }
+
+    setIsCheckingRemediation(true);
+    setRemediationError(undefined);
+    try {
+      const response = await services.http.post<EvidenceReviewResponse>(
+        '/internal/observability_agent_builder/significant_events/evidence_review',
+        {
+          body: JSON.stringify({
+            significantEventId: eventData.raw.event_id,
+            significantEventsIndex: SIGEVENTS_INDEX,
+          }),
+        }
+      );
+      setRemediationStatus(response);
+    } catch (err) {
+      setRemediationError((err as Error).message);
+    } finally {
+      setIsCheckingRemediation(false);
+    }
+  }, [eventData?.raw.event_id, services.http]);
 
   const lastUpdatedLabel = useMemo(() => {
     if (!eventData?.timestamp) {
@@ -519,6 +575,21 @@ export function SigeventsOverviewPage() {
               event={detailFields}
               hideHeader
               onRemediate={handleFlyoutRemediate}
+              services={{
+                lens: services.lens,
+                dataViews: services.dataViews,
+                uiActions: services.uiActions,
+              }}
+              evidenceReview={
+                eventData?.raw.event_id
+                  ? {
+                      runReview: runEvidenceReview,
+                      isLoading: isCheckingRemediation,
+                      status: remediationStatus,
+                      error: remediationError,
+                    }
+                  : undefined
+              }
             />
           </EuiFlyoutBody>
         </EuiFlyout>
