@@ -155,6 +155,7 @@ Object {
           "negate": false,
           "params": Array [
             "auditbeat-mytest-*",
+            "*:auditbeat-mytest-*",
           ],
           "type": "phrases",
         },
@@ -165,6 +166,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "auditbeat-mytest-*",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:auditbeat-mytest-*",
                 },
               },
             ],
