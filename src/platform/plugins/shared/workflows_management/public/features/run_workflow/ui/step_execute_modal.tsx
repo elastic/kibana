@@ -33,7 +33,7 @@ import { StepExecuteManualForm } from './step_execute_manual_form';
 import type { WorkflowStepTriggerTab } from './types';
 import { sanitizeText } from '../../../shared/lib/sanitize_text';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
-import { useWorkflowsMonacoTheme } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
+import { useWorkflowsMonacoTheme } from '@kbn/workflows-ui';
 
 const STEP_TAB_LABELS: Record<WorkflowStepTriggerTab, string> = {
   manual: i18n.translate('workflows.testStepModal.manualTab', { defaultMessage: 'Manual' }),

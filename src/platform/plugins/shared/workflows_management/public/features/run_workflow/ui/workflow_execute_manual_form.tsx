@@ -18,7 +18,7 @@ import { applyInputDefaults, hasDefaultsRecursive } from '@kbn/workflows/spec/li
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { InputValidationCallout } from './input_validation_callout';
 import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
+import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 
 const SCHEMA_URI = `inmemory://schemas/workflow-manual-json-editor-schema`;
 

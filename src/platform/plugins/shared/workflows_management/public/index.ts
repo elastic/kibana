@@ -19,10 +19,5 @@ export type { WorkflowsPublicPluginSetup, WorkflowsPublicPluginStart } from './t
 
 // Used by the agent-builder-workflows plugin
 export { PLUGIN_ID } from '../common';
-export type { TelemetryServiceClient } from './common/lib/telemetry/types';
 export { WorkflowsBaseTelemetry } from './common/service/telemetry';
 export { queryClient } from './shared/lib/query_client';
-export {
-  useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
-} from './widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';

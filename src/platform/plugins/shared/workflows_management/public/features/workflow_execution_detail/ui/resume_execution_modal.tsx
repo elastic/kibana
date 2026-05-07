@@ -28,10 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
-import {
-  useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
-} from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
+import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 
 const DEFAULT_SCHEMA = z.object({}).catchall(z.unknown());
 const SCHEMA_URI = 'inmemory://schemas/resume-execution-json-editor-schema';

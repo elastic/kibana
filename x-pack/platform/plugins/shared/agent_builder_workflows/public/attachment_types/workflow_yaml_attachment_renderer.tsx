@@ -19,14 +19,17 @@ import { CodeEditor } from '@kbn/code-editor';
 import type { AnalyticsServiceStart, ApplicationStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
-import { useWorkflowsApi, useWorkflowsCapabilities, type WorkflowApi } from '@kbn/workflows-ui';
+import {
+  useWorkflowsApi,
+  useWorkflowsCapabilities,
+  useWorkflowsMonacoTheme,
+  WORKFLOWS_MONACO_EDITOR_THEME,
+  type WorkflowApi,
+} from '@kbn/workflows-ui';
 import {
   PLUGIN_ID,
   queryClient,
   WorkflowsBaseTelemetry,
-  useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
-  type TelemetryServiceClient,
 } from '@kbn/workflows-management-plugin/public';
 
 interface WorkflowYamlData {
@@ -291,10 +294,11 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
   analytics: AnalyticsServiceStart;
 }): AttachmentUIDefinition<WorkflowYamlAttachment> => {
   const { application } = core;
-  const telemetryClient: TelemetryServiceClient = {
+  // Minimal adapter matching the shape WorkflowsBaseTelemetry accepts —
+  // duplicated here to avoid importing the internal TelemetryServiceClient type.
+  const telemetry = new WorkflowsBaseTelemetry({
     reportEvent: analytics.reportEvent.bind(analytics),
-  };
-  const telemetry = new WorkflowsBaseTelemetry(telemetryClient);
+  });
   let currentAppId: string | undefined;
   let currentLocation = '';
   let appContextSub: Subscription | undefined;
