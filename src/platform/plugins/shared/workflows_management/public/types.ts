@@ -51,16 +51,20 @@ export interface WorkflowsPublicPluginStart {
     requiredProducts: ServerlessTierRequiredProducts;
   }) => void;
   /**
-   * Shared workflow-domain telemetry. Sibling plugins that emit workflow-related
-   * EBT events should use this instance so events are reported by a single owner.
+   * Lazily resolves the shared workflow-domain telemetry singleton. Sibling
+   * plugins that emit workflow-related EBT events should use this instance so
+   * events are reported by a single owner. The factory is lazy so that the
+   * heavy telemetry module stays out of the page-load bundle.
    */
-  telemetry: WorkflowsBaseTelemetry;
+  getTelemetry: () => Promise<WorkflowsBaseTelemetry>;
   /**
-   * Shared React Query client used by the workflows UI. Sibling plugins that
-   * mutate workflows from outside the workflows app must use this client so
-   * workflows_management's cached queries get invalidated.
+   * Lazily resolves the shared React Query client used by the workflows UI.
+   * Sibling plugins that mutate workflows from outside the workflows app must
+   * use this client so workflows_management's cached queries get invalidated.
+   * The factory is lazy so that @kbn/react-query stays out of the page-load
+   * bundle.
    */
-  queryClient: QueryClient;
+  getQueryClient: () => Promise<QueryClient>;
 }
 
 export interface WorkflowsPublicPluginStartDependencies {

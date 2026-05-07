@@ -26,8 +26,9 @@ import {
   WORKFLOWS_MONACO_EDITOR_THEME,
   type WorkflowApi,
 } from '@kbn/workflows-ui';
+import type { QueryClient } from '@kbn/react-query';
 import { PLUGIN_ID as WORKFLOW_PLUGIN_ID } from '@kbn/workflows-management-plugin/common';
-import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
+import type { WorkflowsBaseTelemetry } from '@kbn/workflows-management-plugin/public';
 
 interface WorkflowYamlData {
   yaml: string;
@@ -52,8 +53,8 @@ interface SaveWorkflowParams {
   yaml: string;
   workflowId?: string;
   updateOrigin: CanvasRenderCallbacks['updateOrigin'];
-  telemetry: WorkflowsPublicPluginStart['telemetry'];
-  queryClient: WorkflowsPublicPluginStart['queryClient'];
+  telemetry: WorkflowsBaseTelemetry;
+  queryClient: QueryClient;
 }
 
 const saveWorkflow = async ({
@@ -131,8 +132,8 @@ const WorkflowYamlCanvasContent: React.FC<{
   updateOrigin: CanvasRenderCallbacks['updateOrigin'];
   application: ApplicationStart;
   isOnWorkflowPage: (workflowId: string) => boolean;
-  telemetry: WorkflowsPublicPluginStart['telemetry'];
-  queryClient: WorkflowsPublicPluginStart['queryClient'];
+  telemetry: WorkflowsBaseTelemetry;
+  queryClient: QueryClient;
 }> = ({
   attachment,
   isSidebar,
@@ -302,8 +303,8 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
   queryClient,
 }: {
   core: CoreStart;
-  telemetry: WorkflowsPublicPluginStart['telemetry'];
-  queryClient: WorkflowsPublicPluginStart['queryClient'];
+  telemetry: WorkflowsBaseTelemetry;
+  queryClient: QueryClient;
 }): AttachmentUIDefinition<WorkflowYamlAttachment> => {
   const { application } = core;
   let currentAppId: string | undefined;

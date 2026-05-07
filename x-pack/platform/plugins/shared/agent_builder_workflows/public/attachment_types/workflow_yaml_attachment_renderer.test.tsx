@@ -12,7 +12,7 @@ import { QueryClient } from '@kbn/react-query';
 import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
-import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
+import type { WorkflowsBaseTelemetry } from '@kbn/workflows-management-plugin/public';
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 
@@ -57,7 +57,7 @@ const createMockServices = ({
   const telemetry = {
     reportWorkflowCreated: jest.fn(),
     reportWorkflowUpdated: jest.fn(),
-  } as unknown as WorkflowsPublicPluginStart['telemetry'];
+  } as unknown as WorkflowsBaseTelemetry;
   return {
     core,
     telemetry,

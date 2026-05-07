@@ -34,10 +34,14 @@ export class AgentBuilderWorkflowsPlugin
       .pipe(first((enabled) => enabled))
       .subscribe(async () => {
         const [coreStart, depsStart] = await coreSetup.getStartServices();
+        const [telemetry, queryClient] = await Promise.all([
+          depsStart.workflowsManagement.getTelemetry(),
+          depsStart.workflowsManagement.getQueryClient(),
+        ]);
         registerWorkflowAttachmentRenderers(depsStart.agentBuilder.attachments, {
           core: coreStart,
-          telemetry: depsStart.workflowsManagement.telemetry,
-          queryClient: depsStart.workflowsManagement.queryClient,
+          telemetry,
+          queryClient,
         });
       });
 
