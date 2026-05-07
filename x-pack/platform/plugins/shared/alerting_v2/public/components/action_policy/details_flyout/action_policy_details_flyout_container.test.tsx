@@ -205,9 +205,10 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
     jest.clearAllMocks();
   });
 
-  it('renders nothing while the policy is loading', () => {
+  it('renders the loading flyout while the policy is loading', () => {
     mockUseFetchActionPolicy.mockReturnValue({ data: undefined, isLoading: true });
     renderContainer();
+    expect(screen.getByTestId('loadingFlyout')).toBeInTheDocument();
     expect(screen.queryByTestId('mockFlyout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('entityNotFoundFlyout')).not.toBeInTheDocument();
   });

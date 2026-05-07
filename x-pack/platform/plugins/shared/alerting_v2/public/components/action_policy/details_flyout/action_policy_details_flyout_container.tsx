@@ -11,6 +11,7 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { paths } from '../../../constants';
 import { EntityNotFoundFlyout } from '../../entity_not_found_flyout';
+import { LoadingFlyout } from '../../loading_flyout';
 import { useCreateActionPolicy } from '../../../hooks/use_create_action_policy';
 import { useDeleteActionPolicy } from '../../../hooks/use_delete_action_policy';
 import { useDisableActionPolicy } from '../../../hooks/use_disable_action_policy';
@@ -74,7 +75,16 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
     onClose();
   };
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <LoadingFlyout
+        title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.loadingTitle', {
+          defaultMessage: 'Action policy',
+        })}
+        onClose={onClose}
+      />
+    );
+  }
 
   if (isError || !policy) {
     return (

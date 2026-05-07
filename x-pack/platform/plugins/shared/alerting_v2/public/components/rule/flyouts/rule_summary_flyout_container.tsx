@@ -7,12 +7,15 @@
 
 import React, { useState } from 'react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import { i18n } from '@kbn/i18n';
 import { paths } from '../../../constants';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { useDeleteRule } from '../../../hooks/use_delete_rule';
 import { useToggleRuleEnabled } from '../../../hooks/use_toggle_rule_enabled';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { DeleteConfirmationModal } from '../modals/delete_confirmation_modal';
+import { EntityNotFoundFlyout } from '../../entity_not_found_flyout';
+import { LoadingFlyout } from '../../loading_flyout';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 
 interface Props {
@@ -25,11 +28,34 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose }: Props) => {
   const { basePath } = useService(CoreStart('http'));
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
 
-  const { data: rule } = useFetchRule(ruleId);
+  const { data: rule, isLoading, isError } = useFetchRule(ruleId);
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { mutate: toggleRuleEnabled } = useToggleRuleEnabled();
 
-  if (!rule) return null;
+  if (isLoading) {
+    return (
+      <LoadingFlyout
+        title={i18n.translate('xpack.alertingV2.rule.summaryFlyout.loadingTitle', {
+          defaultMessage: 'Rule',
+        })}
+        onClose={onClose}
+      />
+    );
+  }
+
+  if (isError || !rule) {
+    return (
+      <EntityNotFoundFlyout
+        title={i18n.translate('xpack.alertingV2.rule.summaryFlyout.notFoundTitle', {
+          defaultMessage: 'Rule not found',
+        })}
+        body={i18n.translate('xpack.alertingV2.rule.summaryFlyout.notFoundBody', {
+          defaultMessage: 'The rule may have been deleted or you may not have access to it.',
+        })}
+        onClose={onClose}
+      />
+    );
+  }
 
   return (
     <>
