@@ -15,6 +15,9 @@ interface CreateStepHandlerContextParams {
   esSearchMock?: jest.Mock;
   esCountMock?: jest.Mock;
   overrides?: Partial<StepHandlerContext>;
+  workflowId?: string;
+  executionId?: string;
+  spaceId?: string;
 }
 
 export const createStepHandlerContext = ({
@@ -24,6 +27,9 @@ export const createStepHandlerContext = ({
   esSearchMock = jest.fn(),
   esCountMock = jest.fn(),
   overrides = {},
+  workflowId = 'workflow-123',
+  executionId = 'execution-456',
+  spaceId = 'default',
 }: CreateStepHandlerContextParams = {}): StepHandlerContext => {
   const context = {
     input,
@@ -31,7 +37,8 @@ export const createStepHandlerContext = ({
     config,
     contextManager: {
       getContext: jest.fn().mockReturnValue({
-        workflow: { spaceId: 'default' },
+        workflow: { id: workflowId, spaceId },
+        execution: { id: executionId },
       }),
       getScopedEsClient: jest.fn().mockReturnValue({
         search: esSearchMock,
@@ -60,5 +67,48 @@ export const createStepHandlerContext = ({
 export const createMockActionService = () => ({
   create: jest.fn(),
   stop: jest.fn(),
+  resolveSavedQueryByName: jest.fn(),
+  resolvePackByName: jest.fn(),
   logger: { info: jest.fn(), error: jest.fn(), debug: jest.fn(), warn: jest.fn() },
 });
+
+/** Creates a mock OsqueryAppContext with controllable auth behaviour. */
+export const createMockOsqueryContext = ({
+  writeLiveQueries = true,
+  runSavedQueries = true,
+  readLiveQueries = true,
+  username = 'test-user',
+  profileUid = 'profile-uid-123',
+}: {
+  writeLiveQueries?: boolean;
+  runSavedQueries?: boolean;
+  readLiveQueries?: boolean;
+  username?: string;
+  profileUid?: string | null;
+} = {}) => {
+  const resolveCapabilities = jest.fn().mockResolvedValue({
+    osquery: { writeLiveQueries, runSavedQueries, readLiveQueries },
+  });
+
+  const coreStart = {
+    capabilities: { resolveCapabilities },
+  };
+
+  const security = {
+    userProfiles: {
+      getCurrent: jest.fn().mockResolvedValue({
+        uid: profileUid,
+        user: { username, full_name: username, email: null },
+      }),
+    },
+    authc: {
+      getCurrentUser: jest.fn().mockReturnValue({ username, full_name: username, email: null }),
+    },
+  };
+
+  return {
+    getStartServices: jest.fn().mockResolvedValue([coreStart, { security }]),
+    security,
+    logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() }) },
+  };
+};

@@ -24,6 +24,8 @@ export function registerOsqueryWorkflowExtensions(
   workflowsExtensions.registerStepDefinition(
     getRunPackStepDefinition(actionService, osqueryContext)
   );
-  workflowsExtensions.registerStepDefinition(getGetResultsStepDefinition());
-  workflowsExtensions.registerStepDefinition(getGetSavedQueryStepDefinition(actionService));
+  workflowsExtensions.registerStepDefinition(getGetResultsStepDefinition(osqueryContext));
+  workflowsExtensions.registerStepDefinition(
+    getGetSavedQueryStepDefinition(actionService, osqueryContext)
+  );
 }

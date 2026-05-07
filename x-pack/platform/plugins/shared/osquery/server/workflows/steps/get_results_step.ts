@@ -6,6 +6,7 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import {
   getResultsStepCommonDefinition,
   type GetResultsStepInput,
@@ -16,14 +17,22 @@ import {
   OSQUERY_INTEGRATION_NAME,
   ACTION_RESPONSES_DATA_STREAM_INDEX,
 } from '../../../common/constants';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getWorkflowRequest, requireOsqueryReadAuthz } from './utils';
 
 const RESULTS_INDEX = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
 
-export const getGetResultsStepDefinition = () =>
+export const getGetResultsStepDefinition = (osqueryContext: OsqueryAppContext) =>
   createServerStepDefinition({
     ...getResultsStepCommonDefinition,
     handler: async (context) => {
       const input = context.input as GetResultsStepInput;
+
+      const fakeRequest = getWorkflowRequest(context);
+      const [coreStart] = await osqueryContext.getStartServices();
+
+      await requireOsqueryReadAuthz(coreStart, fakeRequest);
+
       const esClient = context.contextManager.getScopedEsClient();
       const maxRows = input.max_rows ?? 1000;
 
@@ -77,7 +86,7 @@ export const getGetResultsStepDefinition = () =>
             index: RESULTS_INDEX,
             query: { match: { action_id: queryActionId } },
             size: Math.min(remaining, 1000),
-            sort: [{ '@timestamp': 'asc' }, { 'agent.id': 'asc' }],
+            sort: [{ '@timestamp': { order: 'asc' } }, { 'agent.id': { order: 'asc' } }],
             fields: ['osquery.*', 'agent.*', 'elastic_agent.*'],
             ...(searchAfter ? { search_after: searchAfter } : {}),
           });
@@ -124,9 +133,16 @@ export const getGetResultsStepDefinition = () =>
           } satisfies GetResultsStepOutput,
         };
       } catch (error) {
+        if (error instanceof ExecutionError) {
+          throw error;
+        }
+
         context.logger.error('osquery.getResults failed', error as Error);
 
-        return { error: error as Error };
+        throw new ExecutionError({
+          type: 'RuntimeError',
+          message: (error as Error).message ?? String(error),
+        });
       }
     },
   });

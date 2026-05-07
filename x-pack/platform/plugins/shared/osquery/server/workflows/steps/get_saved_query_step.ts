@@ -6,20 +6,30 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import {
   getSavedQueryStepCommonDefinition,
   type GetSavedQueryStepInput,
 } from '../../../common/workflows/steps/get_saved_query_step';
 import type { createActionService } from '../../handlers/action/create_action_service';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getWorkflowRequest, requireOsqueryReadAuthz } from './utils';
 
 export const getGetSavedQueryStepDefinition = (
-  actionService: ReturnType<typeof createActionService>
+  actionService: ReturnType<typeof createActionService>,
+  osqueryContext: OsqueryAppContext
 ) =>
   createServerStepDefinition({
     ...getSavedQueryStepCommonDefinition,
     handler: async (context) => {
       const input = context.input as GetSavedQueryStepInput;
-      const spaceId = context.contextManager.getContext().workflow?.spaceId ?? 'default';
+
+      const fakeRequest = getWorkflowRequest(context);
+      const [coreStart] = await osqueryContext.getStartServices();
+
+      await requireOsqueryReadAuthz(coreStart, fakeRequest);
+
+      const spaceId = context.contextManager.getContext().workflow.spaceId;
 
       try {
         const savedQuery = await actionService.resolveSavedQueryByName(
@@ -38,9 +48,25 @@ export const getGetSavedQueryStepDefinition = (
           },
         };
       } catch (error) {
+        if (error instanceof ExecutionError) {
+          throw error;
+        }
+
+        const message = (error as Error).message ?? String(error);
+
+        if (message.toLowerCase().includes('not found') || message.toLowerCase().includes('404')) {
+          throw new ExecutionError({
+            type: 'NotFoundError',
+            message: `Saved query not found: ${input.saved_query_id}`,
+          });
+        }
+
         context.logger.error('osquery.getSavedQuery failed', error as Error);
 
-        return { error: error as Error };
+        throw new ExecutionError({
+          type: 'RuntimeError',
+          message,
+        });
       }
     },
   });

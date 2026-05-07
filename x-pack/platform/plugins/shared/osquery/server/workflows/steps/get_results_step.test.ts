@@ -5,47 +5,55 @@
  * 2.0.
  */
 
+import { ExecutionError } from '@kbn/workflows/server';
 import { getGetResultsStepDefinition } from './get_results_step';
-import { createStepHandlerContext } from './test_utils';
+import { createStepHandlerContext, createMockOsqueryContext } from './test_utils';
+
+const makeActionHit = (agents: string[]) => ({
+  hits: { hits: [{ _source: { action_id: 'action-1', agents } }] },
+});
+
+const makeAgentCountResponse = (count: number) => ({
+  aggregations: { unique_agents: { value: count } },
+});
+
+const makeResultHits = (rows: Array<Record<string, unknown>>) => ({
+  hits: {
+    hits: rows.map((row, i) => ({
+      fields: Object.fromEntries(
+        Object.entries(row).map(([k, v]) => [`osquery.${k}`, [v]])
+      ),
+      sort: [`2024-01-01`, `id${i}`],
+    })),
+  },
+});
 
 describe('osquery.getResults step', () => {
-  const stepDef = getGetResultsStepDefinition();
+  describe('authorization', () => {
+    it('should throw PermissionError when author lacks readLiveQueries', async () => {
+      const osqueryContext = createMockOsqueryContext({ readLiveQueries: false });
+      const stepDef = getGetResultsStepDefinition(osqueryContext as any);
+
+      const context = createStepHandlerContext({
+        input: { action_id: 'action-1' },
+        stepType: 'osquery.getResults',
+      });
+
+      await expect(stepDef.handler(context)).rejects.toThrow(ExecutionError);
+      await expect(stepDef.handler(context)).rejects.toMatchObject({ type: 'PermissionError' });
+    });
+  });
 
   describe('completed action', () => {
     it('should return results with status success when all agents responded', async () => {
+      const osqueryContext = createMockOsqueryContext();
+      const stepDef = getGetResultsStepDefinition(osqueryContext as any);
+
       const esSearchMock = jest
         .fn()
-        // First call: action lookup
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              { _source: { action_id: 'action-1', agents: ['agent-1', 'agent-2'] } },
-            ],
-          },
-        })
-        // Second call: agent count
-        .mockResolvedValueOnce({
-          aggregations: { unique_agents: { value: 2 } },
-        })
-        // Third call: result rows
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _source: {
-                  action_response: { osquery: { name: 'process1', pid: 123 } },
-                },
-                sort: ['2024-01-01', 'id1'],
-              },
-              {
-                _source: {
-                  action_response: { osquery: { name: 'process2', pid: 456 } },
-                },
-                sort: ['2024-01-01', 'id2'],
-              },
-            ],
-          },
-        });
+        .mockResolvedValueOnce(makeActionHit(['agent-1', 'agent-2']))
+        .mockResolvedValueOnce(makeAgentCountResponse(2))
+        .mockResolvedValueOnce(makeResultHits([{ name: 'process1', pid: 123 }, { name: 'process2', pid: 456 }]));
 
       const esCountMock = jest.fn().mockResolvedValue({ count: 2 });
 
@@ -59,10 +67,7 @@ describe('osquery.getResults step', () => {
       const result = await stepDef.handler(context);
 
       expect(result.output).toEqual({
-        rows: [
-          { name: 'process1', pid: 123 },
-          { name: 'process2', pid: 456 },
-        ],
+        rows: [{ name: 'process1', pid: 123 }, { name: 'process2', pid: 456 }],
         row_count: 2,
         responded_agents: 2,
         total_agents: 2,
@@ -73,21 +78,14 @@ describe('osquery.getResults step', () => {
 
   describe('partial results', () => {
     it('should return partial status when not all agents responded', async () => {
+      const osqueryContext = createMockOsqueryContext();
+      const stepDef = getGetResultsStepDefinition(osqueryContext as any);
+
       const esSearchMock = jest
         .fn()
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              { _source: { agents: ['agent-1', 'agent-2', 'agent-3'] } },
-            ],
-          },
-        })
-        .mockResolvedValueOnce({
-          aggregations: { unique_agents: { value: 1 } },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [] },
-        });
+        .mockResolvedValueOnce(makeActionHit(['agent-1', 'agent-2', 'agent-3']))
+        .mockResolvedValueOnce(makeAgentCountResponse(1))
+        .mockResolvedValueOnce({ hits: { hits: [] } });
 
       const esCountMock = jest.fn().mockResolvedValue({ count: 0 });
 
@@ -108,9 +106,10 @@ describe('osquery.getResults step', () => {
 
   describe('not found', () => {
     it('should return not_found when action does not exist', async () => {
-      const esSearchMock = jest.fn().mockResolvedValueOnce({
-        hits: { hits: [] },
-      });
+      const osqueryContext = createMockOsqueryContext();
+      const stepDef = getGetResultsStepDefinition(osqueryContext as any);
+
+      const esSearchMock = jest.fn().mockResolvedValueOnce({ hits: { hits: [] } });
 
       const context = createStepHandlerContext({
         input: { action_id: 'nonexistent' },
@@ -122,6 +121,35 @@ describe('osquery.getResults step', () => {
 
       expect(result.output?.status).toBe('not_found');
       expect(result.output?.rows).toEqual([]);
+    });
+  });
+
+  describe('max_rows cap', () => {
+    it('should return at most max_rows rows', async () => {
+      const osqueryContext = createMockOsqueryContext();
+      const stepDef = getGetResultsStepDefinition(osqueryContext as any);
+
+      const rows = Array.from({ length: 5 }, (_, i) => ({ pid: i }));
+
+      const esSearchMock = jest
+        .fn()
+        .mockResolvedValueOnce(makeActionHit(['agent-1']))
+        .mockResolvedValueOnce(makeAgentCountResponse(1))
+        .mockResolvedValueOnce(makeResultHits(rows));
+
+      const esCountMock = jest.fn().mockResolvedValue({ count: 100 });
+
+      const context = createStepHandlerContext({
+        input: { action_id: 'action-1', max_rows: 5 },
+        stepType: 'osquery.getResults',
+        esSearchMock,
+        esCountMock,
+      });
+
+      const result = await stepDef.handler(context);
+
+      expect(result.output?.rows).toHaveLength(5);
+      expect(result.output?.row_count).toBe(100);
     });
   });
 });
