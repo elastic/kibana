@@ -29,26 +29,25 @@ export const useSendMessage = () => {
   const { selectedConnector: connectorId } = useConnectorSelection();
 
   const {
-    activeStream,
+    activeStreams,
     mutateSendMessage,
     mutateResumeRound,
-    cancelActiveStream,
+    cancelStream,
     removeError: removeErrorCtx,
   } = useSendMessageContext();
 
   const record = useStreamRecord(conversationId);
 
-  const isMyStreamActive = Boolean(
-    activeStream && conversationId && activeStream.conversationId === conversationId
-  );
+  const myStream = conversationId ? activeStreams.get(conversationId) : undefined;
+  const isMyStreamActive = Boolean(myStream);
 
   const lastRound = conversation?.rounds?.at(-1);
   const isLastRoundInProgress = lastRound?.status === ConversationRoundStatus.inProgress;
 
   const isResponseLoading =
-    isMyStreamActive && (isLastRoundInProgress || activeStream?.type === 'resume');
-  const isResuming = isMyStreamActive && activeStream?.type === 'resume';
-  const isRegenerating = isMyStreamActive && activeStream?.type === 'regenerate';
+    isMyStreamActive && (isLastRoundInProgress || myStream?.type === 'resume');
+  const isResuming = isMyStreamActive && myStream?.type === 'resume';
+  const isRegenerating = isMyStreamActive && myStream?.type === 'regenerate';
 
   const sendMessage = useCallback(
     ({
@@ -143,8 +142,10 @@ export const useSendMessage = () => {
   }, [isResponseLoading, record.error, record.pendingMessage, conversationId, sendMessage]);
 
   const cancel = useCallback(() => {
-    cancelActiveStream();
-  }, [cancelActiveStream]);
+    if (conversationId) {
+      cancelStream(conversationId);
+    }
+  }, [cancelStream, conversationId]);
 
   const removeError = useCallback(() => {
     if (conversationId) {
@@ -166,8 +167,12 @@ export const useSendMessage = () => {
       pendingMessage: record.pendingMessage,
       error: record.error,
       errorSteps: record.errorSteps,
-      agentReasoning: isMyStreamActive ? activeStream?.agentReasoning ?? null : null,
+      agentReasoning: myStream?.agentReasoning ?? null,
       canCancel: isMyStreamActive,
+      // Use this when the question is "is the conversation locked from external action because
+      // a mutation is in flight?" — `isResponseLoading` answers a narrower question (round-level loading
+      // spinner semantics) and goes false during HITL pause.
+      isStreaming: isMyStreamActive,
     }),
     [
       sendMessage,
@@ -183,7 +188,7 @@ export const useSendMessage = () => {
       record.error,
       record.errorSteps,
       isMyStreamActive,
-      activeStream?.agentReasoning,
+      myStream?.agentReasoning,
     ]
   );
 };
