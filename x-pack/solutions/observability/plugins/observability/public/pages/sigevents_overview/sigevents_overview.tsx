@@ -68,6 +68,15 @@ const stickyBannerStyles = (paddingSize: string) => css`
   margin: -${paddingSize} -${paddingSize} 0;
 `;
 
+function RelativeTimestamp({ timestamp }: { timestamp: string }) {
+  const diffSeconds = Math.round((new Date(timestamp).getTime() - Date.now()) / 1000);
+  return (
+    <>
+      (<FormattedRelativeTime value={diffSeconds} numeric="auto" updateIntervalInSeconds={60} />)
+    </>
+  );
+}
+
 const embeddableConversationWrapperStyles = css`
   [data-test-subj='agentBuilderEmbeddableConversation'] {
     background: transparent;
@@ -315,19 +324,9 @@ export function SigeventsOverviewPage() {
     runEvidenceReview,
   ]);
 
-  const lastUpdatedLabel = useMemo(() => {
-    if (!eventData?.timestamp) {
-      return undefined;
-    }
-    const timestampMs = new Date(eventData.timestamp).getTime();
-    const nowMs = Date.now();
-    const diffSeconds = Math.round((timestampMs - nowMs) / 1000);
-    return (
-      <>
-        (<FormattedRelativeTime value={diffSeconds} numeric="auto" updateIntervalInSeconds={60} />)
-      </>
-    );
-  }, [eventData?.timestamp]);
+  const lastUpdatedLabel = eventData?.timestamp ? (
+    <RelativeTimestamp timestamp={eventData.timestamp} />
+  ) : undefined;
 
   const healthyMetrics: HealthyMetricCardItem[] | undefined = useMemo(() => {
     if (!overviewData) {
