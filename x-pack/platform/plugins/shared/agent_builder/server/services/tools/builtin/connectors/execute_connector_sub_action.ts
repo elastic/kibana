@@ -15,22 +15,35 @@ import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
 import { normalizeExecuteConnectorSubActionArgs } from './normalize_execute_connector_sub_action_args';
 
-const executeConnectorSubActionArgsSchema = z.object({
-  connectorId: z.string().min(1).describe('The ID of the connector instance to execute against'),
+const connectorIdValidationMessage =
+  'connectorId is required at the root of the tool arguments (copy the Connector ID from the connector attachment). ' +
+  'Do not send only sub-action fields at the top level without connectorId and subAction.';
+
+const subActionValidationMessage =
+  'subAction is required at the root (exact sub-action name from the connector attachment, e.g. searchMessages). ' +
+  'This tool does not infer subAction from other parameters.';
+
+export const executeConnectorSubActionArgsSchema = z.object({
+  connectorId: z
+    .string()
+    .min(1, connectorIdValidationMessage)
+    .describe(
+      'Saved connector instance ID at the **root** of arguments — not inside params. ' +
+        'Must match the Connector ID shown in the connector attachment.'
+    ),
   subAction: z
     .string()
-    .min(1)
+    .min(1, subActionValidationMessage)
     .describe(
-      'The exact name of the sub-action to execute. ' +
-        'Must match one of the sub-action names listed in the connector attachment (e.g. searchMessages, sendMessage). ' +
-        'Do not guess — read the connector attachment first.'
+      'Exact sub-action name at the **root** of arguments (must match a tool sub-action listed on the attachment). ' +
+        'Do not guess; read the attachment. Not inferred from params.'
     ),
   params: z
     .record(z.string(), z.any())
     .optional()
     .describe(
-      'Parameters for the sub-action. Must include all required parameters as described in the connector attachment. ' +
-        'Read the connector attachment to see which parameters are required vs optional.'
+      'Sub-action parameters only — put every argument for the sub-action here. ' +
+        'Do not place sub-action fields at the top level next to connectorId (they belong under params).'
     ),
 });
 
@@ -58,9 +71,10 @@ export const createExecuteConnectorSubActionTool = ({
   type: ToolType.builtin,
   description:
     'Execute a sub-action on a connector instance. ' +
-    'IMPORTANT: Before calling this tool, you MUST read the connector attachment to find the exact sub-action names, ' +
-    'required parameters, and the connectorId. Do not guess sub-action names or parameters. ' +
-    'The connector attachment lists all available sub-actions with their parameter schemas.',
+    'Required argument shape: { "connectorId": "<id>", "subAction": "<name>", "params": { ... } } — ' +
+    'connectorId and subAction must always appear at the top level; pass sub-action fields inside params, not flattened to the root. ' +
+    'Read the connector attachment for the Connector ID, exact sub-action names, and each sub-action parameter schema. ' +
+    'Do not guess sub-action names or parameters.',
   schema: executeConnectorSubActionSchema as unknown as typeof executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
   availability: {
