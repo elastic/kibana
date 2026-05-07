@@ -52,6 +52,7 @@ export type { StreamSummary } from './stream_summary';
 export type {
   Verdict,
   Impact,
+  SigEventDocType,
   SigEventEvidence,
   DependencyEdge,
   InfraComponent,
@@ -74,6 +75,7 @@ export {
   IMPACT_COLORS,
   EVIDENCE_RESULTS,
   EXPOSURE_VALUES,
+  SIG_EVENT_DOC_TYPES,
   causeKiSchema,
   dependencyEdgeSchema,
   infraComponentSchema,

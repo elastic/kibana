@@ -161,5 +161,8 @@ export const TRANSLATIONS = {
     exposed: i18n.translate('xpack.streams.lifecycle.exposed', {
       defaultMessage: '⚠ exposed',
     }),
+    rawDocument: i18n.translate('xpack.streams.lifecycle.rawDocument', {
+      defaultMessage: 'Raw document',
+    }),
   },
 };

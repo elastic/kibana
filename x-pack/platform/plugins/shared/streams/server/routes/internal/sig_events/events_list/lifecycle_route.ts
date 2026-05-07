@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { EVIDENCE_RESULTS, EXPOSURE_VALUES } from '../../../../../common';
+import { EVIDENCE_RESULTS, EXPOSURE_VALUES, SIG_EVENT_DOC_TYPES } from '../../../../../common';
 import type {
   LifecycleEvidence,
   LifecycleDetection,
@@ -124,9 +124,10 @@ const mapEvidence = (ev: z.infer<typeof esEvidenceSchema>): LifecycleEvidence =>
   confirmed: ev.confirmed,
 });
 
-const mapDetection = (hit: { _source?: unknown }): LifecycleDetection => {
+const mapDetection = (hit: { _id?: string; _source?: unknown }): LifecycleDetection => {
   const src = esDetectionSourceSchema.parse(hit._source);
   return {
+    id: hit._id ?? '',
     detection_id: src.detection_id,
     timestamp: src['@timestamp'],
     rule_name: src.rule_name,
@@ -260,6 +261,50 @@ const getLifecycleRoute = createServerRoute({
   },
 });
 
+// ---------------------------------------------------------------------------
+// Raw document route
+// ---------------------------------------------------------------------------
+
+const INDEX_MAP: Record<(typeof SIG_EVENT_DOC_TYPES)[number], string> = {
+  detection: DETECTIONS_INDEX,
+  discovery: DISCOVERIES_INDEX,
+  verdict: VERDICTS_INDEX,
+  event: EVENTS_INDEX,
+};
+
+const getRawDocRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/sig_events/raw/{type}/{docId}',
+  params: z.object({
+    path: z.object({
+      type: z.enum(SIG_EVENT_DOC_TYPES),
+      docId: z.string(),
+    }),
+  }),
+  options: {
+    access: 'internal',
+    summary: 'Get the raw ES document for a sig_events entity',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const { scopedClusterClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { type, docId } = params.path;
+    const client = scopedClusterClient.asCurrentUser;
+    const index = INDEX_MAP[type];
+
+    const response = await client.get({ index, id: docId });
+    return { _source: response._source ?? {} };
+  },
+});
+
 export const internalLifecycleRoutes = {
   ...getLifecycleRoute,
+  ...getRawDocRoute,
 };

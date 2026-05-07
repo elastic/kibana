@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   EuiTimeline,
@@ -21,18 +21,21 @@ import {
   EuiDescriptionList,
   EuiLink,
   EuiToolTip,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { VERDICT_COLORS } from '@kbn/streams-plugin/common';
 import type {
   Verdict,
+  SigEventDocType,
   LifecycleDiscovery,
   LifecycleVerdict,
   LifecycleEvidence,
   LifecycleDetection,
 } from '@kbn/streams-plugin/common';
 import { TRANSLATIONS } from './translations';
+import { useRawDocument } from './use_raw_document';
 
 // ---------------------------------------------------------------------------
 // Shared utilities
@@ -130,6 +133,33 @@ const EvidencesList = React.memo(({ evidences }: { evidences: LifecycleEvidence[
 });
 
 // ---------------------------------------------------------------------------
+// Raw document accordion (lazy-fetches full _source on expand)
+// ---------------------------------------------------------------------------
+
+const RawDocAccordion = React.memo(({ type, docId }: { type: SigEventDocType; docId: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { value, loading } = useRawDocument({ type, docId, enabled: isOpen });
+
+  return (
+    <EuiAccordion
+      id={`raw-${type}-${docId}`}
+      buttonContent={TRANSLATIONS.lifecycle.rawDocument}
+      onToggle={setIsOpen}
+      paddingSize="xs"
+      css={compactAccordionCss}
+    >
+      {loading ? (
+        <EuiLoadingSpinner size="s" />
+      ) : value?._source ? (
+        <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable overflowHeight={300}>
+          {JSON.stringify(value._source, null, 2)}
+        </EuiCodeBlock>
+      ) : null}
+    </EuiAccordion>
+  );
+});
+
+// ---------------------------------------------------------------------------
 // Detection timeline item
 // ---------------------------------------------------------------------------
 
@@ -188,6 +218,7 @@ const DetectionItem = React.memo(({ detection }: { detection: LifecycleDetection
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      <RawDocAccordion type="detection" docId={detection.id} />
     </EuiPanel>
   </EuiTimelineItem>
 ));
@@ -344,6 +375,8 @@ const DiscoveryItem = React.memo(({ discovery }: { discovery: LifecycleDiscovery
             </EuiFlexGroup>
           </EuiAccordion>
         )}
+
+        <RawDocAccordion type="discovery" docId={discovery.id} />
       </EuiPanel>
     </EuiTimelineItem>
   );
@@ -443,6 +476,8 @@ const VerdictItem = React.memo(({ verdict: v }: { verdict: LifecycleVerdict }) =
           <EvidencesList evidences={v.evidences} />
         </EuiAccordion>
       )}
+
+      <RawDocAccordion type="verdict" docId={v.id} />
     </EuiPanel>
   </EuiTimelineItem>
 ));
@@ -461,11 +496,12 @@ interface LifecycleTimelineProps {
   detections: LifecycleDetection[];
   discoveries: LifecycleDiscovery[];
   verdicts: LifecycleVerdict[];
+  eventId: string;
   eventTimestamp: string;
 }
 
 export const LifecycleTimeline = React.memo(
-  ({ detections, discoveries, verdicts, eventTimestamp }: LifecycleTimelineProps) => {
+  ({ detections, discoveries, verdicts, eventId, eventTimestamp }: LifecycleTimelineProps) => {
     const sortedItems = useMemo(() => {
       const entries: TimelineEntry[] = [];
 
@@ -510,6 +546,7 @@ export const LifecycleTimeline = React.memo(
               <EuiText size="s">
                 <strong>{TRANSLATIONS.lifecycle.eventCreated}</strong>
               </EuiText>
+              <RawDocAccordion type="event" docId={eventId} />
             </EuiPanel>
           </EuiTimelineItem>
         ),
@@ -517,7 +554,7 @@ export const LifecycleTimeline = React.memo(
 
       entries.sort((a, b) => a.timestamp - b.timestamp);
       return entries;
-    }, [detections, discoveries, verdicts, eventTimestamp]);
+    }, [detections, discoveries, verdicts, eventId, eventTimestamp]);
 
     return (
       <EuiTimeline>

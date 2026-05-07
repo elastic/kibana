@@ -165,6 +165,7 @@ export const EventFlyout = ({ event, onClose }: EventFlyoutProps) => {
             detections={lifecycle.detections}
             discoveries={lifecycle.discoveries}
             verdicts={lifecycle.verdicts}
+            eventId={event.id}
             eventTimestamp={event['@timestamp']}
           />
         ) : (

@@ -20,6 +20,9 @@ export type Impact = (typeof IMPACT_OPTIONS)[number];
 export const EVIDENCE_RESULTS = ['found', 'empty', 'error'] as const;
 export const EXPOSURE_VALUES = ['exposed', 'not_exposed'] as const;
 
+export const SIG_EVENT_DOC_TYPES = ['detection', 'discovery', 'verdict', 'event'] as const;
+export type SigEventDocType = (typeof SIG_EVENT_DOC_TYPES)[number];
+
 export const VERDICT_COLORS: Record<Verdict, string> = {
   promoted: 'success',
   acknowledged: 'warning',
@@ -125,6 +128,7 @@ export const lifecycleInfraComponentSchema = infraComponentSchema.extend({
 export const lifecycleCauseKiSchema = causeKiSchema;
 
 export const lifecycleDetectionSchema = z.object({
+  id: z.string(),
   detection_id: z.string(),
   timestamp: z.string(),
   rule_name: z.string(),
