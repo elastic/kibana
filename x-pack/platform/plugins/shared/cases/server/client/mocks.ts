@@ -7,6 +7,7 @@
 
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 import {
+  httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
   securityServiceMock,
@@ -58,6 +59,19 @@ import {
   createTemplatesServiceMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
+import { CasesEventBus } from '../events/event_bus';
+
+const createCasesEventBusMock = (): CasesEventBus => {
+  return {
+    ...new CasesEventBus(),
+    emitCaseCreated: jest.fn(),
+    emitCaseUpdated: jest.fn(),
+    emitAttachmentsAdded: jest.fn(),
+    onCaseCreated: jest.fn(),
+    onCaseUpdated: jest.fn(),
+    onAttachmentsAdded: jest.fn(),
+  };
+};
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
@@ -254,6 +268,8 @@ export const createCasesClientMockArgs = () => {
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
     fileService: createFileServiceMock(),
     config: ConfigSchema.validate({}),
+    casesEventBus: createCasesEventBusMock(),
+    request: httpServerMock.createKibanaRequest(),
   };
 };
 
@@ -281,6 +297,7 @@ export const createCasesClientFactoryMockArgs = () => {
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     config: ConfigSchema.validate({}),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
+    casesEventBus: createCasesEventBusMock(),
   };
 };
 
