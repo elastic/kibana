@@ -21,6 +21,7 @@ export type * from './src/routes/agent_keys';
 export type * from './src/routes/traces';
 export type * from './src/routes/span_links';
 export type * from './src/routes/observability_overview';
+export type * from './src/routes/agent_explorer';
 export {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,

@@ -114,7 +114,7 @@ type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<in
   ? TResponseType
   : unknown;
 
-interface UseFetcherOptions {
+export interface UseFetcherOptions {
   preservePreviousData?: boolean;
   showToastOnError?: boolean;
   skipTimeRangeRefreshUpdate?: boolean;
