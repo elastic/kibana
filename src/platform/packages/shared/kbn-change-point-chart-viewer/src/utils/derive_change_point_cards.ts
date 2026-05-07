@@ -38,6 +38,13 @@ export interface ChangePointCardModel {
    * Empty object for no-split (single-series) cards.
    */
   readonly entityValues: Readonly<Record<string, string>>;
+  /**
+   * Human-readable "col: val" description of every entity dimension, e.g.
+   * `"host: web-server-1, service: orders"`. Always uses `col: val` format (unlike `title`,
+   * which omits the column name for single-column cards). `undefined` for no-split cards.
+   * Suitable for use as a Lens panel description or case-attachment metadata.
+   */
+  readonly entityDescription: string | undefined;
 }
 
 const serializeCell = (value: unknown): string => {
@@ -308,6 +315,7 @@ export const buildChangePointCards = (params: {
           annotationEvents: [],
           changePointTypes: [],
           entityValues: {},
+          entityDescription: undefined,
         },
       ];
     }
@@ -368,6 +376,11 @@ export const buildChangePointCards = (params: {
       entityValues[col] = serializeCell(firstRow[col]);
     }
 
+    const entityDescription =
+      entityColumnIds.length > 0
+        ? entityColumnIds.map((col) => `${col}: ${entityValues[col]}`).join(', ')
+        : undefined;
+
     cards.push({
       // Use entity label as the stable card ID so React remounts when the entity changes.
       id: `cp-card-${entityLabel || 'all'}`,
@@ -378,6 +391,7 @@ export const buildChangePointCards = (params: {
       minPvalue,
       changePointTypes: [...typesSeen],
       entityValues,
+      entityDescription,
     });
   }
 

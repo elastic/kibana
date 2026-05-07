@@ -188,9 +188,9 @@ describe('derive_change_point_cards', () => {
       expect(cards).toBeUndefined();
 
       // Predicate must agree with the builder.
-      expect(
-        hasChangePointChartCards({ table: tableNoAnnotations, esql: esqlWithHost })
-      ).toBe(false);
+      expect(hasChangePointChartCards({ table: tableNoAnnotations, esql: esqlWithHost })).toBe(
+        false
+      );
     });
 
     it('skips annotation markers when type is set but p-value is null', () => {

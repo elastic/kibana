@@ -54,14 +54,21 @@ export type ChangePointLensProps = Pick<
 /**
  * Builds and keeps the Lens embeddable props up-to-date for a single change point chart card.
  *
- * The hook returns `undefined` while the first build is in flight.
+ * Returns `undefined` while the first build is in flight (renders a loading state).
  *
  * Two independent signals trigger a rebuild:
- *  - `configUpdates$` — fires whenever the card's ES|QL query, title, layers, or error change.
- *  - `discoverFetch$`  — fires whenever Discover triggers a new search (time range, filters, etc.).
+ *  - `chartConfigUpdates$` — fires whenever the card's ES|QL query, title, layers, description,
+ *    or error change (i.e. any input that affects the compiled Lens attributes).
+ *  - `discoverFetch$` — fires whenever Discover triggers a new search (time range, filters, etc.).
+ *    This observable must be a **stable reference**: a new identity on each render restarts the
+ *    RxJS subscription, which immediately triggers a rebuild loop via the BehaviorSubject.
  *
- * Builds are skipped while the chart's DOM element is not visible in the viewport, resuming
- * automatically once it scrolls into view (IntersectionObserver, 10 % threshold).
+ * Builds are skipped while the chart is not visible in the viewport and resume automatically once
+ * it scrolls into view (IntersectionObserver, 10% threshold). This avoids building Lens
+ * expressions for the many off-screen cards in a paginated grid.
+ *
+ * `switchMap` ensures only the latest build is ever applied: if a new trigger arrives while
+ * `builder.build()` is still awaiting, the in-flight result is discarded.
  */
 export const useChangePointLensProps = ({
   lensInstanceId,
@@ -75,65 +82,59 @@ export const useChangePointLensProps = ({
   timeRange: timeRangeOverride,
   error,
   userMessages,
+  description,
 }: {
   lensInstanceId: string;
   /** Human-readable label shown in the Lens panel header, e.g. `"web-server-1"`. */
   title: string;
-  /** The ES|QL query driving this chart (the filtered line-data sub-query). */
+  /** The ES|QL query driving this chart (the entity-filtered line-data sub-query). */
   query: string;
+  /**
+   * Emits whenever Discover executes a new search (time range change, filter change, etc.).
+   *
+   * **Must be a stable reference** (e.g. created once outside the render function). A new
+   * reference on every render restarts the RxJS subscription on each re-render, which triggers
+   * an immediate BehaviorSubject emission → rebuild → `setLensPropsContext` → re-render loop.
+   */
   discoverFetch$: UnifiedChangePointGridProps['fetch$'];
+  /** Ref to the chart's wrapper element used for viewport visibility detection. When omitted (e.g. in tests), builds run unconditionally. */
   chartRef?: React.RefObject<HTMLDivElement>;
+  /** Lens XY layer config: one series layer plus an optional annotation layer. */
   chartLayers: LensXYConfig['layers'];
-  /** Override the chart time range, e.g. to include annotation timestamps outside the fetch range. */
+  /** Overrides the Discover global time range, e.g. to include annotation timestamps that fall before the range start. */
   timeRange?: TimeRange;
+  /** When set, renders an error overlay via Lens `userMessages` instead of the chart. */
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  /** Optional Lens panel description (e.g. entity identity). Forwarded to `LensAttributes.description` for use as case-attachment metadata. */
+  description?: string;
 } & Pick<UnifiedChangePointGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
+  // Captured once — used only as IntersectionObserver rootMargin and does not need to cause the
+  // subscription to be torn down and recreated when the theme changes.
+  const rootMarginRef = useRef(euiTheme.size.base);
 
-  // Signal emitted whenever any card-level config prop changes (query, title, layers, error).
-  // Merged with discoverFetch$ below to form the full set of rebuild triggers.
+  // Emits whenever any prop that affects the compiled Lens attributes changes, bridging React's
+  // render cycle into the RxJS pipeline without recreating the subscription. A BehaviorSubject
+  // is used (rather than a plain Subject) so the initial emission fires immediately on mount,
+  // triggering the first build without waiting for an external event.
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, chartLayers, error, userMessages]);
+  }, [query, title, description, chartLayers, error, userMessages]);
 
-  // Wrapped in useLatest so the RxJS pipeline always invokes the most recent closure
-  // (with the latest query/title/layers) without needing to be listed as a dependency —
-  // adding it to deps would teardown and recreate the entire subscription on every render.
+  // useLatest keeps `.current` pointing to the latest closure on every render. The RxJS
+  // subscription reads `buildAttributesFn.current()` — so it always sees fresh prop values —
+  // without the ref's stable identity ever causing the subscription to be torn down.
   const buildAttributesFn = useLatest(async () => {
-    // Nothing to render: no layers and no error overlay.
     if (!chartLayers.length && !error) return null;
 
-    // LensXYConfig is the high-level, framework-agnostic description of the chart.
-    // Example shape for a split card with one series layer and one annotation layer:
-    //
-    //   {
-    //     chartType: 'xy',
-    //     dataset: { esql: 'FROM logs | CHANGE_POINT metric BY host.name | FORK ...' },
-    //     title: 'web-server-1',
-    //     description: 'host.name: web-server-1',
-    //     layers: [
-    //       { type: 'series', seriesType: 'line',
-    //         xAxis: { type: 'dateHistogram', field: '@timestamp', minimumInterval: 'auto' },
-    //         yAxis: [{ value: 'metric', label: 'metric' }] },
-    //       { type: 'annotation',
-    //         events: [{ name: 'step_change', datetime: '2024-01-15T12:00:00.000Z',
-    //                    icon: 'triangle', color: '#BD271E' }] }
-    //     ],
-    //     legend: { show: false },
-    //     fittingFunction: 'Linear',
-    //   }
     const lensParams: LensXYConfig = {
       chartType: 'xy',
-      dataset: {
-        esql: query,
-      },
+      dataset: { esql: query },
       title,
-      legend: {
-        show: false,
-      },
+      legend: { show: false },
       axisTitleVisibility: {
         showXAxisTitle: false,
         showYAxisTitle: false,
@@ -143,36 +144,25 @@ export const useChangePointLensProps = ({
       fittingFunction: 'Linear',
     };
 
-    const builder = new LensConfigBuilder(services.dataViews);
-
-    // builder.build() compiles LensXYConfig → LensSavedObjectAttributes (the full Lens document).
-    // Example result shape:
-    //
-    //   {
-    //     title: 'web-server-1',
-    //     description: 'host.name: web-server-1',   // set below when description is provided
-    //     visualizationType: 'lnsXY',
-    //     state: {
-    //       datasourceStates: { textBased: { layers: { '<uuid>': { query: { esql: '...' } } } } },
-    //       visualization: { layers: [...], fittingFunction: 'Linear', ... },
-    //       query: { esql: '...' },
-    //       filters: [],
-    //     },
-    //     references: [],
-    //   }
-    const result = (await builder.build(lensParams, {
-      query: {
-        esql: (lensParams.dataset as LensESQLDataset).esql,
-      },
+    // builder.build() compiles the high-level LensXYConfig into a full LensSavedObjectAttributes
+    // document (visualizationType, datasourceStates, visualization, query, filters, references).
+    const result = (await new LensConfigBuilder(services.dataViews).build(lensParams, {
+      query: { esql: (lensParams.dataset as LensESQLDataset).esql },
     })) as LensAttributes;
+
+    // LensConfigBuilder does not expose a description field in its config; set it directly on
+    // the built attributes so it is available as Lens panel description and case-attachment metadata.
+    if (description) {
+      result.description = description;
+    }
 
     return result;
   });
 
   const [lensPropsContext, setLensPropsContext] = useState<ChangePointLensProps>();
 
-  // useStableCallback always invokes the latest closure, so fetchParams / timeRangeOverride
-  // values are always current without needing a dep array (unlike useCallback).
+  // useStableCallback always invokes the latest closure, so fetchParams and timeRangeOverride
+  // are always current even though this callback is only created once (stable identity).
   const updateLensPropsContext = useStableCallback((attributes: LensAttributes) =>
     setLensPropsContext(
       getChangePointLensProps({
@@ -197,7 +187,7 @@ export const useChangePointLensProps = ({
     const intersecting$ = new Observable<boolean>((subscriber) => {
       const observer = new IntersectionObserver(
         ([entry]) => subscriber.next(entry.isIntersecting),
-        { threshold: 0.1, rootMargin: euiTheme.size.base }
+        { threshold: 0.1, rootMargin: rootMarginRef.current }
       );
 
       if (chartRefCurrent) {
@@ -210,15 +200,14 @@ export const useChangePointLensProps = ({
       return () => observer.disconnect();
     }).pipe(distinctUntilChanged(), shareReplay(1));
 
-    // triggers$ fires on every config change or Discover fetch, then immediately
-    // calls buildAttributesFn to produce the updated LensAttributes.
+    // On every config change or Discover fetch, kick off a new async build. switchMap cancels any
+    // in-flight build so only the result of the latest trigger is ever applied.
     const triggers$ = merge(configUpdates$, discoverFetch$).pipe(
       switchMap(() =>
         from(buildAttributesFn.current()).pipe(
-          // Catch synchronous throws and Promise rejections from the builder inside the inner
-          // observable so errors do not propagate to the outer subscription and terminate it.
-          // EMPTY completes the inner stream without emitting, keeping triggers$ alive for the
-          // next emission from configUpdates$ or discoverFetch$.
+          // Errors inside builder.build() must be caught here (inside the inner observable) so
+          // they don't terminate the outer subscription. EMPTY discards the failed build and
+          // leaves the subscription alive for the next trigger.
           catchError((err) => {
             // eslint-disable-next-line no-console
             console.error('[useChangePointLensProps] Failed to build Lens attributes', err);
@@ -229,8 +218,9 @@ export const useChangePointLensProps = ({
       filter((attributes): attributes is LensAttributes => attributes !== null)
     );
 
-    // Only update the rendered props when both a fresh set of attributes is available AND
-    // the chart is currently visible — avoids building Lens expressions for off-screen cards.
+    // Gate state updates on viewport visibility. combineLatest re-emits whenever either source
+    // emits, so a build result that arrives while the chart is off-screen is held until the
+    // chart scrolls into view and intersecting$ emits true.
     const subscription = combineLatest([triggers$, intersecting$])
       .pipe(
         filter(([, isIntersecting]) => isIntersecting),
@@ -243,12 +233,12 @@ export const useChangePointLensProps = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [discoverFetch$, buildAttributesFn, updateLensPropsContext, chartRef, euiTheme.size.base]);
+  }, [discoverFetch$, buildAttributesFn, updateLensPropsContext, chartRef]);
 
   return lensPropsContext;
 };
 
-const getChangePointLensProps = ({
+export const getChangePointLensProps = ({
   id,
   searchSessionId,
   timeRange,

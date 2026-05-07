@@ -19,18 +19,35 @@ import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import React, { useMemo, useRef } from 'react';
-import { ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL } from '../constants';
+import {
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_FOCUSED_VIEW,
+  ACTION_INSPECT_PANEL,
+  ADD_TO_EXISTING_CASE_ACTION_ID,
+} from '../constants';
+import { buildFocusedViewTimeRange } from '../utils/build_change_point_tab_queries';
 import { useChangePointLensProps } from '../hooks/use_change_point_lens_props';
 import type { ChangePointCardModel } from '../utils/derive_change_point_cards';
 import type { UnifiedChangePointGridProps } from '../types';
 
 const CHART_HEIGHT_PX = 230;
 
+const EMBEDDABLE_QUICK_ACTIONS = {
+  quickActions: {
+    view: [ACTION_FOCUSED_VIEW, ACTION_INSPECT_PANEL, ADD_TO_EXISTING_CASE_ACTION_ID] as [
+      string,
+      string,
+      string
+    ],
+  },
+};
+
 const DEFAULT_DISABLED_ACTIONS = [
   'ACTION_CUSTOMIZE_PANEL',
   'ACTION_EXPORT_CSV',
   'alertRule',
   'ACTION_OPEN_IN_DISCOVER',
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
 ];
 
 const chartContainerCss = css`
@@ -131,6 +148,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   const lensProps = useChangePointLensProps({
     lensInstanceId: `changePointMiniLens-${card.id}`,
     title: card.title,
+    description: card.entityDescription,
     query: card.lineEsql,
     services,
     fetchParams,
@@ -143,33 +161,41 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   const { EmbeddableComponent } = services.lens;
 
   const extraActions = useMemo((): Action[] => {
-    if (!actions?.openInNewTab || !lensProps) return [];
-    return [
-      {
-        id: ACTION_EXPLORE_IN_DISCOVER_TAB,
-        order: 20,
-        type: 'actionButton',
-        getDisplayName() {
-          return i18n.translate('changePointChartViewer.lens.exploreInDiscover', {
-            defaultMessage: 'Open in a Discover tab',
-          });
-        },
-        getIconType() {
-          return 'discoverApp';
-        },
-        async isCompatible() {
-          return true;
-        },
-        async execute() {
-          actions.openInNewTab!({
-            query: lensProps.attributes.state.query,
-            tabLabel: lensProps.attributes.title,
-            timeRange: lensProps.timeRange,
-          });
-        },
-      },
-    ];
-  }, [actions, lensProps]);
+    if (!actions?.openInNewTab || !lensProps || !card.annotationEvents.length) return [];
+
+    const timeRange = buildFocusedViewTimeRange(
+      card.annotationEvents,
+      lensProps.timeRange ?? fetchParams.relativeTimeRange
+    );
+
+    return timeRange
+      ? [
+          {
+            id: ACTION_FOCUSED_VIEW,
+            order: 22,
+            type: 'actionButton',
+            getDisplayName() {
+              return i18n.translate('changePointChartViewer.lens.focusedView', {
+                defaultMessage: 'Focused view in Discover tab',
+              });
+            },
+            getIconType() {
+              return 'magnifyPlus';
+            },
+            async isCompatible() {
+              return true;
+            },
+            async execute() {
+              actions.openInNewTab!({
+                query: lensProps.attributes.state.query,
+                tabLabel: `${lensProps.attributes.title} - Focused view`,
+                timeRange,
+              });
+            },
+          },
+        ]
+      : [];
+  }, [actions, card.annotationEvents, fetchParams.relativeTimeRange, lensProps]);
 
   return (
     <div
@@ -183,13 +209,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
     >
       {lensProps ? (
         <div css={chartContainerCss}>
-          <EmbeddableRendererContext.Provider
-            value={{
-              quickActions: {
-                view: [ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL],
-              },
-            }}
-          >
+          <EmbeddableRendererContext.Provider value={EMBEDDABLE_QUICK_ACTIONS}>
             <EmbeddableComponent
               {...lensProps}
               title={lensProps.attributes.title}
