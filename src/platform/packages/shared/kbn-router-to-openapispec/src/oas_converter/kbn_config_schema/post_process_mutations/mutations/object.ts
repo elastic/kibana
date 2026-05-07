@@ -23,10 +23,7 @@ const hasDefault = (schema: OpenAPIV3.SchemaObject): boolean => {
   return schema.default != null;
 };
 
-const populateRequiredFields = (
-  schema: OpenAPIV3.SchemaObject,
-  ctx?: IContext
-): void => {
+const populateRequiredFields = (schema: OpenAPIV3.SchemaObject, ctx?: IContext): void => {
   if (!schema.properties) return;
   const required: string[] = [];
 
@@ -34,9 +31,7 @@ const populateRequiredFields = (
   for (const [key, value] of entries) {
     const optionalViaInline = !isReferenceObject(value) && META_FIELD_X_OAS_OPTIONAL in value;
     const resolvedOptional =
-      ctx && isReferenceObject(value)
-        ? ctx.derefSharedSchema(value.$ref)
-        : undefined;
+      ctx && isReferenceObject(value) ? ctx.derefSharedSchema(value.$ref) : undefined;
     const optionalViaRef =
       resolvedOptional !== undefined && META_FIELD_X_OAS_OPTIONAL in resolvedOptional;
 
