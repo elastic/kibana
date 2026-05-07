@@ -9,10 +9,10 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { transform, size, cloneDeep, get, defaults, isFunction } from 'lodash';
+import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
-import { asPrettyString, formatReactArray } from './utils';
+import { asPrettyString, formatReactArray, formatTextArray } from './utils';
 import type {
   FieldFormatsGetConfigFn,
   FieldFormatInstanceType,
@@ -113,6 +113,24 @@ export abstract class FieldFormat {
   protected textConvert: TextContextTypeConvert | undefined;
 
   /**
+   * Convert a raw value to a formatted string.
+   * Handles arrays automatically (JSON-encodes them).
+   * @param  {unknown} value
+   * @param  {TextContextTypeOptions} [options]
+   * @return {string} - the formatted string
+   * @public
+   */
+  convertToText(value: unknown, options?: TextContextTypeOptions): string {
+    if (Array.isArray(value)) {
+      return formatTextArray(value, (v) => this.convertToText(v, options));
+    }
+    if (this.textConvert) {
+      return this.textConvert(value, options);
+    }
+    return asPrettyString(value, options);
+  }
+
+  /**
    * @property {Function} - ref to child class
    * @internal
    */
@@ -131,21 +149,6 @@ export abstract class FieldFormat {
     if (getConfig) {
       this.getConfig = getConfig;
     }
-  }
-
-  /**
-   * Convert a raw value to a formatted string.
-   * Handles arrays automatically (JSON-encodes them).
-   * @param  {unknown} value
-   * @param  {TextContextTypeOptions} [options]
-   * @return {string} - the formatted string
-   * @public
-   */
-  convertToText(value: unknown, options?: TextContextTypeOptions): string {
-    if (!value || !isFunction((value as any).map)) {
-      return (this.textConvert ?? asPrettyString).call(this, value, options);
-    }
-    return this.convertArray(value as unknown[], options);
   }
 
   /**
@@ -217,16 +220,11 @@ export abstract class FieldFormat {
     return createCustomFieldFormat(convertFn);
   }
 
-  protected convertArray(value: unknown[], options?: TextContextTypeOptions): string {
-    return JSON.stringify(value.map((v) => this.convertToText(v, options)));
-  }
-
   static isInstanceOfFieldFormat(fieldFormat: unknown): fieldFormat is FieldFormat {
     return Boolean(
       fieldFormat &&
         typeof fieldFormat === 'object' &&
-        'convertToText' in fieldFormat &&
-        'convertToReact' in fieldFormat
+        ('convertToText' in fieldFormat || 'convertToReact' in fieldFormat)
     );
   }
 

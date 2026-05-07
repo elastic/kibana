@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { asPrettyString } from './as_pretty_string';
-export { getHighlightReact, getHighlightRequest } from './highlight';
-export { shortenDottedString } from './shorten_dotted_string';
-export { formatReactArray } from './format_react_array';
-export { formatTextArray } from './format_text_array';
-export * as geoUtils from './geo_utils';
+/**
+ * Formats an array value as a JSON-encoded string of individually converted elements.
+ *
+ * This is the text-path counterpart of {@link formatReactArray}.
+ */
+export function formatTextArray(val: unknown[], convertSingle: (v: unknown) => string): string {
+  return JSON.stringify(val.map(convertSingle));
+}
