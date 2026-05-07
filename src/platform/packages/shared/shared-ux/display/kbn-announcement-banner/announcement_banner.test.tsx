@@ -13,16 +13,22 @@ import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { AnnouncementBanner } from './announcement_banner';
 
+const illustration = <img src="" alt="'" />;
+const requiredProps = {
+  title: 'Title',
+  media: illustration,
+};
+
 describe('AnnouncementBanner', () => {
   it('renders the title', () => {
-    const { getByTestId } = renderWithEuiTheme(<AnnouncementBanner title="Hello" />);
+    const { getByTestId } = renderWithEuiTheme(<AnnouncementBanner {...requiredProps} />);
 
-    expect(getByTestId('announcementBanner-title')).toHaveTextContent('Hello');
+    expect(getByTestId('announcementBanner-title')).toHaveTextContent('Title');
   });
 
   it('renders text and children', () => {
     const { getByText } = renderWithEuiTheme(
-      <AnnouncementBanner title="Title" text="Body copy">
+      <AnnouncementBanner {...requiredProps} text="Body copy">
         <span>Extra content</span>
       </AnnouncementBanner>
     );
@@ -33,7 +39,10 @@ describe('AnnouncementBanner', () => {
 
   it('renders the media slot', () => {
     const { getByTestId } = renderWithEuiTheme(
-      <AnnouncementBanner title="Title" media={<img alt="ill" data-test-subj="illustration" />} />
+      <AnnouncementBanner
+        {...requiredProps}
+        media={<img alt="ill" data-test-subj="illustration" />}
+      />
     );
     expect(getByTestId('announcementBanner-media')).toBeInTheDocument();
     expect(getByTestId('illustration')).toBeInTheDocument();
@@ -41,13 +50,15 @@ describe('AnnouncementBanner', () => {
 
   describe('size', () => {
     it('renders as size="m" by default', () => {
-      const { getByTestId } = renderWithEuiTheme(<AnnouncementBanner title="Title" />);
+      const { getByTestId } = renderWithEuiTheme(<AnnouncementBanner {...requiredProps} />);
 
       expect(getByTestId('announcementBanner')).toHaveAttribute('data-size', 'm');
     });
 
     it('renders as size="s"', () => {
-      const { getByTestId } = renderWithEuiTheme(<AnnouncementBanner title="Title" size="s" />);
+      const { getByTestId } = renderWithEuiTheme(
+        <AnnouncementBanner {...requiredProps} size="s" />
+      );
 
       expect(getByTestId('announcementBanner')).toHaveAttribute('data-size', 's');
     });
@@ -55,7 +66,7 @@ describe('AnnouncementBanner', () => {
 
   describe('color', () => {
     it('renders as color="highlighted" by default', () => {
-      const { getByTestId } = renderWithEuiTheme(<AnnouncementBanner title="Title" />);
+      const { getByTestId } = renderWithEuiTheme(<AnnouncementBanner {...requiredProps} />);
 
       expect(getByTestId('announcementBanner')).toHaveAttribute('data-color', 'highlighted');
       expect(getByTestId('announcementBanner')).toHaveStyleRule('background-color', '#F6F9FC');
@@ -63,7 +74,7 @@ describe('AnnouncementBanner', () => {
 
     it('renders as color="plain"', () => {
       const { getByTestId } = renderWithEuiTheme(
-        <AnnouncementBanner title="Title" color="plain" />
+        <AnnouncementBanner {...requiredProps} color="plain" />
       );
 
       expect(getByTestId('announcementBanner')).toHaveAttribute('data-color', 'plain');
@@ -73,7 +84,7 @@ describe('AnnouncementBanner', () => {
 
   describe('onDismiss button', () => {
     it('does not render the dismiss button when onDismiss is omitted', () => {
-      const { queryByTestId } = renderWithEuiTheme(<AnnouncementBanner title="Title" />);
+      const { queryByTestId } = renderWithEuiTheme(<AnnouncementBanner {...requiredProps} />);
 
       expect(queryByTestId('announcementBanner-dismiss')).toBeNull();
     });
@@ -81,7 +92,7 @@ describe('AnnouncementBanner', () => {
     it('fires onDismiss when the dismiss button is clicked', () => {
       const onDismiss = jest.fn();
       const { getByTestId } = renderWithEuiTheme(
-        <AnnouncementBanner title="Title" onDismiss={onDismiss} />
+        <AnnouncementBanner {...requiredProps} onDismiss={onDismiss} />
       );
 
       fireEvent.click(getByTestId('announcementBanner-dismiss'));
@@ -92,7 +103,7 @@ describe('AnnouncementBanner', () => {
     it('spreads dismissButtonProps onto the dismiss button', () => {
       const { getByTestId } = renderWithEuiTheme(
         <AnnouncementBanner
-          title="Title"
+          {...requiredProps}
           onDismiss={() => {}}
           dismissButtonProps={{ 'aria-label': 'Close', 'data-test-subj': 'custom-dismiss' }}
         />
@@ -107,7 +118,7 @@ describe('AnnouncementBanner', () => {
     it('renders primary and secondary action buttons', () => {
       const { getByTestId } = renderWithEuiTheme(
         <AnnouncementBanner
-          title="Title"
+          {...requiredProps}
           actionProps={{
             primary: { children: 'Primary action', onClick: () => {} },
             secondary: { children: 'Secondary action', onClick: () => {} },
@@ -127,7 +138,7 @@ describe('AnnouncementBanner', () => {
     it('does not render a standalone secondary action button', () => {
       const { queryByTestId } = renderWithEuiTheme(
         <AnnouncementBanner
-          title="Title"
+          {...requiredProps}
           actionProps={{
             secondary: { children: 'Secondary action', onClick: () => {} },
           }}
@@ -143,7 +154,7 @@ describe('AnnouncementBanner', () => {
       const secondaryFn = jest.fn();
       const { getByTestId } = renderWithEuiTheme(
         <AnnouncementBanner
-          title="Title"
+          {...requiredProps}
           actionProps={{
             primary: { children: 'Yes', onClick: primaryFn },
             secondary: { children: 'No', onClick: secondaryFn },
@@ -161,14 +172,14 @@ describe('AnnouncementBanner', () => {
 
   describe('headingElement', () => {
     it('renders the title as an h2 by default', () => {
-      const { getByTestId } = renderWithEuiTheme(<AnnouncementBanner title="Heading" />);
+      const { getByTestId } = renderWithEuiTheme(<AnnouncementBanner {...requiredProps} />);
 
       expect(getByTestId('announcementBanner-title').tagName).toBe('H2');
     });
 
     it('renders the title with the requested heading element', () => {
       const { getByTestId } = renderWithEuiTheme(
-        <AnnouncementBanner title="Heading" headingElement="h4" />
+        <AnnouncementBanner {...requiredProps} headingElement="h4" />
       );
 
       expect(getByTestId('announcementBanner-title').tagName).toBe('H4');
@@ -177,7 +188,7 @@ describe('AnnouncementBanner', () => {
 
   it('respects a custom data-test-subj', () => {
     const { getByTestId } = renderWithEuiTheme(
-      <AnnouncementBanner data-test-subj="hero" title="Title" />
+      <AnnouncementBanner {...requiredProps} data-test-subj="hero" />
     );
 
     expect(getByTestId('hero')).toBeInTheDocument();
@@ -186,14 +197,14 @@ describe('AnnouncementBanner', () => {
 
   describe('announceOnMount', () => {
     it('does not render a live region by default', () => {
-      const { queryByRole } = renderWithEuiTheme(<AnnouncementBanner title="Title" />);
+      const { queryByRole } = renderWithEuiTheme(<AnnouncementBanner {...requiredProps} />);
 
       expect(queryByRole('status')).toBeNull();
     });
 
     it('renders a live region when announceOnMount="true"', async () => {
       const { getByRole } = renderWithEuiTheme(
-        <AnnouncementBanner title="Hello" text="World" announceOnMount />
+        <AnnouncementBanner {...requiredProps} title="Hello" text="World" announceOnMount />
       );
 
       await waitFor(() => expect(getByRole('status')).toHaveTextContent('Hello, World'));

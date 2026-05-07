@@ -6,18 +6,20 @@ An announcement banner component with optional media, actions and dismiss button
 
 ```jsx
 // Minimal usage
-<AnnouncementBanner title="This is a title" />
+<AnnouncementBanner title="This is a title" media={<img src="" alt="">} />
 
 // With body text
 <AnnouncementBanner
   title="This is a title"
   text="Announcement body text"
+  media={<img src="" alt="">}
 />
 
 // With actions
 <AnnouncementBanner
   title="This is a title"
   text="Announcement body text"
+  media={<img src="" alt="">}
   actionProps={{
     primary: { children: 'Primary action' onClick: () => {} },
     secondary: { children: 'Secondary action' onClick: () => {} }
@@ -28,6 +30,7 @@ An announcement banner component with optional media, actions and dismiss button
 <AnnouncementBanner
   title="This is a title"
   text="Announcement body text"
+  media={<img src="" alt="">}
   onDismiss={() => {}}
 />
 ```

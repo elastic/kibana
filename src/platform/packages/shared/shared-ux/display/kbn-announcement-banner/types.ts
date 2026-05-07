@@ -69,6 +69,8 @@ export interface AnnouncementBannerProps {
   text?: ReactNode;
   /** Extra content rendered directly below `text`. */
   children?: ReactNode;
+  /** Illustration slot. Wrapped in a square (1:1) container. */
+  media: ReactNode;
   /**
    * Visual size variant.
    * @default 'm'
@@ -86,8 +88,6 @@ export interface AnnouncementBannerProps {
     /** Secondary action, rendered as an `EuiButtonEmpty`. */
     secondary?: AnnouncementBannerActionSecondaryProps;
   };
-  /** Optional illustration. Wrapped in a square (1:1) container. */
-  media?: ReactNode;
   /**
    * When provided, a dismiss button is rendered in the top-right corner and
    * this callback fires when the user activates it.

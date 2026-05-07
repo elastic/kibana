@@ -47,8 +47,7 @@ const IllustrationSmall = () => (
  * Controls panel can toggle the optional slots without exposing their inner
  * shape.
  */
-type StoryArgs = Omit<AnnouncementBannerProps, 'media' | 'actionProps' | 'onDismiss'> & {
-  media: boolean;
+type StoryArgs = Omit<AnnouncementBannerProps, 'actionProps' | 'onDismiss'> & {
   primaryAction: boolean;
   secondaryAction: boolean;
   onDismiss: boolean;
@@ -59,7 +58,7 @@ const buildAnnouncementProps = (args: StoryArgs): AnnouncementBannerProps => {
   return {
     ...rest,
     size,
-    media: media ? size === 's' ? <IllustrationSmall /> : <IllustrationMedium /> : undefined,
+    media: size === 's' ? <IllustrationSmall /> : <IllustrationMedium />,
     actionProps: {
       primary: primaryAction
         ? { children: 'Primary action', onClick: action('primary onClick') }
@@ -80,7 +79,6 @@ const meta: Meta<StoryArgs> = {
     text: 'Envision a realm where your dreams manifest like a breathtaking mural. Each stroke of the brush symbolizes a hope yearning to be fulfilled, creating a tapestry of aspirations that come to life.',
     size: 'm',
     color: 'highlighted',
-    media: true,
     primaryAction: true,
     secondaryAction: true,
     onDismiss: true,
@@ -89,7 +87,6 @@ const meta: Meta<StoryArgs> = {
   argTypes: {
     size: { control: { type: 'inline-radio' }, options: ['s', 'm'] },
     color: { control: { type: 'inline-radio' }, options: ['highlighted', 'plain'] },
-    media: { control: { type: 'boolean' } },
     primaryAction: { control: { type: 'boolean' } },
     secondaryAction: { control: { type: 'boolean' } },
     onDismiss: { control: { type: 'boolean' } },
