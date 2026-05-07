@@ -2638,8 +2638,6 @@
       "@kbn/vis-type-gauge-plugin/*": ["src/platform/plugins/private/vis_types/gauge/*"],
       "@kbn/vis-type-heatmap-plugin": ["src/platform/plugins/private/vis_types/heatmap"],
       "@kbn/vis-type-heatmap-plugin/*": ["src/platform/plugins/private/vis_types/heatmap/*"],
-      "@kbn/vis-type-markdown-plugin": ["src/platform/plugins/private/vis_type_markdown"],
-      "@kbn/vis-type-markdown-plugin/*": ["src/platform/plugins/private/vis_type_markdown/*"],
       "@kbn/vis-type-metric-plugin": ["src/platform/plugins/private/vis_types/metric"],
       "@kbn/vis-type-metric-plugin/*": ["src/platform/plugins/private/vis_types/metric/*"],
       "@kbn/vis-type-pie-plugin": ["src/platform/plugins/private/vis_types/pie"],

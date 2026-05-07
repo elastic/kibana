@@ -803,7 +803,6 @@ src/platform/plugins/private/links @elastic/kibana-presentation
 src/platform/plugins/private/maps_ems @elastic/kibana-presentation
 src/platform/plugins/private/url_forwarding @elastic/kibana-visualizations
 src/platform/plugins/private/vis_default_editor @elastic/kibana-visualizations
-src/platform/plugins/private/vis_type_markdown @elastic/kibana-presentation
 src/platform/plugins/private/vis_types/gauge @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/heatmap @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/metric @elastic/kibana-visualizations
