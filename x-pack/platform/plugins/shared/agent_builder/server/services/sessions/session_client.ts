@@ -325,16 +325,36 @@ export class SessionClientImpl implements SessionClient {
     });
 
     if (triggerToStart && agentId) {
+      const capturedTrigger = triggerToStart;
       this.startRound(
         conversationId,
         agentId,
-        triggerToStart,
+        capturedTrigger,
         connectorId,
         systemPromptOverride
-      ).catch((err) => {
+      ).catch(async (err) => {
         this.logger.error(
           `Failed to start round from drain queue for session ${conversationId}: ${err}`
         );
+        // Re-queue the trigger so it isn't silently dropped.
+        await this.withOCC(conversationId, (source) => {
+          const ss = source.state?.standing_session;
+          if (!ss) return source;
+          const requeued: PendingTriggerEvent = {
+            id: uuidv4(),
+            queued_at: new Date().toISOString(),
+            context: capturedTrigger,
+          };
+          return updateStandingSession(source, {
+            ...ss,
+            status: 'idle',
+            pending_triggers: [requeued, ...ss.pending_triggers],
+          });
+        }).catch((requeueErr) => {
+          this.logger.error(
+            `Failed to re-queue trigger for session ${conversationId}: ${requeueErr}`
+          );
+        });
       });
     }
   }
