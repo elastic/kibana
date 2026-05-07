@@ -37,6 +37,7 @@ if (!BUMP_TYPE) {
       // Step 3: Wait, then trigger DRA snapshot (async).
       pipeline.push('  - wait # before dra snapshot');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
 
       // Step 4: Update the labels for PRs and the color of the label itself
       pipeline.push('  - wait # before update label color');
