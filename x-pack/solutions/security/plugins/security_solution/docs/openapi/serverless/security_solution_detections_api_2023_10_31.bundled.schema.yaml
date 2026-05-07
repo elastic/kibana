@@ -8721,17 +8721,17 @@ components:
       type: object
       properties:
         scriptId:
+          description: The ID of the script to run (from the Kibana Script library)
           type: string
         scriptInput:
+          description: The arguments to pass to the script (if any)
           type: string
         timeout:
           description: Specify the timeout in seconds for the script execution
           example: 60
           type: integer
     RunscriptParams:
-      description: |
-        > warn
-        > This functionality is currently not available
+      description: Run a script on the Elastic Defend host that triggered the alert.
       type: object
       properties:
         command:
