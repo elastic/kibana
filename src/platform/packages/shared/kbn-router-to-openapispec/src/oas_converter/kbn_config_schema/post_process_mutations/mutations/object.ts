@@ -9,6 +9,8 @@
 
 import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
+import { isReferenceObject } from '../../../common';
+import type { IContext } from '../context';
 import { deleteField, stripBadDefault } from './utils';
 
 const { META_FIELD_X_OAS_OPTIONAL } = metaFields;
@@ -21,19 +23,35 @@ const hasDefault = (schema: OpenAPIV3.SchemaObject): boolean => {
   return schema.default != null;
 };
 
-const populateRequiredFields = (schema: OpenAPIV3.SchemaObject): void => {
+const populateRequiredFields = (
+  schema: OpenAPIV3.SchemaObject,
+  ctx?: IContext
+): void => {
   if (!schema.properties) return;
   const required: string[] = [];
 
   const entries = Object.entries(schema.properties as Record<string, OpenAPIV3.SchemaObject>);
   for (const [key, value] of entries) {
-    if (META_FIELD_X_OAS_OPTIONAL in value) {
-      deleteField(value, META_FIELD_X_OAS_OPTIONAL);
+    const optionalViaInline = !isReferenceObject(value) && META_FIELD_X_OAS_OPTIONAL in value;
+    const resolvedOptional =
+      ctx && isReferenceObject(value)
+        ? ctx.derefSharedSchema(value.$ref)
+        : undefined;
+    const optionalViaRef =
+      resolvedOptional !== undefined && META_FIELD_X_OAS_OPTIONAL in resolvedOptional;
+
+    if (optionalViaInline || optionalViaRef) {
+      if (optionalViaInline) {
+        deleteField(value, META_FIELD_X_OAS_OPTIONAL);
+      } else if (resolvedOptional) {
+        deleteField(resolvedOptional, META_FIELD_X_OAS_OPTIONAL);
+      }
       // `schema.maybe()` → omit from `required` only. Do not set `nullable` — that documents JSON
       // `null` as a valid value, which `maybe` does not imply.
     } else if (
-      hasDefault(value) ||
-      Boolean(value.anyOf && value.anyOf.some((v) => isNullable(v as OpenAPIV3.SchemaObject)))
+      !isReferenceObject(value) &&
+      (hasDefault(value) ||
+        Boolean(value.anyOf && value.anyOf.some((v) => isNullable(v as OpenAPIV3.SchemaObject))))
     ) {
       // Must not be added to the required array
     } else {
@@ -57,8 +75,8 @@ const removeNeverType = (schema: OpenAPIV3.SchemaObject): void => {
   }
 };
 
-export const processObject = (schema: OpenAPIV3.SchemaObject): void => {
+export const processObject = (schema: OpenAPIV3.SchemaObject, ctx?: IContext): void => {
   stripBadDefault(schema);
   removeNeverType(schema);
-  populateRequiredFields(schema);
+  populateRequiredFields(schema, ctx);
 };

@@ -110,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Providing an infinite retention might not be allowed for a given project,
         // due to it having an existing max retention period. Because of this
-        // we will only check whether the request was recieved by ES.
+        // we will only check whether the request was received by ES.
         expect(body.success).to.eql(true);
       });
     });

@@ -81,7 +81,7 @@ export async function captureOasSnapshot({
       }
     });
 
-    log.info(`Recieved OAS, writing to ${outputFile}...`);
+    log.info(`Received OAS, writing to ${outputFile}...`);
     await fs.writeFile(outputFile, sortAndPrettyPrint(currentOas));
     const { size: sizeBytes } = await fs.stat(outputFile);
     log.success(`OAS written to ${outputFile}. File size ~${twoDeci(sizeBytes / MB)} MB.`);

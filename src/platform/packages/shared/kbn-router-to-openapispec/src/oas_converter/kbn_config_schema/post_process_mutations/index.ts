@@ -49,7 +49,7 @@ const walkSchema = (ctx: IContext, schema: Schema): void => {
         walkSchema(ctx, value as OpenAPIV3.SchemaObject);
       });
     }
-    mutations.processObject(schema);
+    mutations.processObject(schema, ctx);
   } else if (type === 'string') {
     mutations.processString(schema);
   } else if (type === 'record') {
