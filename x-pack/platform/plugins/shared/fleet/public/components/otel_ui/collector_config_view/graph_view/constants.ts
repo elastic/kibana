@@ -16,6 +16,7 @@ export const RANK_SEPARATION = 80;
 export const NODE_SEPARATION = 30;
 export const GRAPH_MARGIN = 20;
 export const GROUP_PADDING = 40;
+export const DETAIL_PANEL_CONTENT_MAX_HEIGHT = 390;
 
 export type OTelComponentType = 'receiver' | 'processor' | 'connector' | 'exporter' | 'pipeline';
 
