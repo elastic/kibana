@@ -6639,6 +6639,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ebt-click@link:src/platform/packages/shared/kbn-ebt-click":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ebt-tools@link:src/platform/packages/shared/kbn-ebt-tools":
   version "0.0.0"
   uid ""
@@ -6912,6 +6916,10 @@
   uid ""
 
 "@kbn/evals-suite-observability-ai@link:x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-pci-compliance@link:x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance":
   version "0.0.0"
   uid ""
 
@@ -8975,6 +8983,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-vectordb-settings@link:src/platform/packages/shared/serverless/settings/vectordb_project":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-vectordb@link:x-pack/solutions/vectordb/plugins/serverless_vectordb":
+  version "0.0.0"
+  uid ""
+
 "@kbn/serverless-workplace-ai-settings@link:src/platform/packages/shared/serverless/settings/workplace_ai_project":
   version "0.0.0"
   uid ""
@@ -9792,10 +9808,6 @@
   uid ""
 
 "@kbn/vis-type-heatmap-plugin@link:src/platform/plugins/private/vis_types/heatmap":
-  version "0.0.0"
-  uid ""
-
-"@kbn/vis-type-markdown-plugin@link:src/platform/plugins/private/vis_type_markdown":
   version "0.0.0"
   uid ""
 
@@ -14181,9 +14193,9 @@
   integrity sha512-vq7fv0rnt+QTXgPxr5Hjc210p6YKq2kmdziLgnsZGgLJ9e6VAShx1pACLuRjd/AS/sr7phAR58OIIpf0LlmQNw==
 
 "@tootallnate/once@2":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-2.0.0.tgz#f544a148d3ab35801c1f633a7441fd87c2e484bf"
-  integrity sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-2.0.1.tgz#35adc6222e3662fa2222ce123b961476a746b9ea"
+  integrity sha512-HqmEUIGRJ5fSXchkVgR5F7qn48bDBzv0kWj/Kfu5e6uci4UlEeng4331LnBkWffb++Ei3FOVLxo8JJWMFBDMeQ==
 
 "@tootallnate/quickjs-emscripten@^0.23.0":
   version "0.23.0"
@@ -28571,10 +28583,10 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@2.13.4:
-  version "2.13.4"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.13.4.tgz#4e1bf1d727f1481deee900be0f960c5f01a4f59f"
-  integrity sha512-fPlKBeFe+8rpcyR3umUmmHuNwu6gc6T3STvkgEa9WDX/HEgal9wDeflpCUAIRtmvaLZM2igfI5y1bZ9G5J26KA==
+msw@2.13.5:
+  version "2.13.5"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.13.5.tgz#3ef9183096c962435781fc37db490239c6b1a77b"
+  integrity sha512-LuJem+CbqbywJtafv4zh5kcCQNmZnKwfJgJ/LcNYjeG3CU/xJLepJM1CNZcbp+oV8tXFGvUfswPGru34Mx7QGQ==
   dependencies:
     "@inquirer/confirm" "^6.0.11"
     "@mswjs/interceptors" "^0.41.3"
