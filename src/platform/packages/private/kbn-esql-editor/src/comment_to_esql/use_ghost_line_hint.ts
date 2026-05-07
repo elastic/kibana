@@ -103,6 +103,7 @@ export const useGhostLineHint = ({
 
   const clearDecoration = useCallback(() => {
     decorationsRef.current?.clear();
+    decorationsRef.current = undefined;
   }, []);
 
   // Expose clearDecoration through the forward-ref so the comment-to-esql hook

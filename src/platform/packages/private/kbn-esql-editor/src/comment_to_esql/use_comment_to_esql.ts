@@ -369,50 +369,59 @@ export const useCommentToEsql = ({
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    const result = await generateESQL(nlInstruction, isSurgical, queryForRoute, controller.signal);
+    // Ensures the generating flag and decoration are reset on every exit path,
+    // even if a downstream step throws (e.g. executeEdits on a disposed model).
+    try {
+      const result = await generateESQL(
+        nlInstruction,
+        isSurgical,
+        queryForRoute,
+        controller.signal
+      );
 
-    // Was aborted (retrigger / cleanup) or had no content.
-    if (controller.signal.aborted || !result) {
-      if (abortControllerRef.current === controller) {
-        abortControllerRef.current = undefined;
+      // Was aborted (retrigger / cleanup) or had no content.
+      if (controller.signal.aborted || !result) {
+        if (abortControllerRef.current === controller) {
+          abortControllerRef.current = undefined;
+        }
+        return;
       }
+      abortControllerRef.current = undefined;
+
+      const liveModel = editorModel.current;
+      const anchorRanges = commentAnchorRef.current?.getRanges() ?? [];
+      clearCommentAnchor();
+
+      const currentCommentLine = anchorRanges[0]?.startLineNumber;
+      if (!currentCommentLine || !isModelStillValid(liveModel, currentCommentLine)) return;
+
+      if (!isSurgical) {
+        const fullRange = liveModel.getFullModelRange();
+        editor.executeEdits('nl-to-esql', [{ range: fullRange, text: result.content }]);
+        return;
+      }
+
+      const { generatedLineStart, generatedLineEnd } = insertGeneratedCode(
+        editor,
+        liveModel,
+        currentCommentLine,
+        result.content
+      );
+
+      const replacedLineNumber =
+        result.replacesNext && generatedLineEnd + 1 <= liveModel.getLineCount()
+          ? generatedLineEnd + 1
+          : null;
+
+      showReview({
+        commentLineNumber: currentCommentLine,
+        generatedLineStart,
+        generatedLineEnd,
+        replacedLineNumber,
+      });
+    } finally {
       clearGeneratingDecoration();
-      return;
     }
-    abortControllerRef.current = undefined;
-    clearGeneratingDecoration();
-
-    const liveModel = editorModel.current;
-    const anchorRanges = commentAnchorRef.current?.getRanges() ?? [];
-    clearCommentAnchor();
-
-    const currentCommentLine = anchorRanges[0]?.startLineNumber;
-    if (!currentCommentLine || !isModelStillValid(liveModel, currentCommentLine)) return;
-
-    if (!isSurgical) {
-      const fullRange = liveModel.getFullModelRange();
-      editor.executeEdits('nl-to-esql', [{ range: fullRange, text: result.content }]);
-      return;
-    }
-
-    const { generatedLineStart, generatedLineEnd } = insertGeneratedCode(
-      editor,
-      liveModel,
-      currentCommentLine,
-      result.content
-    );
-
-    const replacedLineNumber =
-      result.replacesNext && generatedLineEnd + 1 <= liveModel.getLineCount()
-        ? generatedLineEnd + 1
-        : null;
-
-    showReview({
-      commentLineNumber: currentCommentLine,
-      generatedLineStart,
-      generatedLineEnd,
-      replacedLineNumber,
-    });
   }, [
     editorRef,
     editorModel,

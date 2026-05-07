@@ -551,6 +551,8 @@ const ESQLEditorInternal = function ESQLEditor({
   // Forward-declared so the comment-to-esql hook can hide an already-visible
   // ghost hint when generation starts; populated below by useGhostLineHint.
   const clearGhostHintRef = useRef<() => void>(() => {});
+  // Stable identity so it does not invalidate downstream useCallback deps.
+  const clearGhostHint = useCallback(() => clearGhostHintRef.current(), []);
 
   const {
     commentToEsqlStyle,
@@ -563,7 +565,7 @@ const ESQLEditorInternal = function ESQLEditor({
     http: core.http,
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
-    clearGhostHint: () => clearGhostHintRef.current(),
+    clearGhostHint,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
