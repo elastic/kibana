@@ -19,7 +19,6 @@ import type {
   LensDocument,
   VisualizeEditorContext,
   LensSerializedState,
-  ILensDocumentService,
 } from '@kbn/lens-common';
 import type { Simplify } from '@kbn/chart-expressions-common';
 import { SaveModal } from './save_modal';
@@ -184,6 +183,7 @@ export function SaveModalContainer({
 
   return (
     <SaveModal
+      hasLibraryItemWithTitle={lensServices.lensDocumentService.hasLibraryItemWithTitle}
       originatingApp={originatingApp}
       getOriginatingPath={getOriginatingPath}
       savingToLibraryPermitted={savingToLibraryPermitted}
@@ -246,7 +246,6 @@ export type SaveVisualizationProps = Simplify<
     getOriginatingPath?: (dashboardId: string) => string;
     textBasedLanguageSave?: boolean;
     switchDatasource?: () => void;
-    lensDocumentService: ILensDocumentService;
     controlsState?: ControlPanelsState;
   } & ExtraProps &
     Pick<
@@ -285,7 +284,6 @@ export const runSaveLensVisualization = async (
     textBasedLanguageSave,
     switchDatasource,
     application,
-    lensDocumentService,
     controlsState,
   } = props;
 
@@ -310,22 +308,6 @@ export const runSaveLensVisualization = async (
 
   const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
   const originalSavedObjectId = originalInput?.ref_id;
-  if (options.saveToLibrary) {
-    await lensDocumentService.checkForDuplicateTitle(
-      {
-        id: originalSavedObjectId,
-        title: docToSave.title,
-        displayName: i18n.translate('xpack.lens.app.saveModalType', {
-          defaultMessage: 'Lens visualization',
-        }),
-        lastSavedTitle: lastKnownDoc.title,
-        copyOnSave: saveProps.newCopyOnSave,
-        isTitleDuplicateConfirmed: saveProps.isTitleDuplicateConfirmed,
-      },
-      saveProps.onTitleDuplicate
-    );
-    // ignore duplicate title failure, user notified in save modal
-  }
 
   try {
     // wrap the doc into a serializable state
