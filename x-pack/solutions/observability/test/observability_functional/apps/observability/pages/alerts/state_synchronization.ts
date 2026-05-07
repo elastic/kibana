@@ -115,6 +115,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     }
 
     async function setTimeRangeToXDaysAgo(numberOfDays: number) {
+      if (await testSubjects.exists('dateRangePickerControlButton', { timeout: 2000 })) {
+        // New DateRangePicker: type the relative range directly into the input.
+        await testSubjects.click('dateRangePickerControlButton');
+        await testSubjects.existOrFail('dateRangePickerInput', { timeout: 5000 });
+        await testSubjects.setValue('dateRangePickerInput', `now-${numberOfDays}d to now`);
+        await testSubjects.pressEnter('dateRangePickerInput');
+        await testSubjects.missingOrFail('dateRangePickerPopoverPanel', { timeout: 5000 });
+        return;
+      }
       await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
       const numberField = await find.byCssSelector('[aria-label="Time value"]');
       await numberField.clearValueWithKeyboard();
