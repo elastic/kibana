@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Observable } from 'rxjs';
+
+/**
+ * An update emission published when a stored value changes.
+ *
+ * @public
+ */
+export interface UserStorageUpdate<T = unknown> {
+  key: string;
+  newValue: T;
+  oldValue: T | undefined;
+}
+
+/**
+ * Browser-side user storage client. Returns synchronously from an in-memory
+ * cache that is seeded from server-injected metadata at first paint, and is
+ * refreshed by `set` / `remove` after the corresponding HTTP write completes.
+ *
+ * Distinct from the server-side `IUserStorageClient` (in
+ * `@kbn/core-user-storage-common`) which is fully Promise-based.
+ *
+ * @public
+ */
+export interface IUserStorageClient {
+  /**
+   * Synchronous read from the local cache. Returns `defaultValue` (or
+   * `undefined` if not provided) when no cached value exists for the key.
+   */
+  get<T = unknown>(key: string, defaultValue?: T): T;
+
+  /**
+   * Observable that emits the current cached value followed by every future
+   * value seen for the given key. Suitable for React subscriptions.
+   */
+  get$<T = unknown>(key: string, defaultValue?: T): Observable<T>;
+
+  /**
+   * Returns a clone of every cached key/value pair.
+   */
+  getAll(): Readonly<Record<string, unknown>>;
+
+  /**
+   * Persists a new value via `PUT /internal/user_storage/{key}`. On success
+   * the local cache is updated and subscribers to `get$` / `getUpdate$` are
+   * notified. On HTTP failure the cache is left untouched, the error is
+   * published to `getUpdateErrors$`, and the returned promise rejects.
+   */
+  set<T = unknown>(key: string, value: T): Promise<void>;
+
+  /**
+   * Removes the user override via `DELETE /internal/user_storage/{key}`.
+   * On success the cached value is deleted (subsequent reads fall back to
+   * `defaultValue`) and subscribers are notified.
+   */
+  remove(key: string): Promise<void>;
+
+  /**
+   * Stream of every successful key update.
+   */
+  getUpdate$(): Observable<UserStorageUpdate>;
+
+  /**
+   * Stream of HTTP errors raised by `set` / `remove` after the call returned
+   * to the caller. Suitable for centralised toast / telemetry handling.
+   */
+  getUpdateErrors$(): Observable<Error>;
+}

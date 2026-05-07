@@ -618,6 +618,7 @@ export class Server {
 
     this.rendering.start({
       featureFlags: featureFlagsStart,
+      userStorage: userStorageStart,
     });
 
     this.coreStart = {

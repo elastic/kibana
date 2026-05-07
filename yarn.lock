@@ -6283,6 +6283,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-storage-browser-internal@link:src/core/packages/user-storage/browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-storage-browser@link:src/core/packages/user-storage/browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-storage-common@link:src/core/packages/user-storage/common":
   version "0.0.0"
   uid ""
