@@ -9,14 +9,16 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
-import { PanelContent } from './content';
-import { PanelHeader } from './header';
+import { Header } from '../../../flyout_v2/rule/header';
+import { Content } from '../../../flyout_v2/rule/content';
 import { PreviewFooter } from '../preview/footer';
-import { useRuleDetails } from '../hooks/use_rule_details';
+import { useRuleDetails } from '../../../flyout_v2/rule/hooks/use_rule_details';
 import { LOADING_TEST_ID } from './test_ids';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
-import { FlyoutError } from '../../shared/components/flyout_error';
+import { FlyoutError } from '../../../flyout_v2/shared/components/flyout_error';
+import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { FlyoutBody } from '../../shared/components/flyout_body';
 
 export interface RulePanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'rule-panel' | 'rule-preview-panel';
@@ -59,8 +61,12 @@ export const RulePanel: FC<RulePanelProps> = memo(({ ruleId, isPreviewMode }) =>
   ) : rule ? (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} isPreviewMode={isPreviewMode} />
-      <PanelHeader rule={rule} isSuppressed={!isExistingRule} />
-      <PanelContent rule={rule} />
+      <FlyoutHeader>
+        <Header rule={rule} isSuppressed={!isExistingRule} />
+      </FlyoutHeader>
+      <FlyoutBody>
+        <Content rule={rule} />
+      </FlyoutBody>
       <PreviewFooter rule={rule} isPreviewMode={isPreviewMode} />
     </>
   ) : (
