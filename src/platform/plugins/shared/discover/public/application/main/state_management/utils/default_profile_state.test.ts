@@ -134,7 +134,6 @@ describe('getDefaultProfileState', () => {
       }).getPostFetchState({
         defaultColumns: ['messsage', 'bytes'],
         esqlQueryColumns: undefined,
-        isEsqlMode: false,
       });
 
       expect(appStateFromDataView).toEqual({
