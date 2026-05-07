@@ -1235,12 +1235,6 @@ export const QueryBarTopRow = React.memo(
             <>
               <EuiFlexGroup {...queryBarFlexGroupProps}>
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
-                {/* Optional wrapper for the ES|QL controls elements */}
-                {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
-                  <EuiFlexItem grow={false}>
-                    {props.esqlVariablesConfig?.controlsWrapper}
-                  </EuiFlexItem>
-                )}
                 <EuiFlexItem>
                   <QuickSearchVisor
                     query={
@@ -1251,6 +1245,22 @@ export const QueryBarTopRow = React.memo(
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}
               </EuiFlexGroup>
+              {/* Optional wrapper for the ES|QL controls elements rendered on its own row */}
+              {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
+                <EuiFlexGroup
+                  responsive={false}
+                  gutterSize="s"
+                  wrap
+                  css={css`
+                    padding: ${!props.disableExternalPadding ? euiTheme.size.s : 0};
+                    padding-top: 0;
+                  `}
+                >
+                  <EuiFlexItem grow={false}>
+                    {props.esqlVariablesConfig?.controlsWrapper}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
               {!shouldShowDatePickerAsBadge() && props.filterBar}
               {renderESQLEditor()}
             </>
