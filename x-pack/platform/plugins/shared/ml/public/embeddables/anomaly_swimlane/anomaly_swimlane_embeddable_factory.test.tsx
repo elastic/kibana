@@ -33,6 +33,12 @@ const mockResponse = of([
   },
 ]);
 
+jest.mock('../../application/capabilities/check_capabilities', () => {
+  return {
+    checkPermissionAsync: jest.fn().mockResolvedValue(true),
+  };
+});
+
 jest.mock('../../application/services/anomaly_detector_service', () => {
   return {
     AnomalyDetectorService: jest.fn().mockImplementation(() => {

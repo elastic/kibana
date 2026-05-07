@@ -34,8 +34,10 @@ import {
 
 export const formatResearcherActionHistory = ({
   actions,
+  cycleLimit,
 }: {
   actions: ResearchAgentAction[];
+  cycleLimit: number;
 }): BaseMessageLike[] => {
   const formatted: BaseMessageLike[] = [];
 
@@ -56,6 +58,12 @@ export const formatResearcherActionHistory = ({
           createToolResultMessage({ content: result.content, toolCallId: result.toolCallId })
         )
       );
+
+      // Add system reminder about being close to the limit when only 5 cycles left.
+      const remainingCycles = cycleLimit - action.cycle!;
+      if (remainingCycles === 5 || remainingCycles === 1) {
+        formatted.push(createCycleLimitSystemMessage(remainingCycles));
+      }
     }
     if (isHandoverAction(action)) {
       // returns a single [AI, user] tuple
@@ -71,6 +79,14 @@ export const formatResearcherActionHistory = ({
   }
 
   return formatted;
+};
+
+const createCycleLimitSystemMessage = (cycle: number): BaseMessage => {
+  return createUserMessage(`<system-notice>
+You action budget is almost expired for that round. You only have ${cycle} cycles (tool calls) left before the execution will be terminated.
+Finish what you are doing in that budget and proceed to respond to the user before reaching the end of the cycles.
+Interrupt your current action if necessary to make sure you finish before termination.
+</system-notice>`);
 };
 
 export const formatAnswerActionHistory = ({

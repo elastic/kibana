@@ -61,6 +61,7 @@ export type OnMissingResourcesFetched = (missingResources: SiemMigrationResource
 export enum MigrationSource {
   SPLUNK = 'splunk',
   QRADAR = 'qradar',
+  SENTINEL = 'microsoft-sentinel',
 }
 export interface MigrationStepProps {
   dataInputStep: number;

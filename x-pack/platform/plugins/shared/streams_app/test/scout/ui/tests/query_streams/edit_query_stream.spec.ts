@@ -38,8 +38,8 @@ test.describe('Query streams - Edit query stream', { tag: tags.stateful.classic 
     await pageObjects.streams.gotoStreamMainPage();
   });
 
-  test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
-    await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME);
+  test.afterAll(async ({ kbnClient, apiServices, esClient, log }) => {
+    await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME, log);
     await deleteRootStreamViews(esClient);
     await disableQueryStreams(kbnClient);
   });
@@ -64,8 +64,7 @@ test.describe('Query streams - Edit query stream', { tag: tags.stateful.classic 
     expect(editorValue).toBe(INITIAL_ESQL_QUERY);
     const UPDATED_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-2"';
     await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(UPDATED_ESQL_QUERY);
-    await pageObjects.streams.clickQueryStreamFlyoutSaveButton();
-    await expect(pageObjects.streams.queryStreamUpdatedSuccessToast).toBeVisible();
+    await pageObjects.streams.saveFlyoutQueryStreamEdit();
     await expect(pageObjects.streams.queryStreamDetailsQueryViewerCodeBlock).toHaveText(
       UPDATED_ESQL_QUERY
     );

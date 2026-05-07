@@ -25,6 +25,8 @@ import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { RulesClient } from '../lib/rules_client';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
+import { EventLogService } from '../lib/services/event_log_service/event_log_service';
+import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { ActionPolicySavedObjectService } from '../lib/services/action_policy_saved_object_service/action_policy_saved_object_service';
 import {
@@ -56,6 +58,8 @@ import {
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
+import { WorkflowExtensionsService } from '../lib/services/workflow_extensions_service/workflow_extensions_service';
+import { WorkflowExtensionsServiceToken } from '../lib/services/workflow_extensions_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -67,6 +71,12 @@ import {
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
+import { RuleDoctorInsightsClient } from '../lib/rule_doctor_insights_client/rule_doctor_insights_client';
+import { SpaceContext } from '../routes/rule_doctor_insights/space_context';
+import {
+  InsightsClientScopedToken,
+  InsightsClientInternalToken,
+} from '../lib/rule_doctor_insights_client/tokens';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
@@ -98,6 +108,21 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
+  bind(EventLogService).toSelf().inSingletonScope();
+  bind(EventLogServiceToken).toService(EventLogService);
+  bind(WorkflowExtensionsService)
+    .toDynamicValue(({ get }) => {
+      const workflowsExtensionsSetup = get(
+        PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
+      );
+      const getWorkflowsExtensionsStart = () =>
+        get(
+          PluginStart<AlertingServerStartDependencies['workflowsExtensions']>('workflowsExtensions')
+        );
+      return new WorkflowExtensionsService(workflowsExtensionsSetup, getWorkflowsExtensionsStart);
+    })
+    .inSingletonScope();
+  bind(WorkflowExtensionsServiceToken).toService(WorkflowExtensionsService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
@@ -237,6 +262,24 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         const client = uiSettings.globalAsScopedToClient(soClient);
         return client.get<boolean>(ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID);
       };
+    })
+    .inSingletonScope();
+
+  bind(SpaceContext).toSelf().inRequestScope();
+
+  bind(InsightsClientScopedToken)
+    .toDynamicValue(({ get }) => {
+      const loggerService = get(LoggerServiceToken);
+      const esClient = get(EsServiceScopedToken);
+      return new RuleDoctorInsightsClient(esClient, loggerService);
+    })
+    .inRequestScope();
+
+  bind(InsightsClientInternalToken)
+    .toDynamicValue(({ get }) => {
+      const loggerService = get(LoggerServiceToken);
+      const esClient = get(EsServiceInternalToken);
+      return new RuleDoctorInsightsClient(esClient, loggerService);
     })
     .inSingletonScope();
 

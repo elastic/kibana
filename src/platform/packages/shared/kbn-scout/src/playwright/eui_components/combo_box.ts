@@ -13,6 +13,11 @@ import { expect } from '@playwright/test';
 import type { ScoutPage } from '../fixtures/scope/test/scout_page';
 import { resolveSelector, type SelectorInput } from '../utils';
 
+export interface ComboBoxInputOptions {
+  /** When true, uses fill() instead of pressSequentially() for faster input without keystroke simulation. */
+  useFill?: boolean;
+}
+
 // https://eui.elastic.co/docs/components/forms/selection/combo-box/
 export class EuiComboBoxWrapper {
   private readonly page: ScoutPage;
@@ -65,17 +70,21 @@ export class EuiComboBoxWrapper {
     await this.page.keyboard.press('Escape');
   }
 
-  private async typeValueInSearch(value: string) {
-    await this.comboBoxSearchInput.pressSequentially(value, { delay: 50 });
+  private async typeValueInSearch(value: string, options?: ComboBoxInputOptions) {
+    if (options?.useFill) {
+      await this.comboBoxSearchInput.fill(value);
+    } else {
+      await this.comboBoxSearchInput.pressSequentially(value, { delay: 50 });
+    }
   }
 
-  async selectMultiOption(value: string) {
+  async selectMultiOption(value: string, options?: ComboBoxInputOptions) {
     await this.checkIfAlreadySelected(value);
 
     // put cursor in the comboBox input field
     await this.comboBoxMainInput.click();
     // type the value with a delay to allow for async option loading
-    await this.typeValueInSearch(value);
+    await this.typeValueInSearch(value, options);
     // select the option that matches the value
     const trimmedValue = value.trim();
     await this.page.locator(`.euiFilterSelectItem[title="${trimmedValue}"]`).click();
@@ -85,7 +94,7 @@ export class EuiComboBoxWrapper {
     await this.verifySelectionAndClose(value);
   }
 
-  async selectMultiOptions(values: string[]) {
+  async selectMultiOptions(values: string[], options?: ComboBoxInputOptions) {
     const selectedOptions = await this.getSelectedMultiOptions();
 
     // Check if any values are already selected before starting UI interactions
@@ -97,7 +106,7 @@ export class EuiComboBoxWrapper {
     await this.comboBoxMainInput.click();
 
     for (const value of values) {
-      await this.typeValueInSearch(value);
+      await this.typeValueInSearch(value, options);
       const trimmedValue = value.trim();
       await this.page.locator(`.euiFilterSelectItem[title="${trimmedValue}"]`).click();
       await this.waitForBadgeToBe(value, 'visible');
@@ -108,11 +117,11 @@ export class EuiComboBoxWrapper {
     await this.page.keyboard.press('Escape');
   }
 
-  async setCustomMultiOption(value: string) {
+  async setCustomMultiOption(value: string, options?: ComboBoxInputOptions) {
     await this.checkIfAlreadySelected(value);
 
     await this.comboBoxMainInput.click();
-    await this.typeValueInSearch(value);
+    await this.typeValueInSearch(value, options);
     await this.page.keyboard.press('Enter');
 
     await this.waitForBadgeToBe(value, 'visible');
@@ -146,28 +155,52 @@ export class EuiComboBoxWrapper {
     expect(await this.getSelectedMultiOptions()).not.toContain(value);
   }
 
-  // Select a single option in the comboBox
   async selectSingleOption(
     value: string,
-    options: { optionTestSubj?: string; optionRoleName?: string } = {}
+    options: {
+      optionTestSubj?: string;
+      optionRoleName?: string;
+      /** Use for combos backed by slow suggestion APIs so other suites keep default waits. */
+      optionVisibilityTimeoutMs?: number;
+    } & ComboBoxInputOptions = {}
   ) {
     await this.clear();
     await this.comboBoxMainInput.click();
-    await this.typeValueInSearch(value);
+    await this.typeValueInSearch(value, options);
     // Prefer a specific test subj when option text is ambiguous.
+    const trimmedValue = value.trim();
     const optionLocator = options.optionTestSubj
       ? this.page.testSubj.locator(options.optionTestSubj)
-      : this.page.getByRole('option', { name: options.optionRoleName ?? value, exact: false });
+      : this.page
+          .getByRole('option', { name: options.optionRoleName ?? value, exact: false })
+          .or(this.page.locator(`.euiFilterSelectItem[title="${trimmedValue}"]`));
+
+    await optionLocator.waitFor({
+      state: 'visible',
+      ...(options.optionVisibilityTimeoutMs !== undefined
+        ? { timeout: options.optionVisibilityTimeoutMs }
+        : {}),
+    });
     await optionLocator.click();
     expect(await this.getSelectedValue()).toBe(value);
   }
 
-  async setCustomSingleOption(value: string) {
+  async setCustomSingleOption(
+    value: string,
+    options: {
+      /** Use when confirming selection may lag after Enter (slow suggestions / CI). */
+      settleTimeoutMs?: number;
+    } & ComboBoxInputOptions = {}
+  ) {
     await this.clear();
     await this.comboBoxMainInput.click();
-    await this.typeValueInSearch(value);
+    await this.typeValueInSearch(value, options);
     await this.page.keyboard.press('Enter');
-    expect(await this.getSelectedValue()).toBe(value);
+    await expect
+      .poll(async () => await this.getSelectedValue(), {
+        ...(options.settleTimeoutMs !== undefined ? { timeout: options.settleTimeoutMs } : {}),
+      })
+      .toBe(value);
   }
 
   async getSelectedValue() {
