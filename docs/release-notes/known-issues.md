@@ -8,7 +8,7 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
-::::{dropdown} Dashboards with controls may fail to open
+::::{dropdown} Dashboards with controls might fail to open
 
 Applies to: {{stack}} 9.4.0
 
