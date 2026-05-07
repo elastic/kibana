@@ -231,7 +231,8 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
 
       cy.get(DISABLED_SNOOZE_BADGE)
         .find('[data-test-subj="rulesListNotifyBadge-unsnoozed"]')
-        .trigger('mouseover', { force: true });
+        .closest('.euiToolTipAnchor')
+        .realHover();
 
       cy.get(TOOLTIP).contains('Unable to fetch snooze settings');
     });
