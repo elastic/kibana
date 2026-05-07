@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldEdiorProps } from './field_editor';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
+import type { FieldEdiorProps } from './field_editor';
 import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
 import React from 'react';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
