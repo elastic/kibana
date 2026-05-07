@@ -36,12 +36,16 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: 'bf936f051ec83ba5d4b6b7612879f3aeb7405c911504e157c6607d485ed650c1',
   },
   {
+    id: 'cases.caseStatusUpdated',
+    schemaHash: '',
+  },
+  {
     id: 'cases.attachmentsAdded',
     schemaHash: 'e1d2dc5b465290cb4244976882e258c600c416ae496e1096312515dd174e6336',
   },
   {
     id: 'cases.commentsAdded',
-    schemaHash: '',
+    schemaHash: '673830c048cad59a5813d0c1a73f90c8ce0cd42eae9fa50a5df70db2fe6bc6de',
   },
   {
     id: 'workflows.failed',
