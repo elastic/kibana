@@ -561,6 +561,23 @@ describe('Common authentication routes', () => {
       });
     });
 
+    it('returns 401 when providerType or providerName is an empty string.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.notHandled());
+
+      for (const body of [
+        { providerType: '', providerName: 'saml1', currentURL: '/some-url' },
+        { providerType: 'saml', providerName: '', currentURL: '/some-url' },
+      ]) {
+        const request = httpServerMock.createKibanaRequest({ body });
+
+        await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+          status: 401,
+          payload: 'Unauthorized',
+          options: {},
+        });
+      }
+    });
+
     it('returns redirect location from authentication result if any.', async () => {
       authc.login.mockResolvedValue(AuthenticationResult.redirectTo('http://redirect-to/path'));
 
