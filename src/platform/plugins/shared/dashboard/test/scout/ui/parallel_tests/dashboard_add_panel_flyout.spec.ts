@@ -47,8 +47,7 @@ const getExpected = (config: ScoutTestConfig) => {
  * This test exists to ensures additions to menu
  * notify our team and can be reviewed by design.
  */
-// Failing: See https://github.com/elastic/kibana/issues/268101
-spaceTest.describe.skip(
+spaceTest.describe(
   'Dashboard add panel flyout',
   {
     tag: [
