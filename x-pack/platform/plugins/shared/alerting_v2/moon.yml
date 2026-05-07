@@ -112,6 +112,7 @@ dependsOn:
   - '@kbn/agent-context-layer-plugin'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-notifications-browser'
 tags:
   - plugin
   - prod
