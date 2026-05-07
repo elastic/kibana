@@ -55,6 +55,19 @@ import { AWS_SERVICES, type AwsService } from './ingest_hub/aws_services_data';
 import { useActiveVersion } from '../version_switcher_widget';
 const AWS_TILE = SECTIONS.flatMap((s) => s.tiles).find((t) => t.id === 'aws');
 
+/** Prototype delay before showing a successful connection (replace with real validation). */
+const AWS_ACCOUNT_CONNECT_MOCK_DELAY_MS = 1200;
+/** Prototype delay for AWS service discovery after successful connection (Version 2). */
+const AWS_SERVICE_DISCOVERY_MOCK_DELAY_MS = 1200;
+
+/** Mock service IDs "discovered" after a successful AWS connection (Version 2 prototype). */
+const AWS_MOCK_DETECTED_SERVICE_IDS: readonly string[] = [
+  'amazon_ec2',
+  'amazon_rds',
+  'aws_lambda',
+  'aws_cloudwatch',
+];
+
 const ELASTIC_LOGOS = 'https://raw.githubusercontent.com/elastic/integrations/main/packages';
 
 /** Step 1 — how Elastic authenticates to AWS (drives which credential fields are shown). */
@@ -432,7 +445,7 @@ const serviceMap = new Map(AWS_SERVICES.map((s) => [s.id, s]));
 
 /** AWS integrations that ingest as log pipelines (EDOT Cloud Forwarder–appropriate). */
 const AWS_LOGS_TAB_SERVICE_IDS: readonly string[] = [
-  'aws_cloudwatch',
+  // CloudWatch is handled as a metrics-first, agentless path (CloudWatch Metrics API); not EDOT CF.
   'custom_aws_logs',
   'amazon_vpc',
   'aws_route53',
@@ -1406,6 +1419,7 @@ export const AwsOnboardingPage: React.FC = () => {
 
   const [activeVersion] = useActiveVersion();
   const isAwsVersion1Wizard = activeVersion === 'version1';
+  const isAwsVersion2Wizard = activeVersion === 'version2';
   const [awsVersion1StepIndex, setAwsVersion1StepIndex] = useState(0);
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -1456,21 +1470,20 @@ export const AwsOnboardingPage: React.FC = () => {
         transform: none !important;
       }
       /*
-       * Match EuiStep titleSize="s" content inset (EUI "m" content map): indent body with the
-       * step circle column; avoid padding: 0 which removed this and broke alignment with step 1.
+       * Only style top-level wizard steps (direct .euiStep children). Nested EuiSteps inside a
+       * step body (e.g. federated identity) must keep EUI spacing—otherwise our padding stacks with
+       * EUI’s default bottom padding (~40px) and doubles the gap before the next main step.
        */
-      .euiStep__content {
+      & > .euiStep > .euiStep__content {
         margin-block-start: 0 !important;
         margin-inline-start: calc(${euiTheme.size.xl} / 2) !important;
         padding-block-start: 0 !important;
         padding-inline-start: calc(${euiTheme.size.xl} / 2 + ${euiTheme.size.base}) !important;
         padding-inline-end: 0 !important;
+        /* Remove bottom padding from the main step content block. */
+        padding-block-end: 0 !important;
       }
-      /* Version 2: space before the next step (connector stays continuous). */
-      .euiStep:not(:last-of-type) .euiStep__content {
-        padding-block-end: 56px !important;
-      }
-      .euiStep__title {
+      & > .euiStep > .euiStep__titleWrapper .euiStep__title {
         padding-block-start: 0;
       }
     `,
@@ -1486,6 +1499,12 @@ export const AwsOnboardingPage: React.FC = () => {
   const [awsAccessKeyId, setAwsAccessKeyId] = useState('');
   const [awsSecretAccessKey, setAwsSecretAccessKey] = useState('');
   const [awsSessionToken, setAwsSessionToken] = useState('');
+  const [awsAccountConnectionStatus, setAwsAccountConnectionStatus] = useState<
+    'idle' | 'loading' | 'success'
+  >('idle');
+  const [awsServiceDiscoveryStatus, setAwsServiceDiscoveryStatus] = useState<
+    'idle' | 'loading' | 'complete'
+  >('idle');
   const [awsAuthMethod, setAwsAuthMethod] = useState<AwsAuthMethodId>('federated_identity');
   const [awsServiceBrowseGroup, setAwsServiceBrowseGroup] =
     useState<AwsServiceBrowseGroupId>('all');
@@ -1579,6 +1598,40 @@ export const AwsOnboardingPage: React.FC = () => {
       ? hasAccessKeyCredentials
       : hasTemporaryCredentials;
 
+  const handleConnectAccount = useCallback(async () => {
+    if (!canContinueStep1) {
+      return;
+    }
+    setAwsAccountConnectionStatus('loading');
+    if (isAwsVersion2Wizard) {
+      setAwsServiceDiscoveryStatus('idle');
+    }
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, AWS_ACCOUNT_CONNECT_MOCK_DELAY_MS);
+    });
+    setAwsAccountConnectionStatus('success');
+  }, [canContinueStep1, isAwsVersion2Wizard]);
+
+  useEffect(() => {
+    setAwsAccountConnectionStatus('idle');
+    setAwsServiceDiscoveryStatus('idle');
+  }, [
+    iamRoleArn,
+    awsExternalId,
+    awsAccessKeyId,
+    awsSecretAccessKey,
+    awsSessionToken,
+    awsAuthMethod,
+    awsFederatedIdentityTab,
+    awsFederatedIdentityName,
+  ]);
+
+  useEffect(() => {
+    if (isAwsVersion1Wizard && awsVersion1StepIndex !== 2) {
+      setAwsAccountConnectionStatus('idle');
+    }
+  }, [isAwsVersion1Wizard, awsVersion1StepIndex]);
+
   const canContinueAwsVersion1Monitor = manualServiceIds.size > 0;
   const canContinueAwsVersion1Configure = Boolean(awsIntegrationName.trim());
 
@@ -1614,7 +1667,31 @@ export const AwsOnboardingPage: React.FC = () => {
     setAwsVersion1StepIndex(0);
     setAwsServiceBrowseGroup('all');
     setAwsBrowseServiceSearch('');
+    setAwsAccountConnectionStatus('idle');
+    setAwsServiceDiscoveryStatus('idle');
+    setManualServiceIds(new Set());
   }, [activeVersion]);
+
+  useEffect(() => {
+    if (!isAwsVersion2Wizard || awsAccountConnectionStatus !== 'success') {
+      setAwsServiceDiscoveryStatus('idle');
+      return;
+    }
+    setAwsServiceDiscoveryStatus('loading');
+    const timeout = setTimeout(() => {
+      const next = new Set<string>();
+      for (const id of AWS_MOCK_DETECTED_SERVICE_IDS) {
+        if (serviceMap.has(id)) {
+          next.add(id);
+        }
+      }
+      setManualServiceIds(next);
+      setAwsServiceDiscoveryStatus('complete');
+    }, AWS_SERVICE_DISCOVERY_MOCK_DELAY_MS);
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [awsAccountConnectionStatus, isAwsVersion2Wizard]);
 
   const servicesInActiveBrowseGroup = useMemo(
     () => servicesForBrowseGroup(awsServiceBrowseGroup),
@@ -1860,32 +1937,6 @@ export const AwsOnboardingPage: React.FC = () => {
                 <EuiSpacer size="m" />
               </>
             ) : null}
-            {awsDeploymentProfile.hasMetrics ? (
-              <>
-                <EuiCallOut
-                  data-test-subj="awsOnboardingDeploymentMetricsCallout"
-                  title={i18n.translate(
-                    'xpack.observabilityOnboarding.awsPage.deployment.metricsCalloutTitle',
-                    {
-                      defaultMessage: 'Metrics and non-log telemetry',
-                    }
-                  )}
-                  color="primary"
-                  iconType="indexOpen"
-                >
-                  <p style={{ margin: 0 }}>
-                    {i18n.translate(
-                      'xpack.observabilityOnboarding.awsPage.deployment.metricsCalloutBody',
-                      {
-                        defaultMessage:
-                          'When your environment supports it, choose Agentless for the fastest path. If you need high-volume delivery or agentless is not available, use Amazon Data Firehose to stream into Elastic.',
-                      }
-                    )}
-                  </p>
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </>
-            ) : null}
             {awsDeploymentProfile.hasLogs && awsDeploymentProfile.hasMetrics ? (
               <>
                 <EuiText size="s" color="subdued">
@@ -2001,32 +2052,17 @@ export const AwsOnboardingPage: React.FC = () => {
         }),
         body: (
           <>
-            {!isAwsVersion1Wizard ? (
-              <>
-                <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    <EuiLink
-                      data-test-subj="observabilityOnboardingStepsLearnMoreAboutAwsMonitoringLink"
-                      href={docIamRole}
-                      target="_blank"
-                      external
-                    >
-                      {i18n.translate(
-                        'xpack.observabilityOnboarding.awsPage.step1.learnAwsMonitoring',
-                        {
-                          defaultMessage: 'Learn more about monitoring AWS',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-              </>
-            ) : null}
             <div
+              data-test-subj="awsOnboardingConnectAccountFormLayout"
               css={css`
-                ${awsIntentGoalCardsGridCss};
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
+                gap: ${euiTheme.size.l};
                 align-items: start;
+                min-width: 0;
+                .euiFormRow {
+                  row-gap: ${euiTheme.size.s};
+                }
               `}
             >
               <div data-test-subj="awsOnboardingConnectAccountScope">
@@ -2084,7 +2120,6 @@ export const AwsOnboardingPage: React.FC = () => {
                 </EuiFormRow>
               </div>
               <div css={awsIntentGridFullWidthCellCss}>
-                <EuiSpacer size="xl" />
                 {awsAuthMethod === 'federated_identity' ? (
                   <div
                     data-test-subj="awsOnboardingFederatedIdentityCard"
@@ -2093,6 +2128,18 @@ export const AwsOnboardingPage: React.FC = () => {
                       padding-block: ${euiTheme.size.m};
                       .euiFormHelpText {
                         text-align: start;
+                      }
+                      /*
+                       * EuiSteps (titleSize xxs): 16px under the title row; align body with title text
+                       * (step number width + titleWrapper gap). !important wins over EUI content insets.
+                       */
+                      .euiStep__content {
+                        margin-block-start: 0 !important;
+                        padding-block-start: ${euiTheme.size.base} !important;
+                        margin-inline-start: 0 !important;
+                        padding-inline-start: calc(
+                          ${euiTheme.size.base} + ${euiTheme.size.base}
+                        ) !important;
                       }
                     `}
                   >
@@ -2260,14 +2307,6 @@ export const AwsOnboardingPage: React.FC = () => {
                                         defaultMessage: 'External ID',
                                       }
                                     )}
-                                    labelAppend={
-                                      <EuiIcon
-                                        type="iInCircle"
-                                        size="s"
-                                        color="subdued"
-                                        aria-hidden={true}
-                                      />
-                                    }
                                   >
                                     <EuiFieldText
                                       type="password"
@@ -2286,7 +2325,13 @@ export const AwsOnboardingPage: React.FC = () => {
                                         data-test-subj="observabilityOnboardingStepsContinueButton"
                                         color="primary"
                                         fill
-                                        disabled={!canContinueStep1}
+                                        disabled={
+                                          !canContinueStep1 ||
+                                          awsAccountConnectionStatus === 'loading' ||
+                                          awsAccountConnectionStatus === 'success'
+                                        }
+                                        isLoading={awsAccountConnectionStatus === 'loading'}
+                                        onClick={() => void handleConnectAccount()}
                                       >
                                         {i18n.translate(
                                           'xpack.observabilityOnboarding.awsPage.step1.connectAccount',
@@ -2295,6 +2340,32 @@ export const AwsOnboardingPage: React.FC = () => {
                                           }
                                         )}
                                       </EuiButton>
+                                      {awsAccountConnectionStatus === 'success' ? (
+                                        <>
+                                          <EuiSpacer size="m" />
+                                          <EuiCallOut
+                                            data-test-subj="awsOnboardingAccountConnectSuccessCallout"
+                                            title={i18n.translate(
+                                              'xpack.observabilityOnboarding.awsPage.step1.connectSuccessTitle',
+                                              {
+                                                defaultMessage: 'Connection successful',
+                                              }
+                                            )}
+                                            color="success"
+                                            iconType="check"
+                                          >
+                                            <p style={{ margin: 0 }}>
+                                              {i18n.translate(
+                                                'xpack.observabilityOnboarding.awsPage.step1.connectSuccessBody',
+                                                {
+                                                  defaultMessage:
+                                                    'Your credentials are valid and Elastic can connect to this AWS account.',
+                                                }
+                                              )}
+                                            </p>
+                                          </EuiCallOut>
+                                        </>
+                                      ) : null}
                                     </>
                                   ) : null}
                                 </>
@@ -2352,9 +2423,6 @@ export const AwsOnboardingPage: React.FC = () => {
                               defaultMessage: 'External ID',
                             }
                           )}
-                          labelAppend={
-                            <EuiIcon type="iInCircle" size="s" color="subdued" aria-hidden={true} />
-                          }
                         >
                           <EuiFieldText
                             type="password"
@@ -2373,7 +2441,13 @@ export const AwsOnboardingPage: React.FC = () => {
                               data-test-subj="observabilityOnboardingStepsContinueButton"
                               color="primary"
                               fill
-                              disabled={!canContinueStep1}
+                              disabled={
+                                !canContinueStep1 ||
+                                awsAccountConnectionStatus === 'loading' ||
+                                awsAccountConnectionStatus === 'success'
+                              }
+                              isLoading={awsAccountConnectionStatus === 'loading'}
+                              onClick={() => void handleConnectAccount()}
                             >
                               {i18n.translate(
                                 'xpack.observabilityOnboarding.awsPage.step1.connectAccount',
@@ -2382,6 +2456,32 @@ export const AwsOnboardingPage: React.FC = () => {
                                 }
                               )}
                             </EuiButton>
+                            {awsAccountConnectionStatus === 'success' ? (
+                              <>
+                                <EuiSpacer size="m" />
+                                <EuiCallOut
+                                  data-test-subj="awsOnboardingAccountConnectSuccessCallout"
+                                  title={i18n.translate(
+                                    'xpack.observabilityOnboarding.awsPage.step1.connectSuccessTitle',
+                                    {
+                                      defaultMessage: 'Connection successful',
+                                    }
+                                  )}
+                                  color="success"
+                                  iconType="check"
+                                >
+                                  <p style={{ margin: 0 }}>
+                                    {i18n.translate(
+                                      'xpack.observabilityOnboarding.awsPage.step1.connectSuccessBody',
+                                      {
+                                        defaultMessage:
+                                          'Your credentials are valid and Elastic can connect to this AWS account.',
+                                      }
+                                    )}
+                                  </p>
+                                </EuiCallOut>
+                              </>
+                            ) : null}
                           </>
                         ) : null}
                       </>
@@ -2559,7 +2659,13 @@ export const AwsOnboardingPage: React.FC = () => {
                         data-test-subj="observabilityOnboardingStepsContinueButton"
                         color="primary"
                         fill
-                        disabled={!canContinueStep1}
+                        disabled={
+                          !canContinueStep1 ||
+                          awsAccountConnectionStatus === 'loading' ||
+                          awsAccountConnectionStatus === 'success'
+                        }
+                        isLoading={awsAccountConnectionStatus === 'loading'}
+                        onClick={() => void handleConnectAccount()}
                       >
                         {i18n.translate(
                           'xpack.observabilityOnboarding.awsPage.step1.connectAccount',
@@ -2568,6 +2674,32 @@ export const AwsOnboardingPage: React.FC = () => {
                           }
                         )}
                       </EuiButton>
+                      {awsAccountConnectionStatus === 'success' ? (
+                        <>
+                          <EuiSpacer size="m" />
+                          <EuiCallOut
+                            data-test-subj="awsOnboardingAccountConnectSuccessCallout"
+                            title={i18n.translate(
+                              'xpack.observabilityOnboarding.awsPage.step1.connectSuccessTitle',
+                              {
+                                defaultMessage: 'Connection successful',
+                              }
+                            )}
+                            color="success"
+                            iconType="check"
+                          >
+                            <p style={{ margin: 0 }}>
+                              {i18n.translate(
+                                'xpack.observabilityOnboarding.awsPage.step1.connectSuccessBody',
+                                {
+                                  defaultMessage:
+                                    'Your credentials are valid and Elastic can connect to this AWS account.',
+                                }
+                              )}
+                            </p>
+                          </EuiCallOut>
+                        </>
+                      ) : null}
                     </>
                   ) : null
                 ) : null}
@@ -2752,8 +2884,11 @@ export const AwsOnboardingPage: React.FC = () => {
         ),
       },
     ];
+    const reorderedWizardStepPanels = isAwsVersion1Wizard
+      ? stepPanels
+      : [stepPanels[2], stepPanels[0], stepPanels[1], stepPanels[3], stepPanels[4]];
     return {
-      awsWizardStepPanels: stepPanels,
+      awsWizardStepPanels: reorderedWizardStepPanels,
     };
   }, [
     allBrowseGroupFilteredSelected,
@@ -2768,6 +2903,7 @@ export const AwsOnboardingPage: React.FC = () => {
     awsAgentBasedHostTarget,
     awsAgentBasedNewPolicyName,
     awsExternalId,
+    awsAccountConnectionStatus,
     awsFederatedIdentityName,
     awsFederatedIdentityTab,
     awsDeploymentProfile,
@@ -2787,11 +2923,15 @@ export const AwsOnboardingPage: React.FC = () => {
     browseGroupFilteredServices,
     browseGroupServicesDisplayOrder,
     canContinueStep1,
+    handleConnectAccount,
     isAwsVersion1Wizard,
     docIamRole,
     euiTheme.colors.primary,
     euiThemeContext,
+    euiTheme.size.base,
+    euiTheme.size.l,
     euiTheme.size.m,
+    euiTheme.size.s,
     iamRoleArn,
     manualServiceIds,
   ]);
@@ -2811,32 +2951,54 @@ export const AwsOnboardingPage: React.FC = () => {
     []
   );
 
-  const awsWizardStepDetailDescriptions = useMemo(
-    () =>
-      [
-        i18n.translate('xpack.observabilityOnboarding.awsPage.wizardStepDetail.selectServices', {
-          defaultMessage:
-            'Use All, Logs, or Metrics to narrow the list, then pick the AWS services you want Elastic to monitor.',
-        }),
-        i18n.translate('xpack.observabilityOnboarding.awsPage.wizardStepDetail.deployment', {
-          defaultMessage:
-            'Deployment options reflect what you selected—pick the path that matches logs, metrics, or both.',
-        }),
-        i18n.translate('xpack.observabilityOnboarding.awsPage.wizardStepDetail.connect', {
-          defaultMessage:
-            'Choose how Elastic authenticates to AWS and enter the credentials that match that method.',
-        }),
-        i18n.translate('xpack.observabilityOnboarding.awsPage.wizardStepDetail.configure', {
-          defaultMessage:
-            'Give the integration a clear name and choose organization-wide vs. single-account scope.',
-        }),
-        i18n.translate('xpack.observabilityOnboarding.awsPage.wizardStepDetail.seeData', {
-          defaultMessage:
-            'Finish the flow, then confirm data is arriving and open views tailored to your AWS telemetry.',
-        }),
-      ] as const,
-    []
-  );
+  const awsWizardStepDetailDescriptions = useMemo(() => {
+    const selectServices = i18n.translate(
+      'xpack.observabilityOnboarding.awsPage.wizardStepDetail.selectServices',
+      {
+        defaultMessage:
+          'Use All, Logs, or Metrics to narrow the list, then pick the AWS services you want Elastic to monitor.',
+      }
+    );
+    const selectServicesV2 = i18n.translate(
+      'xpack.observabilityOnboarding.awsPage.wizardStepDetail.selectServicesAfterConnect',
+      {
+        defaultMessage:
+          'Review integrations Elastic discovered in your account (pre-selected below). Narrow with All, Logs, or Metrics, search the catalogue, and confirm what to ingest.',
+      }
+    );
+    const deployment = i18n.translate(
+      'xpack.observabilityOnboarding.awsPage.wizardStepDetail.deployment',
+      {
+        defaultMessage:
+          'Deployment options reflect what you selected—pick the path that matches logs, metrics, or both.',
+      }
+    );
+    const connect = i18n.translate(
+      'xpack.observabilityOnboarding.awsPage.wizardStepDetail.connect',
+      {
+        defaultMessage:
+          'Choose how Elastic authenticates to AWS and enter the credentials that match that method.',
+      }
+    );
+    const configure = i18n.translate(
+      'xpack.observabilityOnboarding.awsPage.wizardStepDetail.configure',
+      {
+        defaultMessage:
+          'Give the integration a clear name and choose organization-wide vs. single-account scope.',
+      }
+    );
+    const seeData = i18n.translate(
+      'xpack.observabilityOnboarding.awsPage.wizardStepDetail.seeData',
+      {
+        defaultMessage:
+          'Finish the flow, then confirm data is arriving and open views tailored to your AWS telemetry.',
+      }
+    );
+    if (isAwsVersion1Wizard) {
+      return [selectServices, deployment, connect, configure, seeData] as const;
+    }
+    return [connect, selectServicesV2, deployment, configure, seeData] as const;
+  }, [isAwsVersion1Wizard]);
 
   const awsWizardStepsForEui = useMemo(() => {
     const fullSteps = awsWizardStepPanels.map(({ title, body }) => ({
@@ -2862,36 +3024,76 @@ export const AwsOnboardingPage: React.FC = () => {
       return fullSteps;
     }
 
-    if (manualServiceIds.size === 0) {
+    if (
+      isAwsVersion2Wizard &&
+      (awsAccountConnectionStatus !== 'success' || awsServiceDiscoveryStatus === 'loading')
+    ) {
+      const isConnected = awsAccountConnectionStatus === 'success';
       return [
         {
           title: fullSteps[0].title,
           children: wrapStepBodyWithDetail(0, fullSteps[0].children),
-          status: 'current' as const,
+          status: isConnected ? ('complete' as const) : ('current' as const),
         },
         {
-          title: '',
+          title: fullSteps[1].title,
           children: <></>,
           status: 'loading' as const,
         },
       ];
     }
 
+    if (isAwsVersion2Wizard) {
+      return fullSteps.map((step, index) => ({
+        ...step,
+        children: wrapStepBodyWithDetail(index, step.children),
+        status:
+          index === 0
+            ? ('complete' as const)
+            : index === 1
+            ? ('current' as const)
+            : ('incomplete' as const),
+      }));
+    }
+
+    const credsOk = awsAccountConnectionStatus === 'success';
+    const servicesOk = manualServiceIds.size > 0;
+    const deployOk = canContinueAwsVersion1Deployment;
+    const configureOk = canContinueAwsVersion1Configure;
+
+    let currentIndex = 0;
+    if (!credsOk) {
+      currentIndex = 0;
+    } else if (!servicesOk) {
+      currentIndex = 1;
+    } else if (!deployOk) {
+      currentIndex = 2;
+    } else if (!configureOk) {
+      currentIndex = 3;
+    } else {
+      currentIndex = 4;
+    }
+
     return fullSteps.map((step, index) => ({
       ...step,
       children: wrapStepBodyWithDetail(index, step.children),
       status:
-        index === 0
+        index < currentIndex
           ? ('complete' as const)
-          : index === 1
+          : index === currentIndex
           ? ('current' as const)
           : ('incomplete' as const),
     }));
   }, [
+    awsAccountConnectionStatus,
+    awsServiceDiscoveryStatus,
     awsWizardStepDetailDescriptions,
     awsWizardStepDetailInStepContentCss,
     awsWizardStepPanels,
+    canContinueAwsVersion1Configure,
+    canContinueAwsVersion1Deployment,
     isAwsVersion1Wizard,
+    isAwsVersion2Wizard,
     manualServiceIds.size,
   ]);
 
@@ -2901,7 +3103,7 @@ export const AwsOnboardingPage: React.FC = () => {
       : awsVersion1StepIndex === 1
       ? canContinueAwsVersion1Deployment
       : awsVersion1StepIndex === 2
-      ? canContinueStep1
+      ? canContinueStep1 && awsAccountConnectionStatus !== 'loading'
       : awsVersion1StepIndex === 3
       ? canContinueAwsVersion1Configure
       : true;
@@ -3173,7 +3375,20 @@ export const AwsOnboardingPage: React.FC = () => {
                         color="primary"
                         size="m"
                         disabled={!awsVersion1StepContinueEnabled}
+                        isLoading={
+                          isAwsVersion1Wizard &&
+                          awsVersion1StepIndex === 2 &&
+                          awsAccountConnectionStatus === 'loading'
+                        }
                         onClick={() => {
+                          if (
+                            isAwsVersion1Wizard &&
+                            awsVersion1StepIndex === 2 &&
+                            awsAccountConnectionStatus !== 'success'
+                          ) {
+                            void handleConnectAccount();
+                            return;
+                          }
                           if (awsVersion1StepIndex < awsWizardStepPanels.length - 1) {
                             setAwsVersion1StepIndex((n) => n + 1);
                           }
@@ -3184,6 +3399,13 @@ export const AwsOnboardingPage: React.FC = () => {
                               'xpack.observabilityOnboarding.awsPage.version1Wizard.done',
                               {
                                 defaultMessage: 'Done',
+                              }
+                            )
+                          : awsVersion1StepIndex === 2 && awsAccountConnectionStatus === 'success'
+                          ? i18n.translate(
+                              'xpack.observabilityOnboarding.awsPage.version1Wizard.continue',
+                              {
+                                defaultMessage: 'Continue',
                               }
                             )
                           : awsVersion1StepIndex === 2

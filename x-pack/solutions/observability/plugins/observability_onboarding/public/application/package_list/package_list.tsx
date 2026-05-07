@@ -33,6 +33,8 @@ export function PackageList({ list, searchTerm = '', showCardLabels }: Props) {
         searchTerm={searchTerm}
         showControls={false}
         showSearchTools={false}
+        availableSubCategories={[]}
+        spacer={false}
         // we either don't need these properties (yet) or handle them upstream, but
         // they are marked as required in the original API.
         selectedCategory=""

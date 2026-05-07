@@ -72,7 +72,17 @@ export const AWS_SERVICES: AwsService[] = [
   { id: 'aws_apigateway', name: 'AWS API Gateway', logoUrl: `${AWS}/logo_apigateway.svg`, category: 'Performance', useCase: 'Track API latency, error rates & usage by endpoint', description: 'Identify slow or error-prone API routes, throttled clients, and integration timeout patterns across your APIs.', packageName: 'aws' },
   { id: 'aws_billing', name: 'AWS Billing', logoUrl: `${AWS}/logo_aws.svg`, category: 'Cost', useCase: 'Visualize cost trends & catch unexpected spend early', description: 'Set up alerts on billing anomalies and correlate cost spikes with infrastructure events to keep budgets on track.', packageName: 'aws' },
   { id: 'aws_cloudtrail', name: 'AWS CloudTrail', logoUrl: `${AWS}/logo_cloudtrail.svg`, category: 'Security', useCase: 'Audit every API call across your AWS account', description: 'Build a complete audit trail for compliance, investigate unauthorized changes, and detect credential misuse.', packageName: 'aws' },
-  { id: 'aws_cloudwatch', name: 'AWS CloudWatch', logoUrl: `${AWS}/logo_cloudwatch.svg`, category: 'Infrastructure', useCase: 'Centralize CloudWatch metrics & logs in Elastic', description: 'Bring all your CloudWatch data into Elastic for richer correlation with APM, infrastructure, and security signals.', packageName: 'aws' },
+  {
+    id: 'aws_cloudwatch',
+    name: 'AWS CloudWatch',
+    logoUrl: `${AWS}/logo_cloudwatch.svg`,
+    category: 'Infrastructure',
+    useCase: 'Pull EC2, RDS, Lambda, and other AWS metrics without agents',
+    description:
+      'Agentless collection uses identity federation (IAM role + OIDC): Elastic polls the CloudWatch Metrics API on a schedule—no agents, no long-lived AWS secrets stored in Elastic.',
+    packageName: 'aws',
+    agentless: true,
+  },
   { id: 'aws_config', name: 'AWS Config', logoUrl: `${AWS}/logo-aws-config.svg`, category: 'Compliance', useCase: 'Track resource configuration changes & drift', description: 'Detect when resources deviate from approved configurations and investigate who changed what and when.', packageName: 'aws', agentless: true },
   { id: 'aws_elb', name: 'AWS ELB', logoUrl: `${AWS}/logo_elb.svg`, category: 'Reliability', useCase: 'Monitor load balancer health, latency & backend errors', description: 'Catch unhealthy targets, high 5xx rates, and connection timeouts before they degrade user-facing availability.', packageName: 'aws' },
   { id: 'aws_fargate', name: 'AWS Fargate (for ECS clusters)', logoUrl: `${AWS}/logo_ecs.svg`, category: 'Infrastructure', useCase: 'Track serverless container CPU, memory & task failures', description: 'Identify OOM-killed containers and CPU-throttled tasks without managing underlying EC2 infrastructure.', packageName: 'aws' },
