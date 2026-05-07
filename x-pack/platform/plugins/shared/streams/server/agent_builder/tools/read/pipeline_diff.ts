@@ -38,6 +38,15 @@ export interface PipelineDiff {
 }
 
 /**
+ * Keys that are stripped before computing a step's structural signature.
+ * `customIdentifier` is regenerated when steps are re-tagged for simulation
+ * (see `addDeterministicCustomIdentifiers`), so two structurally identical
+ * steps can carry different identifiers and must still be recognized as
+ * "unchanged" by the diff.
+ */
+const SIGNATURE_IGNORED_KEYS = new Set(['customIdentifier']);
+
+/**
  * Stable canonical signature used for structural equality between two steps.
  * `JSON.stringify` is sensitive to key order; we sort keys recursively so two
  * steps that differ only in key insertion order are still recognized as
@@ -51,7 +60,7 @@ const canonicalSignature = (value: unknown): string => {
     return `[${value.map(canonicalSignature).join(',')}]`;
   }
   const entries = Object.entries(value as Record<string, unknown>)
-    .filter(([, v]) => v !== undefined)
+    .filter(([k, v]) => v !== undefined && !SIGNATURE_IGNORED_KEYS.has(k))
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([k, v]) => `${JSON.stringify(k)}:${canonicalSignature(v)}`);
   return `{${entries.join(',')}}`;

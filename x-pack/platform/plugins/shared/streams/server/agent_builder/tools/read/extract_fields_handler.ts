@@ -23,6 +23,7 @@ import {
   postParsePipelineDefinitionSchema,
   suggestProcessingPipeline,
 } from '@kbn/streams-ai';
+import { addDeterministicCustomIdentifiers } from '@kbn/streamlang';
 import {
   PRIORITIZED_CONTENT_FIELDS,
   extractMessagesFromField,
@@ -327,7 +328,17 @@ export const runExtractFieldsFlow = async (
     // extracted fields. Keeping existing steps verbatim — never editing or
     // reordering them — guarantees we don't silently break previously
     // working processing.
-    const merged = { steps: [...newlyAdded.steps, ...existingSteps] };
+    //
+    // `addDeterministicCustomIdentifiers` ensures every step (new + existing)
+    // carries a `customIdentifier` that the transpiler turns into an ingest
+    // processor `tag`. Without tags the simulation framework cannot recognize
+    // a processor as "successful" (it requires `!!processor.tag`), so a
+    // single untagged existing step would mis-classify every doc as
+    // `partially_parsed` and report a 0% success rate even when every
+    // processor ran cleanly.
+    const merged = addDeterministicCustomIdentifiers({
+      steps: [...newlyAdded.steps, ...existingSteps],
+    });
 
     // Run a final simulation against the original raw documents so we can
     // produce the same `field_changes` / `success_rate` / errors shape the
@@ -373,15 +384,15 @@ export const runExtractFieldsFlow = async (
         );
       }
     }
-    if (simErrors.length > 0 && successRate !== null) {
+    if (simErrors.length > 0) {
+      const rateLabel =
+        successRate !== null ? `${successRate}% success rate with` : 'Simulation failed with';
       warnings.push(
-        `${successRate}% success rate with ${simErrors.length} error type(s): ${simErrors
-          .slice(0, 3)
-          .join('; ')}`
+        `${rateLabel} ${simErrors.length} error type(s): ${simErrors.slice(0, 3).join('; ')}`
       );
     }
 
-    const finalSteps = injectIgnoreFailure(merged.steps);
+    const finalSteps = injectIgnoreFailure(merged.steps, existingSteps);
 
     // Diff against the pre-existing pipeline so the agent can present a clear
     // before/after view. With the append-existing strategy above the diff is
