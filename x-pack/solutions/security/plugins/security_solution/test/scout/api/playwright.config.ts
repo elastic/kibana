@@ -8,5 +8,5 @@
 import { createPlaywrightConfig } from '@kbn/scout-security';
 
 export default createPlaywrightConfig({
-  testDir: './tests',
+  testDir: './tests/siem_readiness',
 });
