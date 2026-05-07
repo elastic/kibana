@@ -1280,3 +1280,98 @@ setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
 
 The full implementation is ~130 lines and serves as the reference for new types.
 
+## Streams lifecycle (frontend)
+
+The chat streaming layer lives in `public/application/context/send_message/`. This section
+documents how mutations, lifted state, and the React Query cache fit together. Read this
+before touching any of:
+`send_message_context.tsx`, `use_send_message.ts`, `use_send_message_mutation.ts`,
+`use_resume_round_mutation.ts`, `use_subscribe_to_chat_events.ts`,
+`use_is_any_conversation_streaming.ts`.
+
+### The lift
+
+`<SendMessageProvider>` is mounted **once** above the routes/sidebar:
+
+- Routed app: in `mount.tsx`, above `<AgentBuilderRoutes>`. The sidebar is part of the
+  routes, so it can read streaming state directly.
+- Embeddable: in `embeddable_conversations_provider.tsx`, one provider per embeddable
+  instance because each instance has its own `QueryClient`.
+
+The sidebar uses `useIsAnyConversationStreaming()` and `useSendMessageContext()` directly.
+Anything inside the conversation tree should use the per-conversation scoped hook,
+`useSendMessage()` (in `use_send_message.ts`).
+
+### Lifted state
+
+`SendMessageProvider` owns:
+
+- `activeStream: { conversationId, type, agentReasoning } | undefined` — points at the
+  conversation that is currently streaming. Set synchronously when each mutation kicks
+  off; cleared in the mutation's `finally`.
+- `byConversationId: Record<string, StreamRecord>` — per-conversation `pendingMessage`,
+  `error`, `errorSteps`. Persists across stream end so a user can hit Retry after a
+  failure.
+
+### Mutations: single-scope `mutationFn`
+
+`useSendMessageMutation` and `useResumeRoundMutation` use a **single-scope `mutationFn`
+with `try / catch / finally`**, not React Query's lifecycle methods (`onMutate`,
+`onSuccess`, `onError`, `onSettled`). The shape is:
+
+```ts
+mutationFn: async (vars) => {
+  // setup phase (sync, before any await): seed the optimistic round, set pending message.
+  // Note: `activeStream` is set by the provider's `mutateSendMessage` wrapper *before*
+  // `mutate()` returns — not here.
+  const streamActions = createConversationActions({ conversationId: vars.conversationId, ... });
+
+  try {
+    await subscribeToChatEvents({ events$, conversationActions: streamActions, ... });
+    // success cleanup
+  } catch (err) {
+    // error cleanup
+    throw err;
+  } finally {
+    // cleanup: invalidate cache (skipped if round paused on HITL),
+    // clear `activeStream`, clear abort ref.
+  }
+}
+```
+
+**Why not lifecycle methods?** Streams aren't typical mutations — the bulk of the work
+happens *during* `mutationFn`, with state mutations flowing for many seconds. Splitting
+the work across lifecycle callbacks forces you to bridge state between scopes via refs
+or React Query's `context` return — neither is clean for streaming. With single-scope,
+`streamActions` and `vars` are visible throughout. No refs to bridge phases. Reads
+top-to-bottom.
+
+### Each conversation owns its streaming lifecycle
+
+Every `mutationFn` invocation builds its **own** `streamActions` instance via
+`createConversationActions({ conversationId: vars.conversationId, ... })`. That instance
+is closure-bound to the mutation's conversation id. **Stream events target the
+conversation the mutation was started for, regardless of where the user has navigated.**
+
+If the user submits on conversation A and immediately switches to B, the stream events
+keep writing to A's cache. B loads cleanly from the server.
+
+### Per-conversation `useConversation` gate
+
+`useConversation` is disabled for a conversation when (a) a stream is currently writing
+to its cache, or (b) the cache shows it's paused on a HITL prompt. The cache is
+authoritative in both cases, so a refetch would race with optimistic chunks (streaming)
+or with the resume mutation about to fire on Approve (HITL). Other conversations stay
+free to refetch — switch to conversation B while A streams and B loads cleanly. See the
+inline comment on the `enabled` predicate for details.
+
+### Single-stream vs concurrent streams
+
+Today the app enforces single-stream-at-a-time. The global gates (HITL Approve,
+submit button, page-leave guard) all read `useIsAnyConversationStreaming()`.
+
+The architecture supports concurrent streams in principle — per-conversation cache,
+mutation-scoped `streamActions`, lifted `byConversationId`. The follow-up PR removes
+the global gates, moves the abort controller into a per-conversation slot so each
+stream can be cancelled independently, and enables concurrent streams.
+

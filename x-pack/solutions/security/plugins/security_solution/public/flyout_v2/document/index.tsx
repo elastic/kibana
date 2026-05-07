@@ -16,7 +16,7 @@ import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { defaultToolsFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
+import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
 import { EventKind } from './constants/event_kinds';
 import { Footer } from './footer';
@@ -26,7 +26,7 @@ import { NotesDetails } from '../notes';
 import { useKibana } from '../../common/lib/kibana';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
-import { alertFlyoutHistoryKey } from './constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
 
 export interface DocumentFlyoutProps {
@@ -58,7 +58,7 @@ export const DocumentFlyout = memo(
       [hit]
     );
     const isSecurityApp = useIsInSecurityApp();
-    const historyKey = isSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
