@@ -292,7 +292,9 @@ describe('UpdateMonitorAPI', () => {
       );
       getPrivateLocations.mockResolvedValue([{ id: 'pl-1', label: 'PL', spaces: ['default'] }]);
 
-      const { validateMonitorPrivateLocationSpaces } = jest.requireMock('../monitor_locations_utils');
+      const { validateMonitorPrivateLocationSpaces } = jest.requireMock(
+        '../monitor_locations_utils'
+      );
       validateMonitorPrivateLocationSpaces.mockReturnValue({
         message: 'PL is not available in space "team-b"',
         attributes: { errors: [] },

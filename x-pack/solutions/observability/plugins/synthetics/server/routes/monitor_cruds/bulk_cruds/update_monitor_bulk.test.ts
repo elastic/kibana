@@ -120,9 +120,9 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
     });
 
     it('rejects non-string ids', () => {
-      expect(() =>
-        bodySchema.validate({ ids: [1, 2, 3], attributes: {} })
-      ).toThrow(/\[ids\.0\]: expected value of type \[string\]/);
+      expect(() => bodySchema.validate({ ids: [1, 2, 3], attributes: {} })).toThrow(
+        /\[ids\.0\]: expected value of type \[string\]/
+      );
     });
   });
 
@@ -254,7 +254,9 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       const result: any = await route.handler(ctx);
 
       expect(result.body.result).toEqual([{ id: 'mon-1', updated: true }]);
-      expect(result.body.errors).toEqual([{ locationId: 'us_central', error: { reason: 'Timeout' } }]);
+      expect(result.body.errors).toEqual([
+        { locationId: 'us_central', error: { reason: 'Timeout' } },
+      ]);
     });
 
     it('omits `errors` when sync reports no public location errors', async () => {

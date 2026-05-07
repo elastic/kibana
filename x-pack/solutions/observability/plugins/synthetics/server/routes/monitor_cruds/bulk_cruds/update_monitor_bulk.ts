@@ -174,7 +174,8 @@ const classifyId = (
     return {
       id,
       updated: false,
-      error: extractErrorMessage(fleetFailure.error) ?? 'Failed to sync monitor to private location',
+      error:
+        extractErrorMessage(fleetFailure.error) ?? 'Failed to sync monitor to private location',
     };
   }
 
