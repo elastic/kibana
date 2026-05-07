@@ -489,31 +489,22 @@ export class DashboardApp {
     return Number(attribute);
   }
 
-  async getPanelGroupOrder(): Promise<string[]> {
-    const panelGroups = await this.panelSelectionFlyout
+  async getAddPanelFlyoutGroups(): Promise<string[]> {
+    const groupElements = await this.panelSelectionFlyout
       .locator('[data-test-subj*="dashboardEditorMenu-"]')
       .all();
 
-    const panelGroupData = await Promise.all(
-      panelGroups.map(async (panelGroup) => {
-        const order = await panelGroup.getAttribute('data-group-sort-order');
-        const testSubj = await panelGroup.getAttribute('data-test-subj');
+    return await Promise.all(
+      groupElements.map(async (groupElement) => {
+        const testSubj = await groupElement.getAttribute('data-test-subj');
+        // remove prefix so strings like 'dashboardEditorMenu-visualizationsGroup' become 'visualizationsGroup'
         const match = testSubj?.match(/dashboardEditorMenu-(.*)/);
-        return { order, groupTitle: match?.[1] };
+        return match?.[1] ?? '';
       })
     );
-
-    const panelGroupByOrder = new Map<string, string>();
-    panelGroupData
-      .filter((item): item is { order: string; groupTitle: string } =>
-        Boolean(item.order && item.groupTitle)
-      )
-      .forEach((item) => panelGroupByOrder.set(item.order, item.groupTitle));
-
-    return [...panelGroupByOrder.values()];
   }
 
-  async getPanelTypeCount(): Promise<number> {
+  async getAddPanelFlyoutPanelTypesCount(): Promise<number> {
     return this.panelSelectionFlyout.locator('[data-test-subj*="create-action-"]').count();
   }
 

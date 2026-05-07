@@ -18,7 +18,7 @@ import { RemoteDocumentCallout } from '../../flyout_v2/document/components/remot
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/document/header';
-import { alertFlyoutHistoryKey } from '../../flyout_v2/document/constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { NotesDetails } from '../../flyout_v2/notes';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
@@ -81,7 +81,7 @@ export const AlertFlyoutHeader = ({
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
   const isSecurityApp = useIsInSecurityApp();
-  const historyKey = isSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const renderCellActions = useCallback<CellActionRenderer>(
     (props) => (
       <DiscoverCellActions
