@@ -19,6 +19,7 @@ import type {
   HeatmapGridConfigResult,
   HeatmapLegendConfigResult,
 } from '@kbn/lens-common/visualizations/heatmap/types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 import { DEFAULT_LAYER_ID } from '../../../constants';
 import { legendSizeCompat } from '../legend_sizes';
@@ -80,7 +81,7 @@ function buildVisualizationState(config: HeatmapConfig): HeatmapVisualizationSta
     legend: {
       isVisible: layer.legend?.visibility !== 'hidden',
       type: 'heatmap_legend',
-      position: 'right',
+      position: layer.legend?.position ?? 'right',
       ...stripUndefined<HeatmapLegendConfigResult>({
         maxLines: layer.legend?.truncate_after_lines,
         legendSize: legendSizeCompat.toState(layer.legend?.size),
@@ -165,6 +166,7 @@ export function fromAPItoLensState(config: HeatmapConfig): HeatmapAttributesWith
     visualizationType: LENS_HEATMAP_ID,
     ...getSharedChartAPIToLensState(config),
     references,
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates: layers,
       internalReferences,
