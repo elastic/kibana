@@ -106,8 +106,7 @@ export class WorkflowEditorPage {
     const uri = await this.getEditorUri(editor);
     await this.page.evaluate(
       ({ modelUri, editorValue }) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
-        const monacoEnv = (window as any).MonacoEnvironment;
+        const monacoEnv = window.MonacoEnvironment;
 
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
@@ -144,8 +143,7 @@ export class WorkflowEditorPage {
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate(
       ({ modelUri, text, occ }) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- global Monaco env
-        const monacoEnv = (window as any).MonacoEnvironment;
+        const monacoEnv = window.MonacoEnvironment;
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
@@ -198,8 +196,7 @@ export class WorkflowEditorPage {
   async getYamlEditorValue(): Promise<string> {
     const uri = await this.getEditorUri(this.yamlEditor);
     return this.page.evaluate((modelUri) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const monacoEnv = (window as any).MonacoEnvironment;
+      const monacoEnv = window.MonacoEnvironment;
       if (!monacoEnv?.monaco?.editor) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }
@@ -374,8 +371,7 @@ export class WorkflowEditorPage {
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate(
       ({ modelUri, text }) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
-        const monacoEnv = (window as any).MonacoEnvironment;
+        const monacoEnv = window.MonacoEnvironment;
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
@@ -432,8 +428,7 @@ export class WorkflowEditorPage {
   async getEditorVisibleLineRange(): Promise<{ startLine: number; endLine: number }> {
     const uri = await this.getEditorUri(this.yamlEditor);
     return this.page.evaluate((modelUri) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- global Monaco env
-      const monacoEnv = (window as any).MonacoEnvironment;
+      const monacoEnv = window.MonacoEnvironment;
       if (!monacoEnv?.monaco?.editor) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }
@@ -465,8 +460,7 @@ export class WorkflowEditorPage {
     const uri = await this.getEditorUri(this.yamlEditor);
     return this.page.evaluate(
       ({ modelUri, text }) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- global Monaco env
-        const monacoEnv = (window as any).MonacoEnvironment;
+        const monacoEnv = window.MonacoEnvironment;
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
@@ -506,8 +500,7 @@ export class WorkflowEditorPage {
   async focusYamlEditor(): Promise<void> {
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate((modelUri) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const monacoEnv = (window as any).MonacoEnvironment;
+      const monacoEnv = window.MonacoEnvironment;
       if (!monacoEnv?.monaco?.editor) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }
@@ -532,8 +525,7 @@ export class WorkflowEditorPage {
   async triggerUndoInYamlEditor(): Promise<void> {
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate((modelUri) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const monacoEnv = (window as any).MonacoEnvironment;
+      const monacoEnv = window.MonacoEnvironment;
       if (!monacoEnv?.monaco?.editor) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }
@@ -550,8 +542,7 @@ export class WorkflowEditorPage {
   async triggerRedoInYamlEditor(): Promise<void> {
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate((modelUri) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const monacoEnv = (window as any).MonacoEnvironment;
+      const monacoEnv = window.MonacoEnvironment;
       if (!monacoEnv?.monaco?.editor) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }

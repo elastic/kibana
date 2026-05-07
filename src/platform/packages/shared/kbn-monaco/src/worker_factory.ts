@@ -30,7 +30,7 @@ const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 
 export const getWorkerUrl = (languageId: string): string => {
   if (!monacoBundleDir) {
-    return '';
+    throw new Error('Could not resolve Monaco bundle directory');
   }
 
   const workerId = langSpecificWorkerIds.includes(languageId) ? languageId : DEFAULT_WORKER_ID;
@@ -39,8 +39,5 @@ export const getWorkerUrl = (languageId: string): string => {
 
 export const getWorker = (languageId: string): Worker => {
   const workerUrl = getWorkerUrl(languageId);
-  if (!workerUrl) {
-    throw new Error('MonacoEnvironment.getWorkerUrl is not defined');
-  }
   return new Worker(workerUrl, { name: languageId, type: 'module' });
 };
