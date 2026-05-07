@@ -19,6 +19,7 @@ export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
       path: '/api/security/role/{name}',
       access: 'public',
       summary: `Delete a role`,
+      description: 'Delete a Kibana role by its name.',
       options: {
         tags: ['oas-tag:roles'],
       },
