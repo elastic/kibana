@@ -55,6 +55,7 @@ if (!BUMP_TYPE) {
 
       // Step 2: Wait for ES build to complete, then bump package.json and other files on the main branch.
       pipeline.push('  - wait # after es build and promote on main');
+
       pipeline.push(
         getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions_to_main.yml')
       );
@@ -65,12 +66,9 @@ if (!BUMP_TYPE) {
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/create_new_branch.yml'));
 
       // Step 4: Wait, then trigger DRA snapshot and staging on the new release branch,
-      // If branch is main, we only run DRA snapshot, otherwise we run them both.
       pipeline.push('  - wait # before dra snapshot/staging on release branch');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
-      if (process.env.BRANCH !== 'main') {
-        pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
-      }
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
 
       // Step 5: Wait, and then do a bunch of file changes in the new branch.
       pipeline.push('  - wait # before update release branch');
