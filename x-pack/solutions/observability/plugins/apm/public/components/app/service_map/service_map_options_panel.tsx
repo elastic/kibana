@@ -41,14 +41,14 @@ export type ServiceMapOrientation = 'horizontal' | 'vertical';
 
 const CONNECTION_FILTER_OPTIONS: { value: ConnectionFilter; label: string }[] = [
   {
-    value: 'orphanedOnly',
-    label: i18n.translate('xpack.apm.serviceMap.controls.connectionOrphanedOnly', {
+    value: 'orphaned',
+    label: i18n.translate('xpack.apm.serviceMap.controls.connectionOrphaned', {
       defaultMessage: 'No connections',
     }),
   },
   {
-    value: 'hideOrphaned',
-    label: i18n.translate('xpack.apm.serviceMap.controls.connectionHideOrphaned', {
+    value: 'connected',
+    label: i18n.translate('xpack.apm.serviceMap.controls.connectionConnected', {
       defaultMessage: 'With connections',
     }),
   },
@@ -192,10 +192,10 @@ export function ServiceMapOptionsPanel({
       CONNECTION_FILTER_OPTIONS.map((opt) => {
         let count: number;
         switch (opt.value) {
-          case 'orphanedOnly':
+          case 'orphaned':
             count = connectionCounts.orphaned;
             break;
-          case 'hideOrphaned':
+          case 'connected':
             count = connectionCounts.connected;
             break;
         }
@@ -415,7 +415,7 @@ export function ServiceMapOptionsPanel({
         }}
         fullWidth
         compressed
-        isClearable={true}
+        isClearable
         data-test-subj="serviceMapConnectionFilter"
         aria-label={i18n.translate('xpack.apm.serviceMap.controls.connectionFilterAriaLabel', {
           defaultMessage: 'Filter by connection status',

@@ -24,7 +24,7 @@ import {
   getMlSeverityForServiceMapNode,
   getNormalizedSloStatusForMapFilters,
   getServiceNodeAlertCountForStatus,
-  getNodeConnectionCount,
+  buildConnectedNodeIdSet,
 } from './apply_service_map_visibility';
 
 const ALERT_STATUSES: AlertStatus[] = [
@@ -108,12 +108,13 @@ function getConnectionCounts(
   allNodes: ServiceMapNode[],
   edges: ServiceMapEdge[]
 ): ConnectionCounts {
+  const connectedIds = buildConnectedNodeIdSet(edges);
   const counts: ConnectionCounts = { orphaned: 0, connected: 0 };
   for (const node of allNodes) {
-    if (getNodeConnectionCount(node.id, edges) === 0) {
-      counts.orphaned++;
-    } else {
+    if (connectedIds.has(node.id)) {
       counts.connected++;
+    } else {
+      counts.orphaned++;
     }
   }
   return counts;

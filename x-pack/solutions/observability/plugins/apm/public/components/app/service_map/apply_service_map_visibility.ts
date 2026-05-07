@@ -18,10 +18,11 @@ import type {
 import { isServiceNode, isServiceNodeData } from '../../../../common/service_map';
 
 /**
- * Connection-based filter values. `null` = show all.
- * - `orphanedOnly` / `hideOrphaned`: filter by 0 connections (orphan = no edges at all).
+ * Connection-based filter values.
+ * - `orphaned`: show only nodes with 0 edges (no connections at all).
+ * - `connected`: show only nodes with ≥1 edge.
  */
-export type ConnectionFilter = 'orphanedOnly' | 'hideOrphaned';
+export type ConnectionFilter = 'orphaned' | 'connected';
 
 export interface ServiceMapViewFilters {
   /** Empty = show all alert statuses. If non-empty, service must have ≥1 alert in any selected status. */
@@ -40,15 +41,14 @@ export const DEFAULT_SERVICE_MAP_VIEW_FILTERS: ServiceMapViewFilters = {
   anomalySeverityFilter: [],
 };
 
-/** Returns the number of edges that touch `nodeId` (as source or target). */
-export function getNodeConnectionCount(nodeId: string, edges: ServiceMapEdgeType[]): number {
-  let count = 0;
+/** Builds a Set of node IDs that appear on at least one edge (as source or target). */
+export function buildConnectedNodeIdSet(edges: ServiceMapEdgeType[]): Set<string> {
+  const connected = new Set<string>();
   for (const edge of edges) {
-    if (edge.source === nodeId || edge.target === nodeId) {
-      count++;
-    }
+    connected.add(edge.source);
+    connected.add(edge.target);
   }
-  return count;
+  return connected;
 }
 
 /**
@@ -81,13 +81,13 @@ export function getServiceNodeAlertCountForStatus(
 function nodeMatchesConnectionFilter(
   nodeId: string,
   filter: ConnectionFilter,
-  edges: ServiceMapEdgeType[]
+  connectedIds: Set<string>
 ): boolean {
   switch (filter) {
-    case 'orphanedOnly':
-      return getNodeConnectionCount(nodeId, edges) === 0;
-    case 'hideOrphaned':
-      return getNodeConnectionCount(nodeId, edges) > 0;
+    case 'orphaned':
+      return !connectedIds.has(nodeId);
+    case 'connected':
+      return connectedIds.has(nodeId);
   }
 }
 
@@ -99,12 +99,12 @@ export function getMlSeverityForServiceMapNode(data: ServiceNodeData): ML_ANOMAL
 function serviceMatchesFilters(
   data: ServiceNodeData,
   nodeId: string,
-  edges: ServiceMapEdgeType[],
+  connectedIds: Set<string>,
   filters: ServiceMapViewFilters
 ): boolean {
   if (filters.connectionFilter.length > 0) {
     const matchesAnyConnection = filters.connectionFilter.some((f) =>
-      nodeMatchesConnectionFilter(nodeId, f, edges)
+      nodeMatchesConnectionFilter(nodeId, f, connectedIds)
     );
     if (!matchesAnyConnection) return false;
   }
@@ -147,9 +147,13 @@ export function applyServiceMapVisibility(
 ): { nodes: ServiceMapNode[]; edges: ServiceMapEdgeType[] } {
   const visibleIds = new Set<string>();
   const nodeById = new Map(nodes.map((n) => [n.id, n] as const));
+  const connectedIds = buildConnectedNodeIdSet(edges);
 
   for (const node of nodes) {
-    if (isServiceNodeData(node.data) && serviceMatchesFilters(node.data, node.id, edges, filters)) {
+    if (
+      isServiceNodeData(node.data) &&
+      serviceMatchesFilters(node.data, node.id, connectedIds, filters)
+    ) {
       visibleIds.add(node.id);
     }
   }

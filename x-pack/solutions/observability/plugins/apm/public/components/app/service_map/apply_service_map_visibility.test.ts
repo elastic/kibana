@@ -12,6 +12,7 @@ import {
   applyServiceMapVisibility,
   DEFAULT_SERVICE_MAP_VIEW_FILTERS,
 } from './apply_service_map_visibility';
+import { mkEdge } from './test_helpers';
 
 const mkService = (
   id: string,
@@ -42,21 +43,6 @@ const mkService = (
   },
 });
 
-const mkEdge = (id: string, source: string, target: string): ServiceMapEdge =>
-  ({
-    id,
-    source,
-    target,
-    type: 'default',
-    style: { stroke: '#ccc', strokeWidth: 1 },
-    markerEnd: {
-      type: 'arrowclosed',
-      width: 10,
-      height: 10,
-      color: '#ccc',
-    },
-    data: { isBidirectional: false },
-  } as ServiceMapEdge);
 
 describe('applyServiceMapVisibility', () => {
   it('hides services with no alerts in the selected alert statuses (OR across statuses)', () => {
@@ -207,10 +193,10 @@ describe('applyServiceMapVisibility', () => {
     ];
     const edges: ServiceMapEdge[] = [mkEdge('e1', 'connected1', 'connected2')];
 
-    it('orphanedOnly hides connected services and shows orphans', () => {
+    it('orphaned filter hides connected services and shows orphans', () => {
       const { nodes: out } = applyServiceMapVisibility(nodes, edges, {
         ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
-        connectionFilter: ['orphanedOnly'],
+        connectionFilter: ['orphaned'],
       });
       const hidden = Object.fromEntries(out.map((n) => [n.id, n.hidden]));
       expect(hidden.connected1).toBe(true);
@@ -218,10 +204,10 @@ describe('applyServiceMapVisibility', () => {
       expect(hidden.orphan).toBe(false);
     });
 
-    it('hideOrphaned hides orphans and shows connected services', () => {
+    it('connected filter hides orphans and shows connected services', () => {
       const { nodes: out } = applyServiceMapVisibility(nodes, edges, {
         ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
-        connectionFilter: ['hideOrphaned'],
+        connectionFilter: ['connected'],
       });
       const hidden = Object.fromEntries(out.map((n) => [n.id, n.hidden]));
       expect(hidden.connected1).toBe(false);
@@ -250,7 +236,7 @@ describe('applyServiceMapVisibility', () => {
 
       const { nodes: out } = applyServiceMapVisibility(nodesWithAlerts, edgesForCombo, {
         ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
-        connectionFilter: ['hideOrphaned'],
+        connectionFilter: ['connected'],
         alertStatusFilter: ['active'],
       });
       const hidden = Object.fromEntries(out.map((n) => [n.id, n.hidden]));
@@ -258,6 +244,14 @@ describe('applyServiceMapVisibility', () => {
       expect(hidden.connectedNoAlert).toBe(true);
       expect(hidden.orphanWithAlert).toBe(true);
       expect(hidden.orphanNoAlert).toBe(true);
+    });
+
+    it('selecting both orphaned and connected shows all services (OR semantics)', () => {
+      const { nodes: out } = applyServiceMapVisibility(nodes, edges, {
+        ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+        connectionFilter: ['orphaned', 'connected'],
+      });
+      expect(out.every((n) => !n.hidden)).toBe(true);
     });
 
     it('counts a connection to a dependency as connected', () => {
@@ -275,7 +269,7 @@ describe('applyServiceMapVisibility', () => {
 
       const { nodes: out } = applyServiceMapVisibility(nodesWithDep, edgesWithDep, {
         ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
-        connectionFilter: ['orphanedOnly'],
+        connectionFilter: ['orphaned'],
       });
       const hidden = Object.fromEntries(out.map((n) => [n.id, n.hidden]));
       expect(hidden.svc).toBe(true);

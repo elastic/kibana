@@ -7,6 +7,7 @@
 
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
 import { computeServiceMapFilterOptionCounts } from './service_map_filter_option_counts';
+import { mkEdge } from './test_helpers';
 
 function mkService(id: string, sloStatus?: 'healthy' | 'violated' | 'noSLOs'): ServiceMapNode {
   return {
@@ -22,21 +23,6 @@ function mkService(id: string, sloStatus?: 'healthy' | 'violated' | 'noSLOs'): S
   };
 }
 
-const mkEdge = (id: string, source: string, target: string): ServiceMapEdge =>
-  ({
-    id,
-    source,
-    target,
-    type: 'default',
-    style: { stroke: '#ccc', strokeWidth: 1 },
-    markerEnd: {
-      type: 'arrowclosed',
-      width: 10,
-      height: 10,
-      color: '#ccc',
-    },
-    data: { isBidirectional: false },
-  } as ServiceMapEdge);
 
 describe('computeServiceMapFilterOptionCounts', () => {
   it('counts sloStatus noSLOs in the noData bucket', () => {
