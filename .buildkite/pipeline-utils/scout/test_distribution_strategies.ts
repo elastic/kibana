@@ -82,7 +82,7 @@ async function distributeScoutTestsOnLanes() {
         SCOUT_TEST_TARGET_DOMAIN: testTarget.domain,
         SCOUT_TEST_SERVER_CONFIG_SET: server.configSet,
         SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS:
-          process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '180',
+          process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '300',
         ...envVarsIfSet([
           'SERVERLESS_TESTS_ONLY',
           'UIAM_DOCKER_IMAGE',
@@ -110,6 +110,11 @@ async function distributeScoutTestsOnLanes() {
       // Lane load IDs to be referenced by the agent
       loadIDsByStepKey[stepKey] = lane.loads;
     });
+
+  if (steps.length === 0) {
+    // Stop early. No test steps to upload. ✨
+    return;
+  }
 
   const bk = new BuildkiteClient();
 
