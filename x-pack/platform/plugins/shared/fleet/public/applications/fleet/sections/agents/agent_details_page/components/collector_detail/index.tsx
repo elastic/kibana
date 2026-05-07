@@ -14,6 +14,7 @@ import { useGetAgentEffectiveConfigQuery } from '../../../../../hooks';
 import { CollectorConfigView } from '../../../../../../../components/otel_ui';
 import { CollectorMetricsProvider } from '../../../../../../../components/otel_ui/collector_config_view/collector_metrics_context';
 import { CollectorDetailTabs } from '../../../../../../../components/otel_ui/collector_config_view/collector_detail/collector_detail_tabs';
+import { ErrorPatternPanel } from '../../../../../../../components/otel_ui/collector_config_view/error_pattern_panel';
 
 export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> = ({ agent }) => {
   const { data: configData, isLoading } = useGetAgentEffectiveConfigQuery(agent.id);
@@ -42,6 +43,10 @@ export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> 
           isConfigLoading={isLoading}
         />
       </EuiPanel>
+
+      <EuiSpacer size="m" />
+
+      <ErrorPatternPanel agentId={agent.id} />
 
       <EuiSpacer size="m" />
     </CollectorMetricsProvider>
