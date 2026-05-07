@@ -197,6 +197,22 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
             `Action [${actionRequest.parameters.id}] is already completed and cannot be canceled.`
           );
         }
+
+        // Ensure this endpoint supports `cancel`
+        const endpointDetails = await this.options.endpointService
+          .getEndpointMetadataService(this.options.spaceId)
+          .getMetadataForEndpoints(actionRequest.endpoint_ids);
+
+        for (const endpointMeta of endpointDetails) {
+          if (!endpointMeta.Endpoint.capabilities?.includes('cancel')) {
+            throw new ResponseActionsClientError(
+              `Endpoint [${endpointMeta.host.hostname || endpointMeta.host.name} / ${
+                endpointMeta.agent.id
+              }] does not support cancel action.`,
+              400
+            );
+          }
+        }
       } catch (error) {
         return { isValid: false, error };
       }
