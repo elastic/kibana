@@ -6,6 +6,9 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { first } from 'rxjs';
+import { registerWorkflowAttachmentRenderers } from './attachment_types';
 import type {
   AgentBuilderWorkflowsPluginSetup,
   AgentBuilderWorkflowsPluginStart,
@@ -26,6 +29,17 @@ export class AgentBuilderWorkflowsPlugin
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderWorkflowsPluginStart>,
     setupDeps: PluginSetupDependencies
   ): AgentBuilderWorkflowsPluginSetup {
+    coreSetup.uiSettings
+      .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .pipe(first((enabled) => enabled))
+      .subscribe(async () => {
+        const [coreStart, depsStart] = await coreSetup.getStartServices();
+        registerWorkflowAttachmentRenderers(depsStart.agentBuilder.attachments, {
+          core: coreStart,
+          analytics: coreStart.analytics,
+        });
+      });
+
     return {};
   }
 
