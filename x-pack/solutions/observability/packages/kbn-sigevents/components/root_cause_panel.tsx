@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { InfoPanel } from './info_panel';
 import { RootCauseIllustration } from './root_cause_illustration';
-import { DevModePlaceholder } from './dev_mode_placeholder';
 
 const DEFAULT_ILLUSTRATION_SIZE = 48;
 
@@ -103,19 +102,15 @@ export function RootCausePanel({
   children,
   illustrationSize = DEFAULT_ILLUSTRATION_SIZE,
 }: RootCausePanelProps) {
-  const hasPlaceholderData = !children;
-
   return (
-    <DevModePlaceholder hasPlaceholderData={hasPlaceholderData}>
-      <div data-test-subj="sigeventsOverviewRootCausePanel">
-        <InfoPanel
-          color="primary"
-          title={title}
-          titleIcon={<RootCauseIllustration size={illustrationSize} />}
-        >
-          <EuiText size="s">{children ?? <DefaultDescription />}</EuiText>
-        </InfoPanel>
-      </div>
-    </DevModePlaceholder>
+    <div data-test-subj="sigeventsOverviewRootCausePanel">
+      <InfoPanel
+        color="primary"
+        title={title}
+        titleIcon={<RootCauseIllustration size={illustrationSize} />}
+      >
+        <EuiText size="s">{children ?? <DefaultDescription />}</EuiText>
+      </InfoPanel>
+    </div>
   );
 }
