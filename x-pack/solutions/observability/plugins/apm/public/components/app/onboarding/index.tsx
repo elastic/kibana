@@ -8,9 +8,8 @@
 import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
-import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import type { ApmPluginStartDeps } from '../../../plugin';
+import { getApmInternalServices, type ApmPluginStartDeps } from '../../../plugin';
 import { Introduction } from './introduction';
 import { InstructionsSet } from './instructions_set';
 import { serverlessInstructions } from './serverless_instructions';
@@ -19,6 +18,7 @@ import { PrivilegeType } from '../../../../common/privilege_type';
 import type { AgentApiKey, Instruction } from './instruction_variants';
 
 export function Onboarding() {
+  const { callApmApi } = getApmInternalServices();
   const [instructions, setInstructions] = useState<Instruction[]>([]);
   const [agentApiKey, setAgentApiKey] = useState<AgentApiKey>({
     apiKey: null,
@@ -71,9 +71,7 @@ export function Onboarding() {
       setAgentStatusLoading(true);
       const agentStatusCheck = await callApmApi(
         'GET /internal/apm/observability_overview/has_data',
-        {
-          signal: null,
-        }
+        { signal: null }
       );
       setAgentStatus(agentStatusCheck.hasData);
     } catch (error) {

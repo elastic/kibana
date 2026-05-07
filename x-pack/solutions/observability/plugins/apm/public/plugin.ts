@@ -306,10 +306,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     const getApmDataHelper = async () => {
-      const { fetchObservabilityOverviewPageData, getHasData } = await import(
-        './services/rest/apm_observability_overview_fetchers'
-      );
-      const { fetchSpanLinks } = await import('./services/rest/span_links');
       const { fetchLatencyOverallTransactionDistribution } = await import(
         './services/rest/fetch_latency_overall_transaction_distribution'
       );
@@ -324,10 +320,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       createCallApmApi(core);
 
       return {
-        fetchObservabilityOverviewPageData,
-        getHasData,
         hasFleetApmIntegrations,
-        fetchSpanLinks,
         fetchLatencyOverallTransactionDistribution,
         fetchLatencyOverallSpanDistribution,
       };
@@ -360,31 +353,35 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.observability.dashboard.register({
       appName: 'apm',
       hasData: async () => {
-        const dataHelper = await getApmDataHelper();
-        return await dataHelper.getHasData();
+        const { getHasData } = await import('./services/rest/apm_observability_overview_fetchers');
+        return await getHasData();
       },
       fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getApmDataHelper();
-        return await dataHelper.fetchObservabilityOverviewPageData(params);
+        const { fetchObservabilityOverviewPageData } = await import(
+          './services/rest/apm_observability_overview_fetchers'
+        );
+        return await fetchObservabilityOverviewPageData(params);
       },
     });
 
     plugins.exploratoryView.register({
       appName: 'apm',
       hasData: async () => {
-        const dataHelper = await getApmDataHelper();
-        return await dataHelper.getHasData();
+        const { getHasData } = await import('./services/rest/apm_observability_overview_fetchers');
+        return await getHasData();
       },
       fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getApmDataHelper();
-        return await dataHelper.fetchObservabilityOverviewPageData(params);
+        const { fetchObservabilityOverviewPageData } = await import(
+          './services/rest/apm_observability_overview_fetchers'
+        );
+        return await fetchObservabilityOverviewPageData(params);
       },
     });
 
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-span-links',
       fetchSpanLinks: async (params, signal) => {
-        const { fetchSpanLinks } = await getApmDataHelper();
+        const { fetchSpanLinks } = await import('./services/rest/span_links');
         return fetchSpanLinks(params, signal);
       },
     });
