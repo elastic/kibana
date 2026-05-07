@@ -421,11 +421,8 @@ export const getMlApiHelper = (
       await waitForCondition(
         `anomaly detection job '${jobId}' to exist`,
         async () => {
-          const { jobs: adJobs } = await esClient.ml.getJobs({
-            job_id: jobId,
-            allow_no_match: true,
-          });
-          if (adJobs.length > 0) return true;
+          const allJobs = await this.getAllJobs();
+          if (allJobs.some((j) => j.job_id === jobId)) return true;
           throw new Error(`Anomaly detection job '${jobId}' does not exist`);
         },
         timeout
@@ -436,11 +433,8 @@ export const getMlApiHelper = (
       await waitForCondition(
         `anomaly detection job '${jobId}' to not exist`,
         async () => {
-          const { jobs: adJobs } = await esClient.ml.getJobs({
-            job_id: jobId,
-            allow_no_match: true,
-          });
-          if (adJobs.length === 0) return true;
+          const allJobs = await this.getAllJobs();
+          if (!allJobs.some((j) => j.job_id === jobId)) return true;
           throw new Error(`Anomaly detection job '${jobId}' still exists`);
         },
         timeout
