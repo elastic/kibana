@@ -49,3 +49,7 @@ export {
 } from './utils';
 
 export * from './schema';
+
+export { buildStylingState as buildDatatableStylingState } from './transforms/charts/datatable/to_state/styling';
+export { convertStylingToAPIFormat as convertDatatableStylingToAPIFormat } from './transforms/charts/datatable/to_api/styling';
+export type { ColumnIdMapping as DatatableColumnIdMapping } from './transforms/charts/datatable/to_api/columns';
