@@ -40,6 +40,12 @@ const SOLUTION_VIEW_INFO: Record<SolutionKey, { iconType: IconType; label: strin
   oblt: OBS_SOLUTION,
   search: ES_SOLUTION,
   observability: OBS_SOLUTION,
+  vectordb: {
+    iconType: 'logoElasticsearch',
+    label: i18n.translate('xpack.spaces.solutionViewInfo.vectordb', {
+      defaultMessage: 'VectorDB',
+    }),
+  },
   workplaceai: {
     iconType: 'logoElasticsearch',
     label: i18n.translate('xpack.spaces.solutionViewInfo.workplaceai', {

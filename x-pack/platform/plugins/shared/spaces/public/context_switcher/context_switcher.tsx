@@ -9,10 +9,15 @@ import React from 'react';
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { dynamic } from '@kbn/shared-ux-utility';
 
-import { ContextSwitcherComponent } from './context_switcher_component';
 import type { SpacesManager } from '../spaces_manager';
+
+const LazyContextSwitcherComponent = dynamic(() =>
+  import('./context_switcher_component').then((m) => ({
+    default: m.ContextSwitcherComponent,
+  }))
+);
 
 export function initContextSwitcher(
   spacesManager: SpacesManager,
@@ -25,21 +30,13 @@ export function initContextSwitcher(
     return;
   }
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { staleTime: 0, networkMode: 'always' },
-    },
-  });
-
   core.chrome.next.contextSwitcher.set(
-    <QueryClientProvider client={queryClient}>
-      <ContextSwitcherComponent
-        spacesManager={spacesManager}
-        core={core}
-        cloud={cloud}
-        isServerless={isServerless}
-        allowSolutionVisibility={allowSolutionVisibility}
-      />
-    </QueryClientProvider>
+    <LazyContextSwitcherComponent
+      spacesManager={spacesManager}
+      core={core}
+      cloud={cloud}
+      isServerless={isServerless}
+      allowSolutionVisibility={allowSolutionVisibility}
+    />
   );
 }

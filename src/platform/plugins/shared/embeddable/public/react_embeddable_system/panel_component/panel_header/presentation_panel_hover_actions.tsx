@@ -427,14 +427,13 @@ export const PresentationPanelHoverActions = ({
     [setDragHandle, euiTheme.size.xs]
   );
 
-  const hasHoverActions = useMemo(() => {
-    if (quickActionElements.length) return true;
-    return contextMenuPanels.every(({ items }) => items?.length);
-  }, [quickActionElements, contextMenuPanels]);
+  const showContextMenu = useMemo(() => {
+    return contextMenuPanels.some(({ items }) => items?.length);
+  }, [contextMenuPanels]);
 
   return (
     <>
-      {api && hasHoverActions && (
+      {api && (quickActionElements.length || showContextMenu) && (
         <div
           className={classNames('embPanel__hoverActions', className)}
           data-test-subj={`hover-actions-${api.uuid}`}
@@ -472,7 +471,7 @@ export const PresentationPanelHoverActions = ({
                 </EuiToolTip>
               )
             )}
-            {contextMenuPanels.length ? (
+            {showContextMenu ? (
               <EuiPopover
                 repositionOnScroll
                 panelPaddingSize="none"

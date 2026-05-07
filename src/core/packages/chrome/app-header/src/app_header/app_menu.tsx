@@ -21,13 +21,14 @@ const AppMenuComponent = lazy(async () => {
 export interface AppMenuProps {
   menu?: AppMenuConfig;
   hasExplicitShare?: boolean;
+  docLink?: string;
 }
 
-export const AppMenu = React.memo<AppMenuProps>(({ menu, hasExplicitShare }) => {
-  const { config, staticItems } = useAppHeaderMenu(menu, !!hasExplicitShare);
+export const AppMenu = React.memo<AppMenuProps>(({ menu, hasExplicitShare, docLink }) => {
+  const { config, staticItems } = useAppHeaderMenu(menu, !!hasExplicitShare, docLink);
   const hasLegacyActionMenu = useHasLegacyActionMenu();
 
-  if (config) {
+  if (config || staticItems?.length) {
     return (
       <Suspense>
         <AppMenuComponent config={config} staticItems={staticItems} />
