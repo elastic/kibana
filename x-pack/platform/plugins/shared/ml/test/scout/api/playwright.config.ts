@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-type QueryKey = 'match' | 'range';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export type Query = {
-  [key in QueryKey]?: any;
-};
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
