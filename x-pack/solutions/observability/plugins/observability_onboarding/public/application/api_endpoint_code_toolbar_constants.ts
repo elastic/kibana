@@ -13,7 +13,7 @@ export const API_ENDPOINT_CODE_TOOLBAR_BUTTON_PROPS: Pick<
   'color' | 'display' | 'size' | 'iconSize'
 > = {
   color: 'text',
-  display: 'base',
+  display: 'empty',
   size: 'xs',
   iconSize: 's',
 };

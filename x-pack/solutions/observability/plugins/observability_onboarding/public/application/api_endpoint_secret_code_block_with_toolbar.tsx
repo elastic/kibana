@@ -169,7 +169,7 @@ export const ApiEndpointSecretCodeBlockWithToolbar: React.FC<
               <EuiButtonIcon
                 data-test-subj={createEnrollmentTokenDataTestSubj}
                 {...API_ENDPOINT_CODE_TOOLBAR_BUTTON_PROPS}
-                iconType="popout"
+                iconType="plusInCircle"
                 href={fleetUrl}
                 aria-label={createEnrollmentTooltip}
               />
