@@ -16,8 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/user-storage/browser
-dependsOn:
-  - '@kbn/core-user-storage-common'
+dependsOn: []
 tags:
   - shared-browser
   - package
