@@ -13,8 +13,11 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 
 export interface CreateRulePanelProps {
@@ -35,7 +38,15 @@ export const CreateRulePanel: React.FC<CreateRulePanelProps> = ({ onClose }) => 
   }, [application]);
   return (
     <EuiEmptyPrompt
-      css={{ maxWidth: '100%', width: '100%', textAlign: 'center', margin: '0 auto' }}
+      css={{
+        maxWidth: '100%',
+        width: '100%',
+        textAlign: 'center',
+        margin: '0 auto',
+        '.euiEmptyPrompt__main': { maxWidth: '100%' },
+        '.euiEmptyPrompt__actions': { maxWidth: '100%' },
+        gap: '1rem',
+      }}
       title={<h2>Welcome to the new Alerting experience</h2>}
       body={
         <EuiText size="s" color="subdued" textAlign="center">
@@ -44,6 +55,7 @@ export const CreateRulePanel: React.FC<CreateRulePanelProps> = ({ onClose }) => 
         </EuiText>
       }
       hasBorder={true}
+      paddingSize="l"
       actions={
         <>
           <EuiFlexGroup>
@@ -78,7 +90,22 @@ export const CreateRulePanel: React.FC<CreateRulePanelProps> = ({ onClose }) => 
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup alignItems="center" gutterSize="m" css={{ width: '100%' }}>
+            <EuiFlexItem>
+              <EuiHorizontalRule margin="none" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                or
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiHorizontalRule margin="none" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiTitle size="xs">
+            <h2>Start from a rule builder</h2>
+          </EuiTitle>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCard
@@ -95,6 +122,25 @@ export const CreateRulePanel: React.FC<CreateRulePanelProps> = ({ onClose }) => 
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
+      }
+      footer={
+        <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m">
+          <EuiText size="s" color="subdued" textAlign="center">
+            <p>Want to learn more?</p>
+          </EuiText>
+          <EuiLink
+            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/alerting-rule-types.html"
+            target="_blank"
+            external
+            data-test-subj="createRulePanelDocumentationLink"
+            aria-label="Read documentation"
+          >
+            <FormattedMessage
+              id="xpack.alertingV2.rulesListPage.createRulePanel.documentationLinkText"
+              defaultMessage="Read documentation"
+            />
+          </EuiLink>
+        </EuiFlexGroup>
       }
     />
   );
