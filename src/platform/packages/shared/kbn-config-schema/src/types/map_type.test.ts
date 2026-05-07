@@ -191,10 +191,7 @@ test('error preserves full path', () => {
 test('meta', () => {
   const stringSchema = schema.string();
   const type = schema.mapOf(schema.string(), stringSchema);
-  const result = type
-    .getSchema()
-    .describe()
-    .metas![0][META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]();
+  const result = type.getSchema().meta()?.[META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]();
 
   expect(result).toBe(stringSchema.getSchema());
 });

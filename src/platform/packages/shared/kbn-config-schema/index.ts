@@ -49,6 +49,7 @@ import {
   LiteralType,
   MapOfType,
   MaybeType,
+  NullableType,
   NeverType,
   NumberType,
   ObjectType,
@@ -62,11 +63,21 @@ import {
   Lazy,
 } from './src/types';
 
-export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
-export { ObjectType, Type };
+export type {
+  AnyType,
+  ConditionalType,
+  TypeOf,
+  Props,
+  SchemaStructureEntry,
+  NullableProps,
+  ObjectResultType,
+  TypeOptions,
+  UnionTypeOptions,
+};
+export { ObjectType, Type, UnionType };
 export type { SchemaValidationOptions } from './src/types';
 export { ByteSizeValue } from './src/byte_size_value';
-export { SchemaTypeError, ValidationError } from './src/errors';
+export { SchemaTypeError, SchemaTypesError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
 export { offeringBasedSchema } from './src/helpers';
 
@@ -126,7 +137,7 @@ function maybe<V>(type: Type<V>): Type<V | undefined> {
 }
 
 function nullable<V>(type: Type<V>): Type<V | null> {
-  return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
+  return new NullableType(type);
 }
 
 function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P> {

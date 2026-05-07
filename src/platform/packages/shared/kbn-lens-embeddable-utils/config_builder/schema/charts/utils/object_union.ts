@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectType } from '@kbn/config-schema';
-import { Type } from '@kbn/config-schema';
-import { internals } from '@kbn/config-schema/src/internals';
-import type { ObjectResultType, Props, TypeOptions } from '@kbn/config-schema/src/types';
-import { SchemaTypeError, SchemaTypesError } from '@kbn/config-schema/src/errors';
+import type {
+  ObjectType,
+  ObjectResultType,
+  Props,
+  TypeOptions,
+  UnionTypeOptions,
+  Type,
+} from '@kbn/config-schema';
+import { SchemaTypeError, SchemaTypesError, UnionType } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 
 type SomeObjectType = ObjectType<any>;
@@ -27,21 +31,13 @@ export function objectUnion<T extends [SomeObjectType, ...SomeObjectType[]]>(
 }
 
 /**
- * Extends `Type` with duplicate logic from `UnionType` from `@kbn/config-schema`
+ * Extends {@link UnionType} with Lens-specific `extends()` for object branches.
  */
-export class ObjectUnionType<RTS extends Array<SomeObjectType>, T> extends Type<T> {
-  private readonly unionTypes: RTS;
+export class ObjectUnionType<RTS extends Array<SomeObjectType>, T> extends UnionType<RTS, T> {
   private readonly typeOptions?: TypeOptions<T>;
 
   constructor(types: RTS, options?: TypeOptions<T>) {
-    let schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
-
-    if (options?.meta?.id) {
-      schema = schema.id(options.meta.id);
-    }
-
-    super(schema, options);
-    this.unionTypes = types;
+    super(types, options as UnionTypeOptions<T>);
     this.typeOptions = options;
   }
 
@@ -82,6 +78,7 @@ export class ObjectUnionType<RTS extends Array<SomeObjectType>, T> extends Type<
   protected handleError(type: string, { value, details }: Record<string, any>, path: string[]) {
     switch (type) {
       case 'any.required':
+      case 'invalid_type':
         return `expected at least one defined value but got [${typeDetect(value)}]`;
       case 'alternatives.match':
         return new SchemaTypesError(
@@ -97,6 +94,8 @@ export class ObjectUnionType<RTS extends Array<SomeObjectType>, T> extends Type<
               : new SchemaTypeError(e.message, childPathWithIndex);
           })
         );
+      default:
+        return undefined;
     }
   }
 }

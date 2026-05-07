@@ -23,11 +23,11 @@ describe('ip validation', () => {
   test('rejects ipv6 when not specified', () => {
     expect(() =>
       ip({ versions: ['ipv4'] }).validate('1200:0000:AB00:1234:0000:2552:7777:1313')
-    ).toThrowErrorMatchingInlineSnapshot(`"value must be a valid ipv4 address"`);
+    ).toThrowErrorMatchingInlineSnapshot(`"Invalid IPv4 address"`);
   });
   test('rejects ipv4 when not specified', () => {
     expect(() => ip({ versions: ['ipv6'] }).validate('1.1.1.1')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid ipv6 address"`
+      `"Invalid IPv6 address"`
     );
   });
   test('rejects invalid ip addresses', () => {

@@ -8,30 +8,58 @@
  */
 
 import typeDetect from 'type-detect';
-import { internals } from '../internals';
-import type { TypeOptions } from './type';
+import { ipv4 as zIpv4, ipv6 as zIpv6, z as zod } from '@kbn/zod';
+
+import type { TypeOptions } from './interfaces';
 import { Type } from './type';
 
 export type IpVersion = 'ipv4' | 'ipv6';
 export type IpOptions = TypeOptions<string> & {
-  /**
-   * IP versions to accept, defaults to ['ipv4', 'ipv6'].
-   */
   versions: IpVersion[];
 };
 
 export class IpType extends Type<string> {
+  private readonly ipVersions: IpVersion[];
+
   constructor(options: IpOptions = { versions: ['ipv4', 'ipv6'] }) {
-    const schema = internals.string().ip({ version: options.versions, cidr: 'forbidden' });
-    super(schema, options);
+    const parts: zod.ZodTypeAny[] = [];
+    if (options.versions.includes('ipv4')) {
+      parts.push(zIpv4());
+    }
+    if (options.versions.includes('ipv6')) {
+      parts.push(zIpv6());
+    }
+    const union =
+      parts.length === 1
+        ? parts[0]!
+        : zod.union(parts as [zod.ZodTypeAny, zod.ZodTypeAny, ...zod.ZodTypeAny[]]);
+
+    super(zod.string().pipe(union as zod.ZodType<string>), options);
+    this.ipVersions = options.versions;
   }
 
-  protected handleError(type: string, { value, version }: Record<string, any>) {
+  protected structureTypeLabel(): string {
+    return 'string';
+  }
+
+  protected handleError(type: string, { value, message }: Record<string, any>) {
     switch (type) {
-      case 'string.base':
+      case 'invalid_type':
         return `expected value of type [string] but got [${typeDetect(value)}]`;
-      case 'string.ipVersion':
-        return `value must be a valid ${version.join(' or ')} address`;
+      default:
+        if (typeof message === 'string') {
+          const t = message.trim();
+          // Zod v4 pipe/union failures often surface as the generic "Invalid input" — keep legacy copy.
+          if (t !== 'Invalid input' && !/^Invalid input$/i.test(t)) {
+            return message;
+          }
+        }
+        if (this.ipVersions.length === 1) {
+          return this.ipVersions[0] === 'ipv4'
+            ? 'value must be a valid ipv4 address'
+            : 'value must be a valid ipv6 address';
+        }
+        return `value must be a valid ipv4 or ipv6 address`;
     }
   }
 }

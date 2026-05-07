@@ -8,17 +8,28 @@
  */
 
 import typeDetect from 'type-detect';
-import { internals } from '../internals';
-import type { TypeOptions } from './type';
+import { z as zod } from '@kbn/zod';
+
+import type { TypeOptions } from './interfaces';
 import { Type } from './type';
 
 export class BufferType extends Type<Buffer> {
   constructor(options?: TypeOptions<Buffer>) {
-    super(internals.binary(), options);
+    super(
+      zod.preprocess(
+        (val: unknown) => (typeof val === 'string' ? Buffer.from(val) : val),
+        zod.instanceof(Buffer)
+      ),
+      options
+    );
+  }
+
+  protected structureTypeLabel(): string {
+    return 'binary';
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {
-    if (type === 'any.required' || type === 'binary.base') {
+    if (type === 'any.required' || type === 'invalid_type') {
       return `expected value of type [Buffer] but got [${typeDetect(value)}]`;
     }
   }

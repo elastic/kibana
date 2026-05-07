@@ -7,23 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z as zod } from '@kbn/zod';
+import type { OptionsForUnknowns } from './interfaces';
 
-import { Type } from './type';
-
-export class LiteralType<T> extends Type<T> {
-  public readonly expectedValue: T;
-
-  constructor(value: T) {
-    super(zod.literal(value as any), {});
-    this.expectedValue = value;
+export function effectiveUnknowns(
+  unknowns: OptionsForUnknowns | undefined,
+  stripUnknownKeys: boolean | undefined
+): 'allow' | 'ignore' | 'forbid' {
+  if (unknowns !== undefined) {
+    return unknowns;
   }
-
-  protected structureTypeLabel(): string {
-    return String(this.expectedValue);
-  }
-
-  protected handleError(_type: string) {
-    return `expected value to equal [${this.expectedValue}]`;
-  }
+  return stripUnknownKeys ? 'ignore' : 'forbid';
 }

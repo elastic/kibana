@@ -24,6 +24,7 @@ export type { IntersectionTypeOptions } from './intersection_type';
 export { IntersectionType } from './intersection_type';
 export { LiteralType } from './literal_type';
 export { MaybeType } from './maybe_type';
+export { NullableType } from './nullable_type';
 export type { MapOfOptions } from './map_type';
 export { MapOfType } from './map_type';
 export type { NumberOptions } from './number_type';

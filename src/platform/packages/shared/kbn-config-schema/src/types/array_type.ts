@@ -8,8 +8,15 @@
  */
 
 import typeDetect from 'type-detect';
-import { internals } from '../internals';
-import type { TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import type { z } from '@kbn/zod';
+import { z as zod } from '@kbn/zod';
+
+import { SchemaTypeError, ValidationError } from '../errors';
+import type { ExtendsDeepOptions, SchemaValidationOptions, UnknownOptions } from './interfaces';
+import type { TypeOptions } from './interfaces';
+import { prependPathSegment, unwrapValidationError } from './error_utils';
+import { effectiveUnknowns } from './object_helpers';
+import { Reference } from '../references';
 import { Type } from './type';
 
 export type ArrayOptions<T> = TypeOptions<T[]> &
@@ -23,50 +30,148 @@ export class ArrayType<T> extends Type<T[]> {
   private readonly arrayOptions: ArrayOptions<T>;
 
   constructor(type: Type<T>, options: ArrayOptions<T> = {}) {
-    let schema = internals.array().items(type.getSchema().optional()).sparse(false);
-
-    if (options.minSize !== undefined) {
-      schema = schema.min(options.minSize);
-    }
-
-    if (options.maxSize !== undefined) {
-      schema = schema.max(options.maxSize);
-    }
-
-    // Only set stripUnknown if we have an explicit value of unknowns
-    const { unknowns } = options;
-    if (unknowns) {
-      schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
-    }
-
-    if (options.meta?.id) {
-      schema = schema.id(options.meta.id);
-    }
-
-    super(schema, options);
+    super(zod.any(), options);
     this.arrayType = type;
     this.arrayOptions = options;
+  }
+
+  public override getSchema(): z.ZodType<T[]> {
+    let base = zod.array(this.arrayType.getSchema());
+    if (this.arrayOptions.minSize !== undefined) {
+      base = base.min(this.arrayOptions.minSize);
+    }
+    if (this.arrayOptions.maxSize !== undefined) {
+      base = base.max(this.arrayOptions.maxSize);
+    }
+    if (this.arrayOptions.meta?.id) {
+      base = base.meta({ id: this.arrayOptions.meta.id });
+    }
+    return base as z.ZodType<T[]>;
+  }
+
+  protected validateWithFrame(
+    _frame: import('../validation_frame').ValidationFrame,
+    value: unknown,
+    context: Record<string, unknown>,
+    namespace?: string,
+    validationOptions?: SchemaValidationOptions
+  ): T[] {
+    let val: any = value;
+    if (val === undefined && this.typeOptions.defaultValue !== undefined) {
+      const def = this.typeOptions.defaultValue;
+      if (typeof def === 'function') {
+        val = (def as () => T[])();
+      } else if (Reference.isReference(def)) {
+        val = def.resolve() as T[];
+      } else {
+        val = def as T[];
+      }
+    }
+
+    if (typeof val === 'string') {
+      try {
+        val = JSON.parse(val);
+      } catch {
+        throw new ValidationError(
+          new SchemaTypeError('could not parse array value from json input', []),
+          namespace
+        );
+      }
+    }
+
+    if (!Array.isArray(val)) {
+      throw new ValidationError(
+        new SchemaTypeError(`expected value of type [array] but got [${typeDetect(val)}]`, []),
+        namespace
+      );
+    }
+
+    if (this.arrayOptions.minSize !== undefined && val.length < this.arrayOptions.minSize) {
+      throw new ValidationError(
+        new SchemaTypeError(
+          `array size is [${val.length}], but cannot be smaller than [${this.arrayOptions.minSize}]`,
+          []
+        ),
+        namespace
+      );
+    }
+
+    if (this.arrayOptions.maxSize !== undefined && val.length > this.arrayOptions.maxSize) {
+      throw new ValidationError(
+        new SchemaTypeError(
+          `array size is [${val.length}], but cannot be greater than [${this.arrayOptions.maxSize}]`,
+          []
+        ),
+        namespace
+      );
+    }
+
+    const policy = effectiveUnknowns(
+      this.arrayOptions.unknowns,
+      validationOptions?.stripUnknownKeys
+    );
+    const itemValidationOptions: SchemaValidationOptions = {
+      ...(validationOptions ?? {}),
+      stripUnknownKeys: policy === 'ignore',
+    };
+
+    const out: T[] = [];
+    for (let i = 0; i < val.length; i++) {
+      if (val[i] === undefined) {
+        throw new ValidationError(
+          new SchemaTypeError('sparse array are not allowed', [String(i)]),
+          namespace
+        );
+      }
+      try {
+        out.push(this.arrayType.validate(val[i], context, undefined, itemValidationOptions));
+      } catch (e) {
+        const inner = unwrapValidationError(e);
+        if (inner) {
+          throw new ValidationError(prependPathSegment(String(i), inner), namespace);
+        }
+        throw e;
+      }
+    }
+
+    return out;
   }
 
   public extendsDeep(options: ExtendsDeepOptions) {
     return new ArrayType(this.arrayType.extendsDeep(options), this.arrayOptions);
   }
 
+  public addLazyRegistryEntries(map: Map<string, unknown>): void {
+    this.arrayType.addLazyRegistryEntries(map);
+  }
+
+  protected structureTypeLabel(): string {
+    return 'array';
+  }
+
+  public getSchemaStructure() {
+    const nested = this.arrayType.getSchemaStructure();
+    if (nested.length === 1 && nested[0].path.length === 0) {
+      return [{ path: [], type: `array` }];
+    }
+    return [{ path: [], type: 'array' }];
+  }
+
   protected handleError(type: string, { limit, reason, value }: Record<string, any>) {
     switch (type) {
       case 'any.required':
-      case 'array.base':
+      case 'invalid_type':
         return `expected value of type [array] but got [${typeDetect(value)}]`;
       case 'array.sparse':
         return `sparse array are not allowed`;
       case 'array.parse':
         return `could not parse array value from json input`;
-      case 'array.min':
+      case 'too_small':
         return `array size is [${value.length}], but cannot be smaller than [${limit}]`;
-      case 'array.max':
+      case 'too_big':
         return `array size is [${value.length}], but cannot be greater than [${limit}]`;
-      case 'array.includesOne':
-        return reason[0];
+      default:
+        return typeof reason?.[0] === 'string' ? reason[0] : undefined;
     }
   }
 }

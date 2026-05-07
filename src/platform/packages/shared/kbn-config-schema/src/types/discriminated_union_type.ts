@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Schema, SwitchCases } from 'joi';
 import typeDetect from 'type-detect';
+import { z as zod } from '@kbn/zod';
 
-import { internals } from '../internals';
-import {
-  META_FIELD_X_OAS_DISCRIMINATOR,
-  META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE,
-} from '../oas_meta_fields';
-import type { ExtendsDeepOptions } from './type';
-import { Type } from './type';
+import { SchemaTypeError, ValidationError } from '../errors';
+import { Reference } from '../references';
+import type { ExtendsDeepOptions, SchemaValidationOptions } from './interfaces';
+import type { UnionTypeOptions } from './union_type';
+import { LiteralType } from './literal_type';
 import type { ObjectResultType, Props } from './object_type';
 import type { ObjectType } from './object_type';
-import type { UnionTypeOptions } from './union_type';
+import { Type } from './type';
 
 export type ObjectResultUnionType<T> = T extends Props ? ObjectResultType<T> : never;
 
@@ -38,103 +36,143 @@ export class DiscriminatedUnionType<
   private readonly discriminator: Discriminator;
   private readonly discriminatedValues: string[];
   private readonly unionTypes: RTS;
-  private readonly typeOptions?: UnionTypeOptions<T>;
+  private readonly unionOptions?: UnionTypeOptions<T>;
+  private readonly branchByValue = new Map<string, ObjectType<any>>();
+  private readonly fallback?: ObjectType<any>;
 
   constructor(discriminator: Discriminator, types: RTS, options?: UnionTypeOptions<T>) {
+    super(zod.any(), options);
+
     const discriminators = new Set<string>();
 
-    let otherwise: Schema | undefined;
-    const switchCases = types.reduce<SwitchCases[]>((acc, type, index) => {
-      const discriminatorSchema = type.getPropSchemas()[discriminator];
-      const discriminatorValue = discriminatorSchema.expectedValue;
+    let fallback: ObjectType<any> | undefined;
 
-      if (discriminatorValue == null) {
-        if (otherwise) {
+    for (let index = 0; index < types.length; index++) {
+      const objectType = types[index];
+      const discriminatorSchema = objectType.getPropSchemas()[discriminator];
+
+      const literalExpected =
+        discriminatorSchema instanceof LiteralType ? discriminatorSchema.expectedValue : null;
+
+      if (literalExpected == null) {
+        if (fallback) {
           throw new Error(`Only one fallback schema is allowed`);
         }
-
-        otherwise = type.getSchema().meta({ [META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE]: true });
-        return acc;
+        fallback = objectType;
       } else {
-        if (typeof discriminatorValue !== 'string') {
+        if (typeof literalExpected !== 'string') {
           throw new Error(
-            `Discriminator for schema at index ${index} must be a string type, got ${typeof discriminatorValue}`
+            `Discriminator for schema at index ${index} must be a string type, got ${typeof literalExpected}`
           );
         }
 
-        if (discriminators.has(discriminatorValue)) {
+        if (discriminators.has(literalExpected)) {
           throw new Error(
-            `Discriminator for schema at index ${index} must be a unique, ${discriminatorValue} is already used`
+            `Discriminator for schema at index ${index} must be a unique, ${literalExpected} is already used`
           );
         }
 
-        discriminators.add(discriminatorValue);
+        discriminators.add(literalExpected);
+        this.branchByValue.set(literalExpected, objectType);
       }
-
-      acc.push({
-        is: discriminatorValue,
-        then: type.getSchema(),
-      });
-
-      return acc;
-    }, []);
-
-    // This is a workaround to add the discriminator to the first case because our parser
-    // strips it off the alternatives.match container.
-    // https://github.com/kenspirit/joi-to-json/pull/58
-    if (switchCases.length > 0) {
-      switchCases[0].then = (switchCases[0]!.then! as Schema).meta({
-        [META_FIELD_X_OAS_DISCRIMINATOR]: discriminator,
-      });
     }
-
-    const schema = internals
-      .alternatives()
-      .match('any')
-      .meta({ [META_FIELD_X_OAS_DISCRIMINATOR]: discriminator })
-      .conditional(
-        internals.ref(`.${discriminator}`), // self reference object property
-        {
-          switch: switchCases,
-          otherwise,
-        }
-      );
-
-    super(schema, options);
 
     this.discriminator = discriminator;
     this.discriminatedValues = Array.from(discriminators);
     this.unionTypes = types;
-    this.typeOptions = options;
+    this.unionOptions = options;
+    this.fallback = fallback;
+  }
+
+  protected validateWithFrame(
+    _frame: import('../validation_frame').ValidationFrame,
+    value: unknown,
+    context: Record<string, unknown>,
+    namespace?: string,
+    validationOptions?: SchemaValidationOptions
+  ): T {
+    if (value === undefined && this.typeOptions.defaultValue !== undefined) {
+      const def = this.typeOptions.defaultValue;
+      let resolved: unknown;
+      if (typeof def === 'function') {
+        resolved = (def as () => unknown)();
+      } else if (Reference.isReference(def)) {
+        resolved = def.resolve();
+      } else {
+        resolved = def;
+      }
+      return this.validateWithFrame(_frame, resolved, context, namespace, validationOptions);
+    }
+
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      throw new ValidationError(new SchemaTypeError(`expected object`, []), namespace);
+    }
+    const obj = value as Record<string, unknown>;
+    const discriminatorValue = obj[this.discriminator];
+
+    if (discriminatorValue == null) {
+      throw new ValidationError(
+        new SchemaTypeError(`"${this.discriminator}" property is required`, []),
+        namespace
+      );
+    }
+
+    const discriminatorsJoined = this.discriminatedValues.map((v) => JSON.stringify(v)).join(', ');
+
+    let branch: ObjectType<any> | undefined;
+    if (typeof discriminatorValue === 'string') {
+      branch = this.branchByValue.get(discriminatorValue) ?? this.fallback;
+      if (!branch) {
+        throw new ValidationError(
+          new SchemaTypeError(
+            `expected "${
+              this.discriminator
+            }" to be one of [${discriminatorsJoined}] but got [${JSON.stringify(
+              discriminatorValue
+            )}]`,
+            []
+          ),
+          namespace
+        );
+      }
+    } else if (this.fallback) {
+      branch = this.fallback;
+    } else {
+      throw new ValidationError(
+        new SchemaTypeError(
+          `expected "${
+            this.discriminator
+          }" to be a string of [${discriminatorsJoined}] but got [${typeDetect(
+            discriminatorValue
+          )}]`,
+          []
+        ),
+        namespace
+      );
+    }
+
+    return branch.validate(value, context, namespace, validationOptions) as T;
   }
 
   public extendsDeep(options: ExtendsDeepOptions) {
     return new DiscriminatedUnionType(
       this.discriminator,
       this.unionTypes.map((t) => t.extendsDeep(options)),
-      this.typeOptions
+      this.unionOptions
     );
   }
 
-  protected handleError(type: string, { value }: Record<string, any>, path: string[]) {
+  public addLazyRegistryEntries(map: Map<string, unknown>): void {
+    for (const t of this.unionTypes) {
+      t.addLazyRegistryEntries(map);
+    }
+  }
+
+  protected handleError(type: string, { value }: Record<string, unknown>) {
     switch (type) {
       case 'alternatives.any':
-        const discriminatorValue = value[this.discriminator];
-
-        if (discriminatorValue == null) {
-          return `"${this.discriminator}" property is required`;
-        }
-
-        const discriminators = this.discriminatedValues.map((v) => JSON.stringify(v)).join(', ');
-        const discriminatorType = typeDetect(discriminatorValue);
-
-        if (discriminatorType !== 'string') {
-          return `expected "${this.discriminator}" to be a string of [${discriminators}] but got [${discriminatorType}]`;
-        }
-
-        if (!this.discriminatedValues.includes(discriminatorValue)) {
-          return `expected "${this.discriminator}" to be one of [${discriminators}] but got ["${discriminatorValue}"]`;
-        }
+      default:
+        return undefined;
     }
   }
 }

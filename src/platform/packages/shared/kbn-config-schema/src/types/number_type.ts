@@ -8,45 +8,110 @@
  */
 
 import typeDetect from 'type-detect';
-import { internals } from '../internals';
-import type { TypeOptions } from './type';
+import { z as zod } from '@kbn/zod';
+
+import { SchemaTypeError, ValidationError } from '../errors';
+import type { SchemaValidationOptions, TypeOptions } from './interfaces';
 import { Type } from './type';
+
+const NAN_MESSAGE = 'expected value of type [number] but got [number]';
 
 export type NumberOptions = TypeOptions<number> & {
   min?: number;
   max?: number;
-  /**
-   * When set to true, will accept unsafe numbers (integers > 2^53).
-   * Otherwise, unsafe numbers will fail validation.
-   * Default: `false`
-   */
   unsafe?: boolean;
 };
 
 export class NumberType extends Type<number> {
   constructor(options: NumberOptions = {}) {
-    let schema = internals.number();
+    let core = zod.preprocess((value: unknown) => {
+      if (value === undefined) {
+        return value;
+      }
+      if (typeof value === 'string') {
+        return Number(value);
+      }
+      return value;
+    }, zod.number());
+
     if (options.min !== undefined) {
-      schema = schema.min(options.min);
+      core = core.refine((v) => v >= options.min!, {
+        message: `Value must be equal to or greater than [${options.min}].`,
+      });
     }
     if (options.max !== undefined) {
-      schema = schema.max(options.max);
+      core = core.refine((v) => v <= options.max!, {
+        message: `Value must be equal to or lower than [${options.max}].`,
+      });
     }
-    if (options.unsafe === true) {
-      schema = schema.unsafe(true);
+    if (options.unsafe !== true) {
+      core = core.superRefine((val, ctx) => {
+        if (!Number.isFinite(val) || Math.abs(val) > Number.MAX_SAFE_INTEGER) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `"value" must be a safe number`,
+            input: val,
+          } as zod.ZodCustomIssue);
+        }
+      });
     }
 
-    super(schema, options);
+    super(core, options);
+  }
+
+  protected validateWithFrame(
+    frame: import('../validation_frame').ValidationFrame,
+    value: unknown,
+    context: Record<string, unknown>,
+    namespace?: string,
+    validationOptions?: SchemaValidationOptions
+  ): number {
+    const opts = this.typeOptions as NumberOptions & TypeOptions<number>;
+
+    if (value === undefined && opts.validate && opts.defaultValue !== undefined) {
+      const { validate: _dropValidate, ...rest } = opts;
+      const inner = new NumberType(rest);
+      return inner.validate(value, context, namespace, validationOptions);
+    }
+
+    if (typeof value === 'number' && Number.isNaN(value)) {
+      throw new ValidationError(new SchemaTypeError(NAN_MESSAGE, []), namespace);
+    }
+
+    if (value !== undefined && typeof value !== 'number') {
+      if (typeof value === 'string') {
+        if (Number.isNaN(Number(value))) {
+          throw new ValidationError(
+            new SchemaTypeError(
+              `expected value of type [number] but got [${typeDetect(value)}]`,
+              []
+            ),
+            namespace
+          );
+        }
+        return super.validateWithFrame(frame, value, context, namespace, validationOptions);
+      }
+      throw new ValidationError(
+        new SchemaTypeError(`expected value of type [number] but got [${typeDetect(value)}]`, []),
+        namespace
+      );
+    }
+
+    return super.validateWithFrame(frame, value, context, namespace, validationOptions);
+  }
+
+  protected structureTypeLabel(): string {
+    return 'number';
   }
 
   protected handleError(type: string, { limit, value }: Record<string, any>) {
     switch (type) {
       case 'any.required':
-      case 'number.base':
+      case 'invalid_type':
         return `expected value of type [number] but got [${typeDetect(value)}]`;
-      case 'number.min':
+      case 'too_small':
         return `Value must be equal to or greater than [${limit}].`;
-      case 'number.max':
+      case 'too_big':
         return `Value must be equal to or lower than [${limit}].`;
     }
   }

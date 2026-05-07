@@ -68,7 +68,7 @@ describe('lazy', () => {
 
     const { error, value } = object.getSchema().validate(invalidSelf);
     expect(value).toEqual(invalidSelf);
-    expect(error?.message).toBe('expected value of type [string] but got [number]');
+    expect(error?.message).toBe('[self.name]: expected value of type [string] but got [number]');
   });
 
   it('requires a schema with a given ID to be present in the schema when validating', () => {
