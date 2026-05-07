@@ -198,7 +198,7 @@ export function useManageIndexMenu({
       items.push({
         id: 'closeIndex',
         order: order++,
-        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.closeIndexLabel', {
+        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.closeIndexLabel', {
           defaultMessage: 'Close index',
         }),
         run: () => {
@@ -209,7 +209,7 @@ export function useManageIndexMenu({
       items.push({
         id: 'forcemergeIndex',
         order: order++,
-        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.forceMergeIndexLabel', {
+        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.forceMergeIndexLabel', {
           defaultMessage: 'Force merge index',
         }),
         run: () => {
@@ -220,7 +220,7 @@ export function useManageIndexMenu({
       items.push({
         id: 'refreshIndex',
         order: order++,
-        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.refreshIndexLabel', {
+        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.refreshIndexLabel', {
           defaultMessage: 'Refresh index',
         }),
         run: () => {
@@ -231,7 +231,7 @@ export function useManageIndexMenu({
       items.push({
         id: 'clearCacheIndex',
         order: order++,
-        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.clearIndexCacheLabel', {
+        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.clearIndexCacheLabel', {
           defaultMessage: 'Clear index cache',
         }),
         run: () => {
@@ -242,7 +242,7 @@ export function useManageIndexMenu({
       items.push({
         id: 'flushIndex',
         order: order++,
-        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.flushIndexLabel', {
+        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.flushIndexLabel', {
           defaultMessage: 'Flush index',
         }),
         run: () => {
@@ -254,7 +254,7 @@ export function useManageIndexMenu({
       items.push({
         id: 'openIndex',
         order: order++,
-        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.openIndexLabel', {
+        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.openIndexLabel', {
           defaultMessage: 'Open index',
         }),
         run: () => {
@@ -267,7 +267,7 @@ export function useManageIndexMenu({
     items.push({
       id: 'deleteIndex',
       order: order++,
-      label: i18n.translate('xpack.idxMgmt.indexActionsMenu.deleteIndexLabel', {
+      label: i18n.translate('xpack.idxMgmt.indexActionsMenu.detailsPage.deleteIndexLabel', {
         defaultMessage: 'Delete index',
       }),
       run: () => {
@@ -321,9 +321,12 @@ export function useManageIndexMenu({
       items.push({
         id: 'convertToLookupIndex',
         order: order++,
-        label: i18n.translate('xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton', {
-          defaultMessage: 'Convert to lookup index',
-        }),
+        label: i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.detailsPage.convertToLookupIndexButton',
+          {
+            defaultMessage: 'Convert to lookup index',
+          }
+        ),
         disableButton: !isConvertable,
         run: () => {
           modalRef.current?.openModal({ kind: 'convertToLookup' });
@@ -346,8 +349,6 @@ export function useManageIndexMenu({
     flushIndices,
     refreshIndices,
     clearCacheIndices,
-    forcemergeIndices,
-    deleteIndices,
     performExtensionAction,
   ]);
 
