@@ -2378,7 +2378,7 @@ describe('Agent policy', () => {
           expect.objectContaining({
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 1000,
-            sortField: 'created_at',
+            sortField: 'updated_at',
             sortOrder: 'asc',
             fields: ['id', 'name'],
             filter: undefined,
@@ -2398,7 +2398,7 @@ describe('Agent policy', () => {
           expect.objectContaining({
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 13,
-            sortField: 'created_at',
+            sortField: 'updated_at',
             sortOrder: 'asc',
             fields: ['id', 'name'],
             filter: 'one=two',
@@ -2442,7 +2442,7 @@ describe('Agent policy', () => {
           expect.objectContaining({
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 1000,
-            sortField: 'created_at',
+            sortField: 'updated_at',
             sortOrder: 'asc',
             fields: [],
             filter: undefined,
@@ -2460,7 +2460,7 @@ describe('Agent policy', () => {
           expect.objectContaining({
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 1000,
-            sortField: 'created_at',
+            sortField: 'updated_at',
             sortOrder: 'asc',
             fields: [],
             filter: undefined,

@@ -43,6 +43,7 @@ export const integrateTranslations: TaskSignature<TaskOptions> = (
 
           const sourceFilePath = makeAbsolutePath(source);
           const localizedMessages = JSON.parse((await readFileAsync(sourceFilePath)).toString());
+          context.localizedMessages = localizedMessages;
           const namespacedTranslatedMessages = groupMessagesByNamespace(
             localizedMessages,
             namespaces
