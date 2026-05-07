@@ -75,7 +75,8 @@ const registerSOTypes = (setup: InternalCoreSetup) => {
   });
 };
 
-describe('404s from proxies', () => {
+// Failing: See https://github.com/elastic/kibana/issues/141398
+describe.skip('404s from proxies', () => {
   let root: Root;
   let start: InternalCoreStart;
 

@@ -34,6 +34,7 @@ type UnifiedGridProps = ChartSectionProps & {
   actions: ChartSectionConfigurationExtensionParams['actions'];
   breakdownField?: string;
   onBreakdownFieldChange?: (fieldName?: string) => void;
+  externalServices?: { discoverShared?: unknown; dataViews?: unknown };
 };
 
 let unifiedGridProps: UnifiedGridProps | undefined;
@@ -52,6 +53,16 @@ jest.mock('../../../../../application/main/state_management/redux', () => ({
   useAppStateSelector: jest.fn(),
   useCurrentTabAction: jest.fn(),
   useInternalStateDispatch: jest.fn(),
+}));
+
+const mockDiscoverShared = { __sentinel: 'discoverShared' };
+const mockDataViews = { __sentinel: 'dataViews' };
+
+jest.mock('../../../../../hooks/use_discover_services', () => ({
+  useDiscoverServices: jest.fn(() => ({
+    discoverShared: mockDiscoverShared,
+    dataViews: mockDataViews,
+  })),
 }));
 
 const mockDispatch = jest.fn();
@@ -137,6 +148,15 @@ describe('MetricsExperienceGridWrapper', () => {
     expect(mockDispatch).toHaveBeenCalledWith({
       type: 'updateAppState',
       payload: { appState: { breakdownField: 'service.name' } },
+    });
+  });
+
+  it('forwards externalServices (discoverShared, dataViews) to the metrics grid', () => {
+    renderChartSection();
+
+    expect(unifiedGridProps?.externalServices).toEqual({
+      discoverShared: mockDiscoverShared,
+      dataViews: mockDataViews,
     });
   });
 });

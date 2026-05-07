@@ -13562,7 +13562,7 @@
         "label": "aggregateQueryToAst",
         "description": [],
         "signature": [
-          "({ query, timeField, titleForInspector, descriptionForInspector, }: { query: ",
+          "({ query, timeField, titleForInspector, descriptionForInspector, ignoreGlobalFilters, }: { query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -13570,7 +13570,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; timeField?: string | undefined; titleForInspector?: string | undefined; descriptionForInspector?: string | undefined; }) => ",
+          "; timeField?: string | undefined; titleForInspector?: string | undefined; descriptionForInspector?: string | undefined; ignoreGlobalFilters?: boolean | undefined; }) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -13591,10 +13591,10 @@
             "id": "def-common.aggregateQueryToAst.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  query,\n  timeField,\n  titleForInspector,\n  descriptionForInspector,\n}",
+            "label": "{\n  query,\n  timeField,\n  titleForInspector,\n  descriptionForInspector,\n  ignoreGlobalFilters,\n}",
             "description": [],
             "path": "src/platform/plugins/shared/data/common/search/expressions/aggregate_query_to_ast.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -13610,7 +13610,7 @@
                   "{ esql: string; }"
                 ],
                 "path": "src/platform/plugins/shared/data/common/search/expressions/aggregate_query_to_ast.ts",
-                "lineNumber": 22,
+                "lineNumber": 23,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -13626,7 +13626,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/common/search/expressions/aggregate_query_to_ast.ts",
-                "lineNumber": 23,
+                "lineNumber": 24,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -13642,7 +13642,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/common/search/expressions/aggregate_query_to_ast.ts",
-                "lineNumber": 24,
+                "lineNumber": 25,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -13658,7 +13658,23 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/common/search/expressions/aggregate_query_to_ast.ts",
-                "lineNumber": 25,
+                "lineNumber": 26,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.ignoreGlobalFilters",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "ignoreGlobalFilters",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "lineNumber": 27,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
