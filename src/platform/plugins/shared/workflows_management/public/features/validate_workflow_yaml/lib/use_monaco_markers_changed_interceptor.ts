@@ -48,6 +48,10 @@ export function useMonacoMarkersChangedInterceptor({
 }: UseMonacoMarkersChangedInterceptorProps): UseMonacoMarkersChangedInterceptorResult {
   const [validationErrors, setValidationErrors] = useState<YamlValidationResult[]>([]);
   const lastFingerprintRef = useRef<string>('');
+  // yamlDocumentRef lags the model by the 500ms Redux compute debounce, so formatMonacoYamlMarker
+  // needs a parse matching the current model. Cache by versionId so multiple setModelMarkers
+  // bursts within the same version share one parse instead of reparsing per marker callback.
+  const freshYamlDocCacheRef = useRef<{ versionId: number; doc: YAML.Document } | null>(null);
 
   const transformMonacoMarkers = useCallback(
     (
@@ -61,9 +65,15 @@ export function useMonacoMarkersChangedInterceptor({
         return filtered;
       }
 
-      // we absolutely need to have up to date yaml document to format the error message, not the one from the ref object (which is debounced)
-      // the monaco-yaml validation is already debounced, so this won't be run every key stroke
-      const freshYamlDocument = parseDocument(editorModel.getValue());
+      const versionId = editorModel.getVersionId();
+      const cached = freshYamlDocCacheRef.current;
+      const freshYamlDocument =
+        cached && cached.versionId === versionId
+          ? cached.doc
+          : parseDocument(editorModel.getValue());
+      if (cached?.versionId !== versionId) {
+        freshYamlDocCacheRef.current = { versionId, doc: freshYamlDocument };
+      }
 
       return filtered.map((marker) =>
         formatMonacoYamlMarker(marker, editorModel, workflowYamlSchema, freshYamlDocument)
