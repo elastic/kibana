@@ -17,9 +17,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 export type { WorkflowsPublicPluginSetup, WorkflowsPublicPluginStart } from './types';
 
-// Public exports consumed by sibling plugins (e.g. agentBuilderWorkflows).
-// Kibana's browser bundler only allows imports through this public entry,
-// so anything reused cross-plugin must be re-exported here.
+// Used by the agent-builder-workflows plugin
 export { PLUGIN_ID } from '../common';
 export type { TelemetryServiceClient } from './common/lib/telemetry/types';
 export { WorkflowsBaseTelemetry } from './common/service/telemetry';

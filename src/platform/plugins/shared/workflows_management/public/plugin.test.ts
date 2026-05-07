@@ -56,7 +56,6 @@ describe('WorkflowsPlugin', () => {
     plugin = new WorkflowsPlugin(coreMock.createPluginInitializerContext());
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
-    // Ensure onStart returns a Promise so setupAgentBuilderStart can chain .then()/.catch()
     coreSetup.plugins.onStart.mockReturnValue(Promise.resolve({ found: false }));
     setupDeps = {
       triggersActionsUi: { actionTypeRegistry: { register: jest.fn() } },
