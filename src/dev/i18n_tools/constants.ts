@@ -17,4 +17,4 @@ export const I18N_RC = '.i18nrc.json';
  * early, plus usage-pattern fallbacks for edge cases like re-exported i18n helpers.
  */
 export const I18N_CALL_PATTERN =
-  /@kbn\/i18n|\btranslate\(|FormattedMessage|defineMessages|\.formatMessage\(/;
+  /@kbn\/i18n|\btranslate\(|FormattedMessage|defineMessages|\bformatMessage\(/;
