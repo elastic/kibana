@@ -26,7 +26,7 @@ import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { ResponseDetails } from '../../response';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { alertFlyoutHistoryKey } from '../constants/flyout_history';
+import { alertFlyoutHistoryKey } from '../../shared/constants/flyout_history';
 
 const KEY = 'response';
 
