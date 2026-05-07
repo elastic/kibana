@@ -32,6 +32,13 @@ export interface AlertEpisode {
   last_tags?: string[];
 }
 
+/**
+ * Raw ES|QL response shape before client-side normalization.
+ */
+export interface AlertEpisodeEsqlRow extends Omit<AlertEpisode, 'last_tags'> {
+  last_tags?: string | string[] | null;
+}
+
 export const ALERT_EPISODE_FIELDS = [
   '@timestamp',
   'episode.id',
