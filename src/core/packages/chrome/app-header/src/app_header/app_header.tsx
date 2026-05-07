@@ -31,10 +31,11 @@ export interface AppHeaderViewProps {
   favorite?: ReactNode;
   sticky?: boolean;
   padding?: AppHeaderPadding;
+  docLink?: string;
 }
 
 export const AppHeaderView = React.memo<AppHeaderViewProps>(
-  ({ title, back, tabs, badges, menu, onShare, favorite, sticky, padding }) => {
+  ({ title, back, tabs, badges, menu, onShare, favorite, sticky, padding, docLink }) => {
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu, onShare);
     const show =
@@ -54,7 +55,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
         title={<TitleArea title={title} back={back} />}
         badges={<AppBadges badges={badges} />}
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
-        trailing={<AppMenu menu={menu} hasExplicitShare={!!onShare} />}
+        trailing={<AppMenu menu={menu} hasExplicitShare={!!onShare} docLink={docLink} />}
         tabs={<AppTabs tabs={tabs} />}
         sticky={sticky}
         padding={padding}

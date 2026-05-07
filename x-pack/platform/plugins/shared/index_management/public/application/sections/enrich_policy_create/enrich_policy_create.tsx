@@ -12,25 +12,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
-import { useAppContext } from '../../app_context';
 import { PageHeader } from '../../components/page_header';
-
 import { CreatePolicyWizard } from './create_policy_wizard';
 import { CreatePolicyContextProvider } from './create_policy_context';
 
 export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = () => {
-  const {
-    core: { chrome },
-  } = useAppContext();
-
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.enrichPoliciesCreate);
-    chrome.registerAppDocumentationLink(documentationService.getCreateEnrichPolicyLink());
-
-    return () => {
-      chrome.registerAppDocumentationLink('');
-    };
-  }, [chrome]);
+  }, []);
 
   return (
     <CreatePolicyContextProvider>
@@ -40,6 +29,7 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
         })}
         back="/app/management/data/index_management/enrich_policies"
         padding={{ bleed: 'l' }}
+        docLink={documentationService.getCreateEnrichPolicyLink()}
         fallback={{
           'data-test-subj': 'createEnrichPolicyHeaderContent',
           description: (

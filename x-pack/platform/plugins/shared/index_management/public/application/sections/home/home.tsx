@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
@@ -44,18 +44,10 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   history,
 }) => {
   const {
-    core: { chrome },
     plugins: { console: consolePlugin },
     privs,
   } = useAppContext();
 
-  useEffect(() => {
-    chrome.registerAppDocumentationLink(documentationService.getIdxMgmtDocumentationLink());
-
-    return () => {
-      chrome.registerAppDocumentationLink('');
-    };
-  }, [chrome]);
   const onSectionChange = (newSection: Section) => {
     history.push(`/${newSection}`);
   };
@@ -117,6 +109,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         })}
         tabs={tabs}
         padding={{ bleed: 'l' }}
+        docLink={documentationService.getIdxMgmtDocumentationLink()}
         fallback={{
           'data-test-subj': 'indexManagementHeaderContent',
           rightSideItems: [

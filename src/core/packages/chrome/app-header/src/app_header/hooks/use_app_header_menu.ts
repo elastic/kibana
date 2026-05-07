@@ -45,7 +45,7 @@ interface ResolvedAppMenu {
   shareItem: AppMenuItemType | undefined;
 }
 
-const useStaticItems = () => {
+const useStaticItems = (explicitDocLink?: string) => {
   const chrome = useChromeService();
   const feedbackHandler = useObservable(chrome.getFeedbackHandler$(), undefined);
   const documentationLink = useObservable(chrome.getAppDocumentationLink$(), undefined);
@@ -58,7 +58,11 @@ const useStaticItems = () => {
       staticItems.push(createFeedbackMenuItem(feedbackHandler));
     }
 
+    /**
+     * Precedence: <AppHeader/> docLink prop -> chrome.getAppDocumentationLink$() -> chrome.getHelpExtension$()
+     */
     const docLink =
+      explicitDocLink ??
       documentationLink ??
       helpExtension?.links?.find((link) => link.linkType === 'documentation')?.href;
 
@@ -67,7 +71,7 @@ const useStaticItems = () => {
     }
 
     return staticItems;
-  }, [feedbackHandler, documentationLink, helpExtension]);
+  }, [feedbackHandler, explicitDocLink, documentationLink, helpExtension]);
 };
 
 const useResolvedAppMenu = (
@@ -92,13 +96,14 @@ const useResolvedAppMenu = (
 
 export function useAppHeaderMenu(
   pageAppMenu: AppMenuConfig | undefined,
-  hasExplicitShare: boolean
+  hasExplicitShare: boolean,
+  docLink?: string
 ): {
   config: AppMenuConfig | undefined;
   staticItems: AppMenuStaticItem[];
 } {
   const { menu } = useResolvedAppMenu(pageAppMenu, hasExplicitShare);
-  const staticItems = useStaticItems();
+  const staticItems = useStaticItems(docLink);
 
   return {
     config: menu,
