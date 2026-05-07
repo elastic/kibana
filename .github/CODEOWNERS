@@ -3148,6 +3148,19 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/exp
 
 /x-pack/solutions/security/packages/test-api-clients/supertest/entity_analytics.gen.ts @elastic/security-entity-analytics
 
+## Security Solution sub teams - Entity Store / Maintainers / Entity Details (contextual-security-apps co-ownership)
+x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_details_flyout @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_store @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/maintainers @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
+
 ## Security Solution sub teams - Entity Resolution (contextual-security-apps co-ownership)
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_resolution @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_resolution_file_uploader @elastic/contextual-security-apps @elastic/security-entity-analytics
