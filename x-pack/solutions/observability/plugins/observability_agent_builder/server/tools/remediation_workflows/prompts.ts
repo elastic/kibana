@@ -24,10 +24,7 @@ export const getRemediationWorkflowPrompt = ({
 
     ${toolList}
 
-    Choose \`remediation_workflow_k8s_rollback\` vs \`remediation_workflow_circuit_breaker\` vs \`remediation_workflow_service_scaling\` using these rules:
-    - **Bad release / rollout / wrong image / need to revert deployment** → **k8s rollback** (\`remediation_workflow_k8s_rollback\`).
-    - **Partial pod failure, flaky upstream, cascading 5xx / high error rate to a dependency, transient instability** where **isolating or ejecting bad hosts** (or optional standby) is the mitigation → **circuit breaker** (\`remediation_workflow_circuit_breaker\`).
-    - **Resource exhaustion**: OOMKill, CPU throttling, latency from capacity, HPA pinned at max, need more replicas or higher limits → **service scaling** (\`remediation_workflow_service_scaling\`). If the issue is clearly a bad deploy, prefer rollback over scaling.
+    call **remediation_workflow_standard_coordination** ALWAYS.
 
     ## Parameters
 

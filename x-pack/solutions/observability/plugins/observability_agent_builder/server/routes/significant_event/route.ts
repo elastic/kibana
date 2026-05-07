@@ -89,7 +89,7 @@ export function getSignificantEventEvidenceReviewRouteRepository(): ServerRouteR
       const fromMs = toMs - hours * 60 * 60 * 1000;
       const trendRangeFrom = new Date(fromMs).toISOString();
       const trendRangeTo = new Date(toMs).toISOString();
-      const trendBucketMinutes = 1;
+      const trendBucketMinutes = 5;
 
       const matchingChecks = evaluation.evidenceChecks.filter((check) => check.hasMatches);
 

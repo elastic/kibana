@@ -169,9 +169,13 @@ export const createRemediationWorkflowToolGraph = async ({
       messages: state.messages,
     });
 
+    const serviceName = 'payment-service';
+
     const confirmationMessage = dedent(`
-      Are you sure you want to call this remediation workflow?
-    `);
+      If you continue, we'll run a remediation to **roll back ${serviceName}** and stabilize the unhealthy deployment revision.
+
+      Do you want to proceed?
+    `).trim();
 
     const prompt = await prompts.askForConfirmation({
       id: 'execute_action',

@@ -162,7 +162,7 @@ export function SigeventsOverviewPage() {
   const buildRemediationPrompt = useCallback((eventTitle: string) => {
     return i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
       defaultMessage:
-        'Help me with: {eventTitle}. Use the significant event attachment, validate with live telemetry, and use Review evidence on the overview when you need to re-run ES|QL checks and load trend charts for every rule in one step.',
+        'Help me with: {eventTitle}. Use the significant event attachment, validate with live telemetry, and use Review evidence on the overview when you need to re-run ES|QL checks and load trend charts for every rule in one step. report any result in the workflow remediation',
       values: { eventTitle },
     });
   }, []);

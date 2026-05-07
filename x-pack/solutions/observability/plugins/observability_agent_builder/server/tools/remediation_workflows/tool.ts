@@ -28,12 +28,7 @@ export const createRemediationWorkflowTool = ({
   const toolDefinition: BuiltinToolDefinition<any> = {
     id: OBSERVABILITY_REMEDIATION_WORKFLOW_TOOL_ID,
     type: ToolType.builtin,
-    description: `Runs **one** approved observability **emergency remediation workflow** (Buildkite-backed). Pass a natural-language remediation request via \`query\`; an inner agent selects exactly one workflow from the synced catalog, gathers structured parameters (\`service_name\`, \`namespace\`, \`reason\`, etc.), then **interrupts for human confirmation**. After acceptance in the UI, execution resumes and runs the workflow. Use **\`/api/agent_builder/converse\`** with the returned prompt id in \`prompts\` when the conversation awaits confirmation — direct \`tools/_execute\` cannot complete HITL.
-
-Candidate workflows this tool may choose among:
-- **Kubernetes rollback (\`remediation_workflow_k8s_rollback\`)** — Bad deployment or rollout regression; reverting the live revision.
-- **Circuit breaker / traffic isolation (\`remediation_workflow_circuit_breaker\`)** — Partial pod failure or unstable upstream ejection / optional standby routing.
-- **Service scaling (\`remediation_workflow_service_scaling\`)** — Replica and optional limit adjustments for OOM, CPU throttle, or HPA at ceiling.
+    description: `Runs **Incident Remediation — Standard Coordination** (the only remediation workflow in this deployment). Pass a natural-language remediation request via \`query\`; the server infers \`service_name\`, \`namespace\`, and optional \`reason\`, then **interrupts for human confirmation**. After acceptance in the UI, execution resumes and runs the workflow. Use **\`/api/agent_builder/converse\`** with the returned prompt id in \`prompts\` when the conversation awaits confirmation — direct \`tools/_execute\` cannot complete HITL.
 
 When NOT to use:
 - Before completing attachment validation and required complementary expansion for significant-event remediation skills.
