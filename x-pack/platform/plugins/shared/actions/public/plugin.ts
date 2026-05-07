@@ -33,6 +33,12 @@ export interface Config {
       };
     };
   };
+  auth?: {
+    ears?: {
+      enabled: boolean;
+    };
+  };
+  // legacy config
   ears?: {
     enabled: boolean;
   };
@@ -49,7 +55,7 @@ export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
     this.allowedEmailDomains = config.email?.domain_allowlist || null;
     this.enabledEmailServices = Array.from(new Set(config.email?.services?.enabled || ['*']));
     this.webhookSslWithPfxEnabled = config.webhook?.ssl.pfx.enabled ?? true;
-    this.earsEnabled = config.ears?.enabled ?? false;
+    this.earsEnabled = config.auth?.ears?.enabled ?? config.ears?.enabled ?? false;
   }
 
   public setup(): ActionsPublicPluginSetup {
