@@ -72,5 +72,5 @@ export const loadDefaultConnector = async ({
   }
 
   const connectors = await getConnectorList({ actions, request, esClient, logger });
-  return connectors[0];
+  return connectors.length > 0 ? connectors[0] : undefined;
 };
