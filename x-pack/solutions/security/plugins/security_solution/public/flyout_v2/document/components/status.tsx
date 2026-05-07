@@ -11,7 +11,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
+import { FlyoutHeaderBlock } from '../../shared/components/flyout_header_block';
 import {
   type CellActionRenderer,
   noopCellActionRenderer,
@@ -70,7 +70,7 @@ export const Status = memo(
     }, [eventId, hit]);
 
     return (
-      <AlertHeaderBlock
+      <FlyoutHeaderBlock
         hasBorder
         title={
           <FormattedMessage
@@ -97,7 +97,7 @@ export const Status = memo(
                 />
               ),
             })}
-      </AlertHeaderBlock>
+      </FlyoutHeaderBlock>
     );
   }
 );
