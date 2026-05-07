@@ -12,6 +12,7 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
   const supertest = getService('supertest');
   const log = getService('log');
   const retry = getService('retry');
+  const es = getService('es');
 
   const enableV2Setting = async () => {
     await supertest
@@ -100,5 +101,40 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
     return res;
   };
 
-  return { install, uninstall, createEntity, enableV2Setting, disableV2Setting };
+  const getEntityWatchlists = async (euid: string): Promise<string[]> => {
+    const res = await supertest
+      .get('/api/security/entity_store/entities')
+      .query({ filter: `entity.id: "${euid}"`, size: 1 })
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
+      .expect(200);
+
+    const entity = res.body?.entities?.[0];
+    const raw = entity?.entity?.attributes?.watchlists;
+    if (Array.isArray(raw)) return raw as string[];
+    if (typeof raw === 'string') return [raw];
+    return [];
+  };
+
+  const clearAllEntityStoreData = async () => {
+    await es
+      .deleteByQuery(
+        { index: '.entities.v2.latest.security_default*', query: { match_all: {} }, refresh: true },
+        { ignore: [404] }
+      )
+      .catch((err) => {
+        log.error(`Error clearing entity store data: ${err}`);
+      });
+  };
+
+  return {
+    install,
+    uninstall,
+    createEntity,
+    clearAllEntityStoreData,
+    getEntityWatchlists,
+    enableV2Setting,
+    disableV2Setting,
+  };
 };

@@ -10,52 +10,66 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export const WatchlistSyncUtils = (
   getService: FtrProviderContext['getService'],
-  sourceIndexName: string
+  managedIndexNames: string[] = []
 ) => {
   const log = getService('log');
   const es = getService('es');
   const entityAnalyticsApi = getService('entityAnalyticsApi');
+  const kibanaServer = getService('kibanaServer');
 
-  const createSourceIndex = async () =>
+  const createSourceIndex = async (indexName: string) =>
     es.indices.create({
-      index: sourceIndexName,
+      index: indexName,
       mappings: {
         properties: {
-          '@timestamp': {
-            type: 'date',
-          },
-          user: {
-            properties: {
-              name: {
-                type: 'keyword',
-              },
-            },
-          },
+          '@timestamp': { type: 'date' },
+          user: { properties: { name: { type: 'keyword' } } },
+          department: { type: 'keyword' },
         },
       },
     });
 
-  const addUsersToSourceIndex = async (users: string[], timestamp?: string) => {
+  const addUsersToSourceIndex = async (users: string[], indexName: string, timestamp?: string) => {
     const ops = users.flatMap((name) => [
       { index: {} },
       { '@timestamp': timestamp ?? new Date().toISOString(), user: { name } },
     ]);
-    await es.bulk({
-      index: sourceIndexName,
-      body: ops,
-      refresh: true,
+    await es.bulk({ index: indexName, body: ops, refresh: true });
+  };
+
+  const addDocsToSourceIndex = async (docs: Array<Record<string, unknown>>, indexName: string) => {
+    const ops = docs.flatMap((doc) => [{ index: {} }, doc]);
+    await es.bulk({ index: indexName, body: ops, refresh: true });
+  };
+
+  const deleteSourceIndex = async (indexName: string) => {
+    await es.indices.delete({ index: indexName }, { ignore: [404] }).catch((err) => {
+      log.error(`Error deleting index ${indexName}: ${err}`);
     });
   };
 
-  const deleteSourceIndex = async () => {
-    await es.indices.delete({ index: sourceIndexName }, { ignore: [404] }).catch((err) => {
-      log.error(`Error deleting index ${sourceIndexName}: ${err}`);
-    });
+  const deleteAllSourceIndices = async () => {
+    for (const indexName of managedIndexNames) {
+      await deleteSourceIndex(indexName);
+    }
+  };
+
+  const clearSourceIndex = async (indexName: string) => {
+    await es
+      .deleteByQuery(
+        { index: indexName, query: { match_all: {} }, refresh: true },
+        { ignore: [404] }
+      )
+      .catch((err) => {
+        log.error(`Error clearing index ${indexName}: ${err}`);
+      });
   };
 
   const createWatchlistAndEntitySource = async (
     watchlistName: string,
-    range?: { start: string; end: string }
+    sourceIndexPattern: string,
+    range?: { start: string; end: string },
+    queryRule?: string
   ) => {
     const { body: watchlist } = await entityAnalyticsApi.createWatchlist({
       body: {
@@ -72,10 +86,11 @@ export const WatchlistSyncUtils = (
       body: {
         type: 'index',
         name: `Source for ${watchlistName}`,
-        indexPattern: sourceIndexName,
+        indexPattern: sourceIndexPattern,
         identifierField: 'user.name',
         enabled: true,
         range: range ?? { start: 'now-10d', end: 'now' },
+        ...(queryRule ? { queryRule } : {}),
       },
     });
 
@@ -126,10 +141,20 @@ export const WatchlistSyncUtils = (
       });
   };
 
+  const cleanWatchlistState = async () => {
+    await kibanaServer.savedObjects.clean({
+      types: ['watchlist-config', 'watchlist-entity-source'],
+    });
+  };
+
   return {
     createSourceIndex,
     addUsersToSourceIndex,
+    addDocsToSourceIndex,
     deleteSourceIndex,
+    deleteAllSourceIndices,
+    clearSourceIndex,
+    cleanWatchlistState,
     createWatchlistAndEntitySource,
     syncWatchlist,
     queryWatchlistIndex,
