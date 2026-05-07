@@ -98,6 +98,14 @@ export function registerRoutes({
           if (error instanceof errors.RequestAbortedError) {
             opts.statusCode = 499;
             opts.body.message = 'Client closed request';
+          } else if (error instanceof errors.ResponseError) {
+            // Use ES's structured `error.reason`; `error.message` may be a raw
+            // HTML body from an upstream proxy (e.g. 431) we don't want to leak.
+            opts.statusCode = error.statusCode ?? 500;
+            const body = error.body as { error?: { reason?: string } } | string | undefined;
+            const reason = typeof body === 'object' ? body?.error?.reason : undefined;
+            opts.body.message =
+              reason ?? `Upstream Elasticsearch responded with status ${opts.statusCode}`;
           }
 
           logRouteError(logger, opts);

@@ -7,7 +7,11 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { PackageClient } from '@kbn/fleet-plugin/server';
-import { PackageNotFoundError } from '@kbn/fleet-plugin/server/errors';
+import {
+  FleetUnauthorizedError,
+  PackageNotFoundError,
+  RegistryResponseError,
+} from '@kbn/fleet-plugin/server/errors';
 import type { PackageInfo, RegistryDataStream } from '@kbn/fleet-plugin/common';
 import type { IntegrationType } from '../../../common/api_types';
 
@@ -89,9 +93,19 @@ const fetchDatasets = async (options: {
     }
 
     const { name, version, logger } = options;
-    logger.error(
-      `There was an error when trying to fetch information about package ${name} version ${version}: ${error}`
-    );
+    const message = `There was an error when trying to fetch information about package ${name} version ${version}: ${error}`;
+
+    // Registry 4xx and Fleet permission failures are user-facing, not Kibana
+    // faults — log at debug to keep them out of the ERROR stream.
+    const isRecoverable =
+      (error instanceof RegistryResponseError && (error.status ?? 0) < 500) ||
+      error instanceof FleetUnauthorizedError;
+
+    if (isRecoverable) {
+      logger.debug(message);
+    } else {
+      logger.error(message);
+    }
 
     return {};
   }
