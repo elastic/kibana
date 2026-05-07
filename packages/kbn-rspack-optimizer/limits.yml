@@ -33,7 +33,7 @@ pageLoadAssetSize:
   customIntegrations: 636
   dashboard: 452
   dashboardAgent: 3074
-  dashboardMarkdown: 2058
+  dashboardMarkdown: 4081
   data: 11799
   dataQuality: 5836
   datasetQuality: 41081
@@ -120,7 +120,7 @@ pageLoadAssetSize:
   ml: 663
   mockIdpPlugin: 4203
   monitoring: 22416
-  navigation: 8671
+  navigation: 10095
   newsfeed: 9707
   noDataPage: 630
   observability: 3614
@@ -129,7 +129,7 @@ pageLoadAssetSize:
   observabilityAIAssistantApp: 6377
   observabilityAiAssistantManagement: 2011
   observabilityLogsExplorer: 1083
-  observabilityOnboarding: 7767
+  observabilityOnboarding: 7766
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2282
@@ -169,6 +169,7 @@ pageLoadAssetSize:
   serverless: 1272
   serverlessObservability: 14424
   serverlessSearch: 18261
+  serverlessVectordb: 619
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 440
@@ -191,7 +192,7 @@ pageLoadAssetSize:
   transform: 8828
   triggersActionsUi: 3033
   uiActions: 454
-  unifiedDocViewer: 568
+  unifiedDocViewer: 627
   unifiedSearch: 511
   upgradeAssistant: 1822
   uptime: 37803
@@ -204,7 +205,6 @@ pageLoadAssetSize:
   visDefaultEditor: 738
   visTypeGauge: 7639
   visTypeHeatmap: 6961
-  visTypeMarkdown: 4929
   visTypeMetric: 6932
   visTypePie: 22902
   visTypeTable: 13200
