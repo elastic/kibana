@@ -51,12 +51,74 @@ const runWorkflowSchema = z.object({
     ),
 });
 
+// ---------------------------------------------------------------------------
+// session.list_workflows
+// ---------------------------------------------------------------------------
+
+const listWorkflowsSchema = z.object({
+  query: z.string().optional().describe('Free-text search to filter workflows by name.'),
+  enabled_only: z
+    .boolean()
+    .optional()
+    .describe('When true (default), only return enabled workflows.'),
+});
+
+const createListWorkflowsTool = (
+  workflowApi: WorkflowApi
+): BuiltinToolDefinition<typeof listWorkflowsSchema> => ({
+  id: 'session.list_workflows',
+  type: ToolType.builtin,
+  tags: [],
+  description:
+    'List Kibana workflows available in the current space. ' +
+    'Returns workflow IDs, names, descriptions, and enabled status. ' +
+    'Use the returned id with session.run_workflow to start a workflow.',
+  schema: listWorkflowsSchema,
+  handler: async (params, context) => {
+    try {
+      const result = await workflowApi.getWorkflows(
+        {
+          size: 100,
+          page: 1,
+          enabled: params.enabled_only !== false ? [true] : undefined,
+          query: params.query,
+        },
+        context.spaceId
+      );
+      const summary = result.results.map((w) => ({
+        id: w.id,
+        name: w.name,
+        description: w.description ?? null,
+        enabled: w.enabled,
+        valid: w.valid,
+        tags: w.tags ?? [],
+      }));
+      return otherResult(JSON.stringify({ total: result.total, workflows: summary }));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return errResult(`Could not list workflows: ${msg}`);
+    }
+  },
+});
+
+// ---------------------------------------------------------------------------
+// session.run_workflow
+// ---------------------------------------------------------------------------
+
 /**
- * Creates the session.run_workflow built-in tool.
- * Kept separate from createSessionTools because it requires workflowApi
+ * Creates both workflow-related session tools.
+ * Kept separate from createSessionTools because they require workflowApi
  * from the plugin setup contract (not available in the shared package).
  */
-export const createWorkflowSessionTool = (
+export const createWorkflowSessionTools = (
+  sessions: SessionsStart,
+  workflowApi: WorkflowApi
+): BuiltinToolDefinition[] => [
+  createListWorkflowsTool(workflowApi),
+  createRunWorkflowTool(sessions, workflowApi),
+];
+
+const createRunWorkflowTool = (
   sessions: SessionsStart,
   workflowApi: WorkflowApi
 ): BuiltinToolDefinition<typeof runWorkflowSchema> => ({

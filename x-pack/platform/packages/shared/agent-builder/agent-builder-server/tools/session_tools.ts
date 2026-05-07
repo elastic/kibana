@@ -35,6 +35,7 @@ export const SESSION_TOOL_IDS = [
   'session.send_message',
   'session.list_sessions',
   'session.run_workflow',
+  'session.list_workflows',
 ] as const;
 
 // ---------------------------------------------------------------------------

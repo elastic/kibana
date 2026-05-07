@@ -84,6 +84,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.session}.send_message`,
   `${internalNamespaces.session}.list_sessions`,
   `${internalNamespaces.session}.run_workflow`,
+  `${internalNamespaces.session}.list_workflows`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];

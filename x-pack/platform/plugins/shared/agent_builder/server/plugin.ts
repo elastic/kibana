@@ -46,7 +46,7 @@ import {
   registerAgentSessionTriggerTasks,
   registerAgentSessionAlertConnectorType,
 } from './services/sessions';
-import { createWorkflowSessionTool } from './services/sessions/workflow_session_tool';
+import { createWorkflowSessionTools } from './services/sessions/workflow_session_tool';
 
 export class AgentBuilderPlugin
   implements
@@ -234,7 +234,7 @@ export class AgentBuilderPlugin
     });
 
     if (setupDeps.workflowsManagement) {
-      const workflowSessionTool = createWorkflowSessionTool(
+      const workflowSessionTools = createWorkflowSessionTools(
         {
           getScopedClient: ({ request }) => {
             const services = this.serviceManager.internalStart;
@@ -244,7 +244,7 @@ export class AgentBuilderPlugin
         },
         setupDeps.workflowsManagement.management
       );
-      serviceSetups.tools.register(workflowSessionTool);
+      workflowSessionTools.forEach((tool) => serviceSetups.tools.register(tool));
     }
 
     return {
