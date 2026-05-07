@@ -6,7 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import type {
+  ActionResult,
+  ActionsAuthorization,
+  ActionsClient,
+  InMemoryConnector,
+} from '@kbn/actions-plugin/server';
 import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { getSystemActionKibanaPrivileges } from '../connector_adapters/get_system_action_kibana_privileges';
 import { bulkValidateConnectorAdapterActionParams } from '../connector_adapters/validate_rule_action_params';
@@ -18,6 +23,7 @@ interface Params {
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   systemActions: Array<RuleSystemAction | NormalizedSystemAction>;
   rule: { consumer: string; producer: string };
+  preFetchedActions?: Array<ActionResult | InMemoryConnector>;
 }
 
 export const validateAndAuthorizeSystemActions = async ({
@@ -26,6 +32,7 @@ export const validateAndAuthorizeSystemActions = async ({
   actionsAuthorization,
   rule,
   systemActions = [],
+  preFetchedActions,
 }: Params) => {
   if (systemActions.length === 0) {
     return;
@@ -45,10 +52,12 @@ export const validateAndAuthorizeSystemActions = async ({
 
   const actionIds: string[] = Array.from(systemActionCounts.keys());
 
-  const actionResults = await actionsClient.getBulk({
-    ids: actionIds,
-    throwIfSystemAction: false,
-  });
+  const actionResults =
+    preFetchedActions ??
+    (await actionsClient.getBulk({
+      ids: actionIds,
+      throwIfSystemAction: false,
+    }));
 
   const actionTypes = await actionsClient.listTypes({ includeSystemActionTypes: true });
 

@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { ConnectorType } from '@kbn/actions-plugin/server';
+import type { ActionResult, ConnectorType, InMemoryConnector } from '@kbn/actions-plugin/server';
 import { validateHours } from '../../routes/lib/validate_hours';
 import type { RawRule } from '../../types';
 import { RuleNotifyWhen } from '../../types';
@@ -29,7 +29,8 @@ export async function validateActions(
   context: RulesClientContext,
   ruleType: UntypedNormalizedRuleType,
   data: ValidateActionsData,
-  allowMissingConnectorSecrets?: boolean
+  allowMissingConnectorSecrets?: boolean,
+  preFetchedActions?: Array<ActionResult | InMemoryConnector>
 ): Promise<void> {
   const { actions, notifyWhen, throttle, systemActions = [] } = data;
   const hasRuleLevelNotifyWhen = typeof notifyWhen !== 'undefined';
@@ -55,7 +56,9 @@ export async function validateActions(
   const actionIds = [...new Set(actions.map((action) => action.id))];
 
   const actionResults =
-    (await actionsClient.getBulk({ ids: actionIds, throwIfSystemAction: false })) || [];
+    preFetchedActions ??
+    (await actionsClient.getBulk({ ids: actionIds, throwIfSystemAction: false })) ??
+    [];
 
   const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
     (result) => result.isMissingSecrets
