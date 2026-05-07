@@ -15,11 +15,11 @@ import type {
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { PresentationUtilPluginSetup } from '@kbn/presentation-util-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
-import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import type { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { LinksEmbeddableState } from '../common';
 import {
@@ -39,14 +39,14 @@ export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
   contentManagement: ContentManagementPublicSetup;
+  presentationUtil: PresentationUtilPluginSetup;
+  uiActions: UiActionsPublicSetup;
 }
 
 export interface LinksStartDependencies {
   embeddable: EmbeddableStart;
   dashboard: DashboardStart;
-  presentationUtil: PresentationUtilPluginStart;
   contentManagement: ContentManagementPublicStart;
-  uiActions: UiActionsPublicStart;
   usageCollection?: UsageCollectionStart;
 }
 
@@ -56,93 +56,85 @@ export class LinksPlugin
   constructor() {}
 
   public setup(core: CoreSetup<LinksStartDependencies>, plugins: LinksSetupDependencies) {
-    core.getStartServices().then(([_, deps]) => {
-      plugins.contentManagement.registry.register({
-        id: CONTENT_ID,
-        version: {
-          latest: LATEST_VERSION,
-        },
-        name: APP_NAME,
-      });
+    plugins.contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: APP_NAME,
+    });
 
-      plugins.embeddable.registerAddFromLibraryType({
-        onAdd: async (container, savedObject) => {
-          container.addNewPanel<LinksEmbeddableState>(
-            {
-              panelType: LINKS_EMBEDDABLE_TYPE,
-              serializedState: {
-                ref_id: savedObject.id,
-              },
-            },
-            {
-              displaySuccessMessage: true,
-            }
-          );
-        },
-        savedObjectType: LINKS_SAVED_OBJECT_TYPE,
-        savedObjectName: APP_NAME,
-        getIconForSavedObject: () => APP_ICON,
-      });
-
-      plugins.embeddable.registerEmbeddablePublicDefinition(LINKS_EMBEDDABLE_TYPE, async () => {
-        const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
-        return getLinksEmbeddableFactory();
-      });
-
-      plugins.embeddable.registerLegacyURLTransform(LINKS_EMBEDDABLE_TYPE, async () => {
-        const { transformOut } = await import('../common/embeddable/transforms/transform_out');
-        return transformOut;
-      });
-
-      plugins.visualizations.registerAlias({
-        disableCreate: true, // do not allow creation through visualization listing page
-        name: CONTENT_ID,
-        title: APP_NAME,
-        icon: APP_ICON,
-        description: i18n.translate('links.description', {
-          defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
-        }),
-        stage: 'production',
-        appExtensions: {
-          visualizations: {
-            docTypes: [CONTENT_ID],
-            searchFields: ['title^3'],
-            client: getLinksClient,
-            toListItem(
-              linkItem: Omit<LinksCrudTypes['Item'], 'attributes'> & {
-                attributes: { title: string; description?: string };
-              }
-            ) {
-              const { id, type, updatedAt, attributes } = linkItem;
-              const { title, description } = attributes;
-
-              return {
-                id,
-                title,
-                editor: {
-                  onEdit: async (refId: string) => {
-                    const { onVisualizationsEdit } = await import(
-                      './editor/on_visualizations_edit'
-                    );
-                    onVisualizationsEdit(refId);
-                  },
-                },
-                description,
-                updatedAt,
-                icon: APP_ICON,
-                typeTitle: APP_NAME,
-                stage: 'production',
-                savedObjectType: type,
-              };
+    plugins.embeddable.registerAddFromLibraryType({
+      onAdd: async (container, savedObject) => {
+        container.addNewPanel<LinksEmbeddableState>(
+          {
+            panelType: LINKS_EMBEDDABLE_TYPE,
+            serializedState: {
+              ref_id: savedObject.id,
             },
           },
-        },
-      });
+          {
+            displaySuccessMessage: true,
+          }
+        );
+      },
+      savedObjectType: LINKS_SAVED_OBJECT_TYPE,
+      savedObjectName: APP_NAME,
+      getIconForSavedObject: () => APP_ICON,
     });
-  }
 
-  public start(core: CoreStart, plugins: LinksStartDependencies) {
-    setKibanaServices(core, plugins);
+    plugins.embeddable.registerEmbeddablePublicDefinition(LINKS_EMBEDDABLE_TYPE, async () => {
+      const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
+      return getLinksEmbeddableFactory();
+    });
+
+    plugins.embeddable.registerLegacyURLTransform(LINKS_EMBEDDABLE_TYPE, async () => {
+      const { transformOut } = await import('../common/embeddable/transforms/transform_out');
+      return transformOut;
+    });
+
+    plugins.visualizations.registerAlias({
+      disableCreate: true, // do not allow creation through visualization listing page
+      name: CONTENT_ID,
+      title: APP_NAME,
+      icon: APP_ICON,
+      description: i18n.translate('links.description', {
+        defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
+      }),
+      stage: 'production',
+      appExtensions: {
+        visualizations: {
+          docTypes: [CONTENT_ID],
+          searchFields: ['title^3'],
+          client: getLinksClient,
+          toListItem(
+            linkItem: Omit<LinksCrudTypes['Item'], 'attributes'> & {
+              attributes: { title: string; description?: string };
+            }
+          ) {
+            const { id, type, updatedAt, attributes } = linkItem;
+            const { title, description } = attributes;
+
+            return {
+              id,
+              title,
+              editor: {
+                onEdit: async (refId: string) => {
+                  const { onVisualizationsEdit } = await import('./editor/on_visualizations_edit');
+                  onVisualizationsEdit(refId);
+                },
+              },
+              description,
+              updatedAt,
+              icon: APP_ICON,
+              typeTitle: APP_NAME,
+              stage: 'production',
+              savedObjectType: type,
+            };
+          },
+        },
+      },
+    });
 
     plugins.uiActions.addTriggerActionAsync(
       ADD_PANEL_TRIGGER,
@@ -161,6 +153,10 @@ export class LinksPlugin
         return { placementSettings };
       }
     );
+  }
+
+  public start(core: CoreStart, plugins: LinksStartDependencies) {
+    setKibanaServices(core, plugins);
 
     return {};
   }
