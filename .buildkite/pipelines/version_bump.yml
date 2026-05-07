@@ -1,38 +1,33 @@
 notify:
   - slack:
       channels:
-        - '#kibana-operations'
+        - '#kibana-operations-alerts'
     if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/) && (build.state == 'passed' || build.state == 'failed')
   - slack:
       channels:
-        - '#kibana-operations'
+        - '#mission-control'
       message: |
-        🚦 Pipeline waiting for approval 🚦
-        Repo: `${REPO}`
-
-        Ready to fetch DRA artifacts - please unblock when ready.
-        New version: `${NEW_VERSION}`
-        Branch: `${BRANCH}`
-        Workflow: `${WORKFLOW}`
-        ${BUILDKITE_BUILD_URL}
-    if: build.state == "blocked"
+        Kibana has been bumped to `${NEW_VERSION}` on branch `${BRANCH}` and a DRA build has begun.
+        Build: ${BUILDKITE_BUILD_URL}
+    if: build.state == "passed"
 
 steps:
-  # TODO: replace this block step by real version bump logic
-  - block: 'Ready to fetch for DRA artifacts?'
-    prompt: |
-      Unblock when your team is ready to proceed.
+  - command: .buildkite/scripts/steps/version_bump/bump.sh
+    key: bump-version
+    label: Bump version
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+    env:
+      DRY_RUN: 'true'
 
-      Trigger parameters:
-      - NEW_VERSION: ${NEW_VERSION}
-      - BRANCH: ${BRANCH}
-      - WORKFLOW: ${WORKFLOW}
-    key: block-get-dra-artifacts
-    blocked_state: running
+  - wait
 
   - label: 'Fetch DRA Artifacts'
     key: fetch-dra-artifacts
-    depends_on: block-get-dra-artifacts
+    depends_on: bump-version
     agents:
       image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
       cpu: 250m
