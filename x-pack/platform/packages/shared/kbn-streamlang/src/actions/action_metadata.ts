@@ -901,18 +901,18 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
       defaultMessage: 'Registered Domain',
     }),
     description: i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.description', {
-      defaultMessage: 'Extract the domain parts from a FQDN string',
+      defaultMessage: 'Extract the domain parts from an FQDN string',
     }),
     usage: i18n.translate('xpack.streamlang.actionMetadata.registeredDomain.usage', {
       defaultMessage:
-        'Provide `expression` field containing the FQDN and `prefix` for the output columns prefix where the extracted parts will be stored (e.g. `prefix.subdomain`)',
+        'Provide the `expression` field containing the FQDN and `prefix` for the output columns prefix where you want to store the extracted parts (for example, `prefix.subdomain`)',
     }),
     examples: [
       {
         description: i18n.translate(
           'xpack.streamlang.actionMetadata.registeredDomain.examples.simple',
           {
-            defaultMessage: 'Extract the domain parts from a FQDN string',
+            defaultMessage: 'Extract the domain parts from an FQDN string',
           }
         ),
         yaml: `- action: registered_domain
