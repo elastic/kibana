@@ -1606,8 +1606,8 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: DownloadSourceSchemaV2,
-            create: DownloadSourceSchemaV2.extends({}, { unknowns: 'ignore' }),
+            forwardCompatibility: DownloadSourceSchemaV2.extends({}, { unknowns: 'ignore' }),
+            create: DownloadSourceSchemaV2,
           },
         },
       },
