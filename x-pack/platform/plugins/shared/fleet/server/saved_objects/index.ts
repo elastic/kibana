@@ -48,6 +48,7 @@ import {
   SettingsSchemaV8,
   PackagePolicySchemaV22,
   CloudConnectorSchemaV4,
+  DownloadSourceSchemaV2,
 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -1605,17 +1606,8 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: schema.object(
-              {
-                source_id: schema.string(),
-                name: schema.string(),
-                is_default: schema.boolean(),
-                host: schema.string(),
-                proxy_id: schema.maybe(schema.string()),
-                security_artifacts_proxy_id: schema.maybe(schema.string()),
-              },
-              { unknowns: 'ignore' }
-            ),
+            forwardCompatibility: DownloadSourceSchemaV2,
+            create: DownloadSourceSchemaV2.extends({}, { unknowns: 'ignore' }),
           },
         },
       },

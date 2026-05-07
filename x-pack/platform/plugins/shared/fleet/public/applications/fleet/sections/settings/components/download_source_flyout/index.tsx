@@ -309,7 +309,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
                 <EuiText size="s" color="subdued">
                   <FormattedMessage
                     id="xpack.fleet.settings.editDownloadSourcesFlyout.elasticDefendSectionDescription"
-                    defaultMessage="Configure security artifact downloads URL and proxy"
+                    defaultMessage="Configure the URL and proxy for security artifact downloads"
                   />
                 </EuiText>
               </>

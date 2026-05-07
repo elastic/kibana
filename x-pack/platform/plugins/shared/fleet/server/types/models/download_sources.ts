@@ -95,3 +95,17 @@ export const DownloadSourceResponseSchema = DownloadSourceSchema.extends({
 export const GetDownloadSourceResponseSchema = schema.object({
   item: DownloadSourceResponseSchema,
 });
+
+export const DownloadSourceSchemaV2 = schema.object(
+  {
+    source_id: schema.maybe(schema.string()),
+    name: schema.string(),
+    is_default: schema.boolean(),
+    host: schema.string(),
+    proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+    security_artifacts_proxy_id: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string()])
+    ),
+  },
+  { unknowns: 'ignore' }
+);
