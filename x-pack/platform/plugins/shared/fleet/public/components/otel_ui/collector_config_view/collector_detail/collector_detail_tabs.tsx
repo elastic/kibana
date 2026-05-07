@@ -13,7 +13,9 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import type { Agent, ComponentHealth, OTelCollectorConfig } from '../../../../../common/types';
@@ -67,8 +69,15 @@ export const CollectorDetailTabs: React.FC<CollectorDetailTabsProps> = ({
   health,
   isConfigLoading,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [selectedTabId, setSelectedTabId] = useState<DetailTabId>('health');
   const [selectedComponent, setSelectedComponent] = useState<ComponentSelection | null>(null);
+
+  const stickyDetailStyles = css`
+    position: sticky;
+    top: calc(var(--euiFixedHeadersOffset, 96px) + ${euiTheme.size.l});
+    align-self: flex-start;
+  `;
 
   const handleComponentClick = (
     componentId: string,
@@ -128,7 +137,7 @@ export const CollectorDetailTabs: React.FC<CollectorDetailTabsProps> = ({
             ))}
         </EuiFlexItem>
         {selectedComponent && selectedTabId === 'health' && (
-          <EuiFlexItem>
+          <EuiFlexItem css={stickyDetailStyles}>
             <OTelComponentDetail
               componentId={selectedComponent.componentId}
               componentType={selectedComponent.componentType}
