@@ -76,42 +76,28 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect(tool.tags).toEqual(['connector', 'sub-action']);
   });
 
-  describe('schema structural normalization', () => {
-    it('parses flattened top-level sub-action parameters into params', () => {
+  describe('schema (strict, no structural normalization)', () => {
+    it('rejects flattened sub-action fields at the root (unknown keys)', () => {
       const tool = createExecuteConnectorSubActionTool({ getActions });
       const result = tool.schema.safeParse({
         connectorId: 'conn-123',
         subAction: 'searchMessages',
         messageId: 'm1',
       });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({
-          connectorId: 'conn-123',
-          subAction: 'searchMessages',
-          params: { messageId: 'm1' },
-        });
-      }
+      expect(result.success).toBe(false);
     });
 
-    it('parses snake_case root keys via preprocess', () => {
+    it('rejects snake_case aliases (strict canonical keys only)', () => {
       const tool = createExecuteConnectorSubActionTool({ getActions });
       const result = tool.schema.safeParse({
         connector_id: 'conn-123',
         sub_action: 'searchMessages',
         params: { query: 'hi' },
       });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({
-          connectorId: 'conn-123',
-          subAction: 'searchMessages',
-          params: { query: 'hi' },
-        });
-      }
+      expect(result.success).toBe(false);
     });
 
-    it('rejects input that is still invalid after normalization', () => {
+    it('rejects payloads missing connectorId and subAction', () => {
       const tool = createExecuteConnectorSubActionTool({ getActions });
       const result = tool.schema.safeParse({ messageId: '123' });
       expect(result.success).toBe(false);

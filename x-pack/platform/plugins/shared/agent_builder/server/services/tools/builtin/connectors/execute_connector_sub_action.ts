@@ -13,7 +13,6 @@ import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
-import { normalizeExecuteConnectorSubActionArgs } from './normalize_execute_connector_sub_action_args';
 
 const connectorIdValidationMessage =
   'connectorId is required at the root of the tool arguments (copy the Connector ID from the connector attachment). ' +
@@ -23,40 +22,31 @@ const subActionValidationMessage =
   'subAction is required at the root (exact sub-action name from the connector attachment, e.g. searchMessages). ' +
   'This tool does not infer subAction from other parameters.';
 
-export const executeConnectorSubActionArgsSchema = z.object({
-  connectorId: z
-    .string()
-    .min(1, connectorIdValidationMessage)
-    .describe(
-      'Saved connector instance ID at the **root** of arguments — not inside params. ' +
-        'Must match the Connector ID shown in the connector attachment.'
-    ),
-  subAction: z
-    .string()
-    .min(1, subActionValidationMessage)
-    .describe(
-      'Exact sub-action name at the **root** of arguments (must match a tool sub-action listed on the attachment). ' +
-        'Do not guess; read the attachment. Not inferred from params.'
-    ),
-  params: z
-    .record(z.string(), z.any())
-    .optional()
-    .describe(
-      'Sub-action parameters only — put every argument for the sub-action here. ' +
-        'Do not place sub-action fields at the top level next to connectorId (they belong under params).'
-    ),
-});
-
-/**
- * Structural normalization (aliases, hoist, flatten) with **no** `loneConnectorId`.
- * Graph execution runs the same normalizer first with lone-id context; this preprocess
- * still runs so non-graph callers (e.g. HTTP / tests invoking the tool schema directly)
- * get identical structural fixes. Second pass on graph-shaped payloads is cheap and idempotent.
- */
-const executeConnectorSubActionSchema = z.preprocess(
-  (raw) => normalizeExecuteConnectorSubActionArgs(raw, {}),
-  executeConnectorSubActionArgsSchema
-);
+export const executeConnectorSubActionArgsSchema = z
+  .object({
+    connectorId: z
+      .string()
+      .min(1, connectorIdValidationMessage)
+      .describe(
+        'Saved connector instance ID at the **root** of arguments — not inside params. ' +
+          'Must match the Connector ID shown in the connector attachment.'
+      ),
+    subAction: z
+      .string()
+      .min(1, subActionValidationMessage)
+      .describe(
+        'Exact sub-action name at the **root** of arguments (must match a tool sub-action listed on the attachment). ' +
+          'Do not guess; read the attachment. Not inferred from params.'
+      ),
+    params: z
+      .record(z.string(), z.any())
+      .optional()
+      .describe(
+        'Sub-action parameters only — put every argument for the sub-action here. ' +
+          'Do not place sub-action fields at the top level next to connectorId (they belong under params).'
+      ),
+  })
+  .strict();
 
 /**
  * Creates the execute_connector_sub_action tool.
@@ -75,7 +65,7 @@ export const createExecuteConnectorSubActionTool = ({
     'connectorId and subAction must always appear at the top level; pass sub-action fields inside params, not flattened to the root. ' +
     'Read the connector attachment for the Connector ID, exact sub-action names, and each sub-action parameter schema. ' +
     'Do not guess sub-action names or parameters.',
-  schema: executeConnectorSubActionSchema as unknown as typeof executeConnectorSubActionArgsSchema,
+  schema: executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
   availability: {
     cacheMode: 'global',
