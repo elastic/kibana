@@ -51,7 +51,7 @@ export const VariablePopover: React.FC<Props> = ({ variables, onSelect, variable
       }
       isOpen={isVariablesPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       anchorPosition="downLeft"
       aria-label={txtVariablePopoverAriaLabel}
     >
@@ -71,7 +71,6 @@ export const VariablePopover: React.FC<Props> = ({ variables, onSelect, variable
         }}
         listProps={{
           showIcons: false,
-          paddingSize: 's',
         }}
       >
         {(list, search) => (
