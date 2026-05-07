@@ -170,6 +170,9 @@ jest.mock(
         <button data-test-subj="confirmUpdateApiKey" onClick={props.onConfirm} type="button">
           confirm
         </button>
+        <button data-test-subj="cancelUpdateApiKey" onClick={props.onCancel} type="button">
+          cancel
+        </button>
       </div>
     ),
   })
@@ -214,7 +217,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
     expect(screen.getByTestId('mockFlyout')).toBeInTheDocument();
   });
 
-  it('navigates to the edit page on edit', async () => {
+  it('navigates to the edit page and calls onClose on edit', async () => {
     mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
     renderContainer();
 
@@ -222,9 +225,10 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
 
     expect(mockBasePathPrepend).toHaveBeenCalledWith(paths.actionPolicyEdit('policy-1'));
     expect(mockNavigateToUrl).toHaveBeenCalledWith(paths.actionPolicyEdit('policy-1'));
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
-  it('clones the policy with a "[clone]" suffix', async () => {
+  it('clones the policy with a "[clone]" suffix and closes the flyout', async () => {
     mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
     renderContainer();
 
@@ -237,31 +241,79 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
         groupingMode: 'per_episode',
       })
     );
-  });
-
-  it('opens the delete modal and triggers delete + onClose on confirm', async () => {
-    mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
-    mockDeleteActionPolicy.mockImplementation((_id, opts) => opts?.onSuccess?.());
-    renderContainer();
-
-    await userEvent.click(screen.getByTestId('flyout-delete'));
-    expect(screen.getByTestId('mockDeleteModal')).toBeInTheDocument();
-
-    await userEvent.click(screen.getByTestId('confirmDelete'));
-    expect(mockDeleteActionPolicy).toHaveBeenCalledWith('policy-1', expect.any(Object));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
-  it('opens the API key modal and triggers update on confirm', async () => {
-    mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
-    mockUpdateApiKey.mockImplementation((_id, opts) => opts?.onSuccess?.());
-    renderContainer();
+  describe('delete flow', () => {
+    it('hides the flyout and opens the delete modal when delete is clicked', async () => {
+      mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
+      renderContainer();
 
-    await userEvent.click(screen.getByTestId('flyout-update-api-key'));
-    expect(screen.getByTestId('mockUpdateApiKeyModal')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('flyout-delete'));
 
-    await userEvent.click(screen.getByTestId('confirmUpdateApiKey'));
-    expect(mockUpdateApiKey).toHaveBeenCalledWith('policy-1', expect.any(Object));
+      expect(screen.getByTestId('mockDeleteModal')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockFlyout')).not.toBeInTheDocument();
+      expect(mockOnClose).not.toHaveBeenCalled();
+    });
+
+    it('triggers delete + onClose on confirm', async () => {
+      mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
+      mockDeleteActionPolicy.mockImplementation((_id, opts) => opts?.onSuccess?.());
+      renderContainer();
+
+      await userEvent.click(screen.getByTestId('flyout-delete'));
+      await userEvent.click(screen.getByTestId('confirmDelete'));
+
+      expect(mockDeleteActionPolicy).toHaveBeenCalledWith('policy-1', expect.any(Object));
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the flyout (via onClose) on cancel without calling delete', async () => {
+      mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
+      renderContainer();
+
+      await userEvent.click(screen.getByTestId('flyout-delete'));
+      await userEvent.click(screen.getByTestId('cancelDelete'));
+
+      expect(mockDeleteActionPolicy).not.toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('update API key flow', () => {
+    it('hides the flyout and opens the API key modal when update-api-key is clicked', async () => {
+      mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
+      renderContainer();
+
+      await userEvent.click(screen.getByTestId('flyout-update-api-key'));
+
+      expect(screen.getByTestId('mockUpdateApiKeyModal')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockFlyout')).not.toBeInTheDocument();
+      expect(mockOnClose).not.toHaveBeenCalled();
+    });
+
+    it('triggers update + onClose on confirm', async () => {
+      mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
+      mockUpdateApiKey.mockImplementation((_id, opts) => opts?.onSuccess?.());
+      renderContainer();
+
+      await userEvent.click(screen.getByTestId('flyout-update-api-key'));
+      await userEvent.click(screen.getByTestId('confirmUpdateApiKey'));
+
+      expect(mockUpdateApiKey).toHaveBeenCalledWith('policy-1', expect.any(Object));
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the flyout (via onClose) on cancel without calling update', async () => {
+      mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
+      renderContainer();
+
+      await userEvent.click(screen.getByTestId('flyout-update-api-key'));
+      await userEvent.click(screen.getByTestId('cancelUpdateApiKey'));
+
+      expect(mockUpdateApiKey).not.toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('forwards enable/disable mutations', async () => {

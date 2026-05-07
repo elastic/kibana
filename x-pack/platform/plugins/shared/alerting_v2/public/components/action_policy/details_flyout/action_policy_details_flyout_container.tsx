@@ -51,6 +51,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
   const { mutate: updateApiKey, isLoading: isUpdatingApiKey } = useUpdateActionPolicyApiKey();
 
   const navigateToEdit = (id: string) => {
+    onClose();
     navigateToUrl(basePath.prepend(paths.actionPolicyEdit(id)));
   };
 
@@ -68,32 +69,44 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
       ...(throttle != null && { throttle }),
     };
     createActionPolicy(data);
+    onClose();
   };
 
   if (!policy) return null;
 
+  // While a confirmation modal is open, hide the flyout locally so the modal
+  // takes the foreground without unmounting the container — the container owns
+  // the modal state. We only call `onClose` (which the parent uses to unmount
+  // us) once the modal flow ends.
+  const isModalOpen = policyToDelete !== null || policyToUpdateApiKey !== null;
+
   return (
     <>
-      <ActionPolicyDetailsFlyout
-        policy={policy}
-        onClose={onClose}
-        onEdit={navigateToEdit}
-        onClone={clonePolicy}
-        onDelete={setPolicyToDelete}
-        onEnable={(id) => enablePolicy(id)}
-        onDisable={(id) => disablePolicy(id)}
-        onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
-        onCancelSnooze={(id) => unsnoozePolicy(id)}
-        onUpdateApiKey={(id) => setPolicyToUpdateApiKey(id)}
-        isStateLoading={
-          (isEnabling && enableVariables === policy.id) ||
-          (isDisabling && disableVariables === policy.id)
-        }
-      />
+      {!isModalOpen && (
+        <ActionPolicyDetailsFlyout
+          policy={policy}
+          onClose={onClose}
+          onEdit={navigateToEdit}
+          onClone={clonePolicy}
+          onDelete={setPolicyToDelete}
+          onEnable={(id) => enablePolicy(id)}
+          onDisable={(id) => disablePolicy(id)}
+          onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
+          onCancelSnooze={(id) => unsnoozePolicy(id)}
+          onUpdateApiKey={(id) => setPolicyToUpdateApiKey(id)}
+          isStateLoading={
+            (isEnabling && enableVariables === policy.id) ||
+            (isDisabling && disableVariables === policy.id)
+          }
+        />
+      )}
       {policyToDelete && (
         <DeleteActionPolicyConfirmModal
           policyName={policyToDelete.name}
-          onCancel={() => setPolicyToDelete(null)}
+          onCancel={() => {
+            setPolicyToDelete(null);
+            onClose();
+          }}
           onConfirm={() => {
             deleteActionPolicy(policyToDelete.id, {
               onSuccess: () => {
@@ -108,10 +121,16 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
       {policyToUpdateApiKey && (
         <UpdateApiKeyConfirmationModal
           count={1}
-          onCancel={() => setPolicyToUpdateApiKey(null)}
+          onCancel={() => {
+            setPolicyToUpdateApiKey(null);
+            onClose();
+          }}
           onConfirm={() => {
             updateApiKey(policyToUpdateApiKey, {
-              onSuccess: () => setPolicyToUpdateApiKey(null),
+              onSuccess: () => {
+                setPolicyToUpdateApiKey(null);
+                onClose();
+              },
             });
           }}
           isLoading={isUpdatingApiKey}
