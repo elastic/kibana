@@ -105,7 +105,7 @@ export function KnowledgeIndicatorsTable() {
   }
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={true}>
+    <EuiPanel hasBorder hasShadow={false}>
       <KnowledgeIndicatorsToolbar
         knowledgeIndicators={knowledgeIndicators}
         filteredCount={filteredKnowledgeIndicators.length}
