@@ -234,8 +234,57 @@ export function buildFieldDescriptors(
     if (entry.tooltip) field.tooltip = entry.tooltip;
     if (entry.description) field.description = entry.description;
 
+    // Suppress description when it's redundant with the label
+    if (field.description) {
+      field.description = cleanDescription(field.description, field.label);
+    }
+
     fields.push(field);
   }
 
   return fields;
+}
+
+/**
+ * Clean up description text:
+ * - Remove if it's essentially the same as the label
+ * - Strip backtick code artifacts (`true`, `false`, etc.)
+ * - Remove "When `true`," prefixes since the toggle makes it obvious
+ */
+function cleanDescription(description: string, label: string): string | undefined {
+  // Strip backtick code markers
+  let cleaned = description.replace(/`/g, '');
+
+  // Remove trailing period for comparison
+  const descNorm = cleaned
+    .toLowerCase()
+    .replace(/\.\s*$/, '')
+    .trim();
+  const labelNorm = label
+    .toLowerCase()
+    .replace(/\.\s*$/, '')
+    .trim();
+
+  // Suppress if description matches label
+  if (descNorm === labelNorm) return undefined;
+
+  // Suppress if description is just "<label>." with minor variation
+  if (descNorm.length <= labelNorm.length + 5 && descNorm.startsWith(labelNorm)) return undefined;
+
+  // Clean up "When `true`, ..." → just the action part
+  cleaned = cleaned.replace(/^When true,\s*/i, '');
+
+  // Clean up "Accepted values: ..." boilerplate
+  cleaned = cleaned.replace(/\s*Accepted values:.*?\./g, '');
+
+  // Clean up "Defaults to ..." boilerplate
+  cleaned = cleaned.replace(/\s*Defaults to .*?\.?$/g, '');
+
+  // Capitalize first letter after cleanup
+  cleaned = cleaned.replace(/^\w/, (c) => c.toUpperCase()).trim();
+
+  // If nothing meaningful left, suppress
+  if (cleaned.length < 5) return undefined;
+
+  return cleaned;
 }
