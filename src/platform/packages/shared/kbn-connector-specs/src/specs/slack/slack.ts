@@ -202,6 +202,17 @@ export const Slack: ConnectorSpec = {
           tokenType: 'Bearer',
         },
       },
+      {
+        type: 'ears',
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'slack',
+          scope:
+            'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
+        },
+      },
     ],
   },
 
