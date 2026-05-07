@@ -374,7 +374,7 @@ describe('resolveScoutTestingScope', () => {
 describe('serializeScoutTestingScope', () => {
   it('serialises a full/selective-disabled scope with sorted affectedModules and skipNonScoutTests=false', () => {
     const scope: ScoutTestingScope = { kind: 'full', reason: 'selective-disabled' };
-    expect(serializeScoutTestingScope(scope, new Set(['@kbn/b', '@kbn/a']))).toEqual({
+    expect(serializeScoutTestingScope(scope, new Set(['@kbn/b', '@kbn/a']), false)).toEqual({
       kind: 'full',
       reason: 'selective-disabled',
       skipNonScoutTests: false,
@@ -384,7 +384,7 @@ describe('serializeScoutTestingScope', () => {
 
   it('serialises a full/critical-files scope including affectedModules', () => {
     const scope: ScoutTestingScope = { kind: 'full', reason: 'critical-files' };
-    expect(serializeScoutTestingScope(scope, new Set(['@kbn/scout']))).toEqual({
+    expect(serializeScoutTestingScope(scope, new Set(['@kbn/scout']), false)).toEqual({
       kind: 'full',
       reason: 'critical-files',
       skipNonScoutTests: false,
@@ -392,16 +392,39 @@ describe('serializeScoutTestingScope', () => {
     });
   });
 
-  it('serialises a tests-only scope with skipNonScoutTests=true and sorted configs+modules', () => {
+  it('keeps skipNonScoutTests=false for full scopes even when allowSkipNonScoutTests=true', () => {
+    const scope: ScoutTestingScope = { kind: 'full', reason: 'critical-files' };
+    expect(serializeScoutTestingScope(scope, new Set(['@kbn/scout']), true)).toEqual({
+      kind: 'full',
+      reason: 'critical-files',
+      skipNonScoutTests: false,
+      affectedModules: ['@kbn/scout'],
+    });
+  });
+
+  it('serialises a tests-only scope with skipNonScoutTests=false by default', () => {
     const scope: ScoutTestingScope = {
       kind: 'tests-only',
       affectedConfigPaths: new Set(['b/playwright.config.ts', 'a/playwright.config.ts']),
     };
-    expect(serializeScoutTestingScope(scope, new Set(['@kbn/foo']))).toEqual({
+    expect(serializeScoutTestingScope(scope, new Set(['@kbn/foo']), false)).toEqual({
+      kind: 'tests-only',
+      skipNonScoutTests: false,
+      affectedModules: ['@kbn/foo'],
+      affectedConfigs: ['a/playwright.config.ts', 'b/playwright.config.ts'],
+    });
+  });
+
+  it('flips skipNonScoutTests to true for tests-only scopes when allowSkipNonScoutTests=true', () => {
+    const scope: ScoutTestingScope = {
+      kind: 'tests-only',
+      affectedConfigPaths: new Set(['a/playwright.config.ts']),
+    };
+    expect(serializeScoutTestingScope(scope, new Set(['@kbn/foo']), true)).toEqual({
       kind: 'tests-only',
       skipNonScoutTests: true,
       affectedModules: ['@kbn/foo'],
-      affectedConfigs: ['a/playwright.config.ts', 'b/playwright.config.ts'],
+      affectedConfigs: ['a/playwright.config.ts'],
     });
   });
 
@@ -413,16 +436,28 @@ describe('serializeScoutTestingScope', () => {
     // By contract `resolveScoutTestingScope` builds `scope.affectedModuleIds`
     // from the same data as the `affectedModules` arg — the serializer just
     // reuses the explicit arg.
-    expect(serializeScoutTestingScope(scope, new Set(['@kbn/foo', '@kbn/bar']))).toEqual({
+    expect(serializeScoutTestingScope(scope, new Set(['@kbn/foo', '@kbn/bar']), false)).toEqual({
       kind: 'dependency-tree',
       skipNonScoutTests: false,
       affectedModules: ['@kbn/bar', '@kbn/foo'],
     });
   });
 
+  it('keeps skipNonScoutTests=false for dependency-tree scopes even when allowSkipNonScoutTests=true', () => {
+    const scope: ScoutTestingScope = {
+      kind: 'dependency-tree',
+      affectedModuleIds: new Set(['@kbn/foo']),
+    };
+    expect(serializeScoutTestingScope(scope, new Set(['@kbn/foo']), true)).toEqual({
+      kind: 'dependency-tree',
+      skipNonScoutTests: false,
+      affectedModules: ['@kbn/foo'],
+    });
+  });
+
   it('produces an empty affectedModules array when no modules are affected', () => {
     const scope: ScoutTestingScope = { kind: 'full', reason: 'selective-disabled' };
-    expect(serializeScoutTestingScope(scope, new Set())).toEqual({
+    expect(serializeScoutTestingScope(scope, new Set(), false)).toEqual({
       kind: 'full',
       reason: 'selective-disabled',
       skipNonScoutTests: false,
@@ -449,7 +484,7 @@ describe('writeScoutTestingScope', () => {
       affectedConfigPaths: new Set(['x/playwright.config.ts']),
     };
 
-    writeScoutTestingScope(scope, new Set(['@kbn/x']), outputPath);
+    writeScoutTestingScope(scope, new Set(['@kbn/x']), true, outputPath);
 
     expect(fs.existsSync(outputPath)).toBe(true);
     const written = JSON.parse(fs.readFileSync(outputPath, 'utf-8'));
@@ -459,6 +494,19 @@ describe('writeScoutTestingScope', () => {
       affectedModules: ['@kbn/x'],
       affectedConfigs: ['x/playwright.config.ts'],
     });
+  });
+
+  it('threads allowSkipNonScoutTests=false through to the artifact', () => {
+    const outputPath = path.join(tmpRoot, 'no-skip.json');
+    const scope: ScoutTestingScope = {
+      kind: 'tests-only',
+      affectedConfigPaths: new Set(['x/playwright.config.ts']),
+    };
+
+    writeScoutTestingScope(scope, new Set(['@kbn/x']), false, outputPath);
+
+    const written = JSON.parse(fs.readFileSync(outputPath, 'utf-8'));
+    expect(written.skipNonScoutTests).toBe(false);
   });
 });
 
@@ -487,6 +535,7 @@ describe('readScoutTestingScope', () => {
         affectedConfigPaths: new Set(['a/playwright.config.ts']),
       },
       new Set(['@kbn/a']),
+      true,
       outputPath
     );
     expect(readScoutTestingScope(outputPath)).toEqual({

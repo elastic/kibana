@@ -78,9 +78,57 @@ interface FtrConfigsManifest {
   enabled?: Array<string | { [configPath: string]: { queue: string } }>;
 }
 
+export const TESTING_SCOPE_FILE = '.scout/testing_scope.json';
+
+/**
+ * Optional fast-path: if the Scout testing-scope artifact says
+ * `skipNonScoutTests: true`, skip Jest/FTR step emission entirely.
+ *
+ * The artifact is produced by `scout resolve-testing-scope` from the wrapper
+ * script (`pick_test_group_run_order.sh`) only when the PR has the
+ * `ci:skip-non-scout-tests` label AND its diff is exclusively Scout test
+ * files. A missing/unreadable file means "no opt-in" and we fall through to
+ * regular step emission.
+ *
+ * Exported for unit testing.
+ */
+export function shouldSkipNonScoutTests(scopeFilePath: string = TESTING_SCOPE_FILE): {
+  skip: boolean;
+  kind?: string;
+} {
+  if (!Fs.existsSync(scopeFilePath)) return { skip: false };
+
+  try {
+    const scope = JSON.parse(Fs.readFileSync(scopeFilePath, 'utf-8')) as {
+      kind?: string;
+      skipNonScoutTests?: boolean;
+    };
+    return { skip: scope.skipNonScoutTests === true, kind: scope.kind };
+  } catch (err) {
+    console.warn(`Failed to parse ${scopeFilePath}; emitting Jest/FTR steps as a fallback:`, err);
+    return { skip: false };
+  }
+}
+
 export async function pickTestGroupRunOrder() {
   const bk = new BuildkiteClient();
   const ciStats = new CiStatsClient();
+
+  const skipDecision = shouldSkipNonScoutTests();
+  if (skipDecision.skip) {
+    const message =
+      `Skipping Jest unit, Jest integration, and FTR step emission: ` +
+      `Scout testing scope is '${skipDecision.kind}' with skipNonScoutTests=true ` +
+      `(diff is exclusively Scout tests and the 'ci:skip-non-scout-tests' label is set).`;
+    console.log(message);
+    bk.setAnnotation(
+      'jest-ftr-skipped-tests-only',
+      'info',
+      'Jest unit, Jest integration, and FTR steps were skipped: this PR only ' +
+        'changes Scout test files and carries the `ci:skip-non-scout-tests` label.'
+    );
+    return;
+  }
 
   // these keys are synchronized in a few placed by storing them in the env during builds
   const UNIT_TYPE = getRequiredEnv('TEST_GROUP_TYPE_UNIT');

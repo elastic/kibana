@@ -68,6 +68,14 @@ else
   echo "Reason: SELECTIVE_TESTING_ENABLED=${SELECTIVE_TESTING_ENABLED:-false}, 'scout:run-all-tests' label=$(is_pr_with_label "scout:run-all-tests" && echo yes || echo no)"
 fi
 
+# Opt-in to skipping FTR/Jest entirely on a tests-only diff. The flag only
+# takes effect when the resolved scope ends up as 'tests-only'; the producer
+# encodes that into 'skipNonScoutTests' for downstream consumers to honour.
+if is_pr_with_label "ci:skip-non-scout-tests"; then
+  SELECTIVE_SCOUT_FLAG+=(--allow-skip-non-scout-tests)
+  echo "Label 'ci:skip-non-scout-tests' present — FTR/Jest will be skipped if the diff is tests-only"
+fi
+
 node scripts/scout resolve-testing-scope \
   --code-changes "$CODE_CHANGES_FILE" \
   --scope-output "$TESTING_SCOPE_FILE" \
