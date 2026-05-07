@@ -2355,6 +2355,7 @@
         "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
+        "@opentelemetry/otlp-transformer",
         "@opentelemetry/resources",
         "@opentelemetry/sdk-logs",
         "@opentelemetry/semantic-conventions"

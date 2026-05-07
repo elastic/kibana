@@ -59,3 +59,4 @@ patch-package
 @hapi/iron
 fastify
 find-my-way
+@opentelemetry/otlp-transformer
