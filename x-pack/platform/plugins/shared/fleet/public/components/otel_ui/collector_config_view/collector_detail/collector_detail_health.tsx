@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import moment from 'moment';
 import {
   EuiAccordion,
   EuiBadge,
@@ -23,17 +22,19 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
+import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { ComponentHealth, OTelCollectorConfig } from '../../../../../common/types';
 
-import type { OTelComponentType } from '../graph_view/constants';
-import { COMPONENT_TYPE_LABELS, COMPONENT_TYPE_VIS_COLORS } from '../graph_view/constants';
-import { findComponentHealth } from '../graph_view/enrich_nodes_with_health';
+import type { OTelComponentType } from '../constants';
+import { COMPONENT_TYPE_LABELS } from '../constants';
 import {
+  findComponentHealth,
+  getComponentAccentColor,
   getComponentHealthStatus,
   getHealthStatusColor,
   getHealthStatusLabel,
+  nanosToMs,
   type ComponentHealthStatus,
 } from '../utils';
 
@@ -48,20 +49,17 @@ interface CollectorDetailHealthProps {
   selectedComponentId?: string;
 }
 
-const FormattedAbsoluteTimestamp: React.FC<{ nanos: number }> = ({ nanos }) => {
-  const ms = nanos / 1_000_000;
-  return (
-    <FormattedDate
-      value={ms}
-      year="numeric"
-      month="numeric"
-      day="numeric"
-      hour="numeric"
-      minute="numeric"
-      second="numeric"
-    />
-  );
-};
+const FormattedAbsoluteTimestamp: React.FC<{ nanos: number }> = ({ nanos }) => (
+  <FormattedDate
+    value={nanosToMs(nanos)}
+    year="numeric"
+    month="numeric"
+    day="numeric"
+    hour="numeric"
+    minute="numeric"
+    second="numeric"
+  />
+);
 
 const COMPONENT_TYPE_ORDER: OTelComponentType[] = [
   'receiver',
@@ -88,8 +86,7 @@ const ComponentItem: React.FC<{
   onClick?: () => void;
 }> = ({ id, type, status, lastError, isSelected, onClick }) => {
   const { euiTheme } = useEuiTheme();
-  const accentColor =
-    euiTheme.colors.vis[COMPONENT_TYPE_VIS_COLORS[type]] ?? euiTheme.colors.mediumShade;
+  const accentColor = getComponentAccentColor(type, euiTheme);
 
   return (
     <div
@@ -397,9 +394,11 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
             title: i18n.translate('xpack.fleet.otelUi.collectorDetail.health.uptimeLabel', {
               defaultMessage: 'Uptime',
             }),
-            description: health.start_time_unix_nano
-              ? moment.duration(Date.now() - health.start_time_unix_nano / 1_000_000).humanize()
-              : '-',
+            description: health.start_time_unix_nano ? (
+              <FormattedRelative value={nanosToMs(health.start_time_unix_nano)} />
+            ) : (
+              '-'
+            ),
           },
           {
             title: i18n.translate(

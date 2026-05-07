@@ -8,32 +8,12 @@
 import type { Node } from '@xyflow/react';
 
 import type { ComponentHealth } from '../../../../../common/types';
-import { getComponentHealthStatus } from '../utils';
+import { findComponentHealth, getComponentHealthStatus } from '../utils';
 
-import type { OTelComponentType, OTelGraphNodeData } from './constants';
+import type { OTelGraphNodeData } from './constants';
 import type { OTelPipelineGroupNodeData } from './config_to_graph';
 
-export const findComponentHealth = (
-  health: ComponentHealth | undefined,
-  componentType: OTelComponentType,
-  componentId: string
-): ComponentHealth | undefined => {
-  const key = `${componentType}:${componentId}`;
-  const map = health?.component_health_map;
-  if (!map) {
-    return undefined;
-  }
-  if (map[key]) {
-    return map[key];
-  }
-  for (const entry of Object.values(map)) {
-    const found = findComponentHealth(entry, componentType, componentId);
-    if (found) {
-      return found;
-    }
-  }
-  return undefined;
-};
+export { findComponentHealth } from '../utils';
 
 export const enrichNodesWithHealth = (
   nodes: Array<Node>,

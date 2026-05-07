@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { Agent, ComponentHealth, OTelCollectorConfig } from '../../../../../common/types';
 
-import type { OTelComponentType } from '../graph_view/constants';
+import type { OTelComponentType } from '../constants';
 import { YamlViewer } from '../yaml_viewer';
 import { OTelComponentDetail } from '../component_detail';
 

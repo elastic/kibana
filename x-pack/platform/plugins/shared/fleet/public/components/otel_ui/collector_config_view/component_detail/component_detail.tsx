@@ -26,10 +26,14 @@ import type {
   ComponentHealth,
 } from '../../../../../common/types';
 
-import type { OTelComponentType } from '../graph_view/constants';
-import { COMPONENT_TYPE_LABELS } from '../graph_view/constants';
-import { findComponentHealth } from '../graph_view/enrich_nodes_with_health';
-import { getComponentHealthStatus, getHealthStatusColor, getHealthStatusLabel } from '../utils';
+import type { OTelComponentType } from '../constants';
+import { COMPONENT_TYPE_LABELS } from '../constants';
+import {
+  findComponentHealth,
+  getComponentHealthStatus,
+  getHealthStatusColor,
+  getHealthStatusLabel,
+} from '../utils';
 
 import { ComponentConfigTab } from './component_config_tab';
 import { ComponentHealthTab } from './component_health_tab';
