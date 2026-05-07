@@ -8,6 +8,6 @@
 import { createPlaywrightConfig } from '@kbn/scout';
 
 export default createPlaywrightConfig({
-  testDir: './tests/data_management/data_processing',
+  testDir: './tests',
   runGlobalSetup: true,
 });
