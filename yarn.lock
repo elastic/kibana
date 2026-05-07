@@ -4835,6 +4835,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/argus-variant-bank-curation@link:x-pack/solutions/security/packages/argus-variant-bank-curation":
+  version "0.0.0"
+  uid ""
+
 "@kbn/as-code-data-views-schema@link:src/platform/packages/shared/as-code/data-views-schema":
   version "0.0.0"
   uid ""
@@ -5092,6 +5096,10 @@
   uid ""
 
 "@kbn/config-schema@link:src/platform/packages/shared/kbn-config-schema":
+  version "0.0.0"
+  uid ""
+
+"@kbn/config-schema@link:x-pack/platform/packages/shared/kbn-config-schema":
   version "0.0.0"
   uid ""
 
@@ -6900,6 +6908,10 @@
   uid ""
 
 "@kbn/evals-suite-agent-builder@link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-alerts-rag@link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag":
   version "0.0.0"
   uid ""
 
