@@ -7,10 +7,16 @@
 
 import { tags } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
-import { alertsRagDataset } from '../src/datasets';
+import { alertsRagDataset, filterByCategory, getDatasetCategories } from '../src/datasets';
 
 const ELASTIC_ASSISTANT_CAPABILITIES_PATH = '/internal/elastic_assistant/capabilities';
 const ACTIONS_CONNECTOR_PATH = '/api/actions/connector';
+
+const DATASET_NAME = 'Alerts RAG Regression (Episodes 1-8)';
+const DATASET_DESCRIPTION =
+  'Security AI Assistant alerts RAG evaluation dataset migrated from LangSmith. ' +
+  'Tests retrieval relevance, answer faithfulness, and correctness across single-alert queries, ' +
+  'multi-alert correlation, temporal queries, and field-specific lookups.';
 
 evaluate.describe('Alerts RAG', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ kbnClient, evaluationConnector, log }) => {
@@ -49,18 +55,32 @@ evaluate.describe('Alerts RAG', { tag: tags.stateful.classic }, () => {
           `Original error: ${error instanceof Error ? error.message : String(error)}`
       );
     }
+
+    log.info(
+      `[alerts-rag] dataset has ${alertsRagDataset.length} examples across ${
+        getDatasetCategories().length
+      } categories`
+    );
   });
 
-  evaluate('alerts RAG dataset', async ({ evaluateDataset }) => {
-    await evaluateDataset({
-      dataset: {
-        name: 'Alerts RAG Regression (Episodes 1-8)',
-        description:
-          'Security AI Assistant alerts RAG evaluation dataset migrated from LangSmith. ' +
-          'Tests retrieval relevance, answer faithfulness, and correctness across single-alert queries, ' +
-          'multi-alert correlation, temporal queries, and field-specific lookups.',
-        examples: alertsRagDataset,
-      },
+  for (const category of getDatasetCategories()) {
+    const examples = filterByCategory(category);
+
+    evaluate.describe(category, () => {
+      examples.forEach((example, idx) => {
+        evaluate(
+          `[${idx + 1}/${examples.length}] ${example.input}`,
+          async ({ evaluateDataset }) => {
+            await evaluateDataset({
+              dataset: {
+                name: `${DATASET_NAME} › ${category}`,
+                description: DATASET_DESCRIPTION,
+                examples: [example],
+              },
+            });
+          }
+        );
+      });
     });
-  });
+  }
 });
