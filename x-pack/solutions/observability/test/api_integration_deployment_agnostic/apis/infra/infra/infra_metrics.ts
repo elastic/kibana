@@ -14,6 +14,7 @@ import type {
 import type { SupertestWithRoleScopeType } from '../../../services';
 import { DATES } from '../utils/constants';
 import {
+  buildEcsAndSemconvWideTimerange,
   generateSemconvHostsData,
   SEMCONV_HOSTS,
   SEMCONV_HOSTS_DATA_FROM,
@@ -209,7 +210,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Fetch hosts (semconv)', () => {
-      let synthtraceClient: InfraSynthtraceEsClient;
+      let synthtraceClient: InfraSynthtraceEsClient | undefined;
 
       const semconvBasePayload: GetInfraMetricsRequestBodyPayloadClient = {
         limit: 10,
@@ -236,10 +237,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        await synthtraceClient.clean();
+        await synthtraceClient?.clean();
       });
 
-      it('returns only Otel hosts (filtered by data_stream.dataset=hostmetricsreceiver.otel)', async () => {
+      it('returns only OTel hosts (filtered by data_stream.dataset=hostmetricsreceiver.otel)', async () => {
         const response = await makeRequest({ body: semconvBasePayload, expectedHTTPCode: 200 });
 
         const names = (response.body as GetInfraMetricsResponsePayload).nodes
@@ -248,7 +249,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(names).eql(SEMCONV_HOSTS.map((h) => h.hostName).sort());
       });
 
-      it('reports hasSystemMetrics=true and computes core metrics for an Otel host', async () => {
+      it('reports hasSystemMetrics=true and computes core metrics for an OTel host', async () => {
         const response = await makeRequest({
           body: { ...semconvBasePayload, limit: 1 },
           expectedHTTPCode: 200,
@@ -265,15 +266,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(metricsByName.memory).to.be.a('number');
       });
 
+      // Mirrors the exact error thrown by `UNSUPPORTED_SEMCONV_METRICS` in
+      // x-pack/solutions/observability/plugins/infra/server/routes/infra/index.ts
+      // so an unrelated 400 (e.g. unrelated body validation) cannot accidentally
+      // satisfy this assertion.
+      const unsupportedSemconvMessage = (metric: 'rxV2' | 'txV2') =>
+        `The following metrics are not supported for semconv schema: ${metric}`;
+
       it('rejects rxV2 with 400 when schema=semconv', async () => {
         const response = await makeRequest({
           body: { ...semconvBasePayload, metrics: ['rxV2'] },
           expectedHTTPCode: 400,
         });
-        expect(normalizeNewLine(response.body.message)).to.contain(
-          'not supported for semconv schema'
-        );
-        expect(normalizeNewLine(response.body.message)).to.contain('rxV2');
+        expect(normalizeNewLine(response.body.message)).to.equal(unsupportedSemconvMessage('rxV2'));
       });
 
       it('rejects txV2 with 400 when schema=semconv', async () => {
@@ -281,13 +286,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           body: { ...semconvBasePayload, metrics: ['txV2'] },
           expectedHTTPCode: 400,
         });
-        expect(normalizeNewLine(response.body.message)).to.contain(
-          'not supported for semconv schema'
-        );
-        expect(normalizeNewLine(response.body.message)).to.contain('txV2');
+        expect(normalizeNewLine(response.body.message)).to.equal(unsupportedSemconvMessage('txV2'));
       });
 
-      it('returns only the queried Otel host when filtered by host.name', async () => {
+      it('returns only the queried OTel host when filtered by host.name', async () => {
         const targetHost = SEMCONV_HOSTS[0].hostName;
         const response = await makeRequest({
           body: {
@@ -302,13 +304,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    // These mixed-schema cases cover the cohort split when ECS-archived hosts
+    // and OTel synthtrace hosts coexist in the cluster. They do NOT cover
+    // *dual-shipping* (the same `host.name` ingested through both pipelines);
+    // see issue #264011 for tracking.
     describe('Mixed ECS + semconv hosts', () => {
-      let synthtraceClient: InfraSynthtraceEsClient;
+      let synthtraceClient: InfraSynthtraceEsClient | undefined;
+      let archiveLoaded = false;
 
       before(async () => {
         await esArchiver.load(
           'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
         );
+        archiveLoaded = true;
         synthtraceClient = synthtrace.createInfraSynthtraceEsClient();
         await synthtraceClient.clean();
         await synthtraceClient.index(
@@ -321,22 +329,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        await synthtraceClient.clean();
-        await esArchiver.unload(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
-        );
+        try {
+          await synthtraceClient?.clean();
+        } finally {
+          if (archiveLoaded) {
+            await esArchiver.unload(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
+            );
+          }
+        }
       });
 
-      // The widest reasonable window covers BOTH the ECS archive's
-      // `logs_and_metrics` window and the semconv synthtrace window.
-      const wideTimerange = {
-        from: new Date(
-          Math.min(DATES['8.0.0'].logs_and_metrics.min, new Date(SEMCONV_HOSTS_DATA_FROM).getTime())
-        ).toISOString(),
-        to: new Date(
-          Math.max(DATES['8.0.0'].logs_and_metrics.max, new Date(SEMCONV_HOSTS_DATA_TO).getTime())
-        ).toISOString(),
-      };
+      const wideTimerange = buildEcsAndSemconvWideTimerange({
+        ecsFromMs: DATES['8.0.0'].logs_and_metrics.min,
+        ecsToMs: DATES['8.0.0'].logs_and_metrics.max,
+      });
 
       it('returns only ECS hosts when schema=ecs', async () => {
         const response = await makeRequest({
@@ -362,7 +369,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       });
 
-      it('returns only Otel hosts when schema=semconv', async () => {
+      it('returns only OTel hosts when schema=semconv', async () => {
         const response = await makeRequest({
           body: {
             limit: 10,

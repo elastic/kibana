@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { infra, timerange } from '@kbn/synthtrace-client';
+import {
+  infra,
+  timerange,
+  type InfraDocument,
+  type SynthtraceGenerator,
+} from '@kbn/synthtrace-client';
 
 export interface SemconvHost {
   hostName: string;
@@ -20,9 +25,10 @@ export const SEMCONV_HOSTS: SemconvHost[] = [
 ];
 
 /**
- * Generates Otel `hostmetricsreceiver.otel` host docs (cpu, memory, filesystem,
- * network) for the deployment-agnostic API integration tests. Mirrors the Scout
- * fixture under `plugins/infra/test/scout/ui/fixtures/synthtrace/semconv_host_data.ts`
+ * Generates OpenTelemetry `hostmetricsreceiver.otel` host docs (cpu, memory,
+ * filesystem, network) for the deployment-agnostic API integration tests.
+ * Mirrors the Scout fixture under
+ * `plugins/infra/test/scout/ui/fixtures/synthtrace/semconv_host_data.ts`
  * but is parameterized for reuse across infra suites.
  */
 export function generateSemconvHostsData({
@@ -33,7 +39,7 @@ export function generateSemconvHostsData({
   from: string;
   to: string;
   hosts: SemconvHost[];
-}) {
+}): SynthtraceGenerator<InfraDocument> {
   const range = timerange(from, to);
   const hostList = hosts.map(({ hostName }) => infra.semconvHost(hostName));
 
@@ -49,3 +55,20 @@ export function generateSemconvHostsData({
       })
     );
 }
+
+/**
+ * Returns an ISO time range that covers BOTH an ECS archive window and the
+ * semconv synthtrace window above. Used by mixed-schema suites that need both
+ * datasets to fall within the request's `from`/`to` so the server-side schema
+ * filter — not the time bound — is what selects each cohort.
+ */
+export const buildEcsAndSemconvWideTimerange = ({
+  ecsFromMs,
+  ecsToMs,
+}: {
+  ecsFromMs: number;
+  ecsToMs: number;
+}): { from: string; to: string } => ({
+  from: new Date(Math.min(ecsFromMs, new Date(SEMCONV_HOSTS_DATA_FROM).getTime())).toISOString(),
+  to: new Date(Math.max(ecsToMs, new Date(SEMCONV_HOSTS_DATA_TO).getTime())).toISOString(),
+});

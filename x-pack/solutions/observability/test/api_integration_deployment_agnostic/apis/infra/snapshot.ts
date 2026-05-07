@@ -11,6 +11,8 @@ import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
 import type {
   SnapshotNodeResponse,
   SnapshotMetricInput,
+  SnapshotNode,
+  SnapshotNodeMetric,
   SnapshotRequest,
 } from '@kbn/infra-plugin/common/http_api/snapshot_api';
 import type { SupertestWithRoleScopeType } from '../../services';
@@ -267,6 +269,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should not return timeseries data - without groupBy', async () => {
+        // NOTE: `schema` is intentionally omitted here. The host `nodeFilter`
+        // (see metrics_data_access `inventory_models/host/index.ts`) returns
+        // `[]` when `schema` is undefined and applies an ECS module filter
+        // when `schema: 'ecs'`. With `groupBy: null` the request aggregates
+        // across ALL hosts in the archive, so adding the ECS module filter
+        // excludes non-system docs and shifts the pinned `max`/`avg` values.
+        // Other tests in this file pin `schema: 'ecs'` because their
+        // assertions are per-host and unaffected by the filter.
         const snapshot = await fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -276,7 +286,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
-          schema: 'ecs',
           groupBy: null,
           includeTimeseries: false,
         });
@@ -651,10 +660,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('semconv (Otel hostmetricsreceiver)', () => {
-      let synthtraceClient: InfraSynthtraceEsClient;
+    describe('semconv (OpenTelemetry hostmetricsreceiver)', () => {
+      let synthtraceClient: InfraSynthtraceEsClient | undefined;
       const from = new Date(SEMCONV_HOSTS_DATA_FROM).getTime();
       const to = new Date(SEMCONV_HOSTS_DATA_TO).getTime();
+
+      const findMetric = (node: SnapshotNode, name: string): SnapshotNodeMetric => {
+        const metric = node.metrics.find((m) => m.name === name);
+        if (!metric) {
+          throw new Error(
+            `Expected node "${
+              first(node.path)?.value
+            }" to expose metric "${name}", got: ${node.metrics.map((m) => m.name).join(', ')}`
+          );
+        }
+        return metric;
+      };
 
       before(async () => {
         synthtraceClient = synthtrace.createInfraSynthtraceEsClient();
@@ -669,10 +690,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        await synthtraceClient.clean();
+        await synthtraceClient?.clean();
       });
 
-      it('returns Otel hosts when schema=semconv (cpu)', async () => {
+      it('returns OTel hosts when schema=semconv (cpu)', async () => {
         const snapshot = await fetchSnapshot({
           sourceId: 'default',
           timerange: { from, to, interval: '1m' },
@@ -683,20 +704,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           includeTimeseries: false,
         });
 
-        expect(snapshot).to.have.property('nodes');
-        if (!snapshot) return;
+        expect(snapshot).to.be.ok();
+        const { nodes } = snapshot!;
 
-        const nodeNames = snapshot.nodes.map((n) => first(n.path)?.value).sort();
+        const nodeNames = nodes.map((n) => first(n.path)?.value).sort();
         expect(nodeNames).to.eql(SEMCONV_HOSTS.map((h) => h.hostName).sort());
 
-        const firstNode = first(snapshot.nodes) as any;
-        expect(firstNode).to.have.property('metrics');
-        expect(firstNode.metrics[0]).to.have.property('name', 'cpuV2');
-        // Otel cpu utilization is non-null because semconvHost emits state-based docs.
-        expect(firstNode.metrics[0].avg).to.be.a('number');
+        const cpu = findMetric(nodes[0], 'cpuV2');
+        // OTel cpu utilization is non-null because semconvHost emits state-based docs.
+        expect(cpu.avg).to.be.a('number');
       });
 
-      it('returns Otel hosts when schema=semconv (memory)', async () => {
+      it('returns OTel hosts when schema=semconv (memory)', async () => {
         const snapshot = await fetchSnapshot({
           sourceId: 'default',
           timerange: { from, to, interval: '1m' },
@@ -707,11 +726,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           includeTimeseries: false,
         });
 
-        if (!snapshot) return;
-        expect(snapshot.nodes.length).to.equal(SEMCONV_HOSTS.length);
-        const firstNode = first(snapshot.nodes) as any;
-        expect(firstNode.metrics[0]).to.have.property('name', 'memory');
-        expect(firstNode.metrics[0].avg).to.be.a('number');
+        expect(snapshot).to.be.ok();
+        const { nodes } = snapshot!;
+
+        const nodeNames = nodes.map((n) => first(n.path)?.value).sort();
+        expect(nodeNames).to.eql(SEMCONV_HOSTS.map((h) => h.hostName).sort());
+
+        const memory = findMetric(nodes[0], 'memory');
+        expect(memory.avg).to.be.a('number');
       });
     });
 

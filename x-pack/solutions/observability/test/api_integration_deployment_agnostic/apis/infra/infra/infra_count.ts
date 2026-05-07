@@ -17,6 +17,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider
 
 import { DATES } from '../utils/constants';
 import {
+  buildEcsAndSemconvWideTimerange,
   generateSemconvHostsData,
   SEMCONV_HOSTS,
   SEMCONV_HOSTS_DATA_FROM,
@@ -106,7 +107,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       describe('with host (schema=semconv)', () => {
-        let synthtraceClient: InfraSynthtraceEsClient;
+        let synthtraceClient: InfraSynthtraceEsClient | undefined;
 
         before(async () => {
           synthtraceClient = synthtrace.createInfraSynthtraceEsClient();
@@ -121,10 +122,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         after(async () => {
-          await synthtraceClient.clean();
+          await synthtraceClient?.clean();
         });
 
-        it('counts only Otel hosts (filtered by data_stream.dataset)', async () => {
+        it('counts only OTel hosts (filtered by data_stream.dataset)', async () => {
           const infraHosts = await fetchHostsCount({
             params: { entityType: 'host' },
             body: {
@@ -144,13 +145,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
+      // These mixed-schema suites cover the cohort split when ECS-archived
+      // hosts and OTel synthtrace hosts coexist in the cluster. They do NOT
+      // cover *dual-shipping* (the same `host.name` ingested through both
+      // pipelines), where naive sum-of-counts would over-count distinct
+      // machines during a migration — that scenario is out of scope for this
+      // suite; see issue #264011 for tracking.
       describe('with mixed ECS + semconv hosts', () => {
-        let synthtraceClient: InfraSynthtraceEsClient;
+        let synthtraceClient: InfraSynthtraceEsClient | undefined;
+        let archiveLoaded = false;
 
         before(async () => {
           await esArchiver.load(
             'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
           );
+          archiveLoaded = true;
           synthtraceClient = synthtrace.createInfraSynthtraceEsClient();
           await synthtraceClient.clean();
           await synthtraceClient.index(
@@ -163,23 +172,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         after(async () => {
-          await synthtraceClient.clean();
-          await esArchiver.unload(
-            'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
-          );
+          // Run cleanup defensively: if `before` failed mid-setup the second
+          // teardown step must still execute so we don't leak fixtures into
+          // sibling suites.
+          try {
+            await synthtraceClient?.clean();
+          } finally {
+            if (archiveLoaded) {
+              await esArchiver.unload(
+                'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
+              );
+            }
+          }
         });
 
-        const wideTimerange = {
-          from: new Date(
-            Math.min(
-              DATES['8.0.0'].logs_and_metrics.min,
-              new Date(SEMCONV_HOSTS_DATA_FROM).getTime()
-            )
-          ).toISOString(),
-          to: new Date(
-            Math.max(DATES['8.0.0'].logs_and_metrics.max, new Date(SEMCONV_HOSTS_DATA_TO).getTime())
-          ).toISOString(),
-        };
+        const wideTimerange = buildEcsAndSemconvWideTimerange({
+          ecsFromMs: DATES['8.0.0'].logs_and_metrics.min,
+          ecsToMs: DATES['8.0.0'].logs_and_metrics.max,
+        });
 
         it('schema=ecs returns the ECS host count only', async () => {
           const infraHosts = await fetchHostsCount({
@@ -191,7 +201,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(infraHosts.count).to.equal(3);
         });
 
-        it('schema=semconv returns the Otel host count only', async () => {
+        it('schema=semconv returns the OTel host count only', async () => {
           const infraHosts = await fetchHostsCount({
             params: { entityType: 'host' },
             body: { query: emptyQuery, ...wideTimerange, schema: 'semconv' },

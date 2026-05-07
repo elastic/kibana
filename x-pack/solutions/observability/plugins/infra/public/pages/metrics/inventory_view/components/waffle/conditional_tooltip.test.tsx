@@ -199,9 +199,7 @@ describe('ConditionalToolTip', () => {
     } as UseSnapshotRequest);
 
     const useSnapshotCall = mockedUseSnapshot.mock.calls[0][0] as UseSnapshotRequest;
-    const requestedTypes = useSnapshotCall.metrics
-      .map((m: { type?: string }) => ('type' in m ? m.type : null))
-      .filter(Boolean);
+    const requestedTypes = useSnapshotCall.metrics.map((m) => m.type);
     expect(requestedTypes).not.toContain('cpu');
     expect(requestedTypes).not.toContain('rx');
     expect(requestedTypes).not.toContain('tx');

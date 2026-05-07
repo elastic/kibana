@@ -128,7 +128,7 @@ describe('useHostKpiCharts', () => {
   // ECS and semconv expose different formula shapes, so the same chart slug can yield
   // a different subtitle depending on the schema (e.g. semconv `diskUsage` starts with
   // `1 - sum(...)` which matches neither the avg nor max pattern).
-  const expectedKpiByschema: Record<DataSchemaFormat, Array<{ id: string; subtitle: string }>> = {
+  const expectedKpiBySchema: Record<DataSchemaFormat, Array<{ id: string; subtitle: string }>> = {
     ecs: [
       { id: 'cpuUsage', subtitle: 'Average' },
       { id: 'normalizedLoad1m', subtitle: 'Average' },
@@ -148,7 +148,7 @@ describe('useHostKpiCharts', () => {
       const { result } = renderHook(() => useHostKpiCharts({ indexPattern, schema }));
       await waitFor(() => new Promise((resolve) => resolve(null)));
 
-      const expected = expectedKpiByschema[schema];
+      const expected = expectedKpiBySchema[schema];
 
       expect(result.current).toHaveLength(expected.length);
 
