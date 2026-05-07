@@ -20,17 +20,20 @@ const flushMicrotasks = async () => {
 };
 
 describe('registerCasesWorkflowEventBridge', () => {
-  it('forwards cases events to workflows extensions', async () => {
-    const eventBus = new CasesEventBus();
-    const workflowsExtensions = workflowsExtensionsMock.createStart();
-    const logger = loggingSystemMock.createLogger();
-    const request = httpServerMock.createKibanaRequest();
+  const workflowsExtensions = workflowsExtensionsMock.createStart();
+  const logger = loggingSystemMock.createLogger();
+  const request = httpServerMock.createKibanaRequest();
+  let mockClient = { emitEvent: jest.fn(), isWorkflowsAvailable: true };
+  let eventBus = new CasesEventBus();
 
-    const mockClient = { emitEvent: jest.fn(), isWorkflowsAvailable: true };
+  beforeEach(() => {
+    eventBus = new CasesEventBus();
+    mockClient = { emitEvent: jest.fn(), isWorkflowsAvailable: true };
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
-
     registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
+  });
 
+  it('forwards cases events to workflows extensions', async () => {
     eventBus.emitCaseCreated(request, { caseId: 'case-1', owner: 'securitySolution' });
     eventBus.emitCaseUpdated(request, {
       caseId: 'case-1',
@@ -66,19 +69,31 @@ describe('registerCasesWorkflowEventBridge', () => {
     });
   });
 
-  it('logs warning when forwarding fails', async () => {
-    const eventBus = new CasesEventBus();
-    const workflowsExtensions = workflowsExtensionsMock.createStart();
-    const logger = loggingSystemMock.createLogger();
-    const request = httpServerMock.createKibanaRequest();
+  it('changes the legacy `user` attachment type to `comment`', async () => {
+    eventBus.emitAttachmentsAdded(request, {
+      caseId: 'case-1',
+      attachmentIds: ['attachment-1'],
+      attachmentType: 'user',
+      owner: 'securitySolution',
+    });
 
-    const mockClient = {
+    await flushMicrotasks();
+
+    expect(mockClient.emitEvent).toHaveBeenNthCalledWith(1, AttachmentsAddedTriggerId, {
+      caseId: 'case-1',
+      attachmentIds: ['attachment-1'],
+      attachmentType: 'comment',
+      owner: 'securitySolution',
+    });
+  });
+
+  it('logs warning when forwarding fails', async () => {
+    mockClient = {
       emitEvent: jest.fn().mockRejectedValue(new Error('boom')),
       isWorkflowsAvailable: true,
     };
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
     registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
-
     eventBus.emitCaseCreated(request, { caseId: 'case-1', owner: 'securitySolution' });
 
     await flushMicrotasks();

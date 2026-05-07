@@ -44,6 +44,17 @@ export function registerCasesWorkflowEventBridge(
   });
 
   casesEventBus.onAttachmentsAdded((event) => {
-    void forward(AttachmentsAddedTriggerId, event.payload, event.request);
+    // We want comment attachments to always be used with the `comment` type,
+    // even for legacy `user` types
+    const enhancedAttachmentType =
+      event.payload.attachmentType === 'user' ? 'comment' : event.payload.attachmentType;
+    void forward(
+      AttachmentsAddedTriggerId,
+      {
+        ...event.payload,
+        attachmentType: enhancedAttachmentType,
+      },
+      event.request
+    );
   });
 }

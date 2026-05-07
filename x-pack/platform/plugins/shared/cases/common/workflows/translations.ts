@@ -119,14 +119,14 @@ export const ADD_COMMENT_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.
 export const ADD_COMMENT_STEP_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowSteps.addComment.description',
   {
-    defaultMessage: 'Adds a user comment to a case',
+    defaultMessage: 'Adds a comment to a case',
   }
 );
 
 export const ADD_COMMENT_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.addComment.documentation.details',
   {
-    defaultMessage: 'This step appends a new user comment to the selected case.',
+    defaultMessage: 'This step appends a new comment to the selected case.',
   }
 );
 
@@ -508,7 +508,7 @@ export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION =
 export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowTriggers.attachmentsAdded.eventSchema.attachmentType',
   {
-    defaultMessage: 'The type of the attachments that were added (e.g. "user", "alert").',
+    defaultMessage: 'The type of the attachments that were added (e.g. "comment", "alert").',
   }
 );
 

@@ -29,7 +29,7 @@ export const attachmentsAddedTriggerPublicDefinition: PublicTriggerDefinition = 
   documentation: {
     details: i18n.translate('xpack.cases.workflowTriggers.attachmentsAdded.documentation.details', {
       defaultMessage:
-        'Emitted after attachments are added to a case, once per attachment type involved. The payload includes event.caseId, event.owner, event.attachmentIds (all IDs added in that operation for this type), and event.attachmentType (e.g. "user", "alert"). Use KQL on event.* for trigger conditions.',
+        'Emitted after attachments are added to a case, once per attachment type involved. The payload includes event.caseId, event.owner, event.attachmentIds (all IDs added in that operation for this type), and event.attachmentType (e.g. "comment", "alert"). Use KQL on event.* for trigger conditions.',
     }),
     examples: [
       i18n.translate(
@@ -55,7 +55,7 @@ triggers:
 triggers:
   - type: {triggerId}
     on:
-      condition: 'event.attachmentType: "user"'
+      condition: 'event.attachmentType: "comment"'
 \`\`\``,
           values: {
             triggerId: AttachmentsAddedTriggerId,
