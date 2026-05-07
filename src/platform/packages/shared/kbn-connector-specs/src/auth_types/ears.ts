@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import { isConnectorAuthorizationError } from '../errors/connector_authorization_error';
@@ -17,12 +17,14 @@ import * as i18n from './translations';
 export const EARS_AUTH_ID = 'ears';
 export const EARS_PROVIDERS = ['google', 'microsoft', 'slack'] as const;
 
-const authSchema = z
-  .object({
-    provider: z.enum(EARS_PROVIDERS).meta({ hidden: true }),
-    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
-  })
-  .meta({ label: i18n.EARS_LABEL });
+const authSchema = lazySchema(() =>
+  z
+    .object({
+      provider: z.enum(EARS_PROVIDERS).meta({ hidden: true }),
+      scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
+    })
+    .meta({ label: i18n.EARS_LABEL })
+);
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 
