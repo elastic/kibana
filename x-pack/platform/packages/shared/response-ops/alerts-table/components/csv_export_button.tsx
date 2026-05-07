@@ -41,6 +41,7 @@ export const CsvExportButton: React.FC = () => {
     capabilities.reportingLegacy?.generateReport === true;
 
   const handleExport = useCallback(async () => {
+    if (!rendering) return;
     setIsExporting(true);
     try {
       const indexPattern = (indexNames ?? []).join(',');
@@ -154,7 +155,7 @@ export const CsvExportButton: React.FC = () => {
     await handleExport();
   }, [handleExport]);
 
-  if (!hasCsvReportingCapability) {
+  if (!rendering || !hasCsvReportingCapability) {
     return null;
   }
 

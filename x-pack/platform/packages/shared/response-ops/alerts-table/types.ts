@@ -424,7 +424,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     data: DataPublicPluginStart;
     http: HttpStart;
     notifications: NotificationsStart;
-    rendering: RenderingService;
+    rendering?: RenderingService;
     fieldFormats: FieldFormatsStart;
     application: ApplicationStart;
     licensing: LicensingPluginStart;
