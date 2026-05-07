@@ -90,6 +90,7 @@ describe('registerTracingExporter', () => {
       send_to_self: false,
       exporters: [],
       scheduledDelay: 1000,
+      opik_distributed_tracing: false,
     };
 
     const result = await registerTracingExporter({
@@ -113,6 +114,7 @@ describe('registerTracingExporter', () => {
         },
       ],
       scheduledDelay: 750,
+      opik_distributed_tracing: false,
     };
 
     await registerTracingExporter({
@@ -134,6 +136,7 @@ describe('registerTracingExporter', () => {
       send_to_self: true,
       exporters: [],
       scheduledDelay: 500,
+      opik_distributed_tracing: false,
     };
 
     await registerTracingExporter({
@@ -154,6 +157,7 @@ describe('registerTracingExporter', () => {
       send_to_self: true,
       exporters: [],
       scheduledDelay: 250,
+      opik_distributed_tracing: false,
     };
 
     await registerTracingExporter({
@@ -174,6 +178,7 @@ describe('registerTracingExporter', () => {
       send_to_self: true,
       exporters: [],
       scheduledDelay: 100,
+      opik_distributed_tracing: false,
     };
 
     await registerTracingExporter({
@@ -196,6 +201,7 @@ describe('registerTracingExporter', () => {
       send_to_self: true,
       exporters: [],
       scheduledDelay: 100,
+      opik_distributed_tracing: false,
     };
 
     await registerTracingExporter({ core: coreStart, tracingConfig, logger });
@@ -219,6 +225,7 @@ describe('registerTracingExporter', () => {
       send_to_self: true,
       exporters: [],
       scheduledDelay: 100,
+      opik_distributed_tracing: false,
     };
 
     await registerTracingExporter({ core: coreStart, tracingConfig, logger });

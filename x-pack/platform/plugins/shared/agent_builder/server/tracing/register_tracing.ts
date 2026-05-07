@@ -15,6 +15,7 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { LRUCache } from 'lru-cache';
 import type { AgentBuilderConfig } from '../config';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
+import { OpikDistributedTracingSpanProcessor } from './opik_distributed_tracing';
 
 const SETTING_CACHE_TTL_MS = 30_000;
 
@@ -92,14 +93,21 @@ export const registerTracingExporter = async ({
 
   const isEnabled = await createCachedIsEnabled(core, logger);
 
-  const tearDowns = exporters.map((exporter) => {
-    const processor = new AgentBuilderSpanProcessor({
-      exporter,
-      scheduledDelayMillis: tracingConfig.scheduledDelay,
-      isEnabled,
-    });
-    return LateBindingSpanProcessor.register(processor);
-  });
+  // OpikDistributedTracingSpanProcessor must be registered before AgentBuilderSpanProcessor
+  // so that opik.* attributes are set on spans at onStart before the exporter reads them at onEnd.
+  const tearDowns = [
+    ...(tracingConfig.opik_distributed_tracing
+      ? [LateBindingSpanProcessor.register(new OpikDistributedTracingSpanProcessor())]
+      : []),
+    ...exporters.map((exporter) => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter,
+        scheduledDelayMillis: tracingConfig.scheduledDelay,
+        isEnabled,
+      });
+      return LateBindingSpanProcessor.register(processor);
+    }),
+  ];
 
   return async () => {
     await Promise.all(tearDowns.map((teardown) => teardown()));
