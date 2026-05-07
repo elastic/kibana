@@ -240,17 +240,16 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
 
   apiTest(
     'should use pending_count threshold before transitioning to active',
-    async ({ apiServices }) => {
-      await apiServices.alertingV2.sourceIndex.indexDocs({
+    async ({ apiServices, esClient }) => {
+      await esClient.index({
         index: SOURCE_INDEX,
-        docs: [
-          {
-            '@timestamp': new Date().toISOString(),
-            'host.name': 'host-threshold-1',
-            'http.response.status_code': 500,
-            value: 1,
-          },
-        ],
+        document: {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-threshold-1',
+          'http.response.status_code': 500,
+          value: 1,
+        },
+        refresh: true,
       });
 
       // pending_count=2: nextCount = currentStatusCount + 1 >= pending_count.
@@ -270,14 +269,6 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 2 },
         })
-      );
-
-      await apiTest.step(
-        'first execution stays pending (statusCount=1, nextCount=1 < 2)',
-        async () => {
-          const events = await waitForAlertEvents(esClient, rule.id, 1);
-          expect(events[0].episode.status).toBe('pending');
-        }
       );
 
       // First execution: pending (statusCount=1, nextCount=1 < 2)
