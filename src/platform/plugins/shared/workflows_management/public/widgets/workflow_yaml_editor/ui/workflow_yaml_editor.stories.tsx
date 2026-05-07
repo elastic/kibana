@@ -11,7 +11,7 @@ import type { Decorator, StoryContext, StoryObj } from '@storybook/react';
 import React, { useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';

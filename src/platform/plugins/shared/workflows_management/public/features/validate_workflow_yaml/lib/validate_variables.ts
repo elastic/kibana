@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 import type { Document } from 'yaml';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';

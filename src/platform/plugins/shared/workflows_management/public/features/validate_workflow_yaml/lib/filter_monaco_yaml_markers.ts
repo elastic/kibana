@@ -9,7 +9,7 @@
 
 import type YAML from 'yaml';
 import { isScalar } from 'yaml';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { isDynamicValue, isLiquidTagValue, isVariableValue } from '@kbn/workflows-yaml';
 import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
 

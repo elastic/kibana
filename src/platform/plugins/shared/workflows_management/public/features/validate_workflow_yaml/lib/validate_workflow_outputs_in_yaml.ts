@@ -9,7 +9,7 @@
 
 import { isMap, isPair, isScalar } from 'yaml';
 import type { Document, Node, YAMLMap } from 'yaml';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import {
   type NormalizableFieldSchema,
   normalizeFieldsToJsonSchema,

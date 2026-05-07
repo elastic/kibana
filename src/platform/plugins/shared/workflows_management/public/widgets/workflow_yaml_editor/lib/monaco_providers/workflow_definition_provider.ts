@@ -8,7 +8,7 @@
  */
 
 import YAML from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import type { WorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { TemplateExpressionInfo } from '../template_expression/parse_template_at_position';
 import { parseTemplateAtPosition } from '../template_expression/parse_template_at_position';

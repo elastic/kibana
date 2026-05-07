@@ -10,7 +10,7 @@
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import chroma from 'chroma-js';
 import { useEffect } from 'react';
-import { CODE_EDITOR_DEFAULT_THEME_ID, defaultThemesResolvers, monaco } from '@kbn/monaco';
+import { CODE_EDITOR_DEFAULT_THEME_ID, defaultThemesResolvers, monaco } from '@kbn/code-editor';
 
 export const WORKFLOWS_MONACO_EDITOR_THEME = 'workflows-theme';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 
 /**
  * Creates a mock Monaco editor model backed by a real string value.
@@ -77,19 +77,19 @@ export const createMockMonacoEditor = (value: string) => {
 };
 
 /**
- * A mock `@kbn/monaco` module to be used with `jest.mock('@kbn/monaco', () => mockMonacoModule)`.
+ * A mock `@kbn/monaco` module to be used with `jest.mock('@kbn/code-editor', () => mockMonacoModule)`.
  * Stubs the `Range` constructor so tests do not need the real Monaco environment.
  *
  * Usage in test files:
  * ```ts
  * import { mockMonacoModule } from '../../shared/test_utils';
- * jest.mock('@kbn/monaco', () => mockMonacoModule);
+ * jest.mock('@kbn/code-editor', () => mockMonacoModule);
  * ```
  */
 export const mockMonacoModule = {
-  ...jest.requireActual('@kbn/monaco'),
+  ...jest.requireActual('@kbn/code-editor'),
   monaco: {
-    ...jest.requireActual<typeof import('@kbn/monaco')>('@kbn/monaco').monaco,
+    ...jest.requireActual<typeof import('@kbn/code-editor')>('@kbn/code-editor').monaco,
     Range: jest.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
       startLineNumber: startLine,
       startColumn: startCol,

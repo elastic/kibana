@@ -9,9 +9,9 @@
 
 import type { Document } from 'yaml';
 import { isScalar } from 'yaml';
+import { monaco } from '@kbn/code-editor';
 import type { QuerySuggestion } from '@kbn/kql/public';
 import { QuerySuggestionTypes } from '@kbn/kql/public';
-import { monaco } from '@kbn/monaco';
 import { mergeTriggerEventSchemaValueSuggestions } from './event_schema_kql_value_suggestions';
 import { getOrCreateStubDataViewForTriggerEventSchema } from './event_schema_to_stub_data_view';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';

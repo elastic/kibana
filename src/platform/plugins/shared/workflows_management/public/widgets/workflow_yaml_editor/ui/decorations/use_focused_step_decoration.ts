@@ -11,7 +11,7 @@ import { transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css as cssClassName } from '@emotion/css';
 import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { selectEditorFocusedStepInfo } from '../../../../entities/workflows/store';
 import { FOCUSED_STEP_DECORATION_INSET_PX } from '../../styles/constants';
 

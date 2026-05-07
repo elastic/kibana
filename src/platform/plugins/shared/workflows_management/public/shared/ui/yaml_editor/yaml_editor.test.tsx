@@ -26,14 +26,14 @@ jest.mock('./yaml_language_service', () => {
   return {
     yamlLanguageService: {
       initialize: jest.fn().mockImplementation(async () => {
-        const { configureMonacoYamlSchema } = jest.requireMock('@kbn/monaco');
+        const { configureMonacoYamlSchema } = jest.requireMock('@kbn/code-editor');
         mockState.instance = await configureMonacoYamlSchema();
         return mockState.instance;
       }),
       update: jest.fn().mockImplementation(async (schemas) => {
         if (!mockState.instance) {
           // Initialize if not already done
-          const { configureMonacoYamlSchema } = jest.requireMock('@kbn/monaco');
+          const { configureMonacoYamlSchema } = jest.requireMock('@kbn/code-editor');
           // eslint-disable-next-line require-atomic-updates
           mockState.instance = await configureMonacoYamlSchema(schemas);
           // @ts-expect-error - mockState.instance is not typed
@@ -120,7 +120,7 @@ jest.mock('lodash', () => ({
 }));
 
 // Mock the configureMonacoYamlSchema function
-jest.mock('@kbn/monaco', () => ({
+jest.mock('@kbn/code-editor', () => ({
   configureMonacoYamlSchema: jest.fn(() =>
     Promise.resolve({
       dispose: mockDispose,
@@ -182,7 +182,7 @@ describe('YamlEditor', () => {
       const onChange = jest.fn();
 
       // Mock configureMonacoYamlSchema to never resolve
-      const monaco = jest.requireMock('@kbn/monaco');
+      const monaco = jest.requireMock('@kbn/code-editor');
       (monaco.configureMonacoYamlSchema as jest.Mock).mockReturnValue(new Promise(() => {}));
 
       // Render the component
@@ -287,7 +287,9 @@ describe('YamlEditor', () => {
 
       // Both should use same singleton
       expect(yamlLanguageService.getInstance()).toBe(firstSingleton);
-      expect(jest.requireMock('@kbn/monaco').configureMonacoYamlSchema).toHaveBeenCalledTimes(1);
+      expect(jest.requireMock('@kbn/code-editor').configureMonacoYamlSchema).toHaveBeenCalledTimes(
+        1
+      );
 
       // Unmount first component - schemas are cleared but singleton persists
       unmount1();
@@ -358,7 +360,7 @@ describe('YamlEditor', () => {
 
       // Clear mocks to ensure clean count
       jest.clearAllMocks();
-      const monaco = jest.requireMock('@kbn/monaco');
+      const monaco = jest.requireMock('@kbn/code-editor');
 
       // Render first instance
       const { unmount: unmount1 } = render(

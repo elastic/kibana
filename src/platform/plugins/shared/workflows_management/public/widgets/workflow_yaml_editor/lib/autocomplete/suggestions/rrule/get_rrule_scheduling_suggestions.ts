@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { generateRRuleTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
 
 /**

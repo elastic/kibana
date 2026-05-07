@@ -10,7 +10,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type YAML from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { getPathAtOffset } from '../../../../common/lib/yaml';
 
 export interface StepInfo {

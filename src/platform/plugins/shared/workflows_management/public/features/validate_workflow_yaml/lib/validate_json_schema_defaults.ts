@@ -10,7 +10,7 @@
 import type { JSONSchema7 } from 'json-schema';
 import type { Document } from 'yaml';
 import { isPair, isScalar, visit } from 'yaml';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import { normalizeFieldsToJsonSchema, resolveRef } from '@kbn/workflows/spec/lib/field_conversion';

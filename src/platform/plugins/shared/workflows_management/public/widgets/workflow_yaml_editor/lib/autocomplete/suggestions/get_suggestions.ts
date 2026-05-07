@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { LoopStepTypes } from '@kbn/workflows';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';

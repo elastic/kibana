@@ -11,7 +11,7 @@ import { useEffect, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar, parseDocument } from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { isTriggerType } from '@kbn/workflows';
 import { getTriggerNodesWithType } from '../../../../../common/lib/yaml';
 import { triggerSchemas } from '../../../../trigger_schemas';

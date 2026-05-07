@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { UNIFIED_HOVER_PROVIDER_ID } from '../monaco_providers/unified_hover_provider';
 
 const yamlHoverProviders: monaco.languages.HoverProvider[] = [];

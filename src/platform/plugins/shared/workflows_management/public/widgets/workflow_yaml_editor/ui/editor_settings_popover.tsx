@@ -19,8 +19,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
+import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import type { monaco } from '@kbn/monaco';
 
 interface EditorSettingsPopoverProps {
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;

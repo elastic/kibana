@@ -11,7 +11,7 @@ import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import type { Document, Pair, Scalar, YAMLMap } from 'yaml';
 import { isMap, isPair, isScalar } from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { getStepNodesWithType } from '../../../../../common/lib/yaml/get_step_nodes_with_type';
 import { selectWorkflows } from '../../../../entities/workflows/store/workflow_detail/selectors';
 import { getMonacoRangeFromYamlNode } from '../../lib/utils';

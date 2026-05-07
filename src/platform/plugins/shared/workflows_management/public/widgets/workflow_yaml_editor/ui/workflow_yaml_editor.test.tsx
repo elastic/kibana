@@ -9,9 +9,9 @@
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
-import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
@@ -215,7 +215,7 @@ jest.mock('./hooks/use_agent_builder_integration', () => ({
   })),
 }));
 
-jest.mock('@kbn/monaco', () => ({
+jest.mock('@kbn/code-editor', () => ({
   monaco: {
     editor: {
       setModelMarkers: jest.fn(),

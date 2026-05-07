@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { collectAllVariables } from './collect_all_variables';

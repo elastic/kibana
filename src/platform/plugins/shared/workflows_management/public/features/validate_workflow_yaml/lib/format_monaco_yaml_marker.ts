@@ -8,7 +8,7 @@
  */
 
 import type YAML from 'yaml';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { SCHEDULED_INTERVAL_ERROR, SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
 import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
 import { enrichErrorMessage } from '@kbn/workflows-yaml';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { stepSchemas } from '../../../../../common/step_schemas';

@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment-timezone';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 
 const TIMEZONE_NAMES_SORTED = moment.tz.names().sort();
 

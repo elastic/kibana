@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
 import type { ConnectorInstance, ConnectorTypeInfo } from '@kbn/workflows';
 import type { LineColumnPosition } from '../../../../../../entities/workflows/store';
 import {

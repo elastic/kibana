@@ -11,8 +11,8 @@
 
 import { useEffect, useRef } from 'react';
 import type { Document, Node } from 'yaml';
+import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
 import { getTriggerNodes } from '../../../../../common/lib/yaml';
 import { getMonacoRangeFromYamlNode } from '../../lib/utils';
 
