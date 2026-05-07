@@ -13,12 +13,14 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import React, { useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { debounceTime } from 'rxjs';
+import { EMPTY, debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { DashboardApi } from '..';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
+import { useAllowEditingManagedDashboards } from './hooks/use_allow_editing_managed_dashboards';
+import { ManagedEditWarning } from './managed_edit_warning/managed_edit_warning';
 import {
   coreServices,
   dataService,
@@ -180,6 +182,15 @@ export function DashboardApp({
 
   const locator = useMemo(() => shareService?.url.locators.get(DASHBOARD_APP_LOCATOR), []);
 
+  // Show the managed-dashboard edit warning when the user is actively editing
+  // a managed dashboard via the `dashboard:allowEditingManagedDashboards`
+  // advanced setting. The setting is `requiresPageReload`, so reading it once
+  // here is fine.
+  const allowEditingManagedDashboards = useAllowEditingManagedDashboards();
+  const viewMode = useObservable(dashboardApi?.viewMode$ ?? EMPTY, undefined);
+  const showManagedEditWarning =
+    allowEditingManagedDashboards && viewMode === 'edit' && Boolean(dashboardApi?.isManaged);
+
   return showNoDataPage ? (
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
   ) : (
@@ -198,6 +209,9 @@ export function DashboardApp({
       )}
 
       {getLegacyConflictWarning?.()}
+
+      {showManagedEditWarning && <ManagedEditWarning />}
+
       <DashboardRenderer
         key={regenerateId}
         locator={locator}

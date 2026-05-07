@@ -31,4 +31,18 @@ export const getUISettings = (): Record<string, UiSettingsParams<boolean>> => ({
     category: [SETTING_CATEGORY],
     requiresPageReload: true,
   },
+  [UI_SETTINGS.ALLOW_EDITING_MANAGED_DASHBOARDS]: {
+    name: i18n.translate('dashboard.allowEditingManagedDashboards.name', {
+      defaultMessage: 'Allow editing managed dashboards',
+    }),
+    description: i18n.translate('dashboard.allowEditingManagedDashboards.description', {
+      defaultMessage:
+        'When enabled, managed dashboards (installed by Fleet packages, integrations, or solutions) can be edited in place. Saved changes may be overwritten when the source package is upgraded. Technical preview.',
+    }),
+    value: false,
+    type: 'boolean',
+    schema: schema.boolean(),
+    category: [SETTING_CATEGORY],
+    requiresPageReload: true,
+  },
 });

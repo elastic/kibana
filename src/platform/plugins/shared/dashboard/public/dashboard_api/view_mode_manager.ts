@@ -11,9 +11,11 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import { UI_SETTINGS } from '../../common/constants';
 import type { DashboardUser } from './types';
 import { getAccessControlClient } from '../services/access_control_service';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
+import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export function initializeViewModeManager({
@@ -31,6 +33,14 @@ export function initializeViewModeManager({
   createdBy?: string;
   user?: DashboardUser;
 }) {
+  // The `dashboard:allowEditingManagedDashboards` advanced setting flips the
+  // managed-dashboard read-only gate off. The setting is `requiresPageReload`,
+  // so reading it once at API construction time is fine.
+  const allowEditingManagedDashboards = coreServices.uiSettings.get<boolean>(
+    UI_SETTINGS.ALLOW_EDITING_MANAGED_DASHBOARDS,
+    false
+  );
+  const isManagedAndLocked = isManaged && !allowEditingManagedDashboards;
   const dashboardBackupService = getDashboardBackupService();
   const accessControlClient = getAccessControlClient();
 
@@ -47,7 +57,11 @@ export function initializeViewModeManager({
   const canUserEditDashboard = isDashboardInEditAccessMode || canUserManageAccessControl;
 
   function getInitialViewMode() {
-    if (isManaged || !getDashboardCapabilities().showWriteControls || !canUserEditDashboard) {
+    if (
+      isManagedAndLocked ||
+      !getDashboardCapabilities().showWriteControls ||
+      !canUserEditDashboard
+    ) {
       return 'view';
     }
 
@@ -64,8 +78,10 @@ export function initializeViewModeManager({
   const viewMode$ = new BehaviorSubject<ViewMode>(getInitialViewMode());
 
   function setViewMode(viewMode: ViewMode) {
-    // block the Dashboard from entering edit mode if this Dashboard is managed.
-    if (isManaged && viewMode?.toLowerCase() === 'edit') {
+    // Block the Dashboard from entering edit mode if this Dashboard is managed,
+    // unless the `dashboard:allowEditingManagedDashboards` advanced setting is
+    // enabled (in which case the lock is bypassed).
+    if (isManagedAndLocked && viewMode?.toLowerCase() === 'edit') {
       return;
     }
     viewMode$.next(viewMode);

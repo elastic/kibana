@@ -43,6 +43,8 @@ import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializePauseFetchManager } from './pause_fetch_manager';
 import { initializeRelatedPanelsManager } from './related_panels_manager';
+import { UI_SETTINGS } from '../../common/constants';
+import { coreServices } from '../services/kibana_services';
 
 export function getDashboardApi({
   creationOptions,
@@ -256,7 +258,14 @@ export function getDashboardApi({
       return saveResult;
     },
     runQuickSave: async () => {
-      if (isManaged) return;
+      // The `dashboard:allowEditingManagedDashboards` advanced setting bypasses
+      // the managed-dashboard read-only gate so quick save can run while
+      // editing a managed dashboard.
+      const allowEditingManagedDashboards = coreServices.uiSettings.get<boolean>(
+        UI_SETTINGS.ALLOW_EDITING_MANAGED_DASHBOARDS,
+        false
+      );
+      if (isManaged && !allowEditingManagedDashboards) return;
       const dashboardState = getState();
       const previousDashboardId = savedObjectId$.value;
       const saveResult = await saveDashboard({

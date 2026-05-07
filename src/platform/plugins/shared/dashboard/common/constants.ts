@@ -35,4 +35,5 @@ export const DEFAULT_DASHBOARD_OPTIONS = {
 
 export const UI_SETTINGS = {
   ENABLE_LABS_UI: 'labs:dashboard:enable_ui',
+  ALLOW_EDITING_MANAGED_DASHBOARDS: 'dashboard:allowEditingManagedDashboards',
 };
