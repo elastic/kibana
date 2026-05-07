@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsFullModelVersion,
-  SavedObjectsModelDataBackfillChange,
-} from '@kbn/core-saved-objects-server';
+import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export const EntityStoreGlobalStateTypeName = 'entity-store-global-state';
 

@@ -266,8 +266,7 @@ describe('LogsExtractionClient', () => {
         dataViewsService: mockDataViewsService,
         engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
         globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-        ccsLogsExtractionClient:
-          mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
+        ccsLogsExtractionClient: mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
       });
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -1176,8 +1175,7 @@ describe('LogsExtractionClient', () => {
         dataViewsService: mockDataViewsService,
         engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
         globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-        ccsLogsExtractionClient:
-          mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
+        ccsLogsExtractionClient: mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
       });
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(

@@ -111,9 +111,7 @@ describe('LogExtractionInstallParams excludedIndexPatterns', () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      const additional = result.error.issues.find(
-        (i) => i.path[1] === 'additionalIndexPatterns'
-      );
+      const additional = result.error.issues.find((i) => i.path[1] === 'additionalIndexPatterns');
       const excluded = result.error.issues.find((i) => i.path[1] === 'excludedIndexPatterns');
       expect(additional).toBeDefined();
       expect(excluded).toBeDefined();
