@@ -11,14 +11,17 @@ import { DetectionClient } from './detection_client';
 import { detectionsDataStream, type StoredDetection, type detectionsMappings } from './data_stream';
 
 export class DetectionService {
-  async getClient({
+  getClient({
     esClient,
     space,
   }: {
     esClient: ElasticsearchClient;
     space: string;
-  }): Promise<DetectionClient> {
-    const dataStreamClient = DataStreamClient.create<typeof detectionsMappings, StoredDetection>({
+  }): DetectionClient {
+    const dataStreamClient = DataStreamClient.fromDefinition<
+      typeof detectionsMappings,
+      StoredDetection
+    >({
       dataStream: detectionsDataStream,
       elasticsearchClient: esClient,
     });

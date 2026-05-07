@@ -573,7 +573,7 @@ describe('Data streams initialize function', () => {
       ).toEqual({ type: 'keyword' });
     });
 
-    it('allows a DataStreamClient.create-built client to write through ES auto-creation', async () => {
+    it('allows a DataStreamClient.fromDefinition-built client to write through ES auto-creation', async () => {
       const esClient = esServer.getClient();
 
       await DataStreamClient.initializeTemplate({
@@ -585,7 +585,7 @@ describe('Data streams initialize function', () => {
       // Data stream still does not exist after template-only setup.
       await expect(esClient.indices.getDataStream({ name: testDataStream.name })).rejects.toThrow();
 
-      const client = DataStreamClient.create<typeof myTestDocMappings, MyTestDoc>({
+      const client = DataStreamClient.fromDefinition<typeof myTestDocMappings, MyTestDoc>({
         dataStream: testDataStream,
         elasticsearchClient: esClient,
       });

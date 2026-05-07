@@ -15,14 +15,17 @@ import {
 } from './data_stream';
 
 export class DiscoveryService {
-  async getClient({
+  getClient({
     esClient,
     space,
   }: {
     esClient: ElasticsearchClient;
     space: string;
-  }): Promise<DiscoveryClient> {
-    const dataStreamClient = DataStreamClient.create<typeof discoveriesMappings, StoredDiscovery>({
+  }): DiscoveryClient {
+    const dataStreamClient = DataStreamClient.fromDefinition<
+      typeof discoveriesMappings,
+      StoredDiscovery
+    >({
       dataStream: discoveriesDataStream,
       elasticsearchClient: esClient,
     });

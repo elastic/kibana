@@ -11,14 +11,14 @@ import { EventClient } from './event_client';
 import { eventsDataStream, type StoredEvent, type eventsMappings } from './data_stream';
 
 export class EventService {
-  async getClient({
+  getClient({
     esClient,
     space,
   }: {
     esClient: ElasticsearchClient;
     space: string;
-  }): Promise<EventClient> {
-    const dataStreamClient = DataStreamClient.create<typeof eventsMappings, StoredEvent>({
+  }): EventClient {
+    const dataStreamClient = DataStreamClient.fromDefinition<typeof eventsMappings, StoredEvent>({
       dataStream: eventsDataStream,
       elasticsearchClient: esClient,
     });

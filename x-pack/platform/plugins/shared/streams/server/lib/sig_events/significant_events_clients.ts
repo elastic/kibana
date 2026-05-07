@@ -25,10 +25,10 @@ export interface SignificantEventsServices {
 }
 
 export interface SignificantEventsClients {
-  getDetectionClient: () => Promise<DetectionClient>;
-  getDiscoveryClient: () => Promise<DiscoveryClient>;
-  getEventClient: () => Promise<EventClient>;
-  getVerdictClient: () => Promise<VerdictClient>;
+  getDetectionClient: () => DetectionClient;
+  getDiscoveryClient: () => DiscoveryClient;
+  getEventClient: () => EventClient;
+  getVerdictClient: () => VerdictClient;
 }
 
 const SIGNIFICANT_EVENTS_DATA_STREAMS: AnyDataStreamDefinition[] = [
@@ -80,7 +80,7 @@ export async function initializeSignificantEventsTemplates({
           logger,
         });
       } catch (error) {
-        logger.info(
+        logger.error(
           `Failed to initialize template for ${definition.name}: ${
             error instanceof Error ? error.message : String(error)
           }`

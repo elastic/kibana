@@ -90,7 +90,7 @@ export class DataStreamClient<
    * mapping changes are applied to the current write index — same contract as
    * {@link DataStreamClient.initialize}, minus the data stream creation step.
    *
-   * Use {@link DataStreamClient.create} to obtain a client at runtime.
+   * Use {@link DataStreamClient.fromDefinition} to obtain a client at runtime.
    *
    * @remark Idempotent: subsequent calls with the same definition are no-ops; calls with a higher
    *         `version` will update the template and migrate mappings on the existing write index.
@@ -145,7 +145,7 @@ export class DataStreamClient<
    * If the data stream does not exist yet, Elasticsearch will auto-create it on the first
    * write through this client, provided a matching index template is in place.
    */
-  public static create<
+  public static fromDefinition<
     MappingsInDefinition extends MappingsDefinition,
     FullDocumentType extends GetFieldsOf<MappingsInDefinition> = GetFieldsOf<MappingsInDefinition>,
     SRM extends BaseSearchRuntimeMappings = never

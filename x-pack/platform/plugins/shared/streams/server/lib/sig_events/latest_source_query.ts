@@ -29,18 +29,16 @@ export const runLatestSourceEsqlQuery = async <T>({
 
   if (options.from !== undefined) {
     const fromIso = new Date(options.from).toISOString();
-    query = query.where`@timestamp > TO_DATETIME(${fromIso})`;
+    query = query.where`@timestamp >= TO_DATETIME(${fromIso})`;
   }
 
   if (options.to !== undefined) {
     const toIso = new Date(options.to).toISOString();
-    query = query.where`@timestamp < TO_DATETIME(${toIso})`;
+    query = query.where`@timestamp <= TO_DATETIME(${toIso})`;
   }
 
-  query = query
-    .pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(groupBy)}`
-    .where`@timestamp == latest_ts`
-    .keep('_source');
+  query = query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(groupBy)}`
+    .where`@timestamp == latest_ts`.keep('_source');
 
   const response = (await esClient.esql.query({
     query: query.print(),
