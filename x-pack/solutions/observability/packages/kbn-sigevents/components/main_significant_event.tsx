@@ -10,7 +10,6 @@ import {
   EuiBadge,
   EuiBadgeGroup,
   EuiButton,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -45,7 +44,6 @@ export interface MainSignificantEventProps {
   viewDetailsLabel?: string;
   onRemediate?: () => void;
   onViewDetails?: () => void;
-  onOpenMoreActions?: () => void;
 }
 
 const DEFAULT_SCORE = 90;
@@ -87,7 +85,6 @@ export function MainSignificantEvent(props: MainSignificantEventProps) {
     viewDetailsLabel,
     onRemediate,
     onViewDetails,
-    onOpenMoreActions,
   } = props;
 
   const { euiTheme } = useEuiTheme();
@@ -153,27 +150,9 @@ export function MainSignificantEvent(props: MainSignificantEventProps) {
                 </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      {lastUpdatedLabel}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      data-test-subj="sigeventsOverviewMainSignificantEventMoreActions"
-                      iconType="boxesVertical"
-                      color="text"
-                      display="empty"
-                      size="xs"
-                      onClick={onOpenMoreActions}
-                      aria-label={i18n.translate(
-                        'xpack.observability.sigeventsOverview.mainSignificantEvent.moreActionsAria',
-                        { defaultMessage: 'More actions' }
-                      )}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiText size="xs" color="subdued">
+                  {lastUpdatedLabel}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
 
@@ -222,7 +201,7 @@ export function MainSignificantEvent(props: MainSignificantEventProps) {
         <EuiText size="s">
           <p>{description}</p>
         </EuiText>
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="m" />
         <EuiFlexGroup responsive={false} wrap gutterSize="s">
           <EuiFlexItem grow={false}>
             <AiButton

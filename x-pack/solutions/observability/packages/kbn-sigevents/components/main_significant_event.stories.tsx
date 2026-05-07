@@ -27,7 +27,6 @@ export const Default: Story = {
     blastRadiusScore: 90,
     onRemediate: action('onRemediate'),
     onViewDetails: action('onViewDetails'),
-    onOpenMoreActions: action('onOpenMoreActions'),
   },
 };
 

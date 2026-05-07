@@ -18,7 +18,6 @@ describe('MainSignificantEvent', () => {
   const defaultProps = {
     onRemediate: jest.fn(),
     onViewDetails: jest.fn(),
-    onOpenMoreActions: jest.fn(),
   };
 
   beforeEach(() => {
@@ -83,11 +82,5 @@ describe('MainSignificantEvent', () => {
     renderWithIntl(<MainSignificantEvent {...defaultProps} />);
     fireEvent.click(screen.getByTestId('sigeventsOverviewMainSignificantEventViewDetailsButton'));
     expect(defaultProps.onViewDetails).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls onOpenMoreActions when the more actions button is clicked', () => {
-    renderWithIntl(<MainSignificantEvent {...defaultProps} />);
-    fireEvent.click(screen.getByTestId('sigeventsOverviewMainSignificantEventMoreActions'));
-    expect(defaultProps.onOpenMoreActions).toHaveBeenCalledTimes(1);
   });
 });
