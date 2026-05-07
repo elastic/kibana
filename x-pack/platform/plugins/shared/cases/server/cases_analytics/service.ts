@@ -48,17 +48,32 @@ interface StartArgs {
  *
  * Lifecycle:
  *  - `setup()`  — registers the reconciliation task definition. Idempotent.
- *  - `start()`  — bootstraps the indices, instantiates the writer, schedules the
- *                 reconciliation task, starts the template-fields sync service.
+ *  - `start()`  — instantiates the writer (synchronously, before any await),
+ *                 then bootstraps the indices, schedules the reconciliation task,
+ *                 starts the template-fields sync service.
  *
- * The single `getWriter()` accessor exposes the writer to the cases SO services
- * (via `CasesClientFactory`). When `config.enabled === false`, this returns the
- * NOOP_WRITER and `start()` is a no-op.
+ * `getWriter()` returns a stable proxy that delegates to the live writer. The proxy
+ * never changes identity after construction — the writer it forwards to does. This
+ * guarantees that `CasesClientFactory` (which captures the writer at plugin start
+ * time) always sees the latest writer, even though `start()` runs asynchronously.
+ *
+ * When `config.enabled === false`, `start()` is a no-op and the proxy keeps
+ * delegating to NOOP_WRITER.
  */
 export class CasesAnalyticsService {
   private readonly logger: Logger;
   private readonly config: CasesAnalyticsConfig;
+  /**
+   * The "live" writer reference. Mutated by `start()`. Never read directly by
+   * external callers — they go through the proxy returned by `getWriter()`.
+   */
   private writer: CasesAnalyticsWriterContract = NOOP_WRITER;
+  /**
+   * Stable proxy returned by `getWriter()`. Delegates every call to the current
+   * `this.writer` at call time, so callers don't have to worry about late writer
+   * initialization. Constructed once in the constructor; identity never changes.
+   */
+  private readonly writerProxy: CasesAnalyticsWriterContract;
   private templateFieldsSync?: CasesTemplateFieldsSyncService;
   /** Resolved on `start()`; reconciliation task uses this to look up dependencies. */
   private startResolvers?: {
@@ -69,6 +84,12 @@ export class CasesAnalyticsService {
   constructor({ logger, config }: { logger: Logger; config: CasesAnalyticsConfig }) {
     this.logger = logger.get('cases.analytics');
     this.config = config;
+    this.writerProxy = {
+      upsertCase: (so) => this.writer.upsertCase(so),
+      deleteCase: (id) => this.writer.deleteCase(id),
+      appendActivity: (so) => this.writer.appendActivity(so),
+      recomputeLifecycle: (id) => this.writer.recomputeLifecycle(id),
+    };
   }
 
   setup({ core, taskManager }: SetupArgs): void {
@@ -95,15 +116,21 @@ export class CasesAnalyticsService {
   }
 
   async start({ core, taskManager, isServerless }: StartArgs): Promise<void> {
-    if (!this.config.enabled) return;
+    if (!this.config.enabled) {
+      this.logger.info(
+        'cases-as-data: disabled (xpack.cases.analytics.enabled=false); skipping start'
+      );
+      return;
+    }
 
     const esClient = core.elasticsearch.client.asInternalUser;
 
-    // Bootstrap (best-effort). Failures here log but do not abort start — the
-    // reconciliation task is the durability backstop.
-    await ensureCasesDataIlmPolicy({ esClient, logger: this.logger });
-    await ensureCasesDataIndices({ esClient, logger: this.logger, isServerless });
-
+    // Construct the writer SYNCHRONOUSLY first — before any `await` — so that the
+    // proxy returned by `getWriter()` starts delegating to the real writer the
+    // instant `start()` begins executing. CasesClientFactory.initialize() is called
+    // from plugin.start() right after `void casesAnalyticsService.start()`, so any
+    // awaits before this assignment would mean SO writes between the void call and
+    // the first await still hit NOOP. Synchronous-first eliminates that window.
     const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
       CASE_SAVED_OBJECT,
       CASE_USER_ACTION_SAVED_OBJECT,
@@ -142,6 +169,14 @@ export class CasesAnalyticsService {
 
     this.writer = realWriter;
     this.startResolvers = { coreStart: core, realWriter };
+    this.logger.info('cases-as-data: writer wired up (proxy now delegating to real writer)');
+
+    // Bootstrap (best-effort). Failures here log but do not abort start — the
+    // reconciliation task is the durability backstop. These run AFTER the writer is
+    // wired so any case writes during bootstrap still go through the real writer
+    // (and may fail if the index doesn't exist yet, which reconciliation backfills).
+    await ensureCasesDataIlmPolicy({ esClient, logger: this.logger });
+    await ensureCasesDataIndices({ esClient, logger: this.logger, isServerless });
 
     this.templateFieldsSync = new CasesTemplateFieldsSyncService({ esClient, logger: this.logger });
     this.templateFieldsSync.start();
@@ -152,7 +187,7 @@ export class CasesAnalyticsService {
       intervalOverride: this.config.reconciliation.interval,
     });
 
-    this.logger.info('cases-as-data writer + reconciliation started');
+    this.logger.info('cases-as-data: indices bootstrapped, reconciliation scheduled');
   }
 
   stop(): void {
@@ -160,12 +195,12 @@ export class CasesAnalyticsService {
   }
 
   /**
-   * Returns the active writer. When the feature is disabled (config flag false), this
-   * returns a no-op writer so call sites need no `if` guard. The contract type is
-   * intentionally narrow (only the four hook methods) so the SO services can't reach
-   * for internals.
+   * Returns a stable proxy that always delegates to the current writer. The proxy
+   * is constructed once and its identity never changes, so callers (notably
+   * `CasesClientFactory`) can capture this reference at start time without missing
+   * the post-bootstrap writer transition.
    */
   getWriter(): CasesAnalyticsWriterContract {
-    return this.writer;
+    return this.writerProxy;
   }
 }

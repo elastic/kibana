@@ -786,7 +786,11 @@ export class CasesService {
 
       // Cases-as-data: fire-and-forget post-success analytics upsert. NOOP_WRITER
       // when the feature is disabled. Failures are swallowed inside the writer.
+      // Both surfaces are emitted on create so the case AND lifecycle indices
+      // have a row from day one — without this, the lifecycle index only fills
+      // on first patch, which wouldn't happen for short-lived dashboards.
       this.analyticsWriter.upsertCase(createdCase);
+      this.analyticsWriter.recomputeLifecycle(createdCase.id);
 
       const res = transformSavedObjectToExternalModel(createdCase);
       const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
@@ -836,8 +840,11 @@ export class CasesService {
           return theCase;
         }
 
-        // Cases-as-data: emit one analytics doc per successfully created case.
+        // Cases-as-data: emit case + lifecycle docs per successfully created case.
+        // See the rationale on `createCase` above — both surfaces want a row from
+        // day one even before any patch occurs.
         this.analyticsWriter.upsertCase(theCase);
+        this.analyticsWriter.recomputeLifecycle(theCase.id);
 
         const transformedCase = transformSavedObjectToExternalModel(theCase);
         const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(transformedCase.attributes);
@@ -910,6 +917,13 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
 
+      // Cases-as-data: keep the originals indexed by id so the post-success hook
+      // below can merge updated attributes with the original SO envelope (including
+      // `namespaces`) when re-emitting the analytics case doc.
+      const originalCasesById = new Map(
+        cases.map(({ caseId, originalCase }) => [caseId, originalCase])
+      );
+
       const bulkUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
         const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
           updatedAttributes
@@ -936,9 +950,20 @@ export class CasesService {
           return acc;
         }
 
-        // Cases-as-data: trigger lifecycle recompute for each successful row.
-        // Reconciliation backfills the case doc within its next tick — keeping the
-        // bulk path lean (no per-row case-doc construction) is intentional.
+        // Cases-as-data: re-emit the full case doc (merging originals with the
+        // partial update response) and recompute lifecycle. Both surfaces stay in
+        // step with bulk patches — without the upsert, the case index would only
+        // refresh on reconciliation's next tick (up to 30 minutes later).
+        const originalCase = originalCasesById.get(theCase.id);
+        if (originalCase) {
+          this.analyticsWriter.upsertCase({
+            ...originalCase,
+            attributes: {
+              ...originalCase.attributes,
+              ...(theCase.attributes ?? {}),
+            },
+          });
+        }
         this.analyticsWriter.recomputeLifecycle(theCase.id);
 
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));

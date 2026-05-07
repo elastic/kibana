@@ -71,6 +71,7 @@ export class CasesAnalyticsWriter {
    * post-success.
    */
   upsertCase(so: SavedObject<CasePersistedAttributes>): void {
+    this.logger.debug(`upsertCase id=${so.id} owner=${so.attributes?.owner}`);
     void this.fireAndForget('case', so.id, async () => {
       const doc = buildCaseDoc(so);
       await this.esClient.index({
@@ -159,10 +160,13 @@ export class CasesAnalyticsWriter {
       maxRetries: this.maxRetries,
       initialDelayMs: this.retryInitialDelayMs,
     }).catch((err: Error) => {
-      // The reconciliation task is the durability backstop. Log so operators see
-      // sustained issues, but do not propagate.
-      this.logger.warn(
-        `cases.analytics write failed [surface=${surface} id=${targetId}]: ${err.message}`
+      // The reconciliation task is the durability backstop. Logged at ERROR (not
+      // WARN) so failures surface in default operator dashboards — silent failures
+      // here look identical to "the feature isn't wired up at all" and waste
+      // debug time. The error is still NOT propagated to the API caller.
+      this.logger.error(
+        `cases.analytics write failed [surface=${surface} id=${targetId}]: ${err.message}`,
+        { error: err }
       );
     });
   }
