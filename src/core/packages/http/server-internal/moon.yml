@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/spaces-utils'
   - '@kbn/apm-utils'
+  - '@kbn/es-errors'
 tags:
   - shared-server
   - package
