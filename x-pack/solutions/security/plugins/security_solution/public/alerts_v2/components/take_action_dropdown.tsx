@@ -10,9 +10,13 @@ import {
   EuiButton,
   EuiContextMenu,
   EuiPopover,
+  EuiSelectable,
   EuiToolTip,
+  type EuiContextMenuPanelDescriptor,
   type EuiContextMenuPanelItemDescriptor,
+  type EuiSelectableOption,
 } from '@elastic/eui';
+import { DEFAULT_CLOSING_REASON_OPTIONS } from '@kbn/response-ops-detections-close-reason';
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import type { SecurityAlertEpisode } from '../hooks/use_fetch_security_episodes';
 import type { SecurityEpisodeAction } from '../actions/workflow_actions';
@@ -43,6 +47,32 @@ const NOT_IMPLEMENTED_ACTIONS: NotImplementedAction[] = [
   { label: i18n.ACTION_INVESTIGATE_IN_TIMELINE, icon: 'timeline' },
 ];
 
+const CloseReasonContent: React.FC<{
+  onSubmit: (reason?: string) => void;
+}> = ({ onSubmit }) => {
+  const [options, setOptions] = useState<EuiSelectableOption[]>(
+    DEFAULT_CLOSING_REASON_OPTIONS.map((opt) => ({ label: opt.label, key: opt.key }))
+  );
+
+  const selected = useMemo(() => options.find((o) => o.checked === 'on'), [options]);
+
+  return (
+    <>
+      <EuiSelectable options={options} onChange={setOptions} singleSelection="always">
+        {(list) => list}
+      </EuiSelectable>
+      <EuiButton
+        fullWidth
+        size="s"
+        disabled={!selected}
+        onClick={() => onSubmit(selected?.key ?? undefined)}
+      >
+        {i18n.ACTION_CLOSE_ALERT}
+      </EuiButton>
+    </>
+  );
+};
+
 interface TakeActionDropdownProps {
   episodeActions: EpisodeAction[];
   securityActions: SecurityEpisodeAction[];
@@ -62,18 +92,40 @@ export const TakeActionDropdown: React.FC<TakeActionDropdownProps> = ({
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
+  const closeAction = useMemo(
+    () => securityActions.find((a) => a.id === 'SECURITY_WORKFLOW_CLOSE'),
+    [securityActions]
+  );
+
+  const handleCloseWithReason = useCallback(
+    (reason?: string) => {
+      closePopover();
+      closeAction?.execute({ episodes: [episode], onSuccess: onActionSuccess, reason });
+    },
+    [closeAction, episode, closePopover, onActionSuccess]
+  );
+
   const securityItems: EuiContextMenuPanelItemDescriptor[] = useMemo(
     () =>
       securityActions
         .filter((action) => action.isCompatible({ episodes: [episode] }))
-        .map((action) => ({
-          name: action.displayName,
-          icon: action.iconType,
-          onClick: () => {
-            closePopover();
-            action.execute({ episodes: [episode], onSuccess: onActionSuccess });
-          },
-        })),
+        .map((action) => {
+          if (action.panel) {
+            return {
+              name: action.displayName,
+              icon: action.iconType,
+              panel: action.panel,
+            };
+          }
+          return {
+            name: action.displayName,
+            icon: action.iconType,
+            onClick: () => {
+              closePopover();
+              action.execute({ episodes: [episode], onSuccess: onActionSuccess });
+            },
+          };
+        }),
     [securityActions, episode, closePopover, onActionSuccess]
   );
 
@@ -112,14 +164,19 @@ export const TakeActionDropdown: React.FC<TakeActionDropdownProps> = ({
     []
   );
 
-  const panels = useMemo(
+  const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => [
       {
         id: 0,
         items: [...securityItems, ...v2Items, ...notImplementedItems],
       },
+      {
+        id: 'CLOSE_REASON_PANEL',
+        title: i18n.ACTION_CLOSE_REASON_TITLE,
+        content: <CloseReasonContent onSubmit={handleCloseWithReason} />,
+      },
     ],
-    [securityItems, v2Items, notImplementedItems]
+    [securityItems, v2Items, notImplementedItems, handleCloseWithReason]
   );
 
   const defaultButton = useMemo(

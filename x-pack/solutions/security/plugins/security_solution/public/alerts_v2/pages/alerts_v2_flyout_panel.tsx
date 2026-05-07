@@ -50,6 +50,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
 import { AlertEpisodeStatusBadge } from '@kbn/alerting-v2-episodes-ui/components/status/status_badge';
 import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
+import { getDefaultClosingReasonLabel } from '@kbn/response-ops-detections-close-reason';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
   getLastEpisodeStatus,
@@ -199,7 +200,13 @@ const getEventsLogDescription = (
 ): React.ReactNode => {
   const parts: React.ReactNode[] = [];
   if (entry.reason) {
-    parts.push(entry.reason);
+    const isCloseAction = entry.action_type === 'deactivate' || entry.action_type === 'activate';
+    if (isCloseAction) {
+      const label = getDefaultClosingReasonLabel(entry.reason);
+      parts.push(<>Reason: <strong>{label}</strong></>);
+    } else {
+      parts.push(entry.reason);
+    }
   }
   if (entry.action_type === 'snooze' && entry.expiry) {
     parts.push(

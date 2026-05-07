@@ -274,6 +274,16 @@ export const ACTION_NOT_IMPLEMENTED = i18n.translate(
   { defaultMessage: 'Not yet available for Alerts v2' }
 );
 
+export const ACTION_CLOSE_ALERT = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.action.closeAlert',
+  { defaultMessage: 'Close alert' }
+);
+
+export const ACTION_CLOSE_REASON_TITLE = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.action.closeReasonTitle',
+  { defaultMessage: 'Reason for closing' }
+);
+
 export const FLYOUT_RAW_EVENT = i18n.translate(
   'xpack.securitySolution.alertsV2.flyout.rawEvent',
   { defaultMessage: 'Show full event' }

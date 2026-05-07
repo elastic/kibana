@@ -17,8 +17,14 @@ export interface SecurityEpisodeAction {
   order: number;
   displayName: string;
   iconType: string;
+  /** When set, the menu item navigates to this sub-panel instead of executing directly */
+  panel?: string;
   isCompatible: (ctx: { episodes: SecurityAlertEpisode[] }) => boolean;
-  execute: (ctx: { episodes: SecurityAlertEpisode[]; onSuccess?: () => void }) => Promise<void>;
+  execute: (ctx: {
+    episodes: SecurityAlertEpisode[];
+    onSuccess?: () => void;
+    reason?: string;
+  }) => Promise<void>;
 }
 
 interface WorkflowActionDeps {
@@ -117,16 +123,17 @@ export const createWorkflowActions = (deps: WorkflowActionDeps): SecurityEpisode
       defaultMessage: 'Close',
     }),
     iconType: 'securitySignalResolved',
+    panel: 'CLOSE_REASON_PANEL',
     isCompatible: ({ episodes }) =>
       episodes.length > 0 &&
       episodes.some((ep) => ep.workflow_status === 'open' || ep.workflow_status === 'acknowledged'),
-    execute: async ({ episodes, onSuccess }) => {
+    execute: async ({ episodes, onSuccess, reason }) => {
       const items = episodes
         .filter((ep) => ep.workflow_status === 'open' || ep.workflow_status === 'acknowledged')
         .map((ep) => ({
           group_hash: ep.group_hash,
           action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE as const,
-          reason: 'Closed by user',
+          reason: reason ?? 'Closed by user',
         }));
       if (!items.length) return;
       try {
