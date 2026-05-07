@@ -7,10 +7,18 @@
 
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
-import type { EvalsExecutorClient, EvaluationDataset, Evaluator, Example } from '@kbn/evals';
+import type {
+  EvalsExecutorClient,
+  EvaluationDataset,
+  Evaluator,
+  Example,
+  GroundTruth,
+} from '@kbn/evals';
 import { createRagEvaluators } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AlertDocument, AlertsRagCategory, AlertsRagExample } from './dataset';
+import { createAlertsFaithfulnessEvaluator } from './evaluators/alerts_rag_faithfulness_evaluator';
+import { createAlertsCorrectnessEvaluator } from './evaluators/alerts_rag_correctness_evaluator';
 
 /**
  * Synthetic index label used for RAG evaluators (Precision@K / Recall@K / F1@K).
@@ -118,16 +126,22 @@ export const createEvaluateAlertsRagDataset = ({
 
     const k = resolveK();
 
-    const evaluators = createRagEvaluators<AlertsRagTaskOutput, AlertsRagDatasetExpected>({
+    const ragEvaluators = createRagEvaluators<AlertsRagTaskOutput, AlertsRagDatasetExpected>({
       k,
       extractRetrievedDocs: (output) =>
         extractAlertIds(output?.answer).map((id) => ({ index: EVAL_ALERTS_INDEX, id })),
-      extractGroundTruth: (expected) => {
+      extractGroundTruth: (expected): GroundTruth => {
         const ids = extractAlertIds(expected?.reference);
         if (ids.length === 0) return {};
         return { [EVAL_ALERTS_INDEX]: Object.fromEntries(ids.map((id) => [id, 1])) };
       },
     }) as Array<Evaluator<AlertsRagDatasetExample, AlertsRagTaskOutput>>;
+
+    const evaluators: Array<Evaluator<AlertsRagDatasetExample, AlertsRagTaskOutput>> = [
+      ...ragEvaluators,
+      createAlertsFaithfulnessEvaluator({ inferenceClient, log }),
+      createAlertsCorrectnessEvaluator({ inferenceClient, log }),
+    ];
 
     await executorClient.runExperiment(
       {
