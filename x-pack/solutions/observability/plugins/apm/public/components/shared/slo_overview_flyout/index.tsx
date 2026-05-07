@@ -328,6 +328,41 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const columns: Array<EuiBasicTableColumn<SLOWithSummaryResponse>> = useMemo(
     () => [
       {
+        field: 'id',
+        name: '',
+        width: '32px',
+        render: (_: unknown, sloItem: SLOWithSummaryResponse) => (
+          <EuiLink
+            data-test-subj="apmSloExpandLink"
+            onClick={() => handleSloClick(sloItem)}
+            aria-label={i18n.translate('xpack.apm.sloOverviewFlyout.expandIcon.ariaLabel', {
+              defaultMessage: 'Open SLO details',
+            })}
+          >
+            <EuiIcon type="maximize" color="subdued" />
+          </EuiLink>
+        ),
+      },
+      {
+        field: 'name',
+        name: i18n.translate('xpack.apm.sloOverviewFlyout.columns.name', {
+          defaultMessage: 'Name',
+        }),
+        truncateText: true,
+        render: (name: string, sloItem: SLOWithSummaryResponse) => (
+          <EuiToolTip position="top" content={name} anchorProps={{ css: { display: 'flex' } }}>
+            <EuiLink
+              data-test-subj="apmSloNameLink"
+              data-event-element="sloNameTable"
+              onClick={() => handleSloClick(sloItem)}
+              css={{ fontWeight: euiTheme.font.weight.regular }}
+            >
+              {name}
+            </EuiLink>
+          </EuiToolTip>
+        ),
+      },
+      {
         field: 'alerts',
         name: i18n.translate('xpack.apm.sloOverviewFlyout.columns.alerts', {
           defaultMessage: 'Alerts',
@@ -373,31 +408,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           <EuiBadge color={statusColors[status] || 'default'}>
             {status === 'NO_DATA' ? 'No data' : status.charAt(0) + status.slice(1).toLowerCase()}
           </EuiBadge>
-        ),
-      },
-      {
-        field: 'name',
-        name: i18n.translate('xpack.apm.sloOverviewFlyout.columns.name', {
-          defaultMessage: 'Name',
-        }),
-        truncateText: true,
-        render: (name: string, sloItem: SLOWithSummaryResponse) => (
-          <EuiToolTip position="top" content={name} anchorProps={{ css: { display: 'flex' } }}>
-            <EuiLink
-              data-test-subj="apmSloNameLink"
-              data-event-element="sloNameTable"
-              onClick={() => handleSloClick(sloItem)}
-              css={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: euiTheme.size.s,
-                fontWeight: euiTheme.font.weight.regular,
-              }}
-            >
-              <EuiIcon type="maximize" color="subdued" aria-hidden={true} />
-              {name}
-            </EuiLink>
-          </EuiToolTip>
         ),
       },
       {
