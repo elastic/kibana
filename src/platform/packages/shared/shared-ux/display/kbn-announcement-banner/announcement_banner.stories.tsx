@@ -54,17 +54,25 @@ type StoryArgs = Omit<AnnouncementBannerProps, 'actionProps' | 'onDismiss'> & {
 };
 
 const buildAnnouncementProps = (args: StoryArgs): AnnouncementBannerProps => {
-  const { media, primaryAction, secondaryAction, onDismiss, size, ...rest } = args;
+  const { media, primaryAction, secondaryAction, onDismiss, size, actionProps, ...rest } = args;
   return {
     ...rest,
     size,
     media: size === 's' ? <IllustrationSmall /> : <IllustrationMedium />,
     actionProps: {
       primary: primaryAction
-        ? { children: 'Primary action', onClick: action('primary onClick') }
+        ? {
+            children: 'Primary action',
+            onClick: action('primary onClick'),
+            ...actionProps?.primary,
+          }
         : undefined,
       secondary: secondaryAction
-        ? { children: 'Secondary action', onClick: action('secondary onClick') }
+        ? {
+            children: 'Secondary action',
+            onClick: action('secondary onClick'),
+            ...actionProps?.secondary,
+          }
         : undefined,
     },
     onDismiss: onDismiss ? action('onDismiss') : undefined,
@@ -116,6 +124,17 @@ const ContainerSizesRender = (args: StoryArgs) => (
 /** Renders the same announcement at three widths to demo container query zones. */
 export const ContainerSizes: Story = {
   render: (args) => <ContainerSizesRender {...args} />,
+};
+
+export const FilledPrimaryAction: Story = {
+  args: {
+    actionProps: {
+      primary: {
+        children: 'Primary action',
+        fill: true,
+      },
+    },
+  },
 };
 
 export const WithChildren: Story = {

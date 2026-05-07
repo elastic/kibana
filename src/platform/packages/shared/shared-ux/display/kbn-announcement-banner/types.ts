@@ -24,7 +24,7 @@ type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K>
  */
 export type AnnouncementBannerActionPrimaryProps = DistributiveOmit<
   ComponentProps<typeof EuiButton>,
-  'color' | 'size' | 'fill'
+  'color' | 'size'
 >;
 
 /**
