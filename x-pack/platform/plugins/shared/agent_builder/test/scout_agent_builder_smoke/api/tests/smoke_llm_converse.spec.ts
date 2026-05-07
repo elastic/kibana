@@ -26,8 +26,15 @@ const eisCcmKeyMissingReason = `${EIS_CCM_API_KEY_ENV} not set. For local dev: e
 
 const EXCLUDED_STATIC_CONNECTOR_IDS = new Set<string>(['bedrock-claude-sonnet-3-7']);
 
-/** Mirrors FTR `x-pack/platform/test/agent_builder/smoke_tests/tests/index.ts` (no try/catch). */
-const allStaticConnectors: AvailableConnectorWithId[] = getAvailableConnectors().filter(
+const safeGetAvailableConnectors = (): AvailableConnectorWithId[] => {
+  try {
+    return getAvailableConnectors();
+  } catch {
+    return [];
+  }
+};
+
+const allStaticConnectors: AvailableConnectorWithId[] = safeGetAvailableConnectors().filter(
   (c) => !EXCLUDED_STATIC_CONNECTOR_IDS.has(c.id)
 );
 const allEisModels: DiscoveredEisModel[] = getPreDiscoveredEisModelsForScout();
