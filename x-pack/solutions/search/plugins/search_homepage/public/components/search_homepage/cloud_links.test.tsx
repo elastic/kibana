@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { CloudLinks } from './cloud_links';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -28,6 +29,13 @@ const setCloudMock = (cloud: Record<string, unknown> | undefined) => {
   mockUseKibana.mockReturnValue({ services: { cloud } } as unknown as ReturnType<typeof useKibana>);
 };
 
+const renderCloudLinks = () =>
+  render(
+    <EuiThemeProvider>
+      <CloudLinks />
+    </EuiThemeProvider>
+  );
+
 describe('CloudLinks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,25 +43,25 @@ describe('CloudLinks', () => {
 
   it('renders nothing when cloud is undefined', () => {
     setCloudMock(undefined);
-    const { container } = render(<CloudLinks />);
+    const { container } = renderCloudLinks();
     expect(container).toBeEmptyDOMElement();
   });
 
   it('renders nothing when cloud is not enabled', async () => {
     setCloudMock(createCloudMock({ isCloudEnabled: false }));
-    const { container } = render(<CloudLinks />);
+    const { container } = renderCloudLinks();
     expect(container).toBeEmptyDOMElement();
   });
 
   it('renders nothing when baseUrl is missing', async () => {
     setCloudMock(createCloudMock({ baseUrl: undefined }));
-    const { container } = render(<CloudLinks />);
+    const { container } = renderCloudLinks();
     expect(container).toBeEmptyDOMElement();
   });
 
   it('renders cloud logo and all links when cloud is enabled', async () => {
     setCloudMock(createCloudMock());
-    const { getByTestId } = render(<CloudLinks />);
+    const { getByTestId } = renderCloudLinks();
 
     expect(getByTestId('searchHomepageCloudLink-home')).toBeInTheDocument();
     expect(getByTestId('searchHomepageCloudLink-elasticCloud')).toBeInTheDocument();
@@ -66,7 +74,7 @@ describe('CloudLinks', () => {
 
   it('uses URLs directly from cloud object and getPrivilegedUrls', async () => {
     setCloudMock(createCloudMock());
-    const { getByTestId } = render(<CloudLinks />);
+    const { getByTestId } = renderCloudLinks();
 
     expect(getByTestId('searchHomepageCloudLink-home')).toHaveAttribute(
       'href',
@@ -94,7 +102,7 @@ describe('CloudLinks', () => {
       getPrivilegedUrls: jest.fn().mockResolvedValue({}),
     });
     setCloudMock(mock);
-    const { queryByTestId } = render(<CloudLinks />);
+    const { queryByTestId } = renderCloudLinks();
 
     await waitFor(() => {
       expect(mock.getPrivilegedUrls).toHaveBeenCalled();
@@ -108,7 +116,7 @@ describe('CloudLinks', () => {
       getPrivilegedUrls: jest.fn().mockRejectedValue(new Error('forbidden')),
     });
     setCloudMock(mock);
-    const { queryByTestId } = render(<CloudLinks />);
+    const { queryByTestId } = renderCloudLinks();
 
     await waitFor(() => {
       expect(mock.getPrivilegedUrls).toHaveBeenCalled();
@@ -119,7 +127,7 @@ describe('CloudLinks', () => {
 
   it('opens links in a new tab', async () => {
     setCloudMock(createCloudMock());
-    const { getByTestId } = render(<CloudLinks />);
+    const { getByTestId } = renderCloudLinks();
 
     await waitFor(() => {
       expect(getByTestId('searchHomepageCloudLink-usage')).toBeInTheDocument();

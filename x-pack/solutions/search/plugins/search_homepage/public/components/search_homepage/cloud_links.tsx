@@ -7,10 +7,10 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
+import { CloudLinksPillStyle } from './cloud_links_styles';
 
 interface CloudLink {
   id: string;
@@ -22,7 +22,6 @@ export const CloudLinks = () => {
   const {
     services: { cloud },
   } = useKibana();
-  const { euiTheme } = useEuiTheme();
 
   const [billingUrl, setBillingUrl] = useState<string>('');
   useEffect(() => {
@@ -77,16 +76,7 @@ export const CloudLinks = () => {
   }
 
   return (
-    <EuiFlexGroup
-      gutterSize="m"
-      alignItems="center"
-      css={css`
-        background: ${euiTheme.colors.backgroundBasePrimary};
-        border-radius: ${euiTheme.size.m};
-        height: 24px;
-        padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-      `}
-    >
+    <EuiFlexGroup gutterSize="m" alignItems="center" css={CloudLinksPillStyle}>
       <EuiFlexItem grow={false}>
         <EuiLink
           href={cloud.baseUrl}

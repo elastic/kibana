@@ -7,8 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaVersionBadge } from '@kbn/search-shared-ui';
@@ -16,6 +15,7 @@ import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
 import { CloudLinks } from './cloud_links';
+import { VerticalSeparatorStyle } from './cloud_links_styles';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { LicenseBadge } from './license_badge';
 import { SearchHomepageBody } from './search_homepage_body';
@@ -27,7 +27,6 @@ export const SearchHomepagePage = () => {
   } = useKibana();
 
   const { user } = useAuthenticatedUser();
-  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     if (searchNavigation) {
@@ -76,12 +75,7 @@ export const SearchHomepagePage = () => {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <span
-                  css={css`
-                    border-left: ${euiTheme.border.thin};
-                    height: ${euiTheme.size.l};
-                  `}
-                />
+                <span css={VerticalSeparatorStyle} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <CloudLinks />
