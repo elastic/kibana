@@ -9,6 +9,7 @@ import type { CreateInventoryViewAttributes } from './apis/inventory_views/types
 
 export const DATE_WITH_HOSTS_DATA_FROM = '2023-03-28T18:20:00.000Z';
 export const DATE_WITH_HOSTS_DATA_TO = '2023-03-28T18:21:00.000Z';
+export const DATE_WITH_HOSTS_DATA_MIDPOINT = '2023-03-28T18:20:30.000Z';
 export const DATE_WITH_HOSTS_DATA = '03/28/2023 6:20:59 PM';
 export const DATE_WITH_HOSTS_DATA_TIMESTAMP = 1680027659000;
 
