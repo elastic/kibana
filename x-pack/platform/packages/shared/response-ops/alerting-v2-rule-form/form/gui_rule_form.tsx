@@ -21,6 +21,8 @@ export interface GuiRuleFormProps {
   onSubmit: (values: FormValues) => void;
   /** Whether to include the ES|QL query editor (default: true) */
   includeQueryEditor?: boolean;
+  /** Whether the form is editing an existing rule (disables immutable fields like kind) */
+  isEditing?: boolean;
 }
 
 /**
@@ -35,7 +37,11 @@ export interface GuiRuleFormProps {
  *
  * Requires a FormProvider context with FormValues type to be present in the component tree.
  */
-export const GuiRuleForm = ({ onSubmit, includeQueryEditor = true }: GuiRuleFormProps) => {
+export const GuiRuleForm = ({
+  onSubmit,
+  includeQueryEditor = true,
+  isEditing = false,
+}: GuiRuleFormProps) => {
   const { handleSubmit } = useFormContext<FormValues>();
 
   return (
@@ -46,7 +52,7 @@ export const GuiRuleForm = ({ onSubmit, includeQueryEditor = true }: GuiRuleForm
       <EuiSpacer size="m" />
       <RuleExecutionFieldGroup />
       <EuiSpacer size="m" />
-      <KindField />
+      <KindField disabled={isEditing} />
       <EuiSpacer size="m" />
       <AlertConditionsFieldGroup />
       <EuiSpacer size="m" />

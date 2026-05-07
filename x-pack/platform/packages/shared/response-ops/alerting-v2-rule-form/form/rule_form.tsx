@@ -170,7 +170,11 @@ const RuleFormContent = ({
           isSubmitting={isSubmitting}
         />
       ) : (
-        <GuiRuleForm onSubmit={onSubmit} includeQueryEditor={includeQueryEditor} />
+        <GuiRuleForm
+          onSubmit={onSubmit}
+          includeQueryEditor={includeQueryEditor}
+          isEditing={Boolean(ruleId)}
+        />
       )}
 
       {includeSubmission && (
