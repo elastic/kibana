@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isByReference } from '@kbn/as-code-shared-schemas';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import { extractReferences } from './references';
-import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
+import type { LinksByValueState, LinksEmbeddableState } from '../types';
 
 export function transformIn(state: LinksEmbeddableState) {
-  if ((state as LinksByReferenceState).ref_id) {
-    const { ref_id, ...rest } = state as LinksByReferenceState;
+  if (isByReference(state)) {
+    const { ref_id, ...rest } = state;
     return {
       state: rest,
       references: [

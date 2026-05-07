@@ -8,8 +8,9 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { isByReference } from '@kbn/as-code-shared-schemas';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common';
-import type { MarkdownByReferenceState, MarkdownEmbeddableState } from '../..';
+import type { MarkdownEmbeddableState } from '../..';
 import type { StoredMarkdownEmbeddableState } from '../types';
 
 export const MARKDOWN_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
@@ -20,10 +21,10 @@ export function getTransformIn() {
     references: SavedObjectReference[];
   } {
     // by ref
-    if ((state as MarkdownByReferenceState).ref_id) {
-      const { ref_id, ...rest } = state as MarkdownByReferenceState;
+    if (isByReference(state)) {
+      const { ref_id, ...rest } = state;
       return {
-        state: rest as StoredMarkdownEmbeddableState,
+        state: rest,
         references: [
           {
             name: MARKDOWN_SAVED_OBJECT_REF_NAME,

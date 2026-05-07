@@ -9,6 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { asCodeRefIdSchema } from '@kbn/as-code-shared-schemas';
 import {
   BY_REF_SCHEMA_META,
   BY_VALUE_SCHEMA_META,
@@ -22,16 +23,6 @@ const linksByValueStateSchema = schema.object({
   links: linksArraySchema,
 });
 
-// Links by-reference state schema (contains ref_id)
-const linksByReferenceStateSchema = schema.object({
-  ref_id: schema.string({
-    meta: {
-      title: 'Reference ID',
-      description: 'The unique identifier of the Links library item',
-    },
-  }),
-});
-
 // Links by-value embeddable schema (by-value state + titles)
 const linksByValueEmbeddableSchema = schema.allOf(
   [linksByValueStateSchema, serializedTitlesSchema],
@@ -41,12 +32,9 @@ const linksByValueEmbeddableSchema = schema.allOf(
 );
 
 // Links by-reference embeddable schema (by-reference state + titles)
-const linksByReferenceEmbeddableSchema = schema.allOf(
-  [linksByReferenceStateSchema, serializedTitlesSchema],
-  {
-    meta: BY_REF_SCHEMA_META,
-  }
-);
+const linksByReferenceEmbeddableSchema = schema.allOf([asCodeRefIdSchema, serializedTitlesSchema], {
+  meta: BY_REF_SCHEMA_META,
+});
 
 // Complete links embeddable schema (union of by-value and by-reference embeddables)
 export const linksEmbeddableSchema = schema.oneOf(
@@ -58,6 +46,6 @@ export const linksEmbeddableSchema = schema.oneOf(
   }
 );
 
-export type LinksByValueState = TypeOf<typeof linksByValueStateSchema>;
-export type LinksByReferenceState = TypeOf<typeof linksByReferenceStateSchema>;
+export type LinksByValueState = TypeOf<typeof linksByValueEmbeddableSchema>;
+export type LinksByReferenceState = TypeOf<typeof linksByReferenceEmbeddableSchema>;
 export type LinksEmbeddableState = TypeOf<typeof linksEmbeddableSchema>;

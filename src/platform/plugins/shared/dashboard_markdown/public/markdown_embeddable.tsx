@@ -23,11 +23,8 @@ import {
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type {
-  MarkdownEmbeddableState,
-  MarkdownByValueState,
-  MarkdownByReferenceState,
-} from '../server';
+import { isByReference } from '@kbn/as-code-shared-schemas';
+import type { MarkdownByValueState, MarkdownEmbeddableState } from '../server';
 import { APP_NAME, MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 import type { MarkdownEditorApi } from './types';
 import { resolveRelativeLinksPlugin } from './plugins/resolve_relative_links';
@@ -49,10 +46,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
 > = {
   type: MARKDOWN_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const libraryId = (initialState as MarkdownByReferenceState).ref_id;
-    const isByReference = libraryId !== undefined;
-    const initialLibraryState = isByReference
-      ? (await markdownClient.get(libraryId)).data
+    const isEmbeddableByReference = isByReference(initialState);
+    const initialLibraryState = isEmbeddableByReference
+      ? (await markdownClient.get(initialState.ref_id)).data
       : undefined;
 
     const titleManager = initializeTitleManager(initialState);
@@ -91,7 +87,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     };
 
     const serializeState = () =>
-      isByReference ? serializeByReference(libraryId) : serializeByValue();
+      isEmbeddableByReference ? serializeByReference(initialState.ref_id) : serializeByValue();
 
     const resetEditingState = () => {
       isEditing$.next(false);
@@ -114,8 +110,8 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       getComparators: () => {
         return {
           ...titleComparators,
-          content: isByReference ? 'skip' : 'referenceEquality',
-          settings: isByReference ? 'skip' : 'deepEquality',
+          content: isEmbeddableByReference ? 'skip' : 'referenceEquality',
+          settings: isEmbeddableByReference ? 'skip' : 'deepEquality',
           ref_id: 'skip',
         };
       },
@@ -123,9 +119,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         titleManager.reinitializeState(lastSaved);
         // There are no unsaved changes to reset for
         // by reference 'content' or 'settings' since they are saved on apply.
-        if (!isByReference) {
-          content$.next((initialState as MarkdownByValueState).content);
-          settings$.next((initialState as MarkdownByValueState).settings);
+        if (!isEmbeddableByReference) {
+          content$.next(initialState.content);
+          settings$.next(initialState.settings);
         }
       },
     });
@@ -171,8 +167,8 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       },
       getSerializedStateByValue: serializeByValue,
       getSerializedStateByReference: serializeByReference,
-      canLinkToLibrary: async () => !isByReference,
-      canUnlinkFromLibrary: async () => isByReference,
+      canLinkToLibrary: async () => !isEmbeddableByReference,
+      canUnlinkFromLibrary: async () => isEmbeddableByReference,
       checkForDuplicateTitle: async (
         newTitle: string,
         isTitleDuplicateConfirmed: boolean,
@@ -249,8 +245,8 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
               onSave={async (value: string): Promise<void> => {
                 resetEditingState();
                 content$.next(value);
-                if (libraryId) {
-                  await markdownClient.update(libraryId, {
+                if (isEmbeddableByReference) {
+                  await markdownClient.update(initialState.ref_id, {
                     content: value,
                     title:
                       titleManager.api.title$.getValue() ??
