@@ -9,21 +9,15 @@ import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-ag
 import type { Logger } from '@kbn/core/server';
 import type { ResolveVisualizationConfig } from './inline_visualization';
 import type { VisualizationFailure } from './utils';
-import type { OperationExecutionContext } from './operations/types';
 import {
   dashboardOperationSchema,
   executeOperationHandler,
+  prepareOperationExecution,
   type DashboardOperation,
 } from './operations/registry';
-import {
-  collectVisualizationCreationRequests,
-  resolveVisualizationCreationRequests,
-} from './operations/visualization_creation';
 
 export { dashboardOperationSchema };
 export type { DashboardOperation };
-export type { VisualizationPanelInput } from './operations/add_section';
-export type { CreateVisualizationPanelInput } from './operations/create_visualization_panels';
 
 interface ExecuteDashboardOperationsParams {
   dashboardData?: DashboardAttachmentData;
@@ -53,18 +47,14 @@ export const executeDashboardOperations = async ({
 }> => {
   let nextDashboardData = structuredClone(dashboardData ?? createEmptyDashboardData());
   const failures: VisualizationFailure[] = [];
-  const visualizationCreationRequests = collectVisualizationCreationRequests(operations);
-  const resolvedVisualizationCreationRequests = await resolveVisualizationCreationRequests({
-    requestsByOperationIndex: visualizationCreationRequests,
-    resolveVisualizationConfig,
-  });
-  const context: OperationExecutionContext = {
+
+  const context = await prepareOperationExecution({
+    operations,
     logger,
-    failures,
-    resolvedVisualizationCreationRequests,
     resolvePanelsFromAttachments,
     resolveVisualizationConfig,
-  };
+    failures,
+  });
 
   for (const [operationIndex, operation] of operations.entries()) {
     nextDashboardData = await executeOperationHandler({

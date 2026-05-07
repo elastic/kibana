@@ -17,6 +17,7 @@ import { removeSectionOperation } from './remove_section';
 import { setMetadataOperation } from './set_metadata';
 import type { OperationExecutionContext } from './types';
 import { updatePanelLayoutsOperation } from './update_panel_layouts';
+import { resolveVisualizationCreationRequests } from './visualization_creation';
 
 const operationDefinitions = [
   setMetadataOperation,
@@ -42,6 +43,35 @@ export type DashboardOperation = z.infer<typeof dashboardOperationSchema>;
 const operationDefinitionByType = new Map(
   operationDefinitions.map((definition) => [definition.schema.shape.operation.value, definition])
 );
+
+interface PrepareOperationExecutionParams {
+  operations: DashboardOperation[];
+  logger: OperationExecutionContext['logger'];
+  failures: OperationExecutionContext['failures'];
+  resolvePanelsFromAttachments: OperationExecutionContext['resolvePanelsFromAttachments'];
+  resolveVisualizationConfig?: OperationExecutionContext['resolveVisualizationConfig'];
+}
+
+export const prepareOperationExecution = async ({
+  operations,
+  logger,
+  failures,
+  resolvePanelsFromAttachments,
+  resolveVisualizationConfig,
+}: PrepareOperationExecutionParams): Promise<OperationExecutionContext> => {
+  const resolvedInlinePanelSources = await resolveVisualizationCreationRequests({
+    operations,
+    resolveVisualizationConfig,
+  });
+
+  return {
+    logger,
+    failures,
+    resolvedVisualizationCreationRequests: resolvedInlinePanelSources,
+    resolvePanelsFromAttachments,
+    resolveVisualizationConfig,
+  };
+};
 
 export const executeOperationHandler = async ({
   dashboardData,

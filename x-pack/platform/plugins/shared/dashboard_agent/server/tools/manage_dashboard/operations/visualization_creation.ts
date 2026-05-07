@@ -35,7 +35,7 @@ export interface ResolvedVisualizationCreationRequest {
  * Collect inline visualization creation work by operation index so it can be
  * resolved up front in parallel and then applied later in original operation order.
  */
-export const collectVisualizationCreationRequests = (
+const collectVisualizationCreationRequests = (
   operations: DashboardOperation[]
 ): Map<number, VisualizationCreationRequest[]> => {
   const requestsByOperationIndex = new Map<number, VisualizationCreationRequest[]>();
@@ -80,12 +80,14 @@ export const collectVisualizationCreationRequests = (
  * keeping results grouped by their source operation for ordered application later.
  */
 export const resolveVisualizationCreationRequests = async ({
-  requestsByOperationIndex,
+  operations,
   resolveVisualizationConfig,
 }: {
-  requestsByOperationIndex: Map<number, VisualizationCreationRequest[]>;
+  operations: DashboardOperation[];
   resolveVisualizationConfig?: ResolveVisualizationConfig;
 }): Promise<Map<number, ResolvedVisualizationCreationRequest[]>> => {
+  const requestsByOperationIndex = collectVisualizationCreationRequests(operations);
+
   if (requestsByOperationIndex.size === 0) {
     return new Map();
   }
