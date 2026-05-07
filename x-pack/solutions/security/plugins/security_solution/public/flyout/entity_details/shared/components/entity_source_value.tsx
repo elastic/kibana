@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import type { EuiTextProps } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { startCase } from 'lodash';
@@ -73,6 +74,10 @@ interface TruncatedBadgeListProps {
    * comma-joined list of hidden values.
    */
   overflowTooltipTitle?: string;
+  /**
+   * Optional text size to apply to the value text. Defaults to `s`.
+   */
+  textSize?: EuiTextProps['size'];
   'data-test-subj'?: string;
 }
 
@@ -94,6 +99,7 @@ export const TruncatedBadgeList = memo(
     maxVisible = 1,
     formatValue,
     overflowTooltipTitle,
+    textSize = 's',
     'data-test-subj': dataTestSubj,
   }: TruncatedBadgeListProps) => {
     const formattedValues = useMemo(
@@ -102,7 +108,7 @@ export const TruncatedBadgeList = memo(
     );
 
     if (formattedValues.length === 0) {
-      return <EuiText size="s">{getEmptyTagValue()}</EuiText>;
+      return <EuiText size={textSize}>{getEmptyTagValue()}</EuiText>;
     }
 
     const safeMaxVisible = Math.max(1, maxVisible);
@@ -116,19 +122,22 @@ export const TruncatedBadgeList = memo(
         gutterSize="xs"
         alignItems="center"
         responsive={false}
-        wrap
         data-test-subj={dataTestSubj}
+        css={{ width: '100%' }}
       >
         {visible.map((value) => (
-          <EuiFlexItem grow={false} key={value}>
-            <EuiText size="s">{value}</EuiText>
+          <EuiFlexItem grow={false} key={value} css={{ minWidth: 0 }}>
+            <EuiText size={textSize} className="eui-textTruncate">
+              {value}
+            </EuiText>
           </EuiFlexItem>
         ))}
         {hidden.length > 0 && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
             <EuiToolTip position="top" title={overflowTooltipTitle} content={hidden.join(', ')}>
               <EuiBadge
                 color="hollow"
+                tabIndex={0}
                 data-test-subj={overflowTestSubj}
                 aria-label={DEFAULT_OVERFLOW_ARIA_LABEL(hidden.length)}
               >
@@ -144,8 +153,9 @@ export const TruncatedBadgeList = memo(
 TruncatedBadgeList.displayName = 'TruncatedBadgeList';
 
 interface EntitySourceValueProps {
-  values: string[];
-  'data-test-subj'?: string;
+  values: TruncatedBadgeListProps['values'];
+  textSize?: TruncatedBadgeListProps['textSize'];
+  'data-test-subj'?: TruncatedBadgeListProps['data-test-subj'];
 }
 
 const DATA_SOURCE_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
@@ -163,12 +173,17 @@ const DATA_SOURCE_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
  * raw field value).
  */
 export const EntitySourceValue = memo(
-  ({ values, 'data-test-subj': dataTestSubj = 'entitySourceValue' }: EntitySourceValueProps) => (
+  ({
+    values,
+    'data-test-subj': dataTestSubj = 'entitySourceValue',
+    textSize,
+  }: EntitySourceValueProps) => (
     <TruncatedBadgeList
       values={values}
       formatValue={formatEntitySource}
       overflowTooltipTitle={DATA_SOURCE_OVERFLOW_TOOLTIP_TITLE}
       data-test-subj={dataTestSubj}
+      textSize={textSize}
     />
   )
 );

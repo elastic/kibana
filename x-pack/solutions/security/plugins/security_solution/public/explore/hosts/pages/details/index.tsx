@@ -588,10 +588,12 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <AlertCountByRuleByStatus
-                        entityFilter={{ ...entityFilter, entityType: EntityType.host }}
+                        entityFilter={entityFilter}
                         identityFields={resolvedIdentityFields}
                         signalIndexName={signalIndexName}
                         additionalFilters={additionalFilters}
+                        entityType={EntityType.host}
+                        entityRecord={entityStoreV2Enabled ? observedHost.entityRecord : undefined}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
