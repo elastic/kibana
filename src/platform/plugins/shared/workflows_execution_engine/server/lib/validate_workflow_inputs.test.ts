@@ -141,6 +141,63 @@ describe('validateWorkflowInputs', () => {
     });
   });
 
+  describe('multiple manual triggers', () => {
+    const workflowWithTwoManualTriggers: WorkflowExecutionEngineModel = {
+      id: 'workflow-1',
+      name: 'Test Workflow',
+      enabled: true,
+      definition: {
+        name: 'Test Workflow',
+        enabled: true,
+        version: '1',
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              properties: {
+                first: { type: 'string' },
+              },
+              required: ['first'],
+            },
+          },
+          {
+            type: 'manual',
+            inputs: {
+              properties: {
+                second: { type: 'string' },
+              },
+              required: ['second'],
+            },
+          },
+        ] as WorkflowYaml['triggers'],
+        steps: [],
+      },
+      yaml: '',
+    };
+
+    it('should succeed when only the first manual trigger inputs are satisfied', async () => {
+      const result = await callValidate(workflowWithTwoManualTriggers, { inputs: { first: 'ok' } });
+
+      expect(result).toBe(true);
+      expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should fail when the first manual trigger is not satisfied even if the second would be', async () => {
+      const result = await callValidate(workflowWithTwoManualTriggers, {
+        inputs: { second: 'only-second' },
+      });
+
+      expect(result).toBe(false);
+      expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: executionId,
+          status: ExecutionStatus.FAILED,
+          error: expect.objectContaining({ type: 'InputValidationError' }),
+        })
+      );
+    });
+  });
+
   it('should return true when input definition has no properties', async () => {
     const result = await callValidate(makeWorkflow({ required: ['name'] }), { inputs: {} });
 
