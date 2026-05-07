@@ -159,7 +159,11 @@ export const OTelComponentDetail: React.FunctionComponent<OTelComponentDetailPro
       </EuiTabs>
       <EuiSpacer size="m" />
       {selectedTabId === 'config' && (
-        <ComponentConfigTab componentId={componentId} componentConfig={componentConfig} />
+        <ComponentConfigTab
+          componentId={componentId}
+          componentConfig={componentConfig}
+          componentType={componentType}
+        />
       )}
       {selectedTabId === 'health' && <ComponentHealthTab componentHealth={componentHealth} />}
 

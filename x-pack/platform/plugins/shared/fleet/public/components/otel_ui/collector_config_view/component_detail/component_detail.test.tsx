@@ -305,4 +305,50 @@ describe('OTelComponentDetail', () => {
     expect(result.getByTestId('otelComponentDetailMetricsPlaceholder')).toBeInTheDocument();
     expect(result.queryByText(/protocols:/)).not.toBeInTheDocument();
   });
+
+  it('renders a documentation link for a known component', () => {
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="otlp"
+        componentType="receiver"
+        config={config}
+        onClose={jest.fn()}
+      />
+    );
+
+    const docLink = result.getByTestId('otelComponentDocLink');
+    expect(docLink).toBeInTheDocument();
+    expect(docLink.getAttribute('href')).toContain('otlpreceiver/README.md');
+  });
+
+  it('does not render a documentation link for pipeline type', () => {
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="logs/default"
+        componentType="pipeline"
+        config={config}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(result.queryByTestId('otelComponentDocLink')).not.toBeInTheDocument();
+  });
+
+  it('does not render a documentation link for an unknown component', () => {
+    const unknownConfig: OTelCollectorConfig = {
+      receivers: { unknown_nonexistent: { endpoint: 'localhost:1234' } },
+      service: { pipelines: {} },
+    };
+
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="unknown_nonexistent"
+        componentType="receiver"
+        config={unknownConfig}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(result.queryByTestId('otelComponentDocLink')).not.toBeInTheDocument();
+  });
 });
