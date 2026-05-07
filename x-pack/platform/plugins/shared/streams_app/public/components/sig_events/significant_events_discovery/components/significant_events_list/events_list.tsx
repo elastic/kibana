@@ -17,7 +17,7 @@ import {
   EuiPopover,
   EuiSelectable,
   EuiSpacer,
-  EuiButtonEmpty,
+  EuiSuperDatePicker,
   EuiText,
   type EuiBasicTableColumn,
   type EuiSelectableOption,
@@ -31,6 +31,10 @@ import {
   IMPACT_OPTIONS,
 } from '@kbn/streams-plugin/common';
 import type { Verdict, Impact, SigEvent } from '@kbn/streams-plugin/common';
+import { useTimeRange } from '../../../../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
+import { useTimefilter } from '../../../../../hooks/use_timefilter';
+import { useKiGeneration } from '../knowledge_indicators_table';
 import { EventFlyout } from './event_flyout';
 import { useSigEventsList } from './use_sig_events_list';
 import { TRANSLATIONS } from './translations';
@@ -163,17 +167,12 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
 ];
 
 export const SignificantEventsList = () => {
-  const {
-    events,
-    total,
-    loading,
-    filters,
-    pagination,
-    sort,
-    onTableChange,
-    onFilterChange,
-    refresh,
-  } = useSigEventsList();
+  const { events, total, loading, filters, pagination, sort, onTableChange, onFilterChange } =
+    useSigEventsList();
+  const { filteredStreams } = useKiGeneration();
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
+  const { refresh: refreshTimefilter } = useTimefilter();
 
   const [selectedEvent, setSelectedEvent] = useState<SigEvent | null>(null);
 
@@ -202,6 +201,21 @@ export const SignificantEventsList = () => {
     [filters.impact]
   );
 
+  const availableStreams = useMemo(
+    () => (filteredStreams ?? []).map((s) => s.stream.name).sort(),
+    [filteredStreams]
+  );
+
+  const streamSelectableOptions: EuiSelectableOption[] = useMemo(
+    () =>
+      availableStreams.map((name) => ({
+        label: name,
+        key: name,
+        checked: filters.stream.includes(name) ? 'on' : undefined,
+      })),
+    [availableStreams, filters.stream]
+  );
+
   const onVerdictSelectionChange = useCallback(
     (options: EuiSelectableOption[]) => {
       const selected = options
@@ -218,6 +232,16 @@ export const SignificantEventsList = () => {
         .filter((opt) => opt.checked === 'on')
         .map((opt) => opt.key as Impact);
       onFilterChange({ impact: selected });
+    },
+    [onFilterChange]
+  );
+
+  const onStreamSelectionChange = useCallback(
+    (options: EuiSelectableOption[]) => {
+      const selected = options
+        .filter((opt) => opt.checked === 'on')
+        .map((opt) => opt.key ?? opt.label);
+      onFilterChange({ stream: selected });
     },
     [onFilterChange]
   );
@@ -292,12 +316,24 @@ export const SignificantEventsList = () => {
               numActiveFilters={filters.impact.length}
               onChange={onImpactSelectionChange}
             />
+            <FilterPopover
+              label={TRANSLATIONS.streamFilter}
+              ariaLabel={TRANSLATIONS.streamPopoverAriaLabel}
+              options={streamSelectableOptions}
+              numFilters={availableStreams.length}
+              numActiveFilters={filters.stream.length}
+              onChange={onStreamSelectionChange}
+            />
           </EuiFilterGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="refresh" onClick={refresh}>
-            {TRANSLATIONS.refreshButton}
-          </EuiButtonEmpty>
+          <EuiSuperDatePicker
+            start={rangeFrom}
+            end={rangeTo}
+            onTimeChange={({ start, end }) => updateTimeRange({ from: start, to: end })}
+            onRefresh={() => refreshTimefilter()}
+            showUpdateButton="iconOnly"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

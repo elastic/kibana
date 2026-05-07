@@ -23,8 +23,11 @@ export const TRANSLATIONS = {
   impactPopoverAriaLabel: i18n.translate('xpack.streams.sigEventsList.impactPopoverAriaLabel', {
     defaultMessage: 'Filter by impact',
   }),
-  refreshButton: i18n.translate('xpack.streams.sigEventsList.refreshButton', {
-    defaultMessage: 'Refresh',
+  streamFilter: i18n.translate('xpack.streams.sigEventsList.streamFilter', {
+    defaultMessage: 'Stream',
+  }),
+  streamPopoverAriaLabel: i18n.translate('xpack.streams.sigEventsList.streamPopoverAriaLabel', {
+    defaultMessage: 'Filter by stream',
   }),
   tableCaption: i18n.translate('xpack.streams.sigEventsList.tableCaption', {
     defaultMessage: 'Significant events',

@@ -77,12 +77,19 @@ export const useSigEventsList = () => {
   }, [filters.verdict, filters.impact, filters.stream, debouncedSearch, pagination, sort]);
 
   const fetchState = useStreamsAppFetch(
-    async ({ signal }) =>
-      streamsRepositoryClient.fetch('GET /internal/streams/sig_events/list', {
-        params: { query: queryParams },
+    async ({ signal, timeState }) => {
+      const query = { ...queryParams };
+      if (timeState) {
+        query.from = timeState.asAbsoluteTimeRange.from;
+        query.to = timeState.asAbsoluteTimeRange.to;
+      }
+      return streamsRepositoryClient.fetch('GET /internal/streams/sig_events/list', {
+        params: { query },
         signal,
-      }),
-    [streamsRepositoryClient, queryParams]
+      });
+    },
+    [streamsRepositoryClient, queryParams],
+    { withTimeRange: true, withRefresh: true }
   );
 
   const onTableChange = useCallback(
@@ -118,6 +125,5 @@ export const useSigEventsList = () => {
     sort,
     onTableChange,
     onFilterChange,
-    refresh: fetchState.refresh,
   };
 };
