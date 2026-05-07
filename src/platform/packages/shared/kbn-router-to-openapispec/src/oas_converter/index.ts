@@ -15,6 +15,7 @@ import { kbnConfigSchemaConverter } from './kbn_config_schema';
 import { createCtx, postProcessMutations } from './kbn_config_schema/post_process_mutations';
 import { zodConverter } from './zod';
 import { catchAllConverter } from './catch_all';
+import { stripInternalKbnOasMetaExtensions } from './strip_internal_kbn_oas_meta';
 
 export class OasConverter {
   readonly #env: Env;
@@ -86,6 +87,14 @@ export class OasConverter {
       }
     }
 
+    // `processDiscriminator` may attach internal `x-oas-*` markers to shared component schemas
+    // while walking the root schema — after those components were already post-processed. Strip
+    // again so bridge keys never leak into published documents.
+    if (converter === kbnConfigSchemaConverter || converter === zodConverter) {
+      stripInternalKbnOasMetaExtensions(oasSchema);
+      Object.values(shared).forEach((s) => stripInternalKbnOasMetaExtensions(s));
+    }
+
     this.#addComponents(shared);
     return oasSchema as OpenAPIV3.SchemaObject;
   }
@@ -115,6 +124,15 @@ export class OasConverter {
         }
       });
     }
+
+    if (converter === kbnConfigSchemaConverter || converter === zodConverter) {
+      params.forEach((param) => {
+        if (param.schema) {
+          stripInternalKbnOasMetaExtensions(param.schema);
+        }
+      });
+      Object.values(shared).forEach((s) => stripInternalKbnOasMetaExtensions(s));
+    }
     this.#addComponents(shared);
     return params;
   }
@@ -143,6 +161,15 @@ export class OasConverter {
           delete (param.schema as OpenAPIV3.SchemaObject).description;
         }
       });
+    }
+
+    if (converter === kbnConfigSchemaConverter || converter === zodConverter) {
+      query.forEach((param) => {
+        if (param.schema) {
+          stripInternalKbnOasMetaExtensions(param.schema);
+        }
+      });
+      Object.values(shared).forEach((s) => stripInternalKbnOasMetaExtensions(s));
     }
     this.#addComponents(shared);
     return query;

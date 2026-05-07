@@ -18,6 +18,7 @@ import { prependPathSegment, unwrapValidationError } from './error_utils';
 import { effectiveUnknowns } from './object_helpers';
 import { Reference } from '../references';
 import { Type } from './type';
+import { wrapWithTypeOptions } from './wrap_schema';
 
 export type ArrayOptions<T> = TypeOptions<T[]> &
   UnknownOptions & {
@@ -46,7 +47,7 @@ export class ArrayType<T> extends Type<T[]> {
     if (this.arrayOptions.meta?.id) {
       base = base.meta({ id: this.arrayOptions.meta.id });
     }
-    return base as z.ZodType<T[]>;
+    return wrapWithTypeOptions(base, this.arrayOptions) as z.ZodType<T[]>;
   }
 
   public override getInternalSchema(): z.ZodType<T[]> {
@@ -60,7 +61,7 @@ export class ArrayType<T> extends Type<T[]> {
     if (this.arrayOptions.meta?.id) {
       base = base.meta({ id: this.arrayOptions.meta.id });
     }
-    return base as z.ZodType<T[]>;
+    return wrapWithTypeOptions(base, this.arrayOptions) as z.ZodType<T[]>;
   }
 
   protected validateWithFrame(

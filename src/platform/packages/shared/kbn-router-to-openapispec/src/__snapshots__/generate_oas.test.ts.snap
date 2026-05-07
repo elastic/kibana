@@ -713,7 +713,6 @@ Object {
         ],
         "title": "my-catch-all-my-team",
         "type": "object",
-        "x-oas-discriminator-default-case": true,
       },
     },
     "securitySchemes": Object {

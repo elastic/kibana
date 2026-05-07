@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type Joi from 'joi';
 import joiToJsonParse from 'joi-to-json';
 import { omit } from 'lodash';
@@ -26,6 +17,7 @@ import type { z } from '@kbn/zod';
 import { isZod, z as zod } from '@kbn/zod';
 
 import { convert as zodConvert, unwrapZodType } from '../zod/lib';
+import { stripInternalKbnOasMetaExtensions } from '../strip_internal_kbn_oas_meta';
 import { zodSchemaFromKbnType } from './lib';
 import { createCtx, postProcessMutations } from './post_process_mutations';
 import type { IContext } from './post_process_mutations';
@@ -102,5 +94,7 @@ export const parse = ({ schema, ctx = createCtx() }: ParseArgs) => {
     result = parsed;
   }
   postProcessMutations({ schema: result, ctx });
+  stripInternalKbnOasMetaExtensions(result);
+  Object.values(ctx.getSharedSchemas()).forEach((s) => stripInternalKbnOasMetaExtensions(s));
   return { shared: ctx.getSharedSchemas(), result };
 };

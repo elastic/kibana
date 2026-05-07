@@ -12,6 +12,7 @@ import * as mutations from './mutations';
 import type { IContext } from './context';
 import { isAnyType } from './mutations/utils';
 import { isReferenceObject } from '../../common';
+import { stripInternalKbnOasMetaExtensions } from '../../strip_internal_kbn_oas_meta';
 
 type Schema = OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
 
@@ -22,6 +23,7 @@ interface PostProcessMutationsArgs {
 
 export const postProcessMutations = ({ ctx, schema }: PostProcessMutationsArgs) => {
   walkSchema(ctx, schema);
+  stripInternalKbnOasMetaExtensions(schema);
   return ctx;
 };
 
