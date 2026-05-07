@@ -37,23 +37,22 @@ export function useServiceMapFilterState({
   mapOrientation,
   onDagreLayoutFailure,
 }: UseServiceMapFilterStateParams): UseServiceMapFilterStateResult {
-  return useMemo(() => {
-    const filterOptionCounts = computeServiceMapFilterOptionCounts(initialNodes, initialEdges);
-    const { nodes: nodesAfterFilters, edges: edgesAfterFilters } =
+  const filterOptionCounts = useMemo(
+    () => computeServiceMapFilterOptionCounts(initialNodes, initialEdges),
+    [initialNodes, initialEdges]
+  );
+
+  const { nodes: nodesAfterFilters, edges: edgesAfterFilters } = useMemo(
+    () =>
       applyServiceMapRelayoutForFilteredView(
         layoutedNodes,
         initialEdges,
         viewFilters,
         mapOrientation,
         onDagreLayoutFailure
-      );
-    return { filterOptionCounts, nodesAfterFilters, edgesAfterFilters };
-  }, [
-    initialNodes,
-    initialEdges,
-    layoutedNodes,
-    viewFilters,
-    mapOrientation,
-    onDagreLayoutFailure,
-  ]);
+      ),
+    [layoutedNodes, initialEdges, viewFilters, mapOrientation, onDagreLayoutFailure]
+  );
+
+  return { filterOptionCounts, nodesAfterFilters, edgesAfterFilters };
 }
