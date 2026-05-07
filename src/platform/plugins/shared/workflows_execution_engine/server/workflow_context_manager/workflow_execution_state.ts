@@ -146,7 +146,7 @@ export class WorkflowExecutionState {
    */
   public getStepExecutionsByStepId(stepId: string): EsWorkflowStepExecution[] {
     const executionIds = this.stepIdExecutionIdIndex.get(stepId);
-    if (!executionIds) {
+    if (!executionIds?.length) {
       return [];
     }
     return executionIds.map(
