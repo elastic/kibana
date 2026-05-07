@@ -16,7 +16,7 @@ export const FLUSH_INTERVAL_MS = 500;
 
 export async function flushState(params: WorkflowExecutionLoopParams) {
   const flushSpan = apm.startSpan('persistence flush', 'workflow', 'persistence');
-  await Promise.all([params.workflowExecutionState.flush(), params.workflowLogger.flushEvents()]);
+  await Promise.all([params.stepIoService.flush(), params.workflowLogger.flushEvents()]);
   flushSpan?.end();
 }
 

@@ -14,31 +14,12 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { extractReferencedStepIds } from './extract_referenced_step_ids';
 import { EVICTION_EXEMPT_STEP_TYPES } from './step_io_pinned_types';
+import type { StepIoStateAccessor } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { formatBytes, safeOutputSize } from '../step/errors';
 import { buildStepExecutionId } from '../utils';
-
-/**
- * Narrow view of `WorkflowExecutionState` that the service depends on.
- * Keeps the service free of the full state class and makes test doubles trivial.
- */
-export interface StepIoStateAccessor {
-  getStepExecution(stepExecutionId: string): EsWorkflowStepExecution | undefined;
-  getLatestStepExecution(stepId: string): EsWorkflowStepExecution | undefined;
-  upsertStep(step: Partial<EsWorkflowStepExecution>): void;
-  /** Memory-only mutators — do NOT add entries to stepDocumentsChanges. */
-  clearStepOutputInMemory(stepExecutionId: string): void;
-  clearStepInputInMemory(stepExecutionId: string): void;
-  restoreStepOutputInMemory(stepExecutionId: string, output: JsonValue | null): void;
-  /** Workflow-level status used to grade rehydration miss severity. */
-  getWorkflowExecutionStatus(): ExecutionStatus;
-  /** Workflow execution id; used to materialise scope-stack step execution ids. */
-  getWorkflowExecutionId(): string;
-  /** Current workflow scope stack; used by `prepareForRead` to materialise scope-stack step execution ids. */
-  getWorkflowExecutionScopeStack(): StackFrame[];
-}
 
 /**
  * Resolves predecessors for a node — supplied at call time so the service
@@ -93,12 +74,14 @@ export interface PrepareForReadArgs {
  * - **On-demand rehydration** of evicted outputs from ES via
  *   `prepareForRead`, used right before the context manager builds a
  *   step context that may need a previously-evicted output.
+ * - **Resume-time deferred-output orchestration** via `load()`.
+ * - **Stale-loop iteration cleanup** via `evictStaleLoopOutputs`.
  *
- * The service does not own the canonical step document — it mutates
- * `step.input`/`step.output` on the state-owned doc through three
- * named, memory-only mutators. This keeps `WorkflowExecutionState`
- * focused on document storage + ES persistence and makes "this mutation
- * must not propagate to ES" a structural property rather than a comment.
+ * The service is the public entry point for the IO lifecycle: callers
+ * (runtime manager, persistence loop, loop step impls) drive flush / load /
+ * stale-loop cleanup through it. State exposes only the in-memory document
+ * store and ES persistence primitives. The dependency graph is one-way:
+ * service → state → repositories.
  */
 export class StepIoService {
   private readonly stepRepository: StepExecutionRepository;
@@ -216,6 +199,58 @@ export class StepIoService {
     return this.evictedOutputIdsAndBytes.size > 0;
   }
 
+  // ----- Lifecycle (public entry points) -----------------------------------
+
+  /**
+   * Flushes pending step-doc and workflow-doc changes to Elasticsearch and
+   * runs IO bookkeeping (deferred output eviction + immediate input eviction)
+   * on the freshly-flushed step IDs. Replaces the previous `state.flush()`
+   * entry point — callers should now go through the service.
+   */
+  public async flush(): Promise<void> {
+    await Promise.all([this.state.flushWorkflowDoc(), this.flushStepChanges()]);
+  }
+
+  /**
+   * Step-doc-only flush. Drives state's bulk upsert, then runs the deferred
+   * output-eviction cycle and immediate input eviction. Even when there are
+   * no doc changes this still drains the previous cycle's eviction queue —
+   * the deferral is one cycle, not one bulk-upsert.
+   */
+  public async flushStepChanges(): Promise<void> {
+    const flushedIds = await this.state.flushStepDocs();
+    this.runDeferredEvictionCycle(flushedIds);
+  }
+
+  /**
+   * Resume-time entry point. Asks state to fetch step metadata without the
+   * `output` field, marks non-pinned outputs as deferred, then asks state
+   * to eagerly fetch outputs for pinned step types (data.set, waitForInput).
+   */
+  public async load(): Promise<void> {
+    const foundSteps = await this.state.loadStepDocsWithoutOutput();
+    const pinnedIdsToFetch = this.markDeferredAfterLoad(foundSteps);
+    await this.state.loadStepOutputs(pinnedIdsToFetch);
+  }
+
+  /**
+   * Drops in-memory IO from non-latest executions of the given step IDs.
+   * Used by foreach/while exit + loop break/continue to release memory after
+   * an iteration completes. Memory-only — ES docs untouched. Pinned step
+   * types and the latest execution per stepId are preserved.
+   */
+  public evictStaleLoopOutputs(innerStepIds: Iterable<string>): void {
+    for (const stepId of innerStepIds) {
+      const executionIds = this.state.getStepExecutionIdsByStepId(stepId);
+      if (executionIds && executionIds.length > 1) {
+        const staleIds = executionIds.slice(0, -1);
+        for (const execId of staleIds) {
+          this.dropStaleStepIo(execId);
+        }
+      }
+    }
+  }
+
   // ----- Rehydration --------------------------------------------------------
 
   /**
@@ -302,7 +337,7 @@ export class StepIoService {
       // `null` and `undefined` interchangeably at the source level, but the
       // engine relies on the `null` (FAILED) vs `undefined` distinction.
       // FAILED steps are not eviction candidates, so any rehydrated value
-      // here was a COMPLETED output — coerce a missing value back to null
+      // here was a COMPLETED output — coercing a missing value back to null
       // would lose the original signal, so we restore as-is.
       this.state.restoreStepOutputInMemory(doc.id, doc.output ?? null);
       restoredCount++;
@@ -356,17 +391,14 @@ export class StepIoService {
     }
   }
 
-  // ----- Lifecycle hooks ----------------------------------------------------
+  // ----- Internals ----------------------------------------------------------
 
   /**
-   * Called by `WorkflowExecutionState.load()` after step docs are fetched
-   * (without `output`). Marks non-pinned steps as deferred so the existing
-   * `prepareForRead` → `rehydrateOutputs` path will fetch them on demand.
-   * Returns the IDs of pinned steps whose outputs the state should mget
-   * eagerly (data.set is read globally by getVariables; waitForInput
-   * answers must always be present).
+   * Marks non-pinned step outputs as deferred (rehydrated on demand) and
+   * returns the IDs of pinned step types whose outputs the state should
+   * eagerly mget.
    */
-  public onLoad(steps: ReadonlyArray<EsWorkflowStepExecution>): { pinnedIdsToFetch: string[] } {
+  private markDeferredAfterLoad(steps: ReadonlyArray<EsWorkflowStepExecution>): string[] {
     const pinnedIds: string[] = [];
     for (const step of steps) {
       if (step.stepType && this.pinnedStepTypes.has(step.stepType)) {
@@ -376,17 +408,16 @@ export class StepIoService {
         this.evictedOutputIdsAndBytes.set(step.id, 0);
       }
     }
-    return { pinnedIdsToFetch: pinnedIds };
+    return pinnedIds;
   }
 
   /**
-   * Called by `WorkflowExecutionState.flushStepChanges()` after `bulkUpsert`
-   * succeeds. Drains the previous cycle's deferred output evictions, queues
-   * this cycle's flushed IDs for next-cycle eviction, and runs immediate
-   * input eviction on terminal steps. Pass `[]` when the flush had no doc
+   * Drains the previous cycle's deferred output evictions, queues this
+   * cycle's flushed IDs for next-cycle eviction, and runs immediate input
+   * eviction on terminal steps. Called with `[]` when the flush had no doc
    * changes — the queue must still be drained on its scheduled cycle.
    */
-  public onStepsFlushed(flushedIds: ReadonlyArray<string>): void {
+  private runDeferredEvictionCycle(flushedIds: ReadonlyArray<string>): void {
     if (this.pendingOutputEvictionIds.length > 0) {
       const toEvict = this.pendingOutputEvictionIds;
       this.pendingOutputEvictionIds = [];
@@ -405,7 +436,7 @@ export class StepIoService {
    * paying an ES round-trip to bring them back. Pinned-type guards live
    * here so the loop-cleanup caller doesn't have to know the rules.
    */
-  public clearStepIo(stepExecutionId: string): void {
+  private dropStaleStepIo(stepExecutionId: string): void {
     const step = this.state.getStepExecution(stepExecutionId);
     if (!step) return;
     if (step.stepType && this.pinnedStepTypes.has(step.stepType)) return;
@@ -413,8 +444,6 @@ export class StepIoService {
     this.state.clearStepInputInMemory(stepExecutionId);
     this.outputSizes.delete(stepExecutionId);
   }
-
-  // ----- Internals ----------------------------------------------------------
 
   private evictCompletedStepOutputs(candidateIds: ReadonlyArray<string>): void {
     let evictedCount = 0;

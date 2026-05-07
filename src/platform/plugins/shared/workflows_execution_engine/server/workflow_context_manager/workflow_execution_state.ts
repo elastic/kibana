@@ -9,7 +9,6 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import type { StepIoService, StepIoStateAccessor } from './step_io_service';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -21,18 +20,48 @@ export interface FailedStepContext {
 }
 
 /**
+ * Narrow view of `WorkflowExecutionState` used by `StepIoService`. State has
+ * no compile-time knowledge of the service: this interface lives in the file
+ * that defines the producer (state) so the dependency graph is one-way —
+ * service depends on state, state depends on nothing in the IO layer.
+ */
+export interface StepIoStateAccessor {
+  // Reads
+  getStepExecution(stepExecutionId: string): EsWorkflowStepExecution | undefined;
+  getLatestStepExecution(stepId: string): EsWorkflowStepExecution | undefined;
+  upsertStep(step: Partial<EsWorkflowStepExecution>): void;
+
+  // Memory-only mutators — do NOT add entries to stepDocumentsChanges.
+  clearStepOutputInMemory(stepExecutionId: string): void;
+  clearStepInputInMemory(stepExecutionId: string): void;
+  restoreStepOutputInMemory(stepExecutionId: string, output: JsonValue | null): void;
+
+  // Workflow-level reads.
+  getWorkflowExecutionStatus(): EsWorkflowExecution['status'];
+  getWorkflowExecutionId(): string;
+  getWorkflowExecutionScopeStack(): EsWorkflowExecution['scopeStack'];
+  getWorkflowExecutionStepExecutionIds(): string[] | undefined;
+
+  // Stale-loop helper: chronologically-ordered execution ids per stepId.
+  getStepExecutionIdsByStepId(stepId: string): ReadonlyArray<string> | undefined;
+
+  // ES persistence primitives. State drives the bulk upsert / mget; the
+  // service composes them with eviction + size bookkeeping.
+  flushStepDocs(): Promise<ReadonlyArray<string>>;
+  flushWorkflowDoc(): Promise<void>;
+  loadStepDocsWithoutOutput(): Promise<EsWorkflowStepExecution[]>;
+  loadStepOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void>;
+}
+
+/**
  * In-memory step/workflow document store with deferred ES persistence.
  *
  * Owns the canonical step-execution map, change tracking, and the bulk
- * upsert path. The IO lifecycle (input/output reads, output-size
- * tracking, eviction, on-demand rehydration) lives in `StepIoService`,
- * which mutates step `input`/`output` here via the three narrow,
- * memory-only mutators (`clearStepOutputInMemory`,
- * `clearStepInputInMemory`, `restoreStepOutputInMemory`).
+ * upsert / mget primitives. Knows nothing about output eviction, size
+ * tracking, or rehydration — those live in `StepIoService`, which composes
+ * the primitives exposed via `ioStateAccessor`.
  *
- * The service is registered after construction via `setIoService` so
- * the bidirectional dependency (state ↔ service) can be wired in
- * either order in `setup_dependencies.ts`.
+ * The dependency is strictly one-way: state → repositories; service → state.
  */
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
@@ -49,8 +78,6 @@ export class WorkflowExecutionState {
    */
   private stepIdExecutionIdIndex = new Map<string, string[]>();
 
-  private ioService: StepIoService | undefined;
-
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
     private workflowExecutionRepository: WorkflowExecutionRepository,
@@ -60,21 +87,9 @@ export class WorkflowExecutionState {
   }
 
   /**
-   * Wires in the IO service after construction. Must be called before any
-   * load/flush/runtime activity. Throws on a second call to make accidental
-   * re-wiring loud.
-   */
-  public setIoService(ioService: StepIoService): void {
-    if (this.ioService) {
-      throw new Error('WorkflowExecutionState: IO service already registered');
-    }
-    this.ioService = ioService;
-  }
-
-  /**
-   * Narrow accessor exposed to `StepIoService`. Defined as an instance
-   * property whose methods close over `this`, so the service can be
-   * constructed with a stable adapter before the state knows about it.
+   * Narrow accessor consumed by `StepIoService`. Defined as an instance
+   * property whose methods close over `this` so the service can be
+   * constructed with this stable adapter immediately after state is built.
    */
   public readonly ioStateAccessor: StepIoStateAccessor = {
     getStepExecution: (id) => this.stepExecutions.get(id),
@@ -86,56 +101,13 @@ export class WorkflowExecutionState {
     getWorkflowExecutionStatus: () => this.workflowExecution.status,
     getWorkflowExecutionId: () => this.workflowExecution.id,
     getWorkflowExecutionScopeStack: () => this.workflowExecution.scopeStack,
+    getWorkflowExecutionStepExecutionIds: () => this.workflowExecution.stepExecutionIds,
+    getStepExecutionIdsByStepId: (stepId) => this.stepIdExecutionIdIndex.get(stepId),
+    flushStepDocs: () => this.flushStepDocs(),
+    flushWorkflowDoc: () => this.flushWorkflowDoc(),
+    loadStepDocsWithoutOutput: () => this.loadStepDocsWithoutOutput(),
+    loadStepOutputs: (ids) => this.loadStepOutputs(ids),
   };
-
-  /**
-   * Loads step executions from Elasticsearch for a resumed workflow.
-   *
-   * To reduce memory footprint, outputs are excluded from the initial fetch.
-   * The IO service marks non-pinned steps as deferred (rehydrated on demand
-   * by `prepareForRead`) and identifies the pinned IDs whose outputs must be
-   * eagerly fetched (data.set is read globally by getVariables; waitForInput
-   * answers must always be present).
-   */
-  public async load(): Promise<void> {
-    if (!this.workflowExecution.stepExecutionIds) {
-      throw new Error(
-        'WorkflowExecutionState: Workflow execution must have step execution IDs to be loaded'
-      );
-    }
-    const ioService = this.requireIoService();
-
-    // Step 1: fetch step metadata without `output` (potentially large).
-    const foundSteps = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
-      this.workflowExecution.stepExecutionIds,
-      undefined,
-      ['output']
-    );
-    foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
-
-    // Step 2: ask the IO service to register deferred-output bookkeeping
-    // and tell us which pinned steps need eager output fetch.
-    const { pinnedIdsToFetch } = ioService.onLoad(foundSteps);
-
-    // Step 3: kick off the pinned-output fetch concurrently with the index build.
-    const pinnedOutputsPromise =
-      pinnedIdsToFetch.length > 0
-        ? this.workflowStepExecutionRepository.getStepExecutionsByIds(pinnedIdsToFetch, [
-            'id',
-            'output',
-          ])
-        : Promise.resolve([]);
-
-    this.buildStepIdExecutionIdIndex();
-
-    const pinnedOutputs = await pinnedOutputsPromise;
-    for (const doc of pinnedOutputs) {
-      const existing = this.stepExecutions.get(doc.id);
-      if (existing) {
-        existing.output = doc.output;
-      }
-    }
-  }
 
   public getWorkflowExecution(): EsWorkflowExecution {
     return this.workflowExecution;
@@ -199,29 +171,29 @@ export class WorkflowExecutionState {
     }
   }
 
-  public async flushStepChanges(): Promise<void> {
-    const ioService = this.ioService;
+  // ----- ES persistence primitives -----------------------------------------
+  // These are deliberately atomic: they only flush whatever doc changes are
+  // currently buffered. Higher-level lifecycle (deferred eviction, input
+  // eviction, etc.) lives in `StepIoService` and composes these primitives.
+
+  /**
+   * Bulk-upserts pending step document changes. Returns the IDs that were
+   * flushed (or `[]` if nothing was pending). The service uses the returned
+   * IDs to drive deferred output eviction and immediate input eviction.
+   */
+  private async flushStepDocs(): Promise<ReadonlyArray<string>> {
     if (!this.stepDocumentsChanges.size) {
-      // No new doc changes — but the IO service may still have a pending
-      // eviction queue from the previous flush cycle that needs draining
-      // on its scheduled tick.
-      ioService?.onStepsFlushed([]);
-      return;
+      return [];
     }
     const flushedIds = Array.from(this.stepDocumentsChanges.keys());
     const stepDocumentsChanges = Array.from(this.stepDocumentsChanges.values());
 
     this.stepDocumentsChanges.clear();
     await this.workflowStepExecutionRepository.bulkUpsert(stepDocumentsChanges);
-
-    ioService?.onStepsFlushed(flushedIds);
+    return flushedIds;
   }
 
-  public async flush(): Promise<void> {
-    await Promise.all([this.flushWorkflowChanges(), this.flushStepChanges()]);
-  }
-
-  private async flushWorkflowChanges(): Promise<void> {
+  private async flushWorkflowDoc(): Promise<void> {
     if (!this.workflowDocumentChanges) {
       return;
     }
@@ -232,6 +204,49 @@ export class WorkflowExecutionState {
       ...changes,
       id: this.workflowExecution.id,
     });
+  }
+
+  /**
+   * Fetches step metadata for all known step execution ids, excluding the
+   * (potentially large) `output` field. Populates `stepExecutions` and
+   * (re)builds the chronological index. Returns the loaded docs so callers
+   * (the service) can decide which subset needs an eager output fetch.
+   */
+  private async loadStepDocsWithoutOutput(): Promise<EsWorkflowStepExecution[]> {
+    if (!this.workflowExecution.stepExecutionIds) {
+      throw new Error(
+        'WorkflowExecutionState: Workflow execution must have step execution IDs to be loaded'
+      );
+    }
+    const foundSteps = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
+      this.workflowExecution.stepExecutionIds,
+      undefined,
+      ['output']
+    );
+    foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
+    this.buildStepIdExecutionIdIndex();
+    return foundSteps;
+  }
+
+  /**
+   * Fetches `id` and `output` only for the given step execution ids and
+   * applies the outputs to the in-memory docs. Used for the resume-time
+   * eager-output fetch of pinned step types.
+   */
+  private async loadStepOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void> {
+    if (stepExecutionIds.length === 0) {
+      return;
+    }
+    const docs = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
+      Array.from(stepExecutionIds),
+      ['id', 'output']
+    );
+    for (const doc of docs) {
+      const existing = this.stepExecutions.get(doc.id);
+      if (existing) {
+        existing.output = doc.output;
+      }
+    }
   }
 
   private createStep(step: Partial<EsWorkflowStepExecution>) {
@@ -275,39 +290,6 @@ export class WorkflowExecutionState {
     });
   }
 
-  /**
-   * Nullifies `output` and `input` on non-latest in-memory step executions
-   * for the given step IDs, reducing memory pressure after a loop completes.
-   *
-   * Preserves:
-   * - The latest execution per stepId (needed by `getLatestStepExecution`).
-   * - All pinned step types (`data.set` outputs are read globally by
-   *   `getVariables`; `waitForInput` answers must persist for auditability).
-   * - All metadata fields (status, timing, scopeStack, error) — those still
-   *   matter at terminal state for telemetry and UI.
-   *
-   * Eviction here uses global-latest-wins semantics: only the absolute latest
-   * execution per stepId across all loop iterations retains its IO. After
-   * outer-loop completion, only the latest execution from the last outer
-   * iteration keeps its output. Correct because `getLatestStepExecution`
-   * always returns the absolute latest.
-   *
-   * Memory-only — ES-persisted documents are untouched and on resume still
-   * hold the original outputs.
-   */
-  public evictStaleLoopOutputs(innerStepIds: Iterable<string>): void {
-    const ioService = this.requireIoService();
-    for (const stepId of innerStepIds) {
-      const executionIds = this.stepIdExecutionIdIndex.get(stepId);
-      if (executionIds && executionIds.length > 1) {
-        const staleIds = executionIds.slice(0, -1);
-        for (const execId of staleIds) {
-          ioService.clearStepIo(execId);
-        }
-      }
-    }
-  }
-
   // ----- IO mutators (memory-only) -----------------------------------------
   // The only places where `step.input` / `step.output` are mutated out-of-band
   // relative to `stepDocumentsChanges`. They replace the entry in
@@ -341,13 +323,6 @@ export class WorkflowExecutionState {
         output: output as JsonValue,
       });
     }
-  }
-
-  private requireIoService(): StepIoService {
-    if (!this.ioService) {
-      throw new Error('WorkflowExecutionState: IO service not registered');
-    }
-    return this.ioService;
   }
 
   private buildStepIdExecutionIdIndex(): void {

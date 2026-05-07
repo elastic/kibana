@@ -16,22 +16,21 @@ import { WorkflowExecutionState } from '../workflow_execution_state';
 
 describe('WorkflowExecutionState', () => {
   let underTest: WorkflowExecutionState;
+  let ioService: StepIoService;
 
   let workflowExecutionRepository: WorkflowExecutionRepository;
   let stepExecutionRepository: StepExecutionRepository;
 
-  function wireService(
+  function buildService(
     state: WorkflowExecutionState,
     repo: StepExecutionRepository,
     evictionMinBytes = Infinity
   ): StepIoService {
-    const service = new StepIoService({
+    return new StepIoService({
       stepRepository: repo,
       state: state.ioStateAccessor,
       evictionMinBytes,
     });
-    state.setIoService(service);
-    return service;
   }
 
   beforeEach(() => {
@@ -54,7 +53,7 @@ describe('WorkflowExecutionState', () => {
       workflowExecutionRepository,
       stepExecutionRepository
     );
-    wireService(underTest, stepExecutionRepository);
+    ioService = buildService(underTest, stepExecutionRepository);
   });
 
   it('should initialize with the provided workflow execution', () => {
@@ -137,7 +136,7 @@ describe('WorkflowExecutionState', () => {
       workflowExecutionRepository,
       stepExecutionRepository
     );
-    wireService(stateWithTestRun, stepExecutionRepository);
+    buildService(stateWithTestRun, stepExecutionRepository);
 
     stateWithTestRun.upsertStep({
       id: 'fake-id',
@@ -247,7 +246,7 @@ describe('WorkflowExecutionState', () => {
 
       underTest.updateWorkflowExecution(updatedWorkflowExecution);
 
-      await underTest.flush();
+      await ioService.flush();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         updatedWorkflowExecution
@@ -259,7 +258,7 @@ describe('WorkflowExecutionState', () => {
 
       underTest.updateWorkflowExecution(updatedWorkflowExecution);
 
-      await underTest.flush();
+      await ioService.flush();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -278,7 +277,7 @@ describe('WorkflowExecutionState', () => {
 
       underTest.upsertStep(stepExecution);
 
-      await underTest.flush();
+      await ioService.flush();
 
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith([
         expect.objectContaining({
@@ -299,7 +298,7 @@ describe('WorkflowExecutionState', () => {
         status: ExecutionStatus.RUNNING,
         startedAt: '2025-08-05T20:00:00.000Z',
       } as EsWorkflowStepExecution);
-      await underTest.flush(); // initial flush to create the step execution
+      await ioService.flush(); // initial flush to create the step execution
 
       // update step execution
       underTest.upsertStep({
@@ -310,7 +309,7 @@ describe('WorkflowExecutionState', () => {
         executionTimeMs: 60000,
       } as EsWorkflowStepExecution);
 
-      await underTest.flush();
+      await ioService.flush();
 
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith([
         {
@@ -342,7 +341,7 @@ describe('WorkflowExecutionState', () => {
         executionTimeMs: 2000,
       } as EsWorkflowStepExecution);
 
-      await underTest.flush();
+      await ioService.flush();
 
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith([
         expect.objectContaining({
@@ -358,7 +357,7 @@ describe('WorkflowExecutionState', () => {
     });
 
     it('should not flush if there are no changes', async () => {
-      await underTest.flush();
+      await ioService.flush();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
       expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
@@ -376,7 +375,7 @@ describe('WorkflowExecutionState', () => {
         status: ExecutionStatus.RUNNING,
         startedAt: '2025-08-05T20:00:00.000Z',
       } as EsWorkflowStepExecution);
-      await underTest.flush(); // initial flush to create the step execution
+      await ioService.flush(); // initial flush to create the step execution
 
       // update step execution
       underTest.upsertStep({
@@ -393,9 +392,9 @@ describe('WorkflowExecutionState', () => {
         status: ExecutionStatus.RUNNING,
         startedAt: '2025-08-05T20:00:00.000Z',
       } as EsWorkflowStepExecution);
-      await underTest.flush(); // first flush that flushes everything
-      await underTest.flush(); // second flush with no changes
-      await underTest.flush(); // third flush with no changes
+      await ioService.flush(); // first flush that flushes everything
+      await ioService.flush(); // second flush with no changes
+      await ioService.flush(); // third flush with no changes
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(2);
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledTimes(2);
@@ -450,7 +449,7 @@ describe('WorkflowExecutionState', () => {
 
   describe('load', () => {
     it('should throw if stepExecutionIds is not set on the workflow execution', async () => {
-      await expect(underTest.load()).rejects.toThrow(
+      await expect(ioService.load()).rejects.toThrow(
         'WorkflowExecutionState: Workflow execution must have step execution IDs to be loaded'
       );
     });
@@ -471,7 +470,7 @@ describe('WorkflowExecutionState', () => {
           status: ExecutionStatus.COMPLETED,
         } as EsWorkflowStepExecution,
       ]);
-      await underTest.load();
+      await ioService.load();
 
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['11', '22'],
@@ -517,7 +516,7 @@ describe('WorkflowExecutionState', () => {
         .mockResolvedValueOnce([
           { id: '22', output: dataSetOutput } as unknown as EsWorkflowStepExecution,
         ]);
-      await underTest.load();
+      await ioService.load();
 
       expect(underTest.getStepExecution('22')?.output).toEqual(dataSetOutput);
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
@@ -550,7 +549,7 @@ describe('WorkflowExecutionState', () => {
           stepExecutionIndex: 2,
         } as EsWorkflowStepExecution,
       ]);
-      await underTest.load();
+      await ioService.load();
 
       expect(
         underTest.getStepExecutionsByStepId('testStep')?.map((stepExecution) => stepExecution.id)
@@ -579,7 +578,7 @@ describe('WorkflowExecutionState', () => {
         input: { idx: 2 },
       });
 
-      underTest.evictStaleLoopOutputs(['innerStep']);
+      ioService.evictStaleLoopOutputs(['innerStep']);
 
       const executions = underTest.getStepExecutionsByStepId('innerStep');
       expect(executions[0].output).toBeUndefined();
@@ -614,7 +613,7 @@ describe('WorkflowExecutionState', () => {
         input: { myVar: 'val-2' },
       } as unknown as EsWorkflowStepExecution);
 
-      underTest.evictStaleLoopOutputs(['setVar']);
+      ioService.evictStaleLoopOutputs(['setVar']);
 
       const executions = underTest.getStepExecutionsByStepId('setVar');
       expect(executions[0].output).toEqual({ myVar: 'val-0' });
@@ -640,7 +639,7 @@ describe('WorkflowExecutionState', () => {
         output: { latest: true },
       } as unknown as EsWorkflowStepExecution);
 
-      underTest.evictStaleLoopOutputs(['innerStep']);
+      ioService.evictStaleLoopOutputs(['innerStep']);
 
       const evicted = underTest.getStepExecution('exec-1');
       expect(evicted).toEqual(
@@ -666,7 +665,7 @@ describe('WorkflowExecutionState', () => {
         input: { kept: true },
       } as unknown as EsWorkflowStepExecution);
 
-      underTest.evictStaleLoopOutputs(['singleStep']);
+      ioService.evictStaleLoopOutputs(['singleStep']);
 
       const execution = underTest.getStepExecution('only-exec');
       expect(execution?.output).toEqual({ preserved: true });
@@ -685,7 +684,7 @@ describe('WorkflowExecutionState', () => {
         output: { data: 'untouched-1' },
       } as unknown as EsWorkflowStepExecution);
 
-      underTest.evictStaleLoopOutputs(['otherStep']);
+      ioService.evictStaleLoopOutputs(['otherStep']);
 
       const executions = underTest.getStepExecutionsByStepId('outerStep');
       expect(executions[0].output).toEqual({ data: 'untouched-0' });
@@ -699,13 +698,13 @@ describe('WorkflowExecutionState', () => {
         output: { data: true },
       } as unknown as EsWorkflowStepExecution);
 
-      underTest.evictStaleLoopOutputs([]);
+      ioService.evictStaleLoopOutputs([]);
 
       expect(underTest.getStepExecution('exec-1')?.output).toEqual({ data: true });
     });
 
     it('should handle stepIds with no executions in the index', () => {
-      expect(() => underTest.evictStaleLoopOutputs(['nonexistent'])).not.toThrow();
+      expect(() => ioService.evictStaleLoopOutputs(['nonexistent'])).not.toThrow();
     });
 
     it('should handle mixed data.set and non-data.set steps', () => {
@@ -734,7 +733,7 @@ describe('WorkflowExecutionState', () => {
         output: { var: 'val-1' },
       } as unknown as EsWorkflowStepExecution);
 
-      underTest.evictStaleLoopOutputs(['actionStep', 'dataStep']);
+      ioService.evictStaleLoopOutputs(['actionStep', 'dataStep']);
 
       // Non-latest atomic step output evicted
       expect(underTest.getStepExecution('action-1')?.output).toBeUndefined();
@@ -757,7 +756,7 @@ describe('WorkflowExecutionState', () => {
         output: { data: 'latest' },
       } as unknown as EsWorkflowStepExecution);
 
-      underTest.evictStaleLoopOutputs(new Set(['innerStep']));
+      ioService.evictStaleLoopOutputs(new Set(['innerStep']));
 
       expect(underTest.getStepExecution('exec-1')?.output).toBeUndefined();
       expect(underTest.getStepExecution('exec-2')?.output).toEqual({ data: 'latest' });
@@ -788,7 +787,7 @@ describe('WorkflowExecutionState', () => {
           input: { counter: 3 },
         } as unknown as EsWorkflowStepExecution);
 
-        underTest.evictStaleLoopOutputs(['stepA']);
+        ioService.evictStaleLoopOutputs(['stepA']);
 
         // ALL data.set outputs must survive — getVariables() reads every one
         const executions = underTest.getStepExecutionsByStepId('stepA');
@@ -818,7 +817,7 @@ describe('WorkflowExecutionState', () => {
           } as unknown as EsWorkflowStepExecution);
         }
 
-        underTest.evictStaleLoopOutputs(['setVarStep', 'connectorStep']);
+        ioService.evictStaleLoopOutputs(['setVarStep', 'connectorStep']);
 
         // All data.set outputs preserved
         expect(underTest.getStepExecution('ds-0')?.output).toEqual({ accumulator: 'val-0' });
@@ -845,7 +844,7 @@ describe('WorkflowExecutionState', () => {
           } as unknown as EsWorkflowStepExecution);
         }
         // Inner loop finishes -> evict inner body (action)
-        underTest.evictStaleLoopOutputs(['action']);
+        ioService.evictStaleLoopOutputs(['action']);
 
         // After inner eviction: only latest (inner iter 2) has output
         expect(underTest.getStepExecution('action-outer0-inner0')?.output).toBeUndefined();
@@ -864,7 +863,7 @@ describe('WorkflowExecutionState', () => {
           } as unknown as EsWorkflowStepExecution);
         }
         // Inner loop finishes again -> evict inner body
-        underTest.evictStaleLoopOutputs(['action']);
+        ioService.evictStaleLoopOutputs(['action']);
 
         // Now 6 total executions. After second inner eviction,
         // only the very latest (outer1-inner2) should have output
@@ -875,7 +874,7 @@ describe('WorkflowExecutionState', () => {
         expect(withOutput[0].id).toBe('action-outer1-inner2');
 
         // Outer loop finishes -> evict outer body (includes action and inner loop steps)
-        underTest.evictStaleLoopOutputs(['action', 'innerLoop']);
+        ioService.evictStaleLoopOutputs(['action', 'innerLoop']);
 
         // After outer eviction: still only the very latest has output
         const finalWithOutput = underTest
@@ -899,9 +898,9 @@ describe('WorkflowExecutionState', () => {
           output: { data: 'latest' },
         } as unknown as EsWorkflowStepExecution);
 
-        underTest.evictStaleLoopOutputs(['step']);
-        underTest.evictStaleLoopOutputs(['step']);
-        underTest.evictStaleLoopOutputs(['step']);
+        ioService.evictStaleLoopOutputs(['step']);
+        ioService.evictStaleLoopOutputs(['step']);
+        ioService.evictStaleLoopOutputs(['step']);
 
         expect(underTest.getStepExecution('exec-1')?.output).toBeUndefined();
         expect(underTest.getStepExecution('exec-2')?.output).toEqual({ data: 'latest' });
@@ -926,7 +925,7 @@ describe('WorkflowExecutionState', () => {
           output: { data: 'latest' },
         } as unknown as EsWorkflowStepExecution);
 
-        underTest.evictStaleLoopOutputs(['step']);
+        ioService.evictStaleLoopOutputs(['step']);
 
         const latest = underTest.getLatestStepExecution('step');
         expect(latest?.id).toBe('exec-3');
@@ -946,7 +945,7 @@ describe('WorkflowExecutionState', () => {
           } as unknown as EsWorkflowStepExecution);
         }
 
-        underTest.evictStaleLoopOutputs(['loopBody']);
+        ioService.evictStaleLoopOutputs(['loopBody']);
 
         const all = underTest.getAllStepExecutions();
         expect(all).toHaveLength(5);
@@ -977,7 +976,7 @@ describe('WorkflowExecutionState', () => {
           output: { result: 'retry-2' },
         } as unknown as EsWorkflowStepExecution);
 
-        underTest.evictStaleLoopOutputs(['retryStep']);
+        ioService.evictStaleLoopOutputs(['retryStep']);
 
         const evicted = underTest.getStepExecution('exec-1');
         expect(evicted?.state).toEqual({ retryCount: 1, lastError: 'timeout' });
@@ -998,7 +997,7 @@ describe('WorkflowExecutionState', () => {
           } as unknown as EsWorkflowStepExecution);
         }
 
-        underTest.evictStaleLoopOutputs(['heavyStep']);
+        ioService.evictStaleLoopOutputs(['heavyStep']);
 
         const executions = underTest.getStepExecutionsByStepId('heavyStep');
         expect(executions).toHaveLength(iterationCount);
@@ -1024,12 +1023,12 @@ describe('WorkflowExecutionState', () => {
         } as unknown as EsWorkflowStepExecution);
 
         // Flush the creates to ES
-        await underTest.flush();
+        await ioService.flush();
         (stepExecutionRepository.bulkUpsert as jest.Mock).mockClear();
 
         // Now evict — this should NOT trigger another flush of the evicted data
-        underTest.evictStaleLoopOutputs(['step']);
-        await underTest.flush();
+        ioService.evictStaleLoopOutputs(['step']);
+        await ioService.flush();
 
         // No additional bulk upsert should have been triggered
         expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
@@ -1055,9 +1054,9 @@ describe('WorkflowExecutionState', () => {
         } as unknown as EsWorkflowStepExecution);
 
         // Evict BEFORE flushing — the pending entry for exec-1 must still carry its output
-        underTest.evictStaleLoopOutputs(['innerStep']);
+        ioService.evictStaleLoopOutputs(['innerStep']);
 
-        await underTest.flush();
+        await ioService.flush();
 
         // exec-1 was pending. Its flush payload must still include the original output/input
         // because eviction is in-memory-only and must not touch pending ES writes.
@@ -1092,7 +1091,7 @@ describe('WorkflowExecutionState', () => {
           output: { result: 'success' },
         } as unknown as EsWorkflowStepExecution);
 
-        underTest.evictStaleLoopOutputs(['failingStep']);
+        ioService.evictStaleLoopOutputs(['failingStep']);
 
         const evicted = underTest.getStepExecution('exec-1');
         expect(evicted?.error).toEqual({ message: 'timeout', type: 'StepTimeout' });
@@ -1120,7 +1119,7 @@ describe('WorkflowExecutionState', () => {
           output: { data: 'new' },
         } as unknown as EsWorkflowStepExecution);
 
-        underTest.evictStaleLoopOutputs(['innerStep']);
+        ioService.evictStaleLoopOutputs(['innerStep']);
 
         expect(underTest.getStepExecution('exec-1')?.scopeStack).toEqual(scopeStack);
       });

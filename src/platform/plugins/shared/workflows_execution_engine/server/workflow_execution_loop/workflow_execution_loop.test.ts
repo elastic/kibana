@@ -34,6 +34,8 @@ describe('workflowExecutionLoop', () => {
     },
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
+    },
+    stepIoService: {
       flush: jest.fn().mockResolvedValue(undefined),
     },
     workflowLogger: {
@@ -59,7 +61,7 @@ describe('workflowExecutionLoop', () => {
     expect(persistenceLoop).toHaveBeenCalled();
     expect(flushState).toHaveBeenCalled();
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
-    expect(params.workflowExecutionState.flush).toHaveBeenCalled();
+    expect(params.stepIoService.flush).toHaveBeenCalled();
     expect(params.workflowLogger.flushEvents).toHaveBeenCalled();
   });
 

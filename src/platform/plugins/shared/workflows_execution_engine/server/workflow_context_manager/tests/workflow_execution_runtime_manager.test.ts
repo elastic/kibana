@@ -37,6 +37,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
   let underTest: WorkflowExecutionRuntimeManager;
   let workflowExecution: EsWorkflowExecution;
   let workflowExecutionGraph: WorkflowGraph;
+  let stepIoService: StepIoService;
   let workflowLogger: IWorkflowEventLogger;
   let workflowExecutionState: WorkflowExecutionState;
   let fakeCoreStart: jest.Mocked<CoreStart>;
@@ -86,10 +87,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       getStepExecutionsByStepId: jest.fn(),
       getAllStepExecutions: jest.fn().mockReturnValue([]),
       upsertStep: jest.fn(),
-      load: jest.fn(),
-      flush: jest.fn(),
-      flushStepChanges: jest.fn(),
-      evictStaleLoopOutputs: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
     workflowExecutionGraph = {
@@ -123,8 +120,12 @@ describe('WorkflowExecutionRuntimeManager', () => {
     fakeCoreStart = {} as unknown as jest.Mocked<CoreStart>;
     fakeContextDependencies = {} as unknown as jest.Mocked<ContextDependencies>;
 
-    const stepIoService = {
+    stepIoService = {
       getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
+      flush: jest.fn().mockResolvedValue(undefined),
+      flushStepChanges: jest.fn().mockResolvedValue(undefined),
+      load: jest.fn().mockResolvedValue(undefined),
+      evictStaleLoopOutputs: jest.fn(),
     } as unknown as StepIoService;
 
     underTest = new WorkflowExecutionRuntimeManager({
@@ -310,7 +311,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     it('should load workflow execution state', async () => {
       await underTest.resume();
-      expect(workflowExecutionState.load).toHaveBeenCalled();
+      expect(stepIoService.load).toHaveBeenCalled();
     });
 
     it('should set current step to the node from execution', async () => {
@@ -342,7 +343,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         await underTest.resume();
 
         expect(workflowExecutionGraph.getInnerStepIds).toHaveBeenCalledWith('myForeach');
-        expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledWith(innerStepIds);
+        expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledWith(innerStepIds);
       });
 
       it('should evict inner step outputs for completed while loops on resume', async () => {
@@ -359,7 +360,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         await underTest.resume();
 
         expect(workflowExecutionGraph.getInnerStepIds).toHaveBeenCalledWith('myWhile');
-        expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledWith(innerStepIds);
+        expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledWith(innerStepIds);
       });
 
       it('should not evict outputs for a loop that is still running at resume time', async () => {
@@ -373,7 +374,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
         await underTest.resume();
 
-        expect(workflowExecutionState.evictStaleLoopOutputs).not.toHaveBeenCalled();
+        expect(stepIoService.evictStaleLoopOutputs).not.toHaveBeenCalled();
       });
 
       it('should de-duplicate by stepId when a nested loop has multiple COMPLETED executions', async () => {
@@ -391,7 +392,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
         // getInnerStepIds and evictStaleLoopOutputs called exactly once despite 3 executions
         expect(workflowExecutionGraph.getInnerStepIds).toHaveBeenCalledTimes(1);
-        expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledTimes(1);
+        expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledTimes(1);
       });
 
       it('should not call eviction when there are no loop steps', async () => {
@@ -406,7 +407,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
         await underTest.resume();
 
-        expect(workflowExecutionState.evictStaleLoopOutputs).not.toHaveBeenCalled();
+        expect(stepIoService.evictStaleLoopOutputs).not.toHaveBeenCalled();
       });
     });
   });

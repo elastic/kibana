@@ -477,11 +477,11 @@ export class WorkflowExecutionRuntimeManager {
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
     this.logWorkflowStart();
-    await this.workflowExecutionState.flush();
+    await this.stepIoService.flush();
   }
 
   public async resume(): Promise<void> {
-    await this.workflowExecutionState.load();
+    await this.stepIoService.load();
     this.evictCompletedLoopOutputs();
     this.nextNodeId = this.workflowExecution.currentNodeId;
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
@@ -514,7 +514,7 @@ export class WorkflowExecutionRuntimeManager {
 
     for (const loopStepId of completedLoopStepIds) {
       const innerStepIds = this.workflowGraph.getInnerStepIds(loopStepId);
-      this.workflowExecutionState.evictStaleLoopOutputs(innerStepIds);
+      this.stepIoService.evictStaleLoopOutputs(innerStepIds);
     }
   }
 

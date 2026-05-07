@@ -132,7 +132,6 @@ export async function setupDependencies(
     evictionMinBytes: config.eviction.minPayloadSize.getValueInBytes(),
     logger,
   });
-  workflowExecutionState.setIoService(stepIoService);
 
   // Create telemetry client
   const telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, logger);
@@ -182,7 +181,7 @@ export async function setupDependencies(
     workflowExecutionGraph,
     stepExecutionRuntimeFactory,
     enhancedDependencies,
-    workflowExecutionState
+    stepIoService
   );
 
   return {
@@ -190,6 +189,7 @@ export async function setupDependencies(
     workflowRuntime,
     stepExecutionRuntimeFactory,
     workflowExecutionState,
+    stepIoService,
     workflowLogger,
     workflowTaskManager,
     nodesFactory,

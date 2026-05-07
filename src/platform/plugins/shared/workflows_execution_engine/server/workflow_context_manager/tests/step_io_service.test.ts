@@ -56,7 +56,6 @@ function buildHarness(opts: { evictionMinBytes?: number } = {}) {
     state: state.ioStateAccessor,
     evictionMinBytes: opts.evictionMinBytes ?? Infinity,
   });
-  state.setIoService(service);
 
   return { state, service, stepExecutionRepository, workflowExecutionRepository };
 }
@@ -152,20 +151,20 @@ describe('StepIoService', () => {
   });
 
   describe('recordOutputSize', () => {
-    it('stores size for later threshold check', () => {
+    it('stores size for later threshold check', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       createCompletedStep(state, 'step-1', 'myStep', { data: 'something' }, 'connector');
       service.recordOutputSize('step-1', 50);
 
-      service.onStepsFlushed(['step-1']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
       expect(service.hasEvictedOutputs()).toBe(false);
 
       createCompletedStep(state, 'step-2', 'myStep2', { data: 'large' }, 'connector');
       service.recordOutputSize('step-2', 200);
 
-      service.onStepsFlushed(['step-2']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
       expect(service.hasEvictedOutputs()).toBe(true);
       expect(state.getStepExecution('step-2')?.output).toBeUndefined();
     });
@@ -193,7 +192,7 @@ describe('StepIoService', () => {
       expect(service.getOutputSizeStats()).toEqual({ totalBytes: 300, stepCount: 2 });
     });
 
-    it('combines sizes from active and evicted steps', () => {
+    it('combines sizes from active and evicted steps', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       createCompletedStep(state, 'step-1', 's1', { data: 'a' }, 'connector');
       createCompletedStep(state, 'step-2', 's2', { data: 'b' }, 'connector');
@@ -201,8 +200,8 @@ describe('StepIoService', () => {
       service.recordOutputSize('step-2', 250);
 
       // Drive step-2 through the deferral cycle so it ends up evicted.
-      service.onStepsFlushed(['step-2']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       const stats = service.getOutputSizeStats();
       expect(stats.totalBytes).toBe(400);
@@ -216,57 +215,57 @@ describe('StepIoService', () => {
       expect(service.hasEvictedOutputs()).toBe(false);
     });
 
-    it('returns true after eviction', () => {
+    it('returns true after eviction', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       createCompletedStep(state, 'step-1', 'myStep', { data: 'large' }, 'connector');
       service.recordOutputSize('step-1', 250);
 
-      service.onStepsFlushed(['step-1']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(service.hasEvictedOutputs()).toBe(true);
     });
   });
 
   describe('eviction policy', () => {
-    it('evicts output above threshold from completed step', () => {
+    it('evicts output above threshold from completed step', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       createCompletedStep(state, 'step-1', 'myStep', { largeData: 'x'.repeat(200) }, 'connector');
       service.recordOutputSize('step-1', 250);
 
-      service.onStepsFlushed(['step-1']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.output).toBeUndefined();
       expect(service.hasEvictedOutputs()).toBe(true);
     });
 
-    it('evicts output exactly at threshold (minPayloadSize is inclusive)', () => {
+    it('evicts output exactly at threshold (minPayloadSize is inclusive)', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       createCompletedStep(state, 'step-1', 'myStep', { data: 'at-boundary' }, 'connector');
       service.recordOutputSize('step-1', EVICTION_THRESHOLD);
 
-      service.onStepsFlushed(['step-1']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.output).toBeUndefined();
       expect(service.hasEvictedOutputs()).toBe(true);
     });
 
-    it('retains output below threshold', () => {
+    it('retains output below threshold', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       const smallOutput = { key: 'val' };
       createCompletedStep(state, 'step-1', 'myStep', smallOutput, 'connector');
       service.recordOutputSize('step-1', 10);
 
-      service.onStepsFlushed(['step-1']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.output).toEqual(smallOutput);
       expect(service.hasEvictedOutputs()).toBe(false);
     });
 
-    it('retains output from running steps', () => {
+    it('retains output from running steps', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       state.upsertStep({
         id: 'step-1',
@@ -277,49 +276,49 @@ describe('StepIoService', () => {
       } as Partial<EsWorkflowStepExecution>);
       service.recordOutputSize('step-1', 250);
 
-      service.onStepsFlushed(['step-1']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.output).toBeDefined();
       expect(service.hasEvictedOutputs()).toBe(false);
     });
 
-    it('retains output from data.set steps regardless of size (pinned)', () => {
+    it('retains output from data.set steps regardless of size (pinned)', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       createCompletedStep(state, 'step-1', 'myDataSet', { largeData: 'x'.repeat(200) }, 'data.set');
       service.recordOutputSize('step-1', 250);
 
-      service.onStepsFlushed(['step-1']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.output).toBeDefined();
       expect(service.hasEvictedOutputs()).toBe(false);
     });
 
-    it('retains output from waitForInput steps regardless of size (pinned)', () => {
+    it('retains output from waitForInput steps regardless of size (pinned)', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       createCompletedStep(state, 'step-1', 'wait', { answer: 'x'.repeat(200) }, 'waitForInput');
       service.recordOutputSize('step-1', 250);
 
-      service.onStepsFlushed(['step-1']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.output).toBeDefined();
     });
 
-    it('skips steps with no recorded size (assumes small)', () => {
+    it('skips steps with no recorded size (assumes small)', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       createCompletedStep(state, 'step-1', 'myStep', { data: 'something' }, 'connector');
       // No recordOutputSize call
 
-      service.onStepsFlushed(['step-1']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.output).toBeDefined();
       expect(service.hasEvictedOutputs()).toBe(false);
     });
 
-    it('does not evict failed steps (output: null is semantic)', () => {
+    it('does not evict failed steps (output: null is semantic)', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       state.upsertStep({
         id: 'step-1',
@@ -330,8 +329,8 @@ describe('StepIoService', () => {
       } as Partial<EsWorkflowStepExecution>);
       service.recordOutputSize('step-1', 250);
 
-      service.onStepsFlushed(['step-1']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.output).toBeNull();
       expect(service.hasEvictedOutputs()).toBe(false);
@@ -345,11 +344,11 @@ describe('StepIoService', () => {
       service.recordOutputSize('step-1', 250);
 
       // Cycle 1: persists + queues for eviction.
-      await state.flushStepChanges();
+      await service.flushStepChanges();
       jest.clearAllMocks();
 
       // Cycle 2: drains eviction; no new doc change should be sent.
-      await state.flushStepChanges();
+      await service.flushStepChanges();
       expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
     });
   });
@@ -363,8 +362,8 @@ describe('StepIoService', () => {
       createCompletedStep(state, 'step-1', 'myStep', originalOutput, 'connector');
       service.recordOutputSize('step-1', 250);
 
-      service.onStepsFlushed(['step-1']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
       expect(state.getStepExecution('step-1')?.output).toBeUndefined();
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
@@ -400,8 +399,8 @@ describe('StepIoService', () => {
       });
       createCompletedStep(state, 'step-1', 'myStep', { data: 'large' }, 'connector');
       service.recordOutputSize('step-1', 250);
-      service.onStepsFlushed(['step-1']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([]);
 
@@ -418,7 +417,7 @@ describe('StepIoService', () => {
       createCompletedStep(state, 'step-1', 'myStep', { data: 'x'.repeat(200) }, 'connector');
       service.recordOutputSize('step-1', 250);
 
-      await state.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.output).toBeDefined();
       expect(service.hasEvictedOutputs()).toBe(false);
@@ -429,8 +428,8 @@ describe('StepIoService', () => {
       createCompletedStep(state, 'step-1', 'myStep', { data: 'x'.repeat(200) }, 'connector');
       service.recordOutputSize('step-1', 250);
 
-      await state.flushStepChanges();
-      await state.flushStepChanges();
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.output).toBeUndefined();
       expect(service.hasEvictedOutputs()).toBe(true);
@@ -442,8 +441,8 @@ describe('StepIoService', () => {
       createCompletedStep(state, 'step-1', 'myStep', smallOutput, 'connector');
       service.recordOutputSize('step-1', 10);
 
-      await state.flushStepChanges();
-      await state.flushStepChanges();
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.output).toEqual(smallOutput);
       expect(service.hasEvictedOutputs()).toBe(false);
@@ -453,16 +452,16 @@ describe('StepIoService', () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       createCompletedStep(state, 'step-a', 'sA', { data: 'a'.repeat(200) }, 'connector');
       service.recordOutputSize('step-a', 250);
-      await state.flushStepChanges();
+      await service.flushStepChanges();
 
       createCompletedStep(state, 'step-b', 'sB', { data: 'b'.repeat(200) }, 'connector');
       service.recordOutputSize('step-b', 300);
-      await state.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-a')?.output).toBeUndefined();
       expect(state.getStepExecution('step-b')?.output).toBeDefined();
 
-      await state.flushStepChanges();
+      await service.flushStepChanges();
       expect(state.getStepExecution('step-b')?.output).toBeUndefined();
     });
 
@@ -471,10 +470,10 @@ describe('StepIoService', () => {
       createCompletedStep(state, 'step-1', 'myStep', { data: 'x'.repeat(200) }, 'connector');
       service.recordOutputSize('step-1', 250);
 
-      await state.flushStepChanges();
+      await service.flushStepChanges();
       expect(state.getStepExecution('step-1')?.output).toBeDefined();
 
-      await state.flushStepChanges();
+      await service.flushStepChanges();
       expect(state.getStepExecution('step-1')?.output).toBeUndefined();
       expect(service.hasEvictedOutputs()).toBe(true);
     });
@@ -484,8 +483,8 @@ describe('StepIoService', () => {
       createCompletedStep(state, 'step-1', 'myDataSet', { largeData: 'x'.repeat(200) }, 'data.set');
       service.recordOutputSize('step-1', 250);
 
-      await state.flushStepChanges();
-      await state.flushStepChanges();
+      await service.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.output).toBeDefined();
       expect(service.hasEvictedOutputs()).toBe(false);
@@ -494,7 +493,7 @@ describe('StepIoService', () => {
 
   describe('input eviction', () => {
     it('evicts input from completed step after flush', async () => {
-      const { state } = buildHarness();
+      const { state, service } = buildHarness();
       state.upsertStep({
         id: 'step-1',
         stepId: 'myStep',
@@ -504,13 +503,13 @@ describe('StepIoService', () => {
         output: { result: 'ok' },
       } as Partial<EsWorkflowStepExecution>);
 
-      await state.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.input).toBeUndefined();
     });
 
     it('evicts input from failed step after flush', async () => {
-      const { state } = buildHarness();
+      const { state, service } = buildHarness();
       state.upsertStep({
         id: 'step-1',
         stepId: 'myStep',
@@ -520,13 +519,13 @@ describe('StepIoService', () => {
         output: null,
       } as Partial<EsWorkflowStepExecution>);
 
-      await state.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.input).toBeUndefined();
     });
 
     it('does NOT evict input from running step after flush', async () => {
-      const { state } = buildHarness();
+      const { state, service } = buildHarness();
       const input = { foreach: '{{steps.data.output}}' };
       state.upsertStep({
         id: 'step-1',
@@ -536,13 +535,13 @@ describe('StepIoService', () => {
         input,
       } as Partial<EsWorkflowStepExecution>);
 
-      await state.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.input).toEqual(input);
     });
 
     it('does NOT evict input from waiting step after flush', async () => {
-      const { state } = buildHarness();
+      const { state, service } = buildHarness();
       const input = { duration: '20m' };
       state.upsertStep({
         id: 'step-1',
@@ -552,13 +551,13 @@ describe('StepIoService', () => {
         input,
       } as Partial<EsWorkflowStepExecution>);
 
-      await state.flushStepChanges();
+      await service.flushStepChanges();
 
       expect(state.getStepExecution('step-1')?.input).toEqual(input);
     });
 
     it('does not cause stepDocumentsChanges on subsequent flush after input eviction', async () => {
-      const { state, stepExecutionRepository } = buildHarness();
+      const { state, service, stepExecutionRepository } = buildHarness();
       state.upsertStep({
         id: 'step-1',
         stepId: 'myStep',
@@ -567,10 +566,10 @@ describe('StepIoService', () => {
         input: { message: 'hello' },
       } as Partial<EsWorkflowStepExecution>);
 
-      await state.flushStepChanges();
+      await service.flushStepChanges();
       jest.clearAllMocks();
 
-      await state.flushStepChanges();
+      await service.flushStepChanges();
       expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
     });
 
@@ -586,11 +585,11 @@ describe('StepIoService', () => {
       } as Partial<EsWorkflowStepExecution>);
       service.recordOutputSize('step-1', 250);
 
-      await state.flushStepChanges();
+      await service.flushStepChanges();
       expect(state.getStepExecution('step-1')?.input).toBeUndefined();
       expect(state.getStepExecution('step-1')?.output).toBeDefined();
 
-      await state.flushStepChanges();
+      await service.flushStepChanges();
       expect(state.getStepExecution('step-1')?.output).toBeUndefined();
       expect(service.hasEvictedOutputs()).toBe(true);
     });
@@ -620,14 +619,14 @@ describe('StepIoService', () => {
       service.recordOutputSize('iter-2', 250);
 
       // Stale-loop eviction nullifies iter-1 (non-latest).
-      state.evictStaleLoopOutputs(['loopStep']);
+      service.evictStaleLoopOutputs(['loopStep']);
       expect(state.getStepExecution('iter-1')?.output).toBeUndefined();
       expect(state.getStepExecution('iter-2')?.output).toBeDefined();
 
       // Run the deferral cycle on both — iter-1 won't be added to evicted set
       // (output already undefined), iter-2 will.
-      service.onStepsFlushed(['iter-1', 'iter-2']);
-      service.onStepsFlushed([]);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
       expect(service.hasEvictedOutputs()).toBe(true);
       expect(state.getStepExecution('iter-2')?.output).toBeUndefined();
 
@@ -640,10 +639,34 @@ describe('StepIoService', () => {
     });
   });
 
-  describe('onLoad (resume-time deferred outputs)', () => {
-    it('marks non-pinned step outputs as deferred', () => {
-      const { service } = buildHarness();
-      service.onLoad([
+  describe('load (resume-time deferred outputs)', () => {
+    /**
+     * Drives the public `service.load()` path with mocked repository
+     * responses, exercising the same deferred/eager registration logic
+     * `markDeferredAfterLoad` does internally.
+     */
+    async function driveLoad(
+      steps: EsWorkflowStepExecution[],
+      pinnedOutputs: Array<{ id: string; output: unknown }> = []
+    ) {
+      const harness = buildHarness();
+      harness.state.updateWorkflowExecution({ stepExecutionIds: steps.map((s) => s.id) });
+      const calls = harness.stepExecutionRepository.getStepExecutionsByIds as jest.Mock;
+      calls.mockReset();
+      // First call: load without outputs.
+      calls.mockResolvedValueOnce(steps);
+      // Second call (only if pinned IDs are returned): eager output fetch.
+      if (pinnedOutputs.length > 0) {
+        calls.mockResolvedValueOnce(
+          pinnedOutputs.map((p) => ({ id: p.id, output: p.output } as EsWorkflowStepExecution))
+        );
+      }
+      await harness.service.load();
+      return harness;
+    }
+
+    it('marks non-pinned step outputs as deferred', async () => {
+      const { service } = await driveLoad([
         {
           id: '11',
           stepId: 'connectorStep',
@@ -654,37 +677,45 @@ describe('StepIoService', () => {
       expect(service.hasEvictedOutputs()).toBe(true);
     });
 
-    it('returns pinned IDs for eager output fetch (data.set)', () => {
-      const { service } = buildHarness();
-      const result = service.onLoad([
-        {
-          id: '11',
-          stepId: 'setVar',
-          stepType: 'data.set',
-          status: ExecutionStatus.COMPLETED,
-        } as EsWorkflowStepExecution,
-      ]);
-      expect(result.pinnedIdsToFetch).toEqual(['11']);
+    it('eagerly fetches outputs for data.set step types', async () => {
+      const { service, state, stepExecutionRepository } = await driveLoad(
+        [
+          {
+            id: '11',
+            stepId: 'setVar',
+            stepType: 'data.set',
+            status: ExecutionStatus.COMPLETED,
+          } as EsWorkflowStepExecution,
+        ],
+        [{ id: '11', output: { v: 1 } }]
+      );
       expect(service.hasEvictedOutputs()).toBe(false);
+      expect(state.getStepExecution('11')?.output).toEqual({ v: 1 });
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenNthCalledWith(
+        2,
+        ['11'],
+        ['id', 'output']
+      );
     });
 
-    it('returns pinned IDs for waitForInput as well', () => {
-      const { service } = buildHarness();
-      const result = service.onLoad([
-        {
-          id: '11',
-          stepId: 'wait',
-          stepType: 'waitForInput',
-          status: ExecutionStatus.COMPLETED,
-        } as EsWorkflowStepExecution,
-      ]);
-      expect(result.pinnedIdsToFetch).toEqual(['11']);
+    it('eagerly fetches outputs for waitForInput step types', async () => {
+      const { service, state } = await driveLoad(
+        [
+          {
+            id: '11',
+            stepId: 'wait',
+            stepType: 'waitForInput',
+            status: ExecutionStatus.COMPLETED,
+          } as EsWorkflowStepExecution,
+        ],
+        [{ id: '11', output: { reply: 'ok' } }]
+      );
       expect(service.hasEvictedOutputs()).toBe(false);
+      expect(state.getStepExecution('11')?.output).toEqual({ reply: 'ok' });
     });
 
-    it('treats undefined stepType as non-pinned', () => {
-      const { service } = buildHarness();
-      service.onLoad([
+    it('treats undefined stepType as non-pinned', async () => {
+      const { service } = await driveLoad([
         {
           id: '11',
           stepId: 'legacyStep',
@@ -735,14 +766,19 @@ describe('StepIoService', () => {
     });
 
     it('rehydrates only the step IDs referenced in template expressions', async () => {
-      const { state, service, stepExecutionRepository } = buildHarness();
+      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
       const { graph, stepCNode } = buildGraphWorkflow();
 
-      // Seed two completed predecessors and mark them as evicted.
+      // Seed two completed predecessors and drive them through the deferred
+      // eviction cycle so they end up in the evicted-outputs map.
       createCompletedStep(state, 'exec-a', 'step_a', { v: 'a' }, 'connector');
       createCompletedStep(state, 'exec-b', 'step_b', { v: 'b' }, 'connector');
-      service.onLoad([state.getStepExecution('exec-a')!, state.getStepExecution('exec-b')!]);
+      service.recordOutputSize('exec-a', 1);
+      service.recordOutputSize('exec-b', 1);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
       expect(service.hasEvictedOutputs()).toBe(true);
+      stepExecutionRepository.bulkUpsert.mockClear();
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
         { id: 'exec-b', output: { v: 'b' } } as unknown as EsWorkflowStepExecution,
@@ -781,9 +817,12 @@ describe('StepIoService', () => {
         .map((nodeId) => graph.getNode(nodeId))
         .find((n) => n.stepId === 'step_b')!;
 
-      const { state, service, stepExecutionRepository } = buildHarness();
+      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
       createCompletedStep(state, 'exec-a', 'step_a', { v: 'a' }, 'connector');
-      service.onLoad([state.getStepExecution('exec-a')!]);
+      service.recordOutputSize('exec-a', 1);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+      expect(service.hasEvictedOutputs()).toBe(true);
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
         { id: 'exec-a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
