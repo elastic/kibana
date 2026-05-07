@@ -1,0 +1,12 @@
+steps:
+  - name: mock kibana snapshot build
+    if: build.env("DRY_RUN") == "true"
+    command: sleep 10
+
+  - name: Trigger DRA Snapshot Build
+    key: trigger-dra-snapshot
+    if: build.env("DRY_RUN") == "false"
+    trigger: kibana-artifacts-snapshot
+    async: false
+    build:
+      branch: '${BRANCH}'
