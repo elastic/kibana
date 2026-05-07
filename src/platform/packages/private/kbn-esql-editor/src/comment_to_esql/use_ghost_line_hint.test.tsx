@@ -197,6 +197,64 @@ describe('useGhostLineHint', () => {
     expect(stubs.editor.createDecorationsCollection).not.toHaveBeenCalled();
   });
 
+  it('does not show the hint while a generation is in flight', () => {
+    const isGeneratingRef = { current: true };
+    const { model } = buildModel(['FROM logs', '']);
+    const stubs = setupEditorStubs();
+
+    const { result } = renderHook(() =>
+      useGhostLineHint({
+        editorRef: { current: stubs.editor },
+        editorModel: { current: model },
+        isReviewActiveRef: { current: null },
+        isEnabled: true,
+        isGeneratingRef,
+      })
+    );
+
+    act(() => {
+      result.current.setupGhostLineHint(stubs.editor);
+    });
+
+    act(() => {
+      stubs.fireCursorChange();
+      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+    });
+
+    expect(stubs.editor.createDecorationsCollection).not.toHaveBeenCalled();
+  });
+
+  it('writes its clearDecoration into clearGhostHintRef so other hooks can hide a visible hint', () => {
+    const clearGhostHintRef = { current: () => {} };
+    const { model } = buildModel(['FROM logs', '']);
+    const stubs = setupEditorStubs();
+
+    const { result } = renderHook(() =>
+      useGhostLineHint({
+        editorRef: { current: stubs.editor },
+        editorModel: { current: model },
+        isReviewActiveRef: { current: null },
+        isEnabled: true,
+        clearGhostHintRef,
+      })
+    );
+
+    act(() => {
+      result.current.setupGhostLineHint(stubs.editor);
+      stubs.fireCursorChange();
+      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+    });
+    expect(stubs.editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
+
+    // The forward-ref now holds the real clear callback; calling it should
+    // dismiss the visible decoration.
+    act(() => {
+      clearGhostHintRef.current();
+    });
+
+    expect(stubs.decorationsCollection.clear).toHaveBeenCalled();
+  });
+
   it('does not show the hint when the feature is disabled, and starts showing it once enabled', () => {
     const stubs = renderGhostHint({ isEnabled: false });
 

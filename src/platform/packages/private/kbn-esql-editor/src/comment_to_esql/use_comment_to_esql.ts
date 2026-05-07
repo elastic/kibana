@@ -25,6 +25,7 @@ import {
 } from './utils';
 const CODE_ADDED_CLASS = 'esqlCodeAdded';
 const LINE_REPLACED_CLASS = 'esqlLineReplaced';
+const GENERATING_HINT_CLASS = 'esqlGeneratingHint';
 
 interface GenerateResult {
   content: string;
@@ -44,6 +45,9 @@ interface UseCommentToEsqlParams {
   http: HttpStart;
   notifications: NotificationsStart;
   isEnabled: boolean;
+  // Hides any already-visible ghost-line hint so it doesn't overlap with the
+  // "Generating..." decoration during the LLM call.
+  clearGhostHint?: () => void;
 }
 
 export const useCommentToEsql = ({
@@ -52,6 +56,7 @@ export const useCommentToEsql = ({
   http,
   notifications,
   isEnabled,
+  clearGhostHint,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const reviewStateRef = useRef<CommentReviewState | null>(null);
@@ -65,6 +70,16 @@ export const useCommentToEsql = ({
   const commentAnchorRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(
     undefined
   );
+  // Inline "Generating..." hint shown next to the comment while we await the LLM response.
+  const generatingDecorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(
+    undefined
+  );
+  // Read by useGhostLineHint to suppress its hint while a generation is in flight.
+  const isGeneratingRef = useRef(false);
+
+  const generatingText = i18n.translate('esqlEditor.commentToEsql.generating', {
+    defaultMessage: 'Generating...',
+  });
 
   // Diff styles for the comment and the generated code
   const commentToEsqlStyle = useMemo(
@@ -76,8 +91,28 @@ export const useCommentToEsql = ({
         background-color: ${euiTheme.colors.backgroundLightWarning};
         text-decoration: line-through;
       }
+      @keyframes esqlGeneratingPulse {
+        0%,
+        100% {
+          opacity: 0.4;
+        }
+        50% {
+          opacity: 0.75;
+        }
+      }
+      .${GENERATING_HINT_CLASS}::after {
+        content: ${JSON.stringify(' ' + generatingText)};
+        font-style: italic;
+        color: ${euiTheme.colors.textSubdued};
+        animation: esqlGeneratingPulse 1.4s ease-in-out infinite;
+      }
     `,
-    [euiTheme.colors.backgroundLightSuccess, euiTheme.colors.backgroundLightWarning]
+    [
+      euiTheme.colors.backgroundLightSuccess,
+      euiTheme.colors.backgroundLightWarning,
+      euiTheme.colors.textSubdued,
+      generatingText,
+    ]
   );
 
   const clearCommentAnchor = useCallback(() => {
@@ -89,6 +124,33 @@ export const useCommentToEsql = ({
     abortControllerRef.current?.abort();
     abortControllerRef.current = undefined;
   }, []);
+
+  const clearGeneratingDecoration = useCallback(() => {
+    generatingDecorationsRef.current?.clear();
+    generatingDecorationsRef.current = undefined;
+    isGeneratingRef.current = false;
+  }, []);
+
+  const showGeneratingDecoration = useCallback(
+    (lineNumber: number) => {
+      const editor = editorRef.current;
+      const model = editorModel.current;
+      if (!editor || !model) return;
+
+      generatingDecorationsRef.current?.clear();
+
+      const column = model.getLineMaxColumn(lineNumber);
+      generatingDecorationsRef.current = editor.createDecorationsCollection([
+        {
+          range: new monaco.Range(lineNumber, column, lineNumber, column),
+          options: {
+            afterContentClassName: GENERATING_HINT_CLASS,
+          },
+        },
+      ]);
+    },
+    [editorRef, editorModel]
+  );
 
   const cleanup = useCallback(() => {
     decorationsRef.current?.clear();
@@ -105,8 +167,9 @@ export const useCommentToEsql = ({
     reviewStateRef.current = null;
 
     clearCommentAnchor();
+    clearGeneratingDecoration();
     abortInFlight();
-  }, [clearCommentAnchor, abortInFlight]);
+  }, [clearCommentAnchor, clearGeneratingDecoration, abortInFlight]);
 
   const acceptChange = useCallback(() => {
     const editor = editorRef.current;
@@ -299,6 +362,10 @@ export const useCommentToEsql = ({
       },
     ]);
 
+    isGeneratingRef.current = true;
+    clearGhostHint?.();
+    showGeneratingDecoration(targetComment.lineNumber);
+
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
@@ -309,9 +376,11 @@ export const useCommentToEsql = ({
       if (abortControllerRef.current === controller) {
         abortControllerRef.current = undefined;
       }
+      clearGeneratingDecoration();
       return;
     }
     abortControllerRef.current = undefined;
+    clearGeneratingDecoration();
 
     const liveModel = editorModel.current;
     const anchorRanges = commentAnchorRef.current?.getRanges() ?? [];
@@ -344,11 +413,23 @@ export const useCommentToEsql = ({
       generatedLineEnd,
       replacedLineNumber,
     });
-  }, [editorRef, editorModel, cleanup, clearCommentAnchor, generateESQL, showReview, isEnabled]);
+  }, [
+    editorRef,
+    editorModel,
+    cleanup,
+    clearCommentAnchor,
+    showGeneratingDecoration,
+    clearGeneratingDecoration,
+    clearGhostHint,
+    generateESQL,
+    showReview,
+    isEnabled,
+  ]);
 
   return {
     commentToEsqlStyle,
     generateFromComment,
     isReviewActiveRef: reviewStateRef,
+    isGeneratingRef,
   };
 };

@@ -50,6 +50,11 @@ interface UseGhostLineHintParams {
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   isReviewActiveRef: MutableRefObject<object | null>;
   isEnabled: boolean;
+  // Suppresses the hint while a comment-to-esql generation is in flight.
+  isGeneratingRef?: MutableRefObject<boolean>;
+  // Forward-ref into which we write our `clearDecoration` so the comment-to-esql
+  // hook can clear an already-shown hint without circular hook dependencies.
+  clearGhostHintRef?: MutableRefObject<() => void>;
 }
 
 export const useGhostLineHint = ({
@@ -57,6 +62,8 @@ export const useGhostLineHint = ({
   editorModel,
   isReviewActiveRef,
   isEnabled,
+  isGeneratingRef,
+  clearGhostHintRef,
 }: UseGhostLineHintParams) => {
   const { euiTheme } = useEuiTheme();
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
@@ -98,6 +105,12 @@ export const useGhostLineHint = ({
     decorationsRef.current?.clear();
   }, []);
 
+  // Expose clearDecoration through the forward-ref so the comment-to-esql hook
+  // can hide an already-visible hint when generation starts.
+  if (clearGhostHintRef) {
+    clearGhostHintRef.current = clearDecoration;
+  }
+
   const showDecoration = useCallback(
     (lineNumber: number, kind: Exclude<GhostHintKind, null>) => {
       const editor = editorRef.current;
@@ -118,7 +131,6 @@ export const useGhostLineHint = ({
           range: new monaco.Range(lineNumber, column, lineNumber, column),
           options: {
             afterContentClassName,
-            description: 'esql-ghost-line-hint',
           },
         },
       ]);
@@ -144,6 +156,7 @@ export const useGhostLineHint = ({
         debounceTimerRef.current = setTimeout(() => {
           if (!isEnabledRef.current) return;
           if (isReviewActiveRef.current) return;
+          if (isGeneratingRef?.current) return;
 
           const model = editorModel.current;
           const position = editor.getPosition();
@@ -170,7 +183,7 @@ export const useGhostLineHint = ({
 
       return disposables;
     },
-    [editorModel, clearDecoration, clearTimer, showDecoration, isReviewActiveRef]
+    [editorModel, clearDecoration, clearTimer, showDecoration, isReviewActiveRef, isGeneratingRef]
   );
 
   return {

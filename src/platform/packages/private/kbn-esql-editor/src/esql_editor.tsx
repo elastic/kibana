@@ -548,16 +548,22 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const isNlToEsqlEnabled = useNlToEsqlCheck();
 
+  // Forward-declared so the comment-to-esql hook can hide an already-visible
+  // ghost hint when generation starts; populated below by useGhostLineHint.
+  const clearGhostHintRef = useRef<() => void>(() => {});
+
   const {
     commentToEsqlStyle,
     generateFromComment: onGenerateFromComment,
     isReviewActiveRef,
+    isGeneratingRef,
   } = useCommentToEsql({
     editorRef,
     editorModel,
     http: core.http,
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
+    clearGhostHint: () => clearGhostHintRef.current(),
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -568,6 +574,8 @@ const ESQLEditorInternal = function ESQLEditor({
     editorModel,
     isReviewActiveRef,
     isEnabled: isNlToEsqlEnabled,
+    isGeneratingRef,
+    clearGhostHintRef,
   });
 
   const {
