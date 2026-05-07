@@ -154,9 +154,9 @@ describe('hooks', () => {
       // Risk tab receives `entityStoreEntityId` (not the panel param `entityId`).
       // When entity is not in the entity store, this is `undefined` by design.
       expect(getRiskInputTab).toHaveBeenCalledWith({
-        entityName: 'testHost',
+        entityName: defaultParams.hostName,
         entityType: EntityType.host,
-        scopeId: 'test',
+        scopeId: defaultParams.scopeId,
         entityId: undefined,
       });
     });
@@ -181,28 +181,25 @@ describe('hooks', () => {
       ]);
       expect(getInsightsInputTab).toHaveBeenCalledWith({
         field: 'host.name',
-        value: 'testHost',
-        entityId: 'testEntityId',
-        scopeId: 'test',
+        value: defaultParams.hostName,
+        entityId: defaultParams.entityId,
+        scopeId: defaultParams.scopeId,
         entityType: EntityType.host,
       });
     });
 
     it('should return the risk inputs and graph view tabs when entityStoreEntityId and hostName are set', () => {
-      const { result } = renderHook(
-        () =>
-          useTabs({
-            isRiskScoreExist: false,
-            hostName: 'testHost',
-            entityId: 'testEntityId',
-            scopeId: 'scope1',
-            hasMisconfigurationFindings: false,
-            hasVulnerabilitiesFindings: false,
-            hasNonClosedAlerts: false,
-            entityStoreEntityId: 'testEntityStoreId',
-          }),
-        { wrapper: TestProviders }
-      );
+      const params: HostDetailsPanelProps = {
+        isRiskScoreExist: false,
+        hostName: 'testHost',
+        entityId: 'testEntityId',
+        scopeId: 'scope1',
+        hasMisconfigurationFindings: false,
+        hasVulnerabilitiesFindings: false,
+        hasNonClosedAlerts: false,
+        entityStoreEntityId: 'testEntityStoreId',
+      };
+      const { result } = renderHook(() => useTabs(params), { wrapper: TestProviders });
 
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
@@ -211,14 +208,14 @@ describe('hooks', () => {
       // When the entity is in the entity store, the risk tab receives the
       // `entityStoreEntityId` so it can look up unscored-entity context.
       expect(getRiskInputTab).toHaveBeenCalledWith({
-        entityName: 'testHost',
+        entityName: params.hostName,
         entityType: EntityType.host,
-        scopeId: 'scope1',
-        entityId: 'testEntityStoreId',
+        scopeId: params.scopeId,
+        entityId: params.entityStoreEntityId,
       });
       expect(getGraphViewTab).toHaveBeenCalledWith({
-        entityId: 'testEntityStoreId',
-        scopeId: 'scope1',
+        entityId: params.entityStoreEntityId,
+        scopeId: params.scopeId,
       });
     });
 
@@ -265,7 +262,7 @@ describe('hooks', () => {
       expect(getResolutionGroupTab).toHaveBeenCalledWith({
         entityId: 'stored-host-entity-1',
         entityType: EntityType.host,
-        scopeId: 'test',
+        scopeId: defaultParams.scopeId,
       });
     });
 
