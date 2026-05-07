@@ -8,7 +8,9 @@
 import React, { useState } from 'react';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import { i18n } from '@kbn/i18n';
 import { paths } from '../../../constants';
+import { EntityNotFoundFlyout } from '../../entity_not_found_flyout';
 import { useCreateActionPolicy } from '../../../hooks/use_create_action_policy';
 import { useDeleteActionPolicy } from '../../../hooks/use_delete_action_policy';
 import { useDisableActionPolicy } from '../../../hooks/use_disable_action_policy';
@@ -33,7 +35,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
 
-  const { data: policy } = useFetchActionPolicy(policyId);
+  const { data: policy, isLoading, isError } = useFetchActionPolicy(policyId);
   const { mutate: createActionPolicy } = useCreateActionPolicy();
   const { mutate: deleteActionPolicy, isLoading: isDeleting } = useDeleteActionPolicy();
   const {
@@ -72,7 +74,21 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
     onClose();
   };
 
-  if (!policy) return null;
+  if (isLoading) return null;
+
+  if (isError || !policy) {
+    return (
+      <EntityNotFoundFlyout
+        title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.notFoundTitle', {
+          defaultMessage: 'Action policy not found',
+        })}
+        body={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.notFoundBody', {
+          defaultMessage: 'The policy may have been deleted or you may not have access to it.',
+        })}
+        onClose={onClose}
+      />
+    );
+  }
 
   // While a confirmation modal is open, hide the flyout locally so the modal
   // takes the foreground without unmounting the container — the container owns

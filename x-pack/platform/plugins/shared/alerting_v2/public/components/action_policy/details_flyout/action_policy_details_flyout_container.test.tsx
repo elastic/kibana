@@ -206,8 +206,27 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
   });
 
   it('renders nothing while the policy is loading', () => {
-    mockUseFetchActionPolicy.mockReturnValue({ data: undefined });
+    mockUseFetchActionPolicy.mockReturnValue({ data: undefined, isLoading: true });
     renderContainer();
+    expect(screen.queryByTestId('mockFlyout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityNotFoundFlyout')).not.toBeInTheDocument();
+  });
+
+  it('renders the not-found flyout when the fetch errors out', async () => {
+    mockUseFetchActionPolicy.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+    renderContainer();
+
+    expect(screen.getByTestId('entityNotFoundFlyout')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('entityNotFoundFlyoutCloseButton'));
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the not-found flyout when the fetch settles with no data', () => {
+    mockUseFetchActionPolicy.mockReturnValue({ data: null, isLoading: false, isError: false });
+    renderContainer();
+
+    expect(screen.getByTestId('entityNotFoundFlyout')).toBeInTheDocument();
     expect(screen.queryByTestId('mockFlyout')).not.toBeInTheDocument();
   });
 
