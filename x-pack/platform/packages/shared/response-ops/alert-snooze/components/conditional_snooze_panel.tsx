@@ -16,17 +16,21 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { DataConditionType, type ConditionalSnoozeSchedule, type SnoozeCondition } from './types';
+import type {
+  ConditionalSnoozeSchedule,
+  DataConditionEntry,
+  DataConditionTypeDescriptor,
+  SnoozeCondition,
+} from './types';
 import { SNOOZE_DATE_DISPLAY_FORMAT, SNOOZE_UNIT_OPTIONS } from './constants';
 import { validateDuration, computeEndDate } from '../utils/duration_validation';
 import { TimeConditionPanel } from './time_condition_panel';
 import type { TimeConditionState } from './time_condition_panel';
 import { DataConditionPanel } from './data_condition_panel';
-import type { DataConditionEntry } from './data_condition_panel';
+import { DEFAULT_DATA_CONDITION_TYPES } from './built_in_data_conditions';
 import * as i18n from './translations';
 
 export type { ConditionalSnoozeSchedule, SnoozeCondition };
-export type { SelectOption } from './data_condition_panel';
 export type { TimeConditionState } from './time_condition_panel';
 
 export interface ConditionalSnoozePanelProps {
@@ -35,33 +39,39 @@ export interface ConditionalSnoozePanelProps {
    * `undefined` means no valid conditions are confirmed (button should be disabled).
    */
   onScheduleChange: (schedule: ConditionalSnoozeSchedule | undefined) => void;
+  /**
+   * Set of data-condition descriptors available in the type dropdown.
+   * Pass a custom list to add domain-specific types.
+   */
+  dataConditionTypes?: readonly DataConditionTypeDescriptor[];
 }
 
-const newEntry = (id: string): DataConditionEntry => ({
+const newEntry = (
+  id: string,
+  descriptors: readonly DataConditionTypeDescriptor[]
+): DataConditionEntry => ({
   id,
-  type: DataConditionType.FIELD_CHANGE,
+  type: descriptors[0]?.id ?? '',
   field: '',
   value: 'critical',
   confirmed: false,
 });
 
-const toSnoozeCondition = ({ type, field, value }: DataConditionEntry): SnoozeCondition => {
-  if (type === DataConditionType.SEVERITY_CHANGE)
-    return { type: DataConditionType.SEVERITY_CHANGE };
-  if (type === DataConditionType.SEVERITY_EQUALS)
-    return { type: DataConditionType.SEVERITY_EQUALS, value };
-  return { type: DataConditionType.FIELD_CHANGE, field };
-};
+export const ConditionalSnoozePanel = ({
+  onScheduleChange,
+  dataConditionTypes = DEFAULT_DATA_CONDITION_TYPES,
+}: ConditionalSnoozePanelProps) => {
+  const descriptorById = useMemo(
+    () => new Map(dataConditionTypes.map((d) => [d.id, d])),
+    [dataConditionTypes]
+  );
 
-export const ConditionalSnoozePanel = ({ onScheduleChange }: ConditionalSnoozePanelProps) => {
   const idCounterRef = useRef(0);
-
   const [timeCondition, setTimeCondition] = useState<TimeConditionState | null>(null);
   const [dataConditions, setDataConditions] = useState<DataConditionEntry[]>([]);
   const [conditionOperator, setConditionOperator] = useState<'any' | 'all'>('any');
 
   const isConfirmed = timeCondition?.status === 'confirmed';
-
   const {
     isDurationInvalid: isTimeDurationInvalid,
     isPastDateTime,
@@ -69,20 +79,17 @@ export const ConditionalSnoozePanel = ({ onScheduleChange }: ConditionalSnoozePa
   } = validateDuration(timeCondition);
   const isTimeConditionInvalid = isTimeDurationInvalid || isPastDateTime || isDateTimeMissing;
 
-  const confirmedDataConditions = useMemo(
-    () => dataConditions.filter((condition) => condition.confirmed),
-    [dataConditions]
-  );
+  const confirmedDataConditions = dataConditions.filter((condition) => condition.confirmed);
 
   const isSnoozeDisabled =
     isTimeConditionInvalid || (!isConfirmed && confirmedDataConditions.length === 0);
 
-  const timeEndDate = useMemo<string | null>(() => {
-    if (isTimeConditionInvalid) return null;
-    return computeEndDate(timeCondition);
-  }, [isTimeConditionInvalid, timeCondition]);
+  const timeEndDate = useMemo(
+    () => (isTimeConditionInvalid ? null : computeEndDate(timeCondition)),
+    [isTimeConditionInvalid, timeCondition]
+  );
 
-  const timeChipLabel = useMemo<string>(() => {
+  const timeChipLabel = ((): string => {
     if (!timeCondition) return '';
     if (timeCondition.mode === 'datetime') {
       return timeCondition.dateTime?.format(SNOOZE_DATE_DISPLAY_FORMAT) ?? '';
@@ -91,24 +98,27 @@ export const ConditionalSnoozePanel = ({ onScheduleChange }: ConditionalSnoozePa
       SNOOZE_UNIT_OPTIONS.find((o) => o.value === timeCondition.unit)?.text ?? timeCondition.unit
     ).toLowerCase();
     return i18n.getAfterDurationLabel(timeCondition.value, unitText);
-  }, [timeCondition]);
+  })();
 
-  const disabledDataConditionTypes = useMemo<readonly DataConditionType[]>(() => {
-    const hasSeverityChange = dataConditions.some(
-      (c) => c.type === DataConditionType.SEVERITY_CHANGE
-    );
-    return hasSeverityChange ? [DataConditionType.SEVERITY_CHANGE] : [];
-  }, [dataConditions]);
+  const usedDescriptorIds = new Set(dataConditions.map((c) => c.type));
+  const disabledDataConditionTypes: readonly string[] = dataConditionTypes
+    .filter((d) => d.isSingleton && usedDescriptorIds.has(d.id))
+    .map((d) => d.id);
 
-  const hasConflictingSeverityEquals = useMemo(() => {
-    if (conditionOperator !== 'all') return false;
-    const severityEqualsValues = confirmedDataConditions
-      .filter((c) => c.type === DataConditionType.SEVERITY_EQUALS)
-      .map((c) => c.value);
-    return new Set(severityEqualsValues).size > 1;
-  }, [confirmedDataConditions, conditionOperator]);
+  const descriptorWarning = ((): string | null => {
+    const context = {
+      allEntries: dataConditions,
+      confirmedEntries: confirmedDataConditions,
+      conditionOperator,
+    };
+    for (const descriptor of dataConditionTypes) {
+      const warning = descriptor.getWarning?.(context);
+      if (warning) return warning;
+    }
+    return null;
+  })();
 
-  const previewSentences = useMemo<string[]>(() => {
+  const previewSentences = ((): string[] => {
     const formattedTimeDate =
       isConfirmed && timeEndDate ? moment(timeEndDate).format(SNOOZE_DATE_DISPLAY_FORMAT) : null;
 
@@ -118,36 +128,27 @@ export const ConditionalSnoozePanel = ({ onScheduleChange }: ConditionalSnoozePa
     const dataPreviewPart =
       confirmedDataConditions.length > 0
         ? confirmedDataConditions
-            .map((c) => {
-              if (c.type === DataConditionType.SEVERITY_CHANGE) return i18n.PREVIEW_SEVERITY_CHANGE;
-              if (c.type === DataConditionType.SEVERITY_EQUALS)
-                return i18n.getPreviewSeverityEquals(c.value);
-              return i18n.getPreviewFieldChange(c.field);
-            })
+            .map((c) => descriptorById.get(c.type)?.getPreviewText(c) ?? c.type)
             .reduce((acc, part) => `${acc} ${dataConnector} ${part}`)
         : null;
 
-    if (!formattedTimeDate && !dataPreviewPart) {
-      return [i18n.CONDITIONS_FOOTER_HINT];
-    }
+    const sentences = [
+      dataPreviewPart && i18n.getUnsnoozeIfConditionsMessage(dataPreviewPart),
+      formattedTimeDate &&
+        (dataPreviewPart
+          ? i18n.getUnsnoozeAlsoAfterMessage(formattedTimeDate)
+          : i18n.getUnsnoozeOnDateMessage(formattedTimeDate)),
+    ].filter((s): s is string => Boolean(s));
 
-    if (formattedTimeDate && !dataPreviewPart) {
-      return [i18n.getUnsnoozeOnDateMessage(formattedTimeDate)];
-    }
-
-    if (dataPreviewPart && !formattedTimeDate) {
-      return [i18n.getUnsnoozeIfConditionsMessage(dataPreviewPart)];
-    }
-
-    return [
-      i18n.getUnsnoozeIfConditionsMessage(dataPreviewPart as string),
-      i18n.getUnsnoozeAlsoAfterMessage(formattedTimeDate as string),
-    ];
-  }, [isConfirmed, timeEndDate, confirmedDataConditions, conditionOperator]);
+    return sentences.length > 0 ? sentences : [i18n.CONDITIONS_FOOTER_HINT];
+  })();
 
   const addDataCondition = useCallback(() => {
-    setDataConditions((prev) => [...prev, newEntry(`dc-${++idCounterRef.current}`)]);
-  }, []);
+    setDataConditions((prev) => [
+      ...prev,
+      newEntry(`dc-${++idCounterRef.current}`, dataConditionTypes),
+    ]);
+  }, [dataConditionTypes]);
 
   const handleDataConditionChange = useCallback(
     (id: string, newEntryDetails: DataConditionEntry | null) => {
@@ -173,13 +174,23 @@ export const ConditionalSnoozePanel = ({ onScheduleChange }: ConditionalSnoozePa
       schedule.expiresAt = timeEndDate;
     }
 
-    if (confirmedDataConditions.length > 0) {
-      schedule.conditions = confirmedDataConditions.map(toSnoozeCondition);
+    const confirmed = dataConditions.filter((c) => c.confirmed);
+    if (confirmed.length > 0) {
+      schedule.conditions = confirmed
+        .map((entry) => descriptorById.get(entry.type)?.serialize(entry) ?? null)
+        .filter((c): c is SnoozeCondition => c !== null);
       schedule.conditionOperator = conditionOperator;
     }
 
     return schedule;
-  }, [isSnoozeDisabled, isConfirmed, timeEndDate, confirmedDataConditions, conditionOperator]);
+  }, [
+    isSnoozeDisabled,
+    isConfirmed,
+    timeEndDate,
+    dataConditions,
+    conditionOperator,
+    descriptorById,
+  ]);
 
   useEffect(() => {
     onScheduleChange(snoozeSchedule);
@@ -255,6 +266,7 @@ export const ConditionalSnoozePanel = ({ onScheduleChange }: ConditionalSnoozePa
           <DataConditionPanel
             entry={entry}
             onChange={(newEntryDetails) => handleDataConditionChange(entry.id, newEntryDetails)}
+            descriptors={dataConditionTypes}
             disabledTypes={disabledDataConditionTypes}
           />
         </React.Fragment>
@@ -273,14 +285,14 @@ export const ConditionalSnoozePanel = ({ onScheduleChange }: ConditionalSnoozePa
 
       <EuiHorizontalRule margin="m" />
 
-      {hasConflictingSeverityEquals && (
+      {descriptorWarning && (
         <>
           <EuiCallOut
             size="s"
             color="warning"
             iconType="warning"
             data-test-subj="conflictingSeverityEqualsWarning"
-            title={i18n.CONFLICTING_SEVERITY_EQUALS_WARNING}
+            title={descriptorWarning}
           />
           <EuiSpacer size="s" />
         </>

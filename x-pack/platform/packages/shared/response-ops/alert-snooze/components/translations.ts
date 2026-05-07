@@ -160,6 +160,10 @@ export const CONDITION_VALUE_PLACEHOLDER = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.conditionValuePlaceholder',
   { defaultMessage: 'Value' }
 );
+export const FIELD_NAME_PLACEHOLDER = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.fieldNamePlaceholder',
+  { defaultMessage: 'Field name' }
+);
 export const CONDITION_VALUE_ARIA_LABEL = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.conditionValueAriaLabel',
   { defaultMessage: 'Condition value' }

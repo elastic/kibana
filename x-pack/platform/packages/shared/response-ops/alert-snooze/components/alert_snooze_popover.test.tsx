@@ -9,7 +9,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertSnoozePopover } from './alert_snooze_popover';
-import { DataConditionType } from './types';
+import { DataConditionType, type DataConditionTypeDescriptor } from './types';
+import { fieldChangeDescriptor } from './built_in_data_conditions';
 
 const MOCKED_NOW = '2026-03-09T19:05:00.000Z';
 
@@ -121,6 +122,40 @@ describe('AlertSnoozePopover', () => {
       fireEvent.click(await screen.findByTestId('conditional'));
 
       expect(await screen.findByTestId('alertSnoozeApplyButton')).toBeDisabled();
+    });
+
+    it('forwards `dataConditionTypes` to ConditionalSnoozePanel and emits the custom payload shape', async () => {
+      const customDescriptor: DataConditionTypeDescriptor = {
+        id: 'custom_via_popover',
+        label: 'Via popover',
+        isComplete: () => true,
+        renderInput: () => null,
+        renderConfirmedSummary: () => null,
+        getPreviewText: () => 'via popover',
+        serialize: () => ({ type: 'custom_via_popover', marker: 'popover' }),
+      };
+
+      render(
+        <AlertSnoozePopover
+          onApply={onApplyMock}
+          dataConditionTypes={[fieldChangeDescriptor, customDescriptor]}
+        />,
+        { wrapper }
+      );
+      await openPopover();
+      fireEvent.click(await screen.findByTestId('conditional'));
+
+      fireEvent.click(await screen.findByTestId('addDataCondition'));
+      fireEvent.change(await screen.findByTestId('dataConditionType-dc-1'), {
+        target: { value: 'custom_via_popover' },
+      });
+      fireEvent.click(await screen.findByTestId('confirmDataCondition-dc-1'));
+      fireEvent.click(await screen.findByTestId('alertSnoozeApplyButton'));
+
+      expect(onApplyMock).toHaveBeenCalledWith({
+        conditions: [{ type: 'custom_via_popover', marker: 'popover' }],
+        conditionOperator: 'any',
+      });
     });
 
     it('closes the popover after Apply', async () => {

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiButtonIcon,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -19,107 +18,47 @@ import {
   EuiText,
 } from '@elastic/eui';
 import * as i18n from './translations';
-import { DataConditionType, type AlertSeverityLevel } from './types';
-
-export interface SelectOption {
-  value: string;
-  text: string;
-}
+import type { DataConditionEntry, DataConditionTypeDescriptor } from './types';
+import { DEFAULT_DATA_CONDITION_TYPES } from './built_in_data_conditions';
 
 export type LogicalOperator = 'all' | 'any';
-
-export interface DataConditionEntry {
-  id: string;
-  type: DataConditionType;
-  field: string;
-  value: AlertSeverityLevel;
-  confirmed: boolean;
-}
-
-const TYPE_OPTIONS: SelectOption[] = [
-  { value: DataConditionType.FIELD_CHANGE, text: i18n.CONDITION_TYPE_FIELD_CHANGE },
-  { value: DataConditionType.SEVERITY_CHANGE, text: i18n.CONDITION_TYPE_SEVERITY_CHANGE },
-  { value: DataConditionType.SEVERITY_EQUALS, text: i18n.CONDITION_TYPE_SEVERITY_EQUALS },
-];
-
-const SEVERITY_OPTIONS: SelectOption[] = [
-  { value: 'critical', text: i18n.SEVERITY_CRITICAL },
-  { value: 'high', text: i18n.SEVERITY_HIGH },
-  { value: 'medium', text: i18n.SEVERITY_MEDIUM },
-  { value: 'low', text: i18n.SEVERITY_LOW },
-  { value: 'info', text: i18n.SEVERITY_INFO },
-];
-
-const SEVERITY_COLORS: Record<AlertSeverityLevel, string> = {
-  critical: 'danger',
-  high: 'warning',
-  medium: 'success',
-  low: 'primary',
-  info: 'default',
-};
+export type { DataConditionEntry } from './types';
 
 export interface DataConditionPanelProps {
   entry: DataConditionEntry;
   onChange: (newValue: DataConditionEntry | null) => void;
   /**
-   * Types that should be hidden from the type dropdown (e.g. singleton types
-   * like SEVERITY_CHANGE that already exist in another entry). The entry's own
-   * current type is always kept visible so the user can still edit it.
+   * Descriptors for every type that may appear in the dropdown.
    */
-  disabledTypes?: readonly DataConditionType[];
+  descriptors?: readonly DataConditionTypeDescriptor[];
+  /**
+   * Type ids that should be hidden from the type dropdown.
+   */
+  disabledTypes?: readonly string[];
 }
 
-export const DataConditionPanel = ({ entry, onChange, disabledTypes }: DataConditionPanelProps) => {
-  const typeOptions = disabledTypes?.length
-    ? TYPE_OPTIONS.filter(
-        (o) => o.value === entry.type || !disabledTypes.includes(o.value as DataConditionType)
-      )
-    : TYPE_OPTIONS;
-  const isComplete = () => {
-    if (entry.type === DataConditionType.SEVERITY_CHANGE) return true;
-    if (entry.type === DataConditionType.SEVERITY_EQUALS) return !!entry.value;
-    if (entry.type === DataConditionType.FIELD_CHANGE) return !!entry.field;
-    return false;
-  };
+export const DataConditionPanel = ({
+  entry,
+  onChange,
+  descriptors = DEFAULT_DATA_CONDITION_TYPES,
+  disabledTypes,
+}: DataConditionPanelProps) => {
+  const typeOptions = useMemo(
+    () =>
+      descriptors
+        .filter((d) => d.id === entry.type || !disabledTypes?.includes(d.id))
+        .map((d) => ({ value: d.id, text: d.label })),
+    [descriptors, disabledTypes, entry.type]
+  );
 
-  const getConfirmedText = () => {
-    if (entry.type === DataConditionType.SEVERITY_CHANGE) {
-      return (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiBadge>{i18n.CONDITION_TYPE_SEVERITY_CHANGE}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-    if (entry.type === DataConditionType.SEVERITY_EQUALS) {
-      const label = SEVERITY_OPTIONS.find((o) => o.value === entry.value)?.text || entry.value;
-      const color = SEVERITY_COLORS[entry.value] || 'default';
-      return (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiBadge>{i18n.CONDITION_TYPE_SEVERITY_EQUALS}</EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={color as any}>{label}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-    if (entry.type === DataConditionType.FIELD_CHANGE) {
-      return (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiBadge>{i18n.CONDITION_TYPE_FIELD_CHANGE}</EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{entry.field}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-    return null;
-  };
+  const activeDescriptor = useMemo(
+    () => descriptors.find((d) => d.id === entry.type),
+    [descriptors, entry.type]
+  );
+
+  if (!activeDescriptor) return null;
+
+  const isComplete = activeDescriptor.isComplete(entry);
 
   return (
     <EuiPanel
@@ -138,7 +77,18 @@ export const DataConditionPanel = ({ entry, onChange, disabledTypes }: DataCondi
           <EuiFlexItem grow={false}>
             <EuiIcon type="database" />
           </EuiFlexItem>
-          <EuiFlexItem>{getConfirmedText()}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge>{activeDescriptor.label}</EuiBadge>
+              </EuiFlexItem>
+              {activeDescriptor.renderConfirmedSummary(entry) && (
+                <EuiFlexItem grow={false}>
+                  {activeDescriptor.renderConfirmedSummary(entry)}
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               iconType="pencil"
@@ -175,7 +125,7 @@ export const DataConditionPanel = ({ entry, onChange, disabledTypes }: DataCondi
                 display="base"
                 aria-label={i18n.CONFIRM_CONDITION_ARIA_LABEL}
                 onClick={() => onChange({ ...entry, confirmed: true })}
-                isDisabled={!isComplete()}
+                isDisabled={!isComplete}
                 data-test-subj={`confirmDataCondition-${entry.id}`}
               />
             </EuiFlexItem>
@@ -194,36 +144,13 @@ export const DataConditionPanel = ({ entry, onChange, disabledTypes }: DataCondi
               <EuiSelect
                 options={typeOptions}
                 value={entry.type}
-                onChange={(e) => onChange({ ...entry, type: e.target.value as DataConditionType })}
+                onChange={(e) => onChange({ ...entry, type: e.target.value })}
                 aria-label={i18n.CONDITION_FIELD_ARIA_LABEL}
                 data-test-subj={`dataConditionType-${entry.id}`}
               />
             </EuiFlexItem>
-            {entry.type === DataConditionType.SEVERITY_EQUALS && (
-              <EuiFlexItem>
-                <EuiSelect
-                  options={SEVERITY_OPTIONS}
-                  value={entry.value}
-                  onChange={(e) =>
-                    onChange({ ...entry, value: e.target.value as AlertSeverityLevel })
-                  }
-                  hasNoInitialSelection={!entry.value}
-                  aria-label={i18n.CONDITION_VALUE_ARIA_LABEL}
-                  data-test-subj={`dataConditionValue-${entry.id}`}
-                />
-              </EuiFlexItem>
-            )}
-
-            {entry.type === DataConditionType.FIELD_CHANGE && (
-              <EuiFlexItem>
-                <EuiFieldText
-                  value={entry.field}
-                  onChange={(e) => onChange({ ...entry, field: e.target.value })}
-                  placeholder={i18n.CONDITION_VALUE_PLACEHOLDER}
-                  aria-label={i18n.CONDITION_VALUE_ARIA_LABEL}
-                  data-test-subj={`dataConditionField-${entry.id}`}
-                />
-              </EuiFlexItem>
+            {activeDescriptor.renderInput(entry, onChange) && (
+              <EuiFlexItem>{activeDescriptor.renderInput(entry, onChange)}</EuiFlexItem>
             )}
           </EuiFlexGroup>
         </>

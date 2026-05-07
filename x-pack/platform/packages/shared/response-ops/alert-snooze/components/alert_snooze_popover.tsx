@@ -19,13 +19,18 @@ import {
 } from '@elastic/eui';
 import { QuickSnoozePanel } from './quick_snooze_panel';
 import { ConditionalSnoozePanel } from './conditional_snooze_panel';
-import type { ConditionalSnoozeSchedule, SnoozePanelTab } from './types';
+import type {
+  ConditionalSnoozeSchedule,
+  DataConditionTypeDescriptor,
+  SnoozePanelTab,
+} from './types';
 import * as i18n from './translations';
 
 export type AlertSnoozePayload = ConditionalSnoozeSchedule;
 
 export interface AlertSnoozePopoverProps {
   onApply: (payload: AlertSnoozePayload) => void;
+  dataConditionTypes?: readonly DataConditionTypeDescriptor[];
 }
 
 const TAB_OPTIONS: Array<{ id: SnoozePanelTab; label: string }> = [
@@ -33,7 +38,7 @@ const TAB_OPTIONS: Array<{ id: SnoozePanelTab; label: string }> = [
   { id: 'conditional', label: i18n.CONDITIONAL_SNOOZE_TAB },
 ];
 
-export const AlertSnoozePopover = ({ onApply }: AlertSnoozePopoverProps) => {
+export const AlertSnoozePopover = ({ onApply, dataConditionTypes }: AlertSnoozePopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<SnoozePanelTab>('quick');
 
@@ -105,7 +110,10 @@ export const AlertSnoozePopover = ({ onApply }: AlertSnoozePopoverProps) => {
 
         {activeTab === 'quick' && <QuickSnoozePanel onScheduleChange={setQuickEndDate} />}
         {activeTab === 'conditional' && (
-          <ConditionalSnoozePanel onScheduleChange={setConditionalSchedule} />
+          <ConditionalSnoozePanel
+            onScheduleChange={setConditionalSchedule}
+            dataConditionTypes={dataConditionTypes}
+          />
         )}
       </div>
 

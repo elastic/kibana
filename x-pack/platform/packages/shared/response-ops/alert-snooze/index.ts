@@ -38,3 +38,17 @@ export type {
   AlertSnoozePopoverProps,
   AlertSnoozePayload,
 } from './components/alert_snooze_popover';
+
+export {
+  DEFAULT_DATA_CONDITION_TYPES,
+  fieldChangeDescriptor,
+  severityChangeDescriptor,
+  severityEqualsDescriptor,
+} from './components/built_in_data_conditions';
+export { DataConditionType } from './components/types';
+export type {
+  AlertSeverityLevel,
+  DataConditionDescriptorContext,
+  DataConditionEntry,
+  DataConditionTypeDescriptor,
+} from './components/types';
