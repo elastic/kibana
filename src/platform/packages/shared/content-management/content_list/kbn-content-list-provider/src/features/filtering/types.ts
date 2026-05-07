@@ -10,25 +10,11 @@
 import type { ActiveFilters } from '../../datasource';
 
 /**
- * State returned by `useFilterDisplay` indicating which filter UI elements should be rendered.
- */
-export interface FilterDisplayState {
-  /** Whether any filter popover buttons should be shown (sorting or tags). Search is separate. */
-  hasFilters: boolean;
-  /** Whether sorting is enabled. */
-  hasSorting: boolean;
-  /** Whether search is enabled. */
-  hasSearch: boolean;
-  /** Whether tags filtering should be shown. */
-  hasTags: boolean;
-}
-
-/**
  * Return type for the {@link useContentListFilters} hook.
  */
 export interface UseContentListFiltersReturn {
   /** Currently active filters (derived from query text and state). */
   filters: ActiveFilters;
-  /** Clear all filters and search text. */
+  /** Clear all filter and flag clauses from `queryText`, preserving free-text search. */
   clearFilters: () => void;
 }

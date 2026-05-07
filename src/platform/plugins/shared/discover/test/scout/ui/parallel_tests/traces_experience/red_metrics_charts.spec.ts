@@ -12,6 +12,7 @@ import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
   TRACES,
+  RICH_TRACE,
   setupTracesExperience,
   teardownTracesExperience,
 } from '../../fixtures/traces_experience';
@@ -47,6 +48,7 @@ spaceTest.describe(
 
         for (const title of charts.expectedTitles) {
           await expect(charts.getChartTitle(title)).toBeVisible();
+          await expect(charts.getChartError(title)).toBeHidden();
         }
       });
     });
@@ -54,7 +56,7 @@ spaceTest.describe(
     spaceTest('should render RED metrics charts with WHERE filter', async ({ pageObjects }) => {
       await spaceTest.step('run ESQL query with WHERE filter', async () => {
         await pageObjects.discover.writeAndSubmitEsqlQuery(
-          `${TRACES.ESQL_QUERY} | WHERE service.name == "synth-traces-service"`
+          `${TRACES.ESQL_QUERY} | WHERE service.name == "${RICH_TRACE.SERVICE_NAME}"`
         );
       });
 
@@ -65,6 +67,7 @@ spaceTest.describe(
 
         for (const title of charts.expectedTitles) {
           await expect(charts.getChartTitle(title)).toBeVisible();
+          await expect(charts.getChartError(title)).toBeHidden();
         }
       });
     });

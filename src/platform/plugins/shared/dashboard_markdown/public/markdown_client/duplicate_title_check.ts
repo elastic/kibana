@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { markdownClient } from './markdown_client';
 
-const rejectErrorMessage = i18n.translate('links.saveDuplicateRejectedDescription', {
+const rejectErrorMessage = i18n.translate('dashboardMarkdown.saveDuplicateRejectedDescription', {
   defaultMessage: 'Save with duplicate title confirmation was rejected',
 });
 
@@ -41,7 +41,7 @@ export const checkForDuplicateTitle = async ({
     }
 
     const { markdowns } = await markdownClient.search({
-      search: `"${title}"`,
+      query: `"${title}"`,
     });
 
     const existing = markdowns.find(

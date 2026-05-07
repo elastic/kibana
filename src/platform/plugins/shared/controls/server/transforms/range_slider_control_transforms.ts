@@ -24,7 +24,8 @@ const RANGE_SLIDER_LEGACY_REF_NAMES = [
 ] as const;
 
 export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup) => {
-  embeddable.registerTransforms(RANGE_SLIDER_CONTROL, {
+  embeddable.registerEmbeddableServerDefinition(RANGE_SLIDER_CONTROL, {
+    title: 'Range slider control',
     getSchema: () => rangeSliderControlSchema,
     getTransforms: () => ({
       transformIn: (state: RangeSliderControlState) => {
@@ -46,7 +47,7 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
         panelReferences: Reference[] | undefined,
         containerReferences: Reference[] | undefined,
         id: string | undefined
-      ): RangeSliderControlState => {
+      ): Partial<RangeSliderControlState> => {
         const dataControlState = transformDataControlOut(
           id,
           state,
@@ -56,8 +57,8 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
         );
         return {
           ...dataControlState,
-          value: state.value,
-          step: state.step,
+          ...(state.value && { value: state.value }),
+          ...(typeof state.step === 'number' && { step: state.step }),
         };
       },
     }),

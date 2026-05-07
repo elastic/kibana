@@ -114,7 +114,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                         <EuiIcon size="m" type="sortRight" />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiIcon color="primary" size="l" type="launch" />
+                        <EuiIcon color="primary" size="l" type="rocket" />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiFlexItem>
@@ -208,7 +208,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
               data-test-subj="serverlessSearchEmptyConnectorsPromptCreateConnectorButton"
               disabled={!data?.canManageConnectors}
               fill
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={() => createConnector()}
               isLoading={isLoading}
             >

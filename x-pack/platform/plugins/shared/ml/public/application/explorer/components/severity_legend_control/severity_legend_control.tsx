@@ -86,7 +86,8 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIcon
-                    type={isSelected ? 'dot' : 'eyeClosed'}
+                    aria-hidden={true}
+                    type={isSelected ? 'dot' : 'eyeSlash'}
                     color={isSelected ? severity.color : euiTheme.colors.textDisabled}
                     size={isSelected ? 'm' : 's'}
                   />

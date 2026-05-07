@@ -49,7 +49,7 @@ export const AddRoleTemplateButton = (props: Props) => {
   if (props.canUseInlineScripts) {
     return (
       <EuiButtonEmpty
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={() => props.onClick('inline')}
         data-test-subj="addRoleTemplateButton"
       >
@@ -60,7 +60,7 @@ export const AddRoleTemplateButton = (props: Props) => {
 
   return (
     <EuiButtonEmpty
-      iconType="plusInCircle"
+      iconType="plusCircle"
       onClick={() => props.onClick('stored')}
       data-test-subj="addRoleTemplateButton"
     >

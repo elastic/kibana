@@ -111,8 +111,13 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
                       indices={props.indices}
                       shouldUpdate={props.shouldUpdate}
                       filters={props.filters}
+                      useLegacyExpandableFlyout={props.useLegacyExpandableFlyout}
+                      renderCellActions={props.renderCellActions}
                     />
-                    <DetailsPanel resolverComponentInstanceID={props.resolverComponentInstanceID} />
+                    <DetailsPanel
+                      renderCellActions={props.renderCellActions}
+                      resolverComponentInstanceID={props.resolverComponentInstanceID}
+                    />
                   </>
                 </Provider>
               </SideEffectContext.Provider>

@@ -14,7 +14,6 @@ export {
   getControlSuggestionIfSupported,
   getControlSuggestion,
   getSafeInsertText,
-  pushItUpInTheList,
 } from './autocomplete/helpers';
 export {
   suggestForExpression,
@@ -31,5 +30,4 @@ export { getExpressionType } from './expressions';
 export { getMessageFromId, errors } from './errors';
 export { sourceExists } from './sources';
 export { getColumnExists } from './columns';
-export { getValidSignaturesAndTypesToSuggestNext } from './autocomplete/helpers';
 export { getFormattedFunctionSignature } from './hover/functions';

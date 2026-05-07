@@ -486,16 +486,38 @@ export const staticConnectors: BaseConnectorContract[] = [
     type: 'kibana.request',
     summary: 'Kibana Request',
     paramsSchema: z.object({
-      method: z.string(),
+      method: z.string().optional(),
       path: z.string(),
       body: z.any().optional(),
       headers: z.any().optional(),
+      query: z.record(z.string(), z.any()).optional(),
+      form_data: z
+        .record(
+          z.string(),
+          z.object({
+            content: z.string().describe('File content or field value'),
+            filename: z.string().optional().describe('Filename hint (e.g. "export.ndjson")'),
+            content_type: z
+              .string()
+              .optional()
+              .describe('MIME type of the content (e.g. "application/ndjson")'),
+          })
+        )
+        .optional()
+        .describe(
+          'Multipart form-data fields. Use instead of body for APIs that require file uploads (e.g. /api/saved_objects/_import). Mutually exclusive with body.'
+        ),
       fetcher: FetcherConfigSchema,
       ...KibanaStepMetaSchema,
     }),
-    outputSchema: z.any(),
+    outputSchema: z
+      .any()
+      .describe(
+        'JSON-parsed response body, or an empty object ({}) for 204 No Content / 304 Not Modified responses'
+      ),
     description: i18n.translate('workflows.connectors.kibana.request.description', {
-      defaultMessage: 'Make a generic request to a Kibana API',
+      defaultMessage:
+        "Make a generic request to a Kibana API. APIs that return 204 No Content or 304 Not Modified produce an empty output ('{}').",
     }),
   },
 ];

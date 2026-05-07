@@ -35,33 +35,39 @@ const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.agentBuilder.attachmentHea
   defaultMessage: 'Close',
 });
 
-const HEADER_HEIGHT = 72;
+export const HEADER_HEIGHT = 72;
 
 interface AttachmentHeaderProps {
   title: string;
   actionButtons?: ActionButton[];
   onClose?: () => void;
-  showPreviewBadge?: boolean;
-  showCurrentlyPreviewingBadge?: boolean;
+  /**
+   * Controls preview UI state from the parent.
+   * - none: show regular action buttons
+   * - preview_available: show "Preview Only" badge
+   * - previewing: show "You're previewing this" and hide action buttons
+   */
+  previewBadgeState?: 'none' | 'preview_available' | 'previewing';
 }
 
 export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   title,
   actionButtons,
   onClose,
-  showPreviewBadge = false,
-  showCurrentlyPreviewingBadge = false,
+  previewBadgeState = 'none',
 }) => {
   const { euiTheme } = useEuiTheme();
 
   const textStyles = css`
     font-weight: ${euiTheme.font.weight.semiBold};
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   `;
 
   const headerStyles = css`
     position: relative;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     border-bottom: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.borderBaseSubdued};
@@ -82,25 +88,36 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 
   return (
     <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
-      {showPreviewBadge && (
+      {previewBadgeState === 'preview_available' && (
         <EuiBadge iconType="lock" color="primary" css={badgeStyles}>
           {PREVIEW_ONLY_LABEL}
         </EuiBadge>
       )}
-      <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup
+        responsive={false}
+        justifyContent="spaceBetween"
+        alignItems="center"
+        style={{ width: '100%' }}
+      >
+        <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
           <EuiText css={textStyles} size="s">
             {title}
           </EuiText>
         </EuiFlexItem>
-        {showCurrentlyPreviewingBadge === false && <AttachmentActions buttons={actionButtons} />}
-        {showCurrentlyPreviewingBadge === true && (
-          <EuiBadge iconType="eye" color="success">
-            {CURRENTLY_PREVIEWING_LABEL}
-          </EuiBadge>
+        {previewBadgeState !== 'previewing' && (
+          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+            <AttachmentActions buttons={actionButtons} />
+          </EuiFlexItem>
+        )}
+        {previewBadgeState === 'previewing' && (
+          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+            <EuiBadge iconType="eye" color="success">
+              {CURRENTLY_PREVIEWING_LABEL}
+            </EuiBadge>
+          </EuiFlexItem>
         )}
         {onClose && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <EuiButtonIcon
               aria-label={CLOSE_BUTTON_ARIA_LABEL}
               iconType="cross"

@@ -309,7 +309,6 @@ FROM employees
       label: i18n.translate('languageDocumentation.documentationESQL.fork', {
         defaultMessage: 'FORK',
       }),
-      preview: true,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.fork.markdown', {
           defaultMessage: `### FORK

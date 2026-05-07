@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type {
   BoundOptions,
   BoundInferenceClient,
@@ -16,22 +16,29 @@ import type {
   InferenceCallbacks,
 } from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClientProvider } from '../types';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
+import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import type { TokenUsageLogger } from '../token_usage';
 
 interface CreateClientOptions {
   request: KibanaRequest;
   namespace?: string;
-  actions: ActionsPluginStart;
+  actions: ActionsClientProvider;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
   replacementsEsClient?: ElasticsearchClient;
+  endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
   anonymization?: InferenceAnonymizationOptions;
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -51,9 +58,12 @@ export function createClient(
     anonymizationRulesPromise,
     esClient,
     regexWorker,
-    callbacks,
     replacementsEsClient,
+    endpointIdCache,
+    callbacks,
     anonymization,
+    tokenUsageLogger,
+    isTokenUsageTrackingEnabled,
   } = options;
   const client = createInferenceClient({
     request,
@@ -64,8 +74,11 @@ export function createClient(
     regexWorker,
     esClient,
     replacementsEsClient,
+    endpointIdCache,
     callbacks,
     anonymization,
+    tokenUsageLogger,
+    isTokenUsageTrackingEnabled,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);
@@ -73,3 +86,44 @@ export function createClient(
     return client;
   }
 }
+
+interface CreateClientWithoutRequestOptions {
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  logger: Logger;
+  regexWorker: RegexWorkerService;
+  esClient: ElasticsearchClient;
+  endpointIdCache: InferenceEndpointIdCache;
+}
+
+/**
+ * Creates an inference client using pre-scoped services instead of a KibanaRequest.
+ * Useful for background tasks (e.g. alerting rule executors) that have scoped clients
+ * but no HTTP request context.
+ *
+ * Internally wraps the actionsClient in an actions-like object so that the underlying
+ * createInferenceClient can resolve connectors. Anonymization is not available.
+ */
+export const createClientWithoutRequest = ({
+  actionsClient,
+  logger,
+  regexWorker,
+  esClient,
+  endpointIdCache,
+}: CreateClientWithoutRequestOptions): InferenceClient => {
+  // Wrap the pre-scoped actionsClient so that any internal code calling
+  // actions.getActionsClientWithRequest() receives this client directly.
+  const actions: ActionsClientProvider = {
+    getActionsClientWithRequest: () => Promise.resolve(actionsClient),
+  };
+
+  return createInferenceClient({
+    request: {} as KibanaRequest,
+    namespace: 'default',
+    actions,
+    logger: logger.get('client'),
+    anonymizationRulesPromise: Promise.resolve([]),
+    regexWorker,
+    esClient,
+    endpointIdCache,
+  });
+};

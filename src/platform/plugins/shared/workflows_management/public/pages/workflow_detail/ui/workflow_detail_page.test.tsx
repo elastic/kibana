@@ -9,9 +9,11 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailPage } from './workflow_detail_page';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { setWorkflow } from '../../../entities/workflows/store/workflow_detail/slice';
+import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
 
 interface WorkflowDetailPageProps {
@@ -36,6 +38,15 @@ jest.mock('../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', ()
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
+
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(),
+}));
+
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+  typeof useWorkflowsCapabilities
+>;
 
 // Mock the thunks
 jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk', () => ({
@@ -64,6 +75,11 @@ jest.mock('./workflow_detail_layout', () => ({
 jest.mock('./workflow_detail_test_modal', () => ({
   WorkflowDetailTestModal: () => (
     <div data-test-subj="workflow-detail-test-modal">{'Test Modal'}</div>
+  ),
+}));
+jest.mock('./workflow_detail_test_step_modal', () => ({
+  WorkflowDetailTestStepModal: () => (
+    <div data-test-subj="workflow-detail-test-step-modal">{'Test Step Modal'}</div>
   ),
 }));
 jest.mock('../../../features/workflow_execution_detail', () => ({
@@ -133,10 +149,13 @@ describe('WorkflowDetailPage', () => {
     mockUseWorkflowsBreadcrumbs.mockImplementation(() => {
       // Empty function, hook just sets breadcrumbs
     });
+    mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
+
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow' as const,
       selectedExecutionId: undefined,
       setSelectedExecution: jest.fn(),
+      setActiveTab: jest.fn(),
     });
   });
 
@@ -191,6 +210,7 @@ describe('WorkflowDetailPage', () => {
         activeTab: 'executions' as const,
         selectedExecutionId: undefined,
         setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
       });
 
       const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
@@ -206,6 +226,7 @@ describe('WorkflowDetailPage', () => {
         activeTab: 'executions' as const,
         selectedExecutionId: 'execution-123',
         setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
       });
 
       const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
@@ -223,6 +244,7 @@ describe('WorkflowDetailPage', () => {
         activeTab: 'workflow' as const,
         selectedExecutionId: undefined,
         setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
       });
 
       const { getByTestId, queryByTestId } = renderWithProviders(
@@ -277,6 +299,13 @@ describe('WorkflowDetailPage', () => {
     });
   });
 
+  describe('workflow test step modal', () => {
+    it('should render workflow detail test step modal', () => {
+      const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' });
+      expect(getByTestId('workflow-detail-test-step-modal')).toBeInTheDocument();
+    });
+  });
+
   describe('workflow execution detail close handler', () => {
     it('should handle closing execution detail', () => {
       const setSelectedExecutionMock = jest.fn();
@@ -284,6 +313,7 @@ describe('WorkflowDetailPage', () => {
         activeTab: 'executions' as const,
         selectedExecutionId: 'execution-123',
         setSelectedExecution: setSelectedExecutionMock,
+        setActiveTab: jest.fn(),
       });
 
       const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
@@ -293,6 +323,67 @@ describe('WorkflowDetailPage', () => {
       expect(getByTestId('workflow-execution-detail')).toBeInTheDocument();
       // The onClose handler is passed to WorkflowExecutionDetail but we can't test it here
       // as it's a callback that depends on the component's internal implementation
+    });
+  });
+
+  describe('readWorkflowExecution gate', () => {
+    it('switches to workflow tab when executions tab is not allowed', () => {
+      const setActiveTab = jest.fn();
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...mockWorkflowsManagementCapabilities,
+        canReadWorkflowExecution: false,
+      });
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'executions' as const,
+        selectedExecutionId: undefined,
+        setSelectedExecution: jest.fn(),
+        setActiveTab,
+      });
+
+      renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(setActiveTab).toHaveBeenCalledWith('workflow');
+    });
+
+    it('clears selected execution on workflow tab when execution read is not allowed', () => {
+      const setSelectedExecution = jest.fn();
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...mockWorkflowsManagementCapabilities,
+        canReadWorkflowExecution: false,
+      });
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'workflow' as const,
+        selectedExecutionId: 'execution-123',
+        setSelectedExecution,
+        setActiveTab: jest.fn(),
+      });
+
+      renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(setSelectedExecution).toHaveBeenCalledWith(null);
+    });
+
+    it('does not mount execution list when execution read is not allowed', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...mockWorkflowsManagementCapabilities,
+        canReadWorkflowExecution: false,
+      });
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'executions' as const,
+        selectedExecutionId: undefined,
+        setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
+      });
+
+      const { queryByTestId } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(queryByTestId('workflow-execution-list')).not.toBeInTheDocument();
     });
   });
 });

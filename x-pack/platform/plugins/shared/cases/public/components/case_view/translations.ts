@@ -259,6 +259,12 @@ export const ADDED_OBSERVABLES = (totalObservables: number): string =>
       'added {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
   });
 
+export const EDIT_FIELD_ARIA_LABEL = (fieldName: string) =>
+  i18n.translate('xpack.cases.caseView.editFieldAriaLabel', {
+    values: { fieldName },
+    defaultMessage: 'Edit {fieldName}',
+  });
+
 export const DELETED_OBSERVABLES = (totalObservables: number): string =>
   i18n.translate('xpack.cases.caseView.observables.deletedObservables', {
     values: { totalObservables },
@@ -266,9 +272,31 @@ export const DELETED_OBSERVABLES = (totalObservables: number): string =>
       'deleted {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
   });
 
+export const FIELD_NOT_DEFINED = i18n.translate('xpack.cases.caseView.fieldNotDefined', {
+  defaultMessage: 'Field not defined',
+});
+
 export const UPDATED_OBSERVABLES = (totalObservables: number): string =>
   i18n.translate('xpack.cases.caseView.observables.updatedObservables', {
     values: { totalObservables },
     defaultMessage:
       'updated {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
   });
+
+export const FIELD_SUBMISSION_ERROR = i18n.translate('xpack.cases.caseView.fieldSubmissionError', {
+  defaultMessage: 'Error submitting field',
+});
+
+export const TEMPLATE_CHANGED_SUCCESSFULLY = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.successToast',
+  {
+    defaultMessage: 'Template changed successfully.',
+  }
+);
+
+export const ERROR_CHANGING_TEMPLATE = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.errorToast',
+  {
+    defaultMessage: 'Error changing template',
+  }
+);

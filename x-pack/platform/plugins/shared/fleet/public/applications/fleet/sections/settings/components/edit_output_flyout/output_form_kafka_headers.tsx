@@ -24,12 +24,11 @@ import { i18n } from '@kbn/i18n';
 
 import type { OutputFormInputsType } from './use_output_form';
 
-export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFormInputsType }> = (
-  props
-) => {
-  const { inputs } = props;
+export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
+  inputs,
+}) => {
   const {
-    props: { onChange },
+    props: { onChange, disabled },
     value: keyValuePairs,
     formRowProps: { error: errors },
   } = inputs.kafkaHeadersInput;
@@ -66,9 +65,10 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
     [keyValuePairs, onChange]
   );
 
-  const deleteButtonDisabled = keyValuePairs.length === 1;
+  const deleteButtonDisabled = disabled || keyValuePairs.length === 1;
   const addKeyValuePairButtonDisabled =
-    keyValuePairs.length === 1 && (keyValuePairs[0].key === '' || keyValuePairs[0].value === '');
+    disabled ||
+    (keyValuePairs.length === 1 && (keyValuePairs[0].key === '' || keyValuePairs[0].value === ''));
 
   const displayErrors = (errorMessages?: string[]) => {
     return errorMessages?.length
@@ -127,6 +127,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
               <EuiFlexItem>
                 <EuiFormRow
                   fullWidth
+                  isDisabled={disabled}
                   label={
                     <FormattedMessage
                       id="xpack.fleet.settings.editOutputFlyout.kafkaHeaderKeyInputLabel"
@@ -150,6 +151,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
               <EuiFlexItem>
                 <EuiFormRow
                   fullWidth
+                  isDisabled={disabled}
                   label={
                     <FormattedMessage
                       id="xpack.fleet.settings.editOutputFlyout.kafkaHeaderValueInputLabel"
@@ -193,7 +195,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
         disabled={addKeyValuePairButtonDisabled}
         size="xs"
         flush="left"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addKeyValuePair}
       >
         <FormattedMessage id="xpack.fleet.kafkaHeadersInput.addRow" defaultMessage="Add header" />

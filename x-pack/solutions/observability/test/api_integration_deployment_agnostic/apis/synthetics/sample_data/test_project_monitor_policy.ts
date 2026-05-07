@@ -6,7 +6,7 @@
  */
 
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { INSTALLED_VERSION } from '../../../services/synthetics_private_location';
+import { DEFAULT_SYNTHETICS_VERSION } from '../../../services/synthetics_private_location';
 import { getDataStream } from './test_policy';
 
 export const commonVars = {
@@ -30,6 +30,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
     projectId = 'test-suite',
     locationName = 'Fleet Managed',
     namespace,
+    kibanaUrl,
   }: {
     name?: string;
     inputs: Record<string, { value: string | boolean; type: string }>;
@@ -39,6 +40,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
     locationId: string;
     locationName?: string;
     namespace?: string;
+    kibanaUrl?: string;
   } = {
     name: 'My Monitor 3',
     inputs: {},
@@ -53,7 +55,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-${locationName}`,
   namespace: namespace || undefined,
   spaceIds: ['default'],
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: DEFAULT_SYNTHETICS_VERSION },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   policy_ids: ['46034710-0ba6-11ed-ba04-5f123b9faa8b'],
@@ -166,7 +168,9 @@ export const getTestProjectSyntheticsPolicyLightweight = (
                       config_id: configId,
                       'monitor.project.name': projectId,
                       'monitor.project.id': projectId,
+                      'monitor.interval': 3600,
                       meta: { space_id: 'default' },
+                      ...(kibanaUrl ? { kibanaUrl } : {}),
                     },
                     target: '',
                   },
@@ -287,11 +291,13 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               {
                 add_fields: {
                   fields: {
-                    config_id: configId,
                     'monitor.fleet_managed': true,
-                    'monitor.project.id': projectId,
+                    config_id: configId,
                     'monitor.project.name': projectId,
+                    'monitor.project.id': projectId,
+                    'monitor.interval': 3600,
                     meta: { space_id: 'default' },
+                    ...(kibanaUrl ? { kibanaUrl } : {}),
                   },
                   target: '',
                 },
@@ -548,7 +554,7 @@ export const getTestProjectSyntheticsPolicy = (
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: namespace || undefined,
   spaceIds: ['default'],
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: DEFAULT_SYNTHETICS_VERSION },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   policy_ids: ['46034710-0ba6-11ed-ba04-5f123b9faa8b'],

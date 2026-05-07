@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import {
   type LegacyStoredTimeSliderExplicitInput,
   type TimeSliderControlState,
@@ -17,7 +17,8 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
 export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup) => {
-  embeddable.registerTransforms(TIME_SLIDER_CONTROL, {
+  embeddable.registerEmbeddableServerDefinition(TIME_SLIDER_CONTROL, {
+    title: 'Time slider control',
     getSchema: () => timeSliderControlSchema,
     getTransforms: () => ({
       transformOut: <
@@ -26,7 +27,7 @@ export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup)
         >
       >(
         state: StoredStateType
-      ): TimeSliderControlState => {
+      ): Partial<TimeSliderControlState> => {
         /**
          * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
          */
@@ -39,18 +40,32 @@ export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup)
         } = convertCamelCasedKeysToSnakeCase(
           state as LegacyStoredTimeSliderExplicitInput & TimeSliderControlState
         );
+        /**
+         * Pre 9.4, we had long camelCased names to store the time slider selections. This
+         * transform out renames them from...
+         * - timesliceEndAsPercentageOfTimeRange -> end_percentage_of_time_range
+         * - timesliceStartAsPercentageOfTimeRange -> start_percentage_of_time_range
+         */
+        const startPercentage =
+          start_percentage_of_time_range ?? timeslice_start_as_percentage_of_time_range;
+
+        const endPercentage =
+          timeslice_end_as_percentage_of_time_range ?? end_percentage_of_time_range;
+
         return {
-          is_anchored,
-          /**
-           * Pre 9.4, we had long camelCased names to store the time slider selections. This
-           * transform out renames them from...
-           * - timesliceEndAsPercentageOfTimeRange -> end_percentage_of_time_range
-           * - timesliceStartAsPercentageOfTimeRange -> start_percentage_of_time_range
-           */
-          start_percentage_of_time_range:
-            start_percentage_of_time_range ?? timeslice_start_as_percentage_of_time_range,
-          end_percentage_of_time_range:
-            timeslice_end_as_percentage_of_time_range ?? end_percentage_of_time_range,
+          ...(typeof is_anchored === 'boolean' && { is_anchored }),
+          ...(typeof startPercentage === 'number' && {
+            start_percentage_of_time_range: Math.max(
+              startPercentage,
+              DEFAULT_TIME_SLIDER_STATE.start_percentage_of_time_range
+            ),
+          }),
+          ...(typeof endPercentage === 'number' && {
+            end_percentage_of_time_range: Math.min(
+              endPercentage,
+              DEFAULT_TIME_SLIDER_STATE.end_percentage_of_time_range
+            ),
+          }),
         };
       },
     }),

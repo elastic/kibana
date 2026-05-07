@@ -8,8 +8,9 @@
 import { memoize } from 'lodash';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React from 'react';
-import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
@@ -24,14 +25,17 @@ export const initComponent = memoize(
     ChangePointDetectionComponent: ChangePointDetectionSharedComponent
   ) => {
     return React.memo(
-      (props: PersistableStateAttachmentViewProps) => {
-        const { persistableStateAttachmentState } = props;
-
+      (props: UnifiedValueAttachmentViewProps) => {
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
         });
 
-        const inputProps = persistableStateAttachmentState as unknown as ChangePointDetectionProps;
+        const rawState = props.data.state as Record<string, unknown>;
+        const timeRange = (rawState.time_range ?? rawState.timeRange) as TimeRange;
+        const inputProps = {
+          ...(rawState as unknown as ChangePointDetectionProps),
+          timeRange,
+        };
 
         const listItems = [
           {
@@ -54,11 +58,7 @@ export const initComponent = memoize(
           </>
         );
       },
-      (prevProps, nextProps) =>
-        deepEqual(
-          prevProps.persistableStateAttachmentState,
-          nextProps.persistableStateAttachmentState
-        )
+      (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
     );
   }
 );

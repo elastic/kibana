@@ -48,8 +48,8 @@ export {
 export {
   MOCK_USER_PROFILES,
   MOCK_USER_PROFILES_MAP,
-  mockUserProfileServices,
+  mockContentListUserProfilesServices,
 } from './user_profiles';
 
 // Services
-export { mockFavoritesClient, mockTagsService } from './services';
+export { mockFavoritesClient, createMockFavoritesClient, mockTagsService } from './services';

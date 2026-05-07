@@ -11,6 +11,11 @@ import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from './hooks';
+import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
+
+const useFetchMetricsDataMock = useFetchMetricsData as jest.MockedFunction<
+  typeof useFetchMetricsData
+>;
 import type {
   UnifiedHistogramFetch$,
   UnifiedHistogramFetchParams,
@@ -18,21 +23,26 @@ import type {
 } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { MetricField, Dimension, UnifiedMetricsGridProps } from '../../../types';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
-import * as metricsExperienceFieldsCapsProvider from './context/metrics_experience_fields_provider';
 
 jest.mock('./context/metrics_experience_state_provider');
-jest.mock('./context/metrics_experience_fields_provider');
 jest.mock('@kbn/ebt-tools', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
   }),
 }));
-jest.mock('./hooks');
+jest.mock('./hooks', () => ({
+  ...jest.requireActual('./hooks'),
+  useMetricsGridFullScreen: jest.fn(),
+  useMetricFieldsFilter: jest.fn(),
+  useDiscoverFieldForBreakdown: jest.fn(),
+}));
+jest.mock('./hooks/use_fetch_metrics_data', () => ({
+  useFetchMetricsData: jest.fn(),
+}));
 jest.mock('./metrics_experience_grid_content', () => ({
   MetricsExperienceGridContent: jest.fn(() => (
     <div data-test-subj="metricsExperienceGridContent" />
@@ -65,31 +75,31 @@ const useMetricsGridFullScreenMock = hooks.useMetricsGridFullScreen as jest.Mock
   typeof hooks.useMetricsGridFullScreen
 >;
 
-const useMetricFieldsContextMock =
-  metricsExperienceFieldsCapsProvider.useMetricsExperienceFieldsContext as jest.MockedFunction<
-    typeof metricsExperienceFieldsCapsProvider.useMetricsExperienceFieldsContext
-  >;
-
-const useMetricFieldsMock = hooks.useMetricFields as jest.MockedFunction<
-  typeof hooks.useMetricFields
+const useMetricFieldsFilterMock = hooks.useMetricFieldsFilter as jest.MockedFunction<
+  typeof hooks.useMetricFieldsFilter
 >;
 
-const dimensions: Dimension[] = [
-  { name: 'foo', type: ES_FIELD_TYPES.KEYWORD },
-  { name: 'qux', type: ES_FIELD_TYPES.KEYWORD },
-];
-const allFields: MetricField[] = [
+const useDiscoverFieldForBreakdownMock = hooks.useDiscoverFieldForBreakdown as jest.MockedFunction<
+  typeof hooks.useDiscoverFieldForBreakdown
+>;
+
+const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
+const metricItems: ParsedMetricItem[] = [
   {
-    name: 'field1',
-    dimensions: [dimensions[0]],
-    index: 'metrics-*',
-    type: ES_FIELD_TYPES.LONG,
+    metricName: 'field1',
+    dimensionFields: [dimensions[0]],
+    dataStream: 'metrics-*',
+    units: [],
+    metricTypes: [],
+    fieldTypes: [],
   },
   {
-    name: 'field2',
-    dimensions: [dimensions[1]],
-    index: 'metrics-*',
-    type: ES_FIELD_TYPES.LONG,
+    metricName: 'field2',
+    dimensionFields: [dimensions[1]],
+    dataStream: 'metrics-*',
+    units: [],
+    metricTypes: [],
+    fieldTypes: [],
   },
 ];
 
@@ -104,7 +114,7 @@ describe('MetricsExperienceGrid', () => {
     fetchParams = getFetchParamsMock({
       dataView: { getIndexPattern: () => 'metrics-*', isTimeBased: () => true } as any,
       filters: [],
-      query: { esql: 'FROM metrics-*' },
+      query: { esql: 'TS metrics-*' },
       esqlVariables: [],
       relativeTimeRange: { from: 'now-15m', to: 'now' },
     });
@@ -123,9 +133,16 @@ describe('MetricsExperienceGrid', () => {
       },
       services: {
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
+        data: {
+          search: {
+            search: jest.fn(),
+          },
+        },
+        uiSettings: {},
       } as unknown as UnifiedHistogramServices,
       fetch$,
       isComponentVisible: true,
+      profileId: 'test-profile-id',
     };
 
     useMetricsExperienceStateMock.mockReturnValue({
@@ -137,79 +154,32 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      profileId: 'test-profile-id',
+    });
+
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems,
+      allDimensions: dimensions,
+      activeDimensions: [],
+      loading: false,
+      error: null,
     });
 
     useMetricsGridFullScreenMock.mockReturnValue({
       metricsGridId: 'test-metrics-grid-id',
-      metricsGridWrapper: null,
-      setMetricsGridWrapper: jest.fn(),
       styles: {
         'metricsGrid--fullScreen': 'mock-fullscreen-class',
         'metricsGrid--restrictBody': 'mock-restrict-body-class',
       },
     });
 
-    useMetricFieldsContextMock.mockReturnValue({
-      metricFields: [],
-      dimensions: [],
-      getSampleRow: jest.fn(() => undefined),
-      whereStatements: [],
-    });
-
-    useMetricFieldsMock.mockReturnValue({
-      allMetricFields: allFields,
-      visibleMetricFields: allFields,
-      dimensions,
-    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: metricItems });
+    useDiscoverFieldForBreakdownMock.mockReturnValue(undefined);
   });
 
   afterEach(() => {
     // Complete the Subject to prevent memory leaks and hanging tests
     fetch$.complete();
-  });
-
-  it('renders the loading state when fields API is fetching', () => {
-    useMetricFieldsContextMock.mockReturnValue({
-      metricFields: [],
-      dimensions: [],
-      getSampleRow: jest.fn(() => undefined),
-      whereStatements: [],
-    });
-
-    useMetricFieldsMock.mockReturnValue({
-      allMetricFields: [],
-      visibleMetricFields: [],
-      dimensions: [],
-    });
-
-    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} isChartLoading />, {
-      wrapper: IntlProvider,
-    });
-
-    expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
-  });
-
-  it('renders the no data state covering the entire container when Fields API returns no data', () => {
-    useMetricFieldsContextMock.mockReturnValue({
-      metricFields: [],
-      dimensions: [],
-      getSampleRow: jest.fn(() => undefined),
-      whereStatements: [],
-    });
-
-    useMetricFieldsMock.mockReturnValue({
-      allMetricFields: [],
-      visibleMetricFields: [],
-      dimensions: [],
-    });
-
-    const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
-    expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
-    expect(queryByTestId('metricsExperienceBreakdownSelectorButton')).not.toBeInTheDocument();
-    expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument();
   });
 
   it('renders the toolbar', () => {
@@ -221,6 +191,67 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
     expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
+  });
+
+  it('renders only the METRICS_INFO error state when fetch fails', () => {
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems: [],
+      allDimensions: [],
+      activeDimensions: [],
+      loading: false,
+      error: new Error('METRICS_INFO failed'),
+    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+    const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    expect(getByTestId('metricsInfoError')).toBeInTheDocument();
+    expect(getByTestId('metricsInfoErrorTitle')).toHaveTextContent('Unable to load visualization');
+    expect(getByTestId('metricsInfoErrorDescription')).toHaveTextContent(
+      'trouble retrieving the information needed for this visualization'
+    );
+    expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
+  });
+
+  it('does not render the METRICS_INFO error state for AbortError (shows chart grid instead)', () => {
+    const abortError = new Error('Aborted');
+    abortError.name = 'AbortError';
+
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems: [],
+      allDimensions: [],
+      activeDimensions: [],
+      loading: false,
+      error: abortError,
+    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+    const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    expect(queryByTestId('metricsInfoError')).not.toBeInTheDocument();
+    expect(getByTestId('toggleActions')).toBeInTheDocument();
+  });
+
+  it('shows loading empty state instead of METRICS_INFO error while fetch is in progress', () => {
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems: [],
+      allDimensions: [],
+      activeDimensions: [],
+      loading: true,
+      error: new Error('stale error while refetching'),
+    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+    const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    expect(queryByTestId('metricsInfoError')).not.toBeInTheDocument();
+    expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
   });
 
   it('shows and updates the search input when the search button is clicked', () => {
@@ -237,6 +268,7 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange,
       onToggleFullscreen: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -279,6 +311,7 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen,
+      profileId: 'test-profile-id',
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -294,5 +327,89 @@ describe('MetricsExperienceGrid', () => {
     });
 
     expect(onToggleFullscreen).toHaveBeenCalled();
+  });
+
+  describe('wipe orphan dimensions on stream switch (#264957)', () => {
+    // Smoke tests only: these assert the grid wires `useDimensionsWipe`
+    // correctly (selection + breakdown callbacks reach Discover). The full
+    // matrix of wipe scenarios lives in `use_dimensions_wipe.test.ts`.
+    const hostName: Dimension = { name: 'host.name' };
+    const environment: Dimension = { name: 'environment' };
+
+    it('prunes selectedDimensions and proposes a default breakdown via onBreakdownFieldChange', () => {
+      const onDimensionsChange = jest.fn();
+      const onBreakdownFieldChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [hostName, environment],
+        onDimensionsChange,
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        profileId: 'test-profile-id',
+      });
+
+      // Stream's universe only has `host.name`; `environment` is mapped but
+      // not emitted by this stream, so it must be wiped.
+      useFetchMetricsDataMock.mockReturnValue({
+        metricItems,
+        allDimensions: [hostName],
+        activeDimensions: [hostName],
+        loading: false,
+        error: null,
+      });
+
+      render(
+        <MetricsExperienceGrid {...defaultProps} onBreakdownFieldChange={onBreakdownFieldChange} />,
+        { wrapper: IntlProvider }
+      );
+
+      expect(onDimensionsChange).toHaveBeenCalledWith([hostName]);
+      // Discover had no breakdown yet, so the wipe proposes the first
+      // surviving dimension.
+      expect(onBreakdownFieldChange).toHaveBeenCalledWith('host.name');
+    });
+
+    it('does not touch the breakdown when the current breakdownField survives the prune', () => {
+      const onDimensionsChange = jest.fn();
+      const onBreakdownFieldChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [hostName, environment],
+        onDimensionsChange,
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        profileId: 'test-profile-id',
+      });
+
+      useFetchMetricsDataMock.mockReturnValue({
+        metricItems,
+        allDimensions: [hostName],
+        activeDimensions: [hostName],
+        loading: false,
+        error: null,
+      });
+
+      // Discover already breaks down by `host.name`, which survives the
+      // prune; the wipe must leave it untouched.
+      render(
+        <MetricsExperienceGrid
+          {...defaultProps}
+          breakdownField="host.name"
+          onBreakdownFieldChange={onBreakdownFieldChange}
+        />,
+        { wrapper: IntlProvider }
+      );
+
+      expect(onDimensionsChange).toHaveBeenCalledWith([hostName]);
+      expect(onBreakdownFieldChange).not.toHaveBeenCalled();
+    });
   });
 });

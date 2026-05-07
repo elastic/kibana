@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { DateProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
@@ -28,14 +29,14 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]?.['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
+      expect(asDoc(ingestedDocs[0])?.['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
     }
   );
 
@@ -57,14 +58,14 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ event: { created: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]?.event?.created).toBe('2025-01-01');
+      expect(asDoc(asDoc(ingestedDocs[0])?.event)?.created).toBe('2025-01-01');
     }
   );
 
@@ -85,14 +86,14 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ event: { created: '01/01/2025:12:34:56' } }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]?.event?.created_date).toBe('2025-01-01T12:34:56.000Z');
+      expect(asDoc(asDoc(ingestedDocs[0])?.event)?.created_date).toBe('2025-01-01T12:34:56.000Z');
     }
   );
 
@@ -112,7 +113,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = await transpile(streamlangDSL);
 
     const docs = [
       { event: { created: '01/01/2025:12:34:56' } },
@@ -122,8 +123,8 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
 
     const ingestedDocs = await testBed.getDocsOrdered(indexName);
     expect(ingestedDocs).toHaveLength(2);
-    expect(ingestedDocs[0]?.event?.created_date).toBe('01 01 2025 12:34');
-    expect(ingestedDocs[1]?.event?.created_date).toBe('01 01 2025 12:35');
+    expect(asDoc(asDoc(ingestedDocs[0])?.event)?.created_date).toBe('01 01 2025 12:34');
+    expect(asDoc(asDoc(ingestedDocs[1])?.event)?.created_date).toBe('01 01 2025 12:35');
   });
 
   apiTest(
@@ -144,14 +145,14 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ event: { created: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]?.event?.created_date).toBe('2025-01-01');
+      expect(asDoc(asDoc(ingestedDocs[0])?.event)?.created_date).toBe('2025-01-01');
     }
   );
 
@@ -171,7 +172,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ event: { created: '01-01-2025' } }];
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -195,20 +196,20 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
       `${description}`,
       { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
       async () => {
-        expect(() => {
-          const streamlangDSL: StreamlangDSL = {
-            steps: [
-              {
-                action: 'date',
-                from: templateFrom,
-                to: templateTo,
-                formats: ['ISO8601'],
-                output_format: 'yyyy-MM-dd',
-              } as DateProcessor,
-            ],
-          };
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'date',
+              from: templateFrom,
+              to: templateTo,
+              formats: ['ISO8601'],
+              output_format: 'yyyy-MM-dd',
+            } as DateProcessor,
+          ],
+        };
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       }
     );
   });
@@ -232,7 +233,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ event: { created: '10 septembre 2025' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -240,7 +241,9 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
       const ingestedDocs = await testBed.getDocs(indexName);
 
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]?.event?.created_date).toBe('2025-09-10T00:00:00.000+02:00');
+      expect(asDoc(asDoc(ingestedDocs[0])?.event)?.created_date).toBe(
+        '2025-09-10T00:00:00.000+02:00'
+      );
     }
   );
 
@@ -263,7 +266,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ event: { created: '10 septembre 2025' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -293,7 +296,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ event: { created: '10 septembre 2025' } }];
       await testBed.ingest(indexName, docs, processors);

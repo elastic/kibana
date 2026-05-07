@@ -1,0 +1,11 @@
+# summary:
+description: Run `POST /api/apm/services/{serviceName}/annotation` to create a deployment annotation for a service.
+value:
+  "@timestamp": "2024-01-15T12:00:00.000Z"
+  service:
+    version: "1.2.0"
+    environment: "production"
+  message: "Deployment 1.2.0"
+  tags:
+    - "apm"
+    - "deployment"

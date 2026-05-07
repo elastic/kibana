@@ -23,7 +23,6 @@ export function useErrorClickHandler(traceItems: TraceItem[]): OnErrorClick {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer',
     '/dependencies/operation'
   );
   const {
@@ -34,7 +33,7 @@ export function useErrorClickHandler(traceItems: TraceItem[]): OnErrorClick {
 
   return useCallback(
     ({ traceId: errorTraceId, docId }) => {
-      const item = traceItems.find((i) => i.id === docId);
+      const item = traceItems?.find((i) => i.id === docId);
       if (!item) return;
 
       const idField = item.docType === 'span' ? SPAN_ID : TRANSACTION_ID;

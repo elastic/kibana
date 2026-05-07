@@ -9,6 +9,7 @@
 
 // General settings
 export const DISABLE_REQUEST_BATCHING_ID = 'bfetch:disable';
+export const ELASTIC_CONSOLE_ENABLED_SETTING_ID = 'elasticRamen:enabled';
 export const DISABLE_BATCH_COMPRESSION_ID = 'bfetch:disableCompression';
 export const CSV_QUOTE_VALUES_ID = 'csv:quoteValues';
 export const CSV_SEPARATOR_ID = 'csv:separator';
@@ -64,6 +65,10 @@ export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
 export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:experimentalFeatures';
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
 
+// Agent context layer settings
+export const AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID =
+  'agentContextLayer:experimentalFeatures';
+
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';
 export const AUTOCOMPLETE_VALUE_SUGGESTION_METHOD_ID = 'autocomplete:valueSuggestionMethod';
@@ -74,9 +79,6 @@ export const BANNERS_TEXT_CONTENT_ID = 'banners:textContent';
 export const BANNERS_TEXT_COLOR_ID = 'banners:textColor';
 export const BANNERS_LINK_COLOR_ID = 'banners:linkColor';
 export const BANNERS_BACKGROUND_COLOR_ID = 'banners:backgroundColor';
-
-// Data sources settings
-export const DATA_SOURCES_ENABLED_SETTING_ID = 'dataSources:enabled';
 
 // Discover settings
 export const CONTEXT_DEFAULT_SIZE_ID = 'context:defaultSize';
@@ -133,11 +135,10 @@ export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
   'observability:aiAssistantSimulatedFunctionCalling';
 export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
   'observability:aiAssistantSearchConnectorIndexPattern';
-export const OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID =
-  'observability:registerObservabilityAgent';
 export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR = 'genAiSettings:defaultAIConnector';
 export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY =
   'genAiSettings:defaultAIConnectorOnly';
+export const GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING = 'genAiSettings:tokenUsageTracking';
 export const AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE = 'aiAssistant:preferredAIAssistantType';
 export const AI_CHAT_EXPERIENCE_TYPE = 'aiAssistant:preferredChatExperience';
 export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
@@ -149,7 +150,21 @@ export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY =
 export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streamsEnableGroupStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS = 'observability:streamsEnableQueryStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streamsEnableContentPacks';
-export const OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS = 'observability:streamsEnableAttachments';
+export const OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS =
+  'observability:streamsEnableWiredStreamViews';
+export const OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE = 'observability:streamsEnableOverviewPage';
+export const OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS = 'observability:streamsEnableDraftStreams';
+export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED =
+  'observability:streamsContinuousKiExtractionEnabled';
+export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS =
+  'observability:streamsContinuousKiExtractionIntervalHours';
+export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS =
+  'observability:streamsContinuousKiExtractionExcludedStreamPatterns';
+export const OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS =
+  'observability:streamsSigEventsIndexPatterns';
+export const OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG =
+  'observability:streamsSigEventsTuningConfig';
+export const OBSERVABILITY_STREAMS_ENABLE_MEMORY = 'observability:streamsEnableMemory';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings
@@ -166,6 +181,9 @@ export const COURIER_MAX_CONCURRENT_SHARD_REQUEST_ID = 'courier:maxConcurrentSha
 export const COURIER_SET_REQUEST_PREFERENCE_ID = 'courier:setRequestPreference';
 export const SEARCH_INCLUDE_FROZEN_ID = 'search:includeFrozen';
 export const SEARCH_TIMEOUT_ID = 'search:timeout';
+
+// Query activity settings
+export const QUERY_ACTIVITY_MIN_RUNNING_TIME_ID = 'query_activity:minRunningTime';
 
 // Security solution settings
 export const SECURITY_SOLUTION_REFRESH_INTERVAL_DEFAULTS_ID =
@@ -184,13 +202,11 @@ export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
 export const SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
   'securitySolution:suppressionBehaviorOnAlertClosure' as const;
 export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
+export const SECURITY_SOLUTION_EXCLUDED_GAP_REASONS_KEY =
+  'securitySolution:excludedGapReasons' as const;
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
 export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
   'securitySolution:enableAssetCriticality' as const;
-export const SECURITY_SOLUTION_ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
-  'securitySolution:enableVisualizationsInFlyout' as const;
-export const SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING =
-  'securitySolution:enableGraphVisualization' as const;
 export const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING =
   'securitySolution:enableAssetInventory' as const;
 export const SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING =
@@ -201,6 +217,9 @@ export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE =
   'securitySolution:defaultValueReportRate' as const;
 export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE =
   'securitySolution:defaultValueReportTitle' as const;
+// Cases settings
+export const CASES_MAX_OPEN_CASES_PER_RULE_RUN_ID = 'cases:maxOpenCasesPerRuleRun' as const;
+
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';
 export const TIMELION_ES_TIME_FIELD_ID = 'timelion:es.timefield';

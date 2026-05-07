@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout/api';
 
 import { COMMON_HEADERS } from '../fixtures';
 
-apiTest.describe('Create new UIAM session', { tag: tags.serverless.security.complete }, () => {
+apiTest.describe('Create new UIAM session', { tag: tags.serverless.all }, () => {
   apiTest('should be able to authenticate as UIAM user', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
     const response = await apiClient.get('internal/security/me', {

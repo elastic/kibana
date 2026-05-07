@@ -23,10 +23,13 @@ import type { KueryNode } from '@kbn/es-query';
 import type { AxiosInstance } from 'axios';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import type { AuthMode } from '@kbn/connector-specs';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
+import { getAuthStatus } from '../application/connector/methods/get_auth_status';
+import type { GetAuthStatusResult } from '../application/connector/methods/get_auth_status/types';
 import { update } from '../application/connector/methods/update';
 import { listTypes } from '../application/connector/methods/list_types';
 import { create } from '../application/connector/methods/create';
@@ -37,6 +40,7 @@ import type {
   IExecutionLogResult,
 } from '../../common';
 import type { ActionTypeRegistry } from '../action_type_registry';
+import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 import type { ActionExecutorContract } from '../lib';
 import { parseDate } from '../lib';
 import type {
@@ -47,7 +51,9 @@ import type {
   ConnectorTokenClientContract,
   HookServices,
   ActionType,
+  ConnectorLifecycleListener,
 } from '../types';
+import { invokePostDeleteListeners } from '../lib/invoke_lifecycle_listeners';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import type {
   ExecuteOptions as EnqueueExecutionOptions,
@@ -58,6 +64,7 @@ import type { ActionsAuthorization } from '../authorization/actions_authorizatio
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
+  OAuthAuthorizationCodeParams,
   OAuthClientCredentialsParams,
   OAuthJwtParams,
   OAuthParams,
@@ -69,6 +76,11 @@ import type {
   GetOAuthClientCredentialsSecrets,
 } from '../lib/get_oauth_client_credentials_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
+import {
+  getOAuthAuthorizationCodeAccessToken,
+  type GetOAuthAuthorizationCodeConfig,
+  type GetOAuthAuthorizationCodeSecrets,
+} from '../lib/get_oauth_authorization_code_access_token';
 import {
   ACTION_FILTER,
   formatExecutionKPIResult,
@@ -92,6 +104,7 @@ export interface ConstructorOptions {
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
+  authTypeRegistry: AuthTypeRegistry;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
@@ -112,6 +125,8 @@ export interface ConstructorOptions {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  connectorLifecycleListeners?: ConnectorLifecycleListener[];
+  getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export interface ActionsClientContext {
@@ -121,6 +136,7 @@ export interface ActionsClientContext {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   actionTypeRegistry: ActionTypeRegistry;
+  authTypeRegistry: AuthTypeRegistry;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
@@ -136,7 +152,11 @@ export interface ActionsClientContext {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  connectorLifecycleListeners?: ConnectorLifecycleListener[];
+  getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
 }
+
+const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
 
 export class ActionsClient {
   private readonly context: ActionsClientContext;
@@ -144,6 +164,7 @@ export class ActionsClient {
   constructor({
     logger,
     actionTypeRegistry,
+    authTypeRegistry,
     kibanaIndices,
     scopedClusterClient,
     encryptedSavedObjectsClient,
@@ -161,10 +182,13 @@ export class ActionsClient {
     getAxiosInstanceWithAuth,
     spaces,
     isESOCanEncrypt,
+    connectorLifecycleListeners,
+    getCurrentUserProfileId,
   }: ConstructorOptions) {
     this.context = {
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       encryptedSavedObjectsClient,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -182,6 +206,8 @@ export class ActionsClient {
       getAxiosInstanceWithAuth,
       spaces,
       isESOCanEncrypt,
+      connectorLifecycleListeners,
+      getCurrentUserProfileId: getCurrentUserProfileId ?? noop,
     };
   }
 
@@ -232,6 +258,13 @@ export class ActionsClient {
    */
   public async getAllSystemConnectors(): Promise<ConnectorWithExtraFindData[]> {
     return getAllSystemConnectors({ context: this.context });
+  }
+
+  /**
+   * Auth status for all connectors visible in the current space (persisted + in-memory).
+   */
+  public async getAuthStatus(): Promise<GetAuthStatusResult> {
+    return getAuthStatus({ context: this.context });
   }
 
   /**
@@ -420,6 +453,49 @@ export class ActionsClient {
         );
         throw Boom.badRequest(`Failed to retrieve access token`);
       }
+    } else if (type === 'authorization_code') {
+      const tokenOpts = options as OAuthAuthorizationCodeParams;
+      try {
+        let authMode: AuthMode | undefined;
+        try {
+          const rawConnector = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+            'action',
+            tokenOpts.connectorId
+          );
+          authMode = rawConnector.attributes.authMode;
+        } catch (err) {
+          this.context.logger.debug(
+            `Failed to read authMode for connector ${tokenOpts.connectorId}: ${err.message}`
+          );
+        }
+
+        const profileUid = await this.context.getCurrentUserProfileId?.(this.context.request);
+
+        accessToken = await getOAuthAuthorizationCodeAccessToken({
+          connectorId: tokenOpts.connectorId,
+          logger: this.context.logger,
+          configurationUtilities,
+          credentials: {
+            config: tokenOpts.config as GetOAuthAuthorizationCodeConfig,
+            secrets: tokenOpts.secrets as GetOAuthAuthorizationCodeSecrets,
+          },
+          connectorTokenClient: this.context.connectorTokenClient,
+          scope: tokenOpts.scope,
+          authMode,
+          profileUid,
+        });
+
+        this.context.logger.debug(
+          () =>
+            `Successfully retrieved access token using Authorization Code OAuth for connector ${tokenOpts.connectorId} with tokenUrl ${tokenOpts.tokenUrl}`
+        );
+      } catch (err) {
+        this.context.logger.debug(
+          () =>
+            `Failed to retrieve access token using Authorization Code OAuth for connector ${tokenOpts.connectorId} with tokenUrl ${tokenOpts.tokenUrl} - ${err.message}`
+        );
+        throw Boom.badRequest(`Failed to retrieve access token`);
+      }
     }
 
     return { accessToken };
@@ -429,12 +505,12 @@ export class ActionsClient {
    * Delete action
    */
   public async delete({ id }: { id: string }) {
+    const foundInMemoryConnector = this.context.inMemoryConnectors.find(
+      (connector) => connector.id === id
+    );
+
     try {
       await this.context.authorization.ensureAuthorized({ operation: 'delete' });
-
-      const foundInMemoryConnector = this.context.inMemoryConnectors.find(
-        (connector) => connector.id === id
-      );
 
       if (foundInMemoryConnector?.isSystemAction) {
         throw Boom.badRequest(
@@ -444,18 +520,6 @@ export class ActionsClient {
               id,
             },
           })
-        );
-      }
-
-      if (foundInMemoryConnector?.isPreconfigured) {
-        throw new PreconfiguredActionDisabledModificationError(
-          i18n.translate('xpack.actions.serverSideErrors.predefinedActionDeleteDisabled', {
-            defaultMessage: 'Preconfigured action {id} is not allowed to delete.',
-            values: {
-              id,
-            },
-          }),
-          'delete'
         );
       }
     } catch (error) {
@@ -477,17 +541,25 @@ export class ActionsClient {
       })
     );
 
+    let rawAction;
     try {
-      await this.context.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
+      rawAction = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     } catch (e) {
-      this.context.logger.error(
-        `Failed to delete auth tokens for connector "${id}" after delete: ${e.message}`
-      );
+      if (foundInMemoryConnector?.isPreconfigured) {
+        throw new PreconfiguredActionDisabledModificationError(
+          i18n.translate('xpack.actions.serverSideErrors.predefinedActionDeleteDisabled', {
+            defaultMessage: 'Preconfigured action {id} is not allowed to delete.',
+            values: {
+              id,
+            },
+          }),
+          'delete'
+        );
+      }
+      throw e;
     }
-
-    const rawAction = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     const {
-      attributes: { actionTypeId, config },
+      attributes: { actionTypeId, config, authMode },
     } = rawAction;
 
     let actionType: ActionType | undefined;
@@ -522,6 +594,32 @@ export class ActionsClient {
         );
       }
     }
+
+    // Invoke cross-plugin lifecycle listeners (fire-and-forget to avoid blocking the API response)
+    void invokePostDeleteListeners(
+      this.context.connectorLifecycleListeners,
+      actionTypeId,
+      {
+        connectorId: id,
+        config,
+        logger: this.context.logger,
+        request: this.context.request,
+        services: hookServices,
+      },
+      this.context.logger
+    );
+
+    try {
+      await this.context.connectorTokenClient.deleteConnectorTokens({
+        connectorId: id,
+        authMode,
+      });
+    } catch (e) {
+      this.context.logger.error(
+        `Failed to delete auth tokens for connector "${id}" after delete: ${e.message}`
+      );
+    }
+
     return result;
   }
 

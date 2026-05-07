@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
@@ -12,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { LineClamp } from '../../../common/components/line_clamp';
+import { EventKind } from '../constants/event_kinds';
 import {
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
   ALERT_DESCRIPTION_TITLE_TEST_ID,
@@ -42,7 +43,10 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({
   onShowRuleSummary,
   ruleSummaryDisabled,
 }) => {
-  const isAlert = useMemo(() => (getFieldValue(hit, EVENT_KIND) as string) === 'signal', [hit]);
+  const isAlert = useMemo(
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    [hit]
+  );
 
   const ruleDescription = useMemo(
     () => getFieldValue(hit, 'kibana.alert.rule.description') as string,
@@ -119,7 +123,17 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={ALERT_DESCRIPTION_DETAILS_TEST_ID}>
-        <LineClamp>{isAlert ? alertRuleDescription : '-'}</LineClamp>
+        <p
+          css={css`
+            word-break: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          `}
+        >
+          {isAlert ? alertRuleDescription : '-'}
+        </p>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

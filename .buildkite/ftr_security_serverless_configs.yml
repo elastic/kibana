@@ -31,6 +31,8 @@ disabled:
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/solutions/security/test/serverless/api_integration/configs/config.ts
+  - x-pack/solutions/security/test/serverless/api_integration/configs/config.graph.ts
+  - x-pack/solutions/security/test/serverless/api_integration/configs/config.graph_essentials.ts
   - x-pack/platform/test/serverless/api_integration/configs/security/config.group1.ts
   - x-pack/solutions/security/test/serverless/api_integration/test_suites/fleet/config.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.screenshots.ts
@@ -51,6 +53,7 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/security/config.group4.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group5.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group6.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.reporting.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group7.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group8.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group9.ts
@@ -59,6 +62,12 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/security/config.group12.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group13.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group14.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group15.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group16.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group17.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group18.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group19.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.feature_flags.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/trial_license_complete_tier/configs/serverless.config.ts
@@ -119,11 +128,14 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/conversations/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_score_maintainer/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_resolution/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/monitoring/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/monitoring/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_details/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/watchlists/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/exceptions/lists/essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/exceptions/common/essentials_tier/configs/serverless.config.ts
@@ -154,6 +166,7 @@ enabled:
   - x-pack/solutions/security/test/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/solutions/security/test/security_solution_endpoint/configs/serverless.integrations.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/ai4dsoc/cases/search_ai_lake_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/ai4dsoc/ease_rules/search_ai_lake_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/ai4dsoc/nlp_cleanup_task/search_ai_lake_tier/configs/serverless.config.ts
   # serverless config files that run deployment-agnostic tests
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.config.ts

@@ -6,21 +6,23 @@
  */
 
 import React from 'react';
-import type { Store, AnyAction } from 'redux';
+import type { AnyAction, Store } from 'redux';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import type { History as HistoryPackageHistoryInterface } from 'history';
 import { coreMock } from '@kbn/core/public/mocks';
+import { cellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { MockResolver } from './mock_resolver';
-import type { DataAccessLayer, SpyMiddleware, SideEffectSimulator, TimeFilters } from '../../types';
+import type { DataAccessLayer, SideEffectSimulator, SpyMiddleware, TimeFilters } from '../../types';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
 import { uiSetting } from '../../mocks/ui_setting';
 import { EMPTY_RESOLVER } from '../../store/helpers';
 import type { State } from '../../../common/store/types';
 import { createMockStore, mockGlobalState } from '../../../common/mock';
 import { createResolver } from '../../store/actions';
+
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
  */
@@ -80,6 +82,7 @@ export class Simulator {
     history,
     filters,
     shouldUpdate,
+    useLegacyExpandableFlyout = false,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -100,6 +103,7 @@ export class Simulator {
     history: HistoryPackageHistoryInterface;
     filters: TimeFilters;
     shouldUpdate: boolean;
+    useLegacyExpandableFlyout?: boolean;
   }) {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
@@ -149,6 +153,8 @@ export class Simulator {
         indices={indices}
         filters={filters}
         shouldUpdate={shouldUpdate}
+        useLegacyExpandableFlyout={useLegacyExpandableFlyout}
+        renderCellActions={cellActionRenderer}
       />
     );
   }

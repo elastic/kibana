@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export const CASES_ATTACHMENT_LOG_PATTERN = 'aiopsPatternAnalysisEmbeddable';
-
-export const EMBEDDABLE_PATTERN_ANALYSIS_TYPE = 'aiopsPatternAnalysisEmbeddable' as const;
+//
+// Do not change constant value - part of public REST APIs
+//
+export const EMBEDDABLE_PATTERN_ANALYSIS_TYPE = 'aiops_pattern_analysis' as const;
 
 export const PATTERN_ANALYSIS_DATA_VIEW_REF_NAME = 'aiopsPatternAnalysisEmbeddableDataViewId';

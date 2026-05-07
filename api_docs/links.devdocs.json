@@ -22,7 +22,7 @@
         "label": "DashboardLink",
         "description": [],
         "signature": [
-          "{ readonly options?: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }> | undefined; readonly label?: string | undefined; readonly id: string; readonly type: \"dashboardLink\"; readonly order: number; readonly destination: string; }"
+          "{ readonly label?: string | undefined; readonly type: \"dashboardLink\"; readonly options: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }>; readonly destination: string; }"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
         "lineNumber": 23,
@@ -39,7 +39,7 @@
         "label": "ExternalLink",
         "description": [],
         "signature": [
-          "{ readonly options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; readonly label?: string | undefined; readonly id: string; readonly type: \"externalLink\"; readonly order: number; readonly destination: string; }"
+          "{ readonly label?: string | undefined; readonly type: \"externalLink\"; readonly options: Readonly<{} & { open_in_new_tab: boolean; encode_url: boolean; }>; readonly destination: string; }"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
         "lineNumber": 24,
@@ -56,7 +56,7 @@
         "label": "ExternalLinkOptions",
         "description": [],
         "signature": [
-          "{ readonly openInNewTab?: boolean | undefined; readonly encodeUrl?: boolean | undefined; }"
+          "{ readonly open_in_new_tab: boolean; readonly encode_url: boolean; }"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
         "lineNumber": 25,
@@ -73,7 +73,7 @@
         "label": "Link",
         "description": [],
         "signature": [
-          "Readonly<{ options?: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>"
+          "Readonly<{ label?: string | undefined; } & { type: \"dashboardLink\"; options: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }>; destination: string; }> | Readonly<{ label?: string | undefined; } & { type: \"externalLink\"; options: Readonly<{} & { open_in_new_tab: boolean; encode_url: boolean; }>; destination: string; }>"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
         "lineNumber": 26,
@@ -90,7 +90,7 @@
         "label": "LinkOptions",
         "description": [],
         "signature": [
-          "Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }> | Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined"
+          "Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }> | Readonly<{} & { open_in_new_tab: boolean; encode_url: boolean; }>"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
         "lineNumber": 27,
@@ -107,10 +107,10 @@
         "label": "LinksByReferenceState",
         "description": [],
         "signature": [
-          "{ readonly savedObjectId: string; }"
+          "{ readonly ref_id: string; }"
         ],
         "path": "src/platform/plugins/private/links/server/embeddable_schemas.ts",
-        "lineNumber": 59,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -124,10 +124,10 @@
         "label": "LinksByValueState",
         "description": [],
         "signature": [
-          "{ readonly layout?: \"horizontal\" | \"vertical\" | undefined; readonly links: (Readonly<{ options?: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }"
+          "{ readonly layout?: \"horizontal\" | \"vertical\" | undefined; readonly links: (Readonly<{ label?: string | undefined; } & { type: \"dashboardLink\"; options: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }>; destination: string; }> | Readonly<{ label?: string | undefined; } & { type: \"externalLink\"; options: Readonly<{} & { open_in_new_tab: boolean; encode_url: boolean; }>; destination: string; }>)[]; }"
         ],
         "path": "src/platform/plugins/private/links/server/embeddable_schemas.ts",
-        "lineNumber": 58,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -141,10 +141,10 @@
         "label": "LinksEmbeddableState",
         "description": [],
         "signature": [
-          "Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; layout?: \"horizontal\" | \"vertical\" | undefined; } & { links: (Readonly<{ options?: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { savedObjectId: string; }>"
+          "Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; layout?: \"horizontal\" | \"vertical\" | undefined; } & { links: (Readonly<{ label?: string | undefined; } & { type: \"dashboardLink\"; options: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }>; destination: string; }> | Readonly<{ label?: string | undefined; } & { type: \"externalLink\"; options: Readonly<{} & { open_in_new_tab: boolean; encode_url: boolean; }>; destination: string; }>)[]; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { ref_id: string; }>"
         ],
         "path": "src/platform/plugins/private/links/server/embeddable_schemas.ts",
-        "lineNumber": 60,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -158,7 +158,7 @@
         "label": "LinksState",
         "description": [],
         "signature": [
-          "{ readonly description?: string | undefined; readonly title?: string | undefined; readonly hide_title?: boolean | undefined; readonly hide_border?: boolean | undefined; readonly layout?: \"horizontal\" | \"vertical\" | undefined; readonly links: (Readonly<{ options?: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }"
+          "{ readonly description?: string | undefined; readonly title?: string | undefined; readonly hide_title?: boolean | undefined; readonly hide_border?: boolean | undefined; readonly layout?: \"horizontal\" | \"vertical\" | undefined; readonly links: (Readonly<{ label?: string | undefined; } & { type: \"dashboardLink\"; options: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }>; destination: string; }> | Readonly<{ label?: string | undefined; } & { type: \"externalLink\"; options: Readonly<{} & { open_in_new_tab: boolean; encode_url: boolean; }>; destination: string; }>)[]; }"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
         "lineNumber": 29,
@@ -175,10 +175,10 @@
         "label": "StoredDashboardLink",
         "description": [],
         "signature": [
-          "Omit<Readonly<{ options?: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }>, \"destination\"> & { destinationRefName: string; }"
+          "Omit<Readonly<{ label?: string | undefined; } & { type: \"dashboardLink\"; options: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }>; destination: string; }>, \"destination\"> & DeprecatedLinkProperties & { destinationRefName: string; }"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
-        "lineNumber": 33,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -192,18 +192,12 @@
         "label": "StoredLinksState",
         "description": [],
         "signature": [
-          "Omit<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; layout?: \"horizontal\" | \"vertical\" | undefined; } & { links: (Readonly<{ options?: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }>, \"links\"> & { links?: (Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }> | ",
-          {
-            "pluginId": "links",
-            "scope": "server",
-            "docId": "kibLinksPluginApi",
-            "section": "def-server.StoredDashboardLink",
-            "text": "StoredDashboardLink"
-          },
-          ")[] | undefined; }"
+          "Omit<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; layout?: \"horizontal\" | \"vertical\" | undefined; } & { links: (Readonly<{ label?: string | undefined; } & { type: \"dashboardLink\"; options: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }>; destination: string; }> | Readonly<{ label?: string | undefined; } & { type: \"externalLink\"; options: Readonly<{} & { open_in_new_tab: boolean; encode_url: boolean; }>; destination: string; }>)[]; }>, \"links\"> & { links?: ",
+          "StoredLink",
+          "[] | undefined; }"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
-        "lineNumber": 30,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -339,10 +333,10 @@
         "label": "LinksByReferenceState",
         "description": [],
         "signature": [
-          "{ readonly savedObjectId: string; }"
+          "{ readonly ref_id: string; }"
         ],
         "path": "src/platform/plugins/private/links/server/embeddable_schemas.ts",
-        "lineNumber": 59,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -356,10 +350,10 @@
         "label": "LinksByValueState",
         "description": [],
         "signature": [
-          "{ readonly layout?: \"horizontal\" | \"vertical\" | undefined; readonly links: (Readonly<{ options?: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }"
+          "{ readonly layout?: \"horizontal\" | \"vertical\" | undefined; readonly links: (Readonly<{ label?: string | undefined; } & { type: \"dashboardLink\"; options: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }>; destination: string; }> | Readonly<{ label?: string | undefined; } & { type: \"externalLink\"; options: Readonly<{} & { open_in_new_tab: boolean; encode_url: boolean; }>; destination: string; }>)[]; }"
         ],
         "path": "src/platform/plugins/private/links/server/embeddable_schemas.ts",
-        "lineNumber": 58,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -373,10 +367,10 @@
         "label": "LinksEmbeddableState",
         "description": [],
         "signature": [
-          "Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; layout?: \"horizontal\" | \"vertical\" | undefined; } & { links: (Readonly<{ options?: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { savedObjectId: string; }>"
+          "Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; layout?: \"horizontal\" | \"vertical\" | undefined; } & { links: (Readonly<{ label?: string | undefined; } & { type: \"dashboardLink\"; options: Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }>; destination: string; }> | Readonly<{ label?: string | undefined; } & { type: \"externalLink\"; options: Readonly<{} & { open_in_new_tab: boolean; encode_url: boolean; }>; destination: string; }>)[]; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { ref_id: string; }>"
         ],
         "path": "src/platform/plugins/private/links/server/embeddable_schemas.ts",
-        "lineNumber": 60,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

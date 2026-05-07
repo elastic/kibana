@@ -33,7 +33,8 @@ export const indicesOptionsSchema = schema.object({
         schema.literal('closed'),
         schema.literal('hidden'),
         schema.literal('none'),
-      ])
+      ]),
+      { maxSize: 10000 }
     )
   ),
   ignore_unavailable: schema.maybe(schema.boolean()),
@@ -69,6 +70,7 @@ export const categorizationFieldValidationSchema = schema.object({
   analyzer: schema.maybe(schema.any()),
   runtimeMappings: runtimeMappingsSchema,
   indicesOptions: indicesOptionsSchema,
+  projectRouting: schema.maybe(schema.string()),
   includeExamples: schema.boolean(),
 });
 export type CategorizationFieldValidationSchema = TypeOf<

@@ -15,6 +15,7 @@ import { MockDashboardMigrationsRetriever } from '../retrievers/__mocks__/mocks'
 import { getDashboardMigrationAgent } from './graph';
 import type { OriginalDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../../../../common';
 
@@ -57,14 +58,7 @@ const setupAgent = (responses: NodeResponse[]) => {
     dashboardMigrationsRetriever: mockRetriever,
     logger,
     telemetryClient: mockTelemetryClient,
-    inference: {
-      getClient: jest.fn(),
-      getChatModel: jest.fn(),
-      getConnectorList: jest.fn(),
-      getDefaultConnector: jest.fn(),
-      getConnectorById: jest.fn(),
-      ...model,
-    },
+    inference: inferenceMock.createStartContract(),
     request: httpServerMock.createKibanaRequest(),
     connectorId: 'test-connector',
     experimentalFeatures: { splunkV2DashboardsEnabled: false } as unknown as ExperimentalFeatures,

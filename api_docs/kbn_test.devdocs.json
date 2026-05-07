@@ -106,6 +106,7 @@
                 "lineNumber": 30,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Options",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -317,7 +318,7 @@
               "\nTrue when the FTR config indicates that Kibana has a dedicated task runner process, otherwise false. If this\nproperty is false then all other methods on this class will throw when they are called, so if you're not\ncertain where your code will be run make sure to check `dedicatedTaskRunner.enabled` before calling\nother methods."
             ],
             "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
-            "lineNumber": 32,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -333,7 +334,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
-            "lineNumber": 48,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -355,9 +356,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
-                "lineNumber": 48,
+                "lineNumber": 44,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -378,9 +380,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
-                "lineNumber": 48,
+                "lineNumber": 44,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -400,7 +403,7 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
-            "lineNumber": 84,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -420,7 +423,7 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
-            "lineNumber": 91,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -440,7 +443,7 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
-            "lineNumber": 98,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -460,7 +463,7 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
-            "lineNumber": 106,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -477,15 +480,15 @@
             "signature": [
               "() => ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/kbn-client",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnKbnClientPluginApi",
                 "section": "def-common.KbnClient",
                 "text": "KbnClient"
               }
             ],
             "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
-            "lineNumber": 122,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -509,7 +512,7 @@
               ".Test>"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
-            "lineNumber": 129,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -573,9 +576,9 @@
                     "signature": [
                       "[name: string]:  ",
                       {
-                        "pluginId": "@kbn/test",
+                        "pluginId": "@kbn/test-docker-servers",
                         "scope": "common",
-                        "docId": "kibKbnTestPluginApi",
+                        "docId": "kibKbnTestDockerServersPluginApi",
                         "section": "def-common.DockerServerSpec",
                         "text": "DockerServerSpec"
                       }
@@ -608,6 +611,7 @@
                 "lineNumber": 30,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -631,6 +635,7 @@
                 "lineNumber": 31,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Lifecycle",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -736,9 +741,9 @@
             "signature": [
               "(name: string) => { name: string; url: string; enabled: boolean; portInContainer: number; port: number; image: string; preferCached?: boolean | undefined; waitForLogLine?: string | RegExp | undefined; waitForLogLineTimeoutMs?: number | undefined; waitFor?: ((server: ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-docker-servers",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestDockerServersPluginApi",
                 "section": "def-common.DockerServer",
                 "text": "DockerServer"
               },
@@ -1031,6 +1036,7 @@
                 "lineNumber": 32,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1054,6 +1060,7 @@
                 "lineNumber": 33,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Config",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1115,6 +1122,7 @@
                 "lineNumber": 44,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortSignal",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1231,6 +1239,7 @@
                 "lineNumber": 117,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ProviderContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1247,7 +1256,7 @@
         "tags": [],
         "label": "KbnClient",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+        "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
         "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
@@ -1263,7 +1272,7 @@
             "signature": [
               "KbnClientStatus"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
@@ -1279,7 +1288,7 @@
             "signature": [
               "KbnClientPlugins"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
@@ -1295,7 +1304,7 @@
             "signature": [
               "KbnClientVersion"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
@@ -1309,9 +1318,15 @@
             "label": "savedObjects",
             "description": [],
             "signature": [
-              "KbnClientSavedObjects"
+              {
+                "pluginId": "@kbn/kbn-client",
+                "scope": "common",
+                "docId": "kibKbnKbnClientPluginApi",
+                "section": "def-common.KbnClientSavedObjects",
+                "text": "KbnClientSavedObjects"
+              }
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
@@ -1327,7 +1342,7 @@
             "signature": [
               "KbnClientSpaces"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
@@ -1343,7 +1358,7 @@
             "signature": [
               "KbnClientUiSettings"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
@@ -1359,7 +1374,7 @@
             "signature": [
               "KbnClientImportExport"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
@@ -1377,7 +1392,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
@@ -1392,17 +1407,18 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClientOptions",
                     "text": "KbnClientOptions"
                   }
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
                 "lineNumber": 48,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "KbnClientOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1420,12 +1436,18 @@
             ],
             "signature": [
               "<T>(options: ",
-              "ReqOptions",
+              {
+                "pluginId": "@kbn/kbn-client",
+                "scope": "common",
+                "docId": "kibKbnKbnClientPluginApi",
+                "section": "def-common.ReqOptions",
+                "text": "ReqOptions"
+              },
               ") => Promise<",
               "AxiosResponse",
               "<T, any, {}>>"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
@@ -1439,12 +1461,19 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "ReqOptions"
+                  {
+                    "pluginId": "@kbn/kbn-client",
+                    "scope": "common",
+                    "docId": "kibKbnKbnClientPluginApi",
+                    "section": "def-common.ReqOptions",
+                    "text": "ReqOptions"
+                  }
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
                 "lineNumber": 80,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReqOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1461,7 +1490,7 @@
             "signature": [
               "(relativeUrl: string) => string"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
@@ -1477,7 +1506,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
                 "lineNumber": 84,
                 "columnNumber": 14,
                 "deprecated": false,
@@ -1499,15 +1528,15 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClientRequesterError",
             "text": "KbnClientRequesterError"
           },
           " extends Error"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+        "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester_error.ts",
         "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
@@ -1524,7 +1553,7 @@
               "AxiosError",
               "<unknown, any> | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester_error.ts",
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
@@ -1540,7 +1569,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester_error.ts",
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
@@ -1556,7 +1585,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester_error.ts",
                 "lineNumber": 14,
                 "columnNumber": 15,
                 "deprecated": false,
@@ -1573,10 +1602,430 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester_error.ts",
                 "lineNumber": 14,
                 "columnNumber": 32,
                 "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.KbnClientSavedObjects",
+        "type": "Class",
+        "tags": [],
+        "label": "KbnClientSavedObjects",
+        "description": [
+          "\nSO client for FTR.\n"
+        ],
+        "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+        "lineNumber": 143,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.KbnClientSavedObjects.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.KbnClientSavedObjects.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+                "lineNumber": 149,
+                "columnNumber": 15,
+                "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.KbnClientSavedObjects.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "requester",
+                "description": [],
+                "signature": [
+                  "KbnClientRequester"
+                ],
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+                "lineNumber": 149,
+                "columnNumber": 49,
+                "deprecated": false,
+                "docsReferencedTypeName": "KbnClientRequester",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.KbnClientSavedObjects.migrate",
+            "type": "Function",
+            "tags": [],
+            "label": "migrate",
+            "description": [
+              "\nRun the saved objects migration"
+            ],
+            "signature": [
+              "() => Promise<MigrateResponse>"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+            "lineNumber": 151,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.KbnClientSavedObjects.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nGet an object"
+            ],
+            "signature": [
+              "<Attributes extends Record<string, any>>(options: GetOptions) => Promise<SavedObjectResponse<Attributes>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.KbnClientSavedObjects.get.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "GetOptions"
+                ],
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+                "lineNumber": 169,
+                "columnNumber": 60,
+                "deprecated": false,
+                "docsReferencedTypeName": "GetOptions",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.KbnClientSavedObjects.find",
+            "type": "Function",
+            "tags": [],
+            "label": "find",
+            "description": [
+              "\nFind saved objects"
+            ],
+            "signature": [
+              "<Attributes extends Record<string, any>>(options: FindOptions) => Promise<",
+              "SavedObjectsFindResponse",
+              "<Attributes, unknown>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.KbnClientSavedObjects.find.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "FindOptions"
+                ],
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+                "lineNumber": 185,
+                "columnNumber": 61,
+                "deprecated": false,
+                "docsReferencedTypeName": "FindOptions",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.KbnClientSavedObjects.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nCreate a saved object"
+            ],
+            "signature": [
+              "<Attributes extends Record<string, any>>(options: IndexOptions<Attributes>) => Promise<SavedObjectResponse<Attributes>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+            "lineNumber": 210,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.KbnClientSavedObjects.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "IndexOptions<Attributes>"
+                ],
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+                "lineNumber": 213,
+                "columnNumber": 63,
+                "deprecated": false,
+                "docsReferencedTypeName": "IndexOptions",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.KbnClientSavedObjects.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "\nUpdate a saved object"
+            ],
+            "signature": [
+              "<Attributes extends Record<string, any>>(options: UpdateOptions<Attributes>) => Promise<SavedObjectResponse<Attributes>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+            "lineNumber": 232,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.KbnClientSavedObjects.update.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "UpdateOptions<Attributes>"
+                ],
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+                "lineNumber": 235,
+                "columnNumber": 63,
+                "deprecated": false,
+                "docsReferencedTypeName": "UpdateOptions",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.KbnClientSavedObjects.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "\nDelete an object"
+            ],
+            "signature": [
+              "(options: GetOptions) => Promise<unknown>"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+            "lineNumber": 256,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.KbnClientSavedObjects.delete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "GetOptions"
+                ],
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+                "lineNumber": 259,
+                "columnNumber": 23,
+                "deprecated": false,
+                "docsReferencedTypeName": "GetOptions",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.KbnClientSavedObjects.clean",
+            "type": "Function",
+            "tags": [],
+            "label": "clean",
+            "description": [],
+            "signature": [
+              "(options: CleanOptions) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+            "lineNumber": 273,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.KbnClientSavedObjects.clean.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "CleanOptions"
+                ],
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+                "lineNumber": 273,
+                "columnNumber": 22,
+                "deprecated": false,
+                "docsReferencedTypeName": "CleanOptions",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.KbnClientSavedObjects.cleanStandardList",
+            "type": "Function",
+            "tags": [],
+            "label": "cleanStandardList",
+            "description": [],
+            "signature": [
+              "(options?: { space?: string | undefined; } | undefined) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+            "lineNumber": 290,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.KbnClientSavedObjects.cleanStandardList.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+                "lineNumber": 290,
+                "columnNumber": 44,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test",
+                    "id": "def-common.KbnClientSavedObjects.cleanStandardList.$1.space",
+                    "type": "string",
+                    "tags": [],
+                    "label": "space",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+                    "lineNumber": 290,
+                    "columnNumber": 46,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.KbnClientSavedObjects.bulkDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDelete",
+            "description": [],
+            "signature": [
+              "(options: DeleteObjectsOptions) => Promise<{ deleted: number; missing: number; }>"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+            "lineNumber": 295,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.KbnClientSavedObjects.bulkDelete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "DeleteObjectsOptions"
+                ],
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
+                "lineNumber": 295,
+                "columnNumber": 27,
+                "deprecated": false,
+                "docsReferencedTypeName": "DeleteObjectsOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1891,6 +2340,7 @@
                 "lineNumber": 42,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2141,6 +2591,7 @@
                 "lineNumber": 58,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "Args",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2159,7 +2610,7 @@
         "description": [
           "\nManages cookies associated with user roles"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+        "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
         "lineNumber": 54,
         "columnNumber": 1,
         "deprecated": false,
@@ -2175,8 +2626,8 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-            "lineNumber": 69,
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2190,17 +2641,18 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.SamlSessionManagerOptions",
                     "text": "SamlSessionManagerOptions"
                   }
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-                "lineNumber": 69,
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 71,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "SamlSessionManagerOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2217,8 +2669,8 @@
             "signature": [
               "(role: string) => void"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-            "lineNumber": 208,
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 222,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2233,8 +2685,8 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-                "lineNumber": 208,
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 222,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2253,16 +2705,16 @@
             "signature": [
               "(role: string, options?: ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-saml-auth",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestSamlAuthPluginApi",
                 "section": "def-common.GetCookieOptions",
                 "text": "GetCookieOptions"
               },
               " | undefined) => Promise<{ Cookie: string; }>"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-            "lineNumber": 222,
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 236,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2277,8 +2729,8 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-                "lineNumber": 222,
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 236,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2293,18 +2745,19 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-                "lineNumber": 222,
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 236,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetCookieOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2321,16 +2774,16 @@
             "signature": [
               "(role: string, options?: ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-saml-auth",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestSamlAuthPluginApi",
                 "section": "def-common.GetCookieOptions",
                 "text": "GetCookieOptions"
               },
               " | undefined) => Promise<string>"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-            "lineNumber": 231,
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2345,8 +2798,8 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-                "lineNumber": 231,
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 245,
                 "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2361,18 +2814,19 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-saml-auth",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestSamlAuthPluginApi",
                     "section": "def-common.GetCookieOptions",
                     "text": "GetCookieOptions"
                   },
                   " | undefined"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-                "lineNumber": 231,
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 245,
                 "columnNumber": 68,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetCookieOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2389,8 +2843,8 @@
             "signature": [
               "(role: string) => Promise<string>"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-            "lineNumber": 241,
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2405,8 +2859,8 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-                "lineNumber": 241,
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 255,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2427,8 +2881,8 @@
               "UserProfile",
               ">"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-            "lineNumber": 246,
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 260,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2443,8 +2897,8 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-                "lineNumber": 246,
+                "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+                "lineNumber": 260,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2463,8 +2917,8 @@
             "signature": [
               "() => string[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
-            "lineNumber": 252,
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
+            "lineNumber": 266,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2478,25 +2932,6 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-common.checkFTRCodeOwnersCLI",
-        "type": "Function",
-        "tags": [],
-        "label": "checkFTRCodeOwnersCLI",
-        "description": [],
-        "signature": [
-          "() => Promise<void>"
-        ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/cli/code_owners.ts",
-        "lineNumber": 26,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/test",
         "id": "def-common.cleanupElasticsearch",
         "type": "Function",
         "tags": [],
@@ -2505,9 +2940,9 @@
         "signature": [
           "(node: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-es-server",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestEsServerPluginApi",
             "section": "def-common.ICluster",
             "text": "ICluster"
           },
@@ -2521,8 +2956,8 @@
           },
           ") => Promise<void>"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
-        "lineNumber": 83,
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/cleanup_elasticsearch.ts",
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2536,17 +2971,18 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-es-server",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestEsServerPluginApi",
                 "section": "def-common.ICluster",
                 "text": "ICluster"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
-            "lineNumber": 84,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/cleanup_elasticsearch.ts",
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ICluster",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2560,8 +2996,8 @@
             "signature": [
               "boolean"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
-            "lineNumber": 85,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/cleanup_elasticsearch.ts",
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2577,8 +3013,8 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
-            "lineNumber": 86,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/cleanup_elasticsearch.ts",
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2600,10 +3036,11 @@
                 "text": "ToolingLog"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
-            "lineNumber": 87,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/cleanup_elasticsearch.ts",
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2675,6 +3112,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Promise",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2700,17 +3138,17 @@
           },
           ", overrides: Omit<",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-es-server",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestEsServerPluginApi",
             "section": "def-common.EsClientForTestingOptions",
             "text": "EsClientForTestingOptions"
           },
           ", \"esUrl\"> | undefined) => ",
           "default"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/es/es_client_for_testing.ts",
-        "lineNumber": 48,
+        "path": "src/platform/packages/shared/kbn-test/src/ftr_es_client.ts",
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2731,10 +3169,11 @@
                 "text": "Config"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/es_client_for_testing.ts",
-            "lineNumber": 49,
+            "path": "src/platform/packages/shared/kbn-test/src/ftr_es_client.ts",
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Config",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2748,18 +3187,19 @@
             "signature": [
               "Omit<",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-es-server",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestEsServerPluginApi",
                 "section": "def-common.EsClientForTestingOptions",
                 "text": "EsClientForTestingOptions"
               },
               ", \"esUrl\"> | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/es_client_for_testing.ts",
-            "lineNumber": 50,
+            "path": "src/platform/packages/shared/kbn-test/src/ftr_es_client.ts",
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -2777,17 +3217,17 @@
         "signature": [
           "(options: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-es-server",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestEsServerPluginApi",
             "section": "def-common.EsClientForTestingOptions",
             "text": "EsClientForTestingOptions"
           },
           ") => ",
           "default"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/es/es_client_for_testing.ts",
-        "lineNumber": 60,
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/es_client_for_testing.ts",
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2801,17 +3241,18 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-es-server",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestEsServerPluginApi",
                 "section": "def-common.EsClientForTestingOptions",
                 "text": "EsClientForTestingOptions"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/es_client_for_testing.ts",
-            "lineNumber": 60,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/es_client_for_testing.ts",
+            "lineNumber": 31,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "EsClientForTestingOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2837,17 +3278,17 @@
           },
           ", overrides: Omit<",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-es-server",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestEsServerPluginApi",
             "section": "def-common.EsClientForTestingOptions",
             "text": "EsClientForTestingOptions"
           },
           ", \"esUrl\"> | undefined) => ",
           "default"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/es/es_client_for_testing.ts",
-        "lineNumber": 32,
+        "path": "src/platform/packages/shared/kbn-test/src/ftr_es_client.ts",
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2868,10 +3309,11 @@
                 "text": "Config"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/es_client_for_testing.ts",
-            "lineNumber": 33,
+            "path": "src/platform/packages/shared/kbn-test/src/ftr_es_client.ts",
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Config",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2885,18 +3327,19 @@
             "signature": [
               "Omit<",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-es-server",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestEsServerPluginApi",
                 "section": "def-common.EsClientForTestingOptions",
                 "text": "EsClientForTestingOptions"
               },
               ", \"esUrl\"> | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/es_client_for_testing.ts",
-            "lineNumber": 34,
+            "path": "src/platform/packages/shared/kbn-test/src/ftr_es_client.ts",
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -2914,16 +3357,16 @@
         "signature": [
           "(options: Options) => ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-es-server",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestEsServerPluginApi",
             "section": "def-common.EsTestCluster",
             "text": "EsTestCluster"
           },
           "<Options>"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-        "lineNumber": 189,
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+        "lineNumber": 203,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2938,10 +3381,11 @@
             "signature": [
               "Options"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 191,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 205,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Options",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2961,23 +3405,23 @@
         "signature": [
           "(config: {} | { [name: string]: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-docker-servers",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestDockerServersPluginApi",
             "section": "def-common.DockerServerSpec",
             "text": "DockerServerSpec"
           },
           "; }) => {} | { [name: string]: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-docker-servers",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestDockerServersPluginApi",
             "section": "def-common.DockerServerSpec",
             "text": "DockerServerSpec"
           },
           "; }"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
         "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
@@ -2993,15 +3437,15 @@
             "signature": [
               "{} | { [name: string]: ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-docker-servers",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestDockerServersPluginApi",
                 "section": "def-common.DockerServerSpec",
                 "text": "DockerServerSpec"
               },
               "; }"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 35,
             "columnNumber": 43,
             "deprecated": false,
@@ -3051,6 +3495,95 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.executeJestValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "executeJestValidation",
+        "description": [
+          "\nResolves scoped Jest targets from the validation contract and executes the\nrequired config runs via Moon, including downstream expansion when requested."
+        ],
+        "signature": [
+          "({ baseContext, log, passthroughArgs, procRunner, }: ",
+          "ExecuteJestValidationOptions",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.JestValidationResult",
+            "text": "JestValidationResult"
+          },
+          " | null>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 259,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.executeJestValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  baseContext,\n  log,\n  passthroughArgs = [],\n  procRunner,\n}",
+            "description": [],
+            "signature": [
+              "ExecuteJestValidationOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 259,
+            "columnNumber": 45,
+            "deprecated": false,
+            "docsReferencedTypeName": "ExecuteJestValidationOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.findJestConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "findJestConfig",
+        "description": [
+          "Walk up from a test file to find the nearest jest config."
+        ],
+        "signature": [
+          "(testFilePath: string) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.findJestConfig.$1",
+            "type": "string",
+            "tags": [],
+            "label": "testFilePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 73,
+            "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.findTestPluginPaths",
         "type": "Function",
         "tags": [],
@@ -3059,7 +3592,7 @@
         "signature": [
           "(dirs: string | string[]) => string[]"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/find_test_plugin_paths.ts",
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/find_test_plugin_paths.ts",
         "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
@@ -3075,7 +3608,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/find_test_plugin_paths.ts",
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/find_test_plugin_paths.ts",
             "lineNumber": 13,
             "columnNumber": 37,
             "deprecated": false,
@@ -3097,7 +3630,7 @@
           "() => RegExpMatchArray | null | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/fips.ts",
-        "lineNumber": 50,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3116,14 +3649,32 @@
         ],
         "signature": [
           "(args: ",
-          "KibanaCliArg",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.KibanaCliArg",
+            "text": "KibanaCliArg"
+          },
           "[], name: string) => ",
-          "ArgValue",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.ArgValue",
+            "text": "ArgValue"
+          },
           " | ",
-          "ArgValue",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.ArgValue",
+            "text": "ArgValue"
+          },
           "[] | undefined"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
         "lineNumber": 78,
         "columnNumber": 1,
         "deprecated": false,
@@ -3137,10 +3688,16 @@
             "label": "args",
             "description": [],
             "signature": [
-              "KibanaCliArg",
+              {
+                "pluginId": "@kbn/test-kibana-server",
+                "scope": "common",
+                "docId": "kibKbnTestKibanaServerPluginApi",
+                "section": "def-common.KibanaCliArg",
+                "text": "KibanaCliArg"
+              },
               "[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
             "lineNumber": 81,
             "columnNumber": 29,
             "deprecated": false,
@@ -3157,7 +3714,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
             "lineNumber": 81,
             "columnNumber": 51,
             "deprecated": false,
@@ -3181,7 +3738,7 @@
           "(hostPath: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 728,
+        "lineNumber": 772,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3197,7 +3754,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 733,
+            "lineNumber": 777,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -3218,12 +3775,24 @@
         ],
         "signature": [
           "(rawFlags: string[], name: string) => ",
-          "ArgValue",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.ArgValue",
+            "text": "ArgValue"
+          },
           " | ",
-          "ArgValue",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.ArgValue",
+            "text": "ArgValue"
+          },
           "[] | undefined"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
         "lineNumber": 135,
         "columnNumber": 1,
         "deprecated": false,
@@ -3239,7 +3808,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
             "lineNumber": 141,
             "columnNumber": 33,
             "deprecated": false,
@@ -3256,7 +3825,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
             "lineNumber": 141,
             "columnNumber": 53,
             "deprecated": false,
@@ -3279,7 +3848,7 @@
         "signature": [
           "(rawFlags: string[]) => unknown[]"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
         "lineNumber": 145,
         "columnNumber": 1,
         "deprecated": false,
@@ -3295,7 +3864,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
             "lineNumber": 149,
             "columnNumber": 37,
             "deprecated": false,
@@ -3342,6 +3911,7 @@
             "lineNumber": 45,
             "columnNumber": 17,
             "deprecated": false,
+            "docsReferencedTypeName": "UrlParam",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3361,6 +3931,7 @@
             "lineNumber": 45,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "UrlParam",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3412,6 +3983,7 @@
             "lineNumber": 15,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3438,6 +4010,263 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.isActualError",
+        "type": "Function",
+        "tags": [],
+        "label": "isActualError",
+        "description": [
+          "\nCheck if a log line from stderr is actually an error or just info/debug written to stderr"
+        ],
+        "signature": [
+          "(line: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_logs.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.isActualError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "line",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_logs.ts",
+            "lineNumber": 48,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.observeContainerLogs",
+        "type": "Function",
+        "tags": [],
+        "label": "observeContainerLogs",
+        "description": [
+          "\nObserve the logs for a container, reflecting the log lines\nto the ToolingLog and the returned Observable"
+        ],
+        "signature": [
+          "(name: string, containerId: string, log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => ",
+          "Observable",
+          "<string>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_logs.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.observeContainerLogs.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_logs.ts",
+            "lineNumber": 20,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.observeContainerLogs.$2",
+            "type": "string",
+            "tags": [],
+            "label": "containerId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_logs.ts",
+            "lineNumber": 20,
+            "columnNumber": 52,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.observeContainerLogs.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_logs.ts",
+            "lineNumber": 20,
+            "columnNumber": 73,
+            "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.observeContainerRunning",
+        "type": "Function",
+        "tags": [],
+        "label": "observeContainerRunning",
+        "description": [
+          "\nCreate an observable that errors if a docker\ncontainer exits before being unsubscribed"
+        ],
+        "signature": [
+          "(name: string, containerId: string, log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => ",
+          "Observable",
+          "<unknown>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_running.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.observeContainerRunning.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_running.ts",
+            "lineNumber": 18,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.observeContainerRunning.$2",
+            "type": "string",
+            "tags": [],
+            "label": "containerId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_running.ts",
+            "lineNumber": 18,
+            "columnNumber": 55,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.observeContainerRunning.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_running.ts",
+            "lineNumber": 18,
+            "columnNumber": 76,
+            "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.parseMoonJestOutput",
+        "type": "Function",
+        "tags": [],
+        "label": "parseMoonJestOutput",
+        "description": [],
+        "signature": [
+          "(output: string) => ",
+          "MoonJestParseResult"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 149,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.parseMoonJestOutput.$1",
+            "type": "string",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 149,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.parseRawFlags",
         "type": "Function",
         "tags": [],
@@ -3445,10 +4274,16 @@
         "description": [],
         "signature": [
           "(rawFlags: string[]) => ",
-          "KibanaCliArg",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.KibanaCliArg",
+            "text": "KibanaCliArg"
+          },
           "[]"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
         "lineNumber": 93,
         "columnNumber": 1,
         "deprecated": false,
@@ -3464,12 +4299,86 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
             "lineNumber": 93,
             "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.planJestContractRuns",
+        "type": "Function",
+        "tags": [],
+        "label": "planJestContractRuns",
+        "description": [
+          "Builds per-config Jest run plans from changed files and the selected test mode."
+        ],
+        "signature": [
+          "({ entries, testMode, }: { entries: ",
+          "JestChangedFileEntry",
+          "[]; testMode: JestContractTestMode; }) => ",
+          "JestContractRunPlan",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 132,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.planJestContractRuns.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  entries,\n  testMode,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 135,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.planJestContractRuns.$1.entries",
+                "type": "Array",
+                "tags": [],
+                "label": "entries",
+                "description": [],
+                "signature": [
+                  "JestChangedFileEntry",
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+                "lineNumber": 136,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.planJestContractRuns.$1.testMode",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "testMode",
+                "description": [],
+                "signature": [
+                  "\"related\" | \"affected\""
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+                "lineNumber": 137,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -3535,6 +4444,7 @@
             "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3558,6 +4468,7 @@
             "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EsVersion",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3627,12 +4538,24 @@
         ],
         "signature": [
           "(args: ",
-          "KibanaCliArg",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.KibanaCliArg",
+            "text": "KibanaCliArg"
+          },
           "[], kibanaInstallDir: string) => ",
-          "KibanaCliArg",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.KibanaCliArg",
+            "text": "KibanaCliArg"
+          },
           "[]"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
         "lineNumber": 159,
         "columnNumber": 1,
         "deprecated": false,
@@ -3646,10 +4569,16 @@
             "label": "args",
             "description": [],
             "signature": [
-              "KibanaCliArg",
+              {
+                "pluginId": "@kbn/test-kibana-server",
+                "scope": "common",
+                "docId": "kibKbnTestKibanaServerPluginApi",
+                "section": "def-common.KibanaCliArg",
+                "text": "KibanaCliArg"
+              },
               "[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
             "lineNumber": 163,
             "columnNumber": 34,
             "deprecated": false,
@@ -3666,7 +4595,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
             "lineNumber": 163,
             "columnNumber": 56,
             "deprecated": false,
@@ -3688,7 +4617,7 @@
           "() => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3726,7 +4655,7 @@
           "(options: RunElasticsearchOptions) => Promise<() => Promise<void>>"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
-        "lineNumber": 96,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3742,9 +4671,10 @@
               "RunElasticsearchOptions"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
-            "lineNumber": 97,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RunElasticsearchOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3763,7 +4693,7 @@
           "() => void"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/cli/ftr.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3833,6 +4763,159 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.runJestContract",
+        "type": "Function",
+        "tags": [],
+        "label": "runJestContract",
+        "description": [
+          "Runs the validation-contract-aware `scripts/jest` CLI entrypoint."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 367,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.runJestViaMoon",
+        "type": "Function",
+        "tags": [],
+        "label": "runJestViaMoon",
+        "description": [],
+        "signature": [
+          "({ changedFiles, verbose, downstream, onProgress, }: { changedFiles: string[]; verbose?: boolean | undefined; downstream?: string | undefined; onProgress?: ((progress: ",
+          "MoonJestProgress",
+          ") => void) | undefined; }) => Promise<",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.MoonJestResult",
+            "text": "MoonJestResult"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 301,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.runJestViaMoon.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  changedFiles,\n  verbose = false,\n  downstream = 'none',\n  onProgress,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 306,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runJestViaMoon.$1.changedFiles",
+                "type": "Array",
+                "tags": [],
+                "label": "changedFiles",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+                "lineNumber": 307,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runJestViaMoon.$1.verbose",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "verbose",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+                "lineNumber": 308,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runJestViaMoon.$1.downstream",
+                "type": "string",
+                "tags": [],
+                "label": "downstream",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+                "lineNumber": 309,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runJestViaMoon.$1.onProgress",
+                "type": "Function",
+                "tags": [],
+                "label": "onProgress",
+                "description": [],
+                "signature": [
+                  "((progress: ",
+                  "MoonJestProgress",
+                  ") => void) | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+                "lineNumber": 310,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test",
+                    "id": "def-common.runJestViaMoon.$1.onProgress.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "progress",
+                    "description": [],
+                    "signature": [
+                      "MoonJestProgress"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+                    "lineNumber": 310,
+                    "columnNumber": 17,
+                    "deprecated": false,
+                    "docsReferencedTypeName": "MoonJestProgress",
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.runKbnArchiverCli",
         "type": "Function",
         "tags": [],
@@ -3858,26 +4941,18 @@
         "label": "runKibanaServer",
         "description": [],
         "signature": [
-          "(options: { procs: ",
+          "(options: ",
           {
-            "pluginId": "@kbn/dev-proc-runner",
+            "pluginId": "@kbn/test-kibana-server",
             "scope": "common",
-            "docId": "kibKbnDevProcRunnerPluginApi",
-            "section": "def-common.ProcRunner",
-            "text": "ProcRunner"
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.RunKibanaServerOptions",
+            "text": "RunKibanaServerOptions"
           },
-          "; config: ",
-          {
-            "pluginId": "@kbn/test",
-            "scope": "common",
-            "docId": "kibKbnTestPluginApi",
-            "section": "def-common.Config",
-            "text": "Config"
-          },
-          "; installDir?: string | undefined; extraKbnOpts?: string[] | undefined; logsDir?: string | undefined; onEarlyExit?: ((msg: string) => void) | undefined; inspect?: boolean | undefined; remote?: boolean | undefined; }) => Promise<void>"
+          ") => Promise<void>"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
-        "lineNumber": 21,
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3889,173 +4964,22 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
-            "lineNumber": 21,
-            "columnNumber": 48,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
+            "signature": [
               {
-                "parentPluginId": "@kbn/test",
-                "id": "def-common.runKibanaServer.$1.procs",
-                "type": "Object",
-                "tags": [],
-                "label": "procs",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/dev-proc-runner",
-                    "scope": "common",
-                    "docId": "kibKbnDevProcRunnerPluginApi",
-                    "section": "def-common.ProcRunner",
-                    "text": "ProcRunner"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
-                "lineNumber": 22,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-common.runKibanaServer.$1.config",
-                "type": "Object",
-                "tags": [],
-                "label": "config",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/test",
-                    "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
-                    "section": "def-common.Config",
-                    "text": "Config"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
-                "lineNumber": 23,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-common.runKibanaServer.$1.installDir",
-                "type": "string",
-                "tags": [],
-                "label": "installDir",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
-                "lineNumber": 24,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-common.runKibanaServer.$1.extraKbnOpts",
-                "type": "Array",
-                "tags": [],
-                "label": "extraKbnOpts",
-                "description": [],
-                "signature": [
-                  "string[] | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
-                "lineNumber": 25,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-common.runKibanaServer.$1.logsDir",
-                "type": "string",
-                "tags": [],
-                "label": "logsDir",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
-                "lineNumber": 26,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-common.runKibanaServer.$1.onEarlyExit",
-                "type": "Function",
-                "tags": [],
-                "label": "onEarlyExit",
-                "description": [],
-                "signature": [
-                  "((msg: string) => void) | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
-                "lineNumber": 27,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/test",
-                    "id": "def-common.runKibanaServer.$1.onEarlyExit.$1",
-                    "type": "string",
-                    "tags": [],
-                    "label": "msg",
-                    "description": [],
-                    "signature": [
-                      "string"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
-                    "lineNumber": 27,
-                    "columnNumber": 18,
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-common.runKibanaServer.$1.inspect",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "inspect",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
-                "lineNumber": 28,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-common.runKibanaServer.$1.remote",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "remote",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
-                "lineNumber": 29,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
+                "pluginId": "@kbn/test-kibana-server",
+                "scope": "common",
+                "docId": "kibKbnTestKibanaServerPluginApi",
+                "section": "def-common.RunKibanaServerOptions",
+                "text": "RunKibanaServerOptions"
               }
-            ]
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+            "lineNumber": 40,
+            "columnNumber": 39,
+            "deprecated": false,
+            "docsReferencedTypeName": "RunKibanaServerOptions",
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -4115,6 +5039,7 @@
             "lineNumber": 29,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4140,6 +5065,7 @@
             "lineNumber": 29,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "RunTestsOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4272,6 +5198,7 @@
             "lineNumber": 27,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4297,6 +5224,7 @@
             "lineNumber": 27,
             "columnNumber": 53,
             "deprecated": false,
+            "docsReferencedTypeName": "StartServerOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4335,7 +5263,7 @@
         "signature": [
           "(strings: TemplateStringsArray, ...values: (string | number | boolean)[]) => string"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client_requester.ts",
+        "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
         "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
@@ -4351,10 +5279,11 @@
             "signature": [
               "TemplateStringsArray"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client_requester.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TemplateStringsArray",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -4368,10 +5297,11 @@
             "signature": [
               "(string | number | boolean)[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client_requester.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4434,7 +5364,7 @@
         "tags": [],
         "label": "CreateTestEsClusterOptions",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
         "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
@@ -4450,7 +5380,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
@@ -4466,7 +5396,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
@@ -4484,7 +5414,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
@@ -4502,7 +5432,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
@@ -4518,7 +5448,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
@@ -4534,7 +5464,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
@@ -4550,9 +5480,9 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"uiam\" | \"image\" | \"host\" | \"kibanaUrl\" | \"tag\" | \"dataPath\" | \"resources\" | \"projectType\"> | undefined"
+              ", \"uiam\" | \"image\" | \"host\" | \"kibanaUrl\" | \"tag\" | \"dataPath\" | \"resources\" | \"projectType\" | \"uiamOAuth\"> | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
@@ -4568,8 +5498,8 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 81,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4586,8 +5516,8 @@
             "signature": [
               "\"info\" | \"error\" | \"all\" | \"warn\" | \"silent\" | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 82,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4611,8 +5541,8 @@
               },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 88,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4633,8 +5563,8 @@
                 "text": "ToolingLog"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 95,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4649,8 +5579,8 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 96,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4667,8 +5597,8 @@
             "signature": [
               "TestEsClusterNodesOptions[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 97,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4685,8 +5615,8 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 119,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4703,8 +5633,8 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 125,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4721,8 +5651,8 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 146,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4739,8 +5669,8 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 150,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4757,8 +5687,8 @@
             "signature": [
               "((msg: string) => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 155,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4773,8 +5703,8 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-                "lineNumber": 159,
+                "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+                "lineNumber": 167,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4795,8 +5725,26 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 160,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.CreateTestEsClusterOptions.clean",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "clean",
+            "description": [
+              "\nClean existing serverless object store data before startup.\n\nDefaults to `true` for backwards compatibility."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4813,8 +5761,8 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 164,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4831,8 +5779,8 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 168,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4849,22 +5797,22 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-docker-servers",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestDockerServersPluginApi",
             "section": "def-common.DockerServer",
             "text": "DockerServer"
           },
           " extends ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-docker-servers",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestDockerServersPluginApi",
             "section": "def-common.DockerServerSpec",
             "text": "DockerServerSpec"
           }
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
         "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
@@ -4877,7 +5825,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
@@ -4890,7 +5838,7 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
@@ -4906,7 +5854,7 @@
         "tags": [],
         "label": "DockerServerSpec",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
         "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
@@ -4919,7 +5867,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
@@ -4932,7 +5880,7 @@
             "tags": [],
             "label": "portInContainer",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
@@ -4945,7 +5893,7 @@
             "tags": [],
             "label": "port",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
@@ -4958,7 +5906,7 @@
             "tags": [],
             "label": "image",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
@@ -4974,7 +5922,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
@@ -4990,7 +5938,7 @@
             "signature": [
               "string | RegExp | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
@@ -5006,7 +5954,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
@@ -5024,9 +5972,9 @@
             "signature": [
               "((server: ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-docker-servers",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestDockerServersPluginApi",
                 "section": "def-common.DockerServer",
                 "text": "DockerServer"
               },
@@ -5036,7 +5984,7 @@
               "Observable",
               "<unknown>) | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
@@ -5051,17 +5999,18 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-docker-servers",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestDockerServersPluginApi",
                     "section": "def-common.DockerServer",
                     "text": "DockerServer"
                   }
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+                "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
                 "lineNumber": 21,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "DockerServer",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5076,7 +6025,7 @@
                   "Observable",
                   "<string>"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+                "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
                 "lineNumber": 21,
                 "columnNumber": 36,
                 "deprecated": false,
@@ -5096,7 +6045,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
@@ -5116,9 +6065,9 @@
         ],
         "signature": [
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-es-server",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestEsServerPluginApi",
             "section": "def-common.EsClientForTestingOptions",
             "text": "EsClientForTestingOptions"
           },
@@ -5126,8 +6075,8 @@
           "ClientOptions",
           ", \"nodes\" | \"node\" | \"tls\">"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/es/es_client_for_testing.ts",
-        "lineNumber": 18,
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/es_client_for_testing.ts",
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5141,8 +6090,8 @@
             "description": [
               "url of es instance"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/es_client_for_testing.ts",
-            "lineNumber": 20,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/es_client_for_testing.ts",
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5159,8 +6108,8 @@
             "signature": [
               "{ username: string; password: string; } | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/es_client_for_testing.ts",
-            "lineNumber": 22,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/es_client_for_testing.ts",
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5177,8 +6126,8 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/es_client_for_testing.ts",
-            "lineNumber": 24,
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/es_client_for_testing.ts",
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5381,6 +6330,7 @@
                 "lineNumber": 75,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "K",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6007,6 +6957,7 @@
                 "lineNumber": 89,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6045,6 +6996,7 @@
                 "lineNumber": 95,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "K",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6152,7 +7104,7 @@
         "tags": [],
         "label": "GetCookieOptions",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+        "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
         "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
@@ -6168,7 +7120,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
@@ -6184,7 +7136,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
@@ -6200,7 +7152,7 @@
         "tags": [],
         "label": "HostOptions",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+        "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
         "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
@@ -6216,7 +7168,7 @@
             "signature": [
               "\"http\" | \"https\""
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
@@ -6229,7 +7181,7 @@
             "tags": [],
             "label": "hostname",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
@@ -6245,7 +7197,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
@@ -6258,7 +7210,7 @@
             "tags": [],
             "label": "username",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
@@ -6271,7 +7223,7 @@
             "tags": [],
             "label": "password",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
@@ -6287,7 +7239,7 @@
         "tags": [],
         "label": "ICluster",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
         "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
@@ -6303,7 +7255,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
@@ -6326,7 +7278,7 @@
               },
               "[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
@@ -6342,7 +7294,7 @@
             "signature": [
               "() => number"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
@@ -6360,7 +7312,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
@@ -6378,7 +7330,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
@@ -6396,7 +7348,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
@@ -6415,7 +7367,7 @@
               "() => ",
               "default"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
@@ -6433,7 +7385,7 @@
             "signature": [
               "() => string[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
@@ -6446,12 +7398,235 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.JestConfigResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "JestConfigResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.index",
+            "type": "number",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.config",
+            "type": "string",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.passed",
+            "type": "boolean",
+            "tags": [],
+            "label": "passed",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.testCount",
+            "type": "number",
+            "tags": [],
+            "label": "testCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.failureOutput",
+            "type": "string",
+            "tags": [],
+            "label": "failureOutput",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.command",
+            "type": "string",
+            "tags": [],
+            "label": "command",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.JestFailedTest",
+        "type": "Interface",
+        "tags": [],
+        "label": "JestFailedTest",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestFailedTest.file",
+            "type": "string",
+            "tags": [],
+            "label": "file",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestFailedTest.line",
+            "type": "number",
+            "tags": [],
+            "label": "line",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestFailedTest.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestFailedTest.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.JestValidationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "JestValidationResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 66,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestValidationResult.configCount",
+            "type": "number",
+            "tags": [],
+            "label": "configCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestValidationResult.testCount",
+            "type": "number",
+            "tags": [],
+            "label": "testCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.KbnClientOptions",
         "type": "Interface",
         "tags": [],
         "label": "KbnClientOptions",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+        "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
         "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
@@ -6464,7 +7639,7 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
@@ -6480,7 +7655,7 @@
             "signature": [
               "Buffer[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
@@ -6502,7 +7677,7 @@
                 "text": "ToolingLog"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
@@ -6516,10 +7691,16 @@
             "label": "uiSettingDefaults",
             "description": [],
             "signature": [
-              "UiSettingValues",
+              {
+                "pluginId": "@kbn/kbn-client",
+                "scope": "common",
+                "docId": "kibKbnKbnClientPluginApi",
+                "section": "def-common.UiSettingValues",
+                "text": "UiSettingValues"
+              },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
@@ -6535,8 +7716,428 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.MoonJestResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "MoonJestResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.taskCount",
+            "type": "number",
+            "tags": [],
+            "label": "taskCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.cachedCount",
+            "type": "number",
+            "tags": [],
+            "label": "cachedCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.totalTests",
+            "type": "number",
+            "tags": [],
+            "label": "totalTests",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.failed",
+            "type": "Array",
+            "tags": [],
+            "label": "failed",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.MoonJestTaskResult",
+                "text": "MoonJestTaskResult"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.exitCode",
+            "type": "number",
+            "tags": [],
+            "label": "exitCode",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.verboseDetail",
+            "type": "string",
+            "tags": [],
+            "label": "verboseDetail",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.failureExcerpt",
+            "type": "Array",
+            "tags": [],
+            "label": "failureExcerpt",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.warnings",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.MoonJestTaskResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "MoonJestTaskResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestTaskResult.project",
+            "type": "string",
+            "tags": [],
+            "label": "project",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestTaskResult.configPath",
+            "type": "string",
+            "tags": [],
+            "label": "configPath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestTaskResult.cached",
+            "type": "boolean",
+            "tags": [],
+            "label": "cached",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestTaskResult.passed",
+            "type": "boolean",
+            "tags": [],
+            "label": "passed",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestTaskResult.testCount",
+            "type": "number",
+            "tags": [],
+            "label": "testCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestTaskResult.failures",
+            "type": "Array",
+            "tags": [],
+            "label": "failures",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.JestFailedTest",
+                "text": "JestFailedTest"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.ReqOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReqOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.ReqOptions.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.ReqOptions.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.ReqOptions.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.ReqOptions.method",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "method",
+            "description": [],
+            "signature": [
+              "\"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | \"PATCH\""
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.ReqOptions.body",
+            "type": "Any",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.ReqOptions.retries",
+            "type": "number",
+            "tags": [],
+            "label": "retries",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.ReqOptions.headers",
+            "type": "Object",
+            "tags": [],
+            "label": "headers",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.ReqOptions.ignoreErrors",
+            "type": "Array",
+            "tags": [],
+            "label": "ignoreErrors",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.ReqOptions.responseType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "responseType",
+            "description": [],
+            "signature": [
+              "ResponseType",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.ReqOptions.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_requester.ts",
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6551,7 +8152,7 @@
         "tags": [],
         "label": "SamlSessionManagerOptions",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+        "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
         "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
@@ -6566,14 +8167,14 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-saml-auth",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestSamlAuthPluginApi",
                 "section": "def-common.HostOptions",
                 "text": "HostOptions"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
@@ -6586,7 +8187,7 @@
             "tags": [],
             "label": "isCloud",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
@@ -6603,7 +8204,7 @@
               "SupportedRoles",
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
@@ -6619,7 +8220,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
@@ -6632,7 +8233,7 @@
             "tags": [],
             "label": "cloudUsersFilePath",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
@@ -6649,7 +8250,7 @@
               "SamlSessionManagerServerlessOptions",
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
@@ -6671,7 +8272,7 @@
                 "text": "ToolingLog"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
@@ -7260,7 +8861,7 @@
         "description": [
           "\nA prefix string that is unique for each parallel CI process that\nis an empty string outside of CI, so it can be safely injected\ninto strings as a prefix"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/ci_parallel_process_prefix.ts",
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/ci_parallel_process_prefix.ts",
         "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
@@ -7279,7 +8880,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
         "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
@@ -7296,23 +8897,23 @@
         "signature": [
           "Options[\"nodes\"] extends TestEsClusterNodesOptions[] ? ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-es-server",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestEsServerPluginApi",
             "section": "def-common.ICluster",
             "text": "ICluster"
           },
           " : ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-es-server",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestEsServerPluginApi",
             "section": "def-common.ICluster",
             "text": "ICluster"
           },
           " & { getUrl: () => string; }"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
         "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
@@ -7326,7 +8927,7 @@
         "tags": [],
         "label": "fleetPackageRegistryDockerImage",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
         "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
@@ -7378,9 +8979,41 @@
             "lineNumber": 126,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "FtrConfigProviderContext",
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.JEST_LABEL",
+        "type": "string",
+        "tags": [],
+        "label": "JEST_LABEL",
+        "description": [],
+        "signature": [
+          "\"jest\""
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.JEST_LOG_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "JEST_LOG_PREFIX",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -7405,6 +9038,40 @@
         ],
         "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/public_types.ts",
         "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.Role",
+        "type": "Type",
+        "tags": [],
+        "label": "Role",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-saml-auth/src/types.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.UiSettingValues",
+        "type": "Type",
+        "tags": [],
+        "label": "UiSettingValues",
+        "description": [],
+        "signature": [
+          "{ [x: string]: string | number | boolean | string[]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_ui_settings.ts",
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7464,8 +9131,25 @@
         "signature": [
           "EsTestConfig"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/es/es_test_config.ts",
+        "path": "src/platform/packages/shared/kbn-test-es-server/src/es_test_config.ts",
         "lineNumber": 83,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.JEST_CONFIG_NAMES",
+        "type": "Object",
+        "tags": [],
+        "label": "JEST_CONFIG_NAMES",
+        "description": [],
+        "signature": [
+          "readonly [\"jest.config.dev.js\", \"jest.config.js\", \"jest.config.cjs\", \"jest.config.mjs\", \"jest.config.ts\", \"jest.config.json\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7621,7 +9305,7 @@
         "tags": [],
         "label": "packageRegistryDocker",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
         "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
@@ -7634,7 +9318,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
@@ -7647,7 +9331,7 @@
             "tags": [],
             "label": "image",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
@@ -7660,7 +9344,7 @@
             "tags": [],
             "label": "portInContainer",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
@@ -7676,7 +9360,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
@@ -7692,7 +9376,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
@@ -7705,7 +9389,7 @@
             "tags": [],
             "label": "waitForLogLine",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
@@ -7718,7 +9402,7 @@
             "tags": [],
             "label": "waitForLogLineTimeoutMs",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
@@ -7731,7 +9415,7 @@
             "tags": [],
             "label": "preferCached",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
@@ -7761,7 +9445,9 @@
             "type": "string",
             "tags": [],
             "label": "username",
-            "description": [],
+            "description": [
+              "\nUser with higher privileges than regular superuser role for writing to system indices"
+            ],
             "path": "src/platform/packages/shared/kbn-test/src/kbn/users.ts",
             "lineNumber": 37,
             "columnNumber": 3,
@@ -7774,7 +9460,9 @@
             "type": "string",
             "tags": [],
             "label": "password",
-            "description": [],
+            "description": [
+              "\nUser with higher privileges than regular superuser role for writing to system indices"
+            ],
             "path": "src/platform/packages/shared/kbn-test/src/kbn/users.ts",
             "lineNumber": 38,
             "columnNumber": 3,

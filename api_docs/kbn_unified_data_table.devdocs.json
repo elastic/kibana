@@ -54,6 +54,7 @@
             "lineNumber": 47,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Storage",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -141,6 +142,7 @@
             "lineNumber": 24,
             "columnNumber": 66,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -158,7 +160,7 @@
           "\nRender custom element on the left side and all controls to the right"
         ],
         "signature": [
-          "({ leftSide, bottomSection, }: { leftSide?: React.ReactElement<any> | undefined; bottomSection?: React.ReactElement<any> | undefined; }) => ",
+          "({ saveToDashboardButton, leftSide, bottomSection, }: { saveToDashboardButton?: React.ReactElement<any> | undefined; leftSide?: React.ReactElement<any> | undefined; bottomSection?: React.ReactElement<any> | undefined; }) => ",
           {
             "pluginId": "@kbn/unified-data-table",
             "scope": "public",
@@ -168,7 +170,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
-        "lineNumber": 164,
+        "lineNumber": 174,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -178,14 +180,30 @@
             "id": "def-public.getRenderCustomToolbarWithElements.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  leftSide,\n  bottomSection,\n}",
+            "label": "{\n  saveToDashboardButton,\n  leftSide,\n  bottomSection,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
-            "lineNumber": 167,
+            "lineNumber": 178,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.getRenderCustomToolbarWithElements.$1.saveToDashboardButton",
+                "type": "Object",
+                "tags": [],
+                "label": "saveToDashboardButton",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any> | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+                "lineNumber": 179,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
               {
                 "parentPluginId": "@kbn/unified-data-table",
                 "id": "def-public.getRenderCustomToolbarWithElements.$1.leftSide",
@@ -197,7 +215,7 @@
                   "React.ReactElement<any> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
-                "lineNumber": 168,
+                "lineNumber": 180,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -213,7 +231,7 @@
                   "React.ReactElement<any> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
-                "lineNumber": 169,
+                "lineNumber": 181,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -383,6 +401,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -442,6 +461,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -482,6 +502,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewsContract",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -499,6 +520,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Capabilities",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -525,7 +547,7 @@
           ") => React.ReactElement<any>"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
-        "lineNumber": 159,
+        "lineNumber": 169,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -551,6 +573,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedDataTableRenderCustomToolbarProps",
             "trackAdoption": false
           }
         ],
@@ -600,6 +623,7 @@
             "lineNumber": 40,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "RowHeightSettingsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -823,7 +847,7 @@
                     "section": "def-common.FieldFormatsRegistry",
                     "text": "FieldFormatsRegistry"
                   },
-                  ", \"register\" | \"init\"> & { deserialize: ",
+                  ", \"init\" | \"register\"> & { deserialize: ",
                   {
                     "pluginId": "fieldFormats",
                     "scope": "common",
@@ -959,7 +983,7 @@
           ">>"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
-        "lineNumber": 1471,
+        "lineNumber": 1515,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -979,6 +1003,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -1143,6 +1168,7 @@
             "lineNumber": 33,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "UseColumnsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1211,7 +1237,7 @@
           "EuiDataGridRefProps"
         ],
         "path": "node_modules/@elastic/eui/eui.d.ts",
-        "lineNumber": 22821,
+        "lineNumber": 23564,
         "columnNumber": 2,
         "deprecated": false,
         "trackAdoption": false,
@@ -1229,7 +1255,7 @@
               "(isFullScreen: boolean) => void"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 22822,
+            "lineNumber": 23565,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -1245,7 +1271,7 @@
                   "boolean"
                 ],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
-                "lineNumber": 22825,
+                "lineNumber": 23568,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1267,7 +1293,7 @@
               "(cell: { rowIndex: number; colIndex: number; }) => void"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 22826,
+            "lineNumber": 23569,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -1280,7 +1306,7 @@
                 "label": "cell",
                 "description": [],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
-                "lineNumber": 22833,
+                "lineNumber": 23576,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1293,7 +1319,7 @@
                     "label": "rowIndex",
                     "description": [],
                     "path": "node_modules/@elastic/eui/eui.d.ts",
-                    "lineNumber": 22834,
+                    "lineNumber": 23577,
                     "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1306,7 +1332,7 @@
                     "label": "colIndex",
                     "description": [],
                     "path": "node_modules/@elastic/eui/eui.d.ts",
-                    "lineNumber": 22835,
+                    "lineNumber": 23578,
                     "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1329,7 +1355,7 @@
               "(cell: { rowIndex: number; colIndex: number; }) => void"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 22837,
+            "lineNumber": 23580,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -1342,7 +1368,7 @@
                 "label": "cell",
                 "description": [],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
-                "lineNumber": 22840,
+                "lineNumber": 23583,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1355,7 +1381,7 @@
                     "label": "rowIndex",
                     "description": [],
                     "path": "node_modules/@elastic/eui/eui.d.ts",
-                    "lineNumber": 22841,
+                    "lineNumber": 23584,
                     "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1368,7 +1394,7 @@
                     "label": "colIndex",
                     "description": [],
                     "path": "node_modules/@elastic/eui/eui.d.ts",
-                    "lineNumber": 22842,
+                    "lineNumber": 23585,
                     "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1391,7 +1417,7 @@
               "() => void"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 22844,
+            "lineNumber": 23587,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -1411,7 +1437,7 @@
               "((params: { scrollLeft?: number | undefined; scrollTop?: number | undefined; }) => void) | undefined"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 22848,
+            "lineNumber": 23591,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false
@@ -1431,8 +1457,63 @@
               " | undefined; columnIndex?: number | undefined; rowIndex?: number | undefined; }) => void) | undefined"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 22852,
+            "lineNumber": 23595,
             "columnNumber": 6,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.RenderDocumentViewMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "RenderDocumentViewMeta",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
+        "lineNumber": 142,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RenderDocumentViewMeta.displayedRows",
+            "type": "Array",
+            "tags": [],
+            "label": "displayedRows",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
+            "lineNumber": 143,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RenderDocumentViewMeta.displayedColumns",
+            "type": "Array",
+            "tags": [],
+            "label": "displayedColumns",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2241,7 +2322,7 @@
         "label": "DataGridDensity",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 27,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2275,7 +2356,7 @@
           "CommonProps",
           " & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, \"type\" | \"disabled\" | \"onClick\"> & ",
           "EuiContextMenuItemProps",
-          ", \"onClick\"> & { onClick: (payload: { selectedDocIds: string[]; }) => void; label: string | React.ReactElement<any>; key: string; })[]"
+          ", \"onClick\"> & { onClick: (payload: { selectedDocIds: string[]; }) => void; isAvailable?: ((payload: { selectedDocIds: string[]; }) => boolean) | undefined; label: string | React.ReactElement<any>; key: string; })[]"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/types.ts",
         "lineNumber": 68,
@@ -2394,7 +2475,7 @@
         "label": "DataGridPaginationMode",
         "description": [],
         "signature": [
-          "\"infinite\" | \"multiPage\" | \"singlePage\""
+          "\"multiPage\" | \"singlePage\" | \"infinite\""
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/types.ts",
         "lineNumber": 66,
@@ -2462,6 +2543,136 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.RenderDocumentViewCallback",
+        "type": "Type",
+        "tags": [],
+        "label": "RenderDocumentViewCallback",
+        "description": [],
+        "signature": [
+          "(hit: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ", displayedRows: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          "[], displayedColumns: string[], columnsMeta?: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableColumnsMeta",
+            "text": "DataTableColumnsMeta"
+          },
+          " | undefined) => JSX.Element | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
+        "lineNumber": 135,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RenderDocumentViewCallback.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "hit",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
+            "lineNumber": 136,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "DataTableRecord",
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RenderDocumentViewCallback.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "displayedRows",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
+            "lineNumber": 137,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RenderDocumentViewCallback.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "displayedColumns",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
+            "lineNumber": 138,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RenderDocumentViewCallback.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "columnsMeta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableColumnsMeta",
+                "text": "DataTableColumnsMeta"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
+            "lineNumber": 139,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "DataTableColumnsMeta",
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -2558,7 +2769,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
-        "lineNumber": 1473,
+        "lineNumber": 1517,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2609,6 +2820,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UnifiedDataTableRenderCustomToolbarProps",
             "trackAdoption": false
           }
         ],

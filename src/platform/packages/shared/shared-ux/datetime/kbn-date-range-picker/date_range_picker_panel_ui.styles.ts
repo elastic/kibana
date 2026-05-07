@@ -17,8 +17,9 @@ export const panelContainerStyles = ({ euiTheme }: UseEuiTheme) => {
   const root = css`
     display: flex;
     flex-direction: column;
-    min-block-size: ${CONTAINER_HEIGHT * 0.5}px;
-    max-block-size: ${CONTAINER_HEIGHT}px;
+    /* min height fits ~1.5 presets, nav items and footer */
+    min-block-size: calc(${euiTheme.size.base} * 14);
+    max-block-size: min(${CONTAINER_HEIGHT}px, 50vh);
     inline-size: ${euiTheme.components.forms.maxWidth}px;
     max-inline-size: 100%;
   `;
@@ -75,7 +76,6 @@ export const panelBodyStyles = (euiThemeContext: UseEuiTheme) => {
     flex-grow: 1;
     overflow-block: auto;
     ${euiScrollBarStyles(euiThemeContext)}
-    padding-inline: ${euiTheme.size.s};
 
     &:not(:first-child) {
       border-block-start: ${euiTheme.border.thin};
@@ -215,7 +215,7 @@ export const panelSpacingStyles = ({ euiTheme }: UseEuiTheme) => {
     padding-block: ${euiTheme.size.s};
   `;
   const inline = css`
-    padding-inline: ${euiTheme.size.base};
+    padding-inline: ${euiTheme.size.s};
   `;
   const both = css`
     ${block}

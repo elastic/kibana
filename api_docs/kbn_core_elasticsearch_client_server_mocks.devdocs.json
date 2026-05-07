@@ -85,6 +85,7 @@
                 "lineNumber": 36,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Awaited",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -104,6 +105,7 @@
                 "lineNumber": 36,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -144,6 +146,7 @@
                 "lineNumber": 42,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "Awaited",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -163,6 +166,7 @@
                 "lineNumber": 42,
                 "columnNumber": 39,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -277,7 +281,13 @@
             "label": "asInternalUser",
             "description": [],
             "signature": [
-              "{ create: ",
+              "{ child: ",
+              "ClientApiMockInstance",
+              "<",
+              "default",
+              ", [opts: ",
+              "ClientOptions",
+              "]>; create: ",
               "ClientApiMockInstance",
               "<Promise<",
               "WriteResponseBase",
@@ -317,13 +327,7 @@
               "DeeplyMockedApi",
               "<",
               "default",
-              ">; child: ",
-              "ClientApiMockInstance",
-              "<",
-              "default",
-              ", [opts: ",
-              "ClientOptions",
-              "]>; asyncSearch: ",
+              ">; asyncSearch: ",
               "DeeplyMockedApi",
               "<",
               "default",
@@ -868,7 +872,13 @@
             "label": "asInternalUser",
             "description": [],
             "signature": [
-              "{ create: ",
+              "{ child: ",
+              "ClientApiMockInstance",
+              "<",
+              "default",
+              ", [opts: ",
+              "ClientOptions",
+              "]>; create: ",
               "ClientApiMockInstance",
               "<Promise<",
               "WriteResponseBase",
@@ -908,13 +918,7 @@
               "DeeplyMockedApi",
               "<",
               "default",
-              ">; child: ",
-              "ClientApiMockInstance",
-              "<",
-              "default",
-              ", [opts: ",
-              "ClientOptions",
-              "]>; asyncSearch: ",
+              ">; asyncSearch: ",
               "DeeplyMockedApi",
               "<",
               "default",
@@ -1421,7 +1425,13 @@
             "label": "asCurrentUser",
             "description": [],
             "signature": [
-              "{ create: ",
+              "{ child: ",
+              "ClientApiMockInstance",
+              "<",
+              "default",
+              ", [opts: ",
+              "ClientOptions",
+              "]>; create: ",
               "ClientApiMockInstance",
               "<Promise<",
               "WriteResponseBase",
@@ -1461,13 +1471,7 @@
               "DeeplyMockedApi",
               "<",
               "default",
-              ">; child: ",
-              "ClientApiMockInstance",
-              "<",
-              "default",
-              ", [opts: ",
-              "ClientOptions",
-              "]>; asyncSearch: ",
+              ">; asyncSearch: ",
               "DeeplyMockedApi",
               "<",
               "default",
@@ -1974,7 +1978,13 @@
             "label": "asSecondaryAuthUser",
             "description": [],
             "signature": [
-              "{ create: ",
+              "{ child: ",
+              "ClientApiMockInstance",
+              "<",
+              "default",
+              ", [opts: ",
+              "ClientOptions",
+              "]>; create: ",
               "ClientApiMockInstance",
               "<Promise<",
               "WriteResponseBase",
@@ -2014,13 +2024,7 @@
               "DeeplyMockedApi",
               "<",
               "default",
-              ">; child: ",
-              "ClientApiMockInstance",
-              "<",
-              "default",
-              ", [opts: ",
-              "ClientOptions",
-              "]>; asyncSearch: ",
+              ">; asyncSearch: ",
               "DeeplyMockedApi",
               "<",
               "default",
@@ -2539,11 +2543,7 @@
           "IScopedClusterClient",
           ", [request: ",
           "ScopeableRequest",
-          ", opts?: ",
-          "OriginOnlyRouting",
-          " | ",
-          "AllProjectsRouting",
-          " | undefined], unknown>; } & ",
+          "], unknown>; } & ",
           "ICustomClusterClient",
           " & ",
           "ClusterClientMock"
@@ -2584,7 +2584,13 @@
         "label": "ElasticsearchClientMock",
         "description": [],
         "signature": [
-          "{ create: ",
+          "{ child: ",
+          "ClientApiMockInstance",
+          "<",
+          "default",
+          ", [opts: ",
+          "ClientOptions",
+          "]>; create: ",
           "ClientApiMockInstance",
           "<Promise<",
           "WriteResponseBase",
@@ -2624,13 +2630,7 @@
           "DeeplyMockedApi",
           "<",
           "default",
-          ">; child: ",
-          "ClientApiMockInstance",
-          "<",
-          "default",
-          ", [opts: ",
-          "ClientOptions",
-          "]>; asyncSearch: ",
+          ">; asyncSearch: ",
           "DeeplyMockedApi",
           "<",
           "default",
@@ -3234,6 +3234,7 @@
                 "lineNumber": 302,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "Promise",
                 "trackAdoption": false
               }
             ]
@@ -3273,6 +3274,7 @@
                 "lineNumber": 287,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "Promise",
                 "trackAdoption": false
               }
             ]
@@ -3310,6 +3312,7 @@
                 "lineNumber": 348,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               },
               {
@@ -3317,7 +3320,7 @@
                 "id": "def-server.elasticsearchClientMock.createSuccessTransportRequestPromise.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "__1",
+                "label": "{ statusCode = 200 }",
                 "description": [],
                 "signature": [
                   "{ statusCode?: number | undefined; }"
@@ -3342,6 +3345,7 @@
                 "lineNumber": 350,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false
               }
             ]
@@ -3424,6 +3428,7 @@
                 "lineNumber": 361,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false
               }
             ]

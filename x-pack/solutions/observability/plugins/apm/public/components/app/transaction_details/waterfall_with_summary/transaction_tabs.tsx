@@ -10,12 +10,13 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { LazySavedSearchComponent, type SavedSearchTableConfig } from '@kbn/saved-search-component';
+import { getTimestampUs } from '../../../../../common/utils/get_timestamp_us';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { useDiscoverHref } from '../../../shared/links/discover_links/use_discover_href';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
-import { WaterfallContainer } from './waterfall_container';
 import { UnifiedWaterfallContainer } from './waterfall_container/unified_waterfall_container';
-import type { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { type UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
 
 export enum TransactionTab {
@@ -27,7 +28,6 @@ export enum TransactionTab {
 interface Props {
   transaction?: Transaction;
   isLoading: boolean;
-  waterfall: IWaterfall;
   detailTab?: TransactionTab;
   serviceName?: string;
   waterfallItemId?: string;
@@ -36,14 +36,12 @@ interface Props {
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
   logsTableConfig?: SavedSearchTableConfig;
   onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
-  useUnified: boolean;
   unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
   entryTransactionId?: string;
 }
 
 export function TransactionTabs({
   transaction,
-  waterfall,
   isLoading,
   detailTab = TransactionTab.timeline,
   waterfallItemId,
@@ -53,7 +51,6 @@ export function TransactionTabs({
   onShowCriticalPathChange,
   logsTableConfig,
   onLogsTableConfigChange,
-  useUnified,
   unifiedWaterfallFetchResult,
   entryTransactionId,
 }: Props) {
@@ -67,10 +64,8 @@ export function TransactionTabs({
           <TimelineTabContent
             waterfallItemId={waterfallItemId}
             serviceName={serviceName}
-            waterfall={waterfall}
             showCriticalPath={showCriticalPath}
             onShowCriticalPathChange={onShowCriticalPathChange}
-            useUnified={useUnified}
             unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
             entryTransactionId={entryTransactionId}
           />
@@ -90,7 +85,7 @@ export function TransactionTabs({
           <>
             {transaction && (
               <LogsTabContent
-                timestamp={transaction.timestamp.us}
+                timestamp={getTimestampUs(transaction)}
                 duration={transaction.transaction.duration.us}
                 traceId={transaction.trace.id}
                 logsTableConfig={logsTableConfig}
@@ -110,8 +105,6 @@ export function TransactionTabs({
       showCriticalPath,
       transaction,
       unifiedWaterfallFetchResult,
-      useUnified,
-      waterfall,
       waterfallItemId,
     ]
   );
@@ -149,46 +142,48 @@ export function TransactionTabs({
 }
 
 function TimelineTabContent({
-  waterfall,
   waterfallItemId,
   serviceName,
   showCriticalPath,
   onShowCriticalPathChange,
-  useUnified,
   unifiedWaterfallFetchResult,
   entryTransactionId,
 }: {
   waterfallItemId?: string;
   serviceName?: string;
-  waterfall: IWaterfall;
   showCriticalPath: boolean;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
-  useUnified: boolean;
   unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
   entryTransactionId?: string;
 }) {
-  if (useUnified) {
-    return (
-      <UnifiedWaterfallContainer
-        traceItems={unifiedWaterfallFetchResult.traceItems}
-        errors={unifiedWaterfallFetchResult.errors}
-        agentMarks={unifiedWaterfallFetchResult.agentMarks}
-        waterfallItemId={waterfallItemId}
-        serviceName={serviceName}
-        showCriticalPath={showCriticalPath}
-        onShowCriticalPathChange={onShowCriticalPathChange}
-        entryTransactionId={entryTransactionId}
-      />
-    );
-  }
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/dependencies/operation'
+  );
+  const traceId = unifiedWaterfallFetchResult.traceItems[0]?.traceId;
+  const discoverHref = useDiscoverHref({
+    indexType: 'traces',
+    rangeFrom,
+    rangeTo,
+    queryParams: { traceId, sortDirection: 'ASC' },
+  });
 
   return (
-    <WaterfallContainer
+    <UnifiedWaterfallContainer
+      traceItems={unifiedWaterfallFetchResult.traceItems}
+      errors={unifiedWaterfallFetchResult.errors}
+      agentMarks={unifiedWaterfallFetchResult.agentMarks}
       waterfallItemId={waterfallItemId}
       serviceName={serviceName}
-      waterfall={waterfall}
       showCriticalPath={showCriticalPath}
       onShowCriticalPathChange={onShowCriticalPathChange}
+      entryTransactionId={entryTransactionId}
+      traceDocsTotal={unifiedWaterfallFetchResult.traceDocsTotal}
+      maxTraceItems={unifiedWaterfallFetchResult.maxTraceItems}
+      discoverHref={discoverHref}
     />
   );
 }

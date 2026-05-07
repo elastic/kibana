@@ -33,6 +33,7 @@
             "lineNumber": 63,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "LogViewUrlStateDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -130,6 +131,7 @@
             "lineNumber": 43,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "LogViewUrlStateDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -317,6 +319,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -355,6 +358,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -569,6 +573,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -637,6 +642,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -728,6 +734,7 @@
             "lineNumber": 32,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "LogViewUrlStateDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1711,7 +1718,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; getExportHandler: (options: Omit<",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -1719,7 +1734,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
               "IntlShape",
               ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
               {
@@ -1729,7 +1752,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -1773,7 +1804,7 @@
                 "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              "; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1781,31 +1812,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context, {}>) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1871,7 +1878,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"register\" | \"init\"> & { deserialize: ",
+              ", \"init\" | \"register\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -2019,11 +2026,11 @@
               "MlJob",
               ">[] | undefined; estimateModelMemory?: boolean | undefined; }): Promise<",
               "DataRecognizerConfigResponse",
-              ">; getVisualizerFieldHistograms({ indexPattern, query, fields, samplerShardSize, runtimeMappings, }: { indexPattern: string; query: any; fields: ",
+              ">; getVisualizerFieldHistograms({ indexPattern, query, fields, samplerShardSize, runtimeMappings, projectRouting, }: { indexPattern: string; query: any; fields: ",
               "FieldHistogramRequestConfig",
               "[]; samplerShardSize?: number | undefined; runtimeMappings?: ",
               "MappingRuntimeFields",
-              " | undefined; }): Promise<any>; calendars(obj?: { calendarId?: string | undefined; calendarIds?: string[] | undefined; } | undefined): Promise<",
+              " | undefined; projectRouting?: string | undefined; }): Promise<any>; calendars(obj?: { calendarId?: string | undefined; calendarIds?: string[] | undefined; } | undefined): Promise<",
               "MlCalendar",
               "[]>; addCalendar(obj: ",
               "MlCalendar",
@@ -2039,11 +2046,11 @@
               "MlAnalysisConfig",
               "; indexPattern: string; query: any; timeFieldName: string; earliestMs: number; latestMs: number; }): ",
               "Observable",
-              "<{ modelMemoryLimit: string; }>; getCardinalityOfFields({ index, fieldNames, query, timeFieldName, earliestMs, latestMs, }: { index: string; fieldNames: string[]; query: any; timeFieldName: string; earliestMs: number; latestMs: number; }): Promise<any>; getTimeFieldRange({ index, timeFieldName, query, runtimeMappings, indicesOptions, allowFutureTime, }: { index: string; timeFieldName?: string | undefined; query: any; runtimeMappings?: ",
+              "<{ modelMemoryLimit: string; }>; getCardinalityOfFields({ index, fieldNames, query, timeFieldName, earliestMs, latestMs, }: { index: string; fieldNames: string[]; query: any; timeFieldName: string; earliestMs: number; latestMs: number; }): Promise<any>; getTimeFieldRange({ index, timeFieldName, query, runtimeMappings, indicesOptions, allowFutureTime, projectRouting, }: { index: string; timeFieldName?: string | undefined; query: any; runtimeMappings?: ",
               "MappingRuntimeFields",
               " | undefined; indicesOptions?: ",
               "IndicesOptions",
-              " | undefined; allowFutureTime?: boolean | undefined; }): Promise<",
+              " | undefined; allowFutureTime?: boolean | undefined; projectRouting?: string | undefined; }): Promise<",
               "GetTimeFieldRangeResponse",
               ">; esSearch(obj: any): Promise<any>; esSearch$(obj: any): ",
               "Observable",
@@ -2275,7 +2282,7 @@
               "CombinedJobWithStats",
               "[]>; groups(): Promise<",
               "Group",
-              "[]>; updateGroups(updatedJobs: { jobId: string; groups: string[]; }[]): Promise<any>; forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<any>; stopDatafeeds(datafeedIds: string[]): Promise<any>; deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined, deleteAlertingRules?: boolean | undefined): Promise<any>; closeJobs(jobIds: string[]): Promise<any>; resetJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<",
+              "[]>; updateGroups(updatedJobs: { jobId: string; groups: string[]; }[]): Promise<any>; forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<any>; stopDatafeeds(datafeedIds: string[], closeJobs?: boolean | undefined): Promise<any>; deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined, deleteAlertingRules?: boolean | undefined): Promise<any>; closeJobs(jobIds: string[]): Promise<any>; resetJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<",
               "ResetJobsResponse",
               ">; forceStopAndCloseJob(jobId: string): Promise<{ success: boolean; }>; jobAuditMessages({ jobId, from, start, end, }: { jobId: string; from?: number | undefined; start?: string | undefined; end?: string | undefined; }): Promise<{ messages: ",
               "JobMessage",
@@ -2446,13 +2453,7 @@
               "<",
               "StartTrainedModelDeploymentResponse",
               ">; stopModelAllocation(modelId: string, deploymentsIds: string[], options?: { force: boolean; }): Promise<Record<string, { acknowledge: boolean; error?: ",
-              {
-                "pluginId": "@kbn/ml-error-utils",
-                "scope": "common",
-                "docId": "kibKbnMlErrorUtilsPluginApi",
-                "section": "def-common.ErrorType",
-                "text": "ErrorType"
-              },
+              "ErrorType",
               "; }>>; updateModelDeployment(modelId: string, deploymentId: string, params: ",
               "UpdateAllocationParams",
               "): Promise<",
@@ -2864,6 +2865,7 @@
               "lineNumber": 40,
               "columnNumber": 21,
               "deprecated": false,
+              "docsReferencedTypeName": "Omit",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2955,6 +2957,7 @@
                 "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogEntriesAdapter",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2974,6 +2977,7 @@
                 "lineNumber": 68,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Pick",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3030,6 +3034,7 @@
                 "lineNumber": 72,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsSharedPluginRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3047,6 +3052,7 @@
                 "lineNumber": 73,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogViewReference",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3064,6 +3070,7 @@
                 "lineNumber": 74,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogEntriesParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3121,6 +3128,7 @@
                 "lineNumber": 133,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsSharedPluginRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3281,6 +3289,7 @@
                 "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsSharedPluginRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3298,6 +3307,7 @@
                 "lineNumber": 51,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogViewReference",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3315,6 +3325,7 @@
                 "lineNumber": 52,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogEntriesParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3372,6 +3383,7 @@
                 "lineNumber": 56,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsSharedPluginRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3560,6 +3572,7 @@
               "lineNumber": 28,
               "columnNumber": 35,
               "deprecated": false,
+              "docsReferencedTypeName": "UsageCollector",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -3676,6 +3689,7 @@
                 "lineNumber": 19,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3755,6 +3769,7 @@
                 "lineNumber": 27,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3834,6 +3849,7 @@
                 "lineNumber": 11,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3986,6 +4002,7 @@
             "lineNumber": 11,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "UrlService",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4041,6 +4058,7 @@
             "lineNumber": 18,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "NodeLogsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4215,6 +4233,7 @@
             "lineNumber": 32,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "TraceLogsParams",
             "trackAdoption": false,
             "isRequired": true
           }

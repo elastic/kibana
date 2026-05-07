@@ -6,6 +6,7 @@
  */
 
 import type { RepositoryStrategy } from './types';
+import { DEFAULT_REPOSITORY_REGISTER_REQUEST_TIMEOUT_MS } from './constants';
 
 export function createUrlRepository(snapshotUrl: string): RepositoryStrategy {
   return {
@@ -25,10 +26,15 @@ export function createUrlRepository(snapshotUrl: string): RepositoryStrategy {
     async register({ esClient, log, repoName }) {
       log.debug(`Connecting to snapshot at ${snapshotUrl}`);
 
-      await esClient.snapshot.createRepository({
-        name: repoName,
-        body: { type: 'url', settings: { url: snapshotUrl } },
-      });
+      await esClient.snapshot.createRepository(
+        {
+          name: repoName,
+          master_timeout: '2m',
+          timeout: '2m',
+          body: { type: 'url', settings: { url: snapshotUrl } },
+        },
+        { requestTimeout: DEFAULT_REPOSITORY_REGISTER_REQUEST_TIMEOUT_MS }
+      );
     },
   };
 }

@@ -148,7 +148,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-        "lineNumber": 82,
+        "lineNumber": 83,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -164,9 +164,10 @@
               "GetEsQueryConfigParamType | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "GetEsQueryConfigParamType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -263,7 +264,7 @@
           " | null | undefined) => (string | number)[] | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-        "lineNumber": 57,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -282,7 +283,7 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -307,7 +308,7 @@
           "(ruleTypeId: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-        "lineNumber": 106,
+        "lineNumber": 107,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -323,7 +324,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-            "lineNumber": 106,
+            "lineNumber": 107,
             "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
@@ -351,7 +352,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-        "lineNumber": 43,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -367,7 +368,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
@@ -378,7 +379,268 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.RuleDetailsLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleDetailsLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.RuleDetailsLocatorParams",
+            "text": "RuleDetailsLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.RuleDetailsLocatorParams.ruleId",
+            "type": "string",
+            "tags": [],
+            "label": "ruleId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.RuleDetailsLocatorParams.tabId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "tabId",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "common",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-common.RuleDetailsTabId",
+                "text": "RuleDetailsTabId"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.RuleDetailsLocatorParams.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.RuleDetailsLocatorParams.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.RuleDetailsLocatorParams.kuery",
+            "type": "string",
+            "tags": [],
+            "label": "kuery",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.RuleDetailsLocatorParams.controlConfigs",
+            "type": "Array",
+            "tags": [],
+            "label": "controlConfigs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.RulesLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RulesLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.RulesLocatorParams",
+            "text": "RulesLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.RulesLocatorParams.lastResponse",
+            "type": "Array",
+            "tags": [],
+            "label": "lastResponse",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.RulesLocatorParams.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Record<string, string | number> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.RulesLocatorParams.search",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.RulesLocatorParams.status",
+            "type": "Array",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "common",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-common.RuleStatus",
+                "text": "RuleStatus"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.RulesLocatorParams.type",
+            "type": "Array",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [
       {
         "parentPluginId": "@kbn/rule-data-utils",
@@ -2193,7 +2455,7 @@
           "\"ml\" | \"monitoring\" | \"streams\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"AlertingExample\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2207,7 +2469,7 @@
         "label": "AlertSeverity",
         "description": [],
         "signature": [
-          "\"warning\" | \"critical\""
+          "\"critical\" | \"warning\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_severity.ts",
         "lineNumber": 12,
@@ -2252,6 +2514,23 @@
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
         "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"attack-discovery\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2336,7 +2615,7 @@
           "\"observability\"[]"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2670,6 +2949,40 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.RULE_DETAILS_ALERTS_TAB",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "RULE_DETAILS_ALERTS_TAB",
+        "description": [],
+        "signature": [
+          "\"history\" | \"alerts\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.RULE_DETAILS_HISTORY_TAB",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "RULE_DETAILS_HISTORY_TAB",
+        "description": [],
+        "signature": [
+          "\"history\" | \"alerts\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.RuleCreationValidConsumer",
         "type": "Type",
         "tags": [],
@@ -2687,6 +3000,23 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ruleDetailsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "ruleDetailsLocatorID",
+        "description": [],
+        "signature": [
+          "\"RULE_DETAILS_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ruleDetailsRoute",
         "type": "string",
         "tags": [],
@@ -2698,6 +3028,23 @@
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
         "lineNumber": 10,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.RuleDetailsTabId",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleDetailsTabId",
+        "description": [],
+        "signature": [
+          "\"history\" | \"alerts\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2727,7 +3074,7 @@
         "label": "rulesAppDetailsRoute",
         "description": [],
         "signature": [
-          "\"/:ruleId\""
+          "\"/rule/:ruleId\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
         "lineNumber": 14,
@@ -2749,6 +3096,40 @@
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
         "lineNumber": 17,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.rulesLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "rulesLocatorID",
+        "description": [],
+        "signature": [
+          "\"RULES_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.RuleStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleStatus",
+        "description": [],
+        "signature": [
+          "\"enabled\" | \"disabled\" | \"snoozed\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_locator_params.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2853,7 +3234,7 @@
           "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-        "lineNumber": 38,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3046,7 +3427,7 @@
           "\"ml\" | \"monitoring\" | \"streams\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"AlertingExample\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3063,7 +3444,7 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-        "lineNumber": 42,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3101,7 +3482,7 @@
           "{ readonly APM: \"apm\"; readonly LOGS: \"logs\"; readonly INFRASTRUCTURE: \"infrastructure\"; readonly OBSERVABILITY: \"observability\"; readonly STREAMS: \"streams\"; readonly SLO: \"slo\"; readonly SIEM: \"siem\"; readonly UPTIME: \"uptime\"; readonly ML: \"ml\"; readonly STACK_ALERTS: \"stackAlerts\"; readonly EXAMPLE: \"AlertingExample\"; readonly MONITORING: \"monitoring\"; readonly ALERTS: \"alerts\"; readonly DISCOVER: \"discover\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

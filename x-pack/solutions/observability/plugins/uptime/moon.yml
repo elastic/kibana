@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/uptime-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/actionable-obs-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/uptime-plugin'
+  title: '@kbn/uptime-plugin'
   description: Moon project for @kbn/uptime-plugin
   channel: ''
   owner: '@elastic/actionable-obs-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/uptime
+  sourceRoot: x-pack/solutions/observability/plugins/uptime
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
@@ -85,6 +84,7 @@ dependsOn:
   - '@kbn/response-ops-rule-form'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/licensing-types'
+  - '@kbn/ml-common-types'
   - '@kbn/connector-schemas'
   - '@kbn/kql'
 tags:
@@ -102,16 +102,6 @@ fileGroups:
     - server/**/*
     - server/legacy_uptime/lib/requests/__fixtures__/monitor_charts_mock.json
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

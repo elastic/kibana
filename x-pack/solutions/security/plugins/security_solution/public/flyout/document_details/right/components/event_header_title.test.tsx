@@ -8,12 +8,16 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DocumentDetailsContext } from '../../shared/context';
-import { SEVERITY_VALUE_TEST_ID, FLYOUT_EVENT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { EventHeaderTitle } from './event_header_title';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
 import { mockContextValue } from '../../shared/mocks/mock_context';
+import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { TestProvidersComponent } from '../../../../common/mock';
+import {
+  EVENT_TITLE_TEST_ID,
+  SEVERITY_VALUE_TEST_ID,
+} from '../../../../flyout_v2/document/components/test_ids';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -31,7 +35,14 @@ const renderHeader = (contextValue: DocumentDetailsContext) =>
     </TestProvidersComponent>
   );
 
-const EVENT_HEADER_TEXT_TEST_ID = `${FLYOUT_EVENT_HEADER_TITLE_TEST_ID}Text`;
+const EVENT_HEADER_TEXT_TEST_ID = `${EVENT_TITLE_TEST_ID}Text`;
+const createSearchHit = (fields: Record<string, unknown[]>) => ({
+  ...mockSearchHit,
+  fields: {
+    ...mockSearchHit.fields,
+    ...fields,
+  },
+});
 
 describe('<EventHeaderTitle />', () => {
   beforeEach(() => {
@@ -40,82 +51,76 @@ describe('<EventHeaderTitle />', () => {
   });
 
   it('should render component', () => {
-    const { getByTestId } = renderHeader(mockContextValue);
+    const { getByTestId, getByText } = renderHeader({
+      ...mockContextValue,
+      searchHit: createSearchHit({
+        'event.kind': ['event'],
+        'event.category': ['process'],
+        'process.name': ['process name'],
+        'event.severity': [3],
+      }),
+    });
 
     expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(SEVERITY_VALUE_TEST_ID)).toBeInTheDocument();
+    expect(getByText('Jan 1, 2020 @ 00:00:00.000')).toBeInTheDocument();
   });
 
   it('should render corret title if event.kind is alert', () => {
-    const mockGetFieldsData = (field: string) => {
-      switch (field) {
-        case 'event.kind':
-          return 'alert';
-        case 'event.category':
-          return 'malware';
-      }
-    };
     const { getByTestId } = renderHeader({
       ...mockContextValue,
-      getFieldsData: mockGetFieldsData,
+      searchHit: createSearchHit({
+        'event.kind': ['alert'],
+        'event.category': ['malware'],
+      }),
     });
 
     expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('External alert details');
   });
 
   it('should render corret title if event.kind is not alert or event', () => {
-    const mockGetFieldsData = (field: string) => {
-      switch (field) {
-        case 'event.kind':
-          return 'metric';
-        case 'event.category':
-          return 'malware';
-      }
-    };
     const { getByTestId } = renderHeader({
       ...mockContextValue,
-      getFieldsData: mockGetFieldsData,
+      searchHit: createSearchHit({
+        'event.kind': ['metric'],
+        'event.category': ['malware'],
+      }),
     });
 
     expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('Metric details');
   });
 
   it('should render event category as title if event.kind is event', () => {
-    const mockGetFieldsData = (field: string) => {
-      switch (field) {
-        case 'event.kind':
-          return 'event';
-        case 'event.category':
-          return 'process';
-        case 'process.name':
-          return 'process name';
-      }
-    };
     const { getByTestId } = renderHeader({
       ...mockContextValue,
-      getFieldsData: mockGetFieldsData,
+      searchHit: createSearchHit({
+        'event.kind': ['event'],
+        'event.category': ['process'],
+        'process.name': ['process name'],
+      }),
     });
 
     expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('process name');
   });
 
   it('should render default title if event.kind is event and event category is not available', () => {
-    const mockGetFieldsData = (field: string) => {
-      switch (field) {
-        case 'event.kind':
-          return 'event';
-      }
-    };
     const { getByTestId } = renderHeader({
       ...mockContextValue,
-      getFieldsData: mockGetFieldsData,
+      searchHit: createSearchHit({
+        'event.kind': ['event'],
+      }),
     });
 
     expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('Event details');
   });
 
   it('should fallback title if event kind is null', () => {
-    const { getByTestId } = renderHeader({ ...mockContextValue, getFieldsData: () => '' });
+    const { getByTestId } = renderHeader({
+      ...mockContextValue,
+      searchHit: createSearchHit({
+        'event.kind': [''],
+      }),
+    });
 
     expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('Event details');
   });

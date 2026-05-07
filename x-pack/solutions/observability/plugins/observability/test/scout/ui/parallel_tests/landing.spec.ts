@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { test, tags } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
+import { test } from '../fixtures';
 import {
   generateApmData,
   generateLogsData,
   TEST_START_DATE,
   TEST_END_DATE,
 } from '../fixtures/generators';
-import { BIGGER_TIMEOUT } from '../fixtures/constants';
+import { BIGGER_TIMEOUT, SHORTER_TIMEOUT } from '../fixtures/constants';
 
 test.describe(
   'Observability Landing Page',
@@ -41,11 +42,10 @@ test.describe(
         defaultRoute: '/app/metrics',
       });
 
-      // Navigate to observability landing page
-      await page.goto(kbnUrl.get('/'));
-
-      // Wait for redirect and verify we're on the metrics page
-      await expect(page).toHaveURL(/\/app\/metrics/, { timeout: BIGGER_TIMEOUT });
+      await expect(async () => {
+        await page.goto(kbnUrl.get('/'));
+        await expect(page).toHaveURL(/\/app\/metrics/, { timeout: SHORTER_TIMEOUT });
+      }).toPass({ timeout: BIGGER_TIMEOUT });
 
       // Restore default route
       await kbnClient.uiSettings.update({

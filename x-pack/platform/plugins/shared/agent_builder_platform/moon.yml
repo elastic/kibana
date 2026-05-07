@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/agent-builder-platform-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workchat-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/agent-builder-platform-plugin'
+  title: '@kbn/agent-builder-platform-plugin'
   description: Moon project for @kbn/agent-builder-platform-plugin
   channel: ''
   owner: '@elastic/workchat-eng'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/agent_builder_platform
+  sourceRoot: x-pack/platform/plugins/shared/agent_builder_platform
 dependsOn:
   - '@kbn/core'
   - '@kbn/logging'
@@ -25,9 +24,9 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/agent-builder-genai-utils'
+  - '@kbn/agent-builder-tools-base'
   - '@kbn/agent-builder-common'
   - '@kbn/zod'
-  - '@kbn/management-settings-ids'
   - '@kbn/agent-builder-plugin'
   - '@kbn/core-lifecycle-server'
   - '@kbn/esql-language'
@@ -41,6 +40,13 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/share-plugin'
+  - '@kbn/workflows'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/connector-specs'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/management-settings-ids'
+  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/actions-plugin'
 tags:
   - plugin
   - prod
@@ -54,16 +60,6 @@ fileGroups:
     - server/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

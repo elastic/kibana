@@ -15,7 +15,6 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useStreamingAiInsight } from '../../hooks/use_streaming_ai_insight';
-import { OBSERVABILITY_AGENT_ID } from '../../../common/constants';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useUiSetting$: jest.fn(),
@@ -34,7 +33,7 @@ const mockUseStreamingAiInsight = useStreamingAiInsight as jest.Mock;
 const mockCreateStream = jest.fn();
 const AiInsightTest = AiInsight as React.ComponentType<any>;
 
-const mockOpenConversationFlyout = jest.fn();
+const mockOpenChat = jest.fn();
 const mockReportEvent = jest.fn();
 
 const mockConnectorInfo = {
@@ -90,7 +89,7 @@ describe('AiInsight', () => {
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: {
-          openConversationFlyout: mockOpenConversationFlyout,
+          openChat: mockOpenChat,
         },
         application: {
           capabilities: {
@@ -219,10 +218,9 @@ describe('AiInsight', () => {
       fireEvent.click(startConversationButton!);
 
       expect(buildAttachments).toHaveBeenCalledWith('Hello world', 'context');
-      expect(mockOpenConversationFlyout).toHaveBeenCalledWith({
+      expect(mockOpenChat).toHaveBeenCalledWith({
         newConversation: true,
         attachments: [{ type: 'test', data: {} }],
-        agentId: OBSERVABILITY_AGENT_ID,
       });
 
       unmount();

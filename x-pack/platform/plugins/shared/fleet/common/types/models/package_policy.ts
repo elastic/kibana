@@ -7,6 +7,7 @@
 
 import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } from './epm';
 import type { SecretReference } from './secret';
+import type { GlobalDataTag } from './agent_policy';
 
 export interface PackagePolicyPackage {
   name: string;
@@ -32,7 +33,7 @@ export interface NewPackagePolicyInputStream {
   keep_enabled?: boolean;
   data_stream: {
     dataset: string;
-    type: string;
+    type?: string;
     elasticsearch?: {
       // TODO: these don't really need to be defined in the package policy schema and could be pulled directly from
       // the package where needed.
@@ -51,6 +52,7 @@ export interface NewPackagePolicyInputStream {
   vars?: PackagePolicyConfigRecord;
   var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
+  migrate_from?: string;
 }
 
 export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
@@ -59,15 +61,20 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 }
 
 export interface NewPackagePolicyInput {
+  /** Auto-generated instance identifier for this input within a saved package policy (e.g. `otelcol-nginx-abc123`). Distinct from `name`, which comes from the registry manifest and is used to disambiguate inputs of the same type. */
   id?: string;
+  /** The registry input's `name` field, when set. Used to disambiguate multiple inputs of the same `type` within a policy template. Falls back to `type` when absent. */
+  name?: string;
   type: string;
   policy_template?: string;
   enabled: boolean;
   keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
   deprecated?: DeprecationInfo;
+  migrate_from?: string;
 }
 
 export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams'> {
@@ -103,6 +110,7 @@ export interface NewPackagePolicy {
   supports_agentless?: boolean | null;
   supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[];
+  global_data_tags?: GlobalDataTag[];
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {
@@ -122,6 +130,7 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   updated_by: string;
   created_at: string;
   created_by: string;
+  package_agent_version_condition?: string;
 }
 
 export type DryRunPackagePolicy = NewPackagePolicy & {

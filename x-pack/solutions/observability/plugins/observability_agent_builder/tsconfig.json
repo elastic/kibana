@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*", "../../../../../typings/**/*", "public/**/*"],
+  "include": ["common/**/*", "server/**/*", "../../../../../typings/**/*", "public/**/*", "scripts/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/agent-builder-common",
@@ -35,6 +35,7 @@
     "@kbn/logging",
     "@kbn/ai-assistant-common",
     "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-ai-components",
     "@kbn/shared-ux-utility",
     "@kbn/discover-shared-plugin",
     "@kbn/i18n",
@@ -49,6 +50,10 @@
     "@kbn/slo-schema",
     "@kbn/apm-types-shared",
     "@kbn/observability-utils-server",
+    "@kbn/calculate-auto",
+    "@kbn/search-inference-endpoints",
+    "@kbn/inference-connectors",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

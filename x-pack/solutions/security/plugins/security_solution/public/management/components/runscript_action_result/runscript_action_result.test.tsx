@@ -67,14 +67,11 @@ describe('RunscriptActionResult component', () => {
     setUserPrivileges.reset();
   });
 
-  it.each(['crowdstrike', 'sentinel_one'] as const)(
-    'should display no output if %s agent type does not support outputs',
-    (agentType) => {
-      action.agentType = agentType;
-      render();
-      expect(renderResult.queryByTestId('test-output')).toBeNull();
-    }
-  );
+  it('should display no output if sentinel_one agent type does not support outputs', () => {
+    action.agentType = 'sentinel_one';
+    render();
+    expect(renderResult.queryByTestId('test-output')).toBeNull();
+  });
 
   it.each(['crowdstrike', 'microsoft_defender_endpoint', 'sentinel_one'] as const)(
     'should display no download link for %s when user has no authz',
@@ -86,6 +83,33 @@ describe('RunscriptActionResult component', () => {
       expect(renderResult.queryByTestId('test-download')).toBeNull();
     }
   );
+
+  describe('for CrowdStrike', () => {
+    beforeEach(() => {
+      action.agentType = 'crowdstrike';
+    });
+
+    it('should display output content when stdout is present', () => {
+      action.outputs = {
+        'agent-a': {
+          type: 'text',
+          content: {
+            code: '200',
+            stdout: 'crowdstrike script output',
+            stderr: '',
+          },
+        },
+      };
+      render();
+
+      expect(renderResult.getByTestId('test-output-stdout')).toBeInTheDocument();
+    });
+
+    it('should not display file download link', () => {
+      render();
+      expect(renderResult.queryByTestId('test-download')).toBeNull();
+    });
+  });
 
   describe('for Microsoft Defender Endpoint', () => {
     it('should display file link for `microsoft_defender_endpoint` agent type', async () => {

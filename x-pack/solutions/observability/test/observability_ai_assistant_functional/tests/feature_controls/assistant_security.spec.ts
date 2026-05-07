@@ -52,11 +52,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const results = await PageObjects.navigationalSearch.getDisplayedResults();
         expect(results[0].label).to.eql(obsAssistantConversationsGlobalSearchEntry);
       });
-      describe('with no connector setup', () => {
+      describe('with no model setup', () => {
         before(async () => {
           await deleteConnectors(supertest);
         });
-        it('loads conversations UI with setup connector message', async () => {
+        it('loads conversations UI with add model message', async () => {
           await PageObjects.common.navigateToUrl('obsAIAssistant', '', {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
@@ -65,7 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail(ui.pages.conversations.setupGenAiConnectorsButtonSelector);
         });
       });
-      describe('with connector setup', () => {
+      describe('with model setup', () => {
         let proxy: LlmProxy;
 
         before(async () => {
@@ -89,26 +89,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const isDisabled = await chatInputElement.getAttribute('disabled');
           expect(isDisabled).to.be(null);
         });
-      });
-    });
-    describe('no actions privileges', () => {
-      before(async () => {
-        await createAndLoginUserWithCustomRole(getPageObjects, getService, {
-          // need some obs app or obs menu wont show where we can click on AI Assistant
-          infrastructure: ['all'],
-          observabilityAIAssistant: ['all'],
-        });
-      });
-      it('loads conversations UI with connector error message', async () => {
-        await PageObjects.common.navigateToUrl('obsAIAssistant', '', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-          shouldUseHashForSubUrl: false,
-        });
-        await testSubjects.existOrFail(ui.pages.conversations.connectorsErrorMsg);
-      });
-      after(async () => {
-        await deleteAndLogoutUser(getService, getPageObjects);
       });
     });
     describe('no privileges', () => {

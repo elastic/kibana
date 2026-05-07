@@ -103,6 +103,23 @@ describe('TimeSeriesParams validate()', () => {
     );
   });
 
+  it('accepts optional project_routing', async () => {
+    params.project_routing = '_alias:*';
+    expect(validate()).toEqual(expect.objectContaining({ project_routing: '_alias:*' }));
+  });
+
+  it('omits project_routing when unset', async () => {
+    const result = validate();
+    expect(result).not.toHaveProperty('project_routing');
+  });
+
+  it('fails for invalid project_routing type', async () => {
+    params.project_routing = 99;
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[project_routing]: expected value of type [string] but got [number]"`
+    );
+  });
+
   function onValidate(): () => void {
     return () => validate();
   }

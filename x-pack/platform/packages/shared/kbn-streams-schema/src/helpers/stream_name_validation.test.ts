@@ -8,6 +8,8 @@
 import {
   validateStreamName,
   MAX_STREAM_NAME_LENGTH,
+  INVALID_STREAM_NAME_PREFIXES,
+  RESERVED_STREAM_NAMES,
   INVALID_STREAM_NAME_CHARACTERS,
 } from './stream_name_validation';
 
@@ -22,6 +24,7 @@ describe('validateStreamName', () => {
   it('returns invalid for empty name', () => {
     expect(validateStreamName('')).toEqual({
       valid: false,
+      error: 'empty',
       message: 'Stream name must not be empty.',
     });
   });
@@ -30,7 +33,9 @@ describe('validateStreamName', () => {
     const longName = 'a'.repeat(MAX_STREAM_NAME_LENGTH + 1);
     expect(validateStreamName(longName)).toEqual({
       valid: false,
+      error: 'tooLong',
       message: `Stream name cannot be longer than ${MAX_STREAM_NAME_LENGTH} characters.`,
+      meta: { maxLength: MAX_STREAM_NAME_LENGTH },
     });
   });
 
@@ -42,14 +47,17 @@ describe('validateStreamName', () => {
   it('returns invalid for uppercase characters', () => {
     expect(validateStreamName('Logs')).toEqual({
       valid: false,
+      error: 'uppercase',
       message: 'Stream name cannot contain uppercase characters.',
     });
     expect(validateStreamName('LOGS')).toEqual({
       valid: false,
+      error: 'uppercase',
       message: 'Stream name cannot contain uppercase characters.',
     });
     expect(validateStreamName('loGs')).toEqual({
       valid: false,
+      error: 'uppercase',
       message: 'Stream name cannot contain uppercase characters.',
     });
   });
@@ -57,8 +65,37 @@ describe('validateStreamName', () => {
   it('returns invalid for space character', () => {
     expect(validateStreamName('my stream')).toEqual({
       valid: false,
+      error: 'invalidCharacter',
       message: 'Stream name cannot contain spaces.',
+      meta: { characters: [' '] },
     });
+  });
+
+  it('returns invalid for reserved names', () => {
+    for (const reserved of RESERVED_STREAM_NAMES) {
+      expect(validateStreamName(reserved)).toEqual({
+        valid: false,
+        error: 'reservedName',
+        message: `Stream name cannot be "${reserved}".`,
+        meta: { name: reserved },
+      });
+    }
+  });
+
+  it('returns invalid for names with invalid prefixes', () => {
+    for (const prefix of INVALID_STREAM_NAME_PREFIXES) {
+      expect(validateStreamName(`${prefix}logs`)).toEqual({
+        valid: false,
+        error: 'invalidPrefix',
+        message: `Stream name cannot start with "${prefix}".`,
+        meta: { prefix },
+      });
+    }
+  });
+
+  it('does not treat invalid prefix as invalid when it is not at the start', () => {
+    expect(validateStreamName('logs-_data')).toEqual({ valid: true });
+    expect(validateStreamName('logs.ds-data')).toEqual({ valid: true });
   });
 
   describe('invalid characters', () => {
@@ -67,6 +104,8 @@ describe('validateStreamName', () => {
       { char: '\\', display: '"\\\\"' },
       { char: '*', display: '"*"' },
       { char: ',', display: '","' },
+      { char: '#', display: '"#"' },
+      { char: ':', display: '":"' },
       { char: '/', display: '"/"' },
       { char: '<', display: '"<"' },
       { char: '>', display: '">"' },
@@ -80,8 +119,28 @@ describe('validateStreamName', () => {
         expect(result.valid).toBe(false);
         if (!result.valid) {
           expect(result.message).toContain('Stream name cannot contain');
+          expect(result.error).toBe('invalidCharacter');
+          expect(result.meta).toEqual({ characters: [char] });
         }
       });
+    });
+  });
+
+  it('reports all invalid characters at once', () => {
+    expect(validateStreamName('my*stream#test:data')).toEqual({
+      valid: false,
+      error: 'invalidCharacter',
+      message: 'Stream name cannot contain "*", "#", ":".',
+      meta: { characters: ['*', '#', ':'] },
+    });
+  });
+
+  it('reports spaces alongside other invalid characters', () => {
+    expect(validateStreamName('my stream|data')).toEqual({
+      valid: false,
+      error: 'invalidCharacter',
+      message: 'Stream name cannot contain spaces, "|".',
+      meta: { characters: [' ', '|'] },
     });
   });
 
@@ -92,6 +151,8 @@ describe('validateStreamName', () => {
       '\\',
       '*',
       ',',
+      '#',
+      ':',
       '/',
       '<',
       '>',

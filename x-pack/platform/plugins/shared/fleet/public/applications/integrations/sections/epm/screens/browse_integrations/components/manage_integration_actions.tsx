@@ -19,9 +19,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataStreamResponse } from '@kbn/automatic-import-v2-plugin/common';
 
-import type { CreatedIntegrationRow } from './manage_integrations_table';
+import { useStartServices } from '../../../../../hooks';
+
+import type {
+  AutomaticImportTelemetry,
+  CreatedIntegrationRow,
+  DataStreamResultsFlyoutComponent,
+} from './manage_integrations_table';
 import type { ReviewIntegrationDetails } from './review_approve_modal';
 import { ReviewApproveModal } from './review_approve_modal';
 
@@ -29,34 +34,49 @@ export type { ReviewIntegrationDetails } from './review_approve_modal';
 
 export const ManageIntegrationActions: React.FC<{
   integration: CreatedIntegrationRow;
-  canReviewApprove: boolean;
+  isPackageReady: boolean;
+  installedVersion?: string;
   inlineActionType?: 'reviewApprove' | 'editIntegration';
   showMenuButton?: boolean;
   onEdit: (integrationId: string) => void;
   onDelete: (integrationId: string) => Promise<void>;
-  DataStreamResultsFlyoutComponent?: React.ComponentType<{
-    integrationId: string;
-    dataStream: DataStreamResponse;
-    onClose: () => void;
-  }>;
+  DataStreamResultsFlyoutComponent?: DataStreamResultsFlyoutComponent;
   onFetchReviewDetails: (integrationId: string) => Promise<ReviewIntegrationDetails>;
-  onApproveAndDeploy: (integrationId: string, version: string) => Promise<void>;
+  onApproveAndInstall: (
+    integrationId: string,
+    version: string,
+    categories: string[],
+    autoInstallAfterApproval: boolean
+  ) => Promise<void>;
+  onDownloadZip?: (integrationId: string) => Promise<void>;
+  onInstallToCluster?: (
+    integrationId: string,
+    options?: { skipSuccessToast?: boolean }
+  ) => Promise<void>;
 }> = ({
   integration,
-  canReviewApprove,
+  isPackageReady,
+  installedVersion,
   inlineActionType,
   showMenuButton = true,
   onEdit,
   onDelete,
   DataStreamResultsFlyoutComponent,
   onFetchReviewDetails,
-  onApproveAndDeploy,
+  onApproveAndInstall,
+  onDownloadZip,
+  onInstallToCluster,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { automaticImport } = useStartServices();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
+  const [isInstalling, setIsInstalling] = useState(false);
+
+  const isApproved = integration.status === 'approved';
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
@@ -65,6 +85,28 @@ export const ManageIntegrationActions: React.FC<{
     setIsPopoverOpen(false);
     setShowDeleteConfirm(true);
   }, []);
+
+  const handleDownloadZip = useCallback(async () => {
+    if (!onDownloadZip) return;
+    setIsPopoverOpen(false);
+    setIsDownloadingZip(true);
+    try {
+      await onDownloadZip(integration.integrationId);
+    } finally {
+      setIsDownloadingZip(false);
+    }
+  }, [onDownloadZip, integration.integrationId]);
+
+  const handleInstallToCluster = useCallback(async () => {
+    if (!onInstallToCluster) return;
+    setIsPopoverOpen(false);
+    setIsInstalling(true);
+    try {
+      await onInstallToCluster(integration.integrationId);
+    } finally {
+      setIsInstalling(false);
+    }
+  }, [onInstallToCluster, integration.integrationId]);
 
   const handleConfirmDelete = useCallback(async () => {
     setIsDeleting(true);
@@ -79,30 +121,72 @@ export const ManageIntegrationActions: React.FC<{
   const openReviewModal = useCallback(() => {
     setIsPopoverOpen(false);
     setShowReviewModal(true);
-  }, []);
+    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+      'automatic_import_review_approve_menu_clicked',
+      { integrationId: integration.integrationId, version: integration.version ?? '' }
+    );
+  }, [automaticImport, integration.integrationId, integration.version]);
 
   const closeReviewModal = useCallback(() => {
     setShowReviewModal(false);
   }, []);
+
+  const isSameVersionInstalled =
+    installedVersion !== undefined && installedVersion === integration.version;
+
+  const getInstallToClusterTooltip = () => {
+    if (isSameVersionInstalled) {
+      return i18n.translate(
+        'xpack.fleet.epmList.manageIntegrations.actions.installAlreadyInstalledHelp',
+        { defaultMessage: 'This integration is already installed.' }
+      );
+    }
+    if (!isApproved) {
+      return i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.installDisabledHelp', {
+        defaultMessage: 'Install is available only for approved integrations.',
+      });
+    }
+  };
+
+  const reviewApproveDisabled = !isPackageReady || isApproved;
+  const reviewApproveTooltip = isApproved
+    ? i18n.translate(
+        'xpack.fleet.epmList.manageIntegrations.actions.reviewApproveAlreadyApprovedHelp',
+        { defaultMessage: 'This integration has already been approved.' }
+      )
+    : !isPackageReady
+    ? i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewApproveDisabledHelp', {
+        defaultMessage: 'Review & Approve is available only when all data streams are successful.',
+      })
+    : undefined;
 
   return (
     <>
       {inlineActionType === 'reviewApprove' && (
         <EuiButtonEmpty
           size="xs"
+          color="primary"
           iconType="checkInCircleFilled"
           iconSide="left"
           onClick={openReviewModal}
+          data-test-subj="manageIntegrationReviewApproveInlineBtn"
           style={{
             backgroundColor: euiTheme.colors.backgroundLightPrimary,
-            paddingLeft: euiTheme.size.xs,
-            paddingRight: euiTheme.size.xs,
+            borderRadius: euiTheme.border.radius.small,
+            paddingLeft: euiTheme.size.s,
+            paddingRight: euiTheme.size.s,
+            gap: '4px',
+            fontFamily: euiTheme.font.family,
+            fontWeight: euiTheme.font.weight.medium,
+            fontSize: '12px',
+            lineHeight: euiTheme.size.l,
+            letterSpacing: '0px',
             whiteSpace: 'nowrap',
           }}
         >
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.actions.reviewApproveInline"
-            defaultMessage="Review and Approve"
+            defaultMessage="Review & approve"
           />
         </EuiButtonEmpty>
       )}
@@ -116,11 +200,17 @@ export const ManageIntegrationActions: React.FC<{
       )}
       {showMenuButton && (
         <EuiPopover
+          aria-label={i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
+            { defaultMessage: 'Open actions menu' }
+          )}
           anchorPosition="downRight"
           panelPaddingSize="none"
           button={
             <EuiButtonIcon
               iconType="boxesVertical"
+              color="text"
+              style={{ color: euiTheme.colors.textSubdued }}
               aria-label={i18n.translate(
                 'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
                 { defaultMessage: 'Open actions menu' }
@@ -138,23 +228,50 @@ export const ManageIntegrationActions: React.FC<{
               <EuiContextMenuItem
                 key="review"
                 icon="grid"
-                disabled={!canReviewApprove}
-                toolTipContent={
-                  canReviewApprove
-                    ? undefined
-                    : i18n.translate(
-                        'xpack.fleet.epmList.manageIntegrations.actions.reviewApproveDisabledHelp',
-                        {
-                          defaultMessage:
-                            'Review & Approve is available only when all data streams are successful.',
-                        }
-                      )
-                }
+                disabled={reviewApproveDisabled}
+                toolTipContent={reviewApproveTooltip}
                 onClick={openReviewModal}
+                data-test-subj="manageIntegrationReviewApproveMenuItem"
               >
                 <FormattedMessage
                   id="xpack.fleet.epmList.manageIntegrations.actions.reviewApprove"
                   defaultMessage="Review & Approve"
+                />
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="installToCluster"
+                icon="exportAction"
+                disabled={!isApproved || isInstalling || isSameVersionInstalled}
+                data-test-subj="manageIntegrationInstallMenuItem"
+                toolTipContent={getInstallToClusterTooltip()}
+                onClick={handleInstallToCluster}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.installToCluster"
+                  defaultMessage="Install"
+                />
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="downloadZip"
+                icon="download"
+                disabled={!isPackageReady || isDownloadingZip}
+                data-test-subj="manageIntegrationDownloadZipMenuItem"
+                toolTipContent={
+                  isPackageReady
+                    ? undefined
+                    : i18n.translate(
+                        'xpack.fleet.epmList.manageIntegrations.actions.downloadZipDisabledHelp',
+                        {
+                          defaultMessage:
+                            'Download is available only when all data streams are successful.',
+                        }
+                      )
+                }
+                onClick={handleDownloadZip}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.downloadZip"
+                  defaultMessage="Download .zip package"
                 />
               </EuiContextMenuItem>,
               <EuiContextMenuItem
@@ -164,6 +281,7 @@ export const ManageIntegrationActions: React.FC<{
                   closePopover();
                   onEdit(integration.integrationId);
                 }}
+                data-test-subj="manageIntegrationEditMenuItem"
               >
                 <FormattedMessage
                   id="xpack.fleet.epmList.manageIntegrations.actions.edit"
@@ -174,6 +292,7 @@ export const ManageIntegrationActions: React.FC<{
                 key="delete"
                 icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
                 onClick={openDeleteConfirm}
+                data-test-subj="manageIntegrationDeleteMenuItem"
               >
                 <EuiTextColor color="danger">
                   <FormattedMessage
@@ -231,7 +350,8 @@ export const ManageIntegrationActions: React.FC<{
         onClose={closeReviewModal}
         onEdit={onEdit}
         onFetchReviewDetails={onFetchReviewDetails}
-        onApproveAndDeploy={onApproveAndDeploy}
+        onApproveAndInstall={onApproveAndInstall}
+        onInstallToCluster={onInstallToCluster}
         DataStreamResultsFlyoutComponent={DataStreamResultsFlyoutComponent}
       />
     </>

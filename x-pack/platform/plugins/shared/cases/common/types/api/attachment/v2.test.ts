@@ -7,6 +7,10 @@
 
 import { AttachmentType } from '../../domain/attachment/v1';
 import { AttachmentRequestRtV2, BulkCreateAttachmentsRequestRtV2 } from './v2';
+import {
+  AttachmentRequestSchemaV2,
+  BulkCreateAttachmentsRequestSchemaV2,
+} from '../../api_zod/attachment/v2';
 
 describe('Unified Attachments', () => {
   describe('AttachmentRequestRtV2', () => {
@@ -29,6 +33,7 @@ describe('Unified Attachments', () => {
       const v2Request = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'cases',
         data: {
           attributes: {
             title: 'My Visualization',
@@ -55,6 +60,7 @@ describe('Unified Attachments', () => {
     it('accepts v2 unified attachment request with only attachmentId', () => {
       const v2Request = {
         type: 'lens',
+        owner: 'cases',
         attachmentId: 'attachment-123',
       };
 
@@ -69,6 +75,7 @@ describe('Unified Attachments', () => {
     it('accepts v2 unified attachment request with only data', () => {
       const v2Request = {
         type: 'user',
+        owner: 'cases',
         data: {
           content: {
             title: 'My comment',
@@ -87,6 +94,7 @@ describe('Unified Attachments', () => {
     it('rejects v2 unified attachment request with neither attachmentId nor data', () => {
       const v2Request = {
         type: 'lens',
+        owner: 'cases',
       };
 
       const query = AttachmentRequestRtV2.decode(v2Request);
@@ -118,6 +126,7 @@ describe('Unified Attachments', () => {
       const v2Request = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'cases',
         data: {
           attributes: {
             title: 'My Visualization',
@@ -136,6 +145,7 @@ describe('Unified Attachments', () => {
         right: {
           type: 'lens',
           attachmentId: 'attachment-123',
+          owner: 'cases',
           data: {
             attributes: {
               title: 'My Visualization',
@@ -172,6 +182,28 @@ describe('Unified Attachments', () => {
         expect(query.right).not.toHaveProperty('attachmentId');
         expect(query.right).not.toHaveProperty('data');
       }
+    });
+
+    it('zod: accepts v1 user comment attachment request', () => {
+      const v1Request = {
+        comment: 'This is a comment',
+        type: AttachmentType.user,
+        owner: 'cases',
+      };
+      const result = AttachmentRequestSchemaV2.safeParse(v1Request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(v1Request);
+    });
+
+    it('zod: accepts v2 unified attachment request', () => {
+      const v2Request = {
+        type: 'lens',
+        attachmentId: 'attachment-123',
+        owner: 'cases',
+      };
+      const result = AttachmentRequestSchemaV2.safeParse(v2Request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(v2Request);
     });
   });
 
@@ -212,6 +244,7 @@ describe('Unified Attachments', () => {
         {
           type: 'lens',
           attachmentId: 'attachment-1',
+          owner: 'cases',
           data: {
             attributes: {
               title: 'First Visualization',
@@ -221,6 +254,7 @@ describe('Unified Attachments', () => {
         {
           type: 'lens',
           attachmentId: 'attachment-2',
+          owner: 'cases',
           data: {
             attributes: {
               title: 'Second Visualization',
@@ -237,6 +271,24 @@ describe('Unified Attachments', () => {
       });
     });
 
+    it('accepts security.event reference payloads with attachmentId and metadata', () => {
+      const securityEventRequests = [
+        {
+          type: 'security.event',
+          attachmentId: 'doc-id',
+          owner: 'securitySolution',
+          metadata: { index: '.siem-signals-index' },
+        },
+      ];
+
+      const query = BulkCreateAttachmentsRequestRtV2.decode(securityEventRequests);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: securityEventRequests,
+      });
+    });
+
     it('accepts mixed array of v1 and v2 attachment requests', () => {
       const mixedRequests = [
         {
@@ -247,6 +299,7 @@ describe('Unified Attachments', () => {
         {
           type: 'lens',
           attachmentId: 'attachment-123',
+          owner: 'cases',
           data: {
             attributes: {
               title: 'My Visualization',
@@ -280,6 +333,7 @@ describe('Unified Attachments', () => {
           data: {
             content: 'My comment',
           },
+          owner: 'cases',
           foo: 'bar',
         },
       ];
@@ -300,9 +354,29 @@ describe('Unified Attachments', () => {
             data: {
               content: 'My comment',
             },
+            owner: 'cases',
           },
         ],
       });
+    });
+
+    it('zod: accepts array of v1 attachment requests', () => {
+      const v1Requests = [
+        {
+          comment: 'First comment',
+          type: AttachmentType.user,
+          owner: 'cases',
+        },
+      ];
+      const result = BulkCreateAttachmentsRequestSchemaV2.safeParse(v1Requests);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(v1Requests);
+    });
+
+    it('zod: accepts empty array', () => {
+      const result = BulkCreateAttachmentsRequestSchemaV2.safeParse([]);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual([]);
     });
   });
 });

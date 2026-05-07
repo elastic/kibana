@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/streams-app-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/streams-app-plugin'
+  title: '@kbn/streams-app-plugin'
   description: Moon project for @kbn/streams-app-plugin
   channel: ''
   owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/streams_app
+  sourceRoot: x-pack/platform/plugins/shared/streams_app
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -42,12 +41,11 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/grok-ui'
-  - '@kbn/grok-heuristics'
-  - '@kbn/dissect-heuristics'
   - '@kbn/streams-plugin'
   - '@kbn/search-types'
   - '@kbn/xstate-utils'
   - '@kbn/datemath'
+  - '@kbn/data-lifecycle-phases'
   - '@kbn/index-lifecycle-management-common-shared'
   - '@kbn/charts-theme'
   - '@kbn/index-management-shared-types'
@@ -73,6 +71,7 @@ dependsOn:
   - '@kbn/saved-objects-tagging-plugin'
   - '@kbn/config-schema'
   - '@kbn/scout'
+  - '@kbn/scout-synthtrace'
   - '@kbn/unified-doc-viewer'
   - '@kbn/monaco'
   - '@kbn/unified-doc-viewer-plugin'
@@ -96,7 +95,7 @@ dependsOn:
   - '@kbn/traced-es-client'
   - '@kbn/streamlang-yaml-editor'
   - '@kbn/tooling-log'
-  - '@kbn/core-chrome-navigation'
+  - '@kbn/ui-side-navigation'
   - '@kbn/classic-stream-flyout'
   - '@kbn/ebt-tools'
   - '@kbn/language-documentation'
@@ -105,9 +104,22 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/timerange'
   - '@kbn/inference-common'
+  - '@kbn/inference-connectors'
   - '@kbn/esql'
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/stack-connectors-plugin'
+  - '@kbn/std'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/streams-ai'
+  - '@kbn/cps'
+  - '@kbn/evals-plugin'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/deeplinks-management'
+  - '@kbn/rule-data-utils'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/inference-connectors'
+  - '@kbn/safer-lodash-set'
 tags:
   - plugin
   - prod
@@ -124,16 +136,6 @@ fileGroups:
     - test/scout/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

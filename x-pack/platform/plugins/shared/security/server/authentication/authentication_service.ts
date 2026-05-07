@@ -6,6 +6,7 @@
  */
 
 import type { errors } from '@elastic/elasticsearch';
+import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 import type { BuildFlavor } from '@kbn/config';
 import type {
@@ -18,7 +19,8 @@ import type {
   Logger,
   LoggerFactory,
 } from '@kbn/core/server';
-import type { APIKeysType } from '@kbn/core-security-server';
+import type { APIKeysType, UiamOAuthType } from '@kbn/core-security-server';
+import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { i18n as i18nLib } from '@kbn/i18n';
 import type {
@@ -34,14 +36,15 @@ import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
 import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
+import { UiamOAuth } from './oauth';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
-import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
+import { KIBANA_AUTH_FULL_HEADER, NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
-import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import type { UiamServicePublic } from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
@@ -72,6 +75,7 @@ interface AuthenticationServiceStartParams {
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
   buildFlavor?: BuildFlavor;
+  userActivity: UserActivityServiceStart;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -84,9 +88,11 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'invalidate'
     | 'validate'
     | 'grantAsInternalUser'
+    | 'cloneAsInternalUser'
     | 'invalidateAsInternalUser'
     | 'uiam'
   >;
+  oauth: UiamOAuthType | null;
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
   acknowledgeAccessAgreement: (request: KibanaRequest) => Promise<void>;
@@ -213,6 +219,35 @@ export class AuthenticationService {
         ? `${http.basePath.get(request)}/`
         : this.authenticator.getRequestOriginalURL(request);
 
+      // For routes that accept UIAM OAuth tokens, return a 401 with a WWW-Authenticate header
+      // containing the resource_metadata URL instead of redirecting to the login page.
+      // https://datatracker.ietf.org/doc/html/rfc9728#name-www-authenticate-response
+      if (
+        preResponse.statusCode === 401 &&
+        config.mcp?.oauth2 &&
+        request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH)
+      ) {
+        const baseUrl =
+          http.basePath.publicBaseUrl ??
+          `${request.url.protocol}//${request.url.host}${http.basePath.serverBasePath}`;
+        const resourceMetadataUrl = `${baseUrl}/.well-known/oauth-protected-resource`;
+
+        return toolkit.render({
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: null,
+            // TODO: In MCP SDK v2, ErrorCode is renamed to ProtocolErrorCode, and ConnectionClosed moves to
+            // SdkErrorCode (local-only, string-valued). Update this import when upgrading to SDK v2.
+            // https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/migration.md#error-hierarchy-refactoring
+            error: { code: ErrorCode.ConnectionClosed, message: 'Unauthorized' },
+          }),
+          headers: {
+            'WWW-Authenticate': `Bearer resource_metadata="${resourceMetadataUrl}"`,
+            'Content-Type': 'application/json',
+          },
+        });
+      }
+
       // Let API responses or <400 responses pass through as we can let their handlers deal with them.
       if (preResponse.statusCode < 400 || !canRedirectRequest(request)) {
         return toolkit.next();
@@ -301,10 +336,12 @@ export class AuthenticationService {
         // WORKAROUND: Due to BWC reasons Core mutates headers of the original request with authentication
         // headers returned during authentication stage. We should remove these headers before re-authentication to not
         // conflict with the HTTP authentication logic. Performance impact is negligible since this is not a hot path.
+        // Additionally, we explicitly include KIBANA_AUTH_FULL_HEADER header to skip any authentication optimizations
+        // and make sure re-authentication is performed in full scope.
         (request.headers as Record<string, unknown>) = Object.fromEntries(
-          Object.entries(originalHeaders).filter(
-            ([headerName]) => headerName.toLowerCase() !== 'authorization'
-          )
+          Object.entries(originalHeaders)
+            .filter(([headerName]) => headerName.toLowerCase() !== 'authorization')
+            .concat([[KIBANA_AUTH_FULL_HEADER, 'true']])
         );
         authenticationResult = await this.authenticator.reauthenticate(request);
       } catch (err) {
@@ -354,6 +391,7 @@ export class AuthenticationService {
     customLogoutURL,
     buildFlavor = 'traditional',
     uiam,
+    userActivity,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
@@ -368,6 +406,14 @@ export class AuthenticationService {
     const uiamAPIKeys = uiam
       ? new UiamAPIKeys({
           logger: this.logger.get('api-key-uiam'),
+          license: this.license,
+          uiam,
+        })
+      : null;
+
+    const uiamOAuth = uiam
+      ? new UiamOAuth({
+          logger: this.logger.get('oauth-uiam'),
           license: this.license,
           uiam,
         })
@@ -396,6 +442,7 @@ export class AuthenticationService {
       config: {
         authc: config.authc,
         accessAgreement: config.accessAgreement,
+        uiam: config.uiam,
       },
       getCurrentUser,
       featureUsageService,
@@ -406,6 +453,7 @@ export class AuthenticationService {
       isElasticCloudDeployment,
       customLogoutURL,
       uiam,
+      userActivity,
     }));
 
     return {
@@ -415,6 +463,7 @@ export class AuthenticationService {
         create: apiKeys.create.bind(apiKeys),
         update: apiKeys.update.bind(apiKeys),
         grantAsInternalUser: apiKeys.grantAsInternalUser.bind(apiKeys),
+        cloneAsInternalUser: apiKeys.cloneAsInternalUser.bind(apiKeys),
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
@@ -426,6 +475,18 @@ export class AuthenticationService {
             }
           : null,
       },
+
+      oauth: uiamOAuth
+        ? {
+            createClient: uiamOAuth.createClient.bind(uiamOAuth),
+            listClients: uiamOAuth.listClients.bind(uiamOAuth),
+            updateClient: uiamOAuth.updateClient.bind(uiamOAuth),
+            revokeClient: uiamOAuth.revokeClient.bind(uiamOAuth),
+            listConnections: uiamOAuth.listConnections.bind(uiamOAuth),
+            updateConnection: uiamOAuth.updateConnection.bind(uiamOAuth),
+            revokeConnection: uiamOAuth.revokeConnection.bind(uiamOAuth),
+          }
+        : null,
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {
         const providerIdentifier =

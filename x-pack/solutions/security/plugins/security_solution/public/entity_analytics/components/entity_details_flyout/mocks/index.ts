@@ -24,4 +24,10 @@ export const alertInputDataMock: InputAlert = {
     [ALERT_RULE_UUID]: '2e051244-b3c6-4779-a241-e1b4f0beceb9',
     [ALERT_RULE_NAME]: 'Rule Name',
   },
+  rawSource: {
+    user: {
+      name: 'elastic',
+      id: 'elastic-id',
+    },
+  },
 };

@@ -15,7 +15,7 @@
       "label": "WorkflowsPublicPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-      "lineNumber": 27,
+      "lineNumber": 35,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -31,11 +31,66 @@
       "label": "WorkflowsPublicPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-      "lineNumber": 36,
+      "lineNumber": 41,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "workflowsManagement",
+          "id": "def-public.WorkflowsPublicPluginStart.setUnavailableInServerlessTier",
+          "type": "Function",
+          "tags": [],
+          "label": "setUnavailableInServerlessTier",
+          "description": [
+            "\nSets Workflows availability status to unavailable. Should only be called in serverless mode.\n\nThe `requiredProducts` parameter is used to render the upselling message,\nso the user is aware of which products to upgrade to in order to have Workflows available."
+          ],
+          "signature": [
+            "(options: { requiredProducts: ",
+            "ServerlessTierRequiredProducts",
+            "; }) => void"
+          ],
+          "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
+          "lineNumber": 42,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "workflowsManagement",
+              "id": "def-public.WorkflowsPublicPluginStart.setUnavailableInServerlessTier.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
+              "lineNumber": 48,
+              "columnNumber": 45,
+              "deprecated": false,
+              "trackAdoption": false,
+              "children": [
+                {
+                  "parentPluginId": "workflowsManagement",
+                  "id": "def-public.WorkflowsPublicPluginStart.setUnavailableInServerlessTier.$1.requiredProducts",
+                  "type": "Array",
+                  "tags": [],
+                  "label": "requiredProducts",
+                  "description": [],
+                  "signature": [
+                    "string[]"
+                  ],
+                  "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
+                  "lineNumber": 49,
+                  "columnNumber": 5,
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -43,7 +98,111 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "workflowsManagement",
+        "id": "def-server.BulkScheduleWorkflowItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkScheduleWorkflowItem",
+        "description": [],
+        "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
+        "lineNumber": 139,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-server.BulkScheduleWorkflowItem.workflow",
+            "type": "Object",
+            "tags": [],
+            "label": "workflow",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowExecutionEngineModel",
+                "text": "WorkflowExecutionEngineModel"
+              }
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-server.BulkScheduleWorkflowItem.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-server.BulkScheduleWorkflowItem.inputs",
+            "type": "Object",
+            "tags": [],
+            "label": "inputs",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-server.BulkScheduleWorkflowItem.triggeredBy",
+            "type": "string",
+            "tags": [],
+            "label": "triggeredBy",
+            "description": [],
+            "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-server.BulkScheduleWorkflowItem.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowExecutionEventDispatchMetadata",
+                "text": "WorkflowExecutionEventDispatchMetadata"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
@@ -55,7 +214,7 @@
       "label": "WorkflowsServerPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 37,
+      "lineNumber": 44,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -71,7 +230,7 @@
             "WorkflowsManagementApi"
           ],
           "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-          "lineNumber": 38,
+          "lineNumber": 45,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -83,18 +242,16 @@
     "start": {
       "parentPluginId": "workflowsManagement",
       "id": "def-server.WorkflowsServerPluginStart",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "WorkflowsServerPluginStart",
       "description": [],
-      "signature": [
-        "{ [x: string]: never; }"
-      ],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 41,
+      "lineNumber": 49,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -141,6 +298,23 @@
       },
       {
         "parentPluginId": "workflowsManagement",
+        "id": "def-common.WORKFLOWS_DOCUMENTATION_URL",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOWS_DOCUMENTATION_URL",
+        "description": [],
+        "signature": [
+          "\"https://ela.st/workflows-docs\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsManagement",
         "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX",
         "type": "string",
         "tags": [],
@@ -148,6 +322,23 @@
         "description": [],
         "signature": [
           "\".workflows-executions\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsManagement",
+        "id": "def-common.WORKFLOWS_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOWS_INDEX",
+        "description": [],
+        "signature": [
+          "\".workflows-workflows\""
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
         "lineNumber": 13,
@@ -167,7 +358,7 @@
           "\".workflows-step-executions\""
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

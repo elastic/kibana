@@ -44,7 +44,7 @@ interface DecisionPathChartProps {
 
 const DECISION_PATH_MARGIN = 125;
 const DECISION_PATH_ROW_HEIGHT = 10;
-const AnnotationBaselineMarker = <EuiIcon type="dot" size="m" />;
+const AnnotationBaselineMarker = <EuiIcon type="dot" size="m" aria-hidden={true} />;
 
 export const DecisionPathChart = ({
   decisionPathData,

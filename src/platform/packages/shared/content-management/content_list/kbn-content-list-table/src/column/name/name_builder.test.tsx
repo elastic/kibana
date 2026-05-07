@@ -20,7 +20,15 @@ const defaultContext: ColumnBuilderContext = {
   itemConfig: undefined,
   isReadOnly: false,
   entityName: 'dashboard',
-  supports: { sorting: true, pagination: true, search: false, selection: true, tags: false },
+  supports: {
+    sorting: true,
+    pagination: true,
+    search: false,
+    selection: true,
+    tags: false,
+    starred: false,
+    userProfiles: false,
+  },
 };
 
 describe('name column builder', () => {
@@ -43,11 +51,21 @@ describe('name column builder', () => {
       expect(result).toMatchObject({ name: 'Dashboard Name' });
     });
 
-    it('applies custom width', () => {
-      const props: NameColumnProps = { width: '50%' };
+    it('applies custom layout props', () => {
+      const props: NameColumnProps = {
+        width: '32em',
+        minWidth: '24em',
+        maxWidth: '64em',
+        truncateText: { lines: 4 },
+      };
       const result = buildNameColumn(props, defaultContext);
 
-      expect(result).toMatchObject({ width: '50%' });
+      expect(result).toMatchObject({
+        width: '32em',
+        minWidth: '24em',
+        maxWidth: '64em',
+        truncateText: { lines: 4 },
+      });
     });
 
     it('does not include width when not specified', () => {
@@ -65,7 +83,15 @@ describe('name column builder', () => {
     it('forces sortable false when sorting is unsupported', () => {
       const context: ColumnBuilderContext = {
         ...defaultContext,
-        supports: { sorting: false, pagination: true, search: false, selection: true, tags: false },
+        supports: {
+          sorting: false,
+          pagination: true,
+          search: false,
+          selection: true,
+          tags: false,
+          starred: false,
+          userProfiles: false,
+        },
       };
 
       const result = buildNameColumn({}, context);
@@ -86,6 +112,52 @@ describe('name column builder', () => {
       const item = { id: '1', title: 'Test' };
       result.render?.('Test', item);
       expect(customRender).toHaveBeenCalledWith(item);
+    });
+
+    it('passes title click handlers through to the rendered name cell', () => {
+      const handleClick = jest.fn();
+      const props: NameColumnProps = { onClick: handleClick, shouldUseHref: true };
+      const result = buildNameColumn(props, defaultContext) as NameColumn;
+
+      const item = { id: '1', title: 'Test' };
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+
+      expect(rendered.props).toMatchObject({ onClick: handleClick, shouldUseHref: true });
+    });
+  });
+
+  describe('showTags auto-enable', () => {
+    it('auto-enables showTags when supports.tags is true', () => {
+      const context: ColumnBuilderContext = {
+        ...defaultContext,
+        supports: { ...defaultContext.supports!, tags: true },
+      };
+      const result = buildNameColumn({}, context) as NameColumn;
+
+      const item = { id: '1', title: 'Test', tags: ['tag-1'] };
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+      expect(rendered.props).toMatchObject({ showTags: true });
+    });
+
+    it('does not show tags when supports.tags is false', () => {
+      const result = buildNameColumn({}, defaultContext) as NameColumn;
+      // supports.tags is false in defaultContext — showTags defaults to false.
+      const item = { id: '1', title: 'Test', tags: ['tag-1'] };
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+      expect(rendered.props).toMatchObject({ showTags: false });
+    });
+
+    it('respects explicit showTags=false even when supports.tags is true', () => {
+      const context: ColumnBuilderContext = {
+        ...defaultContext,
+        supports: { ...defaultContext.supports!, tags: true },
+      };
+      const props: NameColumnProps = { showTags: false };
+      const result = buildNameColumn(props, context) as NameColumn;
+
+      const item = { id: '1', title: 'Test', tags: ['tag-1'] };
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+      expect(rendered.props).toMatchObject({ showTags: false });
     });
   });
 });

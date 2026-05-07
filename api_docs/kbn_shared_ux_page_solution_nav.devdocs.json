@@ -13,7 +13,7 @@
           "\nA wrapper around `EuiSideNav` that includes the appropriate title with optional solution logo."
         ],
         "signature": [
-          "({ children, headingProps, icon, isOpenOnDesktop, items, mobileBreakpoints, closeFlyoutButtonPosition, name, onCollapse, canBeCollapsed, ...rest }: ",
+          "({ children, headingProps, icon, isOpenOnDesktop, items, mobileBreakpoints, closeFlyoutButtonPosition, name, onCollapse, canBeCollapsed, footer, ...rest }: ",
           {
             "pluginId": "@kbn/shared-ux-page-solution-nav",
             "scope": "public",
@@ -24,7 +24,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
-        "lineNumber": 101,
+        "lineNumber": 102,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -34,7 +34,7 @@
             "id": "def-public.SolutionNav.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  headingProps,\n  icon,\n  isOpenOnDesktop = false,\n  items,\n  mobileBreakpoints = ['xs', 's'],\n  closeFlyoutButtonPosition = 'outside',\n  name,\n  onCollapse,\n  canBeCollapsed = true,\n  ...rest\n}",
+            "label": "{\n  children,\n  headingProps,\n  icon,\n  isOpenOnDesktop = false,\n  items,\n  mobileBreakpoints = ['xs', 's'],\n  closeFlyoutButtonPosition = 'outside',\n  name,\n  onCollapse,\n  canBeCollapsed = true,\n  footer,\n  ...rest\n}",
             "description": [],
             "signature": [
               {
@@ -46,7 +46,7 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
-            "lineNumber": 101,
+            "lineNumber": 102,
             "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
@@ -69,7 +69,7 @@
           ">(WrappedComponent: React.ComponentType<P>) => { (props: Props<P>): React.JSX.Element; displayName: string; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -85,9 +85,10 @@
               "React.ComponentType<P>"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "ComponentType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -111,14 +112,14 @@
         "signature": [
           "Omit<",
           "EuiSideNavProps",
-          "<{}>, \"children\" | \"heading\" | \"items\"> & { name: string; icon?: ",
+          "<{}>, \"children\" | \"items\" | \"heading\"> & { name: string; icon?: ",
           "IconType",
           " | undefined; items?: ",
           "EuiSideNavItemType",
-          "<{}>[] | undefined; children?: React.ReactNode; closeFlyoutButtonPosition?: \"inside\" | \"outside\" | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; canBeCollapsed?: boolean | undefined; }"
+          "<{}>[] | undefined; children?: React.ReactNode; closeFlyoutButtonPosition?: \"inside\" | \"outside\" | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; canBeCollapsed?: boolean | undefined; footer?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
-        "lineNumber": 44,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

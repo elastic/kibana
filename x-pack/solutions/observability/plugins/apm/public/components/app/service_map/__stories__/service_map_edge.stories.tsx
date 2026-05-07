@@ -18,11 +18,12 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { EuiText, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ServiceNode } from '../service_node';
-import { DependencyNode } from '../dependency_node';
+import { DependencyNode } from '../../../shared/service_map/dependency_node';
 import { ServiceMapEdge } from '../service_map_edge';
-import { applyDagreLayout } from '../layout';
+import { applyDagreLayout } from '../../../shared/service_map/layout';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
 import type {
   ServiceMapNode,
   ServiceMapEdge as ServiceMapEdgeType,
@@ -48,7 +49,9 @@ const meta: Meta = {
     (Story) => (
       <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
         <ReactFlowProvider>
-          <Story />
+          <ServiceMapSearchProvider>
+            <Story />
+          </ServiceMapSearchProvider>
         </ReactFlowProvider>
       </MockApmPluginStorybook>
     ),
@@ -323,7 +326,7 @@ export const EdgeHighlighting: StoryObj = {
           <EuiCallOut
             size="s"
             title="Click a node to highlight its connected edges"
-            iconType="crosshairs"
+            iconType="crosshair"
           />
           <EuiSpacer size="s" />
           <EuiText size="xs" color="subdued">

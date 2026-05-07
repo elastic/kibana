@@ -7,16 +7,20 @@
 
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { PerformRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { PERFORM_RULE_INSTALLATION_URL } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
-  BOOTSTRAP_PREBUILT_RULES_URL,
-  PERFORM_RULE_INSTALLATION_URL,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
+  INITIALIZE_SECURITY_SOLUTION_URL,
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+  INITIALIZATION_FLOW_INIT_AI_PROMPTS,
+} from '@kbn/security-solution-plugin/common/api/initialization';
 import {
   ELASTIC_SECURITY_RULE_ID,
   PREBUILT_RULES_PACKAGE_NAME,
 } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
+import type { createDeprecatedRuleAssetSavedObject } from '../../helpers/rules';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import { refreshSavedObjectIndices, rootRequest } from './common';
@@ -80,6 +84,21 @@ export const getInstalledPrebuiltRulesCount = () => {
   return getPrebuiltRulesStatus().then(({ body }) => body.rules_installed);
 };
 
+/**
+ * Builds an ndjson bulk-index request body from an array of rule asset objects.
+ * Each element must expose a `'security-rule'` key with at least `rule_id` and `version`.
+ */
+const buildBulkIndexBody = <T extends { 'security-rule': { rule_id: string; version: number } }>(
+  index: string,
+  rules: T[]
+): string =>
+  rules.reduce((body, rule) => {
+    const documentId = `security-rule:${rule['security-rule'].rule_id}_${rule['security-rule'].version}`;
+    return body.concat(
+      `${JSON.stringify({ index: { _index: index, _id: documentId } })}\n${JSON.stringify(rule)}\n`
+    );
+  }, '');
+
 export const bulkCreateRuleAssets = ({
   index = '.kibana_security_solution',
   rules = [SAMPLE_PREBUILT_RULE],
@@ -92,32 +111,64 @@ export const bulkCreateRuleAssets = ({
     rules?.map((rule) => rule['security-rule'].rule_id).join(', ')
   );
 
-  const bulkIndexRequestBody = rules.reduce((body, rule) => {
-    const document = JSON.stringify(rule);
-    const documentId = `security-rule:${rule['security-rule'].rule_id}`;
-    const documentIdWithVersion = `${documentId}_${rule['security-rule'].version}`;
-
-    const indexHistoricalRuleAsset = `${JSON.stringify({
-      index: {
-        _index: index,
-        _id: documentIdWithVersion,
-      },
-    })}\n${document}\n`;
-
-    return body.concat(indexHistoricalRuleAsset);
-  }, '');
-
   cy.task('putMapping', index);
-  cy.task('bulkInsert', bulkIndexRequestBody);
+  cy.task('bulkInsert', buildBulkIndexBody(index, rules));
 };
 
-/* Prevent the installation of the `security_detection_engine` package from Fleet
-/* by intercepting the request and returning a mock empty object as response
-/* Used primarily to prevent the unwanted installation of "real" prebuilt rules
-/* during e2e tests, and allow for manual installation of mock rules instead. */
+/**
+ * Flows that install Fleet packages. These are the ones we want to mock out
+ * so the real packages are never pulled during e2e tests.
+ */
+const MOCK_PACKAGE_FLOW_RESULTS: Record<string, object> = {
+  [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: {
+    status: 'ready',
+    payload: {
+      name: 'security_detection_engine',
+      version: '0.0.0',
+      install_status: 'already_installed',
+    },
+  },
+  [INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION]: {
+    status: 'ready',
+    payload: { name: 'endpoint', version: '0.0.0', install_status: 'already_installed' },
+  },
+  [INITIALIZATION_FLOW_INIT_AI_PROMPTS]: {
+    status: 'ready',
+    payload: { name: 'security_ai_prompts', version: '0.0.0', install_status: 'already_installed' },
+  },
+};
+
+/* Prevent the installation of Fleet packages (prebuilt rules, endpoint, AI
+/* prompts) by stripping them from the initialization request and returning mock
+/* results. Non-package flows (list indices, data views, etc.) are forwarded to
+/* the real server so the necessary infrastructure is still created. */
 export const preventPrebuiltRulesPackageInstallation = () => {
   cy.log('Prevent prebuilt rules package installation');
-  cy.intercept('POST', BOOTSTRAP_PREBUILT_RULES_URL, { packages: [] });
+  cy.intercept('POST', INITIALIZE_SECURITY_SOLUTION_URL, (req) => {
+    const requestedFlows: string[] = req.body?.flows ?? [];
+    const mockedFlows = requestedFlows.filter((id) => id in MOCK_PACKAGE_FLOW_RESULTS);
+    const serverFlows = requestedFlows.filter((id) => !(id in MOCK_PACKAGE_FLOW_RESULTS));
+
+    if (serverFlows.length === 0) {
+      // Every requested flow is mocked — reply immediately without hitting the server
+      const flows: Record<string, object> = {};
+      for (const id of mockedFlows) {
+        flows[id] = MOCK_PACKAGE_FLOW_RESULTS[id];
+      }
+      req.reply({ flows });
+      return;
+    }
+
+    // Forward only non-package flows to the server
+    req.body.flows = serverFlows;
+    req.continue((res) => {
+      // Merge mock package results into the real server response
+      for (const id of mockedFlows) {
+        res.body.flows[id] = MOCK_PACKAGE_FLOW_RESULTS[id];
+      }
+      res.send();
+    });
+  });
 };
 
 const installByUploadPrebuiltRulesPackage = (packagePath: string): Cypress.Chainable => {
@@ -234,3 +285,27 @@ const deleteFleetPackage = (
 
 export const deletePrebuiltRulesFleetPackage = (): Cypress.Chainable<Cypress.Response<unknown>> =>
   deleteFleetPackage(PREBUILT_RULES_PACKAGE_NAME);
+
+/**
+ * Bulk create deprecated rule asset saved objects in ES.
+ * These are minimal stubs with `deprecated: true` that signal a rule has been deprecated.
+ * Use `createDeprecatedRuleAssetSavedObject()` to build each rule asset.
+ *
+ * Use in combination with `preventPrebuiltRulesPackageInstallation` so that only
+ * the mocked assets are present during the test.
+ */
+export const createDeprecatedRuleAssets = ({
+  index = '.kibana_security_solution',
+  rules,
+}: {
+  index?: string;
+  rules: Array<ReturnType<typeof createDeprecatedRuleAssetSavedObject>>;
+}) => {
+  cy.log(
+    'Bulk create deprecated rule assets',
+    rules.map((rule) => rule['security-rule'].rule_id).join(', ')
+  );
+
+  cy.task('putMapping', index);
+  cy.task('bulkInsert', buildBulkIndexBody(index, rules));
+};

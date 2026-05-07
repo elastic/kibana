@@ -32,14 +32,15 @@
     "@kbn/react-query",
     "@kbn/product-doc-base-plugin",
     "@kbn/ai-assistant-common",
-    "@kbn/ai-agent-confirmation-modal",
+    "@kbn/anonymization-common",
+    "@kbn/anonymization-ui",
     "@kbn/product-doc-common",
     "@kbn/react-kibana-mount",
     "@kbn/agent-builder-common",
     "@kbn/scout",
     "@kbn/workflows",
     "@kbn/agent-builder-browser",
-    "@kbn/agent-builder-plugin",
+    "@kbn/zod",
   ],
   "exclude": ["target/**/*"]
 }

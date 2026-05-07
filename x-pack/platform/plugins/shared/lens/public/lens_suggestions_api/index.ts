@@ -12,12 +12,11 @@ import type {
   DatasourceMap,
   VisualizationMap,
   VisualizeEditorContext,
-  Suggestion,
   DataViewsState,
   TypedLensByValueInput,
 } from '@kbn/lens-common';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import { mergeSuggestionWithVisContext, switchVisualizationType } from './helpers';
+import { createSuggestionWithAttributes, selectAndApplyChartSuggestion } from './helpers';
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
@@ -28,26 +27,6 @@ interface SuggestionsApiProps {
   preferredChartType?: ChartType;
   preferredVisAttributes?: TypedLensByValueInput['attributes'];
 }
-
-// Helper function to find compatible suggestion by chart type
-const findCompatibleSuggestion = (suggestionCandidates: Suggestion[], targetChartType: ChartType) =>
-  suggestionCandidates.find(
-    (s) => s.title.includes(targetChartType) || s.visualizationId.includes(targetChartType)
-  );
-
-// Helper function to merge suggestion with visual attributes if needed
-const createSuggestionWithAttributes = (
-  suggestion: Suggestion,
-  preferredVisAttributes: TypedLensByValueInput['attributes'] | undefined,
-  context: VisualizeFieldContext | VisualizeEditorContext
-) =>
-  preferredVisAttributes
-    ? mergeSuggestionWithVisContext({
-        suggestion,
-        visAttributes: preferredVisAttributes,
-        context,
-      })
-    : suggestion;
 
 export const suggestionsApi = ({
   context,
@@ -91,13 +70,23 @@ export const suggestionsApi = ({
 
   const query = 'query' in context ? context.query : undefined;
 
+  // When preferred visualization attributes are provided, pass the prior visualization state
+  // so that each visualization's suggestion logic can preserve its own settings (e.g. XY chart
+  // preserves legend, axis titles, etc. via its buildSuggestion when it receives currentState).
+  const preferredVisualization = preferredVisAttributes
+    ? visualizationMap[preferredVisAttributes.visualizationType] ?? initialVisualization
+    : initialVisualization;
+  const previousVisualizationState = preferredVisAttributes
+    ? preferredVisAttributes.state.visualization
+    : undefined;
+
   // find the active visualizations from the context
   const suggestions = getSuggestions({
     datasourceMap,
     datasourceStates,
     visualizationMap,
-    activeVisualization: initialVisualization,
-    visualizationState: undefined,
+    activeVisualization: preferredVisualization,
+    visualizationState: previousVisualizationState,
     visualizeTriggerFieldContext: context,
     subVisualizationId: isInitialSubTypeSupported ? preferredChartType?.toLowerCase() : undefined,
     dataViews,
@@ -105,7 +94,12 @@ export const suggestionsApi = ({
   });
   if (!suggestions.length) return [];
 
-  const primarySuggestion = suggestions[0];
+  const primarySuggestion =
+    preferredVisAttributes && preferredVisualization
+      ? suggestions.find(
+          (suggestion) => suggestion.visualizationId === preferredVisualization.id
+        ) ?? suggestions[0]
+      : suggestions[0];
   const activeVisualization = visualizationMap[primarySuggestion.visualizationId];
   if (
     primarySuggestion.incomplete ||
@@ -113,6 +107,8 @@ export const suggestionsApi = ({
   ) {
     return [];
   }
+  const chartType = preferredChartType?.toLowerCase();
+
   // compute the rest suggestions depending on the active one and filter out the lnsLegacyMetric
   const newSuggestions = getSuggestions({
     datasourceMap,
@@ -124,6 +120,7 @@ export const suggestionsApi = ({
     },
     visualizationMap,
     activeVisualization,
+    subVisualizationId: chartType,
     visualizationState: primarySuggestion.visualizationState,
     dataViews,
     query,
@@ -136,27 +133,6 @@ export const suggestionsApi = ({
       // Filter out suggestions that are hidden and legacy metrics
       (!sug.hide && sug.visualizationId !== 'lnsLegacyMetric')
   );
-
-  const chartType = preferredChartType?.toLowerCase();
-
-  const xyResult = switchVisualizationType({
-    visualizationMap,
-    suggestions: newSuggestions,
-    targetTypeId: chartType,
-    familyType: 'lnsXY',
-    forceSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
-  });
-  if (xyResult) return xyResult;
-
-  // to return a donut instead of a pie chart
-  const pieResult = switchVisualizationType({
-    visualizationMap,
-    suggestions: newSuggestions,
-    targetTypeId: chartType,
-    familyType: 'lnsPie',
-    forceSwitch: preferredChartType === ChartType.Donut,
-  });
-  if (pieResult) return pieResult;
 
   const chartTypeFromAttrs = preferredVisAttributes
     ? mapVisToChartType(preferredVisAttributes.visualizationType)
@@ -178,10 +154,9 @@ export const suggestionsApi = ({
       return true;
     })
     .sort((a, b) => {
-      // If has transformations, prioritize lnsXY
-      if (a.visualizationId === 'lnsXY' && b.visualizationId !== 'lnsXY') return -1;
-      if (a.visualizationId !== 'lnsXY' && b.visualizationId === 'lnsXY') return 1;
-      // Both are same type, sort by score
+      const priorityA = visualizationMap[a.visualizationId]?.suggestionPriority ?? 0;
+      const priorityB = visualizationMap[b.visualizationId]?.suggestionPriority ?? 0;
+      if (priorityA !== priorityB) return priorityB - priorityA;
       return b.score - a.score;
     });
 
@@ -206,10 +181,16 @@ export const suggestionsApi = ({
     const shouldSkipSearch =
       !preferredChartType && suggestionsList.length > 1 && targetChartType === ChartType.Table;
     if (!shouldSkipSearch) {
-      const compatibleSuggestion = findCompatibleSuggestion(suggestionsList, targetChartType);
-      const selectedSuggestion = compatibleSuggestion ?? suggestionsList[0];
-
-      return [createSuggestionWithAttributes(selectedSuggestion, preferredVisAttributes, context)];
+      return [
+        selectAndApplyChartSuggestion({
+          suggestionsList,
+          targetChartType,
+          chartType,
+          visualizationMap,
+          preferredVisAttributes,
+          context,
+        }),
+      ];
     }
   }
 

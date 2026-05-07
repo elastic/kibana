@@ -18,3 +18,16 @@ export const useEsqlGlobalFilterQuery = (): ESBoolQuery | undefined => {
 
   return filterQuery;
 };
+
+/**
+ * Like {@link useEsqlGlobalFilterQuery}, but with a fixed time range instead
+ * of the one from the global date picker. Use this for surfaces that should
+ * always query a specific range (e.g. a panel hardcoded to "last 30 days")
+ * while still respecting pinned KQL and filters from the global filter bar.
+ */
+export const useEsqlFixedRangeFilterQuery = (from: string, to: string): ESBoolQuery | undefined => {
+  const extraFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
+  const { filterQuery } = useGlobalFilterQuery({ extraFilter });
+
+  return filterQuery;
+};

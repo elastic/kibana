@@ -5,21 +5,90 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextAreaField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
-import type { TextareaFieldSchema } from '../../../../../common/types/domain/template/fields';
+import { getFieldSnakeKey } from '../../../../../common/utils';
+import type {
+  TextareaFieldSchema,
+  ConditionRenderProps,
+} from '../../../../../common/types/domain/template/fields';
+import {
+  FIELD_REQUIRED,
+  FIELD_MIN_LENGTH,
+  FIELD_MAX_LENGTH,
+  FIELD_PATTERN_MISMATCH,
+  FIELD_PATTERN_INVALID,
+} from '../../translations';
+import { OptionalFieldLabel } from '../../../optional_field_label';
 
-export const Textarea = ({ label, name, type }: z.infer<typeof TextareaFieldSchema>) => {
+const { emptyField } = fieldValidators;
+
+type TextareaProps = z.infer<typeof TextareaFieldSchema> & ConditionRenderProps;
+
+export const Textarea = ({
+  label,
+  name,
+  type,
+  isRequired,
+  patternValidation,
+  minLength,
+  maxLength,
+}: TextareaProps) => {
+  const validations = [];
+
+  if (isRequired) {
+    validations.push({ validator: emptyField(FIELD_REQUIRED) });
+  }
+
+  if (patternValidation) {
+    const { regex, message } = patternValidation;
+    validations.push({
+      validator: ({ value }: { value: unknown }) => {
+        if (typeof value !== 'string' || value === '') return;
+        try {
+          if (!new RegExp(regex).test(value)) {
+            return { message: message ?? FIELD_PATTERN_MISMATCH(regex) };
+          }
+        } catch {
+          return { message: FIELD_PATTERN_INVALID };
+        }
+      },
+    });
+  }
+
+  if (minLength !== undefined) {
+    validations.push({
+      validator: ({ value }: { value: unknown }) => {
+        if (typeof value === 'string' && value.length < minLength) {
+          return { message: FIELD_MIN_LENGTH(minLength) };
+        }
+      },
+    });
+  }
+
+  if (maxLength !== undefined) {
+    validations.push({
+      validator: ({ value }: { value: unknown }) => {
+        if (typeof value === 'string' && value.length > maxLength) {
+          return { message: FIELD_MAX_LENGTH(maxLength) };
+        }
+      },
+    });
+  }
+
   return (
     <UseField
       key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
       component={TextAreaField}
+      config={{ validations }}
       componentProps={{
         label,
+        labelAppend: !isRequired ? OptionalFieldLabel : undefined,
       }}
     />
   );

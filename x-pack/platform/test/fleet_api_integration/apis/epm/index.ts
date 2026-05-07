@@ -33,6 +33,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./install_tsds_disable'));
     loadTestFile(require.resolve('./install_tag_assets'));
     loadTestFile(require.resolve('./install_with_streaming'));
+    loadTestFile(require.resolve('./install_with_dependencies'));
     loadTestFile(require.resolve('./bulk_upgrade'));
     loadTestFile(require.resolve('./bulk_uninstall'));
     loadTestFile(require.resolve('./bulk_install_upgrade'));
@@ -53,9 +54,13 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./routing_rules'));
     loadTestFile(require.resolve('./install_runtime_field'));
     loadTestFile(require.resolve('./get_templates_inputs'));
+    loadTestFile(require.resolve('./get_templates_inputs_otel'));
+    loadTestFile(require.resolve('./template_paths_compilation'));
     loadTestFile(require.resolve('./data_views'));
     loadTestFile(require.resolve('./custom_integrations'));
     loadTestFile(require.resolve('./rollback'));
+    loadTestFile(require.resolve('./rollback_composable'));
     loadTestFile(require.resolve('./knowledge_base'));
+    loadTestFile(require.resolve('./review_upgrade'));
   });
 }

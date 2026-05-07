@@ -8,6 +8,12 @@ requestBody:
             input: "What is Elasticsearch?"
             agent_id: "elastic-ai-agent"
             connector_id: "my-connector-id"
+        converseRequestInferenceExample:
+          description: "Example using inference_id (mutually exclusive with connector_id)"
+          value:
+            input: "What is Elasticsearch?"
+            agent_id: "elastic-ai-agent"
+            inference_id: "my-inference-endpoint-id"
 responses:
   200:
     description: "Indicates a successful response"

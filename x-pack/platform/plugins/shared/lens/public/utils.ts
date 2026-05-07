@@ -9,7 +9,7 @@ import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG, type ColorMapping } from '@kbn/coloring';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -33,9 +33,10 @@ import type {
   UserMessage,
   DatasourceStates,
   VisualizationState,
-  SupportedDatasourceId,
   TriggerEvent,
 } from '@kbn/lens-common';
+import type { LensDatasourceId } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import {
   isOperation,
   isLensBrushEvent,
@@ -94,14 +95,17 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
   return configuredTimeZone;
 }
 
-export function getActiveDatasourceIdFromDoc(doc?: LensDocument): SupportedDatasourceId | null {
+export function getActiveDatasourceIdFromDoc(doc?: LensDocument): LensDatasourceId | null {
   if (!doc) {
     return null;
   }
 
   const [firstDatasourceFromDoc] = Object.keys(doc.state.datasourceStates);
-  if (firstDatasourceFromDoc === 'formBased' || firstDatasourceFromDoc === 'textBased') {
-    return firstDatasourceFromDoc;
+  if (
+    firstDatasourceFromDoc === LENS_DATASOURCE_ID.FORM_BASED ||
+    firstDatasourceFromDoc === LENS_DATASOURCE_ID.TEXT_BASED
+  ) {
+    return firstDatasourceFromDoc as LensDatasourceId;
   }
   return null;
 }
@@ -465,11 +469,16 @@ export function shouldRemoveSource(
   );
 }
 
-export const getColorMappingDefaults = () => {
+export const getColorMappingDefaults = (
+  options: {
+    defaultPaletteId?: ColorMapping.Config['paletteId'];
+  } = {}
+) => {
   if (COLOR_MAPPING_OFF_BY_DEFAULT) {
     return undefined;
   }
-  return { ...DEFAULT_COLOR_MAPPING_CONFIG };
+  const defaultPaletteId = options.defaultPaletteId ?? DEFAULT_COLOR_MAPPING_CONFIG.paletteId;
+  return { ...DEFAULT_COLOR_MAPPING_CONFIG, paletteId: defaultPaletteId };
 };
 
 export const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';

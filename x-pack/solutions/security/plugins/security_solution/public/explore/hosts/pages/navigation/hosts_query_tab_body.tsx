@@ -7,8 +7,10 @@
 
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
-import { useAllHost, ID } from '../../containers/hosts';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { useAllEntityStoreHosts, useAllHost, ID } from '../../containers/hosts';
 import type { HostsComponentsQueryProps } from './types';
+import { useUiSetting } from '../../../../common/lib/kibana';
 import { HostsTable } from '../../components/hosts_table';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
@@ -25,20 +27,30 @@ export const HostsQueryTabBody = ({
   startDate,
   type,
 }: HostsComponentsQueryProps) => {
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) === true;
   const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
-  const [loading, { hosts, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch }] =
-    useAllHost({
-      endDate,
-      filterQuery,
-      indexNames,
-      skip: querySkip,
-      startDate,
-      type,
-    });
+  const commonHostQueryArgs = {
+    endDate,
+    filterQuery,
+    indexNames,
+    startDate,
+    type,
+  };
+  const [legacyLoading, legacyHostsArgs] = useAllHost({
+    ...commonHostQueryArgs,
+    skip: querySkip || entityStoreV2Enabled,
+  });
+  const [entityStoreLoading, entityStoreHostsArgs] = useAllEntityStoreHosts({
+    ...commonHostQueryArgs,
+    skip: querySkip || !entityStoreV2Enabled,
+  });
+  const loading = entityStoreV2Enabled ? entityStoreLoading : legacyLoading;
+  const { hosts, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch } =
+    entityStoreV2Enabled ? entityStoreHostsArgs : legacyHostsArgs;
 
   return (
     <HostsTableManage

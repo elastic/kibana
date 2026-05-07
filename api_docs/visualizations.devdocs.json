@@ -614,6 +614,7 @@
                 "lineNumber": 98,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false
               },
               {
@@ -636,6 +637,7 @@
                 "lineNumber": 99,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisToExpressionAstParams",
                 "trackAdoption": false
               }
             ]
@@ -749,6 +751,7 @@
                 "lineNumber": 58,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisTypeDefinition",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -830,6 +833,7 @@
                 "lineNumber": 41,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "PersistedStatePath",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -866,6 +870,7 @@
                 "lineNumber": 58,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "PersistedStateKey",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -1043,6 +1048,7 @@
                 "lineNumber": 89,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "PersistedStatePath",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1336,6 +1342,7 @@
                 "lineNumber": 72,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SerializedVis",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1372,6 +1379,7 @@
                 "lineNumber": 97,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "PartialVisState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1505,7 +1513,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"visualization\""
+              "\"legacy_vis\""
             ],
             "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/visualize_embeddable.tsx",
             "lineNumber": 136,
@@ -1549,6 +1557,7 @@
                 "lineNumber": 147,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimefilterContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1566,6 +1575,7 @@
                 "lineNumber": 148,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisualizeEmbeddableConfiguration",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1589,6 +1599,7 @@
                 "lineNumber": 149,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisualizeInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1607,6 +1618,7 @@
                 "lineNumber": 150,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "AttributeService",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1915,6 +1927,7 @@
                 "lineNumber": 402,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionRenderError",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1953,6 +1966,7 @@
                 "lineNumber": 437,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2096,6 +2110,7 @@
                 "lineNumber": 679,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisualizeInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2165,7 +2180,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/visualizations/public/embeddable/interfaces/has_visualize_config.ts",
-        "lineNumber": 18,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2181,7 +2196,7 @@
               "unknown"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/embeddable/interfaces/has_visualize_config.ts",
-            "lineNumber": 18,
+            "lineNumber": 20,
             "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
@@ -2281,6 +2296,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewsPublicPluginStart",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2387,6 +2403,7 @@
             "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Vis",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2410,6 +2427,7 @@
             "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "VisToExpressionAstParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2454,6 +2472,7 @@
             "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2868,6 +2887,7 @@
                 "lineNumber": 152,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "EditorRenderProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4008,6 +4028,7 @@
                 "lineNumber": 109,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4874,6 +4895,7 @@
                 "lineNumber": 103,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4945,6 +4967,7 @@
                 "lineNumber": 111,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -4969,6 +4992,7 @@
                 "lineNumber": 112,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimefilterContract",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5030,6 +5054,7 @@
                 "lineNumber": 120,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -5054,6 +5079,7 @@
                 "lineNumber": 121,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimefilterContract",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5122,6 +5148,7 @@
                 "lineNumber": 128,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5174,6 +5201,7 @@
                 "lineNumber": 135,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5482,6 +5510,7 @@
                 "lineNumber": 190,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5580,6 +5609,7 @@
                 "lineNumber": 98,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false
               },
               {
@@ -5602,6 +5632,7 @@
                 "lineNumber": 99,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisToExpressionAstParams",
                 "trackAdoption": false
               }
             ]
@@ -5652,6 +5683,7 @@
                 "lineNumber": 208,
                 "columnNumber": 43,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5711,6 +5743,7 @@
                 "lineNumber": 210,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5959,6 +5992,7 @@
                 "lineNumber": 61,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Omit",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6035,6 +6069,7 @@
                 "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Omit",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6137,6 +6172,7 @@
                 "lineNumber": 74,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SearchQuery",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6738,7 +6774,7 @@
             "section": "def-common.HasType",
             "text": "HasType"
           },
-          "<\"visualization\"> & { getVis: () => ",
+          "<\"legacy_vis\"> & { getVis: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -6754,10 +6790,10 @@
             "section": "def-common.VisParams",
             "text": "VisParams"
           },
-          ">; }"
+          ">; getExpressionVariables?: (() => Record<string, unknown> | undefined) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/visualizations/public/embeddable/interfaces/has_visualize_config.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6883,6 +6919,7 @@
             "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Vis",
             "trackAdoption": false
           },
           {
@@ -6905,6 +6942,7 @@
             "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "VisToExpressionAstParams",
             "trackAdoption": false
           }
         ],
@@ -6994,7 +7032,7 @@
         "label": "VisualizeEmbeddableContract",
         "description": [],
         "signature": [
-          "{ readonly id: string; readonly type: \"visualization\"; destroy: () => void; getQuery: () => ",
+          "{ readonly id: string; readonly type: \"legacy_vis\"; destroy: () => void; getQuery: () => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -7363,7 +7401,7 @@
         "; }"
       ],
       "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-      "lineNumber": 123,
+      "lineNumber": 127,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -7436,7 +7474,7 @@
         "<any>[]; }"
       ],
       "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-      "lineNumber": 133,
+      "lineNumber": 137,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -7449,12 +7487,12 @@
           "label": "showNewVisModal",
           "description": [],
           "signature": [
-            "({ editorParams, onClose, originatingApp, originatingPath, outsideVisualizeApp, showAggsSelection, selectedVisType, }?: ",
+            "({ editorParams, onClose, originatingApp, originatingPath, breadcrumbs, outsideVisualizeApp, showAggsSelection, selectedVisType, }?: ",
             "ShowNewVisModalParams",
             ") => () => void"
           ],
           "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-          "lineNumber": 134,
+          "lineNumber": 138,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -7465,15 +7503,16 @@
               "id": "def-public.VisualizationsStart.showNewVisModal.$1",
               "type": "Object",
               "tags": [],
-              "label": "__0",
+              "label": "{\n  editorParams = [],\n  onClose,\n  originatingApp,\n  originatingPath,\n  breadcrumbs,\n  outsideVisualizeApp,\n  showAggsSelection,\n  selectedVisType,\n}",
               "description": [],
               "signature": [
                 "ShowNewVisModalParams"
               ],
               "path": "src/platform/plugins/shared/visualizations/public/wizard/show_new_vis.tsx",
-              "lineNumber": 46,
+              "lineNumber": 48,
               "columnNumber": 33,
               "deprecated": false,
+              "docsReferencedTypeName": "ShowNewVisModalParams",
               "trackAdoption": false
             }
           ]
@@ -7563,7 +7602,7 @@
             "> | undefined; editor?: { editUrl: string; editApp?: string | undefined; } | { onEdit: (savedObjectId: string) => Promise<void>; } | undefined; })[]; }>"
           ],
           "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-          "lineNumber": 135,
+          "lineNumber": 139,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -7579,7 +7618,7 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-              "lineNumber": 136,
+              "lineNumber": 140,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -7596,7 +7635,7 @@
                 "number"
               ],
               "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-              "lineNumber": 137,
+              "lineNumber": 141,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -7620,7 +7659,7 @@
                 "[] | undefined"
               ],
               "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-              "lineNumber": 138,
+              "lineNumber": 142,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -7644,7 +7683,7 @@
                 "[] | undefined"
               ],
               "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-              "lineNumber": 139,
+              "lineNumber": 143,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -7798,6 +7837,7 @@
             "lineNumber": 18,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "IAggConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -7888,6 +7928,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ColorSchemas",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -10127,7 +10168,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"count\" | \"min\" | \"range\" | \"terms\" | \"max\" | \"sum\" | \"median\" | \"cumulative_sum\" | \"date_histogram\" | \"filters\" | \"last_value\" | \"percentile\" | \"average\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"count\" | \"min\" | \"range\" | \"terms\" | \"max\" | \"sum\" | \"median\" | \"cumulative_sum\" | \"date_histogram\" | \"filters\" | \"last_value\" | \"percentile\" | \"average\" | \"moving_average\" | \"formula\" | \"static_value\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"differences\" | \"counter_rate\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types.ts",
         "lineNumber": 201,
@@ -10144,7 +10185,7 @@
         "label": "OperationWithReferences",
         "description": [],
         "signature": [
-          "\"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"cumulative_sum\" | \"moving_average\" | \"formula\" | \"static_value\" | \"differences\" | \"counter_rate\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types.ts",
         "lineNumber": 203,

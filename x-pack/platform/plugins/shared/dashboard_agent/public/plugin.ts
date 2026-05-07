@@ -6,12 +6,14 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
+import { registerDashboardAttachmentUiDefinition } from './attachment_types';
 
 export class DashboardAgentPlugin
   implements
@@ -34,13 +36,17 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
-      this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
-        attachments: plugins.agentBuilder.attachments,
-      });
+    this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
+      agentBuilder: plugins.agentBuilder,
+      chrome: core.chrome,
+      canWriteDashboards: core.application.capabilities.dashboard_v2?.showWriteControls === true,
+      dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
+      unifiedSearch: plugins.unifiedSearch,
+      data: plugins.data,
+      dashboardPlugin: plugins.dashboard,
     });
 
     return {};
