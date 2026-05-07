@@ -102,7 +102,6 @@ describe('Scripts library schemas', () => {
       });
 
       it('should error if `platform` includes invalid values', () => {
-        // @ts-expect-error
         reqBody.platform = ['foo'];
 
         expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();

@@ -36,6 +36,7 @@ import type {
   UnionTypeOptions,
   PropsWithDiscriminator,
   ObjectResultUnionType,
+  UnionSchemaOutputs,
 } from './src/types';
 import {
   AnyType,
@@ -75,6 +76,7 @@ export type {
   TypeOptions,
   TypeOptionsValidate,
   UnionTypeOptions,
+  UnionSchemaOutputs,
 };
 export { ObjectType, Type, UnionType };
 export type { SchemaValidationOptions } from './src/types';
@@ -333,11 +335,11 @@ function oneOf<A, B, C>(
 ): Type<A | B | C>;
 function oneOf<A, B>(types: [Type<A>, Type<B>], options?: UnionTypeOptions<A | B>): Type<A | B>;
 function oneOf<A>(types: [Type<A>], options?: UnionTypeOptions<A>): Type<A>;
-function oneOf<RTS extends Array<Type<any>>>(
+function oneOf<const RTS extends readonly Type<any>[]>(
   types: RTS,
-  options?: UnionTypeOptions<any>
-): Type<any> {
-  return new UnionType(types, options);
+  options?: UnionTypeOptions<UnionSchemaOutputs<RTS>>
+): Type<UnionSchemaOutputs<RTS>> {
+  return new UnionType(types, options as UnionTypeOptions<any>);
 }
 
 function discriminatedUnion<

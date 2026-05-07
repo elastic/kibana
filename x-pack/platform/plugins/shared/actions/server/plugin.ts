@@ -321,7 +321,9 @@ export class ActionsPlugin
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
       if (preconfiguredId !== AlertHistoryEsIndexConnectorId) {
         const rawPreconfiguredConnector: ConnectorWithOptionalDeprecation = {
-          ...this.actionsConfig.preconfigured[preconfiguredId],
+          ...(this.actionsConfig.preconfigured[
+            preconfiguredId
+          ] as ConnectorWithOptionalDeprecation),
           id: preconfiguredId,
           isPreconfigured: true,
           isSystemAction: false,

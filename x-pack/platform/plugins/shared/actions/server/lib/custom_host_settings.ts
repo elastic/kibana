@@ -30,7 +30,7 @@ const ProtocolsForSmtp = new Set(['smtp:']);
 // validation we can't do in config-schema, since the cloud validation can't
 // do these sorts of validations
 export function resolveCustomHosts(logger: Logger, config: ActionsConfig): ActionsConfig {
-  const result: ActionsConfigWriteable = cloneDeep(config);
+  const result = cloneDeep(config) as ActionsConfigWriteable;
 
   if (!result.customHostSettings) {
     return result as ActionsConfig;

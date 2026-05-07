@@ -20,25 +20,31 @@ import typeDetect from 'type-detect';
 
 type SomeObjectType = ObjectType<any>;
 
+/** Output type for `objectUnion([typeA, typeB, ...])` — union of each branch output `V`. */
+export type ObjectUnionOutputs<T extends [SomeObjectType, ...SomeObjectType[]]> = {
+  [K in keyof T]: T[K] extends Type<infer V> ? V : never;
+}[number];
+
 /**
  * A custom schema type used in lens for object unions with ability to extend
  */
-export function objectUnion<T extends [SomeObjectType, ...SomeObjectType[]]>(
+export function objectUnion<const T extends [SomeObjectType, ...SomeObjectType[]]>(
   types: T,
-  options?: TypeOptions<T[number]['type']>
-) {
-  return new ObjectUnionType(types, options);
+  options?: TypeOptions<ObjectUnionOutputs<T>>
+): ObjectUnionType<T, ObjectUnionOutputs<T>> {
+  return new ObjectUnionType<T, ObjectUnionOutputs<T>>(types, options);
 }
 
 /**
  * Extends {@link UnionType} with Lens-specific `extends()` for object branches.
  */
 export class ObjectUnionType<RTS extends Array<SomeObjectType>, T> extends UnionType<RTS, T> {
-  private readonly typeOptions?: TypeOptions<T>;
+  /** Lens-only options merged in {@link extends}; must not shadow {@link Type}'s `typeOptions`. */
+  private readonly objectUnionOptions?: TypeOptions<T>;
 
   constructor(types: RTS, options?: TypeOptions<T>) {
     super(types, options as UnionTypeOptions<T>);
-    this.typeOptions = options;
+    this.objectUnionOptions = options;
   }
 
   /**
@@ -69,13 +75,18 @@ export class ObjectUnionType<RTS extends Array<SomeObjectType>, T> extends Union
       return t.extends(props); // no overriding type.options
     }) as RTS; // these types are correct but need to be forced to work
     const newOptions = {
-      ...this.typeOptions,
+      ...this.objectUnionOptions,
       ...options,
     } as TypeOptions<ObjectResultType<P> & T>;
     return new ObjectUnionType<RTS, ObjectResultType<P> & T>(newTypes, newOptions);
   }
 
-  protected handleError(type: string, { value, details }: Record<string, any>, path: string[]) {
+  protected handleError(
+    type: string,
+    context: Record<string, any>,
+    path: string[]
+  ): string | SchemaTypesError | undefined {
+    const { value, details } = context;
     switch (type) {
       case 'any.required':
       case 'invalid_type':

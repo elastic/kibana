@@ -25,7 +25,15 @@ import { Type } from './type';
 
 export type UnionTypeOptions<T> = TypeOptions<T>;
 
-export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
+/** Output type for `schema.oneOf([...])` — union of each branch validated output. */
+export type UnionSchemaOutputs<RTS extends readonly Type<any>[]> = {
+  [K in keyof RTS]: RTS[K] extends { readonly type: infer V } ? V : never;
+}[number];
+
+export class UnionType<
+  RTS extends readonly Type<any>[],
+  T = UnionSchemaOutputs<RTS>
+> extends Type<T> {
   protected readonly unionTypes: RTS;
   private readonly unionOptions?: UnionTypeOptions<T>;
 
@@ -93,7 +101,7 @@ export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
 
   public extendsDeep(options: ExtendsDeepOptions) {
     return new UnionType(
-      this.unionTypes.map((t) => t.extendsDeep(options)),
+      this.unionTypes.map((t) => t.extendsDeep(options)) as unknown as RTS,
       this.unionOptions
     );
   }
@@ -104,7 +112,12 @@ export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
     }
   }
 
-  protected handleError(type: string, { value }: Record<string, any>) {
+  protected handleError(
+    type: string,
+    context: Record<string, any>,
+    _path: string[]
+  ): string | SchemaTypeError | undefined {
+    const { value } = context;
     switch (type) {
       case 'any.required':
       case 'invalid_type':

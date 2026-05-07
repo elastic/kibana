@@ -31,12 +31,27 @@ export type Props = Record<string, Type<any>>;
 
 export type NullableProps = Record<string, Type<any> | undefined | null>;
 
-export type TypeOrLazyType = Type<any> | (() => Type<any>);
+/**
+ * `Type<V>` and lazy `() => Type<V>`, structurally. Some subclasses (e.g. custom
+ * `UnionType` wrappers) are not always assignable to `Type<any>` as a type
+ * parameter constraint; the `__isKbnConfigSchemaType` brand matches all runtime
+ * schema classes from this package.
+ */
+export type TypeOrLazyType =
+  | { readonly __isKbnConfigSchemaType: true; readonly type: unknown }
+  | (() => { readonly __isKbnConfigSchemaType: true; readonly type: unknown });
 
+/**
+ * Extract the validated output type `V` from `Type<V>` (including subclasses like `UnionType`).
+ * Uses the phantom `type` field on {@link Type} because `RT extends Type<infer V>` fails to infer
+ * `V` for some concrete subclasses (e.g. multi-generic union wrappers).
+ */
 export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any>
-  ? ReturnType<RT>['type']
-  : RT extends Type<any>
-  ? RT['type']
+  ? ReturnType<RT> extends { readonly type: infer V }
+    ? V
+    : never
+  : RT extends { readonly type: infer V }
+  ? V
   : never;
 
 type OptionalProperties<Base extends Props> = Pick<

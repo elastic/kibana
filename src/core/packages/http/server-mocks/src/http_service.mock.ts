@@ -212,7 +212,7 @@ const createInternalSetupContractMock = () => {
       protocol: 'http',
     }),
     registerRouterAfterListening: jest.fn(),
-    rateLimiter: config.schema.getSchema().extract('rateLimiter').validate({}).value,
+    rateLimiter: config.schema.validate({}).rateLimiter,
   });
 
   mock.authRequestHeaders.get.mockReturnValue({ authorization: 'authorization-header' });
