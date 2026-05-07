@@ -128,6 +128,35 @@ export const updateDates = (container: string = GLOBAL_FILTERS_CONTAINER) => {
   );
 };
 
+/**
+ * Asserts that the date picker inside `container` reflects the given range.
+ * On the new picker, reads the ISO range from the control button's
+ * `data-date-range` attribute. On the legacy picker, reads the formatted
+ * `title` from the start/end popover buttons.
+ */
+export const expectDateRangeToBe = (
+  container: string,
+  expected: { start: string; end: string }
+) => {
+  usingNewPicker(
+    container,
+    () => {
+      const expectedRange = `${toIsoIfDate(expected.start)} to ${toIsoIfDate(expected.end)}`;
+      cy.get(`${container} ${NEW_PICKER_CONTROL}`)
+        .first()
+        .should('have.attr', 'data-date-range', expectedRange);
+    },
+    () => {
+      cy.get(`${container} [data-test-subj="superDatePickerstartDatePopoverButton"]`)
+        .first()
+        .should('have.attr', 'title', expected.start);
+      cy.get(`${container} [data-test-subj="superDatePickerendDatePopoverButton"]`)
+        .first()
+        .should('have.attr', 'title', expected.end);
+    }
+  );
+};
+
 export const updateTimelineDates = () => {
   cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).first().click();
   cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).first().should('not.have.text', 'Updating');
