@@ -14,6 +14,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -90,6 +91,7 @@ export const CreateRulePanel: React.FC<CreateRulePanelProps> = ({ onClose }) => 
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <EuiFlexGroup alignItems="center" gutterSize="m" css={{ width: '100%' }}>
             <EuiFlexItem>
               <EuiHorizontalRule margin="none" />
@@ -103,9 +105,11 @@ export const CreateRulePanel: React.FC<CreateRulePanelProps> = ({ onClose }) => 
               <EuiHorizontalRule margin="none" />
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <EuiTitle size="xs">
             <h2>Start from a rule builder</h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCard
