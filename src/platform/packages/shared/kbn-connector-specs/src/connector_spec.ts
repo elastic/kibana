@@ -83,7 +83,7 @@ export interface OAuthGetTokenOpts {
   tokenUrl: string;
   scope?: string;
   clientId: string;
-  clientSecret?: string;
+  clientSecret: string;
   additionalFields?: Record<string, unknown>;
   tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic';
   accessTokenPath?: string;
@@ -91,13 +91,20 @@ export interface OAuthGetTokenOpts {
   tokenType?: string;
 }
 
+export type OAuthWithCertificateGetTokenOpts = Omit<
+  OAuthGetTokenOpts,
+  'clientSecret' | 'authType'
+> & {
+  authType: 'oauth_entra_client_certificate';
+};
+
 export interface EarsGetTokenOpts {
   authType: 'ears';
   provider: string;
   scope?: string;
 }
 
-export type GetTokenOpts = OAuthGetTokenOpts | EarsGetTokenOpts;
+export type GetTokenOpts = OAuthGetTokenOpts | OAuthWithCertificateGetTokenOpts | EarsGetTokenOpts;
 
 export interface BuildClientAssertionOpts {
   tokenUrl: string;

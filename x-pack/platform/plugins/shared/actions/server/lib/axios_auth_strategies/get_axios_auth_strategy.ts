@@ -21,6 +21,8 @@ export const getAxiosAuthStrategy = (authTypeId: string): AxiosAuthStrategy => {
       return new EarsStrategy();
     case 'oauth_authorization_code':
       return new OAuthAuthCodeStrategy();
+    case 'oauth_entra_client_certificate':
+      return new OAuthAuthCodeStrategy();
     default:
       return new DefaultStrategy();
   }

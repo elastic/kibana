@@ -110,7 +110,7 @@ export const OAuthEntraClientCertificate: AuthTypeSpec<AuthSchemaType> = {
     let token;
     try {
       token = await ctx.getToken({
-        authType: 'oauth',
+        authType: 'oauth_entra_client_certificate',
         tokenUrl: secret.tokenUrl,
         scope: secret.scope,
         clientId: secret.clientId,
