@@ -37,6 +37,7 @@ export interface HealthyMetricCardItem {
   iconType?: NonNullable<EuiAvatarProps['iconType']>;
   iconBackground?: EuiAvatarProps['color'];
   iconColor?: EuiAvatarProps['iconColor'];
+  href?: string;
 }
 
 const DEFAULT_IMPACTED_CARDS: ImpactedCardItem[] = [
@@ -190,7 +191,7 @@ export function SigeventsOverview({
           data-test-subj="sigeventsOverviewHealthyMetrics"
         >
           {resolvedHealthyMetrics.map(
-            ({ id, label, value, iconType, iconBackground, iconColor }) => (
+            ({ id, label, value, iconType, iconBackground, iconColor, href }) => (
               <EuiFlexItem key={id} grow={1}>
                 <MetadataIconCard
                   title={label}
@@ -198,6 +199,7 @@ export function SigeventsOverview({
                   iconType={iconType}
                   color={iconBackground}
                   iconColor={iconColor}
+                  href={href}
                 />
               </EuiFlexItem>
             )

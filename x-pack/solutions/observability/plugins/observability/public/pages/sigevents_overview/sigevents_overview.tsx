@@ -412,7 +412,7 @@ export function SigeventsOverviewPage() {
         iconBackground: euiTheme.colors.backgroundBaseSubdued,
         iconColor: euiTheme.colors.textParagraph,
         href: http.basePath.prepend(
-          '/app/streams/_discovery/knowledge_indicators?kiTypes=entity%2Ctechnology&rangeFrom=now-15m&rangeTo=now'
+          '/app/streams/_discovery/knowledge_indicators?kiTypes=technology&rangeFrom=now-15m&rangeTo=now'
         ),
       },
       {

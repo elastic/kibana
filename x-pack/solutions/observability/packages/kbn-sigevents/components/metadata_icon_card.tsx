@@ -25,6 +25,7 @@ export interface MetadataIconCardProps {
   iconColor?: EuiAvatarProps['iconColor'];
   hideIcon?: boolean;
   iconType?: NonNullable<EuiAvatarProps['iconType']>;
+  href?: string;
 }
 
 export function MetadataIconCard({
@@ -34,6 +35,7 @@ export function MetadataIconCard({
   color,
   iconColor,
   hideIcon = false,
+  href,
 }: MetadataIconCardProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -42,8 +44,28 @@ export function MetadataIconCard({
     white-space: nowrap;
   `;
 
-  if (hideIcon) {
+  const linkCss = css`
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    &:hover,
+    &:focus {
+      text-decoration: none;
+      color: inherit;
+    }
+  `;
+
+  const wrapWithLink = (content: React.ReactElement) => {
+    if (!href) return content;
     return (
+      <a href={href} css={linkCss}>
+        {content}
+      </a>
+    );
+  };
+
+  if (hideIcon) {
+    return wrapWithLink(
       <EuiPanel
         hasShadow={false}
         hasBorder
@@ -61,7 +83,7 @@ export function MetadataIconCard({
     );
   }
 
-  return (
+  return wrapWithLink(
     <EuiPanel
       hasShadow={false}
       hasBorder
