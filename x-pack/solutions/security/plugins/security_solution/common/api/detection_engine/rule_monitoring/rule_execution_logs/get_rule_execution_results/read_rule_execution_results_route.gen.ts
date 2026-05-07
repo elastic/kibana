@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   UnifiedExecutionStatus,
@@ -24,87 +24,93 @@ import {
 import { RuleRunType } from '../../model/execution_run_type.gen';
 import { SortOrder } from '../../../model/sorting.gen';
 
+export const ReadRuleExecutionResultsRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * Saved object ID of the rule to get execution results for.
+     */
+    ruleId: z.string().min(1),
+  })
+);
 export type ReadRuleExecutionResultsRequestParams = z.infer<
   typeof ReadRuleExecutionResultsRequestParams
 >;
-export const ReadRuleExecutionResultsRequestParams = z.object({
-  /**
-   * Saved object ID of the rule to get execution results for.
-   */
-  ruleId: z.string().min(1),
-});
 export type ReadRuleExecutionResultsRequestParamsInput = z.input<
   typeof ReadRuleExecutionResultsRequestParams
 >;
 
+export const ReadRuleExecutionResultsRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Filtering criteria for execution results. If omitted, defaults to the last 2 hours (from: now-2h, to: now).
+     */
+    filter: z
+      .object({
+        /**
+         * Filter by execution outcome (success, warning, failure). Empty = all outcomes.
+         */
+        outcome: z.array(UnifiedExecutionStatus).max(3).optional().default([]),
+        /**
+         * Filter by run type (standard, backfill). Empty = all run types.
+         */
+        run_type: z.array(RuleRunType).max(2).optional().default([]),
+        /**
+         * Start of the time range (executions that started within this range).
+         */
+        from: z.string().datetime(),
+        /**
+         * End of the time range (executions that started within this range).
+         */
+        to: z.string().datetime(),
+      })
+      .optional(),
+    /**
+     * Sorting configuration for execution results.
+     */
+    sort: z
+      .object({
+        /**
+         * Field to sort results by.
+         */
+        field: UnifiedExecutionResultSortField.optional().default('execution_start'),
+        /**
+         * Sort order (asc or desc).
+         */
+        order: SortOrder.optional().default('desc'),
+      })
+      .optional(),
+    /**
+     * Page number to return.
+     */
+    page: z.number().int().min(1).optional().default(1),
+    /**
+     * Number of results per page.
+     */
+    per_page: z.number().int().min(1).max(100).optional().default(20),
+  })
+);
 export type ReadRuleExecutionResultsRequestBody = z.infer<
   typeof ReadRuleExecutionResultsRequestBody
 >;
-export const ReadRuleExecutionResultsRequestBody = z.object({
-  /**
-   * Filtering criteria for execution results. If omitted, defaults to the last 2 hours (from: now-2h, to: now).
-   */
-  filter: z
-    .object({
-      /**
-       * Filter by execution outcome (success, warning, failure). Empty = all outcomes.
-       */
-      outcome: z.array(UnifiedExecutionStatus).max(3).optional().default([]),
-      /**
-       * Filter by run type (standard, backfill). Empty = all run types.
-       */
-      run_type: z.array(RuleRunType).max(2).optional().default([]),
-      /**
-       * Start of the time range (executions that started within this range).
-       */
-      from: z.string().datetime(),
-      /**
-       * End of the time range (executions that started within this range).
-       */
-      to: z.string().datetime(),
-    })
-    .optional(),
-  /**
-   * Sorting configuration for execution results.
-   */
-  sort: z
-    .object({
-      /**
-       * Field to sort results by.
-       */
-      field: UnifiedExecutionResultSortField.optional().default('execution_start'),
-      /**
-       * Sort order (asc or desc).
-       */
-      order: SortOrder.optional().default('desc'),
-    })
-    .optional(),
-  /**
-   * Page number to return.
-   */
-  page: z.number().int().min(1).optional().default(1),
-  /**
-   * Number of results per page.
-   */
-  per_page: z.number().int().min(1).max(100).optional().default(20),
-});
 export type ReadRuleExecutionResultsRequestBodyInput = z.input<
   typeof ReadRuleExecutionResultsRequestBody
 >;
 
+export const ReadRuleExecutionResultsResponse = lazySchema(() =>
+  z.object({
+    data: z.array(UnifiedExecutionResult),
+    /**
+     * Total number of results matching the filter.
+     */
+    total: z.number().int(),
+    /**
+     * Current page number (echoed from request).
+     */
+    page: z.number().int(),
+    /**
+     * Number of results per page (echoed from request).
+     */
+    per_page: z.number().int(),
+  })
+);
 export type ReadRuleExecutionResultsResponse = z.infer<typeof ReadRuleExecutionResultsResponse>;
-export const ReadRuleExecutionResultsResponse = z.object({
-  data: z.array(UnifiedExecutionResult),
-  /**
-   * Total number of results matching the filter.
-   */
-  total: z.number().int(),
-  /**
-   * Current page number (echoed from request).
-   */
-  page: z.number().int(),
-  /**
-   * Number of results per page (echoed from request).
-   */
-  per_page: z.number().int(),
-});

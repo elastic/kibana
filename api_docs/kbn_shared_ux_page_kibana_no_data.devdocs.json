@@ -49,6 +49,7 @@
             "lineNumber": 21,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaNoDataPageProps",
             "trackAdoption": false,
             "isRequired": true
           }

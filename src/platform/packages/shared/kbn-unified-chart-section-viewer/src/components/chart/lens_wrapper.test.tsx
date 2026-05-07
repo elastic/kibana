@@ -191,7 +191,7 @@ describe('LensWrapper', () => {
       );
     });
 
-    it('wraps EmbeddableComponent in PresentationPanelQuickActionContext', () => {
+    it('wraps EmbeddableComponent in EmbeddableRendererContext', () => {
       const { getByTestId } = render(
         <EuiThemeProvider>
           <LensWrapper {...defaultProps} titleHighlight="test" />

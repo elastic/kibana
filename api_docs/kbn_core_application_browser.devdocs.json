@@ -59,7 +59,15 @@
             "tags": [],
             "label": "category",
             "description": [
-              "\nThe category definition of the product\nSee {@link AppCategory}\nSee DEFAULT_APP_CATEGORIES for more reference"
+              "\nThe category definition of the product\nSee ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-public.AppCategory",
+                "text": "AppCategory"
+              },
+              "\nSee DEFAULT_APP_CATEGORIES for more reference"
             ],
             "signature": [
               "AppCategory",
@@ -119,7 +127,23 @@
             "tags": [],
             "label": "defaultPath",
             "description": [
-              "\nAllow to define the default path a user should be directed to when navigating to the app.\nWhen defined, this value will be used as a default for the `path` option when calling {@link ApplicationStart.navigateToApp | navigateToApp}`,\nand will also be appended to the {@link ChromeNavLink | application navLink} in the navigation bar."
+              "\nAllow to define the default path a user should be directed to when navigating to the app.\nWhen defined, this value will be used as a default for the `path` option when calling ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-public.ApplicationStart.navigateToApp",
+                "text": "navigateToApp"
+              },
+              "`,\nand will also be appended to the ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-public.ChromeNavLink",
+                "text": "application navLink"
+              },
+              " in the navigation bar."
             ],
             "signature": [
               "string | undefined"
@@ -137,7 +161,23 @@
             "tags": [],
             "label": "updater$",
             "description": [
-              "\nAn {@link AppUpdater} observable that can be used to update the application {@link AppUpdatableFields} at runtime.\n"
+              "\nAn ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-public.AppUpdater",
+                "text": "AppUpdater"
+              },
+              " observable that can be used to update the application ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-public.AppUpdatableFields",
+                "text": "AppUpdatableFields"
+              },
+              " at runtime.\n"
             ],
             "signature": [
               "Observable",
@@ -229,6 +269,7 @@
                 "lineNumber": 25,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "AppMountParameters",
                 "trackAdoption": false
               }
             ]
@@ -316,7 +357,23 @@
         "tags": [],
         "label": "AppLeaveActionFactory",
         "description": [
-          "\nFactory provided when invoking a {@link AppLeaveHandler} to retrieve the {@link AppLeaveAction} to execute."
+          "\nFactory provided when invoking a ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppLeaveHandler",
+            "text": "AppLeaveHandler"
+          },
+          " to retrieve the ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppLeaveAction",
+            "text": "AppLeaveAction"
+          },
+          " to execute."
         ],
         "path": "src/core/packages/application/browser/src/app_leave.ts",
         "lineNumber": 78,
@@ -435,6 +492,7 @@
                 "lineNumber": 99,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "EuiButtonColor",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -472,7 +530,23 @@
         "tags": [],
         "label": "AppLeaveConfirmAction",
         "description": [
-          "\nAction to return from a {@link AppLeaveHandler} to show a confirmation\nmessage when trying to leave an application.\n\nSee {@link AppLeaveActionFactory}\n"
+          "\nAction to return from a ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppLeaveHandler",
+            "text": "AppLeaveHandler"
+          },
+          " to show a confirmation\nmessage when trying to leave an application.\n\nSee ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppLeaveActionFactory",
+            "text": "AppLeaveActionFactory"
+          },
+          "\n"
         ],
         "path": "src/core/packages/application/browser/src/app_leave.ts",
         "lineNumber": 52,
@@ -586,7 +660,23 @@
         "tags": [],
         "label": "AppLeaveDefaultAction",
         "description": [
-          "\nAction to return from a {@link AppLeaveHandler} to execute the default\nbehaviour when leaving the application.\n\nSee {@link AppLeaveActionFactory}\n"
+          "\nAction to return from a ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppLeaveHandler",
+            "text": "AppLeaveHandler"
+          },
+          " to execute the default\nbehaviour when leaving the application.\n\nSee ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppLeaveActionFactory",
+            "text": "AppLeaveActionFactory"
+          },
+          "\n"
         ],
         "path": "src/core/packages/application/browser/src/app_leave.ts",
         "lineNumber": 40,
@@ -664,6 +754,7 @@
                 "lineNumber": 22,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "App",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -677,7 +768,15 @@
             "tags": [],
             "label": "registerAppUpdater",
             "description": [
-              "\nRegister an application updater that can be used to change the {@link AppUpdatableFields} fields\nof all applications at runtime.\n\nThis is meant to be used by plugins that needs to updates the whole list of applications.\nTo only updates a specific application, use the `updater$` property of the registered application instead.\n"
+              "\nRegister an application updater that can be used to change the ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-public.AppUpdatableFields",
+                "text": "AppUpdatableFields"
+              },
+              " fields\nof all applications at runtime.\n\nThis is meant to be used by plugins that needs to updates the whole list of applications.\nTo only updates a specific application, use the `updater$` property of the registered application instead.\n"
             ],
             "signature": [
               "(appUpdater$: ",
@@ -709,6 +808,7 @@
                 "lineNumber": 51,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "Observable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -826,6 +926,7 @@
                 "lineNumber": 79,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "NavigateToAppOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -888,6 +989,7 @@
                 "lineNumber": 123,
                 "columnNumber": 30,
                 "deprecated": false,
+                "docsReferencedTypeName": "NavigateToUrlOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1225,6 +1327,7 @@
                 "lineNumber": 175,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "AppLeaveHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1513,7 +1616,15 @@
             "tags": [],
             "label": "theme$",
             "description": [
-              "\nAn observable emitting {@link CoreTheme | Core's theme}.\nShould be used when mounting the application to include theme information.\n"
+              "\nAn observable emitting ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "Core's theme"
+              },
+              ".\nShould be used when mounting the application to include theme information.\n"
             ],
             "signature": [
               "Observable",
@@ -1627,7 +1738,14 @@
         "tags": [],
         "label": "NavigateToAppOptions",
         "description": [
-          "\nOptions for the {@link ApplicationStart.navigateToApp | navigateToApp API}"
+          "\nOptions for the ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.ApplicationStart.navigateToApp",
+            "text": "navigateToApp API"
+          }
         ],
         "path": "src/core/packages/application/browser/src/contracts.ts",
         "lineNumber": 161,
@@ -1642,7 +1760,23 @@
             "tags": [],
             "label": "deepLinkId",
             "description": [
-              "\noptional {@link App.deepLinks | deep link} id inside the application to navigate to.\nIf an additional {@link NavigateToAppOptions.path | path} is defined it will be appended to the deep link path."
+              "\noptional ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-public.App.deepLinks",
+                "text": "deep link"
+              },
+              " id inside the application to navigate to.\nIf an additional ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-public.NavigateToAppOptions.path",
+                "text": "path"
+              },
+              " is defined it will be appended to the deep link path."
             ],
             "signature": [
               "string | undefined"
@@ -1660,7 +1794,15 @@
             "tags": [],
             "label": "path",
             "description": [
-              "\noptional path inside application to deep link to.\nIf undefined, will use {@link App.defaultPath | the app's default path} as default."
+              "\noptional path inside application to deep link to.\nIf undefined, will use ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-public.App.defaultPath",
+                "text": "the app's default path"
+              },
+              " as default."
             ],
             "signature": [
               "string | undefined"
@@ -1753,7 +1895,14 @@
         "tags": [],
         "label": "NavigateToUrlOptions",
         "description": [
-          "\nOptions for the {@link ApplicationStart.navigateToUrl | navigateToUrl API}"
+          "\nOptions for the ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.ApplicationStart.navigateToUrl",
+            "text": "navigateToUrl API"
+          }
         ],
         "path": "src/core/packages/application/browser/src/contracts.ts",
         "lineNumber": 196,
@@ -1825,7 +1974,15 @@
         "tags": [],
         "label": "ScopedHistory",
         "description": [
-          "\nA wrapper around a `History` instance that is scoped to a particular base path of the history stack. Behaves\nsimilarly to the `basename` option except that this wrapper hides any history stack entries from outside the scope\nof this base path.\n\nThis wrapper also allows Core and Plugins to share a single underlying global `History` instance without exposing\nthe history of other applications.\n\nThe {@link ScopedHistory.createSubHistory | createSubHistory} method is particularly useful for applications that\ncontain any number of \"sub-apps\" which should not have access to the main application's history or basePath.\n"
+          "\nA wrapper around a `History` instance that is scoped to a particular base path of the history stack. Behaves\nsimilarly to the `basename` option except that this wrapper hides any history stack entries from outside the scope\nof this base path.\n\nThis wrapper also allows Core and Plugins to share a single underlying global `History` instance without exposing\nthe history of other applications.\n\nThe ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.ScopedHistory.createSubHistory",
+            "text": "createSubHistory"
+          },
+          " method is particularly useful for applications that\ncontain any number of \"sub-apps\" which should not have access to the main application's history or basePath.\n"
         ],
         "signature": [
           "ScopedHistory",
@@ -1916,6 +2073,7 @@
                 "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocationDescriptorObject",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2047,7 +2205,31 @@
         "tags": [],
         "label": "AppLeaveAction",
         "description": [
-          "\nPossible actions to return from a {@link AppLeaveHandler}\n\nSee {@link AppLeaveConfirmAction} and {@link AppLeaveDefaultAction}\n"
+          "\nPossible actions to return from a ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppLeaveHandler",
+            "text": "AppLeaveHandler"
+          },
+          "\n\nSee ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppLeaveConfirmAction",
+            "text": "AppLeaveConfirmAction"
+          },
+          " and ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppLeaveDefaultAction",
+            "text": "AppLeaveDefaultAction"
+          },
+          "\n"
         ],
         "signature": [
           "AppLeaveDefaultAction",
@@ -2068,7 +2250,15 @@
         "tags": [],
         "label": "AppLeaveHandler",
         "description": [
-          "\nA handler that will be executed before leaving the application, either when\ngoing to another application or when closing the browser tab or manually changing\nthe url.\nShould return `confirm` to prompt a message to the user before leaving the page, or `default`\nto keep the default behavior (doing nothing).\n\nSee {@link AppMountParameters} for detailed usage examples.\n"
+          "\nA handler that will be executed before leaving the application, either when\ngoing to another application or when closing the browser tab or manually changing\nthe url.\nShould return `confirm` to prompt a message to the user before leaving the page, or `default`\nto keep the default behavior (doing nothing).\n\nSee ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppMountParameters",
+            "text": "AppMountParameters"
+          },
+          " for detailed usage examples.\n"
         ],
         "signature": [
           "(factory: ",
@@ -2097,6 +2287,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AppLeaveActionFactory",
             "trackAdoption": false
           },
           {
@@ -2142,7 +2333,15 @@
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [
-          "An unmounting function that will be called to unmount the application. See {@link AppUnmount }."
+          "An unmounting function that will be called to unmount the application. See ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppUnmount",
+            "text": "AppUnmount"
+          },
+          "."
         ],
         "children": [
           {
@@ -2152,7 +2351,13 @@
             "tags": [],
             "label": "params",
             "description": [
-              "{@link AppMountParameters }"
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-public.AppMountParameters",
+                "text": "AppMountParameters"
+              }
             ],
             "signature": [
               "AppMountParameters",
@@ -2162,6 +2367,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AppMountParameters",
             "trackAdoption": false
           }
         ],
@@ -2195,7 +2401,15 @@
         "tags": [],
         "label": "AppUpdatableFields",
         "description": [
-          "\nDefines the list of fields that can be updated via an {@link AppUpdater}."
+          "\nDefines the list of fields that can be updated via an ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppUpdater",
+            "text": "AppUpdater"
+          },
+          "."
         ],
         "signature": [
           "{ status?: ",
@@ -2220,7 +2434,14 @@
         "tags": [],
         "label": "AppUpdater",
         "description": [
-          "\nUpdater for applications.\nsee {@link ApplicationSetup}"
+          "\nUpdater for applications.\nsee ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.ApplicationSetup",
+            "text": "ApplicationSetup"
+          }
         ],
         "signature": [
           "(app: ",
@@ -2251,6 +2472,7 @@
             "lineNumber": 64,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "App",
             "trackAdoption": false
           }
         ],
@@ -2263,7 +2485,15 @@
         "tags": [],
         "label": "PublicAppDeepLinkInfo",
         "description": [
-          "\nPublic information about a registered app's {@link AppDeepLink | deepLinks}\n"
+          "\nPublic information about a registered app's ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.AppDeepLink",
+            "text": "deepLinks"
+          },
+          "\n"
         ],
         "signature": [
           "Omit<",
@@ -2288,7 +2518,15 @@
         "tags": [],
         "label": "PublicAppInfo",
         "description": [
-          "\nPublic information about a registered {@link App | application}\n"
+          "\nPublic information about a registered ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-public.App",
+            "text": "application"
+          },
+          "\n"
         ],
         "signature": [
           "Omit<",

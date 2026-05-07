@@ -98,3 +98,22 @@ Object {
   },
 }
 `;
+
+exports[`getEuidDslFilterBasedOnDocument user evaluates correctly for real non-IDP document 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "user.name": "tyrese.goldner",
+        },
+      },
+      Object {
+        "term": Object {
+          "host.id": "4a7a8b68-1814-487f-9e56-5e7bed425edc",
+        },
+      },
+    ],
+  },
+}
+`;

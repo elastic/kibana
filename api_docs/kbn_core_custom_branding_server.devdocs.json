@@ -57,6 +57,7 @@
                 "lineNumber": 25,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomBrandingFetchFn",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -98,6 +99,7 @@
                 "lineNumber": 27,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -200,6 +202,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           },
           {

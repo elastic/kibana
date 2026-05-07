@@ -47,6 +47,7 @@
             "lineNumber": 71,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldButtonProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -100,6 +101,7 @@
             "lineNumber": 82,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldIconProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -151,6 +153,7 @@
             "lineNumber": 20,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldNameWithIconProps",
             "trackAdoption": false,
             "isRequired": true
           }

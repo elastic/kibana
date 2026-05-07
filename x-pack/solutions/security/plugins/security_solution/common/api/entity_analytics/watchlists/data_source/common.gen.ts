@@ -14,111 +14,127 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const EntitySourceType = lazySchema(() =>
+  z.enum(['index', 'entity_analytics_integration', 'store'])
+);
 export type EntitySourceType = z.infer<typeof EntitySourceType>;
-export const EntitySourceType = z.enum(['index', 'entity_analytics_integration', 'store']);
 export type EntitySourceTypeEnum = typeof EntitySourceType.enum;
 export const EntitySourceTypeEnum = EntitySourceType.enum;
 
-export type Matcher = z.infer<typeof Matcher>;
-export const Matcher = z.object({
-  fields: z.array(z.string()),
-  /**
+export const Matcher = lazySchema(() =>
+  z.object({
+    fields: z.array(z.string()),
+    /**
       * Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
 
       */
-  values: z.union([z.array(z.string()), z.array(z.boolean())]),
-});
+    values: z.union([z.array(z.string()), z.array(z.boolean())]),
+  })
+);
+export type Matcher = z.infer<typeof Matcher>;
 
+export const Filter = lazySchema(() =>
+  z.object({
+    kuery: z.union([z.string(), z.object({})]).optional(),
+  })
+);
 export type Filter = z.infer<typeof Filter>;
-export const Filter = z.object({
-  kuery: z.union([z.string(), z.object({})]).optional(),
-});
 
+export const Integrations = lazySchema(() =>
+  z.object({
+    /**
+     * Index to read latest sync markers from
+     */
+    syncMarkerIndex: z.string().optional(),
+    /**
+     * integrations latest full sync and update syncData
+     */
+    syncData: z
+      .object({
+        /**
+         * Timestamp of the last full sync from integrations
+         */
+        lastFullSync: z.string().datetime().optional(),
+        /**
+         * Timestamp of the last update processed from integrations
+         */
+        lastUpdateProcessed: z.string().datetime().optional(),
+      })
+      .optional(),
+  })
+);
 export type Integrations = z.infer<typeof Integrations>;
-export const Integrations = z.object({
-  /**
-   * Index to read latest sync markers from
-   */
-  syncMarkerIndex: z.string().optional(),
-  /**
-   * integrations latest full sync and update syncData
-   */
-  syncData: z
-    .object({
-      /**
-       * Timestamp of the last full sync from integrations
-       */
-      lastFullSync: z.string().datetime().optional(),
-      /**
-       * Timestamp of the last update processed from integrations
-       */
-      lastUpdateProcessed: z.string().datetime().optional(),
-    })
-    .optional(),
-});
 
 /**
  * Defines the lookback period for filtering source data by timestamp.
  */
+export const DateRange = lazySchema(() =>
+  z.object({
+    /**
+     * Start of the lookback period (date math or ISO string, e.g. "now-10d")
+     */
+    start: z.string(),
+    /**
+     * End of the lookback period (date math or ISO string, e.g. "now")
+     */
+    end: z.string(),
+  })
+);
 export type DateRange = z.infer<typeof DateRange>;
-export const DateRange = z.object({
-  /**
-   * Start of the lookback period (date math or ISO string, e.g. "now-10d")
-   */
-  start: z.string(),
-  /**
-   * End of the lookback period (date math or ISO string, e.g. "now")
-   */
-  end: z.string(),
-});
 
+export const UpdateableMonitoringEntitySourceProperties = lazySchema(() =>
+  z.object({
+    type: EntitySourceType.optional(),
+    name: z.string().optional(),
+    indexPattern: z.string().optional(),
+    integrationName: z.string().optional(),
+    enabled: z.boolean().optional(),
+    /**
+     * Field used to query the entity store for index-type sources
+     */
+    identifierField: z.string().optional(),
+    /**
+     * KQL query used to filter data from the provided index patterns
+     */
+    queryRule: z.string().optional(),
+    matchers: z.array(Matcher).optional(),
+    filter: Filter.optional(),
+    integrations: Integrations.optional(),
+    range: DateRange.optional(),
+  })
+);
 export type UpdateableMonitoringEntitySourceProperties = z.infer<
   typeof UpdateableMonitoringEntitySourceProperties
 >;
-export const UpdateableMonitoringEntitySourceProperties = z.object({
-  type: EntitySourceType.optional(),
-  name: z.string().optional(),
-  indexPattern: z.string().optional(),
-  integrationName: z.string().optional(),
-  enabled: z.boolean().optional(),
-  /**
-   * Field used to query the entity store for index-type sources
-   */
-  identifierField: z.string().optional(),
-  /**
-   * KQL query used to filter data from the provided index patterns
-   */
-  queryRule: z.string().optional(),
-  matchers: z.array(Matcher).optional(),
-  filter: Filter.optional(),
-  integrations: Integrations.optional(),
-  range: DateRange.optional(),
-});
 
+export const UpdateEntitySourceNoadditionalProps = lazySchema(() =>
+  UpdateableMonitoringEntitySourceProperties.merge(z.object({}).strict())
+);
 export type UpdateEntitySourceNoadditionalProps = z.infer<
   typeof UpdateEntitySourceNoadditionalProps
 >;
-export const UpdateEntitySourceNoadditionalProps = UpdateableMonitoringEntitySourceProperties.merge(
-  z.object({}).strict()
-);
 
+export const MonitoringEntitySourceProperties = lazySchema(() =>
+  UpdateableMonitoringEntitySourceProperties.merge(
+    z.object({
+      managed: z.boolean().optional(),
+    })
+  )
+);
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
-export const MonitoringEntitySourceProperties = UpdateableMonitoringEntitySourceProperties.merge(
-  z.object({
-    managed: z.boolean().optional(),
-  })
-);
 
+export const MonitoringEntitySourceAttributes = lazySchema(() =>
+  MonitoringEntitySourceProperties.merge(z.object({}))
+);
 export type MonitoringEntitySourceAttributes = z.infer<typeof MonitoringEntitySourceAttributes>;
-export const MonitoringEntitySourceAttributes = MonitoringEntitySourceProperties.merge(
-  z.object({})
-);
 
-export type MonitoringEntitySource = z.infer<typeof MonitoringEntitySource>;
-export const MonitoringEntitySource = MonitoringEntitySourceProperties.merge(
-  z.object({
-    id: z.string(),
-  })
+export const MonitoringEntitySource = lazySchema(() =>
+  MonitoringEntitySourceProperties.merge(
+    z.object({
+      id: z.string(),
+    })
+  )
 );
+export type MonitoringEntitySource = z.infer<typeof MonitoringEntitySource>;

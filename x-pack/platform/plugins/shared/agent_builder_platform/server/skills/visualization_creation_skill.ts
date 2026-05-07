@@ -7,7 +7,7 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-genai-utils';
+import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-tools-base';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 const chartTypeSelectionContent = getChartTypeSelectionPromptContent();

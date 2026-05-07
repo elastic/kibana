@@ -57,6 +57,13 @@ const computedFields: Record<string, RuntimeField> = {
       },
     },
   },
+  assignees: {
+    type: 'keyword',
+    script: { source: "emit('')" },
+    customLabel: i18n.translate('xpack.alertingV2EpisodesUi.assigneesFieldLabel', {
+      defaultMessage: 'Assignee',
+    }),
+  },
 };
 
 const defaultQuery = buildEpisodesBaseQuery().print('basic');

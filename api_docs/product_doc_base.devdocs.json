@@ -61,6 +61,7 @@
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ProductDocBasePluginStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -84,6 +85,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseInstallProductDocOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -159,6 +161,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ProductDocBasePluginStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -182,6 +185,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseProductDocStatusOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -247,6 +251,7 @@
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ProductDocBasePluginStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -270,6 +275,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseUninstallProductDocOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -344,6 +350,7 @@
                 "lineNumber": 22,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ServerError",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -477,6 +484,7 @@
                 "lineNumber": 22,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ServerError",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -571,7 +579,14 @@
         "tags": [],
         "label": "DocSearchOptions",
         "description": [
-          "\nOptions for the Product documentation {@link SearchApi}"
+          "\nOptions for the Product documentation ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.SearchApi",
+            "text": "SearchApi"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
         "lineNumber": 10,
@@ -701,7 +716,14 @@
         "tags": [],
         "label": "DocSearchResponse",
         "description": [
-          "\nResponse for the {@link SearchApi}"
+          "\nResponse for the ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.SearchApi",
+            "text": "SearchApi"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
         "lineNumber": 47,
@@ -744,7 +766,22 @@
         "tags": [],
         "label": "DocSearchResult",
         "description": [
-          "\nIndividual result returned in a {@link DocSearchResponse} by the {@link SearchApi}"
+          "\nIndividual result returned in a ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.DocSearchResponse",
+            "text": "DocSearchResponse"
+          },
+          " by the ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.SearchApi",
+            "text": "SearchApi"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
         "lineNumber": 31,
@@ -894,6 +931,7 @@
             "lineNumber": 58,
             "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "DocSearchOptions",
             "trackAdoption": false
           }
         ],
@@ -983,6 +1021,7 @@
               "lineNumber": 58,
               "columnNumber": 26,
               "deprecated": false,
+              "docsReferencedTypeName": "DocSearchOptions",
               "trackAdoption": false
             }
           ]

@@ -72,6 +72,10 @@ export {
   isComputedColumn,
   getQuerySummary,
   getEsqlControls,
+  getAllEsqlControls,
+  convertFiltersToESQLExpression,
+  convertQueryToESQLExpression,
+  injectWhereClauseAfterSourceCommand,
   type ESQLStatsQueryMeta,
 } from './src';
 

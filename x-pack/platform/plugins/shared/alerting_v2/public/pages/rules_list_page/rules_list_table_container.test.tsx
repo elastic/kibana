@@ -390,7 +390,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
       expect(mockBulkEnableMutate).toHaveBeenCalledWith(
-        { filter: '' },
+        { match_all: true },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -420,7 +420,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
       expect(mockBulkEnableMutate).toHaveBeenCalledWith(
-        { filter: 'kind: alert' },
+        { filter: '(kind: alert)' },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });

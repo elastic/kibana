@@ -45,10 +45,16 @@ export type OptInAction =
 export interface ReportOptInActionParams {
   action: OptInAction;
   source: OptInSource;
+  /** Announcement modal design variant when the event originates from that flow. */
+  announcement_variant?: '1a' | '1b' | '2a';
+  /** Whether the user had prior Observability or Security AI Assistant conversations (current space). */
+  had_prior_ai_assistant_usage?: boolean;
 }
 
 export interface ReportOptOutParams {
   source: 'security_settings_menu' | 'stack_management' | 'agent_builder_nav_control';
+  announcement_variant?: '1a' | '1b' | '2a';
+  had_prior_ai_assistant_usage?: boolean;
 }
 
 export interface ReportAddToChatClickedParams {
@@ -295,6 +301,20 @@ const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
+    announcement_variant: {
+      type: 'keyword',
+      _meta: {
+        description: 'Agent Builder announcement modal variant (1a|1b|2a)',
+        optional: true,
+      },
+    },
+    had_prior_ai_assistant_usage: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the user had prior AI Assistant conversations in the current space',
+        optional: true,
+      },
+    },
   },
 };
 
@@ -307,6 +327,20 @@ const OPT_OUT_EVENT: AgentBuilderTelemetryEvent = {
         description:
           'Source of the opt-out action (security_settings_menu|stack_management|agent_builder_nav_control)',
         optional: false,
+      },
+    },
+    announcement_variant: {
+      type: 'keyword',
+      _meta: {
+        description: 'Agent Builder announcement modal variant (1a|1b|2a)',
+        optional: true,
+      },
+    },
+    had_prior_ai_assistant_usage: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the user had prior AI Assistant conversations in the current space',
+        optional: true,
       },
     },
   },
@@ -802,7 +836,7 @@ const TOOL_CALL_SUCCESS_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom-<sha256_prefix>")',
-        optional: false,
+        optional: true,
       },
     },
     conversation_id: {
@@ -879,7 +913,7 @@ const TOOL_CALL_ERROR_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom-<sha256_prefix>")',
-        optional: false,
+        optional: true,
       },
     },
     conversation_id: {

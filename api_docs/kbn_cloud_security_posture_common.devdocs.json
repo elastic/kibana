@@ -75,6 +75,7 @@
                 "lineNumber": 113,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "UsageCollectionSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -113,6 +114,7 @@
                 "lineNumber": 130,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UiCounterMetricType",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -130,6 +132,7 @@
                 "lineNumber": 131,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CloudSecurityUiCounters",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -349,6 +352,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CspBenchmarkRulesStates",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -590,6 +594,7 @@
             "lineNumber": 40,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "CspBenchmarkRuleMetadata",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -666,6 +671,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CspBenchmarkRuleMetadata",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -703,7 +709,7 @@
           "QueryDslQueryContainer",
           "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
           "QueryDslQueryContainer",
-          "; }; }) => { user: string[]; host: string[]; service: string[]; generic: string[]; all: string[]; }"
+          "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }) => { user: string[]; host: string[]; service: string[]; generic: string[]; all: string[]; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
         "lineNumber": 170,
@@ -743,12 +749,15 @@
               "getEuidDslFilterBasedOnDocument",
               "; getEuidDocumentsContainsIdFilter: typeof ",
               "getEuidDslDocumentsContainsIdFilter",
+              "; }; kql: { getEuidFilterBasedOnDocument: typeof ",
+              "getEuidKqlFilterBasedOnDocument",
               "; }; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
             "lineNumber": 170,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "EntityStoreEuid",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -786,7 +795,7 @@
           "QueryDslQueryContainer",
           "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
           "QueryDslQueryContainer",
-          "; }; }) => { user: string[]; host: string[]; service: string[]; generic: string[]; all: string[]; }"
+          "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }) => { user: string[]; host: string[]; service: string[]; generic: string[]; all: string[]; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
         "lineNumber": 188,
@@ -826,12 +835,15 @@
               "getEuidDslFilterBasedOnDocument",
               "; getEuidDocumentsContainsIdFilter: typeof ",
               "getEuidDslDocumentsContainsIdFilter",
+              "; }; kql: { getEuidFilterBasedOnDocument: typeof ",
+              "getEuidKqlFilterBasedOnDocument",
               "; }; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
             "lineNumber": 188,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "EntityStoreEuid",
             "trackAdoption": false,
             "isRequired": true
           }

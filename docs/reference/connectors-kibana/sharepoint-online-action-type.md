@@ -152,7 +152,7 @@ This matches the **OAuth Client Certificate (Microsoft Entra)** authentication t
 1. Grant **application** Microsoft Graph permissions:
    1. In the app registration, go to **API permissions** > **Add a permission** > **Microsoft Graph** > **Application permissions**.
    2. Add the following permissions:
-      - `Sites.Read.All` — read items in all site collections.
+      - `Sites.Selected` — read items in selected site collections.
       - `Files.Read.All` — read files in all site collections.
       - `Sites.ReadWrite.All` and/or `Files.ReadWrite.All` — only if write operations are needed.
    3. Select **Grant admin consent** for your organization.
@@ -199,7 +199,7 @@ This matches the **OAuth 2.0 authorization code** authentication type in {{kib}}
 2. Grant **delegated** Microsoft Graph permissions:
    1. In the app registration, go to **API permissions** > **Add a permission** > **Microsoft Graph** > **Delegated permissions**.
    2. Add the following permissions:
-      - `Sites.Read.All` — read items in site collections the signed-in user has access to.
+      - `Sites.Selected` — read items in selected site collections.
       - `Files.Read.All` — read files in site collections the signed-in user has access to.
       - `offline_access` — allow {{kib}} to refresh tokens without re-prompting the user.
    3. Select **Grant admin consent** if required by your tenant's policy.

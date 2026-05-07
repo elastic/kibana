@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { BehaviorSubject, firstValueFrom, merge, skip, map } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map, merge, skip } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
@@ -20,10 +20,10 @@ import type { FetchContext } from '@kbn/presentation-publishing';
 import {
   initializeTimeRangeManager,
   initializeTitleManager,
+  initializeUnsavedChanges,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
-  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
@@ -118,11 +118,12 @@ export const getSearchEmbeddableFactory = ({
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const fetchContext$ = new BehaviorSubject<FetchContext | undefined>(undefined);
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
+      const refreshTrigger$ = new BehaviorSubject<void>(undefined);
 
       /** Build API */
       const titleManager = initializeTitleManager(runtimeState);
       const timeRangeManager = initializeTimeRangeManager(runtimeState);
-      const drilldownsManager = await initializeDrilldownsManager(uuid, runtimeState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, runtimeState);
       const searchEmbeddable = await initializeSearchEmbeddableApi({
         initialState: runtimeState,
         dataLoading$,
@@ -146,7 +147,9 @@ export const getSearchEmbeddableFactory = ({
         uuid,
         parentApi,
         tabs,
+        analytics: discoverServices.analytics,
         selectedTabId$,
+        savedObjectId$,
         searchEmbeddable,
         blockingError$,
         dataLoading$,
@@ -297,6 +300,7 @@ export const getSearchEmbeddableFactory = ({
         discoverServices,
         stateManager: searchEmbeddable.stateManager,
         scopedProfilesManager,
+        refreshTrigger$,
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
@@ -359,6 +363,10 @@ export const getSearchEmbeddableFactory = ({
             },
             [dataView]
           );
+
+          const onRefreshData = useCallback(() => {
+            refreshTrigger$.next(undefined);
+          }, []);
 
           const renderAsFieldStatsTable = useMemo(
             () => isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings),
@@ -427,6 +435,7 @@ export const getSearchEmbeddableFactory = ({
                       <SearchEmbeddableGridComponent
                         api={{ ...api, fetchWarnings$, fetchContext$ }}
                         dataView={dataView!}
+                        onRefreshData={onRefreshData}
                         onAddFilter={
                           runtimeState.nonPersistedDisplayOptions?.enableFilters === false
                             ? undefined

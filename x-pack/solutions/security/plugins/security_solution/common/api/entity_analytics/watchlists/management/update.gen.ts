@@ -14,39 +14,43 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { WatchlistObject } from './common.gen';
 
+export const UpdateWatchlistRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the watchlist to update
+     */
+    id: z.string(),
+  })
+);
 export type UpdateWatchlistRequestParams = z.infer<typeof UpdateWatchlistRequestParams>;
-export const UpdateWatchlistRequestParams = z.object({
-  /**
-   * The ID of the watchlist to update
-   */
-  id: z.string(),
-});
 export type UpdateWatchlistRequestParamsInput = z.input<typeof UpdateWatchlistRequestParams>;
 
+export const UpdateWatchlistRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Unique name of the watchlist
+     */
+    name: z.string(),
+    /**
+     * Description of the watchlist
+     */
+    description: z.string().optional(),
+    /**
+     * Risk score modifier associated with the watchlist
+     */
+    riskModifier: z.number().min(0).max(2),
+    /**
+     * Indicates if the watchlist is managed by the system
+     */
+    managed: z.boolean().optional(),
+  })
+);
 export type UpdateWatchlistRequestBody = z.infer<typeof UpdateWatchlistRequestBody>;
-export const UpdateWatchlistRequestBody = z.object({
-  /**
-   * Unique name of the watchlist
-   */
-  name: z.string(),
-  /**
-   * Description of the watchlist
-   */
-  description: z.string().optional(),
-  /**
-   * Risk score modifier associated with the watchlist
-   */
-  riskModifier: z.number().min(0).max(2),
-  /**
-   * Indicates if the watchlist is managed by the system
-   */
-  managed: z.boolean().optional(),
-});
 export type UpdateWatchlistRequestBodyInput = z.input<typeof UpdateWatchlistRequestBody>;
 
+export const UpdateWatchlistResponse = lazySchema(() => WatchlistObject);
 export type UpdateWatchlistResponse = z.infer<typeof UpdateWatchlistResponse>;
-export const UpdateWatchlistResponse = WatchlistObject;

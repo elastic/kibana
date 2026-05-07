@@ -22,11 +22,15 @@ jest.mock('../../document/components/severity', () => ({
   DocumentSeverity: () => <div data-test-subj="mockDocumentSeverity" />,
 }));
 
-jest.mock('../../document/components/timestamp', () => ({
-  Timestamp: () => <div data-test-subj="mockTimestamp" />,
+jest.mock('./timestamp', () => ({
+  Timestamp: ({ hit }: { hit: { id: string; flattened: Record<string, unknown> } }) => (
+    <div data-test-subj="mockTimestamp" data-hit-id={hit.id} />
+  ),
 }));
 
-const createMockHit = (flattened: DataTableRecord['flattened'] = {}): DataTableRecord =>
+const createMockHit = (
+  flattened: DataTableRecord['flattened'] = { '@timestamp': '2024-01-15T10:30:00.000Z' }
+): DataTableRecord =>
   ({
     id: 'hit-1',
     raw: {},
@@ -67,5 +71,6 @@ describe('<ToolsFlyoutHeader />', () => {
   it('should render the document timestamp', () => {
     const { getByTestId } = renderHeader();
     expect(getByTestId('mockTimestamp')).toBeInTheDocument();
+    expect(getByTestId('mockTimestamp')).toHaveAttribute('data-hit-id', 'hit-1');
   });
 });

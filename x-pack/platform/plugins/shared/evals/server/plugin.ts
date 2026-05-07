@@ -35,11 +35,13 @@ export class EvalsPlugin
 {
   private readonly logger: Logger;
   private readonly config: EvalsConfig;
+  private readonly isServerless: boolean;
   private datasetService?: DatasetService;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   setup(
@@ -52,7 +54,7 @@ export class EvalsPlugin
     }
 
     this.logger.info('Setting up Evals plugin');
-    this.datasetService = new DatasetService(this.logger);
+    this.datasetService = new DatasetService(this.logger, this.isServerless);
 
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
     encryptedSavedObjects.registerType({

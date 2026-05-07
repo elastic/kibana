@@ -15,7 +15,7 @@ export * from './auth_types/basic';
 export * from './auth_types/gcp_service_account';
 export * from './auth_types/none';
 export * from './auth_types/oauth';
-export * from './auth_types/oauth_authorization_code';
+export { OAuthAuthorizationCode } from './auth_types/oauth_authorization_code';
 export { OAuthEntraClientCertificate } from './auth_types/oauth_entra_client_certificate';
 export { Ears } from './auth_types/ears';
 

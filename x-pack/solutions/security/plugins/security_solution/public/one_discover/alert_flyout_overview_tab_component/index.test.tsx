@@ -15,13 +15,16 @@ import { Router } from '@kbn/shared-ux-router';
 import { createStore } from 'redux';
 import { AlertFlyoutOverviewTab } from '.';
 import type { StartServices } from '../../types';
+import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 
 jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
   UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+const mockOverviewTab = jest.fn((_: unknown) => <div>{'MockOverviewTab'}</div>);
+
 jest.mock('../../flyout_v2/document/tabs/overview_tab', () => ({
-  OverviewTab: () => <div>{'MockOverviewTab'}</div>,
+  OverviewTab: (props: unknown) => mockOverviewTab(props),
 }));
 
 jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
@@ -52,6 +55,11 @@ jest.mock('../../common/hooks/use_experimental_features', () => ({
     mockUseIsExperimentalFeatureEnabled(feature),
 }));
 
+const mockUseIsInSecurityApp = jest.fn();
+jest.mock('../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: () => mockUseIsInSecurityApp(),
+}));
+
 describe('AlertFlyoutOverviewTab', () => {
   const onAlertUpdated = jest.fn();
   const servicesMock = {
@@ -68,8 +76,10 @@ describe('AlertFlyoutOverviewTab', () => {
   } as unknown as StartServices;
 
   beforeEach(() => {
+    mockOverviewTab.mockClear();
     mockUseInitDataViewManager.mockReset();
     mockUseIsExperimentalFeatureEnabled.mockReset();
+    mockUseIsInSecurityApp.mockReturnValue(false);
   });
 
   it('wraps the overview tab in KibanaContextProvider and ReactQueryClientProvider', async () => {
@@ -302,5 +312,96 @@ describe('AlertFlyoutOverviewTab', () => {
     await waitFor(() => {
       expect(screen.getByText('MockOverviewTab')).toBeInTheDocument();
     });
+  });
+
+  it('passes a Discover-aware cell action renderer to the overview tab', async () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const store = createStore(() => ({
+      dataViewManager: {
+        shared: { status: 'pristine' },
+      },
+    }));
+
+    render(
+      <AlertFlyoutOverviewTab
+        hit={hit}
+        servicesPromise={Promise.resolve(servicesMock)}
+        storePromise={Promise.resolve(store as never)}
+        onAlertUpdated={onAlertUpdated}
+        columns={['host.name']}
+        filter={jest.fn()}
+        onAddColumn={jest.fn()}
+        onRemoveColumn={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('MockOverviewTab')).toBeInTheDocument();
+    });
+
+    expect(mockOverviewTab).toHaveBeenCalledWith(
+      expect.objectContaining({
+        renderCellActions: expect.any(Function),
+      })
+    );
+
+    const lastCall = mockOverviewTab.mock.calls[mockOverviewTab.mock.calls.length - 1];
+    const lastProps = lastCall?.[0] as { renderCellActions?: unknown } | undefined;
+    const renderCellActions = lastProps?.renderCellActions;
+    expect(renderCellActions).not.toBe(noopCellActionRenderer);
+  });
+
+  it('renders DataViewManagerBootstrap when not in the Security app', async () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    mockUseIsInSecurityApp.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      (feature: string) => feature === 'newDataViewPickerEnabled'
+    );
+
+    const initSpy = jest.fn();
+    mockUseInitDataViewManager.mockReturnValue(initSpy);
+
+    const store = createStore(() => ({ dataViewManager: { shared: { status: 'pristine' } } }));
+
+    await act(async () => {
+      TestRenderer.create(
+        <AlertFlyoutOverviewTab
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={onAlertUpdated}
+        />
+      );
+      await Promise.resolve();
+    });
+
+    expect(initSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render DataViewManagerBootstrap when in the Security app', async () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    mockUseIsInSecurityApp.mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      (feature: string) => feature === 'newDataViewPickerEnabled'
+    );
+
+    const initSpy = jest.fn();
+    mockUseInitDataViewManager.mockReturnValue(initSpy);
+
+    const store = createStore(() => ({ dataViewManager: { shared: { status: 'pristine' } } }));
+
+    await act(async () => {
+      TestRenderer.create(
+        <AlertFlyoutOverviewTab
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={onAlertUpdated}
+        />
+      );
+      await Promise.resolve();
+    });
+
+    expect(initSpy).not.toHaveBeenCalled();
   });
 });
