@@ -59,7 +59,7 @@ export const prepareOperationExecution = async ({
   resolvePanelsFromAttachments,
   resolveVisualizationConfig,
 }: PrepareOperationExecutionParams): Promise<OperationExecutionContext> => {
-  const resolvedInlinePanelSources = await resolveVisualizationCreationRequests({
+  const resolvedVisualizationCreationRequests = await resolveVisualizationCreationRequests({
     operations,
     resolveVisualizationConfig,
   });
@@ -67,7 +67,7 @@ export const prepareOperationExecution = async ({
   return {
     logger,
     failures,
-    resolvedVisualizationCreationRequests: resolvedInlinePanelSources,
+    resolvedVisualizationCreationRequests,
     resolvePanelsFromAttachments,
     resolveVisualizationConfig,
   };
