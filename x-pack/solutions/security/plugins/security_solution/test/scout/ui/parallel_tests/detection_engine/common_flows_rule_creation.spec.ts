@@ -11,10 +11,11 @@ import { expect } from '@kbn/scout-security/ui';
 // Test data — same values as the Cypress ruleFields object
 const RULE_NAME = 'Test Rule';
 const RULE_DESCRIPTION = 'Test Rule Description';
-const MAX_SIGNALS = '100';
+const MAX_SIGNALS = '200';
 const SETUP_GUIDE_TEXT = '# test setup markdown';
 const LOOK_BACK_VALUE = '50000';
 const LOOK_BACK_UNIT = 'h';
+const TIMELINE_QUERY = 'host.name: *';
 
 spaceTest.describe(
   'Common rule creation flows',
@@ -49,12 +50,12 @@ spaceTest.describe(
 
         await spaceTest.step('fill define section and continue', async () => {
           await createRulePage.importQueryFromTimeline(timelineId);
-          await expect(createRulePage.customQueryInput).not.toBeEmpty();
+          await expect(createRulePage.customQueryInput).toHaveValue(TIMELINE_QUERY);
           await createRulePage.defineContinueButton.click();
         });
 
         await spaceTest.step('fill about section and continue', async () => {
-          await createRulePage.ruleNameInput.waitFor({ state: 'visible' });
+          await createRulePage.ruleNameInput.waitFor();
           await createRulePage.fillRuleName(RULE_NAME);
           await createRulePage.fillRuleDescription(RULE_DESCRIPTION);
           await createRulePage.expandAdvancedSettings();
@@ -65,13 +66,14 @@ spaceTest.describe(
         });
 
         await spaceTest.step('fill schedule and verify state persistence', async () => {
-          await createRulePage.scheduleContinueButton.waitFor({ state: 'visible' });
+          await createRulePage.scheduleContinueButton.waitFor();
           await createRulePage.lookBackInterval.scrollIntoViewIfNeeded();
           await createRulePage.fillLookBack(LOOK_BACK_VALUE, LOOK_BACK_UNIT);
+          await expect(createRulePage.lookBackInterval).toHaveValue(LOOK_BACK_VALUE);
 
           // Go back to define step and verify query is still there
           await createRulePage.defineEditButton.click();
-          await expect(createRulePage.customQueryInput).not.toBeEmpty();
+          await expect(createRulePage.customQueryInput).toHaveValue(TIMELINE_QUERY);
           await createRulePage.defineContinueButton.click();
 
           // Go back to about step and verify rule name is still there
@@ -79,7 +81,7 @@ spaceTest.describe(
           await expect(createRulePage.ruleNameInput).toHaveValue(RULE_NAME);
           await createRulePage.aboutContinueButton.scrollIntoViewIfNeeded();
           await createRulePage.aboutContinueButton.click();
-          await createRulePage.scheduleContinueButton.waitFor({ state: 'visible' });
+          await createRulePage.scheduleContinueButton.waitFor();
           await createRulePage.scheduleContinueButton.click();
         });
 
