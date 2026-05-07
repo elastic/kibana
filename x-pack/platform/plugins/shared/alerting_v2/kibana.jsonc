@@ -21,6 +21,7 @@
       "security",
       "encryptedSavedObjects",
       "workflowsManagement",
+      "workflowsExtensions",
       "expressions",
       "uiActions",
       "fieldFormats",
