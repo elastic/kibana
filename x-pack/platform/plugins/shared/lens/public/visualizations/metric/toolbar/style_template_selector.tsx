@@ -7,8 +7,10 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { MetricStyleTemplateId, MetricStyleTemplatePresetId } from '@kbn/lens-common';
 
@@ -46,6 +48,15 @@ const styleTemplates: Array<{
   },
 ];
 
+const styleTemplateGridStyles = {
+  gridItem: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexBasis: `calc(50% - ${euiTheme.size.xs})`,
+      minWidth: `calc(50% - ${euiTheme.size.xs})`,
+      maxWidth: `calc(50% - ${euiTheme.size.xs})`,
+    }),
+};
+
 export function StyleTemplateSelector({
   selectedTemplate,
   onSelectTemplate,
@@ -53,20 +64,13 @@ export function StyleTemplateSelector({
   selectedTemplate: MetricStyleTemplateId;
   onSelectTemplate: (template: MetricStyleTemplateId) => void;
 }) {
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(styleTemplateGridStyles);
 
   return (
     <div role="radiogroup" aria-label={styleTemplateSelectorLabel}>
       <EuiFlexGroup gutterSize="s" wrap>
         {styleTemplates.map(({ id, label, preview }) => (
-          <EuiFlexItem
-            key={id}
-            css={css`
-              flex-basis: calc(50% - ${euiTheme.size.xs});
-              min-width: calc(50% - ${euiTheme.size.xs});
-              max-width: calc(50% - ${euiTheme.size.xs});
-            `}
-          >
+          <EuiFlexItem key={id} css={styles.gridItem}>
             <StyleTemplateCard
               id={id}
               label={label}
