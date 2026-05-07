@@ -6,10 +6,7 @@
  */
 
 import type { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type {
-  FieldValuePair,
-  CommonCorrelationsQueryParams,
-} from '../../../../common/correlations/types';
+import type { FieldValuePair, CommonCorrelationsQueryParams } from '@kbn/apm-types';
 import { TERMS_SIZE } from '../../../../common/correlations/constants';
 
 import { splitAllSettledPromises } from '../utils';

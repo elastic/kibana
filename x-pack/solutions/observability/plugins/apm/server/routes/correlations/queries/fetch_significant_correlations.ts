@@ -9,7 +9,7 @@ import { range } from 'lodash';
 
 import { termQuery } from '@kbn/observability-plugin/server';
 import { isNonLocalIndexName } from '@kbn/es-query';
-import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
+import type { LatencyCorrelation } from '@kbn/apm-types';
 import type {
   CommonCorrelationsQueryParams,
   EntityType,

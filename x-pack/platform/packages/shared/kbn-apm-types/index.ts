@@ -22,3 +22,4 @@ export type * from './src/coordinate';
 export * from './src/downstream_dependencies';
 export * from './src/latency_aggregation_types';
 export * from './src/apm_timeseries';
+export type * from './src/correlations';
