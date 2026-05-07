@@ -10106,14 +10106,14 @@
   dependencies:
     "@opentelemetry/semantic-conventions" "1.28.0"
 
-"@opentelemetry/core@2.6.0", "@opentelemetry/core@2.x", "@opentelemetry/core@^2.0.0":
+"@opentelemetry/core@2.6.0":
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-2.6.0.tgz#719c829ed98bd7af808a2d2c83374df1fd1f3c66"
   integrity sha512-HLM1v2cbZ4TgYN6KEOj+Bbj8rAKriOdkF9Ed3tG25FoprSiQl7kYc+RRT6fUZGOvx0oMi5U67GoFdT+XUn8zEg==
   dependencies:
     "@opentelemetry/semantic-conventions" "^1.29.0"
 
-"@opentelemetry/core@2.6.1":
+"@opentelemetry/core@2.6.1", "@opentelemetry/core@2.x", "@opentelemetry/core@^2.0.0":
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-2.6.1.tgz#a59d22a9ae3be80bb41b280bbbe1fe9fbdb6c2a5"
   integrity sha512-8xHSGWpJP9wBxgBpnqGL0R3PbdWQndL1Qp50qrg71+B28zK5OQmUgcDKLJgzyAAV38t4tOyLMGDD60LneR5W8g==
@@ -10991,7 +10991,7 @@
     "@opentelemetry/core" "1.30.1"
     "@opentelemetry/semantic-conventions" "1.28.0"
 
-"@opentelemetry/resources@2.6.0", "@opentelemetry/resources@^2.0.0":
+"@opentelemetry/resources@2.6.0":
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/resources/-/resources-2.6.0.tgz#1a945dbb8986043d8b593c358d5d8e3de6becf5a"
   integrity sha512-D4y/+OGe3JSuYUCBxtH5T9DSAWNcvCb/nQWIga8HNtXTVPQn59j0nTBAgaAXxUVBDl40mG3Tc76b46wPlZaiJQ==
@@ -10999,7 +10999,7 @@
     "@opentelemetry/core" "2.6.0"
     "@opentelemetry/semantic-conventions" "^1.29.0"
 
-"@opentelemetry/resources@2.6.1":
+"@opentelemetry/resources@2.6.1", "@opentelemetry/resources@^2.0.0":
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/resources/-/resources-2.6.1.tgz#e1b02772c5f65c0e074d59e4743188f7575e97c7"
   integrity sha512-lID/vxSuKWXM55XhAKNoYXu9Cutoq5hFdkbTdI/zDKQktXzcWBVhNsOkiZFTMU9UtEWuGRNe0HUgmsFldIdxVA==
@@ -21216,7 +21216,7 @@ fast-xml-builder@^1.1.4:
   dependencies:
     path-expression-matcher "^1.1.3"
 
-fast-xml-parser@5.4.1, fast-xml-parser@5.5.7, fast-xml-parser@^5.3.4, fast-xml-parser@^5.5.1:
+fast-xml-parser@5.4.1, fast-xml-parser@5.5.7, fast-xml-parser@^5.5.1:
   version "5.5.7"
   resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.5.7.tgz#e1ddc86662d808450a19cf2fb6ccc9c3c9933c5d"
   integrity sha512-LteOsISQ2GEiDHZch6L9hB0+MLoYVLToR7xotrzU0opCICBkxOPgHAy1HxAvtxfJNXDJpgAsQN30mkrfpO2Prg==
@@ -27665,16 +27665,7 @@ openapi-fetch@^0.12.5:
   dependencies:
     openapi-typescript-helpers "^0.0.15"
 
-openapi-sampler@^1.5.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/openapi-sampler/-/openapi-sampler-1.7.0.tgz#d57790d5094f2ef5f8402d87ac1b197b3ed82187"
-  integrity sha512-fWq32F5vqGpgRJYIarC/9Y1wC9tKnRDcCOjsDJ7MIcSv2HsE7kNifcXIZ8FVtNStBUWxYrEk/MKqVF0SwZ5gog==
-  dependencies:
-    "@types/json-schema" "^7.0.7"
-    fast-xml-parser "^5.3.4"
-    json-pointer "0.6.2"
-
-openapi-sampler@^1.7.1:
+openapi-sampler@^1.5.0, openapi-sampler@^1.7.1:
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/openapi-sampler/-/openapi-sampler-1.7.2.tgz#2bb1087af0b77007829d788536fa2218171d0aad"
   integrity sha512-OKytvqB5XIaTgA9xtw8W8UTar+uymW2xPVpFN0NihMtuHPdPTGxBEhGnfFnJW5g/gOSIvkP+H0Xh3XhVI9/n7g==
