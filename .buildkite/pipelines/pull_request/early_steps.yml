@@ -7,6 +7,9 @@ steps:
       diskType: hyperdisk-balanced
       zones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 200
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
     key: build
     timeout_in_minutes: 60
     retry:
@@ -21,6 +24,9 @@ steps:
     agents:
       machineType: n2-standard-2
       diskSizeGb: 115
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
     timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
@@ -37,6 +43,9 @@ steps:
     if: "build.env('SKIP_CI') != 'true'"
     agents:
       machineType: n2d-standard-8
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
     key: build_scout_tests
     timeout_in_minutes: 20
     env:
