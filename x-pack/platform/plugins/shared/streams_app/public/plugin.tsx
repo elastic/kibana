@@ -110,6 +110,22 @@ export class StreamsAppPlugin
       appRoute: '/app/streams',
       category: DEFAULT_APP_CATEGORIES.management,
       order: 10000,
+      // Entity-centric lab: deep link consumed by the Observability nav tree
+      // (gated client-side by the `discover:entityCentricLab` UI setting). The
+      // backing route is registered in `routes/config.tsx`.
+      deepLinks: [
+        {
+          id: 'manageEntityTypes',
+          title: i18n.translate('xpack.streams.deepLinks.manageEntityTypesTitle', {
+            defaultMessage: 'Manage entity types',
+          }),
+          path: '/manage-entity-types',
+          // Hidden from the global side nav / search by default; the
+          // Observability solution nav tree explicitly references it when the
+          // entity-centric lab is enabled.
+          visibleIn: [],
+        },
+      ],
       updater$: from(startServicesPromise).pipe(
         switchMap(([_, pluginsStart]) =>
           pluginsStart.streams.navigationStatus$.pipe(

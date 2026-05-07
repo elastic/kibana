@@ -41,18 +41,40 @@ function isEditingFromDashboard(
   return isVizApp && hasOriginatingApp;
 }
 
+/**
+ * Hard-coded entity-type sub-links for the entity-centric lab "Entities" panel.
+ * Counts are mocked from the design — clicking any of these takes the user to
+ * the Manage entity types page (filtered by category in a future iteration).
+ */
+const ENTITY_CENTRIC_LAB_ENTITIES_PANEL_ITEMS: ReadonlyArray<{ id: string; title: string }> = [
+  { id: 'all', title: 'All entities (40)' },
+  { id: 'hosts', title: 'Hosts (200)' },
+  { id: 'kubernetes', title: 'Kubernetes (123)' },
+  { id: 'databases', title: 'Databases (12)' },
+  { id: 'services', title: 'Services (4)' },
+  { id: 'cloud', title: 'Cloud (8)' },
+  { id: 'apm-service', title: 'APM Service' },
+  { id: 'aws-ec2', title: 'AWS EC2 Instance' },
+  { id: 'aws-lambda', title: 'AWS Lambda function' },
+  { id: 'aws-s3', title: 'AWS S3 bucket' },
+  { id: 'middleware', title: 'Middleware (3)' },
+  { id: 'llms', title: 'LLMs (2)' },
+];
+
 function createNavTree({
   streamsAvailable,
   showAiAssistant,
   isCloudEnabled,
   showAlertingV2,
   ingestHubAvailable,
+  entityCentricLabEnabled,
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
   showAlertingV2?: boolean;
   ingestHubAvailable?: boolean;
+  entityCentricLabEnabled?: boolean;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -101,9 +123,72 @@ function createNavTree({
       },
       ...(streamsAvailable
         ? [
+            entityCentricLabEnabled
+              ? {
+                  link: 'streams' as const,
+                  icon: 'productStreamsWired',
+                  // When the entity-centric lab is on, expose `Manage entity
+                  // types` directly under Streams (Cases-style sub-items).
+                  children: [
+                    {
+                      link: 'streams' as const,
+                      title: i18n.translate('xpack.observability.obltNav.streams.allStreams', {
+                        defaultMessage: 'All streams',
+                      }),
+                      getIsActive: ({
+                        pathNameSerialized,
+                        prepend,
+                      }: {
+                        pathNameSerialized: string;
+                        prepend: (path: string) => string;
+                      }) => {
+                        const root = prepend('/app/streams');
+                        return (
+                          pathNameSerialized === root ||
+                          pathNameSerialized === `${root}/` ||
+                          (pathNameSerialized.startsWith(root) &&
+                            !pathNameSerialized.startsWith(`${root}/manage-entity-types`))
+                        );
+                      },
+                    },
+                    {
+                      link: 'streams:manageEntityTypes' as const,
+                    },
+                  ],
+                }
+              : {
+                  link: 'streams' as const,
+                  icon: 'productStreamsWired',
+                },
+          ]
+        : []),
+      ...(entityCentricLabEnabled
+        ? [
             {
-              link: 'streams' as const,
-              icon: 'productStreamsWired',
+              id: 'entities',
+              title: i18n.translate('xpack.observability.obltNav.entities', {
+                defaultMessage: 'Entities',
+              }),
+              renderAs: 'panelOpener' as const,
+              icon: 'tableDensityNormal',
+              children: [
+                {
+                  // No sub-group title — children sit directly under the panel
+                  // header. Each entity-type entry navigates to the same
+                  // Manage entity types page (lab placeholder).
+                  children: [
+                    ...ENTITY_CENTRIC_LAB_ENTITIES_PANEL_ITEMS.map((item) => ({
+                      id: `entityCentricLab-${item.id}`,
+                      title: item.title,
+                      link: 'streams:manageEntityTypes' as const,
+                    })),
+                    {
+                      id: 'entityCentricLab-manage',
+                      link: 'streams:manageEntityTypes' as const,
+                    },
+                  ],
+                },
+              ],
             },
           ]
         : []),
@@ -713,6 +798,13 @@ function createNavTree({
   return navTree;
 }
 
+// Mirrors the constant declared in the Discover plugin
+// (`src/platform/plugins/shared/discover/public/lab/entity_centric/constants.ts`).
+// Inlined here to avoid a cross-plugin public-import that would couple the
+// Observability nav to Discover's internals; the setting key is a stable
+// public contract registered server-side in `discover/server/ui_settings.ts`.
+const ENTITY_CENTRIC_LAB_SETTING = 'discover:entityCentricLab';
+
 export const createDefinition = (
   coreStart: CoreStart,
   pluginsStart: ObservabilityPublicPluginsStart
@@ -724,14 +816,16 @@ export const createDefinition = (
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
     pluginsStart.ingestHub?.navigationAvailable$ || of(false),
+    coreStart.settings.client.get$<boolean>(ENTITY_CENTRIC_LAB_SETTING, false),
   ]).pipe(
-    map(([{ status }, chatExperience, ingestHubAvailable]) =>
+    map(([{ status }, chatExperience, ingestHubAvailable, entityCentricLabEnabled]) =>
       createNavTree({
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
         showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
         ingestHubAvailable,
+        entityCentricLabEnabled: Boolean(entityCentricLabEnabled),
       })
     )
   ),

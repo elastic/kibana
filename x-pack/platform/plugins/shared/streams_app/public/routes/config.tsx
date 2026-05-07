@@ -17,6 +17,7 @@ import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
 import { SignificantEventsDiscoveryPage } from '../components/sig_events/significant_events_discovery/page';
+import { ManageEntityTypesView } from '../components/entity_centric_lab';
 
 /**
  * Optional time range query params.
@@ -66,6 +67,19 @@ const streamsAppRoutes = {
         element: <StreamListView />,
         params: t.partial({
           query: timeRangeQueryParams,
+        }),
+      },
+      /**
+       * Entity-centric lab: prototype management page reachable via the
+       * `streams:manageEntityTypes` deep link. Gated client-side by the
+       * `discover:entityCentricLab` UI setting at the Observability nav layer.
+       */
+      '/manage-entity-types': {
+        element: <ManageEntityTypesView />,
+        params: t.partial({
+          query: t.partial({
+            category: t.string,
+          }),
         }),
       },
       '/_discovery': {
