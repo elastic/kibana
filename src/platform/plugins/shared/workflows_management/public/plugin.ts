@@ -217,10 +217,19 @@ export class WorkflowsPlugin
   private setupAgentBuilderStart(
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
   ): void {
-    this.agentBuilderPromise = core.plugins
-      .onStart<{ agentBuilder: AgentBuilderPluginStart }>('agentBuilder')
-      .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined))
-      .catch(() => undefined);
+    // `core.plugins.onStart` throws synchronously when the named plugin is not in the
+    // current build's dependency map — which happens when `agentBuilder` is disabled
+    // for the running solution/tier (e.g. serverless security essentials sets
+    // `xpack.agentBuilder.enabled: false`). The synchronous throw bypasses the
+    // promise `.catch`, so we wrap the call in try/catch and fall back to undefined.
+    try {
+      this.agentBuilderPromise = core.plugins
+        .onStart<{ agentBuilder: AgentBuilderPluginStart }>('agentBuilder')
+        .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined))
+        .catch(() => undefined);
+    } catch {
+      this.agentBuilderPromise = Promise.resolve(undefined);
+    }
   }
 
   /** Creates the start services to be used in the Kibana services context of the workflows application */
