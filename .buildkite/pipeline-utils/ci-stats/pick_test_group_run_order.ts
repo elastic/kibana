@@ -18,6 +18,7 @@ import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';
 import type { TestGroupRunOrderResponse } from './client';
 import { CiStatsClient } from './client';
+import { getTrackedBranch } from '../utils';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import SHARDED_JEST_CONFIGS from '../../sharded_jest_configs.json';
@@ -27,15 +28,20 @@ import {
   getAffectedPackages,
   listChangedFiles,
   filterFilesByPackages,
-  SELECTIVE_TESTS_LABEL,
+  PREVENT_SELECTIVE_TESTS_LABEL,
   CRITICAL_FILES_JEST_UNIT_TESTS,
   touchedCriticalFiles,
   CRITICAL_FILES_JEST_INTEGRATION_TESTS,
 } from '../affected-packages';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
-// TODO: this is always false on on-merge, when switching to enable this by default, check if this is a PR
-const USE_SELECTIVE_TESTING = process.env.GITHUB_PR_LABELS?.includes(SELECTIVE_TESTS_LABEL);
+const prLabels =
+  process.env.GITHUB_PR_LABELS?.split(',')
+    .map((l) => l.trim())
+    .filter(Boolean) ?? [];
+const isPrBuild = Boolean(process.env.GITHUB_PR_NUMBER);
+const preventSelectiveTesting = prLabels.includes(PREVENT_SELECTIVE_TESTS_LABEL);
+const USE_SELECTIVE_TESTING = isPrBuild && !preventSelectiveTesting;
 
 const SHARD_ANNOTATION_SEP = '||shard=';
 /**
@@ -566,23 +572,6 @@ function getRunGroup(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string
     throw new Error(`expected to find exactly 1 "${typeName}" run group`);
   }
   return groups[0];
-}
-
-function getTrackedBranch(): string {
-  let pkg;
-  try {
-    pkg = JSON.parse(Fs.readFileSync('package.json', 'utf8'));
-  } catch (_) {
-    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to read kibana's package.json file: ${error.message}`);
-  }
-
-  const branch = pkg.branch;
-  if (typeof branch !== 'string') {
-    throw new Error('missing `branch` field from package.json file');
-  }
-
-  return branch;
 }
 
 function isObj(x: unknown): x is Record<string, unknown> {

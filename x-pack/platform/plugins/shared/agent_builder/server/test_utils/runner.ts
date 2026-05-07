@@ -340,6 +340,11 @@ export interface ToolHandlerContextMock extends ToolHandlerContext {
 
 export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
   return {
+    callContext: {
+      toolId: 'toolId',
+      toolCallId: 'toolCallId',
+      callSource: 'agent',
+    },
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     esClient: elasticsearchServiceMock.createScopedClusterClient(),

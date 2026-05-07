@@ -65,6 +65,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
             ),
             render: (connector: ConnectorViewItem) => (
               <EuiLinkTo
+                data-test-subj="contentConnectorsConnectorsTableNameLink"
                 to={generateEncodedPath(CONNECTOR_DETAIL_PATH, { connectorId: connector.id })}
               >
                 {connector.name}

@@ -192,6 +192,7 @@ export const builtinToolToExecutable = ({
     tags: tool.tags,
     configuration: {},
     readonly: true,
+    experimental: tool.experimental ?? false,
     getSchema: () => tool.schema,
     summarizeToolReturn: tool.summarizeToolReturn,
     execute: async (params) => {
@@ -204,6 +205,7 @@ export const builtinToolToExecutable = ({
           tags: tool.tags,
           configuration: {},
           readonly: true,
+          experimental: tool.experimental ?? false,
           confirmation: { askUser: 'never' },
           isAvailable: async () => ({ status: 'available' as const }),
           getSchema: () => tool.schema,

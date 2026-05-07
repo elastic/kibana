@@ -105,6 +105,7 @@ export interface UpdatePackageRequest {
   };
   body: {
     keepPoliciesUpToDate?: boolean;
+    namespace_customization_enabled_for?: string[];
   };
 }
 

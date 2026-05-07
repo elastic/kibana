@@ -45,6 +45,7 @@ export type {
   ScopedModel,
   ModelProviderStats,
   ModelCallInfo,
+  ModelSelectionPreferences,
 } from './model_provider';
 export type { ToolResultStore, WritableToolResultStore, ToolResultWithMeta } from './result_store';
 export type { AttachmentsService } from './attachments_service';

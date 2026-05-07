@@ -10,11 +10,9 @@
 import YAML, { LineCounter } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
 import { buildWorkflowLookup } from './build_workflow_lookup';
-import {
-  correctYamlSyntax,
-  parseWorkflowYamlForAutocomplete,
-} from '../../../../../../common/lib/yaml';
+import { correctYamlSyntax } from '../../../../../../common/lib/yaml';
 import type { ComputedData } from '../types';
 
 export const performComputation = (

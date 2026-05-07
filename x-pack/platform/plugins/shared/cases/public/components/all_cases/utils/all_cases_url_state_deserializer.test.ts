@@ -25,6 +25,7 @@ describe('allCasesUrlStateDeserializer', () => {
         "filterOptions": Object {
           "assignees": Array [],
           "category": Array [],
+          "extendedFieldFilters": Array [],
           "from": "now-30d",
           "owner": Array [],
           "reporters": Array [],
