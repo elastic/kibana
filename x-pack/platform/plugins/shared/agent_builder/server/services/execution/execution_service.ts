@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import { shareReplay } from 'rxjs';
+import { EMPTY, shareReplay } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -78,6 +78,22 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     abortSignal,
     metadata,
   }: ExecuteAgentParams): Promise<ExecuteAgentResult> {
+    // For standing sessions that are currently active: queue the incoming message
+    // instead of starting a concurrent round. Skip this check when the execution is
+    // itself session-managed (source already set by startRound) to avoid recursion.
+    if (
+      mode === AgentExecutionMode.conversation &&
+      !params.nextInput.source &&
+      this.deps.sessionsService
+    ) {
+      const conversationId = (params as ConversationExecutionParams).conversationId;
+      const message = params.nextInput.message;
+      if (conversationId && message) {
+        const queued = await this.tryQueueForActiveSession(conversationId, message, request);
+        if (queued) return queued;
+      }
+    }
+
     const executionId = providedExecutionId ?? uuidv4();
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
@@ -361,6 +377,50 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       ...options,
       spaceId: options?.spaceId || defaultSpaceId,
     });
+  }
+
+  /**
+   * If the conversation is a standing session currently running a round (status=active),
+   * queue the incoming human message as a pending trigger instead of starting a concurrent
+   * round. Returns a synthetic ExecuteAgentResult with an empty events$ on success, or
+   * null to proceed with normal execution.
+   */
+  private async tryQueueForActiveSession(
+    conversationId: string,
+    message: string,
+    request: KibanaRequest
+  ): Promise<ExecuteAgentResult | null> {
+    try {
+      const client = this.deps.sessionsService!.getScopedClient({ request });
+      const conversation = await client.get(conversationId).catch(() => null);
+
+      if (conversation?.session_mode !== 'standing') return null;
+
+      const ss = conversation.state?.standing_session;
+      if (!ss || ss.status !== 'active') return null;
+
+      await client.enqueueTrigger(conversationId, {
+        type: 'session_message',
+        subscription_id: undefined,
+        event: {
+          from_session_id: conversationId,
+          from_agent_id: conversation.agent_id,
+          message,
+          message_id: uuidv4(),
+        },
+      });
+
+      this.logger.debug(
+        `[session] ${conversationId} is active; queued human message as pending trigger`
+      );
+
+      return { executionId: uuidv4(), events$: EMPTY as Observable<never> };
+    } catch (err) {
+      this.logger.debug(
+        `[session] queue check failed for ${conversationId}, proceeding normally: ${err}`
+      );
+      return null;
+    }
   }
 
   private createExecutionClient(): AgentExecutionClient {
