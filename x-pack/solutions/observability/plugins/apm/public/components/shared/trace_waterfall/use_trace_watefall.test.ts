@@ -19,6 +19,7 @@ import {
   getRootItemOrFallback,
   TraceDataState,
   useTraceWaterfall,
+  getSubtreeIds,
 } from './use_trace_waterfall';
 
 jest.mock('@elastic/eui', () => ({
@@ -979,6 +980,31 @@ describe('getclockSkew', () => {
       parent: parentWithSkew,
     });
     expect(result).toBe(1000350);
+  });
+});
+
+describe('getSubtreeIds', () => {
+  const parentChildMap = {
+    root: [root],
+    '1': [child1, child2],
+    '2': [grandchild],
+  };
+
+  it('returns the root id and all descendant ids', () => {
+    const result = getSubtreeIds(parentChildMap, '1');
+    expect(result).toEqual(expect.arrayContaining(['1', '2', '3', '4']));
+    expect(result).toHaveLength(4);
+  });
+
+  it('returns only the given id when it has no children', () => {
+    const result = getSubtreeIds(parentChildMap, '3');
+    expect(result).toEqual(['3']);
+  });
+
+  it('returns a partial subtree starting from a non-root node', () => {
+    const result = getSubtreeIds(parentChildMap, '2');
+    expect(result).toEqual(expect.arrayContaining(['2', '4']));
+    expect(result).toHaveLength(2);
   });
 });
 
