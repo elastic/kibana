@@ -8,7 +8,7 @@
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import type { ResolveVisualizationConfig } from './inline_visualization';
-import type { VisualizationFailure } from './utils';
+import type { PanelResolutionFailure, VisualizationFailure } from './utils';
 import type { OperationExecutionContext } from './operations/types';
 import {
   collectVisualizationCreationRequests,
@@ -20,8 +20,7 @@ import { resolveVisualizationCreationRequests } from './operations/visualization
 
 export { dashboardOperationSchema };
 export type { DashboardOperation };
-export type { VisualizationPanelInput } from './operations/add_section';
-export type { CreateVisualizationPanelInput } from './operations/create_visualization_panels';
+export type { AddPanelInput, SectionPanelInput } from './operations/panel_sources';
 
 interface ExecuteDashboardOperationsParams {
   dashboardData?: DashboardAttachmentData;
@@ -29,7 +28,7 @@ interface ExecuteDashboardOperationsParams {
   logger: Logger;
   resolvePanelsFromAttachments: (
     attachmentInputs: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>
-  ) => { panels: AttachmentPanel[]; failures: VisualizationFailure[] };
+  ) => { panels: AttachmentPanel[]; failures: PanelResolutionFailure[] };
   resolveVisualizationConfig?: ResolveVisualizationConfig;
 }
 

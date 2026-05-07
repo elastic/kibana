@@ -6,42 +6,15 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { panelGridSchema, sectionGridSchema } from '@kbn/dashboard-agent-common';
+import { sectionGridSchema } from '@kbn/dashboard-agent-common';
 import type { DashboardSection } from '@kbn/dashboard-agent-common';
-import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { z } from '@kbn/zod/v4';
 import {
-  getResolvedVisualizationCreationRequests,
-  materializeResolvedVisualizationPanels,
-} from './visualization_creation';
+  collectVisualizationCreationRequestsForPanels,
+  materializePanelInputs,
+} from './panel_materialization';
+import { sectionPanelInputSchema } from './panel_sources';
 import { defineOperation } from './types';
-
-export const visualizationPanelInputSchema = z.object({
-  query: z.string().describe('A natural language query describing the desired visualization.'),
-  index: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
-    ),
-  chartType: z
-    .nativeEnum(SupportedChartType)
-    .optional()
-    .describe(
-      '(optional) The type of chart to create as indicated by the user. If not provided, the LLM will suggest the best chart type.'
-    ),
-  esql: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) An ES|QL query. If not provided, the tool will generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
-    ),
-  grid: panelGridSchema.describe(
-    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
-  ),
-});
-
-export type VisualizationPanelInput = z.infer<typeof visualizationPanelInputSchema>;
 
 export const addSectionOperation = defineOperation({
   schema: z.object({
@@ -49,11 +22,11 @@ export const addSectionOperation = defineOperation({
     title: z.string().describe('Section title.'),
     grid: sectionGridSchema,
     panels: z
-      .array(visualizationPanelInputSchema)
+      .array(sectionPanelInputSchema)
       .min(1)
       .optional()
       .describe(
-        'Optional inline Lens visualization panels to create inside the new section. Panel grids are section-relative.'
+        'Optional panels to create inside the new section. Panel grids are section-relative.'
       ),
   }),
   handler: ({ dashboardData, operation, operationIndex, context }) => {
@@ -66,13 +39,11 @@ export const addSectionOperation = defineOperation({
     };
 
     if (operation.panels) {
-      const sectionPanels = materializeResolvedVisualizationPanels({
-        resolvedRequests: getResolvedVisualizationCreationRequests({
-          resolvedRequestsByOperationIndex: context.resolvedVisualizationCreationRequests,
-          operationIndex,
-          operationType: operation.operation,
-        }),
-        failures: context.failures,
+      const sectionPanels = materializePanelInputs({
+        panelInputs: operation.panels,
+        operationIndex,
+        operationType: operation.operation,
+        context,
       }).map(({ panel }) => panel);
 
       nextSection = {
@@ -87,8 +58,10 @@ export const addSectionOperation = defineOperation({
     };
   },
   collectVisualizationCreationRequests: (operation) =>
-    operation.panels?.map((panelInput) => ({
-      operationType: operation.operation,
-      panelInput,
-    })) ?? [],
+    operation.panels
+      ? collectVisualizationCreationRequestsForPanels({
+          operationType: operation.operation,
+          panels: operation.panels,
+        })
+      : [],
 });

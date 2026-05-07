@@ -101,7 +101,6 @@ describe('resolvePanelsFromAttachments', () => {
     expect(result.panels).toEqual([]);
     expect(result.failures).toEqual([
       expect.objectContaining({
-        type: 'attachment_panels',
         identifier: 'unsupported-1',
       }),
     ]);
@@ -117,7 +116,6 @@ describe('resolvePanelsFromAttachments', () => {
     expect(result.panels).toEqual([]);
     expect(result.failures).toEqual([
       expect.objectContaining({
-        type: 'attachment_panels',
         identifier: 'missing-id',
       }),
     ]);

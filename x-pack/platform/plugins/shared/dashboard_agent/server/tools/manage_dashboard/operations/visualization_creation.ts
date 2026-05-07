@@ -9,19 +9,23 @@ import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentPanel } from '@kbn/dashboard-agent-common';
 import type { ResolveVisualizationConfig } from '../inline_visualization';
 import type { VisualizationFailure } from '../utils';
-import type { VisualizationPanelInput } from './add_section';
-import type { CreateVisualizationPanelInput } from './create_visualization_panels';
+import type {
+  InlineVisualizationAddPanelInput,
+  InlineVisualizationSectionPanelInput,
+} from './panel_sources';
 
 type ResolvedVisualizationPanel = Awaited<ReturnType<ResolveVisualizationConfig>>;
-export type VisualizationCreationOperationType = 'add_section' | 'create_visualization_panels';
+export type VisualizationCreationOperationType = 'add_section' | 'add_panels';
 export type VisualizationCreationRequest =
   | {
       operationType: 'add_section';
-      panelInput: VisualizationPanelInput;
+      panelInput: InlineVisualizationSectionPanelInput;
+      panelIndex: number;
     }
   | {
-      operationType: 'create_visualization_panels';
-      panelInput: CreateVisualizationPanelInput;
+      operationType: 'add_panels';
+      panelInput: InlineVisualizationAddPanelInput;
+      panelIndex: number;
       sectionId?: string;
     };
 

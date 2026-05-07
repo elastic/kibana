@@ -15,16 +15,22 @@ import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-com
 import { z } from '@kbn/zod/v4';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { DashboardOperation } from './operations';
-import {
-  DASHBOARD_OPERATION_FAILURE_TYPES,
-  type DashboardOperationFailureType,
-} from './failure_types';
+import type { DashboardOperationFailureType } from './failure_types';
 
 /**
- * Failure record for tracking visualization errors.
+ * Failure record reported by a dashboard operation.
  */
 export interface VisualizationFailure {
   type: DashboardOperationFailureType;
+  identifier: string;
+  error: string;
+}
+
+/**
+ * Lower-level attachment resolution failure. Operation handlers wrap this with
+ * the public dashboard operation failure type before returning it to callers.
+ */
+export interface PanelResolutionFailure {
   identifier: string;
   error: string;
 }
@@ -78,7 +84,7 @@ const resolvePanelsFromAttachment = (
   }
 
   throw new Error(
-    `Attachment type "${type}" is not supported in add_panels_from_attachments. Only "${AttachmentType.visualization}" is supported.`
+    `Attachment type "${type}" is not supported for dashboard panels. Only "${AttachmentType.visualization}" is supported.`
   );
 };
 
@@ -94,13 +100,13 @@ export const resolvePanelsFromAttachments = ({
   attachmentInputs?: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>;
   attachments: AttachmentStateManager;
   logger: Logger;
-}): { panels: AttachmentPanel[]; failures: VisualizationFailure[] } => {
+}): { panels: AttachmentPanel[]; failures: PanelResolutionFailure[] } => {
   if (!attachmentInputs || attachmentInputs.length === 0) {
     return { panels: [], failures: [] };
   }
 
   const panels: AttachmentPanel[] = [];
-  const failures: VisualizationFailure[] = [];
+  const failures: PanelResolutionFailure[] = [];
 
   for (const { attachmentId, grid } of attachmentInputs) {
     try {
@@ -122,7 +128,6 @@ export const resolvePanelsFromAttachments = ({
         `Error resolving dashboard panels from attachment "${attachmentId}": ${errorMessage}`
       );
       failures.push({
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.attachmentPanels,
         identifier: attachmentId,
         error: errorMessage,
       });

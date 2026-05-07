@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import type { z } from '@kbn/zod/v4';
 import type { ResolveVisualizationConfig } from '../inline_visualization';
-import type { VisualizationFailure } from '../utils';
+import type { PanelResolutionFailure, VisualizationFailure } from '../utils';
 import type {
   ResolvedVisualizationCreationRequest,
   VisualizationCreationRequest,
@@ -21,7 +21,7 @@ export interface OperationExecutionContext {
   resolvedVisualizationCreationRequests: Map<number, ResolvedVisualizationCreationRequest[]>;
   resolvePanelsFromAttachments: (
     attachmentInputs: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>
-  ) => { panels: AttachmentPanel[]; failures: VisualizationFailure[] };
+  ) => { panels: AttachmentPanel[]; failures: PanelResolutionFailure[] };
   resolveVisualizationConfig?: ResolveVisualizationConfig;
 }
 
