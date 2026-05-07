@@ -890,7 +890,7 @@ export function DimensionEditorAdditionalSection({
 
   const selectedSupportingVisualization = supportingVisualization(state);
   const colorControlsSectionVisible =
-    selectedSupportingVisualization !== 'panel' || Boolean(state.applyColorTo);
+    selectedSupportingVisualization !== 'panel' || state.applyColorTo !== 'none';
   const { anchorRef: colorControlsAnchorRef, scrollIntoView: scrollToColorControls } =
     useScrollIntoView();
 
@@ -1168,24 +1168,24 @@ export function DimensionEditorAdditionalSection({
                 value: 'none',
               },
               {
-                id: `${buttonIdPrefix}background`,
-                label: i18n.translate('xpack.lens.metric.supportingVis.applyColorTo.background', {
-                  defaultMessage: 'Panel',
-                }),
-                value: 'background',
-              },
-              {
                 id: `${buttonIdPrefix}value`,
                 label: i18n.translate('xpack.lens.metric.supportingVis.applyColorTo.value', {
                   defaultMessage: 'Value',
                 }),
                 value: 'value',
               },
+              {
+                id: `${buttonIdPrefix}background`,
+                label: i18n.translate('xpack.lens.metric.supportingVis.applyColorTo.background', {
+                  defaultMessage: 'Panel',
+                }),
+                value: 'background',
+              },
             ]}
             idSelected={
               state.applyColorTo
                 ? `${buttonIdPrefix}${state.applyColorTo}`
-                : `${buttonIdPrefix}none`
+                : `${buttonIdPrefix}background`
             }
             onChange={(_id, newApplyColorTo) => {
               setState({
@@ -1269,7 +1269,7 @@ export function DimensionEditorAdditionalSection({
               display="columnCompressed"
               fullWidth
               label={i18n.translate('xpack.lens.metric.dynamicColorMapping.label', {
-                defaultMessage: 'Dynamic color mapping',
+                defaultMessage: 'Color mapping',
               })}
               css={css`
                 // Center the field wrapper

@@ -1310,7 +1310,7 @@ describe('dimension editor', () => {
               },
             });
           expect(applyColorToOptions.none).toHaveAttribute('aria-pressed', 'true');
-          expect(colorModeGroup).toBeInTheDocument();
+          expect(colorModeGroup).not.toBeInTheDocument();
           expect(colorControls).not.toBeInTheDocument();
         });
 
