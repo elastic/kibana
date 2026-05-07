@@ -13,6 +13,7 @@ import { tracesRouteDefinitions } from './traces';
 import { spanLinksRouteDefinitions } from './span_links';
 import { observabilityOverviewRouteDefinitions } from './observability_overview';
 import { agentExplorerRouteDefinitions } from './agent_explorer';
+import { alertsRouteDefinitions } from './alerts';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -23,6 +24,7 @@ export const routeDefinitions = {
   spanLinks: spanLinksRouteDefinitions,
   observabilityOverview: observabilityOverviewRouteDefinitions,
   agentExplorer: agentExplorerRouteDefinitions,
+  alerts: alertsRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;

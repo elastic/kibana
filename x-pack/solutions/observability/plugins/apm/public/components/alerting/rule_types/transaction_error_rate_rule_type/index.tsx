@@ -121,7 +121,8 @@ export function TransactionErrorRateRuleType(props: Props) {
       params.windowUnit,
       params.groupBy,
       params.searchConfiguration,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
 
   const onGroupByChange = useCallback(

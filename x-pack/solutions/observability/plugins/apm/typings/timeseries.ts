@@ -15,12 +15,8 @@ import type {
   SeriesColorAccessorFn,
   SeriesColorsArray,
 } from '@elastic/charts';
-import type { Maybe } from './common';
-
-export interface Coordinate {
-  x: number;
-  y: Maybe<number>;
-}
+import type { Coordinate } from '@kbn/apm-types';
+export type { Coordinate } from '@kbn/apm-types';
 
 export interface BandCoordinate {
   x: number;

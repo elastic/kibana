@@ -17,3 +17,5 @@ export * from './src/environment_rt';
 export * from './src/environment_filter_values';
 export * from './src/processor_event';
 export * from './src/agent_explorer';
+export * from './src/aggregation_type';
+export type * from './src/coordinate';
