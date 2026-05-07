@@ -61,4 +61,9 @@ export const queryKeys = {
   connectors: {
     all: ['connectors'] as const,
   },
+  sessions: {
+    all: ['sessions'] as const,
+    byAgent: (agentId: string) => ['sessions', 'list', { agentId }],
+    byId: (sessionId: string) => ['sessions', sessionId],
+  },
 };

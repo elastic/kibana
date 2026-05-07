@@ -16,6 +16,11 @@ export const appPaths = {
       byId: ({ agentId, conversationId }: { agentId: string; conversationId: string }) =>
         `/agents/${agentId}/conversations/${conversationId}`,
     },
+    sessions: {
+      list: ({ agentId }: { agentId: string }) => `/agents/${agentId}/sessions`,
+      byId: ({ agentId, sessionId }: { agentId: string; sessionId: string }) =>
+        `/agents/${agentId}/sessions/${sessionId}`,
+    },
     skills: ({ agentId }: { agentId: string }) => `/agents/${agentId}/skills`,
     plugins: ({ agentId }: { agentId: string }) => `/agents/${agentId}/plugins`,
     tools: ({ agentId }: { agentId: string }) => `/agents/${agentId}/tools`,

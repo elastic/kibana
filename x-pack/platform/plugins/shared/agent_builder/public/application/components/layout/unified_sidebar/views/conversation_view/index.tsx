@@ -27,6 +27,7 @@ import {
   getAgentIdFromPath,
   getAgentSettingsNavItems,
   getConversationIdFromPath,
+  getSessionIdFromPath,
 } from '../../../../../route_config';
 import { useFeatureFlags } from '../../../../../hooks/use_feature_flags';
 import { useNavigation } from '../../../../../hooks/use_navigation';
@@ -39,6 +40,7 @@ import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
 import { ConversationFooter } from './conversation_footer';
 import { ConversationList } from './conversation_list';
+import { SessionList } from './session_list';
 import { ConversationSearchModal } from '../../../../conversations/conversation_search_modal';
 
 const customizeLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.customize', {
@@ -68,10 +70,19 @@ const conversationListScrollRegionLabel = i18n.translate(
   }
 );
 
+const sessionsLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.sessions', {
+  defaultMessage: 'Sessions',
+});
+
+const newSessionLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.newSession', {
+  defaultMessage: 'New',
+});
+
 export const ConversationSidebarView: React.FC = () => {
   const { pathname } = useLocation();
   const agentId = getAgentIdFromPath(pathname) ?? agentBuilderDefaultAgentId;
   const conversationId = getConversationIdFromPath(pathname);
+  const sessionId = getSessionIdFromPath(pathname);
   const { euiTheme } = useEuiTheme();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const validateAgentId = useValidateAgentId();
@@ -244,6 +255,35 @@ export const ConversationSidebarView: React.FC = () => {
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiSpacer size="m" />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
+                    <EuiFlexItem grow>
+                      <EuiText size="xs" color="subdued" css={sectionLabelCss}>
+                        {sessionsLabel}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        iconType="plus"
+                        size="s"
+                        color="text"
+                        onClick={() =>
+                          navigateToAgentBuilderUrl(appPaths.agent.sessions.list({ agentId }))
+                        }
+                        data-test-subj="agentBuilderSidebarNewSessionButton"
+                      >
+                        {newSessionLabel}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                  <SessionList agentId={agentId} currentSessionId={sessionId} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>

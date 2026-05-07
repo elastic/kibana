@@ -20,6 +20,7 @@ import type { SmlService } from './sml/sml_service';
 import type { PluginsService } from './plugins/plugins_service';
 import type { NavigationService } from './navigation';
 import type { EventsService } from './events';
+import type { SessionsService } from './sessions/sessions_service';
 
 export interface AgentBuilderInternalService {
   agentService: AgentService;
@@ -36,6 +37,7 @@ export interface AgentBuilderInternalService {
   usageCollection?: UsageCollectionSetup;
   accessChecker: AgentBuilderAccessChecker;
   eventsService: EventsService;
+  sessionsService: SessionsService;
   isEarsEnabled: boolean;
   openSidebarConversation: (
     options?: OpenConversationSidebarOptions

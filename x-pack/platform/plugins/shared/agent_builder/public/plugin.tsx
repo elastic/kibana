@@ -42,6 +42,7 @@ import {
   SmlService,
   PluginsService,
   EventsService,
+  SessionsService,
   type AgentBuilderInternalService,
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
@@ -158,6 +159,7 @@ export class AgentBuilderPlugin
     const skillsService = new SkillsService({ http });
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
+    const sessionsService = new SessionsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -221,6 +223,7 @@ export class AgentBuilderPlugin
       usageCollection,
       accessChecker,
       eventsService,
+      sessionsService,
       isEarsEnabled: this.isEarsEnabled,
       openSidebarConversation: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);

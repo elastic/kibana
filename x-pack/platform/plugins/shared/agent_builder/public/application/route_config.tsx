@@ -10,6 +10,8 @@ import { matchPath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { AgentBuilderConversationsPage } from './pages/conversations';
+import { AgentBuilderSessionsPage } from './pages/sessions';
+import { AgentBuilderSessionDetailPage } from './pages/session_detail';
 import { AgentBuilderAgentsPage } from './pages/agents';
 import { AgentBuilderAgentsCreate } from './pages/agent_create';
 import { AgentBuilderAgentsEdit } from './pages/agent_edit';
@@ -65,10 +67,26 @@ const navLabels = {
   agents: i18n.translate('xpack.agentBuilder.routeConfig.agents', {
     defaultMessage: 'Agents',
   }),
+  sessions: i18n.translate('xpack.agentBuilder.routeConfig.sessions', {
+    defaultMessage: 'Sessions',
+  }),
 };
 
 // Routes ordered from most specific to least specific for correct matching
 export const agentRoutes: RouteDefinition[] = [
+  {
+    path: '/agents/:agentId/sessions/:conversationId',
+    viewId: agentBuilderViewIds.agentSession,
+    sidebarView: 'conversation',
+    element: <AgentBuilderSessionDetailPage />,
+  },
+  {
+    path: '/agents/:agentId/sessions',
+    viewId: agentBuilderViewIds.agentSessions,
+    sidebarView: 'conversation',
+    navLabel: navLabels.sessions,
+    element: <AgentBuilderSessionsPage />,
+  },
   {
     path: '/agents/:agentId/conversations/:conversationId',
     viewId: agentBuilderViewIds.agentConversation,
@@ -226,6 +244,11 @@ export const getAgentIdFromPath = (pathname: string): string | undefined => {
 
 export const getConversationIdFromPath = (pathname: string): string | undefined => {
   const match = pathname.match(/^\/agents\/[^/]+\/conversations\/([^/]+)/);
+  return match ? match[1] : undefined;
+};
+
+export const getSessionIdFromPath = (pathname: string): string | undefined => {
+  const match = pathname.match(/^\/agents\/[^/]+\/sessions\/([^/]+)/);
   return match ? match[1] : undefined;
 };
 
