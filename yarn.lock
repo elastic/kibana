@@ -6639,6 +6639,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ebt-click@link:src/platform/packages/shared/kbn-ebt-click":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ebt-tools@link:src/platform/packages/shared/kbn-ebt-tools":
   version "0.0.0"
   uid ""
@@ -8976,6 +8980,14 @@
   uid ""
 
 "@kbn/serverless-types@link:src/platform/packages/shared/serverless/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-vectordb-settings@link:src/platform/packages/shared/serverless/settings/vectordb_project":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-vectordb@link:x-pack/solutions/vectordb/plugins/serverless_vectordb":
   version "0.0.0"
   uid ""
 
