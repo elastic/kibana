@@ -39,8 +39,8 @@ spaceTest.describe('Discover data grid - doc table', { tag: testData.DISCOVER_CO
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     // Viewer is sufficient for read-only grid interactions.
     await browserAuth.loginAsViewer();
+    await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
-    await pageObjects.discover.selectDataViewMode();
     await pageObjects.discover.waitUntilSearchingHasFinished();
     // Search can finish before the grid leaves "Loading documents" (histogram may
     // render first). Wait until the table reports a stable render before row counts.

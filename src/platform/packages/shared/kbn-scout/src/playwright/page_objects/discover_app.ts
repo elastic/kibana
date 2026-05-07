@@ -13,6 +13,8 @@ import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
+const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
+
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -496,31 +498,6 @@ export class DiscoverApp {
     }
   }
 
-  getCurrentTab() {
-    const tabsContainer = this.page.testSubj.locator('unifiedTabs_tabsBar');
-    return tabsContainer.locator('[data-test-subj^="unifiedTabs_tab_"]', {
-      has: this.page.locator('[aria-selected="true"]'),
-    });
-  }
-
-  async clickSelectedTabMenuItem(menuItemTestSubj: string) {
-    await this.getCurrentTab().hover();
-    await this.getCurrentTab().locator('button[aria-label="Actions"]').click({ timeout: 10_000 });
-    await this.page.testSubj.click(menuItemTestSubj);
-  }
-
-  async selectDataViewMode() {
-    if (await this.page.testSubj.isVisible('select-text-based-language-btn')) return; // Discover is already in data view mode
-    await this.clickSelectedTabMenuItem('unifiedTabs_tabMenuItem_switchToClassic');
-
-    if (await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal')) {
-      await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
-      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
-        state: 'detached',
-      });
-    }
-  }
-
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);
@@ -637,5 +614,14 @@ export class DiscoverApp {
     }
 
     await expect(docTable).toContainText(text);
+  }
+
+  public setQueryMode(mode: 'esql' | 'classic') {
+    return this.page.addInitScript(
+      ([_mode, _discoverQueryModeKey]) => {
+        window.localStorage.setItem(_discoverQueryModeKey, JSON.stringify(_mode));
+      },
+      [mode, DISCOVER_QUERY_MODE_KEY]
+    );
   }
 }
