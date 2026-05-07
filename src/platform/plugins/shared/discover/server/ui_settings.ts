@@ -254,4 +254,17 @@ export const getUiSettings: (
     }),
     schema: schema.number({ min: -1 }),
   },
+  'discover:entityCentricLab': {
+    name: i18n.translate('discover.advancedSettings.entityCentricLab.title', {
+      defaultMessage: '[Lab] Entity-centric mode',
+    }),
+    value: false,
+    category: ['discover'],
+    description: i18n.translate('discover.advancedSettings.entityCentricLab.description', {
+      defaultMessage:
+        'Experimental: when enabled, Discover renders a panel of fake entity-centric log entries above the results table. Clicking a service name opens an entity detail flyout. Used to prototype the entity-centric experience; refresh the page after changing this setting.',
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
 });

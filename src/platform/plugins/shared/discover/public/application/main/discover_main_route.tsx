@@ -46,6 +46,7 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
 import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
+import { EntityCentricLabPanel, EntityCentricLabProvider } from '../../lab/entity_centric';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -89,14 +90,21 @@ export const DiscoverMainRoute = ({
     <DiscoverCustomizationContextProvider value={customizationContext}>
       <RuntimeStateManagerProvider value={runtimeStateManager}>
         <InternalStateProvider store={internalState}>
-          <DiscoverMainRouteContent
-            customizationContext={customizationContext}
-            customizationCallbacks={customizationCallbacks}
-            urlStateStorage={urlStateStorage}
-            internalState={internalState}
-            runtimeStateManager={runtimeStateManager}
-            searchSessionManager={searchSessionManager}
-          />
+          {/*
+           * The lab provider lives here so the entity-centric panel/flyout are
+           * available across every Discover render branch (loading, no data,
+           * single tab, tabs view) without having to duplicate the provider.
+           */}
+          <EntityCentricLabProvider>
+            <DiscoverMainRouteContent
+              customizationContext={customizationContext}
+              customizationCallbacks={customizationCallbacks}
+              urlStateStorage={urlStateStorage}
+              internalState={internalState}
+              runtimeStateManager={runtimeStateManager}
+              searchSessionManager={searchSessionManager}
+            />
+          </EntityCentricLabProvider>
         </InternalStateProvider>
       </RuntimeStateManagerProvider>
     </DiscoverCustomizationContextProvider>
@@ -251,12 +259,15 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     !mainRouteInitializationState.value.hasUserDataView
   ) {
     return (
-      <NoDataPage
-        {...mainRouteInitializationState.value}
-        onDataViewCreated={() => {
-          // This is unused if there is no ES data
-        }}
-      />
+      <>
+        <EntityCentricLabPanel />
+        <NoDataPage
+          {...mainRouteInitializationState.value}
+          onDataViewCreated={() => {
+            // This is unused if there is no ES data
+          }}
+        />
+      </>
     );
   }
 

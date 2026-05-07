@@ -47,6 +47,7 @@ import { ScopedServicesProvider } from '../../../../components/scoped_services_p
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
 import type { DiscoverSearchSessionManager } from '../../state_management/discover_search_session';
+import { EntityCentricLabPanel } from '../../../../lab/entity_centric';
 
 export interface SingleTabViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -145,6 +146,7 @@ export const SingleTabView = ({
   if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NoData) {
     return (
       <HideTabsBar customizationContext={customizationContext}>
+        <EntityCentricLabPanel />
         <NoDataPage
           {...appInitializationState}
           onDataViewCreated={async (dataViewUnknown) => {
