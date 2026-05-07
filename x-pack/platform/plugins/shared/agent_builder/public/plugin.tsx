@@ -65,6 +65,7 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
+import { storageKeys } from './application/storage_keys';
 
 export class AgentBuilderPlugin
   implements
@@ -170,7 +171,14 @@ export class AgentBuilderPlugin
     const sidebar = core.chrome.sidebar.getApp('agentBuilder');
 
     const openSidebarInternal = (options?: OpenConversationSidebarOptions) => {
-      const config = options ?? this.conversationActiveConfig;
+      const { conversationId, ...openOptions } = options ?? {};
+      const config =
+        Object.keys(openOptions).length > 0 ? openOptions : this.conversationActiveConfig;
+
+      if (conversationId) {
+        const storageKey = storageKeys.getLastConversationKey(config.sessionTag, config.agentId);
+        window?.localStorage?.setItem(storageKey, JSON.stringify(conversationId));
+      }
 
       // If already open, update props instead of creating new
       if (this.activeSidebarRef && this.sidebarCallbacks) {

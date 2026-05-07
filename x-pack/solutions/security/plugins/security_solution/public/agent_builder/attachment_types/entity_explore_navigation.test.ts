@@ -332,6 +332,41 @@ describe('entity_explore_navigation', () => {
         expect(application.navigateToApp).toHaveBeenCalledTimes(1);
       });
 
+      describe('fallback when openSidebarConversation is not provided', () => {
+        const AGENT_BUILDER_AGENT_ID_KEY = 'agentBuilder.agentId';
+
+        beforeEach(() => {
+          window.localStorage.removeItem(AGENT_BUILDER_AGENT_ID_KEY);
+        });
+
+        afterEach(() => {
+          jest.useRealTimers();
+        });
+
+        it('opens chat via agentBuilder.openChat with sessionTag: security and the stored agentId', () => {
+          jest.useFakeTimers();
+          const application = buildApplicationMock();
+          const agentBuilder = buildAgentBuilderNavigationMock();
+          const storedAgentId = 'my-agent';
+          window.localStorage.setItem(AGENT_BUILDER_AGENT_ID_KEY, JSON.stringify(storedAgentId));
+
+          navigateToEntityAnalyticsHomePageInApp({
+            application,
+            appId: 'securitySolutionUI',
+            agentBuilder: agentBuilder as unknown as AgentBuilderPluginStart,
+          });
+
+          jest.runAllTimers();
+
+          expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+          expect(agentBuilder.openChat).toHaveBeenCalledWith({
+            sessionTag: 'security',
+            newConversation: false,
+            agentId: storedAgentId,
+          });
+        });
+      });
+
       describe('when already on the EA home page', () => {
         beforeEach(() => {
           window.history.replaceState({}, '', EA_HOME_PATH);
