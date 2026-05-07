@@ -419,6 +419,13 @@
   "alerting_rule": {
     "dynamic": false,
     "properties": {
+      "builder_config": {
+        "properties": {
+          "type": {
+            "type": "keyword"
+          }
+        }
+      },
       "createdAt": {
         "type": "date"
       },
@@ -479,6 +486,9 @@
             "type": "keyword"
           }
         }
+      },
+      "origin": {
+        "type": "keyword"
       },
       "recovery_policy": {
         "properties": {
@@ -1476,10 +1486,6 @@
       }
     }
   },
-  "entity-store-ccs-state": {
-    "dynamic": false,
-    "properties": {}
-  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
@@ -1626,6 +1632,10 @@
         "type": "keyword"
       }
     }
+  },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
   },
   "entity-store-global-state": {
     "dynamic": false,

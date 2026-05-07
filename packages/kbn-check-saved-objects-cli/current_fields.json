@@ -123,6 +123,8 @@
     "uiamApiKey"
   ],
   "alerting_rule": [
+    "builder_config",
+    "builder_config.type",
     "createdAt",
     "createdBy",
     "enabled",
@@ -140,6 +142,7 @@
     "no_data",
     "no_data.behavior",
     "no_data.timeframe",
+    "origin",
     "recovery_policy",
     "recovery_policy.query",
     "recovery_policy.query.base",
