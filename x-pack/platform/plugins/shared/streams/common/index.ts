@@ -48,3 +48,15 @@ export {
 } from './get_streams_location/get_streams_location';
 
 export type { StreamSummary } from './stream_summary';
+
+export type {
+  Verdict,
+  Impact,
+  SigEventEvidence,
+  DependencyEdge,
+  InfraComponent,
+  CauseKi,
+  SigEvent,
+  SigEventsListResponse,
+} from './sig_events_types';
+export { VERDICT_OPTIONS, IMPACT_OPTIONS, VERDICT_COLORS, IMPACT_COLORS } from './sig_events_types';

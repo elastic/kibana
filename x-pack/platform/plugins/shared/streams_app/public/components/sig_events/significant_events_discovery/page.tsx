@@ -25,9 +25,9 @@ import {
 import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
-import { InsightsTab } from './components/insights/tab';
 import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
+import { SignificantEventsList } from './components/significant_events_list';
 
 const discoveryTabs = [
   'streams',
@@ -191,7 +191,7 @@ export function SignificantEventsDiscoveryPage() {
           {tab === 'streams' && <StreamsView />}
           {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
           {tab === 'queries' && <QueriesTable />}
-          {tab === 'significant_events' && <InsightsTab />}
+          {tab === 'significant_events' && <SignificantEventsList />}
           {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
           {tab === 'settings' && <SettingsTab />}
         </StreamsAppPageTemplate.Body>
