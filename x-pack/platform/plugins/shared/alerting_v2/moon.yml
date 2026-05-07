@@ -68,6 +68,7 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/event-log-plugin'
   - '@kbn/workflows-management-plugin'
+  - '@kbn/workflows-extensions'
   - '@kbn/workflows'
   - '@kbn/core-http-server-utils'
   - '@kbn/eval-kql'

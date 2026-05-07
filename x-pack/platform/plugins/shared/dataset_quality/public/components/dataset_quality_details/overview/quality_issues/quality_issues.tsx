@@ -27,9 +27,9 @@ export function QualityIssues() {
           <EuiTitle size="xs">
             <span>{issuesTableName}</span>
           </EuiTitle>
-          <EuiIconTip content={overviewQualityIssueSectionTitleTooltip} color="subdued" size="m" />
+          <EuiIconTip type="info" content={overviewQualityIssueSectionTitleTooltip} size="m" />
         </EuiFlexGroup>
-        <EuiFilterGroup>
+        <EuiFilterGroup compressed>
           <FieldSelector />
           <IssueTypeSelector />
           <CurrentQualityIssuesToggle />
