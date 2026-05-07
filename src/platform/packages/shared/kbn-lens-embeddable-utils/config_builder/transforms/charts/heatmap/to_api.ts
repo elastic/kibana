@@ -43,6 +43,7 @@ import type { XScaleSchemaType } from '../../../schema/charts/shared';
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapConfig['legend'] {
   return {
     visibility: legend.isVisible ? 'visible' : 'hidden',
+    position: legend.position,
     ...stripUndefined<HeatmapConfig['legend']>({
       truncate_after_lines: getLegendTruncateAfterLines(legend),
       size: legendSizeCompat.toAPI(legend.legendSize),

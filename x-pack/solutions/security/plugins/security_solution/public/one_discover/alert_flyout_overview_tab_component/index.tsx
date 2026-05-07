@@ -16,6 +16,7 @@ import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { DataViewManagerBootstrap } from './data_view_manager_bootstrap';
 import { DiscoverCellActions } from '../cell_actions';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 
 export interface AlertFlyoutOverviewTabProps {
   /**
@@ -64,6 +65,7 @@ export const AlertFlyoutOverviewTab = ({
 }: AlertFlyoutOverviewTabProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
+
   const renderCellActions = useCallback<CellActionRenderer>(
     (props) => (
       <DiscoverCellActions
@@ -109,15 +111,49 @@ export const AlertFlyoutOverviewTab = ({
     services,
     store,
     children: (
-      <>
-        <DataViewManagerBootstrap />
-        <EuiSpacer size="m" />
-        <OverviewTab
-          hit={hit}
-          renderCellActions={renderCellActions}
-          onAlertUpdated={onAlertUpdated}
-        />
-      </>
+      <AlertFlyoutOverviewTabContent
+        hit={hit}
+        renderCellActions={renderCellActions}
+        onAlertUpdated={onAlertUpdated}
+      />
     ),
   });
+};
+
+interface AlertFlyoutOverviewTabContentProps {
+  /**
+   * The document record that will be used to render the content of the overview tab in the alert details flyout.
+   */
+  hit: DataTableRecord;
+  /**
+   * Callback passed to the flyout content to render cell actions
+   */
+  renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh the Discover table.
+   */
+  onAlertUpdated: () => void;
+}
+
+/**
+ * The content of the overview tab in the alert details flyout. This is rendered inside the flyout providers to have access to the services and store.
+ */
+const AlertFlyoutOverviewTabContent = ({
+  hit,
+  renderCellActions,
+  onAlertUpdated,
+}: AlertFlyoutOverviewTabContentProps) => {
+  const isInSecurityApp = useIsInSecurityApp();
+
+  return (
+    <>
+      {!isInSecurityApp && <DataViewManagerBootstrap />}
+      <EuiSpacer size="m" />
+      <OverviewTab
+        hit={hit}
+        renderCellActions={renderCellActions}
+        onAlertUpdated={onAlertUpdated}
+      />
+    </>
+  );
 };
