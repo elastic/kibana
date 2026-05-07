@@ -81,7 +81,7 @@ export abstract class FieldFormat {
    * @property {reactConvertSingle}
    * @protected
    */
-  reactConvertSingle: ReactContextTypeSingleConvert | undefined;
+  protected reactConvertSingle: ReactContextTypeSingleConvert | undefined;
 
   /**
    * React-based converter. Handles arrays and delegates single values to `reactConvertSingle`
@@ -121,10 +121,8 @@ export abstract class FieldFormat {
   /**
    * @property {textConvert}
    * @protected
-   * have to remove the protected because of
-   * https://github.com/Microsoft/TypeScript/issues/17293
    */
-  textConvert: TextContextTypeConvert | undefined;
+  protected textConvert: TextContextTypeConvert | undefined;
 
   /**
    * @property {Function} - ref to child class
