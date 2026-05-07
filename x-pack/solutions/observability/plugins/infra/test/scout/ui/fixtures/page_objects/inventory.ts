@@ -128,6 +128,15 @@ export class InventoryPage {
       .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
   }
 
+  /**
+   * Waits for the snapshot "Loading data" panel (`infraNodesOverviewLoadingPanel`) to finish,
+   * then for the onboarding empty state (`kbnNoDataPage`).
+   */
+  public async waitForOnboardingNoDataPage() {
+    await this.waitForNodesToLoad();
+    await this.noDataPage.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
   private async waitForPageToLoad() {
     await this.page.getByTestId('infraMetricsPage').waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.waitForNodesToLoad();

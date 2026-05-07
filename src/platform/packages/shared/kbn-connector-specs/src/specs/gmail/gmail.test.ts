@@ -53,6 +53,30 @@ describe('GmailConnector', () => {
         },
       });
     });
+
+    it('supports ears auth type with correct Google defaults and overrides', () => {
+      const types = GmailConnector.auth?.types as Array<
+        | string
+        | {
+            type: string;
+            defaults?: Record<string, unknown>;
+            overrides?: Record<string, unknown>;
+          }
+      >;
+      expect(types.map((t) => (typeof t === 'string' ? t : t.type))).toContain('ears');
+
+      const earsType = types.find((t) => typeof t === 'object' && t.type === 'ears');
+      expect(earsType).toMatchObject({
+        type: 'ears',
+        defaults: {
+          provider: 'google',
+          scope: 'https://www.googleapis.com/auth/gmail.readonly',
+        },
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+      });
+    });
   });
 
   describe('actions', () => {
