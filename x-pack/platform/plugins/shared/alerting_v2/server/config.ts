@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { validateDuration } from './lib/duration';
 
+// TODO: placeholder
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   invalidateApiKeysTask: schema.object({
