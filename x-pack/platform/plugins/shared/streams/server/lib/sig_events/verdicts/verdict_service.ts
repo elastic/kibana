@@ -11,13 +11,7 @@ import { VerdictClient } from './verdict_client';
 import { verdictsDataStream, type StoredVerdict, type verdictsMappings } from './data_stream';
 
 export class VerdictService {
-  getClient({
-    esClient,
-    space,
-  }: {
-    esClient: ElasticsearchClient;
-    space: string;
-  }): VerdictClient {
+  getClient({ esClient, space }: { esClient: ElasticsearchClient; space: string }): VerdictClient {
     const dataStreamClient = DataStreamClient.fromDefinition<
       typeof verdictsMappings,
       StoredVerdict
