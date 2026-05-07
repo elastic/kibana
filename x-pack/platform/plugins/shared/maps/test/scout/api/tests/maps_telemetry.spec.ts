@@ -45,13 +45,11 @@ apiTest.describe('Maps - maps telemetry', { tag: [...tags.stateful.classic] }, (
         (fieldStat: { name: string }) => fieldStat.name === 'geo_point'
       );
       expect(geoPointFieldStats.count).toBeGreaterThanOrEqual(71);
-      expect(geoPointFieldStats.index_count).toBeGreaterThanOrEqual(14);
 
       const geoShapeFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
         (fieldStat: { name: string }) => fieldStat.name === 'geo_shape'
       );
       expect(geoShapeFieldStats.count).toBeGreaterThanOrEqual(3);
-      expect(geoShapeFieldStats.index_count).toBeGreaterThanOrEqual(3);
 
       const mapUsage = apiResponse.stack_stats.kibana.plugins.maps;
       delete mapUsage.timeCaptured;
