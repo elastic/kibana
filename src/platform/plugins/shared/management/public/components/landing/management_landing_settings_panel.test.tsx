@@ -140,6 +140,8 @@ describe('ManagementLandingSettingsPanel', () => {
       target: { value: 'enabled' },
     });
 
+    fireEvent.click(screen.getByTestId('managementLandingSettingsRowSave-dark_mode'));
+
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent('Not a valid value');
     });
@@ -167,6 +169,8 @@ describe('ManagementLandingSettingsPanel', () => {
     fireEvent.change(darkModeControl.querySelector('select')!, {
       target: { value: 'enabled' },
     });
+
+    fireEvent.click(screen.getByTestId('managementLandingSettingsRowSave-dark_mode'));
 
     await waitFor(() => {
       expect(uiSettings.validateValue).toHaveBeenCalledWith('theme:darkMode', 'enabled');

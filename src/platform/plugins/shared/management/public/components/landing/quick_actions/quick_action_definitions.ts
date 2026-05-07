@@ -24,8 +24,10 @@ export {
 
 export interface QuickActionDefinition {
   id: string;
+  /** Short imperative CTA shown as the card title. */
   title: string;
-  icon: string;
+  /** Subdued helper text under the title. */
+  description: string;
   appId: string;
   path: string;
   capabilityPath: string;
@@ -37,39 +39,50 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
   {
     id: 'index_management',
     title: i18n.translate('management.landing.quickActions.manageIndices', {
-      defaultMessage: 'Manage Indices',
+      defaultMessage: 'Manage indices',
     }),
-    icon: 'indexManagementApp',
+    description: i18n.translate('management.landing.quickActions.manageIndicesDescription', {
+      defaultMessage: 'Create, delete, and maintain Elasticsearch indices and index templates.',
+    }),
     appId: 'management',
     path: 'data/index_management',
     capabilityPath: 'management.data.index_management',
   },
   {
     id: 'alerting_rules',
-    title: i18n.translate('management.landing.quickActions.alertingRules', {
-      defaultMessage: 'Alerting Rules',
+    title: i18n.translate('management.landing.quickActions.manageAlertingRules', {
+      defaultMessage: 'Manage alerting rules',
     }),
-    icon: 'bell',
+    description: i18n.translate('management.landing.quickActions.manageAlertingRulesDescription', {
+      defaultMessage:
+        'Create and tune rules that notify you when your data meets defined conditions.',
+    }),
     appId: 'management',
     path: 'insightsAndAlerting/triggersActions',
     capabilityPath: 'management.insightsAndAlerting.triggersActions',
   },
   {
     id: 'reporting',
-    title: i18n.translate('management.landing.quickActions.reportingExports', {
-      defaultMessage: 'Reporting & Exports',
+    title: i18n.translate('management.landing.quickActions.viewReportingExports', {
+      defaultMessage: 'View reporting and exports',
     }),
-    icon: 'reportingApp',
+    description: i18n.translate('management.landing.quickActions.viewReportingExportsDescription', {
+      defaultMessage:
+        'Download PDF, CSV, and other generated reports from your Elastic environment.',
+    }),
     appId: 'management',
     path: 'insightsAndAlerting/reporting/exports',
     capabilityPath: 'management.insightsAndAlerting.reporting',
   },
   {
     id: 'api_keys',
-    title: i18n.translate('management.landing.quickActions.apiKeys', {
-      defaultMessage: 'API Keys',
+    title: i18n.translate('management.landing.quickActions.createApiKey', {
+      defaultMessage: 'Create an API key',
     }),
-    icon: 'lockOpen',
+    description: i18n.translate('management.landing.quickActions.createApiKeyDescription', {
+      defaultMessage:
+        'Issue credentials for applications and scripts to call Elasticsearch and Kibana APIs.',
+    }),
     appId: 'management',
     path: 'security/api_keys/create',
     overlayId: API_KEYS_CREATE_LANDING_OVERLAY_ID,
@@ -77,10 +90,12 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
   },
   {
     id: 'data_views',
-    title: i18n.translate('management.landing.quickActions.dataViews', {
-      defaultMessage: 'Data Views',
+    title: i18n.translate('management.landing.quickActions.createDataView', {
+      defaultMessage: 'Create a data view',
     }),
-    icon: 'indexPatternApp',
+    description: i18n.translate('management.landing.quickActions.createDataViewDescription', {
+      defaultMessage: 'Point Discover, dashboards, and Lens at the indices you want to analyze.',
+    }),
     appId: 'management',
     path: 'kibana/dataViews/create',
     overlayId: DATA_VIEWS_CREATE_LANDING_OVERLAY_ID,
@@ -88,10 +103,13 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
   },
   {
     id: 'connectors',
-    title: i18n.translate('management.landing.quickActions.connectors', {
-      defaultMessage: 'Connectors',
+    title: i18n.translate('management.landing.quickActions.createConnector', {
+      defaultMessage: 'Create a connector',
     }),
-    icon: 'plugs',
+    description: i18n.translate('management.landing.quickActions.createConnectorDescription', {
+      defaultMessage:
+        'Add an outbound connection for alerting, cases, and third-party integrations.',
+    }),
     appId: 'management',
     path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
     overlayId: CONNECTORS_LANDING_OVERLAY_ID,
@@ -99,10 +117,13 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
   },
   {
     id: 'saved_objects',
-    title: i18n.translate('management.landing.quickActions.savedObjects', {
-      defaultMessage: 'Saved Objects',
+    title: i18n.translate('management.landing.quickActions.importSavedObjects', {
+      defaultMessage: 'Import saved objects',
     }),
-    icon: 'savedObjectsApp',
+    description: i18n.translate('management.landing.quickActions.importSavedObjectsDescription', {
+      defaultMessage:
+        'Upload a file to add dashboards, maps, saved searches, and other objects to this space.',
+    }),
     appId: 'management',
     path: 'kibana/objects',
     overlayId: SAVED_OBJECTS_IMPORT_LANDING_OVERLAY_ID,
@@ -110,10 +131,12 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
   },
   {
     id: 'users',
-    title: i18n.translate('management.landing.quickActions.usersRoles', {
-      defaultMessage: 'Users & Roles',
+    title: i18n.translate('management.landing.quickActions.addUser', {
+      defaultMessage: 'Add a user',
     }),
-    icon: 'usersRolesApp',
+    description: i18n.translate('management.landing.quickActions.addUserDescription', {
+      defaultMessage: 'Invite people to Elastic and control access with roles and privileges.',
+    }),
     appId: 'management',
     path: 'security/users/create',
     capabilityPath: 'management.security.users',

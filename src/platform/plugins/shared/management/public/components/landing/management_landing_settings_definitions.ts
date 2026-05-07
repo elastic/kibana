@@ -96,6 +96,5 @@ export const MANAGEMENT_LANDING_SETTINGS_ROWS: ManagementLandingSettingsRowDefin
     icon: 'users',
     capabilityPath: 'management.security.users',
     managementPath: 'security/users/create',
-    sectionBreakBefore: true,
   },
 ];

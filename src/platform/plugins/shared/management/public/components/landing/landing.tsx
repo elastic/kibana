@@ -153,7 +153,7 @@ function ManagementLandingClassicBody({
   const twoColumnLandingGridCss = css`
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: ${euiTheme.size.l};
+    gap: ${euiTheme.size.m};
     align-items: start;
     @media (max-width: ${euiTheme.breakpoint.m}px) {
       grid-template-columns: minmax(0, 1fr);

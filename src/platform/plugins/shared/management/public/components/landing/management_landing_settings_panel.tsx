@@ -10,6 +10,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,6 +32,7 @@ import {
 import {
   ManagementLandingSettingsNavigateContent,
   ManagementLandingSettingsUiContent,
+  ManagementLandingUiSettingReadonlyValue,
 } from './management_landing_settings_inline_controls';
 
 export function ManagementLandingSettingsPanel({
@@ -150,27 +152,54 @@ export function ManagementLandingSettingsPanel({
                 data-test-subj={rowTestSubj(row)}
               >
                 <EuiFlexGroup
-                  alignItems="flexStart"
+                  alignItems="center"
                   justifyContent="spaceBetween"
                   responsive={false}
                   gutterSize="s"
                 >
-                  <EuiFlexItem grow={true}>
-                    <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={row.icon} size="m" aria-hidden />
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow={true}
+                    css={css`
+                      min-width: 0;
+                    `}
+                  >
+                    <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="m"
+                      responsive={false}
+                      wrap
+                      css={css`
+                        row-gap: ${euiTheme.size.xs};
+                      `}
+                    >
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type={row.icon} size="m" aria-hidden />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={true}>
                         <EuiTitle size="xxs">
                           <h3
                             css={css`
                               font-weight: ${euiTheme.font.weight.semiBold};
+                              margin-bottom: 0;
                             `}
                           >
                             {row.title}
                           </h3>
                         </EuiTitle>
                       </EuiFlexItem>
+                      {editingRowId !== row.id && row.kind === 'uiSetting' ? (
+                        <EuiFlexItem
+                          grow={true}
+                          css={css`
+                            min-width: 0;
+                          `}
+                        >
+                          <ManagementLandingUiSettingReadonlyValue
+                            row={row}
+                            uiSettings={uiSettings}
+                          />
+                        </EuiFlexItem>
+                      ) : null}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -209,20 +238,40 @@ export function ManagementLandingSettingsPanel({
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                {row.kind === 'navigate' ? (
-                  <ManagementLandingSettingsNavigateContent
-                    row={row}
-                    isEditing={editingRowId === row.id}
-                    navigateToApp={navigateToApp}
-                  />
-                ) : (
-                  <ManagementLandingSettingsUiContent
-                    row={row}
-                    isEditing={editingRowId === row.id}
-                    uiSettings={uiSettings}
-                  />
-                )}
+                {editingRowId === row.id ? (
+                  <>
+                    <EuiSpacer size="s" />
+                    {row.kind === 'navigate' ? (
+                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                        <EuiFlexItem grow={true}>
+                          <ManagementLandingSettingsNavigateContent
+                            row={row}
+                            navigateToApp={navigateToApp}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            size="s"
+                            fill
+                            onClick={() => setEditingRowId(null)}
+                            data-test-subj={`managementLandingSettingsRowSave-${row.id}`}
+                          >
+                            <FormattedMessage
+                              id="management.landing.settingsPanel.saveRow"
+                              defaultMessage="Save"
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ) : (
+                      <ManagementLandingSettingsUiContent
+                        row={row}
+                        uiSettings={uiSettings}
+                        onDoneEditing={() => setEditingRowId(null)}
+                      />
+                    )}
+                  </>
+                ) : null}
               </EuiPanel>
             </div>
           </EuiFlexItem>

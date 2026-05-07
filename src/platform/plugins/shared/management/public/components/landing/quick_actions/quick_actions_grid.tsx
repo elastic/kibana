@@ -11,12 +11,13 @@ import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiCard,
-  EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTitle,
+  useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
 import { get } from 'lodash';
@@ -37,6 +38,7 @@ export const QuickActionsGrid = ({
   onOpenLandingOverlay: (overlayId: string) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const quickActionCardTitleFont = useEuiFontSize('s');
   const visibleActions = useMemo(
     () =>
       QUICK_ACTION_DEFINITIONS.filter((action) =>
@@ -89,30 +91,41 @@ export const QuickActionsGrid = ({
 
       <EuiSpacer size="m" />
 
-      <div
+      <EuiFlexGrid
+        columns={2}
+        gutterSize="s"
+        alignItems="stretch"
+        data-test-subj="managementQuickActionsStack"
         css={css`
           width: 100%;
         `}
-        data-test-subj="managementQuickActionsStack"
       >
-        <EuiFlexGroup direction="column" gutterSize="s" responsive={false} alignItems="stretch">
-          {visibleActions.map((action) => (
-            <EuiFlexItem key={action.id} grow={false}>
-              <EuiCard
-                css={css`
-                  width: 100%;
-                `}
-                icon={<EuiIcon type={action.icon} size="l" aria-hidden />}
-                title={action.title}
-                titleSize="xs"
-                layout="horizontal"
-                onClick={() => handleClick(action)}
-                data-test-subj={`managementQuickAction-${action.id}`}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </div>
+        {visibleActions.map((action) => (
+          <EuiFlexItem key={action.id}>
+            <EuiCard
+              css={css`
+                width: 100%;
+                height: 100%;
+                .euiCard__title {
+                  ${quickActionCardTitleFont}
+                }
+              `}
+              hasBorder
+              hasShadow={false}
+              textAlign="left"
+              title={action.title}
+              titleElement="h3"
+              titleSize="xs"
+              onClick={() => handleClick(action)}
+              data-test-subj={`managementQuickAction-${action.id}`}
+            >
+              <EuiText size="s" color="subdued">
+                {action.description}
+              </EuiText>
+            </EuiCard>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
     </EuiPanel>
   );
 };
