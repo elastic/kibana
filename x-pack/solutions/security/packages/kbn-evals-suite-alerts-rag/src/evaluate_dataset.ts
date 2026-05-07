@@ -80,7 +80,7 @@ const extractAlertIds = (text: string | undefined): string[] => {
   return [...new Set(text.match(/rag-alert-\d+/g) ?? [])];
 };
 
-const buildAlertContextText = (context: AlertDocument[]): string =>
+export const buildAlertContextText = (context: AlertDocument[]): string =>
   context
     .map((doc) => {
       const src = doc._source;
@@ -96,7 +96,7 @@ const buildAlertContextText = (context: AlertDocument[]): string =>
     })
     .join('\n\n');
 
-const toDatasetExample = (ex: AlertsRagExample): AlertsRagDatasetExample => ({
+export const toDatasetExample = (ex: AlertsRagExample): AlertsRagDatasetExample => ({
   input: { question: ex.input, context: ex.context ?? [] },
   output: ex.expected,
   metadata: {
