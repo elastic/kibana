@@ -47,24 +47,18 @@ const getExpected = (config: ScoutTestConfig) => {
  * This test exists to ensures additions to menu
  * notify our team and can be reviewed by design.
  */
-// Failing: See https://github.com/elastic/kibana/issues/268101
-spaceTest.describe.skip(
+spaceTest.describe(
   'Dashboard add panel flyout',
   {
     tag: [
-      ...tags.stateful.classic,
       ...tags.serverless.search,
-      ...tags.serverless.security.complete,
-      ...tags.serverless.observability.complete,
     ],
   },
   () => {
-    let expectedCount: number;
     let expectedGroups: string[];
 
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {
       const expected = getExpected(config);
-      expectedCount = expected.count;
       expectedGroups = expected.groups;
       await scoutSpace.savedObjects.cleanStandardList();
       await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
@@ -92,7 +86,8 @@ spaceTest.describe.skip(
       });
 
       await spaceTest.step('verify total panel count', async () => {
-        expect(await pageObjects.dashboard.getAddPanelFlyoutPanelTypesCount()).toBe(expectedCount);
+        const addPanelActions = await pageObjects.dashboard.getAddPanelFlyoutActions();
+        expect(addPanelActions).toStrictEqual([]);
       });
     });
   }

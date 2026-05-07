@@ -504,8 +504,19 @@ export class DashboardApp {
     );
   }
 
-  async getAddPanelFlyoutPanelTypesCount(): Promise<number> {
-    return this.panelSelectionFlyout.locator('[data-test-subj*="create-action-"]').count();
+  async getAddPanelFlyoutActions(): Promise<string[]> {
+    const addPanelActions = await this.panelSelectionFlyout
+      .locator('[data-test-subj*="create-action-"]')
+      .all();
+
+    return await Promise.all(
+      addPanelActions.map(async (action) => {
+        const testSubj = await action.getAttribute('data-test-subj');
+        // remove prefix so strings like 'create-action-Links' become 'Links'
+        const match = testSubj?.match(/create-action-(.*)/);
+        return match?.[1] ?? '';
+      })
+    );
   }
 
   /**
