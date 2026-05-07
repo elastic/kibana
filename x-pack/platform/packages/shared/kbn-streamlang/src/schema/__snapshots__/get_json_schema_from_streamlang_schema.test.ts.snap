@@ -2139,7 +2139,7 @@ Object {
             },
             Object {
               "additionalProperties": false,
-              "description": "Extract the domain parts from a FQDN string",
+              "description": "Extract the domain parts from an FQDN string",
               "properties": Object {
                 "action": Object {
                   "const": "registered_domain",
@@ -3653,7 +3653,7 @@ Object {
               },
               Object {
                 "additionalProperties": false,
-                "description": "Extract the domain parts from a FQDN string",
+                "description": "Extract the domain parts from an FQDN string",
                 "properties": Object {
                   "action": Object {
                     "const": "registered_domain",
