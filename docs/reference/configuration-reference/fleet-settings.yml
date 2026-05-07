@@ -537,6 +537,16 @@ groups:
           ech: ga
           self: ga
 
+      - setting: xpack.fleet.versionSpecificPolicyAssignment.taskInterval
+        description: |
+          Configure the interval at which {{fleet}} reassigns agents to the matching [version-specific agent policy](docs-content://reference/fleet/version-specific-agent-policies.md).
+        datatype: string
+        default: "1m"
+        applies_to:
+          stack: ga 9.4
+          ech: ga
+          self: ga
+
       - setting: xpack.fleet.integrationRollbackTTL
         description: |
           Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, or `1w`). For more information, refer to [Roll back an integration](docs-content://reference/fleet/roll-back-integration.md).

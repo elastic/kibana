@@ -7,7 +7,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 7442
+  alertingVTwo: 8509
   apm: 16978
   apmSourcesAccess: 779
   automaticImport: 13257
@@ -169,6 +169,7 @@ pageLoadAssetSize:
   serverless: 1272
   serverlessObservability: 14424
   serverlessSearch: 18261
+  serverlessVectordb: 619
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 440
@@ -204,7 +205,6 @@ pageLoadAssetSize:
   visDefaultEditor: 738
   visTypeGauge: 7639
   visTypeHeatmap: 6961
-  visTypeMarkdown: 4929
   visTypeMetric: 6932
   visTypePie: 22902
   visTypeTable: 13200
