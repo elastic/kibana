@@ -340,7 +340,7 @@ export const Navigation = ({
                                     data-test-subj="customizeNavigationMoreMenuButton"
                                   >
                                     <FormattedMessage
-                                      id="core.ui.chrome.sideNavigation.customizeNavigationButton"
+                                      id="kbnUI.sideNavigation.customizeNavigationButton"
                                       defaultMessage="Customize navigation"
                                     />
                                   </EuiButton>
