@@ -304,6 +304,140 @@ describe('FastifyHttpServer', () => {
       expect(JSON.parse(res.body)).toEqual({ body: {} });
     }, 15000);
 
+    it('applies Hapi default Cache-Control to router JSON responses', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      router.get(
+        {
+          path: '/cc-default',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: false,
+        },
+        async (_context, _req, res) => res.ok({ body: { ok: true } })
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+      expect(listenPort).toBeGreaterThan(0);
+
+      const res = await httpRequest(listenPort, '/api/fastify-mvp/cc-default');
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['cache-control']).toBe('private, no-cache, no-store, must-revalidate');
+    }, 15000);
+
+    it('times out slow JSON payload streams when route timeout.payload is set (Hapi parity)', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      router.post(
+        {
+          path: '/slow-payload',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: false,
+          options: {
+            body: { accepts: ['application/json'] },
+            timeout: { payload: 100 },
+          },
+        },
+        async (_context, _req, res) => res.ok({})
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+      expect(listenPort).toBeGreaterThan(0);
+
+      const body = '{"foo":"bar"}';
+      await new Promise<void>((resolve, reject) => {
+        const req = http.request(
+          {
+            hostname: '127.0.0.1',
+            port: listenPort,
+            path: '/api/fastify-mvp/slow-payload',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Transfer-Encoding': 'chunked',
+            },
+          },
+          (incoming) => {
+            incoming.resume();
+            reject(
+              new Error(
+                `expected connection reset during slow upload, got status ${incoming.statusCode}`
+              )
+            );
+          }
+        );
+        req.on('error', () => resolve());
+        let i = 0;
+        const id = setInterval(() => {
+          if (i < body.length) {
+            req.write(body[i++]);
+          } else {
+            clearInterval(id);
+            req.end();
+          }
+        }, 20);
+      });
+    }, 15000);
+
+    it('serves a sibling .gz asset when Accept-Encoding prefers gzip', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      const dir = fs.mkdtempSync(nodePath.join(os.tmpdir(), 'fastify-static-gz-'));
+      fs.writeFileSync(nodePath.join(dir, 'bundle.js'), 'not-gzip');
+      fs.writeFileSync(nodePath.join(dir, 'bundle.js.gz'), 'gzipped-body');
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+      setup.registerStaticDir('/assets/{any*}', dir);
+
+      await server.start();
+      const address = (setup.server as any).server.address();
+      const port = typeof address === 'object' && address ? address.port : 0;
+
+      const res = await httpRequest(port, '/assets/bundle.js', 'GET', {
+        headers: { 'accept-encoding': 'gzip' },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-encoding']).toBe('gzip');
+      expect(res.body).toBe('gzipped-body');
+      expect(Number(res.headers['content-length'])).toBe(Buffer.byteLength('gzipped-body'));
+
+      fs.rmSync(dir, { recursive: true, force: true });
+    }, 15000);
+
     it('parses multipart/form-data into Hapi-shaped body.file (saved_objects _import parity)', async () => {
       const ctx = createCoreContext();
       const config = createHttpConfig(PORT);
@@ -507,6 +641,8 @@ describe('FastifyHttpServer', () => {
       expect(res.body).toBe('static-from-fastify');
       expect(res.headers['content-length']).toBe('19');
       expect(res.headers['content-type']).toMatch(/^text\/plain/);
+      expect(res.headers['cache-control']).toBe('must-revalidate');
+      expect(String(res.headers.vary ?? '').toLowerCase()).toBe('accept-encoding');
 
       fs.rmSync(dir, { recursive: true, force: true });
     }, 15000);

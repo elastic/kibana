@@ -15,6 +15,9 @@ import { isResponseError as isElasticsearchResponseError } from '@kbn/es-errors'
 import type { ResponseError, ResponseErrorAttributes } from '@kbn/core-http-server';
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 
+/** Mirrors `getServerOptions` default `routes.cache` for Hapi (`@kbn/server-http-tools`). */
+const HAPI_DEFAULT_CACHE_CONTROL = 'private, no-cache, no-store, must-revalidate';
+
 const statusHelpers = {
   isSuccess: (code: number) => code >= 100 && code < 300,
   isNotModified: (code: number) => code === 304,
@@ -71,6 +74,17 @@ export class FastifyResponseAdapter {
     }
   }
 
+  private applyDefaultCacheControl(reply: FastifyReply, kibanaResponse: KibanaResponse): void {
+    if (reply.hasHeader('cache-control')) {
+      return;
+    }
+    const h = kibanaResponse.options.headers;
+    if (h && Object.keys(h).some((k) => k.toLowerCase() === 'cache-control')) {
+      return;
+    }
+    reply.header('cache-control', HAPI_DEFAULT_CACHE_CONTROL);
+  }
+
   private toSuccess(kibanaResponse: KibanaResponse, reply: FastifyReply): FastifyReply {
     reply.code(kibanaResponse.status);
     this.applyHeaders(reply, kibanaResponse.options.headers);
@@ -86,6 +100,7 @@ export class FastifyResponseAdapter {
     ) {
       reply.header('content-type', 'text/html; charset=utf-8');
     }
+    this.applyDefaultCacheControl(reply, kibanaResponse);
     return reply.send(payload);
   }
 
@@ -96,6 +111,7 @@ export class FastifyResponseAdapter {
       throw new Error("expected 'location' header to be set");
     }
     this.applyHeaders(reply, kibanaResponse.options.headers);
+    this.applyDefaultCacheControl(reply, kibanaResponse);
     return reply.code(kibanaResponse.status).redirect(location);
   }
 
@@ -109,6 +125,7 @@ export class FastifyResponseAdapter {
     if (Buffer.isBuffer(payload) || payload instanceof stream.Readable) {
       reply.code(kibanaResponse.status);
       this.applyHeaders(reply, kibanaResponse.options.headers);
+      this.applyDefaultCacheControl(reply, kibanaResponse);
       return reply.send(kibanaResponse.payload);
     }
 
@@ -128,6 +145,7 @@ export class FastifyResponseAdapter {
 
     reply.code(kibanaResponse.status);
     this.applyHeaders(reply, kibanaResponse.options.headers);
+    this.applyDefaultCacheControl(reply, kibanaResponse);
     return reply.send(errorBody);
   }
 }

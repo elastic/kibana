@@ -22,6 +22,7 @@ import type {
   OnPreResponseToolkit,
   OnPreRoutingHandler,
   OnPreRoutingToolkit,
+  RouterRoute,
 } from '@kbn/core-http-server';
 import {
   isKibanaResponse,
@@ -118,6 +119,7 @@ const buildKibanaRequest = (req: FastifyRequest): HapiRequest => {
     typeof mergedSecurity === 'function'
       ? undefined
       : (mergedSecurity as RouteSecurity | undefined);
+  const matchedRoute = matched as RouterRoute | undefined;
   const compat: any = {
     app,
     url,
@@ -137,7 +139,12 @@ const buildKibanaRequest = (req: FastifyRequest): HapiRequest => {
         app: settingsApp,
         tags: matched?.options.tags ? Array.from(matched.options.tags) : [],
         auth: mapRouteSecurityToHapiAuthSettings(routeSecurity, authRegistered),
-        payload: matched?.options.body ?? {},
+        payload: {
+          ...(matchedRoute?.options.body ?? {}),
+          ...(matchedRoute?.options.timeout?.payload !== undefined
+            ? { timeout: matchedRoute.options.timeout.payload }
+            : {}),
+        },
       },
     },
   };

@@ -155,7 +155,12 @@ export function buildHapiCompatRequestFromFastify(
         app: routeApp,
         tags: route.options.tags ? Array.from(route.options.tags) : [],
         auth: settingsAuth,
-        payload: route.options.body,
+        payload: {
+          ...(route.options.body ?? {}),
+          ...(route.options.timeout?.payload !== undefined
+            ? { timeout: route.options.timeout.payload }
+            : {}),
+        },
       },
     },
   };

@@ -62,6 +62,8 @@ import { KIBANA_HAPI_COMPAT_REQUEST, registerFastifyAuthentication } from './fas
 import { installHapiCompatibleJsonBodyParser } from './fastify/install_hapi_compatible_json_body_parser';
 import { installFastifyGlobalErrorHandler } from './fastify/fastify_global_error_handler';
 import { registerFastifyMultipartAndKibanaBodyHook } from './fastify/fastify_multipart_kibana_body';
+import { resolvePrecompressedStaticPath } from './fastify/precompressed_static_file';
+import { registerFastifyPayloadTimeoutPreParsing } from './fastify/register_fastify_payload_timeout_pre_parsing';
 import { isReplyCommitted } from './fastify/fastify_reply_utils';
 
 /** Upper bound for Fastify's raw body limit — must cover saved_objects `_import` (see `savedObjects.maxImportPayloadBytes`). */
@@ -311,6 +313,7 @@ export class FastifyHttpServer {
     });
     this.installFastifyDispatcher(this.fastify, this.fmw);
     this.installRouteLookupHook(this.fastify, this.fmw);
+    registerFastifyPayloadTimeoutPreParsing(this.fastify);
 
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     const staticAssets = new StaticAssets({
@@ -865,7 +868,7 @@ export class FastifyHttpServer {
         ? fastifyPath
         : `${fastifyPath.endsWith('/') ? fastifyPath : `${fastifyPath}/`}*`;
 
-    const handler: FmwHandler = async (_req, reply, params) => {
+    const handler: FmwHandler = async (req, reply, params) => {
       const wildcardValue = staticRelativePathFromParams(routePath, params);
       const requested = nodePath.normalize(nodePath.join(resolvedRoot, wildcardValue));
       // Containment check: prevent traversal escapes via `..`.
@@ -879,14 +882,25 @@ export class FastifyHttpServer {
             .code(404)
             .send({ statusCode: 404, error: 'Not Found', message: 'Not Found' });
         }
+        const acceptEncoding = req.headers['accept-encoding'];
+        const resolved = await resolvePrecompressedStaticPath(
+          requested,
+          typeof acceptEncoding === 'string' ? acceptEncoding : undefined
+        );
+        const fileStat = await fs.promises.stat(resolved.path);
         const contentType = mime.lookup(requested) || 'application/octet-stream';
         reply
+          .header('cache-control', 'must-revalidate')
+          .header('vary', 'accept-encoding')
           .header('content-type', mime.contentType(contentType) || contentType)
-          .header('content-length', String(stat.size));
+          .header('content-length', String(fileStat.size));
+        if (resolved.contentEncoding) {
+          reply.header('content-encoding', resolved.contentEncoding);
+        }
         // Stream from disk so a single Kibana process can serve large/many static
         // assets without buffering each file in memory. Fastify pipes Readable
         // streams natively and finalizes the reply when the stream ends.
-        return reply.send(fs.createReadStream(requested));
+        return reply.send(fs.createReadStream(resolved.path));
       } catch (err) {
         if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
           return reply
