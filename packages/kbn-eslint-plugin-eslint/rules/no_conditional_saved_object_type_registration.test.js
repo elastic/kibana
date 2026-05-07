@@ -70,6 +70,18 @@ ruleTester.run('@kbn/eslint/no_conditional_saved_object_type_registration', rule
     },
     {
       code: dedent`
+        config.enabled ?? core.savedObjects.registerType(myType);
+      `,
+      errors: [{ message: errorMessage }],
+    },
+    {
+      code: dedent`
+        config.enabled ?? (client = core.savedObjects.registerType(myType));
+      `,
+      errors: [{ message: errorMessage }],
+    },
+    {
+      code: dedent`
         const register = config.enabled ? savedObjects.registerType(myType) : undefined;
       `,
       errors: [{ message: errorMessage }],

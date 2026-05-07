@@ -69,6 +69,7 @@ const isSavedObjectsRegisterTypeCall = (node) => {
  * @param {Node[]} ancestors
  */
 const isConditionallyExecuted = (node, ancestors) => {
+  let currentNode = node;
   for (let index = ancestors.length - 1; index >= 0; index--) {
     const ancestor = ancestors[index];
     if (isConditionalNode(ancestor)) {
@@ -77,11 +78,12 @@ const isConditionallyExecuted = (node, ancestors) => {
 
     if (
       ancestor.type === esTypes.LogicalExpression &&
-      ancestor.right === node &&
-      (ancestor.operator === '&&' || ancestor.operator === '||')
+      ancestor.right === currentNode &&
+      (ancestor.operator === '&&' || ancestor.operator === '||' || ancestor.operator === '??')
     ) {
       return true;
     }
+    currentNode = ancestor;
   }
 
   return false;
