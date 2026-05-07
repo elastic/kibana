@@ -13,3 +13,5 @@ export type * from './src/errors';
 export type * from './src/traces';
 export type * from './src/focused_trace_waterfall';
 export type * from './src/full_trace_waterfall';
+export * from './src/environment_rt';
+export * from './src/environment_filter_values';

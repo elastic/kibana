@@ -11,7 +11,6 @@ import { either } from 'fp-ts/Either';
 import type { BoolQuery } from '@kbn/es-query';
 import { ApmDocumentType } from '../../common/document_type';
 import { RollupInterval } from '../../common/rollup';
-
 export { environmentRt } from '../../common/environment_rt';
 
 export const rangeRt = t.type({

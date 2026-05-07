@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import * as t from 'io-ts';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
 
 export const rangeRt = t.type({
   start: isoToEpochRt,
   end: isoToEpochRt,
+});
+
+export const kueryRt = t.type({ kuery: t.string });
+
+export const probabilityRt = t.type({
+  probability: toNumberRt,
 });

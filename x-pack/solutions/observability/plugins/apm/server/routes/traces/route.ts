@@ -16,9 +16,9 @@ import {
   type UnifiedTracesByIdSummaryResponse,
   type UnifiedTraceSpanResponse,
   type UnifiedTracesRootSpanResponse,
+  type TopTracesPrimaryStatsResponse,
 } from '@kbn/apm-api-shared';
 import { type ErrorsByTraceId } from '@kbn/apm-types';
-import * as t from 'io-ts';
 import {
   DURATION,
   SPAN_DURATION,
@@ -32,13 +32,11 @@ import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
 import { getSpan } from '../transactions/get_span';
 import { getTransaction } from '../transactions/get_transaction';
 import { getTransactionByName } from '../transactions/get_transaction_by_name';
 import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
 import { buildFocusedTraceItems, findRootItem } from './build_focused_trace_items';
-import type { TopTracesPrimaryStatsResponse } from './get_top_traces_primary_stats';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
 import { getTraceSummaryCount } from './get_trace_summary_count';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
@@ -46,10 +44,8 @@ import { getUnifiedTraceItems } from './get_unified_trace_items';
 import { getUnifiedTraceSpan } from './get_unified_trace_span';
 
 const tracesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces',
-  params: t.type({
-    query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),
-  }),
+  endpoint: routeDefinitions.traces.traces.endpoint,
+  params: routeDefinitions.traces.traces.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TopTracesPrimaryStatsResponse> => {
     const { config, params, request, core } = resources;
