@@ -125,34 +125,62 @@ function createNavTree({
         ? [
             entityCentricLabEnabled
               ? {
+                  // When the entity-centric lab is on, Streams becomes a
+                  // panel-opener that exposes (1) the existing All streams
+                  // entry, (2) an `Entities` group listing the mocked entity
+                  // types, and (3) a Manage entity types shortcut. The parent
+                  // node still navigates to /app/streams when clicked
+                  // directly (mirrors the Infrastructure pattern).
+                  id: 'streams',
                   link: 'streams' as const,
                   icon: 'productStreamsWired',
-                  // When the entity-centric lab is on, expose `Manage entity
-                  // types` directly under Streams (Cases-style sub-items).
+                  renderAs: 'panelOpener' as const,
                   children: [
                     {
-                      link: 'streams' as const,
-                      title: i18n.translate('xpack.observability.obltNav.streams.allStreams', {
-                        defaultMessage: 'All streams',
-                      }),
-                      getIsActive: ({
-                        pathNameSerialized,
-                        prepend,
-                      }: {
-                        pathNameSerialized: string;
-                        prepend: (path: string) => string;
-                      }) => {
-                        const root = prepend('/app/streams');
-                        return (
-                          pathNameSerialized === root ||
-                          pathNameSerialized === `${root}/` ||
-                          (pathNameSerialized.startsWith(root) &&
-                            !pathNameSerialized.startsWith(`${root}/manage-entity-types`))
-                        );
-                      },
+                      children: [
+                        {
+                          link: 'streams' as const,
+                          title: i18n.translate('xpack.observability.obltNav.streams.allStreams', {
+                            defaultMessage: 'All streams',
+                          }),
+                          getIsActive: ({
+                            pathNameSerialized,
+                            prepend,
+                          }: {
+                            pathNameSerialized: string;
+                            prepend: (path: string) => string;
+                          }) => {
+                            const root = prepend('/app/streams');
+                            return (
+                              pathNameSerialized === root ||
+                              pathNameSerialized === `${root}/` ||
+                              (pathNameSerialized.startsWith(root) &&
+                                !pathNameSerialized.startsWith(`${root}/manage-entity-types`))
+                            );
+                          },
+                        },
+                      ],
                     },
                     {
-                      link: 'streams:manageEntityTypes' as const,
+                      id: 'streamsEntities',
+                      title: i18n.translate('xpack.observability.obltNav.streams.entities', {
+                        defaultMessage: 'Entities',
+                      }),
+                      // Each entry reuses the Manage entity types deep link;
+                      // the prototype page does not yet filter by category.
+                      children: ENTITY_CENTRIC_LAB_ENTITIES_PANEL_ITEMS.map((item) => ({
+                        id: `entityCentricLab-${item.id}`,
+                        title: item.title,
+                        link: 'streams:manageEntityTypes' as const,
+                      })),
+                    },
+                    {
+                      children: [
+                        {
+                          id: 'entityCentricLab-manage',
+                          link: 'streams:manageEntityTypes' as const,
+                        },
+                      ],
                     },
                   ],
                 }
@@ -160,36 +188,6 @@ function createNavTree({
                   link: 'streams' as const,
                   icon: 'productStreamsWired',
                 },
-          ]
-        : []),
-      ...(entityCentricLabEnabled
-        ? [
-            {
-              id: 'entities',
-              title: i18n.translate('xpack.observability.obltNav.entities', {
-                defaultMessage: 'Entities',
-              }),
-              renderAs: 'panelOpener' as const,
-              icon: 'tableDensityNormal',
-              children: [
-                {
-                  // No sub-group title — children sit directly under the panel
-                  // header. Each entity-type entry navigates to the same
-                  // Manage entity types page (lab placeholder).
-                  children: [
-                    ...ENTITY_CENTRIC_LAB_ENTITIES_PANEL_ITEMS.map((item) => ({
-                      id: `entityCentricLab-${item.id}`,
-                      title: item.title,
-                      link: 'streams:manageEntityTypes' as const,
-                    })),
-                    {
-                      id: 'entityCentricLab-manage',
-                      link: 'streams:manageEntityTypes' as const,
-                    },
-                  ],
-                },
-              ],
-            },
           ]
         : []),
       {
