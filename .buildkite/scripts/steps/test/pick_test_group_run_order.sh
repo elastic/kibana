@@ -28,7 +28,23 @@ if [[ -n "${GITHUB_PR_NUMBER:-}" ]] && is_pr_with_label "ci:skip-non-scout-tests
   export CODE_CHANGES_FILE=".scout/code_changes.json"
   export TESTING_SCOPE_FILE=".scout/testing_scope.json"
 
-  ts-node .buildkite/scripts/steps/test/scout/resolve_selective_testing.ts
+  # TEMP — REMOVE BEFORE MERGE: stub a tests-only diff so CI exercises the
+  # Jest/FTR skip regardless of what's actually in the PR. Must match the stub
+  # in `scout/test_run_builder.sh` so both agents resolve the same scope.
+  cat > "$CODE_CHANGES_FILE" <<'EOF'
+{
+  "mergeBase": "ci-stub-tests-only",
+  "changedFiles": [
+    "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts"
+  ],
+  "affectedModules": ["@kbn/discover-enhanced-plugin"]
+}
+EOF
+  echo "Using stubbed code_changes.json (CI verification — REMOVE BEFORE MERGE)"
+  cat "$CODE_CHANGES_FILE"
+
+  # Real bridge disabled while the stub is in place.
+  # ts-node .buildkite/scripts/steps/test/scout/resolve_selective_testing.ts
 
   node scripts/scout resolve-testing-scope \
     --code-changes "$CODE_CHANGES_FILE" \
