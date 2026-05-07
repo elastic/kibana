@@ -9,28 +9,76 @@
 
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
+import { type AnnouncementBannerSize } from './types';
 
 const CONTAINER_NAME = 'kbn-announcement-banner';
 
-/** Narrowest possible layout */
-const CQC_MAX_NARROW = '(max-width: 360px)';
-/** Below this width the layout collapses to a single column. */
-const CQC_SUPER_NARROW = '(max-width: 540px)';
-const CQC_NARROW = '(min-width: 541px)';
-/** At and above this width actions move beside the body and primary appears last. */
-const CQC_WIDE = '(min-width: 1000px)';
+const CQC_LAYOUTS = ['superNarrow', 'narrow', 'wide'] as const;
+type AnnouncementBannerLayouts = (typeof CQC_LAYOUTS)[number];
+const CQC_BREAKPOINTS: Record<
+  // manually adds 'l' while it's still hidden from public API
+  AnnouncementBannerSize | 'l',
+  Record<AnnouncementBannerLayouts, string>
+> = {
+  s: {
+    superNarrow: '(max-width: 400px)',
+    narrow: '(min-width: 401px)',
+    wide: '(min-width: 800px)',
+  },
+  m: {
+    superNarrow: '(max-width: 600px)',
+    narrow: '(min-width: 601px)',
+    wide: '(min-width: 1000px)',
+  },
+  l: {
+    superNarrow: '(max-width: 800px)',
+    narrow: '(min-width: 801px)',
+    wide: '(min-width: 1200px)',
+  },
+};
 
 /** Maximum reading width for `text` and `children` slots. */
 const TEXT_MAX_WIDTH = 1200;
 
+const withContainerQuery = ({
+  layout,
+  styles,
+}: {
+  layout: AnnouncementBannerLayouts;
+  styles: string;
+}) => {
+  return Object.keys(CQC_BREAKPOINTS)
+    .map(
+      (sizeKey) => `
+        @container ${CONTAINER_NAME}--${sizeKey} ${
+        CQC_BREAKPOINTS[sizeKey as AnnouncementBannerSize | 'l'][layout]
+      } {
+          ${styles}
+        }
+      `
+    )
+    .join('\n');
+};
+
 export const announcementBannerStyles = {
   root: ({ euiTheme }: UseEuiTheme) => css`
-    container-type: inline-size;
     container-name: ${CONTAINER_NAME};
+    container-type: inline-size;
     position: relative;
-
     border: ${euiTheme.border.thin};
     border-radius: ${euiTheme.border.radius.medium};
+
+    &[data-size='s'] {
+      container-name: ${CONTAINER_NAME} ${CONTAINER_NAME}--s;
+    }
+
+    &[data-size='m'] {
+      container-name: ${CONTAINER_NAME} ${CONTAINER_NAME}--m;
+    }
+
+    &[data-size='l'] {
+      container-name: ${CONTAINER_NAME} ${CONTAINER_NAME}--l;
+    }
   `,
   container: ({ euiTheme }: UseEuiTheme) => css`
     display: flex;
@@ -48,11 +96,14 @@ export const announcementBannerStyles = {
       padding-block: ${euiTheme.size.m};
     }
 
-    @container ${CONTAINER_NAME} ${CQC_SUPER_NARROW} {
-      flex-direction: column;
-      align-items: stretch;
-      gap: ${euiTheme.size.m};
-    }
+    ${withContainerQuery({
+      layout: 'superNarrow',
+      styles: `
+        flex-direction: column;
+        align-items: stretch;
+        gap: ${euiTheme.size.m};
+      `,
+    })}
   `,
   media: ({ euiTheme }: UseEuiTheme) => css`
     --kbn-announcementBannerMediaSize: ${`calc(${euiTheme.size.base} * 5)`};
@@ -88,18 +139,24 @@ export const announcementBannerStyles = {
       gap: ${euiTheme.size.s};
     }
 
-    @container ${CONTAINER_NAME} ${CQC_SUPER_NARROW} {
-      align-self: flex-start;
-    }
+    ${withContainerQuery({
+      layout: 'superNarrow',
+      styles: `
+        align-self: flex-start;
+      `,
+    })}
 
-    @container ${CONTAINER_NAME} ${CQC_WIDE} {
-      flex-direction: row;
-      align-items: center;
-      /* stretch to match the media's height so align-items has space to work */
-      align-self: stretch;
-      justify-content: space-between;
-      gap: ${euiTheme.size.l};
-    }
+    ${withContainerQuery({
+      layout: 'wide',
+      styles: `
+        flex-direction: row;
+        align-items: center;
+        /* stretch to match the media's height so align-items has space to work */
+        align-self: stretch;
+        justify-content: space-between;
+        gap: ${euiTheme.size.l};
+      `,
+    })}
   `,
   // At size `s` the content slot becomes a block container so the title and
   // text flow inline. Other sizes keep the flex column with a fixed gap.
@@ -141,28 +198,36 @@ export const announcementBannerStyles = {
   actions: ({ euiTheme }: UseEuiTheme) => css`
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
     align-items: center;
     gap: ${euiTheme.size.s};
 
-    @container ${CONTAINER_NAME} ${CQC_MAX_NARROW} {
+    /* uses container query directly as it should apply generically independent of size */
+    @container ${CONTAINER_NAME} ${CQC_BREAKPOINTS.s.superNarrow} {
+      flex-wrap: wrap;
+
       /* use full width actions */
       > * {
         inline-size: 100%;
       }
     }
 
-    @container ${CONTAINER_NAME} ${CQC_WIDE} {
-      /* Reverses source order so primary appears last (rightmost). */
-      flex-direction: row-reverse;
-      flex-shrink: 0;
-      align-self: flex-end;
-    }
+    ${withContainerQuery({
+      layout: 'wide',
+      styles: `
+        /* Reverses source order so primary appears last (rightmost). */
+        flex-direction: row-reverse;
+        flex-shrink: 0;
+        align-self: flex-end;
+      `,
+    })}
   `,
   hasDismiss: ({ euiTheme }: UseEuiTheme) => css`
-    @container ${CONTAINER_NAME} ${CQC_NARROW} {
-      padding-inline-end: calc(${euiTheme.size.s} * 5);
-    }
+    ${withContainerQuery({
+      layout: 'narrow',
+      styles: `
+        padding-inline-end: calc(${euiTheme.size.s} * 5);
+      `,
+    })}
   `,
   dismiss: ({ euiTheme }: UseEuiTheme) => css`
     position: absolute;
