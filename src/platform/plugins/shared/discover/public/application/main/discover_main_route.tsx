@@ -46,7 +46,11 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
 import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
-import { EntityCentricLabPanel, EntityCentricLabProvider } from '../../lab/entity_centric';
+import {
+  EntityCentricLabPanel,
+  EntityCentricLabProvider,
+  useEntityCentricLab,
+} from '../../lab/entity_centric';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -113,6 +117,9 @@ export const DiscoverMainRoute = ({
 
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { customizationContext, runtimeStateManager } = props;
+  // When the entity-centric lab is on we suppress the global no-data page
+  // (`Add integrations`) so the fake logs panel takes over the empty state.
+  const { enabled: entityCentricLabEnabled } = useEntityCentricLab();
   const services = useDiscoverServices();
   const { core, dataViews, chrome, data } = services;
   const history = useHistory();
@@ -261,12 +268,14 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     return (
       <>
         <EntityCentricLabPanel />
-        <NoDataPage
-          {...mainRouteInitializationState.value}
-          onDataViewCreated={() => {
-            // This is unused if there is no ES data
-          }}
-        />
+        {entityCentricLabEnabled ? null : (
+          <NoDataPage
+            {...mainRouteInitializationState.value}
+            onDataViewCreated={() => {
+              // This is unused if there is no ES data
+            }}
+          />
+        )}
       </>
     );
   }

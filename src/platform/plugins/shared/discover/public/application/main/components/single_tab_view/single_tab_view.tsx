@@ -47,7 +47,7 @@ import { ScopedServicesProvider } from '../../../../components/scoped_services_p
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
 import type { DiscoverSearchSessionManager } from '../../state_management/discover_search_session';
-import { EntityCentricLabPanel } from '../../../../lab/entity_centric';
+import { EntityCentricLabPanel, useEntityCentricLab } from '../../../../lab/entity_centric';
 
 export interface SingleTabViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -68,6 +68,9 @@ export const SingleTabView = ({
 }: SingleTabViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
+  // When the entity-centric lab is on we suppress the per-tab no-data page
+  // (`Add integrations`) so the fake logs panel takes over the empty state.
+  const { enabled: entityCentricLabEnabled } = useEntityCentricLab();
 
   const appInitializationState = useInternalStateSelector((state) => state.initializationState);
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
@@ -147,27 +150,29 @@ export const SingleTabView = ({
     return (
       <HideTabsBar customizationContext={customizationContext}>
         <EntityCentricLabPanel />
-        <NoDataPage
-          {...appInitializationState}
-          onDataViewCreated={async (dataViewUnknown) => {
-            await dispatch(internalStateActions.loadDataViewList());
-            dispatch(
-              internalStateActions.setInitializationState({
-                hasESData: true,
-                hasUserDataView: true,
-              })
-            );
-            const dataView = dataViewUnknown as DataView;
-            initializeTab.current({
-              defaultUrlState: dataView.id
-                ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
-                : undefined,
-            });
-          }}
-          onESQLNavigationComplete={() => {
-            initializeTab.current();
-          }}
-        />
+        {entityCentricLabEnabled ? null : (
+          <NoDataPage
+            {...appInitializationState}
+            onDataViewCreated={async (dataViewUnknown) => {
+              await dispatch(internalStateActions.loadDataViewList());
+              dispatch(
+                internalStateActions.setInitializationState({
+                  hasESData: true,
+                  hasUserDataView: true,
+                })
+              );
+              const dataView = dataViewUnknown as DataView;
+              initializeTab.current({
+                defaultUrlState: dataView.id
+                  ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
+                  : undefined,
+              });
+            }}
+            onESQLNavigationComplete={() => {
+              initializeTab.current();
+            }}
+          />
+        )}
       </HideTabsBar>
     );
   }
