@@ -570,7 +570,7 @@ describe('Data streams initialize function', () => {
       });
       expect(
         writeIndexMappings[writeIndex.index_name].mappings.properties?.mappedFieldRequired
-      ).toEqual({ type: 'keyword' });
+      ).toEqual({ type: 'keyword', ignore_above: 1024 });
     });
 
     it('allows a DataStreamClient.fromDefinition-built client to write through ES auto-creation', async () => {
