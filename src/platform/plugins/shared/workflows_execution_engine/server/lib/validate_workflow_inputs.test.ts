@@ -10,7 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowExecutionEngineModel, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import type { WorkflowInput } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -19,7 +19,7 @@ describe('validateWorkflowInputs', () => {
   let mockRepository: jest.Mocked<Pick<WorkflowExecutionRepository, 'updateWorkflowExecution'>>;
   let mockLogger: jest.Mocked<Pick<Logger, 'error'>>;
 
-  const makeWorkflow = (inputs?: ManualTrigger['inputs']): WorkflowExecutionEngineModel => {
+  const makeWorkflow = (inputs?: WorkflowInput): WorkflowExecutionEngineModel => {
     const triggers: WorkflowYaml['triggers'] =
       inputs !== undefined ? ([{ type: 'manual', inputs }] as WorkflowYaml['triggers']) : [];
     return {
@@ -60,6 +60,85 @@ describe('validateWorkflowInputs', () => {
 
     expect(result).toBe(true);
     expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  describe('manual trigger inputs: empty {} vs { properties: {} }', () => {
+    it('should return true when manual trigger inputs are an empty object {}', async () => {
+      const workflow = makeWorkflow({} as WorkflowInput);
+      const result = await callValidate(workflow, { inputs: { ignored: 'value' } });
+
+      expect(result).toBe(true);
+      expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should return true when manual trigger inputs have empty properties object', async () => {
+      const workflow = makeWorkflow({ properties: {} } as WorkflowInput);
+      const result = await callValidate(workflow, { inputs: {} });
+
+      expect(result).toBe(true);
+      expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should return true when manual trigger inputs have empty properties but required lists a field without property schemas', async () => {
+      const workflow = makeWorkflow({
+        type: 'object',
+        properties: {},
+        required: ['name'],
+      } as WorkflowInput);
+
+      const result = await callValidate(workflow, { inputs: {} });
+
+      expect(result).toBe(true);
+      expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('legacy array manual inputs', () => {
+    it('should return true when legacy array inputs match schema', async () => {
+      const workflow = makeWorkflow([
+        { name: 'title', type: 'string', required: true },
+      ] as WorkflowInput);
+
+      const result = await callValidate(workflow, { inputs: { title: 'ok' } });
+
+      expect(result).toBe(true);
+      expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should return false when legacy array inputs omit a required field', async () => {
+      const workflow = makeWorkflow([
+        { name: 'title', type: 'string', required: true },
+      ] as WorkflowInput);
+
+      const result = await callValidate(workflow, { inputs: {} });
+
+      expect(result).toBe(false);
+      expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+        id: executionId,
+        status: ExecutionStatus.FAILED,
+        error: {
+          type: 'InputValidationError',
+          message: expect.stringContaining('Workflow input validation failed'),
+        },
+      });
+    });
+
+    it('should return false on type mismatch for legacy array-defined field', async () => {
+      const workflow = makeWorkflow([
+        { name: 'count', type: 'number', required: true },
+      ] as WorkflowInput);
+
+      const result = await callValidate(workflow, { inputs: { count: 'not-a-number' } });
+
+      expect(result).toBe(false);
+      expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: executionId,
+          status: ExecutionStatus.FAILED,
+          error: expect.objectContaining({ type: 'InputValidationError' }),
+        })
+      );
+    });
   });
 
   it('should return true when input definition has no properties', async () => {

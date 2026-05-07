@@ -732,7 +732,7 @@ export const WorkflowSchema = WorkflowSchemaBase.extend({
 
     return {
       ...trigger,
-      inputs: trigger.inputs ? normalizeFieldsToJsonSchema(trigger.inputs) : undefined,
+      inputs: normalizeFieldsToJsonSchema(trigger.inputs),
     };
   });
 

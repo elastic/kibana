@@ -20,7 +20,7 @@ export const AlertSchema = z.object({
   _id: z.string(),
   _index: z.string(),
   kibana: z.object({
-    alert: z.any(),
+    alert: z.unknown(),
   }),
   '@timestamp': z.string(),
 });
@@ -39,9 +39,9 @@ export const RuleSchema = z.object({
  * For autocomplete, use getEventSchemaForTriggers() to get a trigger-aware schema.
  */
 export const AlertEventSchema = z.object({
-  alerts: z.array(z.union([AlertSchema, z.any()])),
+  alerts: z.array(z.union([AlertSchema, z.unknown()])),
   rule: RuleSchema,
-  params: z.any(),
+  params: z.unknown(),
   spaceId: z.string().describe('The space where the event was emitted.'),
 });
 export type AlertEvent = z.infer<typeof AlertEventSchema>;
