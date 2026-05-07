@@ -13,13 +13,22 @@ import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { getRowControlColumn } from './row_control_column';
 import { getRowMenuControlColumn } from './row_menu_control_column';
 
+export const DEFAULT_VISIBLE_ROW_ACTIONS = 1;
+
 export const getAdditionalRowControlColumns = (
-  rowControlColumns: RowControlColumn[]
+  rowControlColumns: RowControlColumn[],
+  visibleRowActions: number = DEFAULT_VISIBLE_ROW_ACTIONS
 ): {
   totalWidth: number;
   columns: RenderCellValue[];
 } => {
-  if (rowControlColumns.length <= 2) {
+  const visible = Math.max(1, visibleRowActions);
+  const n = rowControlColumns.length;
+
+  // Render all inline when there's at most one extra control beyond the visible
+  // budget — collapsing would only save a single slot, which the menu trigger
+  // itself would consume.
+  if (n <= visible + 1) {
     const totalWidth = rowControlColumns.reduce(
       (acc, column) => acc + (column.width ?? DEFAULT_CONTROL_COLUMN_WIDTH),
       0
@@ -27,12 +36,15 @@ export const getAdditionalRowControlColumns = (
     return { columns: rowControlColumns.map(getRowControlColumn), totalWidth };
   }
 
+  const inlineControls = rowControlColumns.slice(0, visible);
+  const menuControls = rowControlColumns.slice(visible);
+  const inlineWidth = inlineControls.reduce(
+    (acc, column) => acc + (column.width ?? DEFAULT_CONTROL_COLUMN_WIDTH),
+    0
+  );
+
   return {
-    columns: [
-      getRowControlColumn(rowControlColumns[0]),
-      getRowMenuControlColumn(rowControlColumns.slice(1)),
-    ],
-    totalWidth:
-      (rowControlColumns[0].width ?? DEFAULT_CONTROL_COLUMN_WIDTH) + DEFAULT_CONTROL_COLUMN_WIDTH,
+    columns: [...inlineControls.map(getRowControlColumn), getRowMenuControlColumn(menuControls)],
+    totalWidth: inlineWidth + DEFAULT_CONTROL_COLUMN_WIDTH,
   };
 };

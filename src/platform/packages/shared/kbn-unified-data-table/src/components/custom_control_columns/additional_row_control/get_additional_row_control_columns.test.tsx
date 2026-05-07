@@ -14,10 +14,10 @@ import React from 'react';
 import { UnifiedDataTableContext } from '../../../table_context';
 import { dataTableContextComplexMock } from '../../../../__mocks__/table_context';
 import { userEvent } from '@testing-library/user-event';
-import type { RowControlColumn } from '@kbn/discover-utils';
+import type { RowControlColumn, RowControlComponent } from '@kbn/discover-utils';
 
-const setup = (rowControlColumns: RowControlColumn[]) => {
-  const { columns } = getAdditionalRowControlColumns(rowControlColumns);
+const setup = (rowControlColumns: RowControlColumn[], visibleRowActions?: number) => {
+  const { columns } = getAdditionalRowControlColumns(rowControlColumns, visibleRowActions);
 
   render(
     <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
@@ -113,5 +113,88 @@ describe('getAdditionalRowControlColumns', () => {
     const { totalWidth } = getAdditionalRowControlColumns(mocks);
 
     expect(totalWidth).toBe(74); // 50 (first control) + 24 (menu button default width)
+  });
+
+  describe('with visibleRowActions = 2', () => {
+    it('renders 3 controls inline (n <= v + 1)', () => {
+      const mocks = [
+        mockRowAdditionalLeadingControls[0],
+        mockRowAdditionalLeadingControls[1],
+        mockRowAdditionalLeadingControls[2],
+      ];
+
+      setup(mocks, 2);
+
+      expect(screen.getByTestId(mocks[0].id)).toBeVisible();
+      expect(screen.getByTestId(mocks[1].id)).toBeVisible();
+      expect(screen.getByTestId(mocks[2].id)).toBeVisible();
+      expect(
+        screen.queryByTestId('unifiedDataTable_additionalRowControl_actionsMenu')
+      ).not.toBeInTheDocument();
+    });
+
+    it('renders 2 inline + menu when n > v + 1', async () => {
+      const user = userEvent.setup();
+      const fourthMock: RowControlColumn = {
+        id: 'exampleRowControl-fourth',
+        render: (Control) => (
+          <Control
+            data-test-subj="exampleRowControl-fourth"
+            label="Fourth"
+            iconType="empty"
+            onClick={jest.fn()}
+          />
+        ),
+      };
+      const mocks = [
+        mockRowAdditionalLeadingControls[0],
+        mockRowAdditionalLeadingControls[1],
+        mockRowAdditionalLeadingControls[2],
+        fourthMock,
+      ];
+
+      setup(mocks, 2);
+
+      expect(screen.getByTestId(mocks[0].id)).toBeVisible();
+      expect(screen.getByTestId(mocks[1].id)).toBeVisible();
+
+      await user.click(screen.getByTestId('unifiedDataTable_additionalRowControl_actionsMenu'));
+      await waitFor(() => {
+        expect(screen.getByTestId(mocks[2].id)).toBeVisible();
+        expect(screen.getByTestId(fourthMock.id)).toBeVisible();
+      });
+    });
+
+    it('calculates totalWidth for the collapsed branch (n > v + 1)', () => {
+      const mocks = [
+        { ...mockRowAdditionalLeadingControls[0], width: 50 },
+        { ...mockRowAdditionalLeadingControls[1], width: 30 },
+        { ...mockRowAdditionalLeadingControls[2] },
+        {
+          id: 'exampleRowControl-fourth',
+          render: (Control: RowControlComponent) => (
+            <Control label="Fourth" iconType="empty" onClick={jest.fn()} />
+          ),
+        },
+      ];
+
+      const { totalWidth } = getAdditionalRowControlColumns(mocks, 2);
+
+      // 50 + 30 (first two visible) + 24 (menu)
+      expect(totalWidth).toBe(104);
+    });
+  });
+
+  it('clamps visibleRowActions <= 0 to 1', () => {
+    const mocks = [
+      mockRowAdditionalLeadingControls[0],
+      mockRowAdditionalLeadingControls[1],
+      mockRowAdditionalLeadingControls[2],
+    ];
+
+    const { columns } = getAdditionalRowControlColumns(mocks, 0);
+
+    // With v clamped to 1 and n=3 (n > v+1=2), expect 1 inline + 1 menu = 2 columns
+    expect(columns).toHaveLength(2);
   });
 });

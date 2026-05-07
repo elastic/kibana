@@ -424,6 +424,15 @@ interface InternalUnifiedDataTableProps {
    **/
   visibleCellActions?: number;
   /**
+   * Maximum number of `rowAdditionalLeadingControls` rendered as standalone icon
+   * buttons before the rest collapse into the overflow menu. Defaults to 1.
+   *
+   * Note: when the total number of controls is `visibleRowActions + 1` or fewer,
+   * all of them render inline (the overflow menu trigger would itself consume
+   * one slot, so collapsing a single extra control saves nothing).
+   */
+  visibleRowActions?: number;
+  /**
    * Disable cell actions for the table.
    */
   disableCellActions?: boolean;
@@ -521,6 +530,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateHeaderRowHeight,
       controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
       rowAdditionalLeadingControls,
+      visibleRowActions,
       dataView,
       loadingState,
       onFilter,
@@ -1122,6 +1132,8 @@ const InternalUnifiedDataTable = React.forwardRef<
         baseColumns: leadColumnsExtraContent,
         rowAdditionalLeadingControls,
         externalControlColumns,
+        cellPadding: gridStyle.cellPadding,
+        visibleRowActions,
       });
       if (actionsColumn) {
         filteredLeadColumns.push(actionsColumn);
@@ -1135,6 +1147,8 @@ const InternalUnifiedDataTable = React.forwardRef<
       externalControlColumns,
       getRowIndicator,
       rowAdditionalLeadingControls,
+      gridStyle.cellPadding,
+      visibleRowActions,
     ]);
 
     const additionalControls = useMemo(() => {

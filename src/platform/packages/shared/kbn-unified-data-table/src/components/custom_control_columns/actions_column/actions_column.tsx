@@ -10,6 +10,7 @@
 import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
+  EuiDataGridStyle,
   RenderCellValue,
 } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -28,10 +29,14 @@ export const getActionsColumn = ({
   baseColumns,
   externalControlColumns,
   rowAdditionalLeadingControls,
+  cellPadding,
+  visibleRowActions,
 }: {
   baseColumns: RenderCellValue[];
   rowAdditionalLeadingControls?: RowControlColumn[];
   externalControlColumns?: EuiDataGridControlColumn[];
+  cellPadding?: EuiDataGridStyle['cellPadding'];
+  visibleRowActions?: number;
 }) => {
   if (
     !baseColumns.length &&
@@ -54,7 +59,8 @@ export const getActionsColumn = ({
   }
   if (rowAdditionalLeadingControls?.length) {
     const { columns: additionalRowControlColumns, totalWidth } = getAdditionalRowControlColumns(
-      rowAdditionalLeadingControls
+      rowAdditionalLeadingControls,
+      visibleRowActions
     );
     actions.push(...additionalRowControlColumns);
     columnWidth += totalWidth;
@@ -76,6 +82,6 @@ export const getActionsColumn = ({
         ))}
       </EuiFlexGroup>
     ),
-    headerCellRender: () => <ActionsHeader maxWidth={columnWidth} />,
+    headerCellRender: () => <ActionsHeader maxWidth={columnWidth} cellPadding={cellPadding} />,
   };
 };

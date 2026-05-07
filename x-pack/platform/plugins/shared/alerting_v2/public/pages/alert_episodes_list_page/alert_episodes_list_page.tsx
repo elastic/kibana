@@ -210,12 +210,8 @@ export const AlertEpisodesListPage = () => {
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
     () =>
-      episodeActions.map((action, index) => ({
+      episodeActions.map((action) => ({
         id: action.id,
-        // The UnifiedDataTable actions header maxWidth calculation doesn't take into account larger
-        // paddings, causing the column title to wrap. This forces the column width to be larger and
-        // avoids the problem until https://github.com/elastic/kibana/issues/265569 is fixed
-        width: index === 0 ? 38 : undefined,
         render: (Control, { record }) => {
           const episodes = [dataTableRecordToEpisode(record)];
           if (!action.isCompatible({ episodes })) return <></>;
@@ -351,6 +347,7 @@ export const AlertEpisodesListPage = () => {
                 onUpdateRowHeight={setRowHeight}
                 customBulkActions={customBulkActions}
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+                visibleRowActions={2}
                 enableComparisonMode={false}
                 services={services}
               />

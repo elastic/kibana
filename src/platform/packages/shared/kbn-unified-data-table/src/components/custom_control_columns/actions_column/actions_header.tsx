@@ -7,27 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
+  type EuiDataGridStyle,
   type EuiResizeObserverProps,
   EuiIconTip,
   EuiResizeObserver,
   EuiScreenReaderOnly,
+  mathWithUnits,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import ColumnHeaderTruncateContainer from '../../column_header_truncate_container';
 
-export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
+export interface ActionsHeaderProps {
+  maxWidth: number;
+  cellPadding?: EuiDataGridStyle['cellPadding'];
+}
+
+export const ActionsHeader = ({ maxWidth, cellPadding = 's' }: ActionsHeaderProps) => {
+  const { euiTheme } = useEuiTheme();
   const [showText, setShowText] = useState(false);
+
+  // Mirrors EUI's internal cellPadding -> size mapping (data_grid.styles.ts).
+  // Header cell applies the value on all sides, so horizontal padding = 2 * value.
+  const horizontalPaddingPx = useMemo(() => {
+    const resolved =
+      cellPadding === 'l'
+        ? euiTheme.size.s
+        : cellPadding === 'm'
+        ? mathWithUnits(euiTheme.size.m, (x) => x / 2)
+        : euiTheme.size.xs;
+    return parseInt(resolved, 10) * 2;
+  }, [cellPadding, euiTheme]);
 
   const measure: EuiResizeObserverProps['onResize'] = useCallback(
     (dimensions) => {
       if (!dimensions) return;
-
-      setShowText(dimensions.width < maxWidth);
+      setShowText(dimensions.width < maxWidth - horizontalPaddingPx);
     },
-    [maxWidth]
+    [maxWidth, horizontalPaddingPx]
   );
 
   const actionsText = i18n.translate('unifiedDataTable.controlColumnsActionHeader', {

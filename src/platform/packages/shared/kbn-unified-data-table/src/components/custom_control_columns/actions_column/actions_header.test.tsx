@@ -18,16 +18,12 @@ const setup = (props: React.ComponentProps<typeof ActionsHeader>) => {
 describe('<ActionsHeader />', () => {
   describe('when the maxWidth is greater than the text width', () => {
     it('should show the text', () => {
-      const maxWidth = 500;
-      setup({ maxWidth });
-
+      setup({ maxWidth: 500 });
       expect(screen.getByTestId('unifiedDataTable_actionsColumnHeaderText')).toBeVisible();
     });
 
     it('should NOT show the icon', () => {
-      const maxWidth = 500;
-      setup({ maxWidth });
-
+      setup({ maxWidth: 500 });
       expect(
         screen.queryByTestId('unifiedDataTable_actionsColumnHeaderIcon')
       ).not.toBeInTheDocument();
@@ -36,19 +32,30 @@ describe('<ActionsHeader />', () => {
 
   describe('when the maxWidth is less than the text width', () => {
     it('should NOT show the text', () => {
-      const maxWidth = 0;
-      setup({ maxWidth });
-
+      setup({ maxWidth: 0 });
       expect(
         screen.queryByTestId('unifiedDataTable_actionsColumnHeaderText')
       ).not.toBeInTheDocument();
     });
 
     it('should show the icon', () => {
-      const maxWidth = 0;
-      setup({ maxWidth });
-
+      setup({ maxWidth: 0 });
       expect(screen.getByTestId('unifiedDataTable_actionsColumnHeaderIcon')).toBeVisible();
+    });
+  });
+
+  describe('when cellPadding shrinks the available width below the text width', () => {
+    it.each(['s', 'm', 'l'] as const)(
+      'still shows the icon when maxWidth equals 0 with cellPadding=%s',
+      (cellPadding) => {
+        setup({ maxWidth: 0, cellPadding });
+        expect(screen.getByTestId('unifiedDataTable_actionsColumnHeaderIcon')).toBeVisible();
+      }
+    );
+
+    it('shows the text when maxWidth is large enough even after subtracting cellPadding=l', () => {
+      setup({ maxWidth: 500, cellPadding: 'l' });
+      expect(screen.getByTestId('unifiedDataTable_actionsColumnHeaderText')).toBeVisible();
     });
   });
 });
