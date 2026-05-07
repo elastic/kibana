@@ -26,7 +26,7 @@ const COLLECT_COMMITS_MARKER_FILE = join(REPO_ROOT, '.collect_commits_marker');
 interface QuickCheck {
   script: string;
   mayChangeFiles?: boolean;
-  // Additional properties can be added here in the future
+  parallelSafe?: boolean;
 }
 
 interface CheckResult {
@@ -73,29 +73,41 @@ void run(async ({ log, flagsReader }) => {
     checks: flagsReader.string('checks'),
   });
 
-  // Partition checks based on mayChangeFiles flag
-  const fileChangingChecks = checksToRun
-    .filter((check) => check.mayChangeFiles)
-    .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
+  const toAbsolute = (check: QuickCheck) =>
+    isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script);
 
-  const regularChecks = checksToRun
-    .filter((check) => !check.mayChangeFiles)
-    .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
+  // Partition checks into three groups:
+  // 1. Sequential file-changing: may change files, must run one at a time (git add -A)
+  // 2. Parallel-safe file-changing: may change files but use scoped git pathspecs,
+  //    safe to run concurrently with other parallel-safe checks
+  // 3. Regular: read-only, full parallelism
+  const sequentialFileChanging = checksToRun
+    .filter((check) => check.mayChangeFiles && !check.parallelSafe)
+    .map(toAbsolute);
+
+  const parallelSafeFileChanging = checksToRun
+    .filter((check) => check.mayChangeFiles && check.parallelSafe)
+    .map(toAbsolute);
+
+  const regularChecks = checksToRun.filter((check) => !check.mayChangeFiles).map(toAbsolute);
 
   logger.write(
-    `--- Running ${checksToRun.length} checks (${fileChangingChecks.length} file-changing with parallelism=1, ${regularChecks.length} regular with parallelism=${MAX_PARALLELISM})...`
+    `--- Running ${checksToRun.length} checks (${sequentialFileChanging.length} sequential file-changing, ${parallelSafeFileChanging.length} parallel-safe file-changing, ${regularChecks.length} regular with parallelism=${MAX_PARALLELISM})...`
   );
   const startTime = Date.now();
-  const results = await runPartitionedChecks(fileChangingChecks, regularChecks);
+  const results = await runPartitionedChecks(
+    sequentialFileChanging,
+    parallelSafeFileChanging,
+    regularChecks
+  );
 
   logger.write('--- All checks finished.');
   printResults(startTime, results);
 
-  // Check if any commits were made and push them in a single batch
-  // This allows multiple quick-check fixes to be committed and pushed together,
-  // avoiding multiple CI restarts when a PR has multiple offenses.
-  // File-changing checks run with parallelism=1 (sequentially), so commits happen
-  // one at a time without conflicts.
+  // Check if any commits were made and push them in a single batch.
+  // Sequential file-changing checks run one at a time (git add -A).
+  // Parallel-safe file-changing checks use scoped git pathspecs (CHECK_GIT_PATHSPEC)
+  // so their commits don't interfere with each other.
   const commitsWereMade = existsSync(COLLECT_COMMITS_MARKER_FILE);
   if (commitsWereMade) {
     logger.write('--- Commits were made during checks. Pushing all changes now...');
@@ -166,16 +178,21 @@ function collectScriptsToRun(inputOptions: {
 }
 
 async function runPartitionedChecks(
-  fileChangingChecks: string[],
+  sequentialFileChanging: string[],
+  parallelSafeFileChanging: string[],
   regularChecks: string[]
 ): Promise<CheckResult[]> {
-  // Run both partitions concurrently, but with different parallelism
-  const [fileChangingResults, regularResults] = await Promise.all([
-    runAllChecks(fileChangingChecks, 1), // File-changing checks run one at a time
-    runAllChecks(regularChecks, MAX_PARALLELISM), // Regular checks run with full parallelism
+  // Run all three partitions concurrently, each with appropriate parallelism:
+  // - Sequential file-changing: parallelism=1 (uses git add -A, must not overlap)
+  // - Parallel-safe file-changing: full parallelism (uses scoped git pathspecs)
+  // - Regular: full parallelism (read-only, no git operations)
+  const [sequentialResults, parallelSafeResults, regularResults] = await Promise.all([
+    runAllChecks(sequentialFileChanging, 1),
+    runAllChecks(parallelSafeFileChanging, MAX_PARALLELISM),
+    runAllChecks(regularChecks, MAX_PARALLELISM),
   ]);
 
-  return [...fileChangingResults, ...regularResults];
+  return [...sequentialResults, ...parallelSafeResults, ...regularResults];
 }
 
 async function runAllChecks(

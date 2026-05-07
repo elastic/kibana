@@ -5,6 +5,11 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 echo "--- Check yarn.lock for duplicated modules"
-node scripts/yarn_deduplicate && yarn kbn bootstrap --force-install
+node scripts/yarn_deduplicate
+
+if [ "$(git status --porcelain -- yarn.lock)" ]; then
+  echo "yarn.lock was modified by deduplication, re-bootstrapping..."
+  yarn kbn bootstrap --force-install
+fi
 
 check_for_changed_files 'node scripts/yarn_deduplicate' true 'TO FIX: Run node '"'"'scripts/yarn_deduplicate && yarn kbn bootstrap'"'"' locally, or add an exception to src/dev/yarn_deduplicate/index.ts and then commit the changes and push to your branch'

@@ -1,7 +1,8 @@
 [
   {
     "script": ".buildkite/scripts/steps/checks/ts_projects.sh",
-    "mayChangeFiles": true
+    "mayChangeFiles": true,
+    "parallelSafe": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/packages.sh",
@@ -25,7 +26,8 @@
   },
   {
     "script": ".buildkite/scripts/steps/checks/telemetry.sh",
-    "mayChangeFiles": true
+    "mayChangeFiles": true,
+    "parallelSafe": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/jest_configs.sh"

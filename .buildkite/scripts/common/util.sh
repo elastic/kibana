@@ -44,7 +44,17 @@ check_for_changed_files() {
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
   CUSTOM_FIX_MESSAGE="${3:-Changes from $1}"
-  GIT_CHANGES="$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')"
+
+  # CHECK_GIT_PATHSPEC scopes git operations to specific paths, enabling
+  # parallel-safe file-changing checks that don't interfere with each other.
+  local git_pathspec
+  if [[ -n "${CHECK_GIT_PATHSPEC:-}" ]]; then
+    IFS=' ' read -r -a git_pathspec <<< "$CHECK_GIT_PATHSPEC"
+  else
+    git_pathspec=('.' ':!config/node.options' ':!config/kibana.yml')
+  fi
+
+  GIT_CHANGES="$(git status --porcelain -- "${git_pathspec[@]}")"
 
   if [ "$GIT_CHANGES" ]; then
     if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
@@ -55,7 +65,7 @@ check_for_changed_files() {
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
-      git add -A -- . ':!config/node.options' ':!config/kibana.yml'
+      git add -A -- "${git_pathspec[@]}"
       git commit -m "$CUSTOM_FIX_MESSAGE"
 
       # If COLLECT_COMMITS_MARKER_FILE is set, we're in batch mode (e.g., called from quick checks runner)
