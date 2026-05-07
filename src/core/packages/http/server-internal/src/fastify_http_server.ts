@@ -64,6 +64,9 @@ import { installFastifyGlobalErrorHandler } from './fastify/fastify_global_error
 import { registerFastifyMultipartAndKibanaBodyHook } from './fastify/fastify_multipart_kibana_body';
 import { isReplyCommitted } from './fastify/fastify_reply_utils';
 
+/** Upper bound for Fastify's raw body limit — must cover saved_objects `_import` (see `savedObjects.maxImportPayloadBytes`). */
+const FASTIFY_BODY_LIMIT_CEILING_BYTES = 36 * 1024 * 1024;
+
 const isSafeMethod = (method: string) => method === 'get' || method === 'options';
 
 /** Same semantics as {@link HttpServer.registerStaticDir} `options.app` (public + no auth). */
@@ -247,6 +250,7 @@ export class FastifyHttpServer {
     const listener = getServerListener(config);
     this.fastify = Fastify({
       logger: false,
+      bodyLimit: Math.max(config.maxPayload.getValueInBytes(), FASTIFY_BODY_LIMIT_CEILING_BYTES),
       serverFactory: ((handler: (req: any, res: any) => void) => {
         listener.on('request', handler);
         return listener;

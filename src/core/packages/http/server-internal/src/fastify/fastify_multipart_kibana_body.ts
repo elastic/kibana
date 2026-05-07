@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import fastifyMultipart from '@fastify/multipart';
@@ -102,9 +103,16 @@ export async function registerFastifyMultipartAndKibanaBodyHook(params: {
     const maxBytes = route?.options?.body?.maxBytes ?? maxPayloadBytes;
     const body: Record<string, unknown> = {};
 
+    // Busboy only advances after each file stream is fully consumed. Handing the raw `part.file`
+    // to the route handler and continuing `for await` deadlocks on large bodies (nothing drains the
+    // stream yet). Teeing into PassThrough also stalls when the handler has not started reading:
+    // PassThrough backpressure stops the pipe before preValidation finishes. Buffer each file with
+    // `toBuffer()` (respects multipart fileSize limits) then expose a small Readable — bounded by
+    // `savedObjects.maxImportPayloadBytes` / route maxBytes, same as loading the upload in memory.
     for await (const part of req.parts(multipartRequestOptions(maxBytes))) {
       if (part.type === 'file') {
-        const stream = part.file;
+        const buf = await (part as { toBuffer: () => Promise<Buffer> }).toBuffer();
+        const stream = Readable.from(buf);
         Object.assign(stream as { hapi?: { filename: string } }, {
           hapi: { filename: part.filename ?? 'upload.ndjson' },
         });
