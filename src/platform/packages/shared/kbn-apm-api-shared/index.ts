@@ -15,12 +15,11 @@ export {
 } from './src/create_call_apm_api';
 export { routeDefinitions } from './src/routes';
 export type { SharedAPMRouteRepository } from './src/routes';
-export type * from './src/routes/foo';
-export type * from './src/routes/bar';
 export type * from './src/routes/historical_data';
 export type * from './src/routes/suggestions';
 export type * from './src/routes/agent_keys';
 export type * from './src/routes/traces';
+export type * from './src/routes/span_links';
 export {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
