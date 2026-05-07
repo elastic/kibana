@@ -242,7 +242,8 @@ export const EventSchema = schema.maybe(
               type: ecsString(),
               type_id: ecsString(),
               space_agnostic: ecsBoolean(),
-            })
+            }),
+            { maxSize: 1000 }
           )
         ),
         cps_scope_expression: ecsString(),
@@ -253,7 +254,8 @@ export const EventSchema = schema.maybe(
               alias: ecsString(),
               type: ecsString(),
               organization: ecsString(),
-            })
+            }),
+            { maxSize: 1000 }
           )
         ),
         space_ids: ecsStringMulti(),
@@ -318,7 +320,8 @@ export const EventSchema = schema.maybe(
                       processed_gaps: ecsStringOrNumber(),
                       status: ecsString(),
                       error: ecsString(),
-                    })
+                    }),
+                    { maxSize: 1000 }
                   )
                 ),
               })

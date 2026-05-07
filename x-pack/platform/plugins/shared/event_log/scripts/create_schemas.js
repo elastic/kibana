@@ -203,10 +203,13 @@ function generateSchemaLines(lineWriter, prop, mappings) {
   }
   lineWriter.dedent();
 
-  lineWriter.addLine('})');
   if (mappings.type === 'nested') {
+    lineWriter.addLine('}),');
+    lineWriter.addLine('{ maxSize: 1000 }');
     lineWriter.dedent();
     lineWriter.addLine(')');
+  } else {
+    lineWriter.addLine('})');
   }
 
   lineWriter.dedent();
