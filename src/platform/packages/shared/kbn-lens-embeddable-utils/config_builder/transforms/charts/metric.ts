@@ -687,6 +687,29 @@ export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithou
   };
 }
 
+/**
+ * Convert metric visualization state to API styling format.
+ * Used by the schema-driven flyout editor.
+ */
+export function convertMetricStylingToAPIFormat(
+  state: MetricVisualizationState
+): Pick<MetricConfig, 'styling'> {
+  const hasSecondary = !!state.secondaryMetricAccessor;
+  const styling = convertStylingToAPIFormat(state, hasSecondary);
+  return { styling };
+}
+
+/**
+ * Convert API styling config to metric visualization state properties.
+ * Used by the schema-driven flyout editor.
+ */
+export function buildMetricStylingState(
+  config: Pick<MetricConfig, 'styling'>,
+  hasSecondary: boolean
+): Partial<MetricVisualizationState> {
+  return convertStylingToStateFormat(config.styling, hasSecondary);
+}
+
 export function fromLensStateToAPI(config: LensAttributes): MetricConfig {
   const { state } = config;
   const visualization = state.visualization as MetricVisualizationState;

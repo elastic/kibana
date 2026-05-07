@@ -6,7 +6,15 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { datatableConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils/config_builder/schema';
+import {
+  datatableConfigSchemaNoESQL,
+  xyConfigSchemaNoESQL,
+  heatmapConfigSchemaNoESQL,
+  pieConfigSchemaNoESQL,
+  metricConfigSchemaNoESQL,
+  gaugeConfigSchemaNoESQL,
+  tagcloudConfigSchemaNoESQL,
+} from '@kbn/lens-embeddable-utils/config_builder/schema';
 import type { FieldDescriptor } from '../../../ui_schemas';
 import { uiSchemaRegistry } from '../../../ui_schemas';
 import { buildFieldDescriptors } from '../../../schema_walker';
@@ -18,6 +26,12 @@ interface VizSchemaConfig {
 // Schema registry mapping viz IDs to their kbn-config-schema instances
 const vizSchemas: Record<string, VizSchemaConfig> = {
   lnsDatatable: { schema: datatableConfigSchemaNoESQL },
+  lnsXY: { schema: xyConfigSchemaNoESQL },
+  lnsHeatmap: { schema: heatmapConfigSchemaNoESQL },
+  lnsPie: { schema: pieConfigSchemaNoESQL },
+  lnsMetric: { schema: metricConfigSchemaNoESQL },
+  lnsGauge: { schema: gaugeConfigSchemaNoESQL },
+  lnsTagcloud: { schema: tagcloudConfigSchemaNoESQL },
 };
 
 // Cache — computed once on first request

@@ -246,6 +246,53 @@ export function fromAPItoLensState(
   };
 }
 
+/**
+ * Convert tagcloud visualization state to API styling format.
+ * Used by the schema-driven flyout editor.
+ */
+export function convertTagcloudStylingToAPIFormat(
+  state: LensTagCloudState
+): Pick<TagcloudConfig, 'styling'> {
+  return {
+    styling: stripUndefined({
+      orientation:
+        state.orientation === TAGCLOUD_ORIENTATION.SINGLE
+          ? ('horizontal' as const)
+          : state.orientation === TAGCLOUD_ORIENTATION.MULTIPLE
+          ? ('angled' as const)
+          : ('vertical' as const),
+      font_size: {
+        min: state.minFontSize,
+        max: state.maxFontSize,
+      },
+      caption: { visible: state.showLabel },
+    }),
+  };
+}
+
+/**
+ * Convert API styling config to tagcloud visualization state properties.
+ * Used by the schema-driven flyout editor.
+ */
+export function buildTagcloudStylingState(
+  config: Pick<TagcloudConfig, 'styling'>
+): Partial<LensTagCloudState> {
+  const styling = config.styling;
+  if (!styling) return {};
+  return stripUndefined({
+    orientation: styling.orientation
+      ? styling.orientation === 'horizontal'
+        ? TAGCLOUD_ORIENTATION.SINGLE
+        : styling.orientation === 'vertical'
+        ? TAGCLOUD_ORIENTATION.RIGHT_ANGLED
+        : TAGCLOUD_ORIENTATION.MULTIPLE
+      : undefined,
+    maxFontSize: styling.font_size?.max ?? undefined,
+    minFontSize: styling.font_size?.min ?? undefined,
+    showLabel: styling.caption?.visible ?? undefined,
+  }) as Partial<LensTagCloudState>;
+}
+
 export function fromLensStateToAPI(
   config: LensAttributes
 ): Extract<LensApiConfig, { type: 'tag_cloud' }> {

@@ -6,6 +6,14 @@
  */
 
 // Viz IDs that have schema-driven flyout support
-const SUPPORTED_VIZ_IDS = new Set(['lnsDatatable']);
+const SUPPORTED_VIZ_IDS = new Set([
+  'lnsDatatable',
+  'lnsXY',
+  'lnsHeatmap',
+  'lnsPie',
+  'lnsMetric',
+  'lnsGauge',
+  'lnsTagcloud',
+]);
 
 export const hasSchemaForVisualization = (vizId: string): boolean => SUPPORTED_VIZ_IDS.has(vizId);
