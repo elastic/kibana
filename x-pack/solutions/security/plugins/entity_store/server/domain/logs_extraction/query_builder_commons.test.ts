@@ -435,6 +435,25 @@ describe('buildPaginationSection', () => {
     expect(parts[1]).toContain('| WHERE @timestamp > TO_DATETIME("2024-01-10T00:00:00.000Z")');
     expect(parts[1]).toContain('recent.id > "recovery-entity-id"');
   });
+
+  it('should escape double quotes and backslashes in idCursor to prevent ESQL injection', () => {
+    const parts = buildPaginationSection('2024-01-01T00:00:00.000Z', 25, paginationFields, {
+      timestampCursor: '2024-06-01T00:00:00.000Z',
+      idCursor: 'evil"id\\with"chars',
+    });
+    expect(parts[1]).toContain('recent.id > "evil\\"id\\\\with\\"chars"');
+  });
+
+  it('should escape double quotes and backslashes in recoveryId', () => {
+    const parts = buildPaginationSection(
+      '2024-01-10T00:00:00.000Z',
+      10,
+      paginationFields,
+      { timestampCursor: 'ignored-ts', idCursor: 'ignored-id' },
+      'evil"recovery\\id'
+    );
+    expect(parts[1]).toContain('recent.id > "evil\\"recovery\\\\id"');
+  });
 });
 
 describe('statsFieldDestinations', () => {

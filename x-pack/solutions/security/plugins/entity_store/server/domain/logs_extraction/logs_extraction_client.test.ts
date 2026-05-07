@@ -114,13 +114,20 @@ function createMockEngineDescriptor(
 }
 
 function createMockGlobalStateClient(
-  logExtractionOverrides?: Partial<{ lookbackPeriod: string; delay: string }>
+  logExtractionOverrides?: Partial<{
+    lookbackPeriod: string;
+    delay: string;
+    maxTimeWindowSize: string;
+  }>
 ): jest.Mocked<Pick<EntityStoreGlobalStateClient, 'find' | 'findOrThrow' | 'update'>> {
   const logsExtraction = LogExtractionConfig.parse({
     docsLimit: 10000,
     additionalIndexPatterns: [],
     lookbackPeriod: logExtractionOverrides?.lookbackPeriod ?? '3h',
     delay: logExtractionOverrides?.delay ?? '1m',
+    // Default to a very large cap so existing tests run as a single sub-window. The dedicated
+    // sub-window cap describe block overrides this to exercise capping behavior.
+    maxTimeWindowSize: logExtractionOverrides?.maxTimeWindowSize ?? '999d',
   });
   const state = { logsExtraction } as EntityStoreGlobalState;
   return {
@@ -291,7 +298,11 @@ describe('LogsExtractionClient', () => {
       };
 
       const globalStateWithDelay5s = {
-        logsExtraction: LogExtractionConfig.parse({ lookbackPeriod: '3h', delay: '5s' }),
+        logsExtraction: LogExtractionConfig.parse({
+          lookbackPeriod: '3h',
+          delay: '5s',
+          maxTimeWindowSize: '999d',
+        }),
       } as EntityStoreGlobalState;
       mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
       mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
@@ -331,7 +342,11 @@ describe('LogsExtractionClient', () => {
       };
 
       const globalStateWithDelay5s = {
-        logsExtraction: LogExtractionConfig.parse({ lookbackPeriod: '3h', delay: '5s' }),
+        logsExtraction: LogExtractionConfig.parse({
+          lookbackPeriod: '3h',
+          delay: '5s',
+          maxTimeWindowSize: '999d',
+        }),
       } as EntityStoreGlobalState;
       mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
       mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
@@ -368,7 +383,11 @@ describe('LogsExtractionClient', () => {
       };
 
       const globalStateWithDelay5s = {
-        logsExtraction: LogExtractionConfig.parse({ lookbackPeriod: '3h', delay: '5s' }),
+        logsExtraction: LogExtractionConfig.parse({
+          lookbackPeriod: '3h',
+          delay: '5s',
+          maxTimeWindowSize: '999d',
+        }),
       } as EntityStoreGlobalState;
       mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
       mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
@@ -783,7 +802,7 @@ describe('LogsExtractionClient', () => {
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
 
-      // CCS error is stored in the saved object
+      // CCS error is stored in the saved object alongside the cleared log extraction state.
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
         'user',
         expect.objectContaining({
@@ -905,6 +924,155 @@ describe('LogsExtractionClient', () => {
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
       expect(mockIngestEntities).not.toHaveBeenCalled();
       expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+    });
+
+    describe('sub-window cap', () => {
+      // fixedNow = 12:00:00 ; delay = 1m → effectiveWindowEnd = 11:59:00.
+      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+      const effectiveWindowEnd = '2025-01-15T11:59:00.000Z';
+
+      const setupCapTest = (overrides: {
+        lastExecutionTimestamp: string;
+        maxTimeWindowSize: string;
+      }) => {
+        jest.useFakeTimers({ now: fixedNow.getTime() });
+        const globalState = {
+          logsExtraction: LogExtractionConfig.parse({
+            lookbackPeriod: '3h',
+            delay: '1m',
+            maxTimeWindowSize: overrides.maxTimeWindowSize,
+          }),
+        } as EntityStoreGlobalState;
+        mockGlobalStateClient.find.mockResolvedValue(globalState);
+        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+          createMockEngineDescriptor('user', {
+            lastExecutionTimestamp: overrides.lastExecutionTimestamp,
+          }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+        );
+        mockDataViewsService.get.mockResolvedValue({
+          getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        } as any);
+        mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+      };
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('walks the time window in capped sub-windows when fromDateISO is far behind effectiveWindowEnd', async () => {
+        // Window = effectiveWindowEnd - lastExec = 30m. cap=5m, grace=30s → 6 sub-windows
+        // (final sub-window has width 5m which fits in cap+grace, so it is not capped).
+        setupCapTest({
+          lastExecutionTimestamp: '2025-01-15T11:29:00.000Z',
+          maxTimeWindowSize: '5m',
+        });
+
+        const result = await client.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        // 6 sub-windows × 1 probe each. Each probe returns empty so the inner outer-loop never
+        // runs `advanceEngineStateAfterLogPageCompletes` — no per-slice persistence either.
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(6);
+
+        // Single update call: the final cleanup at the end of extractLogs.
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledTimes(1);
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+          'user',
+          expect.objectContaining({
+            logExtractionState: {
+              paginationTimestamp: null,
+              paginationId: null,
+              logsPageCursorStartTimestamp: null,
+              logsPageCursorStartId: null,
+              logsPageCursorEndTimestamp: null,
+              logsPageCursorEndId: null,
+              lastExecutionTimestamp: effectiveWindowEnd,
+            },
+          })
+        );
+      });
+
+      it('does not cap when fromDateISO is within maxTimeWindowSize + grace', async () => {
+        // Window = 5m10s, cap=5m, grace=30s → 5m10s <= 5m30s, no cap. Single sub-window.
+        setupCapTest({
+          lastExecutionTimestamp: '2025-01-15T11:53:50.000Z',
+          maxTimeWindowSize: '5m',
+        });
+
+        await client.extractLogs('user');
+
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledTimes(1);
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+          'user',
+          expect.objectContaining({
+            logExtractionState: expect.objectContaining({
+              lastExecutionTimestamp: effectiveWindowEnd,
+            }),
+          })
+        );
+      });
+
+      it('bypasses the sub-window cap when specificWindow is provided', async () => {
+        const fromDate = '2024-01-01T00:00:00.000Z';
+        const toDate = '2024-01-01T23:59:00.000Z'; // 24h, far exceeds the 5m default cap
+
+        const globalState = {
+          logsExtraction: LogExtractionConfig.parse({
+            lookbackPeriod: '3h',
+            delay: '1m',
+            maxTimeWindowSize: '5m',
+          }),
+        } as EntityStoreGlobalState;
+        mockGlobalStateClient.find.mockResolvedValue(globalState);
+        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+          createMockEngineDescriptor('user') as Awaited<
+            ReturnType<EngineDescriptorClient['findOrThrow']>
+          >
+        );
+        mockDataViewsService.get.mockResolvedValue({
+          getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        } as any);
+        mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+
+        await client.extractLogs('user', {
+          specificWindow: { fromDateISO: fromDate, toDateISO: toDate },
+        });
+
+        // A single probe over the full user-supplied window — no sub-window splitting.
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+        const probeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
+        expect(probeQuery).toContain(fromDate);
+        expect(probeQuery).toContain(toDate);
+        // specificWindow runs do not touch the engine descriptor.
+        expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+      });
+
+      it('passes monotonically advancing fromDateISO/toDateISO across sub-windows', async () => {
+        // Window=15m, cap=5m, grace=30s → 3 sub-windows.
+        setupCapTest({
+          lastExecutionTimestamp: '2025-01-15T11:44:00.000Z',
+          maxTimeWindowSize: '5m',
+        });
+
+        await client.extractLogs('user');
+
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
+
+        const subWindow1 = mockExecuteEsqlQuery.mock.calls[0][0].query;
+        expect(subWindow1).toContain('2025-01-15T11:44:00.000Z');
+        expect(subWindow1).toContain('2025-01-15T11:49:00.000Z');
+
+        const subWindow2 = mockExecuteEsqlQuery.mock.calls[1][0].query;
+        expect(subWindow2).toContain('2025-01-15T11:49:00.000Z');
+        expect(subWindow2).toContain('2025-01-15T11:54:00.000Z');
+
+        const subWindow3 = mockExecuteEsqlQuery.mock.calls[2][0].query;
+        expect(subWindow3).toContain('2025-01-15T11:54:00.000Z');
+        expect(subWindow3).toContain(effectiveWindowEnd);
+      });
     });
   });
 

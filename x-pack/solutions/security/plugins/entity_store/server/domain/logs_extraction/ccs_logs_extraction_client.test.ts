@@ -76,6 +76,9 @@ describe('CcsLogsExtractionClient', () => {
     lookbackPeriod: '3h',
     delay: '1m',
     entityDefinition: getEntityDefinition('host', 'default'),
+    // Use a very large cap so existing tests remain a single sub-window. The sub-window cap
+    // behavior is exercised by the dedicated tests at the end of this describe block.
+    maxTimeWindowSize: '999d',
   };
 
   beforeEach(() => {
@@ -471,5 +474,103 @@ describe('CcsLogsExtractionClient', () => {
     expect(result).toEqual({ count: 0, pages: 0 });
     expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
     expect(mockCcsStateClient.clearRecoveryId).not.toHaveBeenCalled();
+  });
+
+  describe('sub-window cap', () => {
+    it('walks the time window in capped sub-windows when checkpointTimestamp is far behind effectiveWindowEnd', async () => {
+      // FIXED_NOW = 2026-01-01T12:00 ; delay = 1m → effectiveWindowEnd = 2026-01-01T11:59
+      // checkpoint = 2026-01-01T11:29 → window ~30m, cap=5m, grace=30s → 6 sub-windows.
+      const checkpoint = '2026-01-01T11:29:00.000Z';
+      mockCcsStateClient.findOrInit.mockResolvedValue({
+        checkpointTimestamp: checkpoint,
+        paginationRecoveryId: null,
+      });
+      // Each sub-window probe returns empty (no logs), so the inner outer-loop terminates
+      // immediately and never persists per-slice checkpoints. No state updates occur.
+      mockExecuteEsqlQuery.mockResolvedValue(emptyProbeResponse);
+
+      const result = await client.extractToUpdates({
+        ...defaultExtractParams,
+        maxTimeWindowSize: '5m',
+      });
+
+      expect(result).toEqual({ count: 0, pages: 0 });
+      // 6 sub-windows × 1 probe each.
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(6);
+      // No per-sub-window checkpoint persistence — inner per-slice persistence is the only
+      // mechanism, and it didn't fire because every probe was empty.
+      expect(mockCcsStateClient.update).not.toHaveBeenCalled();
+      // count=0 across all sub-windows → clearRecoveryId
+      expect(mockCcsStateClient.clearRecoveryId).toHaveBeenCalledWith('host');
+    });
+
+    it('does not cap when the gap is within maxTimeWindowSize + grace', async () => {
+      // Window ~ 5m + 10s, cap = 5m, grace = 30s → no cap, single sub-window.
+      const checkpoint = '2026-01-01T11:53:50.000Z';
+      mockCcsStateClient.findOrInit.mockResolvedValue({
+        checkpointTimestamp: checkpoint,
+        paginationRecoveryId: null,
+      });
+      mockExecuteEsqlQuery.mockResolvedValueOnce(emptyProbeResponse);
+
+      await client.extractToUpdates({
+        ...defaultExtractParams,
+        maxTimeWindowSize: '5m',
+      });
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      // Empty probe → no per-slice state updates either.
+      expect(mockCcsStateClient.update).not.toHaveBeenCalled();
+    });
+
+    it('bypasses the sub-window cap when windowOverride is provided', async () => {
+      const overrideFrom = '2024-01-01T00:00:00.000Z';
+      const overrideTo = '2024-12-31T23:59:00.000Z'; // ~1y, exceeds the 5m cap
+
+      mockExecuteEsqlQuery.mockResolvedValueOnce(emptyProbeResponse);
+
+      await client.extractToUpdates({
+        ...defaultExtractParams,
+        maxTimeWindowSize: '5m',
+        windowOverride: { fromDateISO: overrideFrom, toDateISO: overrideTo },
+      });
+
+      // Single probe over the full user-supplied window — no sub-window splitting.
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      const probeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query as string;
+      expect(probeQuery).toContain(overrideFrom);
+      expect(probeQuery).toContain(overrideTo);
+      // Override runs do not touch CCS state.
+      expect(mockCcsStateClient.findOrInit).not.toHaveBeenCalled();
+      expect(mockCcsStateClient.update).not.toHaveBeenCalled();
+    });
+
+    it('passes monotonically advancing fromDateISO/toDateISO to each sub-window probe', async () => {
+      const checkpoint = '2026-01-01T11:44:00.000Z'; // 15m before effectiveWindowEnd
+      mockCcsStateClient.findOrInit.mockResolvedValue({
+        checkpointTimestamp: checkpoint,
+        paginationRecoveryId: null,
+      });
+      mockExecuteEsqlQuery.mockResolvedValue(emptyProbeResponse);
+
+      await client.extractToUpdates({
+        ...defaultExtractParams,
+        maxTimeWindowSize: '5m',
+      });
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
+
+      const subWindow1 = mockExecuteEsqlQuery.mock.calls[0][0].query as string;
+      expect(subWindow1).toContain('2026-01-01T11:44:00.000Z');
+      expect(subWindow1).toContain('2026-01-01T11:49:00.000Z');
+
+      const subWindow2 = mockExecuteEsqlQuery.mock.calls[1][0].query as string;
+      expect(subWindow2).toContain('2026-01-01T11:49:00.000Z');
+      expect(subWindow2).toContain('2026-01-01T11:54:00.000Z');
+
+      const subWindow3 = mockExecuteEsqlQuery.mock.calls[2][0].query as string;
+      expect(subWindow3).toContain('2026-01-01T11:54:00.000Z');
+      expect(subWindow3).toContain('2026-01-01T11:59:00.000Z');
+    });
   });
 });

@@ -40,6 +40,7 @@ const logExtractionSchema = schema.object({
   maxLogsPerPage: schema.maybe(schema.number()),
   timeout: schema.maybe(schema.string()),
   frequency: schema.maybe(schema.string()),
+  maxTimeWindowSize: schema.maybe(schema.string()),
 });
 
 const globalStateSchemaV1 = schema.object({

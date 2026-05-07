@@ -28,6 +28,7 @@ export const LogExtractionInstallParams = LogExtractionConfig.pick({
   delay: true,
   docsLimit: true,
   maxLogsPerPage: true,
+  maxTimeWindowSize: true,
 }).partial();
 
 export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
@@ -49,6 +50,10 @@ export const LogExtractionUpdateParams = z.object({
     .optional(),
   docsLimit: z.number().int().min(1).optional(),
   maxLogsPerPage: z.number().int().min(1).optional(),
+  maxTimeWindowSize: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional(),
 });
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;
