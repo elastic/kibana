@@ -17,6 +17,7 @@ import {
 
 import {
   ACTIVE_TIMELINE_BOTTOM_BAR,
+  TIMELINE_EVENT_COUNT_BADGE,
   ADD_FILTER,
   ADD_NOTE_BUTTON,
   ATTACH_TIMELINE_TO_CASE_BUTTON,
@@ -291,7 +292,11 @@ export const attachTimelineToExistingCase = () => {
 
 export const closeTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).click();
-  cy.get(TIMELINE_FLYOUT).should('not.be.visible');
+  // Use a positive assertion: this badge is conditionally rendered only when show=false,
+  // so asserting it's visible guarantees the timeline has fully closed in Redux state.
+  // Negative assertions like 'not.be.visible' on fixed-position elements can falsely pass
+  // during the opening animation (opacity: 0 but pointer-events still active).
+  cy.get(TIMELINE_EVENT_COUNT_BADGE).should('be.visible');
 };
 
 export const createNewTimeline = () => {
