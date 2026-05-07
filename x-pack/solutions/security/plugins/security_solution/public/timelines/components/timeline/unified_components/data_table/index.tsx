@@ -216,7 +216,14 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
                 services,
                 store,
                 history,
-                children: <AttackDetails hit={eventData} onShowNotes={onShowNotes} />,
+                children: (
+                  <AttackDetails
+                    hit={eventData}
+                    onShowNotes={onShowNotes}
+                    renderCellActions={cellActionRenderer}
+                    onAlertUpdated={refetch}
+                  />
+                ),
               }),
               {
                 ...defaultFlyoutProperties,

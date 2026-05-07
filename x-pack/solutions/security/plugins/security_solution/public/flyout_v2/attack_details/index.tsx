@@ -6,9 +6,12 @@
  */
 
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { RemoteDocumentCallout } from '../document/components/remote_document_callout';
 import { ATTACK_DETAILS_FLYOUT_TEST_ID } from './constants/test_ids';
 import { AttackDetailsProvider } from './context';
@@ -16,6 +19,18 @@ import { Content } from './content';
 import { Footer } from './footer';
 import { Header } from './header';
 import { useTabs } from './hooks/use_tabs';
+import { useKibana } from '../../common/lib/kibana';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import { alertFlyoutHistoryKey } from '../document/constants/flyout_history';
+import {
+  defaultToolsFlyoutProperties,
+  useDefaultDocumentFlyoutProperties,
+} from '../shared/hooks/use_default_flyout_properties';
+import { flyoutProviders } from '../shared/components/flyout_provider';
+import { DocumentFlyoutWrapper } from '../document/document_flyout_wrapper';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
+import { AttackEntities } from './attack_entities';
+import { AttackCorrelations } from './attack_correlations';
 
 export interface AttackDetailsProps {
   /**
@@ -29,22 +44,31 @@ export interface AttackDetailsProps {
    * by the regular document flyout.
    */
   onShowNotes: () => void;
+  /**
+   * Cell action renderer threaded through to the alert preview opened from
+   * the attack-correlations child flyout's related-alerts table. Mirrors
+   * the `renderCellActions` prop on `DocumentFlyout` so the previewed alert
+   * gets the same field-level actions Discover provides for the parent
+   * attack-discovery hit.
+   */
+  renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh related flyouts.
+   * Threaded to {@link DocumentFlyoutWrapper} when previewing a related
+   * alert from the attack-correlations child flyout.
+   */
+  onAlertUpdated: () => void;
 }
 
-/**
- * v2 attack details flyout content. Rendered inside the v2 document flyout
- * surface when the document hit is detected as an attack-discovery alert.
- *
- * The legacy expandable-flyout exposed three panels (right / left / preview);
- * this v2 surface implements the right panel only. Left + preview behaviour
- * is intentionally omitted (see PR description / spec scope) and the
- * "expand" affordances on the legacy right panel (entities chevron,
- * correlations chevron, header notes link) have been replaced with
- * Discover-friendly equivalents (notes opens via `onShowNotes`; the others
- * are dropped because there is no left-panel target in v2).
- */
-const AttackDetailsInner: FC<{ onShowNotes: () => void }> = memo(({ onShowNotes }) => {
-  const { tabsDisplayed, selectedTabId, setSelectedTabId } = useTabs();
+const AttackDetailsInner: FC<{
+  onShowNotes: () => void;
+  onShowAttackEntities: () => void;
+  onShowAttackCorrelations: () => void;
+}> = memo(({ onShowNotes, onShowAttackEntities, onShowAttackCorrelations }) => {
+  const { tabsDisplayed, selectedTabId, setSelectedTabId } = useTabs({
+    onShowAttackEntities,
+    onShowAttackCorrelations,
+  });
 
   return (
     <>
@@ -68,13 +92,104 @@ const AttackDetailsInner: FC<{ onShowNotes: () => void }> = memo(({ onShowNotes 
 
 AttackDetailsInner.displayName = 'AttackDetailsInner';
 
-export const AttackDetails: FC<AttackDetailsProps> = memo(({ hit, onShowNotes }) => (
-  <>
-    <RemoteDocumentCallout hit={hit} />
-    <AttackDetailsProvider hit={hit}>
-      <AttackDetailsInner onShowNotes={onShowNotes} />
-    </AttackDetailsProvider>
-  </>
-));
+/**
+ * v2 attack details flyout content. Rendered inside the v2 document flyout
+ * surface when the document hit is detected as an attack-discovery alert.
+ *
+ * The legacy expandable-flyout exposed three panels (right / left / preview);
+ * this v2 surface implements the right panel plus two attack-specific child
+ * flyouts (Entities and Correlations) that ported the legacy left-panel
+ * Insights sub-tabs as discrete sibling flyouts opened via
+ * `overlays.openSystemFlyout`. The header notes link reuses the parent
+ * `DocumentFlyout`'s `onShowNotes` callback.
+ */
+export const AttackDetails: FC<AttackDetailsProps> = memo(
+  ({ hit, onShowNotes, renderCellActions, onAlertUpdated }) => {
+    const { services } = useKibana();
+    const { overlays } = services;
+    const store = useStore();
+    const history = useHistory();
+    const isInSecurityApp = useIsInSecurityApp();
+    const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+
+    const onShowAlert = useCallback(
+      (id: string, indexName: string) =>
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <DocumentFlyoutWrapper
+                documentId={id}
+                indexName={indexName}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            ),
+          }),
+          {
+            ...defaultDocumentFlyoutProperties,
+            session: 'inherit',
+          }
+        ),
+      [
+        defaultDocumentFlyoutProperties,
+        history,
+        onAlertUpdated,
+        overlays,
+        renderCellActions,
+        services,
+        store,
+      ]
+    );
+
+    const onShowAttackEntities = useCallback(() => {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: <AttackEntities hit={hit} />,
+        }),
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+        }
+      );
+    }, [history, historyKey, hit, overlays, services, store]);
+
+    const onShowAttackCorrelations = useCallback(() => {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: <AttackCorrelations hit={hit} onShowAlert={onShowAlert} />,
+        }),
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+        }
+      );
+    }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
+
+    return (
+      <>
+        <RemoteDocumentCallout hit={hit} />
+        <AttackDetailsProvider hit={hit}>
+          <AttackDetailsInner
+            onShowNotes={onShowNotes}
+            onShowAttackEntities={onShowAttackEntities}
+            onShowAttackCorrelations={onShowAttackCorrelations}
+          />
+        </AttackDetailsProvider>
+      </>
+    );
+  }
+);
 
 AttackDetails.displayName = 'AttackDetails';

@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { FLYOUT_STORAGE_KEYS } from '../../../flyout/attack_details/constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
 import * as tabs from '../tabs';
 import type { AttackDetailsPanelPaths, AttackDetailsPanelTabType } from '../types';
 
-export const tabsDisplayed: AttackDetailsPanelTabType[] = [
-  tabs.overviewTab,
-  tabs.tableTab,
-  tabs.jsonTab,
-];
-
-const tabIds = tabsDisplayed.map((tab) => tab.id);
+export interface UseTabsProps {
+  /**
+   * Callback that opens the attack-specific Entities child flyout (forwarded
+   * into the Overview tab).
+   */
+  onShowAttackEntities: () => void;
+  /**
+   * Callback that opens the attack-specific Correlations child flyout
+   * (forwarded into the Overview tab).
+   */
+  onShowAttackCorrelations: () => void;
+}
 
 export interface UseTabsResult {
   /**
@@ -43,12 +48,31 @@ export interface UseTabsResult {
  * intentionally: a user who switches between the legacy attack flyout (in
  * the security app) and the v2 one (in Discover) will see consistent tab
  * preferences.
+ *
+ * The Overview tab needs per-instance callbacks for the Insights → Entities
+ * and Insights → Correlations title links — they're constructed in the
+ * parent {@link AttackDetails} using `overlays.openSystemFlyout(...)` and
+ * threaded into this hook so the displayed tab list rebuilds when the
+ * callbacks change.
  */
-export const useTabs = (): UseTabsResult => {
+export const useTabs = ({
+  onShowAttackEntities,
+  onShowAttackCorrelations,
+}: UseTabsProps): UseTabsResult => {
   const { storage } = useKibana().services;
+
+  const tabsDisplayed = useMemo<AttackDetailsPanelTabType[]>(
+    () => [
+      tabs.overviewTab({ onShowAttackEntities, onShowAttackCorrelations }),
+      tabs.tableTab,
+      tabs.jsonTab,
+    ],
+    [onShowAttackEntities, onShowAttackCorrelations]
+  );
 
   const [selectedTabId, setSelectedTabIdState] = useState<AttackDetailsPanelPaths>(() => {
     const stored = storage.get(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS);
+    const tabIds = tabsDisplayed.map((tab) => tab.id);
     if (stored && tabIds.includes(stored)) {
       return stored as AttackDetailsPanelPaths;
     }

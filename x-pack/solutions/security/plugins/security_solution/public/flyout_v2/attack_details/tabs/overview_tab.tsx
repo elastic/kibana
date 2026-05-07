@@ -14,28 +14,46 @@ import { AISummarySection } from '../components/ai_summary_section';
 import { VisualizationsSection } from '../components/visualizations_section';
 import { InsightsSection } from '../components/insights_section';
 
+export interface OverviewTabProps {
+  /**
+   * Callback that opens the attack-specific Entities child flyout. Forwarded
+   * to {@link InsightsSection} → {@link EntitiesOverview}.
+   */
+  onShowAttackEntities: () => void;
+  /**
+   * Callback that opens the attack-specific Correlations child flyout.
+   * Forwarded to {@link InsightsSection} → {@link CorrelationsOverview}.
+   */
+  onShowAttackCorrelations: () => void;
+}
+
 /**
  * Renders the Overview tab content in the Attack Details flyout.
  */
-export const OverviewTab = memo(() => {
-  return (
-    <EuiPanel
-      hasBorder={false}
-      hasShadow={false}
-      paddingSize="none"
-      data-test-subj={OVERVIEW_TAB_TEST_ID}
-      aria-label={i18n.translate(
-        'xpack.securitySolution.attackDetailsFlyout.overview.overviewContentAriaLabel',
-        { defaultMessage: 'Overview' }
-      )}
-    >
-      <AISummarySection />
-      <EuiHorizontalRule margin="m" />
-      <VisualizationsSection />
-      <EuiHorizontalRule margin="m" />
-      <InsightsSection />
-    </EuiPanel>
-  );
-});
+export const OverviewTab: React.FC<OverviewTabProps> = memo(
+  ({ onShowAttackEntities, onShowAttackCorrelations }) => {
+    return (
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="none"
+        data-test-subj={OVERVIEW_TAB_TEST_ID}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.attackDetailsFlyout.overview.overviewContentAriaLabel',
+          { defaultMessage: 'Overview' }
+        )}
+      >
+        <AISummarySection />
+        <EuiHorizontalRule margin="m" />
+        <VisualizationsSection />
+        <EuiHorizontalRule margin="m" />
+        <InsightsSection
+          onShowAttackEntities={onShowAttackEntities}
+          onShowAttackCorrelations={onShowAttackCorrelations}
+        />
+      </EuiPanel>
+    );
+  }
+);
 
 OverviewTab.displayName = 'OverviewTab';

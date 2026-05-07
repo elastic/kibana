@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { HeaderTitle } from './components/header_title';
@@ -37,24 +38,36 @@ export interface HeaderProps {
  * the tab strip; intended to be wrapped in `<EuiFlyoutHeader>` by the parent.
  */
 export const Header: FC<HeaderProps> = memo(
-  ({ selectedTabId, setSelectedTabId, tabs, onShowNotes }) => (
-    <>
-      <HeaderTitle onShowNotes={onShowNotes} />
-      <EuiSpacer size="m" />
-      <EuiTabs bottomBorder={false}>
-        {tabs.map((tab) => (
-          <EuiTab
-            key={tab.id}
-            onClick={() => setSelectedTabId(tab.id)}
-            isSelected={tab.id === selectedTabId}
-            data-test-subj={tab['data-test-subj']}
-          >
-            {tab.name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-    </>
-  )
+  ({ selectedTabId, setSelectedTabId, tabs, onShowNotes }) => {
+    const { euiTheme } = useEuiTheme();
+    // Pull the tab strip down by `EuiFlyoutHeader`'s built-in
+    // `padding-block-end` (16px from the parent flyout's `paddingSize: 'm'`)
+    // so the active-tab underline coincides with the header's bottom border —
+    // matching the legacy `FlyoutHeaderTabs` `margin-bottom: -17px` trick
+    // (legacy needed an extra px to compensate for its inner `EuiPanel`
+    // padding; v2 has no inner panel, so `-${size.base}` is enough).
+    const tabsCss = css`
+      margin-block-end: -${euiTheme.size.base};
+    `;
+    return (
+      <>
+        <HeaderTitle onShowNotes={onShowNotes} />
+        <EuiSpacer size="m" />
+        <EuiTabs bottomBorder={false} expand css={tabsCss}>
+          {tabs.map((tab) => (
+            <EuiTab
+              key={tab.id}
+              onClick={() => setSelectedTabId(tab.id)}
+              isSelected={tab.id === selectedTabId}
+              data-test-subj={tab['data-test-subj']}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      </>
+    );
+  }
 );
 
 Header.displayName = 'Header';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { AttackDetailsContext } from '../context';
 import {
@@ -82,29 +82,61 @@ describe('InsightsSection', () => {
   });
 
   it('renders the Insights section with test id', () => {
-    renderWithEui(<InsightsSection />);
+    renderWithEui(
+      <InsightsSection onShowAttackEntities={jest.fn()} onShowAttackCorrelations={jest.fn()} />
+    );
 
     expect(screen.getByTestId(INSIGHTS_SECTION_TEST_ID)).toBeInTheDocument();
   });
 
-  it('renders Entities overview with a static title (no left-panel link)', () => {
-    renderWithEui(<InsightsSection />);
+  it('renders Entities overview with a clickable section title link', () => {
+    renderWithEui(
+      <InsightsSection onShowAttackEntities={jest.fn()} onShowAttackCorrelations={jest.fn()} />
+    );
 
-    expect(screen.getByTestId(`${INSIGHTS_ENTITIES_TEST_ID}TitleText`)).toBeInTheDocument();
-    expect(screen.queryByTestId(`${INSIGHTS_ENTITIES_TEST_ID}TitleLink`)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(`${INSIGHTS_ENTITIES_TEST_ID}LinkIcon`)).not.toBeInTheDocument();
+    expect(screen.getByTestId(`${INSIGHTS_ENTITIES_TEST_ID}TitleLink`)).toBeInTheDocument();
+    expect(screen.getByTestId(`${INSIGHTS_ENTITIES_TEST_ID}LinkIcon`)).toBeInTheDocument();
   });
 
-  it('renders Correlations overview with Related alerts count and static title', () => {
-    renderWithEui(<InsightsSection />);
+  it('renders Correlations overview with a clickable section title link and Related alerts count', () => {
+    renderWithEui(
+      <InsightsSection onShowAttackEntities={jest.fn()} onShowAttackCorrelations={jest.fn()} />
+    );
 
     expect(screen.getByTestId(INSIGHTS_CORRELATIONS_TEST_ID)).toBeInTheDocument();
     expect(screen.getByText('Correlation')).toBeInTheDocument();
     expect(screen.getByText('Related alerts')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
-    expect(screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleText`)).toBeInTheDocument();
-    expect(
-      screen.queryByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleLink`)
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleLink`)).toBeInTheDocument();
+  });
+
+  it('forwards onShowAttackEntities to the Entities overview title link', () => {
+    const onShowAttackEntities = jest.fn();
+
+    renderWithEui(
+      <InsightsSection
+        onShowAttackEntities={onShowAttackEntities}
+        onShowAttackCorrelations={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId(`${INSIGHTS_ENTITIES_TEST_ID}TitleLink`));
+
+    expect(onShowAttackEntities).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards onShowAttackCorrelations to the Correlations overview title link', () => {
+    const onShowAttackCorrelations = jest.fn();
+
+    renderWithEui(
+      <InsightsSection
+        onShowAttackEntities={jest.fn()}
+        onShowAttackCorrelations={onShowAttackCorrelations}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleLink`));
+
+    expect(onShowAttackCorrelations).toHaveBeenCalledTimes(1);
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,48 +20,78 @@ const TITLE = (
   />
 );
 
+const TOOLTIP = (
+  <FormattedMessage
+    id="xpack.securitySolution.attackDetailsFlyout.overview.insights.correlationTooltip"
+    defaultMessage="Show related alerts"
+  />
+);
+
+export interface CorrelationsOverviewProps {
+  /**
+   * Callback that opens the attack-specific Correlations child flyout when
+   * the section title link is clicked. The wiring lives in
+   * `flyout_v2/attack_details/index.tsx`.
+   */
+  onShowAttackCorrelations: () => void;
+}
+
 /**
  * Correlation section under Insights section in the Attack Details overview tab.
- * Renders related alerts count.
+ * Renders related alerts count with a chevron link that opens the
+ * attack-specific Correlations child flyout (related-alerts-by-ancestry only).
  */
-export const CorrelationsOverview: React.FC = memo(() => {
-  const { euiTheme } = useEuiTheme();
-  const originalAlertIds = useOriginalAlertIds();
-  const relatedAlertsCount = originalAlertIds.length;
+export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(
+  ({ onShowAttackCorrelations }) => {
+    const { euiTheme } = useEuiTheme();
+    const originalAlertIds = useOriginalAlertIds();
+    const relatedAlertsCount = originalAlertIds.length;
 
-  return (
-    <SectionPanel data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID} title={TITLE} highlightTitle>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="m"
-        responsive={false}
-        css={css`
-          padding: ${euiTheme.size.m} ${euiTheme.size.base};
-        `}
+    const link = useMemo(
+      () => ({ callback: onShowAttackCorrelations, tooltip: TOOLTIP }),
+      [onShowAttackCorrelations]
+    );
+
+    return (
+      <SectionPanel
+        data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
+        title={TITLE}
+        highlightTitle
+        link={link}
+        linkIconType="arrowStart"
       >
-        <EuiFlexItem>
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.securitySolution.attackDetailsFlyout.overview.insights.relatedAlerts"
-                  defaultMessage="Related alerts"
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{relatedAlertsCount}</EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </SectionPanel>
-  );
-});
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="m"
+          responsive={false}
+          css={css`
+            padding: ${euiTheme.size.m} ${euiTheme.size.base};
+          `}
+        >
+          <EuiFlexItem>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="s"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.securitySolution.attackDetailsFlyout.overview.insights.relatedAlerts"
+                    defaultMessage="Related alerts"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{relatedAlertsCount}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </SectionPanel>
+    );
+  }
+);
 
 CorrelationsOverview.displayName = 'CorrelationsOverview';

@@ -43,8 +43,22 @@ jest.mock('../../shared/tools/notes', () => ({
   NotesDetails: () => <div data-test-subj="mock-notes-details" />,
 }));
 jest.mock('../attack_details', () => ({
-  AttackDetails: ({ onShowNotes }: { onShowNotes: () => void }) => (
-    <button type="button" data-test-subj="mock-attack-details" onClick={onShowNotes} />
+  AttackDetails: ({
+    onShowNotes,
+    renderCellActions,
+    onAlertUpdated,
+  }: {
+    onShowNotes: () => void;
+    renderCellActions: unknown;
+    onAlertUpdated: () => void;
+  }) => (
+    <button
+      type="button"
+      data-test-subj="mock-attack-details"
+      data-has-render-cell-actions={String(renderCellActions != null)}
+      data-has-on-alert-updated={String(onAlertUpdated != null)}
+      onClick={onShowNotes}
+    />
   ),
 }));
 
@@ -214,6 +228,29 @@ describe('<DocumentFlyout />', () => {
 
       expect(getByTestId('mock-header')).toBeInTheDocument();
       expect(queryByTestId('mock-attack-details')).not.toBeInTheDocument();
+    });
+
+    it('threads renderCellActions and onAlertUpdated through to the v2 attack details panel', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <DocumentFlyout
+            hit={createAlertHit({
+              [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+            })}
+            renderCellActions={jest.fn()}
+            onAlertUpdated={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId('mock-attack-details')).toHaveAttribute(
+        'data-has-render-cell-actions',
+        'true'
+      );
+      expect(getByTestId('mock-attack-details')).toHaveAttribute(
+        'data-has-on-alert-updated',
+        'true'
+      );
     });
 
     it('threads onShowNotes through to the v2 attack details panel', () => {

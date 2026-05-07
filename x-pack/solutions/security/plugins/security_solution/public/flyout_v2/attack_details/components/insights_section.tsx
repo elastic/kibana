@@ -16,34 +16,49 @@ import { EntitiesOverview } from './entities_overview';
 
 const KEY = 'insights';
 
+export interface InsightsSectionProps {
+  /**
+   * Callback to open the attack-specific Entities child flyout. Forwarded
+   * to {@link EntitiesOverview} as its title-link callback.
+   */
+  onShowAttackEntities: () => void;
+  /**
+   * Callback to open the attack-specific Correlations child flyout.
+   * Forwarded to {@link CorrelationsOverview} as its title-link callback.
+   */
+  onShowAttackCorrelations: () => void;
+}
+
 /**
  * Renders the Overview tab - InsightsSection content in the Attack Details flyout.
  */
-export const InsightsSection = memo(() => {
-  const expanded = useExpandSection({
-    storageKey: FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS,
-    title: KEY,
-    defaultValue: false,
-  });
+export const InsightsSection: React.FC<InsightsSectionProps> = memo(
+  ({ onShowAttackEntities, onShowAttackCorrelations }) => {
+    const expanded = useExpandSection({
+      storageKey: FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS,
+      title: KEY,
+      defaultValue: false,
+    });
 
-  return (
-    <ExpandableSection
-      expanded={expanded}
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.attackDetailsFlyout.overview.insightsSection.sectionTitle"
-          defaultMessage="Insights"
-        />
-      }
-      localStorageKey={FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS}
-      sectionId={KEY}
-      gutterSize="s"
-      data-test-subj={INSIGHTS_SECTION_TEST_ID}
-    >
-      <EntitiesOverview />
-      <CorrelationsOverview />
-    </ExpandableSection>
-  );
-});
+    return (
+      <ExpandableSection
+        expanded={expanded}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.attackDetailsFlyout.overview.insightsSection.sectionTitle"
+            defaultMessage="Insights"
+          />
+        }
+        localStorageKey={FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS}
+        sectionId={KEY}
+        gutterSize="s"
+        data-test-subj={INSIGHTS_SECTION_TEST_ID}
+      >
+        <EntitiesOverview onShowAttackEntities={onShowAttackEntities} />
+        <CorrelationsOverview onShowAttackCorrelations={onShowAttackCorrelations} />
+      </ExpandableSection>
+    );
+  }
+);
 
 InsightsSection.displayName = 'InsightsSection';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { CorrelationsOverview } from './correlations_overview';
 import { INSIGHTS_CORRELATIONS_TEST_ID } from '../constants/test_ids';
@@ -31,19 +31,19 @@ describe('CorrelationsOverview', () => {
   });
 
   it('renders the section with the correlations test id', () => {
-    renderWithEui(<CorrelationsOverview />);
+    renderWithEui(<CorrelationsOverview onShowAttackCorrelations={jest.fn()} />);
 
     expect(screen.getByTestId(INSIGHTS_CORRELATIONS_TEST_ID)).toBeInTheDocument();
   });
 
   it('renders the Related alerts label', () => {
-    renderWithEui(<CorrelationsOverview />);
+    renderWithEui(<CorrelationsOverview onShowAttackCorrelations={jest.fn()} />);
 
     expect(screen.getByText('Related alerts')).toBeInTheDocument();
   });
 
   it('renders the related alerts count in a badge', () => {
-    renderWithEui(<CorrelationsOverview />);
+    renderWithEui(<CorrelationsOverview onShowAttackCorrelations={jest.fn()} />);
 
     expect(screen.getByText('2')).toBeInTheDocument();
   });
@@ -51,7 +51,7 @@ describe('CorrelationsOverview', () => {
   it('renders count of zero when there are no original alert IDs', () => {
     jest.mocked(useOriginalAlertIds).mockReturnValue([]);
 
-    renderWithEui(<CorrelationsOverview />);
+    renderWithEui(<CorrelationsOverview onShowAttackCorrelations={jest.fn()} />);
 
     expect(screen.getByText('0')).toBeInTheDocument();
   });
@@ -59,20 +59,28 @@ describe('CorrelationsOverview', () => {
   it('renders count matching the number of original alert IDs', () => {
     jest.mocked(useOriginalAlertIds).mockReturnValue(['id-1', 'id-2', 'id-3']);
 
-    renderWithEui(<CorrelationsOverview />);
+    renderWithEui(<CorrelationsOverview onShowAttackCorrelations={jest.fn()} />);
 
     expect(screen.getByText('3')).toBeInTheDocument();
   });
 
-  it('renders a static section title without expand affordance', () => {
-    renderWithEui(<CorrelationsOverview />);
+  it('renders the section title as a clickable link with the chevron link icon', () => {
+    renderWithEui(<CorrelationsOverview onShowAttackCorrelations={jest.fn()} />);
 
-    expect(screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleText`)).toBeInTheDocument();
+    expect(screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleLink`)).toBeInTheDocument();
+    expect(screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}LinkIcon`)).toBeInTheDocument();
     expect(
-      screen.queryByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleLink`)
+      screen.queryByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleText`)
     ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}LinkIcon`)
-    ).not.toBeInTheDocument();
+  });
+
+  it('invokes onShowAttackCorrelations when the title link is clicked', () => {
+    const onShowAttackCorrelations = jest.fn();
+
+    renderWithEui(<CorrelationsOverview onShowAttackCorrelations={onShowAttackCorrelations} />);
+
+    fireEvent.click(screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleLink`));
+
+    expect(onShowAttackCorrelations).toHaveBeenCalledTimes(1);
   });
 });

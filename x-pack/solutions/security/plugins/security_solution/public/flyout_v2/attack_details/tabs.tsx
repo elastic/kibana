@@ -13,7 +13,29 @@ import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
 import type { AttackDetailsPanelTabType } from './types';
 
-export const overviewTab: AttackDetailsPanelTabType = {
+export interface OverviewTabFactoryProps {
+  /**
+   * Callback that opens the attack-specific Entities child flyout.
+   */
+  onShowAttackEntities: () => void;
+  /**
+   * Callback that opens the attack-specific Correlations child flyout.
+   */
+  onShowAttackCorrelations: () => void;
+}
+
+/**
+ * Factory for the Overview tab. The Overview tab needs the Insights → Entities
+ * and Insights → Correlations title-link callbacks, which are constructed in
+ * `flyout_v2/attack_details/index.tsx` via `useKibana()` + `useStore()` +
+ * `useHistory()` + `overlays.openSystemFlyout(...)` and threaded down through
+ * the tab tree. Returning a factory keeps the tab definition shape consistent
+ * with `tableTab`/`jsonTab` while allowing per-instance callbacks.
+ */
+export const overviewTab = ({
+  onShowAttackEntities,
+  onShowAttackCorrelations,
+}: OverviewTabFactoryProps): AttackDetailsPanelTabType => ({
   id: 'overview',
   'data-test-subj': OVERVIEW_TAB_TEST_ID,
   name: (
@@ -22,8 +44,13 @@ export const overviewTab: AttackDetailsPanelTabType = {
       defaultMessage="Overview"
     />
   ),
-  content: <OverviewTab />,
-};
+  content: (
+    <OverviewTab
+      onShowAttackEntities={onShowAttackEntities}
+      onShowAttackCorrelations={onShowAttackCorrelations}
+    />
+  ),
+});
 
 export const tableTab: AttackDetailsPanelTabType = {
   id: 'table',

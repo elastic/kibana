@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -27,75 +27,105 @@ const TITLE = (
   />
 );
 
+const TOOLTIP = (
+  <FormattedMessage
+    id="xpack.securitySolution.attackDetailsFlyout.overview.insights.entitiesTooltip"
+    defaultMessage="Show all entities"
+  />
+);
+
+export interface EntitiesOverviewProps {
+  /**
+   * Callback that opens the attack-specific Entities child flyout when the
+   * section title link is clicked. The wiring lives in
+   * `flyout_v2/attack_details/index.tsx`.
+   */
+  onShowAttackEntities: () => void;
+}
+
 /**
  * Entities section under Insights section in the Attack Details overview tab.
- * Renders related users and related hosts counts.
+ * Renders related users and related hosts counts with a chevron link that
+ * opens the attack-specific Entities child flyout.
  */
-export const EntitiesOverview: React.FC = memo(() => {
-  const { euiTheme } = useEuiTheme();
-  const { relatedUsers, relatedHosts, loading } = useAttackEntitiesCounts();
+export const EntitiesOverview: React.FC<EntitiesOverviewProps> = memo(
+  ({ onShowAttackEntities }) => {
+    const { euiTheme } = useEuiTheme();
+    const { relatedUsers, relatedHosts, loading } = useAttackEntitiesCounts();
 
-  return (
-    <SectionPanel data-test-subj={INSIGHTS_ENTITIES_TEST_ID} title={TITLE} highlightTitle>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="m"
-        responsive={false}
-        css={css`
-          padding: ${euiTheme.size.m} ${euiTheme.size.base};
-        `}
+    const link = useMemo(
+      () => ({ callback: onShowAttackEntities, tooltip: TOOLTIP }),
+      [onShowAttackEntities]
+    );
+
+    return (
+      <SectionPanel
+        data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
+        title={TITLE}
+        highlightTitle
+        link={link}
+        linkIconType="chevronLimitLeft"
       >
-        <EuiFlexItem>
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.securitySolution.attackDetailsFlyout.overview.insights.relatedUsers"
-                  defaultMessage="Related users"
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {loading ? (
-                <EuiSkeletonText lines={1} size="xs" />
-              ) : (
-                <EuiBadge color="hollow">{relatedUsers}</EuiBadge>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.securitySolution.attackDetailsFlyout.overview.insights.relatedHosts"
-                  defaultMessage="Related hosts"
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {loading ? (
-                <EuiSkeletonText lines={1} size="xs" />
-              ) : (
-                <EuiBadge color="hollow">{relatedHosts}</EuiBadge>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </SectionPanel>
-  );
-});
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="m"
+          responsive={false}
+          css={css`
+            padding: ${euiTheme.size.m} ${euiTheme.size.base};
+          `}
+        >
+          <EuiFlexItem>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="s"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.securitySolution.attackDetailsFlyout.overview.insights.relatedUsers"
+                    defaultMessage="Related users"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {loading ? (
+                  <EuiSkeletonText lines={1} size="xs" />
+                ) : (
+                  <EuiBadge color="hollow">{relatedUsers}</EuiBadge>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="s"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.securitySolution.attackDetailsFlyout.overview.insights.relatedHosts"
+                    defaultMessage="Related hosts"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {loading ? (
+                  <EuiSkeletonText lines={1} size="xs" />
+                ) : (
+                  <EuiBadge color="hollow">{relatedHosts}</EuiBadge>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </SectionPanel>
+    );
+  }
+);
 
 EntitiesOverview.displayName = 'EntitiesOverview';

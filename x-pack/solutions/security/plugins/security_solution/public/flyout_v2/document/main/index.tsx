@@ -99,7 +99,14 @@ export const DocumentFlyout = memo(
     }
 
     if (isAttackDiscovery) {
-      return <AttackDetails hit={hit} onShowNotes={onShowNotes} />;
+      return (
+        <AttackDetails
+          hit={hit}
+          onShowNotes={onShowNotes}
+          renderCellActions={renderCellActions}
+          onAlertUpdated={onAlertUpdated}
+        />
+      );
     }
 
     return (
