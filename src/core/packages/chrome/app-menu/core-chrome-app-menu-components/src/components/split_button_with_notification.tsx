@@ -57,86 +57,84 @@ export const SplitButtonWithNotification = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div css={{ padding: `0 ${euiTheme.size.s}` }}>
-      <EuiSplitButton
-        color="text"
-        size="s"
-        isDisabled={isDisabled}
-        isLoading={isLoading}
-        css={
-          fullWidth &&
-          css`
-            display: flex;
-            width: 100%;
-          `
-        }
+    <EuiSplitButton
+      color="text"
+      size="s"
+      isDisabled={isDisabled}
+      isLoading={isLoading}
+      css={
+        fullWidth &&
+        css`
+          display: flex;
+          width: 100%;
+        `
+      }
+    >
+      <EuiSplitButton.ActionPrimary
+        data-test-subj={dataTestSubj}
+        id={id}
+        onClick={onClick as MouseEventHandler}
+        isLoading={isMainButtonLoading}
+        isSelected={isSelected}
+        href={href}
+        target={target}
+        fullWidth={fullWidth}
+        aria-haspopup={ariaHasPopup}
       >
-        <EuiSplitButton.ActionPrimary
-          data-test-subj={dataTestSubj}
-          id={id}
-          onClick={onClick as MouseEventHandler}
-          isLoading={isMainButtonLoading}
-          isSelected={isSelected}
-          href={href}
-          target={target}
-          fullWidth={fullWidth}
-          aria-haspopup={ariaHasPopup}
-        >
-          {iconType && !isMainButtonLoading && (
-            <span
-              css={{
-                position: 'relative',
-                display: 'inline-flex',
-                marginInlineEnd: euiTheme.size.xs,
-              }}
-            >
-              <EuiIcon type={iconType} size="m" aria-hidden={true} />
-              {showNotificationIndicator && (
-                <div
-                  data-test-subj="split-button-notification-indicator"
-                  css={{
-                    position: 'absolute',
-                    top: 0,
-                    right: 0,
-                    transform: 'translate(50%, -50%)',
-                    zIndex: 1,
-                    pointerEvents: 'none',
-                    '& svg': {
-                      stroke: euiTheme.colors.backgroundBasePlain,
-                      strokeWidth: euiTheme.size.xxs,
-                      paintOrder: 'stroke fill',
-                    },
-                  }}
-                >
-                  <span css={{ pointerEvents: 'auto' }}>
-                    <EuiIconTip
-                      type="dot"
-                      size="m"
-                      color="primary"
-                      content={notificationIndicatorTooltipContent}
-                      iconProps={{
-                        onClick:
-                          isDisabled || isLoading || isMainButtonLoading
-                            ? undefined
-                            : (onClick as MouseEventHandler),
-                      }}
-                    />
-                  </span>
-                </div>
-              )}
-            </span>
-          )}
-          {label}
-        </EuiSplitButton.ActionPrimary>
-        <EuiSplitButton.ActionSecondary
-          data-test-subj={dataTestSubj ? `${dataTestSubj}-secondary-button` : undefined}
-          iconType="chevronSingleDown"
-          aria-label={secondaryButtonAriaLabel}
-          onClick={onSecondaryButtonClick}
-          isDisabled={isSecondaryButtonDisabled}
-          isSelected={isSelected}
-        />
-      </EuiSplitButton>
-    </div>
+        {iconType && !isMainButtonLoading && (
+          <span
+            css={{
+              position: 'relative',
+              display: 'inline-flex',
+              marginInlineEnd: euiTheme.size.xs,
+            }}
+          >
+            <EuiIcon type={iconType} size="m" aria-hidden={true} />
+            {showNotificationIndicator && (
+              <div
+                data-test-subj="split-button-notification-indicator"
+                css={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  transform: 'translate(50%, -50%)',
+                  zIndex: 1,
+                  pointerEvents: 'none',
+                  '& svg': {
+                    stroke: euiTheme.colors.backgroundBasePlain,
+                    strokeWidth: euiTheme.size.xxs,
+                    paintOrder: 'stroke fill',
+                  },
+                }}
+              >
+                <span css={{ pointerEvents: 'auto' }}>
+                  <EuiIconTip
+                    type="dot"
+                    size="m"
+                    color="primary"
+                    content={notificationIndicatorTooltipContent}
+                    iconProps={{
+                      onClick:
+                        isDisabled || isLoading || isMainButtonLoading
+                          ? undefined
+                          : (onClick as MouseEventHandler),
+                    }}
+                  />
+                </span>
+              </div>
+            )}
+          </span>
+        )}
+        {label}
+      </EuiSplitButton.ActionPrimary>
+      <EuiSplitButton.ActionSecondary
+        data-test-subj={dataTestSubj ? `${dataTestSubj}-secondary-button` : undefined}
+        iconType="chevronSingleDown"
+        aria-label={secondaryButtonAriaLabel}
+        onClick={onSecondaryButtonClick}
+        isDisabled={isSecondaryButtonDisabled}
+        isSelected={isSelected}
+      />
+    </EuiSplitButton>
   );
 };
