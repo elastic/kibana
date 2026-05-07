@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamClient } from '@kbn/data-streams';
 import { EventClient } from './event_client';
 import { eventsDataStream, type StoredEvent, type eventsMappings } from './data_stream';
 
 export class EventService {
-  constructor(private readonly logger: Logger) {}
-
   async getClient({
     esClient,
     space,
@@ -20,15 +18,10 @@ export class EventService {
     esClient: ElasticsearchClient;
     space: string;
   }): Promise<EventClient> {
-    const dataStreamClient = await DataStreamClient.initialize<typeof eventsMappings, StoredEvent>({
+    const dataStreamClient = DataStreamClient.create<typeof eventsMappings, StoredEvent>({
       dataStream: eventsDataStream,
       elasticsearchClient: esClient,
-      logger: this.logger,
     });
-
-    if (!dataStreamClient) {
-      throw new Error(`Failed to initialize data stream client for ${eventsDataStream.name}`);
-    }
 
     return new EventClient({
       dataStreamClient,

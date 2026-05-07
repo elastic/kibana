@@ -38,12 +38,12 @@ const SIGNIFICANT_EVENTS_DATA_STREAMS: AnyDataStreamDefinition[] = [
   verdictsDataStream,
 ];
 
-export function createSignificantEventsServices(logger: Logger): SignificantEventsServices {
+export function createSignificantEventsServices(): SignificantEventsServices {
   return {
-    detection: new DetectionService(logger),
-    discovery: new DiscoveryService(logger),
-    event: new EventService(logger),
-    verdict: new VerdictService(logger),
+    detection: new DetectionService(),
+    discovery: new DiscoveryService(),
+    event: new EventService(),
+    verdict: new VerdictService(),
   };
 }
 
@@ -74,7 +74,7 @@ export async function initializeSignificantEventsTemplates({
   await Promise.all(
     SIGNIFICANT_EVENTS_DATA_STREAMS.map(async (definition) => {
       try {
-        await DataStreamClient.initialize({
+        await DataStreamClient.initializeTemplate({
           dataStream: definition,
           elasticsearchClient: esClient,
           logger,
