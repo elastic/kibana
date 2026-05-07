@@ -35,6 +35,7 @@ export class VerdictService {
 
     return new VerdictClient({
       dataStreamClient,
+      esClient,
       space,
     });
   }

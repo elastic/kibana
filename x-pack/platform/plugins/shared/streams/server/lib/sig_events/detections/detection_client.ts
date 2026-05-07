@@ -6,20 +6,30 @@
  */
 
 import type { IDataStreamClient } from '@kbn/data-streams';
-import { dateRangeQuery } from '@kbn/es-query';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { type CommonSearchOptions } from '../query_utils';
-import { readScalar } from '../storage_utils';
-import { TIMESTAMP } from './fields';
-import { type StoredDetection, type detectionsMappings } from './data_stream';
+import { runLatestEsqlQuery } from '../latest_query';
+import {
+  DETECTIONS_DATA_STREAM,
+  type StoredDetection,
+  type detectionsMappings,
+} from './data_stream';
 
 export interface Detection {
   '@timestamp': string;
+  detection_id: string;
   rule_uuid: string;
   rule_name: string;
   stream: string;
 }
 
-const DEFAULT_PAGE_SIZE = 1_000;
+const DETECTION_FIELDS: ReadonlyArray<keyof Detection & string> = [
+  '@timestamp',
+  'detection_id',
+  'rule_uuid',
+  'rule_name',
+  'stream',
+];
 
 export type DetectionDataStreamClient = IDataStreamClient<
   typeof detectionsMappings,
@@ -30,6 +40,7 @@ export class DetectionClient {
   constructor(
     private readonly clients: {
       dataStreamClient: DetectionDataStreamClient;
+      esClient: ElasticsearchClient;
       space: string;
     }
   ) {}
@@ -41,26 +52,18 @@ export class DetectionClient {
     });
   }
 
-  async search(options: CommonSearchOptions = {}): Promise<{ hits: Detection[] }> {
-    const response = await this.clients.dataStreamClient.search({
+  async find(options: CommonSearchOptions = {}): Promise<{ hits: Detection[] }> {
+    return runLatestEsqlQuery<Detection>({
+      esClient: this.clients.esClient,
       space: this.clients.space,
-      size: DEFAULT_PAGE_SIZE,
-      _source: true,
-      query: { bool: { filter: dateRangeQuery(options.from, options.to, TIMESTAMP) } },
-      sort: [{ [TIMESTAMP]: { order: 'desc' } }],
+      options,
+      index: DETECTIONS_DATA_STREAM,
+      fields: DETECTION_FIELDS,
+      stats: (query) => query.pipe`STATS @timestamp = MAX(@timestamp),
+              rule_uuid = LATEST(rule_uuid),
+              rule_name = LATEST(rule_name),
+              stream = LATEST(stream)
+          BY detection_id`,
     });
-
-    return {
-      hits: response.hits.hits.map((hit) => fromStorage(hit._source!)),
-    };
   }
-}
-
-export function fromStorage(stored: StoredDetection): Detection {
-  return {
-    '@timestamp': readScalar(stored['@timestamp']) as string,
-    rule_uuid: readScalar(stored.rule_uuid) as string,
-    rule_name: readScalar(stored.rule_name) as string,
-    stream: readScalar(stored.stream) as string,
-  };
 }

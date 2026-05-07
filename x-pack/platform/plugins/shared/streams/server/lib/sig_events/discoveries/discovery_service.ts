@@ -39,6 +39,7 @@ export class DiscoveryService {
 
     return new DiscoveryClient({
       dataStreamClient,
+      esClient,
       space,
     });
   }

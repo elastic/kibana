@@ -6,11 +6,14 @@
  */
 
 import type { IDataStreamClient } from '@kbn/data-streams';
-import { dateRangeQuery } from '@kbn/es-query';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { type CommonSearchOptions } from '../query_utils';
-import { readScalar } from '../storage_utils';
-import { TIMESTAMP } from './fields';
-import { type StoredDiscovery, type discoveriesMappings } from './data_stream';
+import { runLatestEsqlQuery } from '../latest_query';
+import {
+  DISCOVERIES_DATA_STREAM,
+  type StoredDiscovery,
+  type discoveriesMappings,
+} from './data_stream';
 
 export interface Discovery {
   '@timestamp': string;
@@ -20,7 +23,13 @@ export interface Discovery {
   title: string;
 }
 
-const DEFAULT_PAGE_SIZE = 1_000;
+const DISCOVERY_FIELDS: ReadonlyArray<keyof Discovery & string> = [
+  '@timestamp',
+  'discovery_id',
+  'discovery_slug',
+  'status',
+  'title',
+];
 
 export type DiscoveryDataStreamClient = IDataStreamClient<
   typeof discoveriesMappings,
@@ -31,6 +40,7 @@ export class DiscoveryClient {
   constructor(
     private readonly clients: {
       dataStreamClient: DiscoveryDataStreamClient;
+      esClient: ElasticsearchClient;
       space: string;
     }
   ) {}
@@ -42,27 +52,18 @@ export class DiscoveryClient {
     });
   }
 
-  async search(options: CommonSearchOptions = {}): Promise<{ hits: Discovery[] }> {
-    const response = await this.clients.dataStreamClient.search({
+  async find(options: CommonSearchOptions = {}): Promise<{ hits: Discovery[] }> {
+    return runLatestEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
       space: this.clients.space,
-      size: DEFAULT_PAGE_SIZE,
-      _source: true,
-      query: { bool: { filter: dateRangeQuery(options.from, options.to, TIMESTAMP) } },
-      sort: [{ [TIMESTAMP]: { order: 'desc' } }],
+      options,
+      index: DISCOVERIES_DATA_STREAM,
+      fields: DISCOVERY_FIELDS,
+      stats: (query) => query.pipe`STATS @timestamp = MAX(@timestamp),
+              status = LATEST(status),
+              discovery_slug = LATEST(discovery_slug),
+              title = LATEST(\`title.keyword\`)
+          BY discovery_id`,
     });
-
-    return {
-      hits: response.hits.hits.map((hit) => fromStorage(hit._source!)),
-    };
   }
-}
-
-export function fromStorage(stored: StoredDiscovery): Discovery {
-  return {
-    '@timestamp': readScalar(stored['@timestamp']) as string,
-    discovery_id: readScalar(stored.discovery_id) as string,
-    discovery_slug: readScalar(stored.discovery_slug) as string,
-    status: readScalar(stored.status) as string,
-    title: readScalar(stored.title) as string,
-  };
 }

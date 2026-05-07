@@ -32,6 +32,7 @@ export class EventService {
 
     return new EventClient({
       dataStreamClient,
+      esClient,
       space,
     });
   }

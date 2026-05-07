@@ -15,6 +15,7 @@ export const detectionsMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date(),
+    detection_id: mappings.keyword(),
     rule_uuid: mappings.keyword(),
     rule_name: mappings.keyword(),
     stream: mappings.keyword(),

@@ -6,11 +6,10 @@
  */
 
 import type { IDataStreamClient } from '@kbn/data-streams';
-import { dateRangeQuery } from '@kbn/es-query';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { type CommonSearchOptions } from '../query_utils';
-import { readScalar } from '../storage_utils';
-import { TIMESTAMP } from './fields';
-import { type StoredEvent, type eventsMappings } from './data_stream';
+import { runLatestEsqlQuery } from '../latest_query';
+import { EVENTS_DATA_STREAM, type StoredEvent, type eventsMappings } from './data_stream';
 
 export interface SigEvent {
   '@timestamp': string;
@@ -22,7 +21,15 @@ export interface SigEvent {
   title: string;
 }
 
-const DEFAULT_PAGE_SIZE = 1_000;
+const EVENT_FIELDS: ReadonlyArray<keyof SigEvent & string> = [
+  '@timestamp',
+  'event_id',
+  'verdict',
+  'verdict_id',
+  'discovery_id',
+  'discovery_slug',
+  'title',
+];
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 
@@ -30,6 +37,7 @@ export class EventClient {
   constructor(
     private readonly clients: {
       dataStreamClient: EventDataStreamClient;
+      esClient: ElasticsearchClient;
       space: string;
     }
   ) {}
@@ -41,29 +49,20 @@ export class EventClient {
     });
   }
 
-  async search(options: CommonSearchOptions = {}): Promise<{ hits: SigEvent[] }> {
-    const response = await this.clients.dataStreamClient.search({
+  async find(options: CommonSearchOptions = {}): Promise<{ hits: SigEvent[] }> {
+    return runLatestEsqlQuery<SigEvent>({
+      esClient: this.clients.esClient,
       space: this.clients.space,
-      size: DEFAULT_PAGE_SIZE,
-      _source: true,
-      query: { bool: { filter: dateRangeQuery(options.from, options.to, TIMESTAMP) } },
-      sort: [{ [TIMESTAMP]: { order: 'desc' } }],
+      options,
+      index: EVENTS_DATA_STREAM,
+      fields: EVENT_FIELDS,
+      stats: (query) => query.pipe`STATS @timestamp = MAX(@timestamp),
+              verdict = LATEST(verdict),
+              verdict_id = LATEST(verdict_id),
+              discovery_id = LATEST(discovery_id),
+              discovery_slug = LATEST(discovery_slug),
+              title = LATEST(\`title.keyword\`)
+          BY event_id`,
     });
-
-    return {
-      hits: response.hits.hits.map((hit) => fromStorage(hit._source!)),
-    };
   }
-}
-
-export function fromStorage(stored: StoredEvent): SigEvent {
-  return {
-    '@timestamp': readScalar(stored['@timestamp']) as string,
-    event_id: readScalar(stored.event_id) as string,
-    verdict: readScalar(stored.verdict) as string,
-    verdict_id: readScalar(stored.verdict_id) as string,
-    discovery_id: readScalar(stored.discovery_id) as string,
-    discovery_slug: readScalar(stored.discovery_slug) as string,
-    title: readScalar(stored.title) as string,
-  };
 }

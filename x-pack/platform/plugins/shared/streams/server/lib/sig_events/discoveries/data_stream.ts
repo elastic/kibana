@@ -18,7 +18,12 @@ export const discoveriesMappings = {
     status: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
-    title: mappings.text({ fields: { keyword: { type: 'keyword', ignore_above: 512 } } }),
+    title: mappings.text({
+      fields: {
+        keyword: { type: 'keyword', ignore_above: 512 },
+        semantic: { type: 'semantic_text' },
+      },
+    }),
   },
 } satisfies MappingsDefinition;
 

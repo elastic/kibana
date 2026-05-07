@@ -35,6 +35,7 @@ export class DetectionService {
 
     return new DetectionClient({
       dataStreamClient,
+      esClient,
       space,
     });
   }

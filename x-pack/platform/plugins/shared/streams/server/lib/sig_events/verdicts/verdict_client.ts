@@ -6,11 +6,10 @@
  */
 
 import type { IDataStreamClient } from '@kbn/data-streams';
-import { dateRangeQuery } from '@kbn/es-query';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { type CommonSearchOptions } from '../query_utils';
-import { readScalar } from '../storage_utils';
-import { TIMESTAMP } from './fields';
-import { type StoredVerdict, type verdictsMappings } from './data_stream';
+import { runLatestEsqlQuery } from '../latest_query';
+import { VERDICTS_DATA_STREAM, type StoredVerdict, type verdictsMappings } from './data_stream';
 
 export interface Verdict {
   '@timestamp': string;
@@ -21,7 +20,14 @@ export interface Verdict {
   title: string;
 }
 
-const DEFAULT_PAGE_SIZE = 1_000;
+const VERDICT_FIELDS: ReadonlyArray<keyof Verdict & string> = [
+  '@timestamp',
+  'verdict',
+  'verdict_id',
+  'discovery_id',
+  'discovery_slug',
+  'title',
+];
 
 export type VerdictDataStreamClient = IDataStreamClient<typeof verdictsMappings, StoredVerdict>;
 
@@ -29,6 +35,7 @@ export class VerdictClient {
   constructor(
     private readonly clients: {
       dataStreamClient: VerdictDataStreamClient;
+      esClient: ElasticsearchClient;
       space: string;
     }
   ) {}
@@ -40,28 +47,19 @@ export class VerdictClient {
     });
   }
 
-  async search(options: CommonSearchOptions = {}): Promise<{ hits: Verdict[] }> {
-    const response = await this.clients.dataStreamClient.search({
+  async find(options: CommonSearchOptions = {}): Promise<{ hits: Verdict[] }> {
+    return runLatestEsqlQuery<Verdict>({
+      esClient: this.clients.esClient,
       space: this.clients.space,
-      size: DEFAULT_PAGE_SIZE,
-      _source: true,
-      query: { bool: { filter: dateRangeQuery(options.from, options.to, TIMESTAMP) } },
-      sort: [{ [TIMESTAMP]: { order: 'desc' } }],
+      options,
+      index: VERDICTS_DATA_STREAM,
+      fields: VERDICT_FIELDS,
+      stats: (query) => query.pipe`STATS @timestamp = MAX(@timestamp),
+              verdict = LATEST(verdict),
+              discovery_id = LATEST(discovery_id),
+              discovery_slug = LATEST(discovery_slug),
+              title = LATEST(\`title.keyword\`)
+          BY verdict_id`,
     });
-
-    return {
-      hits: response.hits.hits.map((hit) => fromStorage(hit._source!)),
-    };
   }
-}
-
-export function fromStorage(stored: StoredVerdict): Verdict {
-  return {
-    '@timestamp': readScalar(stored['@timestamp']) as string,
-    verdict: readScalar(stored.verdict) as string,
-    verdict_id: readScalar(stored.verdict_id) as string,
-    discovery_id: readScalar(stored.discovery_id) as string,
-    discovery_slug: readScalar(stored.discovery_slug) as string,
-    title: readScalar(stored.title) as string,
-  };
 }
