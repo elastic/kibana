@@ -27,7 +27,12 @@ export const TextField = ({ descriptor, control }: TextFieldProps) => {
   const { field } = useController({ name: descriptor.path, control });
 
   return (
-    <EuiFormRow label={descriptor.label} helpText={descriptor.description} fullWidth>
+    <EuiFormRow
+      label={descriptor.label}
+      helpText={descriptor.description}
+      display="columnCompressed"
+      fullWidth
+    >
       <EuiFieldText
         value={String(field.value ?? '')}
         onChange={(e) => field.onChange(e.target.value)}

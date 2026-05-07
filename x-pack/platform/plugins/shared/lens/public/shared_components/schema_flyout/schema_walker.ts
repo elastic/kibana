@@ -12,6 +12,8 @@
  * 2.0".
  */
 
+import { humanizeLabel } from './utils';
+
 export interface FormFieldDescriptor {
   path: string;
   type:
@@ -115,7 +117,7 @@ function walkDescription(
   if (excludePaths.has(currentPath)) return null;
 
   const meta = extractMeta(desc);
-  const label = meta.title ?? key;
+  const label = meta.title ?? humanizeLabel(key);
   const flags = desc.flags as Record<string, unknown> | undefined;
   const defaultValue = flags?.default;
   const presence = flags?.presence as string | undefined;

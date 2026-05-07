@@ -64,8 +64,7 @@ describe('SchemaFormField', () => {
       },
       { position: 'top' }
     );
-    expect(screen.getByRole('combobox')).toBeInTheDocument();
-    expect(screen.getByText('Position')).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Position' })).toBeInTheDocument();
   });
 
   it('renders EuiFieldNumber for number type', () => {

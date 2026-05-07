@@ -136,7 +136,7 @@ describe('walkSchemaDescription', () => {
       },
     };
     const fields = walkSchemaDescription(desc);
-    expect(fields[0].label).toBe('myField');
+    expect(fields[0].label).toBe('My Field');
   });
 
   it('should return empty array for description without keys', () => {

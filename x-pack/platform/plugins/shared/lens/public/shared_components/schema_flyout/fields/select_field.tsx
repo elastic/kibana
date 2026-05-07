@@ -13,7 +13,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { useController } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import type { FormFieldDescriptor } from '../schema_walker';
@@ -26,18 +26,47 @@ interface SelectFieldProps {
 export const SelectField = ({ descriptor, control }: SelectFieldProps) => {
   const { field } = useController({ name: descriptor.path, control });
 
-  const options = (descriptor.options ?? []).map((opt) => ({
+  const rawOptions = descriptor.options ?? [];
+
+  if (rawOptions.length <= 4) {
+    return (
+      <EuiFormRow
+        label={descriptor.label}
+        helpText={descriptor.description}
+        display="columnCompressed"
+        fullWidth
+      >
+        <EuiButtonGroup
+          legend={descriptor.label}
+          options={rawOptions.map((opt) => ({ id: opt.value, label: opt.label }))}
+          idSelected={(field.value as string) ?? ''}
+          onChange={(id) => field.onChange(id)}
+          buttonSize="compressed"
+          isFullWidth
+          data-test-subj={`schemaField-${descriptor.path}`}
+        />
+      </EuiFormRow>
+    );
+  }
+
+  const options = rawOptions.map((opt) => ({
     value: opt.value,
     text: opt.label,
   }));
 
   return (
-    <EuiFormRow label={descriptor.label} helpText={descriptor.description} fullWidth>
+    <EuiFormRow
+      label={descriptor.label}
+      helpText={descriptor.description}
+      display="columnCompressed"
+      fullWidth
+    >
       <EuiSelect
         options={options}
         value={String(field.value ?? '')}
         onChange={(e) => field.onChange(e.target.value)}
         onBlur={field.onBlur}
+        compressed
         data-test-subj={`schemaField-${descriptor.path}`}
         fullWidth
       />
