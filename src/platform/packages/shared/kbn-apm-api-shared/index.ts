@@ -23,6 +23,7 @@ export type * from './src/routes/span_links';
 export type * from './src/routes/observability_overview';
 export type * from './src/routes/agent_explorer';
 export type * from './src/routes/alerts';
+export type * from './src/routes/assistant_functions';
 export {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,

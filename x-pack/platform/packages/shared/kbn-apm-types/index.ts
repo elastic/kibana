@@ -19,3 +19,6 @@ export * from './src/processor_event';
 export * from './src/agent_explorer';
 export * from './src/aggregation_type';
 export type * from './src/coordinate';
+export * from './src/downstream_dependencies';
+export * from './src/latency_aggregation_types';
+export * from './src/apm_timeseries';

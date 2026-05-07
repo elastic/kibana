@@ -7,10 +7,11 @@
 
 import datemath from '@elastic/datemath';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import * as t from 'io-ts';
 import type { ChangePointType } from '@kbn/es-types/src';
+import type { getApmTimeseriesRt } from '@kbn/apm-types';
+import { ApmTimeseriesType, type ApmTimeseries } from '@kbn/apm-types';
+import type * as t from 'io-ts';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { termQuery } from '../../../../common/utils/term_query';
@@ -23,99 +24,12 @@ import { getTransactionFailureRate } from './get_transaction_failure_rate';
 import { getTransactionLatency } from './get_transaction_latency';
 import { getTransactionThroughput } from './get_transaction_throughput';
 
-export enum ApmTimeseriesType {
-  transactionThroughput = 'transaction_throughput',
-  transactionLatency = 'transaction_latency',
-  transactionFailureRate = 'transaction_failure_rate',
-  exitSpanThroughput = 'exit_span_throughput',
-  exitSpanLatency = 'exit_span_latency',
-  exitSpanFailureRate = 'exit_span_failure_rate',
-  errorEventRate = 'error_event_rate',
-}
-
-export const getApmTimeseriesRt = t.type({
-  stats: t.array(
-    t.intersection([
-      t.type({
-        'service.name': t.string,
-        title: t.string,
-        timeseries: t.union([
-          t.intersection([
-            t.type({
-              name: t.union([
-                t.literal(ApmTimeseriesType.transactionThroughput),
-                t.literal(ApmTimeseriesType.transactionFailureRate),
-              ]),
-            }),
-            t.partial({
-              'transaction.type': t.string,
-              'transaction.name': t.string,
-            }),
-          ]),
-          t.intersection([
-            t.type({
-              name: t.union([
-                t.literal(ApmTimeseriesType.exitSpanThroughput),
-                t.literal(ApmTimeseriesType.exitSpanFailureRate),
-                t.literal(ApmTimeseriesType.exitSpanLatency),
-              ]),
-            }),
-            t.partial({
-              'span.destination.service.resource': t.string,
-            }),
-          ]),
-          t.intersection([
-            t.type({
-              name: t.literal(ApmTimeseriesType.transactionLatency),
-              function: t.union([
-                t.literal(LatencyAggregationType.avg),
-                t.literal(LatencyAggregationType.p95),
-                t.literal(LatencyAggregationType.p99),
-              ]),
-            }),
-            t.partial({
-              'transaction.type': t.string,
-              'transaction.name': t.string,
-            }),
-          ]),
-          t.type({
-            name: t.literal(ApmTimeseriesType.errorEventRate),
-          }),
-        ]),
-      }),
-      t.partial({
-        filter: t.string,
-        offset: t.string,
-        'service.environment': t.string,
-      }),
-    ])
-  ),
-  start: t.string,
-  end: t.string,
-});
-
-type ApmTimeseriesArgs = t.TypeOf<typeof getApmTimeseriesRt>;
-
-export interface TimeseriesChangePoint {
-  change_point?: number | undefined;
-  r_value?: number | undefined;
-  trend?: string | undefined;
-  p_value?: number;
-  date: string | undefined;
-  type: ChangePointType;
-}
-
-export interface ApmTimeseries {
-  stat: ApmTimeseriesArgs['stats'][number];
-  group: string;
-  id: string;
-  data: Array<{ x: number; y: number | null }>;
-  value: number | null;
-  start: number;
-  end: number;
-  unit: string;
-  changes: TimeseriesChangePoint[];
-}
+export {
+  ApmTimeseriesType,
+  getApmTimeseriesRt,
+  type ApmTimeseries,
+  type TimeseriesChangePoint,
+} from '@kbn/apm-types';
 
 export async function getApmTimeseries({
   arguments: args,
