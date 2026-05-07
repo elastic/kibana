@@ -35,11 +35,6 @@ const parseReviewerCommand = (body = '') => {
 const isAllowedPermission = (permission) =>
   allowedPermissions.has(permission.permission) || allowedRoles.has(permission.role_name);
 
-const getPayloadPrNumber = (context) =>
-  context.payload.issue?.pull_request ? context.payload.issue.number : context.payload.pull_request?.number;
-
-const getPayloadComment = (context) => context.payload.comment;
-
 const getCollaboratorPermission = async ({ github, owner, repo, username }) => {
   try {
     const response = await github.rest.repos.getCollaboratorPermissionLevel({
@@ -131,78 +126,23 @@ const validatePullRequest = ({ core, pullRequest, reviewer }) => {
   return true;
 };
 
-const buildCommandArtifact = ({ context, owner, repo, reviewer, pullNumber, actor }) => {
-  const comment = getPayloadComment(context);
-
-  return {
-    version: 1,
-    repository: `${owner}/${repo}`,
-    reviewer: reviewer.id,
-    command: reviewer.command,
-    reviewer_label: reviewer.label,
-    workflow_id: reviewer.workflowId,
-    pr_number: String(pullNumber),
-    actor,
-    comment_id: String(comment.id),
-    comment_type: context.eventName,
-    comment_url: comment.html_url ?? '',
-    comment_path: comment.path ?? '',
-    comment_line: comment.line ? String(comment.line) : '',
-    comment_side: comment.side ?? '',
-    comment_start_line: comment.start_line ? String(comment.start_line) : '',
-    comment_start_side: comment.start_side ?? '',
-    comment_in_reply_to_id: comment.in_reply_to_id ? String(comment.in_reply_to_id) : '',
-  };
-};
-
-const buildCommentContextInput = ({ artifact, liveComment, pullRequest }) =>
-  JSON.stringify({
-    version: 1,
-    reviewer: artifact.reviewer,
-    command: artifact.command,
-    pr_number: String(pullRequest.number),
-    pr_url: pullRequest.html_url,
-    pr_head_sha: pullRequest.head.sha,
-    actor: artifact.actor,
-    comment_id: String(liveComment.id),
-    comment_type: artifact.comment_type,
-    comment_url: liveComment.html_url ?? artifact.comment_url ?? '',
-    comment_path: liveComment.path ?? artifact.comment_path ?? '',
-    comment_line: liveComment.line ? String(liveComment.line) : artifact.comment_line ?? '',
-    comment_side: liveComment.side ?? artifact.comment_side ?? '',
-    comment_start_line: liveComment.start_line
-      ? String(liveComment.start_line)
-      : artifact.comment_start_line ?? '',
-    comment_start_side: liveComment.start_side ?? artifact.comment_start_side ?? '',
-    comment_in_reply_to_id: liveComment.in_reply_to_id
-      ? String(liveComment.in_reply_to_id)
-      : artifact.comment_in_reply_to_id ?? '',
-    comment_author: liveComment.user?.login ?? '',
-  });
-
 const routeReviewerCommand = async ({ context, core }) => {
-  const { owner, repo } = context.repo;
-  const comment = getPayloadComment(context);
-  const reviewer = parseReviewerCommand(comment?.body);
-
-  if (!reviewer) {
-    core.info('Comment does not contain a configured reviewer mention.');
-    core.setOutput('matched', 'false');
-    return;
-  }
-
-  const pullNumber = getPayloadPrNumber(context);
-  const actor = context.payload.sender?.login;
-  if (!pullNumber || !actor) {
-    core.info('Reviewer command is missing pull request or actor context.');
-    core.setOutput('matched', 'false');
-    return;
-  }
+  const pullNumber = context.payload.issue?.number ?? context.payload.pull_request.number;
+  const commentId = context.payload.comment.id;
 
   fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
   fs.writeFileSync(
     ARTIFACT_PATH,
-    `${JSON.stringify(buildCommandArtifact({ context, owner, repo, reviewer, pullNumber, actor }), null, 2)}\n`
+    `${JSON.stringify(
+      {
+        version: 1,
+        pr_number: String(pullNumber),
+        comment_id: String(commentId),
+        comment_type: context.eventName,
+      },
+      null,
+      2
+    )}\n`
   );
   core.setOutput('matched', 'true');
 };
@@ -223,18 +163,6 @@ const dispatchReviewerCommand = async ({ github, context, core }) => {
   }
 
   const { owner, repo } = context.repo;
-  const expectedRepository = `${owner}/${repo}`;
-  if (artifact.repository !== expectedRepository) {
-    core.setFailed(`Artifact repository ${artifact.repository} did not match ${expectedRepository}.`);
-    return;
-  }
-
-  const reviewer = REVIEWERS[artifact.reviewer];
-  if (!reviewer || artifact.workflow_id !== reviewer.workflowId) {
-    core.setFailed(`Unsupported reviewer in artifact: ${artifact.reviewer}`);
-    return;
-  }
-
   const pullNumber = Number.parseInt(artifact.pr_number, 10);
   const commentId = Number.parseInt(artifact.comment_id, 10);
   if (!Number.isInteger(pullNumber) || !Number.isInteger(commentId)) {
@@ -243,14 +171,6 @@ const dispatchReviewerCommand = async ({ github, context, core }) => {
   }
 
   const pullRequest = await getPullRequest({ github, owner, repo, pullNumber });
-  if (!validatePullRequest({ core, pullRequest, reviewer })) {
-    return;
-  }
-
-  if (!(await validateReviewerAccess({ github, core, owner, repo, actor: artifact.actor }))) {
-    return;
-  }
-
   const liveComment = await fetchLiveComment({
     github,
     owner,
@@ -270,24 +190,26 @@ const dispatchReviewerCommand = async ({ github, context, core }) => {
     return;
   }
 
-  if (liveReviewer.id !== reviewer.id) {
-    core.setFailed(`Artifact reviewer ${reviewer.id} did not match live command ${liveReviewer.id}.`);
+  if (!validatePullRequest({ core, pullRequest, reviewer: liveReviewer })) {
+    return;
+  }
+
+  if (!(await validateReviewerAccess({ github, core, owner, repo, actor: liveComment.user?.login }))) {
     return;
   }
 
   await github.rest.actions.createWorkflowDispatch({
     owner,
     repo,
-    workflow_id: reviewer.workflowId,
+    workflow_id: liveReviewer.workflowId,
     ref: context.payload.repository.default_branch,
     inputs: {
       pr_number: String(pullNumber),
       comment_id: String(commentId),
-      comment_context: buildCommentContextInput({ artifact, liveComment, pullRequest }),
     },
   });
 
-  core.info(`Dispatched ${reviewer.workflowId} for PR #${pullNumber} from comment ${commentId}.`);
+  core.info(`Dispatched ${liveReviewer.workflowId} for PR #${pullNumber} from comment ${commentId}.`);
 };
 
 module.exports = {
