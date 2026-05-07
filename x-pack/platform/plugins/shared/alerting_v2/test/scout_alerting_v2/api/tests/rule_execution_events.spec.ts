@@ -9,7 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { expect } from '@kbn/scout/api';
 import { apiTest, tags } from '@kbn/scout';
-import { API_HEADERS, RULE_API_PATH } from '../fixtures';
+import { COMMON_HEADERS, RULE_API_PATH } from '../../common/constants';
 
 const EVENT_LOG_INDEX = '.kibana-event-log-*';
 
@@ -46,7 +46,7 @@ apiTest.describe('Rule executor execution history events', { tag: tags.stateful.
     for (const ruleId of ruleIds) {
       await apiClient
         .delete(`${RULE_API_PATH}/${ruleId}`, {
-          headers: { ...API_HEADERS, ...apiKeyHeader },
+          headers: { ...COMMON_HEADERS, ...apiKeyHeader },
         })
         .catch(() => {});
 
@@ -116,7 +116,7 @@ apiTest.describe('Rule executor execution history events', { tag: tags.stateful.
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
 
       const createResponse = await apiClient.post(RULE_API_PATH, {
-        headers: { ...API_HEADERS, ...apiKeyHeader },
+        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
         body: {
           kind: 'alert',
           metadata: { name: 'execution-events-success', tags: ['e2e', 'execution-history'] },
@@ -209,7 +209,7 @@ apiTest.describe('Rule executor execution history events', { tag: tags.stateful.
       // ES|QL accepts this query syntactically; the index does not exist,
       // so ExecuteRuleQueryStep throws at runtime — exercises the error path.
       const createResponse = await apiClient.post(RULE_API_PATH, {
-        headers: { ...API_HEADERS, ...apiKeyHeader },
+        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
         body: {
           kind: 'alert',
           metadata: { name: 'execution-events-failure' },
@@ -253,7 +253,7 @@ apiTest.describe('Rule executor execution history events', { tag: tags.stateful.
       const recoveryQuery = `FROM ${SOURCE_INDEX} | WHERE host.name == "never-matches"`;
 
       const createResponse = await apiClient.post(RULE_API_PATH, {
-        headers: { ...API_HEADERS, ...apiKeyHeader },
+        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
         body: {
           kind: 'alert',
           metadata: { name: 'execution-events-recovery-query' },
@@ -285,7 +285,7 @@ apiTest.describe('Rule executor execution history events', { tag: tags.stateful.
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
 
       const createResponse = await apiClient.post(RULE_API_PATH, {
-        headers: { ...API_HEADERS, ...apiKeyHeader },
+        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
         body: {
           kind: 'alert',
           metadata: { name: 'execution-events-queryable' },

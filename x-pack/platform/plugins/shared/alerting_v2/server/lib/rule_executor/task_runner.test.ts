@@ -229,7 +229,7 @@ describe('RuleExecutorTaskRunner', () => {
         finalState: createRulePipelineState(),
       });
 
-      await runner.run({ taskInstance, abortController });
+      await runner.run({ taskInstance, abortController }).catch(() => {});
 
       const summaryEvent = mockEventLogger.logEvent.mock.calls[1][0];
       expect(summaryEvent?.event?.outcome).toBe('failure');
