@@ -54,7 +54,7 @@ the resolved locale id (for example, `KBN_LOCALE=ja-JP`). Attributes:
 
 - Path scoped to the {{kib}} `serverBasePath`.
 - `SameSite=Lax`, `Max-Age` of one year, and `Secure` when the response is over HTTPS.
-- Not `HttpOnly`. The value is a preference, not a secret.
+- `HttpOnly`. The value is a preference, not a secret, but {{kib}} does not need browser-side JavaScript to read it.
 
 Privacy posture: `KBN_LOCALE` is a strictly-necessary preference cookie.
 It does not track the user, store identity, or enable cross-site activity.
