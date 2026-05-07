@@ -8,31 +8,40 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import {
-  ENVIRONMENT_NOT_DEFINED,
-  getNextEnvironmentUrlParam,
-} from '../../../../../common/environment_filter_values';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
-import type { Environment } from '../../../../../common/environment_rt';
-import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import type { TraceItem } from '../../../../../common/waterfall/unified_trace_item';
 import { getTraceParentChildrenMap } from '../../../shared/trace_waterfall/use_trace_waterfall';
+import {
+  TRACE_WATERFALL_EBT_CLICK_ACTIONS,
+  TRACE_WATERFALL_EBT_ELEMENTS,
+} from '../../../shared/trace_waterfall/ebt_constants';
 
-function FullTraceButton({ isLoading, isDisabled }: { isLoading?: boolean; isDisabled?: boolean }) {
+function FullTraceButton({
+  isLoading,
+  isDisabled,
+  onClick,
+}: {
+  isLoading?: boolean;
+  isDisabled?: boolean;
+  onClick?: () => void;
+}) {
   return (
     <EuiButtonEmpty
       aria-label={i18n.translate('xpack.apm.fullTraceButton.viewFullTraceButton.ariaLabel', {
         defaultMessage: 'View full trace',
       })}
       data-test-subj="apmFullTraceButtonViewFullTraceButton"
+      {...(onClick
+        ? getEbtProps({
+            action: TRACE_WATERFALL_EBT_CLICK_ACTIONS.VIEW_FULL_TRACE,
+            element: TRACE_WATERFALL_EBT_ELEMENTS.SUMMARY_VIEW_FULL_TRACE,
+          })
+        : {})}
       iconType="chartWaterfall"
       isLoading={isLoading}
       disabled={isDisabled}
+      onClick={onClick}
     >
       {i18n.translate('xpack.apm.transactionDetails.viewFullTraceButtonLabel', {
         defaultMessage: 'View full trace',
@@ -44,35 +53,14 @@ function FullTraceButton({ isLoading, isDisabled }: { isLoading?: boolean; isDis
 export function MaybeViewTraceLink({
   isLoading,
   transaction,
-  environment,
   traceItems = [],
+  onViewFullTrace,
 }: {
   isLoading: boolean;
   transaction?: ITransaction;
-  environment: Environment;
   traceItems?: TraceItem[];
+  onViewFullTrace: () => void;
 }) {
-  const {
-    query,
-    query: { comparisonEnabled, offset },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view',
-    '/dependencies/operation'
-  );
-
-  const { link } = useApmRouter();
-  const { core } = useApmPluginContext();
-
-  const defaultComparisonEnabled = getComparisonEnabled({
-    core,
-    urlComparisonEnabled: comparisonEnabled,
-  });
-
-  const latencyAggregationType =
-    ('latencyAggregationType' in query && query.latencyAggregationType) ||
-    LatencyAggregationType.avg;
-
   const rootTransactionInfo = useMemo(() => {
     const traceMap = getTraceParentChildrenMap(traceItems, false);
     const root = traceMap.root?.[0];
@@ -105,12 +93,8 @@ export function MaybeViewTraceLink({
   }
 
   const isRoot = transaction.transaction.id === rootTransactionInfo.id;
-  const nextEnvironment = getNextEnvironmentUrlParam({
-    requestedEnvironment: rootTransactionInfo.serviceEnvironment ?? ENVIRONMENT_NOT_DEFINED.value,
-    currentEnvironmentUrlParam: environment,
-  });
 
-  // the user is already viewing the full trace, so don't link to it
+  // the user is already viewing the full trace, so disable the button
   if (isRoot) {
     return (
       <EuiToolTip
@@ -123,27 +107,6 @@ export function MaybeViewTraceLink({
     );
   }
 
-  // the user is viewing a zoomed in version of the trace. Link to the full trace
-  return (
-    <TransactionDetailLink
-      transactionName={rootTransactionInfo.name}
-      href={link('/services/{serviceName}/transactions/view', {
-        path: { serviceName: rootTransactionInfo.serviceName },
-        query: {
-          ...query,
-          latencyAggregationType,
-          traceId: rootTransactionInfo.traceId,
-          transactionId: rootTransactionInfo.id,
-          transactionName: rootTransactionInfo.name,
-          transactionType: rootTransactionInfo.transactionType,
-          comparisonEnabled: defaultComparisonEnabled,
-          offset,
-          environment: nextEnvironment,
-          serviceGroup: '',
-        },
-      })}
-    >
-      <FullTraceButton />
-    </TransactionDetailLink>
-  );
+  // the user is viewing a partial trace — open the full trace flyout
+  return <FullTraceButton onClick={onViewFullTrace} />;
 }
