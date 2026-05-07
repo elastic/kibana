@@ -42,16 +42,28 @@ export const McpClientsTableHeader = ({
       loadingContent={<EuiSkeletonText css={loadingSkeletonTextStyles} lines={1} size="xs" />}
       loadedContent={
         <EuiText size="xs" css={headerTextStyles}>
-          <FormattedMessage
-            id="xpack.agentBuilder.mcpClients.mcpClientsTableSummary"
-            defaultMessage="Showing {start}-{end} of {total} {mcpClients}"
-            values={{
-              start: <strong>{Math.min(pageIndex * pageSize + 1, clients.length)}</strong>,
-              end: <strong>{Math.min((pageIndex + 1) * pageSize, clients.length)}</strong>,
-              total,
-              mcpClients: <strong>{labels.tools.mcpClients.mcpClientsLabel}</strong>,
-            }}
-          />
+          {clients.length > 0 ? (
+            <FormattedMessage
+              id="xpack.agentBuilder.mcpClients.mcpClientsTableSummary"
+              defaultMessage="Showing {start}-{end} of {total} {mcpClients}"
+              values={{
+                start: <strong>{pageIndex * pageSize + 1}</strong>,
+                end: <strong>{Math.min((pageIndex + 1) * pageSize, clients.length)}</strong>,
+                total,
+                mcpClients: <strong>{labels.tools.mcpClients.mcpClientsLabel}</strong>,
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.agentBuilder.mcpClients.mcpClientsTableSummaryEmpty"
+              defaultMessage="Showing {zero} of {total} {mcpClients}"
+              values={{
+                zero: <strong>{0}</strong>,
+                total,
+                mcpClients: <strong>{labels.tools.mcpClients.mcpClientsLabel}</strong>,
+              }}
+            />
+          )}
         </EuiText>
       }
     />
