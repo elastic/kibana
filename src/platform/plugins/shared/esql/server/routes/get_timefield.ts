@@ -17,22 +17,8 @@ import { EsqlService } from '@kbn/esql-server-utils';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 
-type TimeFieldType = 'date' | 'date_nanos';
-
-interface TimestampFieldInfo {
-  hasTimestamp: boolean;
-  type?: TimeFieldType;
-}
-
-const getTimestampFieldInfo = (result: FieldCapsResponse): TimestampFieldInfo => {
-  const timestampField = result.fields?.['@timestamp'];
-  if (!timestampField) {
-    return { hasTimestamp: false };
-  }
-  const fieldTypes = Object.keys(timestampField) as TimeFieldType[];
-  const type = fieldTypes.includes('date_nanos') ? 'date_nanos' : 'date';
-  return { hasTimestamp: true, type };
-};
+const hasTimestampInFieldCapsResponse = (result: FieldCapsResponse) =>
+  Boolean(result.fields && result.fields['@timestamp']);
 
 const toDebugString = (error: unknown): string =>
   error instanceof Error ? error.stack ?? error.message : String(error);
@@ -64,15 +50,10 @@ const checkViewLikeSourceForTimestamp = async ({
 }: {
   client: ElasticsearchClient;
   sourceName: string;
-}): Promise<TimestampFieldInfo> => {
+}): Promise<boolean> => {
   // ES|QL views are resolved by ES|QL itself, and their schema is the output schema.
   const esqlResp = await getEsqlColumnsForSource({ client, sourceName });
-  const col = esqlResp?.columns?.find((c) => c.name === ES_TIMESTAMP_FIELD_NAME);
-  if (!col) {
-    return { hasTimestamp: false };
-  }
-  const type: TimeFieldType = col.type === 'date_nanos' ? 'date_nanos' : 'date';
-  return { hasTimestamp: true, type };
+  return Boolean(esqlResp?.columns?.some((col) => col.name === ES_TIMESTAMP_FIELD_NAME));
 };
 
 /**
@@ -109,32 +90,16 @@ export const registerGetTimeFieldRoute = (
     async (requestHandlerContext, request, response) => {
       const { query } = request.body;
 
-      const core = await requestHandlerContext.core;
-      const client = core.elasticsearch.client.asCurrentUser;
-
       // Query is of the form "from index | where timefield >= ?_tstart".
       // At this point we just want to extract the timefield if present in the query
       const timeField = getTimeFieldFromESQLQuery(query);
       if (timeField) {
-        const sources = getIndexPatternFromESQLQuery(query);
-        let timeFieldType: TimeFieldType = 'date';
-        try {
-          const fieldCapsResp = await client.fieldCaps({
-            index: sources,
-            fields: timeField,
-            include_unmapped: false,
-          });
-          const fieldInfo = fieldCapsResp.fields?.[timeField];
-          if (fieldInfo && 'date_nanos' in fieldInfo) {
-            timeFieldType = 'date_nanos';
-          }
-        } catch {
-          // ignore, fall back to 'date'
-        }
         return response.ok({
-          body: { timeField, timeFieldType },
+          body: { timeField },
         });
       }
+      const core = await requestHandlerContext.core;
+      const client = core.elasticsearch.client.asCurrentUser;
 
       // Trying to identify if there is @timestamp
       const { root } = Parser.parse(query);
@@ -175,21 +140,19 @@ export const registerGetTimeFieldRoute = (
                 fields: '@timestamp',
                 include_unmapped: false,
               });
-              return getTimestampFieldInfo(fieldCapsResp);
+              return hasTimestampInFieldCapsResponse(fieldCapsResp);
             } catch (fieldCapsError) {
               logger.get().debug(toDebugString(fieldCapsError));
-              return { hasTimestamp: false };
+              return false;
             }
           })
         );
 
-        const allHaveTimestamp = fieldCapsResults.every((r) => r.hasTimestamp);
+        const allHaveTimestamp = fieldCapsResults.every(Boolean);
 
         if (allHaveTimestamp) {
-          const hasDateNanos = fieldCapsResults.some((r) => r.type === 'date_nanos');
-          const timeFieldType: TimeFieldType = hasDateNanos ? 'date_nanos' : 'date';
           return response.ok({
-            body: { timeField: ES_TIMESTAMP_FIELD_NAME, timeFieldType },
+            body: { timeField: ES_TIMESTAMP_FIELD_NAME },
           });
         }
 
@@ -202,11 +165,9 @@ export const registerGetTimeFieldRoute = (
               checkViewLikeSourceForTimestamp({ client, sourceName: viewName })
             )
           );
-          if (viewChecks.every((r) => r.hasTimestamp)) {
-            const hasDateNanos = viewChecks.some((r) => r.type === 'date_nanos');
-            const timeFieldType: TimeFieldType = hasDateNanos ? 'date_nanos' : 'date';
+          if (viewChecks.every(Boolean)) {
             return response.ok({
-              body: { timeField: ES_TIMESTAMP_FIELD_NAME, timeFieldType },
+              body: { timeField: ES_TIMESTAMP_FIELD_NAME },
             });
           }
         }

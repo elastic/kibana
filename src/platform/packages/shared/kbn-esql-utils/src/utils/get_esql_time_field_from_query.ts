@@ -10,14 +10,11 @@ import type { HttpStart } from '@kbn/core/public';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { LRUCache } from 'lru-cache';
 
-// TimeField [name, type]
-type TimeFieldCacheValue = [string, string] | undefined;
-
 // Caches the in-flight or resolved TIMEFIELD_ROUTE promise by query.
 // Storing the Promise (not the resolved value) deduplicates concurrent calls:
 // if multiple callers request the same query before the first resolves,
 // they all await the same promise instead of each firing a separate HTTP request.
-const timeFieldCache = new LRUCache<string, Promise<TimeFieldCacheValue>>({ max: 100 });
+const timeFieldCache = new LRUCache<string, Promise<string | undefined>>({ max: 100 });
 
 /**
  * Resolves the default time field for an ES|QL query by calling the timefield API.
@@ -33,7 +30,7 @@ export async function getESQLTimeFieldFromQuery({
 }: {
   query: string;
   http?: HttpStart;
-}): Promise<TimeFieldCacheValue> {
+}): Promise<string | undefined> {
   const cached = timeFieldCache.get(query);
   if (cached !== undefined) {
     return cached;
@@ -41,15 +38,9 @@ export async function getESQLTimeFieldFromQuery({
   if (!http) {
     return undefined;
   }
-  const pendingRequest: Promise<TimeFieldCacheValue> = http
-    .post<{ timeField?: string; timeFieldType?: 'date' | 'date_nanos' }>(TIMEFIELD_ROUTE, {
-      body: JSON.stringify({ query }),
-    })
-    .then((response): TimeFieldCacheValue => {
-      const timeField = response?.timeField;
-      const timeFieldType = response?.timeFieldType ?? 'date';
-      return timeField ? [timeField, timeFieldType] : undefined;
-    })
+  const pendingRequest = http
+    .post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query }) })
+    .then((response) => (response as { timeField?: string } | undefined)?.timeField)
     .catch((error) => {
       // eslint-disable-next-line no-console
       console.error('Failed to fetch the timefield', error);

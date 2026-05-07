@@ -73,7 +73,7 @@ export async function getESQLAdHocDataview({
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  const [timeFieldName] = (await getESQLTimeFieldFromQuery({ query, http })) ?? [];
+  const timeFieldName = await getESQLTimeFieldFromQuery({ query, http });
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
 
@@ -97,18 +97,6 @@ export async function getESQLAdHocDataview({
       id: dataViewId,
       allowNoIndex: options?.allowNoIndex,
       timeFieldName: timeFieldName || undefined,
-      // fields:
-      //   skipFetchFields && timeFieldName && timeFieldType
-      //     ? {
-      //         [timeFieldName]: {
-      //           name: timeFieldName,
-      //           type: 'date',
-      //           esTypes: [timeFieldType],
-      //           searchable: true,
-      //           aggregatable: true,
-      //         },
-      //       }
-      //     : undefined,
     },
     // important to skip if you just need the dataview without the fields for performance reasons
     skipFetchFields
