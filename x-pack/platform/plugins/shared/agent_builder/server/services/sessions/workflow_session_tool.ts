@@ -155,7 +155,7 @@ const createRunWorkflowTool = (
       return errResult(result.error ?? 'Failed to start workflow');
     }
 
-    const executionId = result.execution.executionId;
+    const executionId = result.execution.execution_id;
     const intervalSeconds = params.check_interval_seconds ?? 60;
     const firesAt = new Date(Date.now() + intervalSeconds * 1000).toISOString();
     const subscriptionId = uuidv4();
