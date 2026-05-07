@@ -333,5 +333,33 @@ describe('WorkflowSearchService', () => {
       expect(requestedAggs.name.terms.field).toBe('name.keyword');
       expect(requestedAggs.enabled.terms.field).toBe('enabled');
     });
+
+    it('returns an empty response when the workflow index is missing', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception', reason: 'missing index' } },
+          headers: {},
+          warnings: [],
+          meta: {} as any,
+        })
+      );
+
+      const service = new WorkflowSearchService(deps);
+      const result = await service.getWorkflowAggs(['tags'], 'default');
+
+      expect(result).toEqual({});
+    });
+
+    it('returns an empty response when Elasticsearch omits aggregations', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({});
+
+      const service = new WorkflowSearchService(deps);
+      const result = await service.getWorkflowAggs(['enabled'], 'default');
+
+      expect(result).toEqual({});
+    });
   });
 });

@@ -17,11 +17,17 @@ import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const MAX_AGG_FIELDS = 25;
 const FIELDS_DENY_LIST = new Set(['_id', '_index', '_score', '_source']);
+const EMPTY_FIELDS_ERROR = 'At least one aggregation field is required.';
 
 const fieldSchema = schema.string({
   meta: { description: 'Field name to aggregate.' },
-  validate: (field) =>
-    !FIELDS_DENY_LIST.has(field) ? undefined : 'Field is not allowed for aggregation.',
+  validate: (field) => {
+    if (field.length === 0) {
+      return EMPTY_FIELDS_ERROR;
+    }
+
+    return !FIELDS_DENY_LIST.has(field) ? undefined : 'Field is not allowed for aggregation.';
+  },
 });
 
 export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies) {
@@ -51,6 +57,7 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
                 [
                   fieldSchema,
                   schema.arrayOf(fieldSchema, {
+                    minSize: 1,
                     maxSize: MAX_AGG_FIELDS,
                     meta: { description: 'Fields to aggregate on.' },
                   }),
