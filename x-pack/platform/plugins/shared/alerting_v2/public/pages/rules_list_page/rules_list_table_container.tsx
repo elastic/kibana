@@ -15,8 +15,7 @@ import { useBulkDeleteRules } from '../../hooks/use_bulk_delete_rules';
 import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_enable_disable_rules';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
-import { RuleSummaryFlyout } from '../../components/rule/flyouts';
-import { QuickEditRuleFlyout } from '../../components/rule/flyouts';
+import { RuleSummaryFlyout, QuickEditRuleFlyout } from '../../components/rule/flyouts';
 import { paths } from '../../constants';
 import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
 

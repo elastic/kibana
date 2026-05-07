@@ -47,7 +47,7 @@ export const KindField = ({ disabled = false, compact = false }: KindFieldProps)
                       'xpack.alertingV2.ruleForm.kindField.tooltipDescription',
                       {
                         defaultMessage:
-                          'Enables lifecycle management: the system will track state transitions across alert events for each series, manage episodes, and dispatch to notification policies. Without this, alert events are observation-only records.',
+                          'Enables lifecycle management: the system will track state transitions across alert events for each series, manage episodes, and dispatch to action policies. Without this, alert events are observation-only records.',
                       }
                     )}
                   />

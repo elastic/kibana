@@ -185,7 +185,7 @@ export const QuickEditRuleFlyout = ({ rule, onClose }: QuickEditRuleFlyoutProps)
               >
                 <RuleDetailsFieldGroup />
                 <EuiSpacer size="m" />
-                <ConditionFieldGroup />
+                <ConditionFieldGroup includeBase={false} />
                 <EuiSpacer size="m" />
                 <RuleExecutionFieldGroup />
                 <EuiSpacer size="m" />

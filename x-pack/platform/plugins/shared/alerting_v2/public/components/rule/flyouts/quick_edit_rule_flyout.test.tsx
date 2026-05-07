@@ -156,4 +156,16 @@ describe('QuickEditRuleFlyout', () => {
 
     expect(props.onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('does not call onClose when the mutation fails', async () => {
+    const { props } = renderFlyout();
+
+    fireEvent.click(screen.getByTestId('quickEditRuleFlyoutSubmitButton'));
+
+    await waitFor(() => {
+      expect(mockMutate).toHaveBeenCalledTimes(1);
+    });
+
+    expect(props.onClose).not.toHaveBeenCalled();
+  });
 });
