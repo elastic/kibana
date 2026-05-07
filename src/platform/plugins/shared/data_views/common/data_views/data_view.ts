@@ -263,6 +263,9 @@ export class DataView extends AbstractDataView implements DataViewBase {
    */
 
   isTimeBased(): this is TimeBasedDataView {
+    if (this.type === 'esql' && this.timeFieldName) {
+      return true;
+    }
     return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
   }
 
