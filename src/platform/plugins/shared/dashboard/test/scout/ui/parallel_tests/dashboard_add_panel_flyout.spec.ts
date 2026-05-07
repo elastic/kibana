@@ -79,7 +79,7 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('renders add panel flyout', async ({ pageObjects }) => {
+    spaceTest('renders add panel flyout', async ({ pageObjects, log }) => {
       await spaceTest.step('open new dashboard and add panel flyout', async () => {
         await pageObjects.dashboard.openNewDashboard();
         await pageObjects.dashboard.openAddPanelFlyout();
@@ -91,7 +91,9 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify total panel count', async () => {
-        expect(await pageObjects.dashboard.getAddPanelFlyoutPanelTypesCount()).toBe(expectedCount);
+        const addPanelActions = await pageObjects.dashboard.getAddPanelFlyoutActions();
+        log.debug(`Add panel actions: ${addPanelActions.join(',')}`);
+        expect(addPanelActions).toHaveLength(expectedCount);
       });
     });
   }
