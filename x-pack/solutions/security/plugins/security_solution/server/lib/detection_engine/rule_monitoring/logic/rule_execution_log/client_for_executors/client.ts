@@ -6,6 +6,7 @@
  */
 
 import { omitBy } from 'lodash';
+import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import { addSpanLabels } from '@kbn/apm-utils';
 import type {
@@ -31,7 +32,10 @@ import {
   LogLevelSetting,
   logLevelToNumber,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
-import { SECURITY_RULE_STATUS } from '../../../../rule_types/utils/apm_field_names';
+import {
+  SECURITY_EXECUTION_OUTCOME,
+  SECURITY_RULE_STATUS,
+} from '../../../../rule_types/utils/apm_field_names';
 import type {
   ExecutionResult,
   IRuleExecutionLogForExecutors,
@@ -165,6 +169,17 @@ export function createRuleExecutionLogClientForExecutors(
             message: truncateValue(executionResult.message) ?? '',
             userError: executionResult.userError,
           };
+
+          agent.setCustomContext({
+            [SECURITY_EXECUTION_OUTCOME]: {
+              status: normalizedExecutionResult.status,
+              message: normalizedExecutionResult.message,
+              user_error: normalizedExecutionResult.userError,
+              errors: executionResultBuffer.errors,
+              warnings: executionResultBuffer.warnings,
+              metrics: executionResultBuffer.metrics,
+            },
+          });
 
           writeStatusChangeToEventLog(normalizedExecutionResult);
           writeMetricsToEventLog(executionResultBuffer.metrics);
