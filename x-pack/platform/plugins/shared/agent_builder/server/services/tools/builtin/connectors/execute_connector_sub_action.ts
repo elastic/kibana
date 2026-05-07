@@ -15,12 +15,12 @@ import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
 
 const connectorIdValidationMessage =
-  'connectorId is required at the root of the tool arguments (copy the Connector ID from the connector attachment). ' +
-  'Do not send only sub-action fields at the top level without connectorId and subAction.';
+  'connectorId must be at the root of the arguments (copy the value labeled Connector ID from the connector attachment). ' +
+  'Do not send only sub-action fields at the root; include connectorId and subAction together.';
 
 const subActionValidationMessage =
-  'subAction is required at the root (exact sub-action name from the connector attachment, e.g. searchMessages). ' +
-  'This tool does not infer subAction from other parameters.';
+  'subAction must be at the root — use the exact name from the connector attachment (for example searchMessages). ' +
+  'It is not inferred from params or other fields.';
 
 export const executeConnectorSubActionArgsSchema = z
   .object({
@@ -28,22 +28,22 @@ export const executeConnectorSubActionArgsSchema = z
       .string()
       .min(1, connectorIdValidationMessage)
       .describe(
-        'Saved connector instance ID at the **root** of arguments — not inside params. ' +
-          'Must match the Connector ID shown in the connector attachment.'
+        'Connector instance ID at the **root** of the arguments object (not inside params). ' +
+          'Must match the Connector ID line on the connector attachment.'
       ),
     subAction: z
       .string()
       .min(1, subActionValidationMessage)
       .describe(
-        'Exact sub-action name at the **root** of arguments (must match a tool sub-action listed on the attachment). ' +
-          'Do not guess; read the attachment. Not inferred from params.'
+        'Exact sub-action name at the **root** (must match a name listed under Available sub-actions on the attachment). ' +
+          'Do not guess or infer from params.'
       ),
     params: z
       .record(z.string(), z.any())
       .optional()
       .describe(
-        'Sub-action parameters only — put every argument for the sub-action here. ' +
-          'Do not place sub-action fields at the top level next to connectorId (they belong under params).'
+        'Parameters for the chosen sub-action only — include each field the sub-action expects. ' +
+          'Do not put those fields next to connectorId at the root; they belong in params.'
       ),
   })
   .strict();
@@ -60,11 +60,11 @@ export const createExecuteConnectorSubActionTool = ({
   id: platformCoreTools.executeConnectorSubAction,
   type: ToolType.builtin,
   description:
-    'Execute a sub-action on a connector instance. ' +
-    'Required argument shape: { "connectorId": "<id>", "subAction": "<name>", "params": { ... } } — ' +
-    'connectorId and subAction must always appear at the top level; pass sub-action fields inside params, not flattened to the root. ' +
-    'Read the connector attachment for the Connector ID, exact sub-action names, and each sub-action parameter schema. ' +
-    'Do not guess sub-action names or parameters.',
+    'Runs one sub-action on a saved connector. ' +
+    'Arguments must look like: {"connectorId":"<id>","subAction":"<name>","params":{...}}. ' +
+    'Keep connectorId and subAction at the root; put every argument for the sub-action inside params, not at the root. ' +
+    'Use the connector attachment for the Connector ID, allowed sub-action names, and parameter definitions. ' +
+    'Do not invent names or parameters.',
   schema: executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
   availability: {
@@ -75,7 +75,7 @@ export const createExecuteConnectorSubActionTool = ({
         ? { status: 'available' }
         : {
             status: 'unavailable',
-            reason: 'Connector tools require the connectors feature to be enabled',
+            reason: 'Connector tools require Agent Builder experimental features to be enabled',
           };
     },
   },

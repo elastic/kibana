@@ -66,8 +66,8 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
             `Required JSON shape for tool ${toolId}:`,
             `{"connectorId":"${connectorId}","subAction":"<sub-action name>","params":{ ... }}`,
             subActionEntries.length > 0
-              ? 'Use an exact sub-action name from the list below; put all sub-action arguments inside params, not as top-level keys.'
-              : 'Put all sub-action arguments inside params; use sub-action names documented for this connector type.',
+              ? 'Use a sub-action name exactly as listed below; pass its arguments only inside params, not as top-level keys.'
+              : 'Put every sub-action argument inside params; use names documented for this connector type.',
           ];
 
           if (subActionEntries.length > 0) {
@@ -101,8 +101,8 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
       const toolId = platformCoreTools.executeConnectorSubAction;
       return (
         `A connector attachment describes one connector instance and its callable sub-actions. ` +
-        `Call ${toolId} with JSON {"connectorId":"<id from attachment>","subAction":"<exact sub-action name>","params":{}} — ` +
-        `never flatten parameters to the top level without connectorId and subAction.`
+        `Call ${toolId} with JSON {"connectorId":"<id from attachment>","subAction":"<exact sub-action name>","params":{}}. ` +
+        `Keep connectorId and subAction at the root; put all sub-action arguments under params.`
       );
     },
   };
