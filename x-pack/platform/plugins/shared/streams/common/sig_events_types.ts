@@ -5,67 +5,20 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
+
+// ---------------------------------------------------------------------------
+// Shared constants
+// ---------------------------------------------------------------------------
+
 export const VERDICT_OPTIONS = ['promoted', 'acknowledged', 'demoted'] as const;
 export type Verdict = (typeof VERDICT_OPTIONS)[number];
 
 export const IMPACT_OPTIONS = ['critical', 'high', 'medium', 'low'] as const;
 export type Impact = (typeof IMPACT_OPTIONS)[number];
 
-export interface SigEventEvidence {
-  rule_name: string;
-  result: string;
-  description: string;
-  stream_name: string;
-  row_count: number;
-  collected_at: string;
-  esql_query: string | null;
-}
-
-export interface DependencyEdge {
-  source: string;
-  target: string;
-  protocol?: string;
-  exposure?: string;
-}
-
-export interface InfraComponent {
-  title?: string;
-  workloads?: string[];
-  exposure?: string;
-}
-
-export interface CauseKi {
-  name: string;
-  stream_name: string;
-}
-
-export interface SigEvent {
-  id: string;
-  '@timestamp': string;
-  event_id: string;
-  discovery_id: string;
-  discovery_slug: string;
-  title: string;
-  summary: string;
-  root_cause: string;
-  verdict: string;
-  criticality: number;
-  impact: string;
-  recommended_action: string;
-  rule_names: string[];
-  stream_names: string[];
-  recommendations: string[];
-  last_reviewed_at: string;
-  cause_kis: CauseKi[];
-  evidences: SigEventEvidence[];
-  dependency_edges: DependencyEdge[];
-  infra_components: InfraComponent[];
-}
-
-export interface SigEventsListResponse {
-  total: number;
-  events: SigEvent[];
-}
+export const EVIDENCE_RESULTS = ['found', 'empty', 'error'] as const;
+export const EXPOSURE_VALUES = ['exposed', 'not_exposed'] as const;
 
 export const VERDICT_COLORS: Record<Verdict, string> = {
   promoted: 'success',
@@ -79,3 +32,155 @@ export const IMPACT_COLORS: Record<Impact, string> = {
   medium: 'primary',
   low: 'hollow',
 };
+
+// ---------------------------------------------------------------------------
+// Shared sub-schemas (reused by both SigEvent and Lifecycle schemas)
+// ---------------------------------------------------------------------------
+
+export const causeKiSchema = z.object({
+  name: z.string(),
+  stream_name: z.string(),
+});
+
+export const dependencyEdgeSchema = z.object({
+  source: z.string(),
+  target: z.string(),
+  protocol: z.string().optional(),
+  exposure: z.string().optional(),
+});
+
+export const infraComponentSchema = z.object({
+  title: z.string().optional(),
+  workloads: z.array(z.string()).optional(),
+  exposure: z.string().optional(),
+});
+
+export const sigEventEvidenceSchema = z.object({
+  rule_name: z.string(),
+  result: z.string(),
+  description: z.string(),
+  stream_name: z.string(),
+  row_count: z.number(),
+  collected_at: z.string(),
+  esql_query: z.string().nullable(),
+});
+
+// ---------------------------------------------------------------------------
+// SigEvent schema (events index document shape)
+// ---------------------------------------------------------------------------
+
+export const sigEventSchema = z.object({
+  id: z.string(),
+  '@timestamp': z.string(),
+  event_id: z.string(),
+  discovery_id: z.string(),
+  discovery_slug: z.string(),
+  title: z.string(),
+  summary: z.string(),
+  root_cause: z.string(),
+  verdict: z.string(),
+  criticality: z.number(),
+  impact: z.string(),
+  recommended_action: z.string(),
+  rule_names: z.array(z.string()),
+  stream_names: z.array(z.string()),
+  recommendations: z.array(z.string()),
+  last_reviewed_at: z.string(),
+  cause_kis: z.array(causeKiSchema).optional().default([]),
+  evidences: z.array(sigEventEvidenceSchema).optional().default([]),
+  dependency_edges: z.array(dependencyEdgeSchema).optional().default([]),
+  infra_components: z.array(infraComponentSchema).optional().default([]),
+});
+
+export const sigEventsListResponseSchema = z.object({
+  total: z.number(),
+  events: z.array(sigEventSchema),
+});
+
+export type SigEventEvidence = z.infer<typeof sigEventEvidenceSchema>;
+export type DependencyEdge = z.infer<typeof dependencyEdgeSchema>;
+export type InfraComponent = z.infer<typeof infraComponentSchema>;
+export type CauseKi = z.infer<typeof causeKiSchema>;
+export type SigEvent = z.infer<typeof sigEventSchema>;
+export type SigEventsListResponse = z.infer<typeof sigEventsListResponseSchema>;
+
+// ---------------------------------------------------------------------------
+// Lifecycle response schemas & types (stricter versions for API responses)
+// ---------------------------------------------------------------------------
+
+export const lifecycleEvidenceSchema = sigEventEvidenceSchema.extend({
+  rule_name: z.string().nullable(),
+  result: z.enum(EVIDENCE_RESULTS),
+  confirmed: z.boolean().optional(),
+});
+
+export const lifecycleDependencyEdgeSchema = dependencyEdgeSchema.extend({
+  exposure: z.enum(EXPOSURE_VALUES).optional(),
+});
+
+export const lifecycleInfraComponentSchema = infraComponentSchema.extend({
+  exposure: z.enum(EXPOSURE_VALUES).optional(),
+});
+
+export const lifecycleCauseKiSchema = causeKiSchema;
+
+export const lifecycleDetectionSchema = z.object({
+  detection_id: z.string(),
+  rule_name: z.string(),
+  stream_name: z.string(),
+  detected_at: z.string(),
+  event_count: z.number(),
+  change_point_type: z.string(),
+  p_value: z.number().nullable(),
+  superseded: z.boolean(),
+});
+
+export const lifecycleDiscoverySchema = z.object({
+  id: z.string(),
+  timestamp: z.string(),
+  title: z.string(),
+  summary: z.string(),
+  root_cause: z.string(),
+  criticality: z.number().nullable(),
+  impact: z.string().nullable(),
+  confidence: z.number().nullable(),
+  detections: z.array(lifecycleDetectionSchema),
+  evidences: z.array(lifecycleEvidenceSchema),
+  dependency_edges: z.array(lifecycleDependencyEdgeSchema),
+  infra_components: z.array(lifecycleInfraComponentSchema),
+  cause_kis: z.array(lifecycleCauseKiSchema),
+  discovery_slug: z.string(),
+  kind: z.string(),
+  change_point_occurrence: z.string().nullable(),
+  conversation_id: z.string().nullable(),
+});
+
+export const lifecycleVerdictSchema = z.object({
+  id: z.string(),
+  timestamp: z.string(),
+  verdict: z.string(),
+  original_verdict: z.string().optional(),
+  verdict_summary: z.string(),
+  assessment_note: z.string(),
+  recommended_action: z.string(),
+  criticality: z.number().nullable(),
+  confidence: z.number().nullable(),
+  recommendations: z.array(z.string()),
+  evidences: z.array(lifecycleEvidenceSchema),
+  conversation_id: z.string().nullable(),
+});
+
+export const sigEventLifecycleSchema = z.object({
+  event_id: z.string(),
+  discovery: lifecycleDiscoverySchema.nullable(),
+  verdicts: z.array(lifecycleVerdictSchema),
+});
+
+export type LifecycleEvidence = z.infer<typeof lifecycleEvidenceSchema>;
+export type LifecycleDependencyEdge = z.infer<typeof lifecycleDependencyEdgeSchema>;
+export type LifecycleInfraComponent = z.infer<typeof lifecycleInfraComponentSchema>;
+export type LifecycleCauseKi = z.infer<typeof lifecycleCauseKiSchema>;
+export type LifecycleDetection = z.infer<typeof lifecycleDetectionSchema>;
+export type LifecycleDiscovery = z.infer<typeof lifecycleDiscoverySchema>;
+export type LifecycleVerdict = z.infer<typeof lifecycleVerdictSchema>;
+export type SigEventLifecycle = z.infer<typeof sigEventLifecycleSchema>;

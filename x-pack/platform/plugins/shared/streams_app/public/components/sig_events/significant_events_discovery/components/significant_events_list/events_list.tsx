@@ -109,6 +109,7 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     field: 'title',
     name: TRANSLATIONS.columns.title,
     truncateText: true,
+    width: '40%',
   },
   {
     field: 'stream_names',

@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { sigEventSchema } from '../../../../../common';
 import type { SigEvent, SigEventsListResponse } from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -61,10 +62,8 @@ const buildSearchClauses = (search: string): Record<string, unknown> => {
   return { bool: { should, minimum_should_match: 1 } };
 };
 
-const toSigEvent = (hit: { _id?: string; _source?: unknown }): SigEvent => ({
-  id: hit._id ?? '',
-  ...(hit._source as Omit<SigEvent, 'id'>),
-});
+const toSigEvent = (hit: { _id?: string; _source?: unknown }): SigEvent =>
+  sigEventSchema.parse(Object.assign({}, hit._source, { id: hit._id ?? '' }));
 
 const listSigEventsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/sig_events/list',

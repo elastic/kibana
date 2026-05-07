@@ -89,8 +89,77 @@ export const TRANSLATIONS = {
     rules: i18n.translate('xpack.streams.eventFlyout.rulesTitle', {
       defaultMessage: 'Rules',
     }),
+    lifecycle: i18n.translate('xpack.streams.eventFlyout.lifecycle', {
+      defaultMessage: 'Lifecycle',
+    }),
     close: i18n.translate('xpack.streams.eventFlyout.closeButton', {
       defaultMessage: 'Close',
+    }),
+  },
+  lifecycle: {
+    detectionStep: i18n.translate('xpack.streams.lifecycle.detectionStep', {
+      defaultMessage: 'Detection',
+    }),
+    discoveryStep: i18n.translate('xpack.streams.lifecycle.discoveryStep', {
+      defaultMessage: 'Discovery',
+    }),
+    verdictStep: i18n.translate('xpack.streams.lifecycle.verdictStep', {
+      defaultMessage: 'Verdict',
+    }),
+    eventCreated: i18n.translate('xpack.streams.lifecycle.eventCreated', {
+      defaultMessage: 'Event Created',
+    }),
+    eventsDetected: i18n.translate('xpack.streams.lifecycle.eventsDetected', {
+      defaultMessage: 'events detected',
+    }),
+    confidence: i18n.translate('xpack.streams.lifecycle.confidence', {
+      defaultMessage: 'Confidence',
+    }),
+    criticality: i18n.translate('xpack.streams.lifecycle.criticality', {
+      defaultMessage: 'Criticality',
+    }),
+    impact: i18n.translate('xpack.streams.lifecycle.impact', {
+      defaultMessage: 'Impact',
+    }),
+    rootCause: i18n.translate('xpack.streams.lifecycle.rootCause', {
+      defaultMessage: 'Root Cause',
+    }),
+    evidences: i18n.translate('xpack.streams.lifecycle.evidences', {
+      defaultMessage: 'Evidence',
+    }),
+    dependencies: i18n.translate('xpack.streams.lifecycle.dependencies', {
+      defaultMessage: 'Dependencies',
+    }),
+    infraComponents: i18n.translate('xpack.streams.lifecycle.infraComponents', {
+      defaultMessage: 'Infrastructure',
+    }),
+    causeKis: i18n.translate('xpack.streams.lifecycle.causeKis', {
+      defaultMessage: 'Cause KIs',
+    }),
+    assessmentNote: i18n.translate('xpack.streams.lifecycle.assessmentNote', {
+      defaultMessage: 'Assessment',
+    }),
+    recommendations: i18n.translate('xpack.streams.lifecycle.recommendations', {
+      defaultMessage: 'Recommendations',
+    }),
+    noData: i18n.translate('xpack.streams.lifecycle.noData', {
+      defaultMessage: 'No data available',
+    }),
+    resolved: i18n.translate('xpack.streams.lifecycle.resolved', {
+      defaultMessage: 'resolved',
+    }),
+    confirmed: i18n.translate('xpack.streams.lifecycle.confirmed', {
+      defaultMessage: 'confirmed',
+    }),
+    viewConversation: i18n.translate('xpack.streams.lifecycle.viewConversation', {
+      defaultMessage: 'View AI reasoning',
+    }),
+    pValueTooltip: i18n.translate('xpack.streams.lifecycle.pValueTooltip', {
+      defaultMessage:
+        'Statistical significance of the change point. Lower = more significant. 0 = extreme.',
+    }),
+    exposed: i18n.translate('xpack.streams.lifecycle.exposed', {
+      defaultMessage: '⚠ exposed',
     }),
   },
 };
