@@ -10,6 +10,7 @@ import { MessageRole } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
 import type { AlertsRagDatasetExample, AlertsRagTaskOutput } from '../evaluate_dataset';
+import { ALERTS_RAG_THRESHOLDS } from '../thresholds';
 
 const EVALUATOR_NAME = 'AnswerCorrectness';
 
@@ -103,7 +104,12 @@ export const createAlertsCorrectnessEvaluator = ({
 
       return {
         score: parsed.score,
-        label: parsed.score >= 0.8 ? 'correct' : parsed.score >= 0.5 ? 'partial' : 'incorrect',
+        label:
+          parsed.score >= ALERTS_RAG_THRESHOLDS.CORRECTNESS_PARTIAL
+            ? 'correct'
+            : parsed.score >= ALERTS_RAG_THRESHOLDS.CORRECTNESS_PASSING
+            ? 'partial'
+            : 'incorrect',
         explanation: parsed.reasoning,
       };
     } catch (err) {

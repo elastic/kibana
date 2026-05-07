@@ -11,6 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
 import type { AlertsRagDatasetExample, AlertsRagTaskOutput } from '../evaluate_dataset';
 import type { AlertDocument } from '../dataset';
+import { ALERTS_RAG_THRESHOLDS } from '../thresholds';
 
 const EVALUATOR_NAME = 'Faithfulness';
 
@@ -111,7 +112,12 @@ export const createAlertsFaithfulnessEvaluator = ({
 
       return {
         score: parsed.score,
-        label: parsed.score >= 0.8 ? 'faithful' : parsed.score >= 0.5 ? 'partial' : 'unfaithful',
+        label:
+          parsed.score >= ALERTS_RAG_THRESHOLDS.FAITHFULNESS_PARTIAL
+            ? 'faithful'
+            : parsed.score >= ALERTS_RAG_THRESHOLDS.FAITHFULNESS_PASSING
+            ? 'partial'
+            : 'unfaithful',
         explanation: parsed.reasoning,
       };
     } catch (err) {
