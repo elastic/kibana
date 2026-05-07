@@ -1,8 +1,16 @@
+<<<<<<< HEAD
 # gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"9e54ca561a3ffbaa2dd8e9b752dc4a2bbddbbfe8dc7a453035358ef26a9e9fa4","compiler_version":"v0.71.5","strict":true,"agent_id":"claude","agent_model":"opus"}
 # gh-aw-manifest: {"version":1,"secrets":["GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","LITELLM_API_KEY"],"actions":[{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"b8068426813005612b960b5ab0b8bd2c27142323","version":"v0.71.5"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.25.40","digest":"sha256:14ff567e8d9d4c2fbc5e55c973488381c71d7e0fdbe72d30ee7b8a738fd86504","pinned_image":"ghcr.io/github/gh-aw-firewall/agent:0.25.40@sha256:14ff567e8d9d4c2fbc5e55c973488381c71d7e0fdbe72d30ee7b8a738fd86504"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.40","digest":"sha256:2883ca3e5ae9f330cafdd9345bfd4ae17fc8da36c96d4c9a1f76e922b4c45280","pinned_image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.40@sha256:2883ca3e5ae9f330cafdd9345bfd4ae17fc8da36c96d4c9a1f76e922b4c45280"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.25.40","digest":"sha256:b084f4a2c771f584ee68084ced52fa6b3245197a1889645d817462d307d3ac51","pinned_image":"ghcr.io/github/gh-aw-firewall/squid:0.25.40@sha256:b084f4a2c771f584ee68084ced52fa6b3245197a1889645d817462d307d3ac51"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.6","digest":"sha256:2bb8eef86006a4c5963c55616a9c51c32f27bfdecb023b8aa6f91f6718d9171c","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.3.6@sha256:2bb8eef86006a4c5963c55616a9c51c32f27bfdecb023b8aa6f91f6718d9171c"},{"image":"ghcr.io/github/github-mcp-server:v1.0.3","digest":"sha256:2ac27ef03461ef2b877031b838a7d1fd7f12b12d4ace7796d8cad91446d55959","pinned_image":"ghcr.io/github/github-mcp-server:v1.0.3@sha256:2ac27ef03461ef2b877031b838a7d1fd7f12b12d4ace7796d8cad91446d55959"},{"image":"node:lts-alpine","digest":"sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f","pinned_image":"node:lts-alpine@sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f"}]}
 #    ___                   _   _
 #   / _ \                 | | (_)
 #  | |_| | __ _  ___ _ __ | |_ _  ___
+=======
+# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"671a465dd88260f652d543a4a9276b92b500c7b1721bec530d8fb59a01d46171","compiler_version":"v0.71.5","strict":true,"agent_id":"claude","agent_model":"opus"}
+# gh-aw-manifest: {"version":1,"secrets":["GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","LITELLM_API_KEY"],"actions":[{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"b8068426813005612b960b5ab0b8bd2c27142323","version":"v0.71.5"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.25.40","digest":"sha256:14ff567e8d9d4c2fbc5e55c973488381c71d7e0fdbe72d30ee7b8a738fd86504","pinned_image":"ghcr.io/github/gh-aw-firewall/agent:0.25.40@sha256:14ff567e8d9d4c2fbc5e55c973488381c71d7e0fdbe72d30ee7b8a738fd86504"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.40","digest":"sha256:2883ca3e5ae9f330cafdd9345bfd4ae17fc8da36c96d4c9a1f76e922b4c45280","pinned_image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.40@sha256:2883ca3e5ae9f330cafdd9345bfd4ae17fc8da36c96d4c9a1f76e922b4c45280"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.25.40","digest":"sha256:b084f4a2c771f584ee68084ced52fa6b3245197a1889645d817462d307d3ac51","pinned_image":"ghcr.io/github/gh-aw-firewall/squid:0.25.40@sha256:b084f4a2c771f584ee68084ced52fa6b3245197a1889645d817462d307d3ac51"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.6","digest":"sha256:2bb8eef86006a4c5963c55616a9c51c32f27bfdecb023b8aa6f91f6718d9171c","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.3.6@sha256:2bb8eef86006a4c5963c55616a9c51c32f27bfdecb023b8aa6f91f6718d9171c"},{"image":"ghcr.io/github/github-mcp-server:v1.0.3","digest":"sha256:2ac27ef03461ef2b877031b838a7d1fd7f12b12d4ace7796d8cad91446d55959","pinned_image":"ghcr.io/github/github-mcp-server:v1.0.3@sha256:2ac27ef03461ef2b877031b838a7d1fd7f12b12d4ace7796d8cad91446d55959"},{"image":"node:lts-alpine","digest":"sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f","pinned_image":"node:lts-alpine@sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f"}]}
+#    ___                   _   _      
+#   / _ \                 | | (_)     
+#  | |_| | __ _  ___ _ __ | |_ _  ___ 
+>>>>>>> upstream/main
 #  |  _  |/ _` |/ _ \ '_ \| __| |/ __|
 #  | | | | (_| |  __/ | | | |_| | (__
 #  \_| |_/\__, |\___|_| |_|\__|_|\___|
@@ -140,15 +148,19 @@ jobs:
           trace-id: ${{ needs.pre_activation.outputs.setup-trace-id }}
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Claude Reviewer"
+<<<<<<< HEAD
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository
             }}/.github/workflows/reviewer-claude.lock.yml@${{ github.ref }}
+=======
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/reviewer-claude.lock.yml@${{ github.ref }}
+>>>>>>> upstream/main
           GH_AW_INFO_VERSION: "2.1.111"
       - name: Generate agentic run info
         id: generate_aw_info
         env:
           GH_AW_INFO_ENGINE_ID: "claude"
           GH_AW_INFO_ENGINE_NAME: "Claude Code"
-          GH_AW_INFO_MODEL: "opus[1m]"
+          GH_AW_INFO_MODEL: "opus"
           GH_AW_INFO_VERSION: "2.1.111"
           GH_AW_INFO_AGENT_VERSION: "2.1.111"
           GH_AW_INFO_CLI_VERSION: "v0.71.5"
@@ -265,13 +277,20 @@ jobs:
         run: |
           bash "${RUNNER_TEMP}/gh-aw/actions/create_prompt_first.sh"
           {
+<<<<<<< HEAD
           cat << 'GH_AW_PROMPT_a6bc562922063f5a_EOF'
           <system>
           GH_AW_PROMPT_a6bc562922063f5a_EOF
+=======
+          cat << 'GH_AW_PROMPT_e71626afebffcd9d_EOF'
+          <system>
+          GH_AW_PROMPT_e71626afebffcd9d_EOF
+>>>>>>> upstream/main
           cat "${RUNNER_TEMP}/gh-aw/prompts/xpia.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/temp_folder_prompt.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/markdown.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_prompt.md"
+<<<<<<< HEAD
           cat << 'GH_AW_PROMPT_a6bc562922063f5a_EOF'
           <safe-output-tools>
           Tools: add_comment, create_pull_request_review_comment(max:10), submit_pull_request_review, reply_to_pull_request_review_comment(max:10), missing_tool, missing_data, noop
@@ -279,6 +298,15 @@ jobs:
           GH_AW_PROMPT_a6bc562922063f5a_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/mcp_cli_tools_prompt.md"
           cat << 'GH_AW_PROMPT_a6bc562922063f5a_EOF'
+=======
+          cat << 'GH_AW_PROMPT_e71626afebffcd9d_EOF'
+          <safe-output-tools>
+          Tools: add_comment, create_pull_request_review_comment(max:10), submit_pull_request_review, reply_to_pull_request_review_comment(max:10), missing_tool, missing_data, noop
+          </safe-output-tools>
+          GH_AW_PROMPT_e71626afebffcd9d_EOF
+          cat "${RUNNER_TEMP}/gh-aw/prompts/mcp_cli_tools_prompt.md"
+          cat << 'GH_AW_PROMPT_e71626afebffcd9d_EOF'
+>>>>>>> upstream/main
           <github-context>
           The following GitHub context information is available for this workflow:
           {{#if __GH_AW_GITHUB_ACTOR__ }}
@@ -311,6 +339,7 @@ jobs:
           GH_AW_PROMPT_5ece75f40fcdf84c_EOF
 =======
           
+<<<<<<< HEAD
           GH_AW_PROMPT_a6bc562922063f5a_EOF
 >>>>>>> 807ba1ad22014d8317e67b78926d46d8b674e28b (cleanup router)
           cat "${RUNNER_TEMP}/gh-aw/prompts/github_mcp_tools_with_safeoutputs_prompt.md"
@@ -319,6 +348,18 @@ jobs:
           {{#runtime-import .github/agents/code-reviewer.md}}
           {{#runtime-import .github/workflows/reviewer-claude.md}}
           GH_AW_PROMPT_a6bc562922063f5a_EOF
+=======
+          GH_AW_PROMPT_e71626afebffcd9d_EOF
+          cat "${RUNNER_TEMP}/gh-aw/prompts/github_mcp_tools_with_safeoutputs_prompt.md"
+          if [ "$GITHUB_EVENT_NAME" = "issue_comment" ] && [ -n "$GH_AW_IS_PR_COMMENT" ] || [ "$GITHUB_EVENT_NAME" = "pull_request_review_comment" ] || [ "$GITHUB_EVENT_NAME" = "pull_request_review" ]; then
+            cat "${RUNNER_TEMP}/gh-aw/prompts/pr_context_prompt.md"
+          fi
+          cat << 'GH_AW_PROMPT_e71626afebffcd9d_EOF'
+          </system>
+          {{#runtime-import .github/agents/code-reviewer.md}}
+          {{#runtime-import .github/workflows/reviewer-claude.md}}
+          GH_AW_PROMPT_e71626afebffcd9d_EOF
+>>>>>>> upstream/main
           } > "$GH_AW_PROMPT"
       - name: Interpolate variables and render templates
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -346,6 +387,10 @@ jobs:
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
           GH_AW_GITHUB_RUN_ID: ${{ github.run_id }}
           GH_AW_GITHUB_WORKSPACE: ${{ github.workspace }}
+<<<<<<< HEAD
+=======
+          GH_AW_IS_PR_COMMENT: ${{ github.event.issue.pull_request && 'true' || '' }}
+>>>>>>> upstream/main
           GH_AW_MCP_CLI_SERVERS_LIST: '- `safeoutputs` — run `safeoutputs --help` to see available tools'
           GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED: ${{ needs.pre_activation.outputs.activated }}
         with:
@@ -370,6 +415,10 @@ jobs:
                 GH_AW_GITHUB_REPOSITORY: process.env.GH_AW_GITHUB_REPOSITORY,
                 GH_AW_GITHUB_RUN_ID: process.env.GH_AW_GITHUB_RUN_ID,
                 GH_AW_GITHUB_WORKSPACE: process.env.GH_AW_GITHUB_WORKSPACE,
+<<<<<<< HEAD
+=======
+                GH_AW_IS_PR_COMMENT: process.env.GH_AW_IS_PR_COMMENT,
+>>>>>>> upstream/main
                 GH_AW_MCP_CLI_SERVERS_LIST: process.env.GH_AW_MCP_CLI_SERVERS_LIST,
                 GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED: process.env.GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED
               }
@@ -432,8 +481,12 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Claude Reviewer"
+<<<<<<< HEAD
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository
             }}/.github/workflows/reviewer-claude.lock.yml@${{ github.ref }}
+=======
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/reviewer-claude.lock.yml@${{ github.ref }}
+>>>>>>> upstream/main
           GH_AW_INFO_VERSION: "2.1.111"
       - name: Set runtime paths
         id: set-runtime-paths
@@ -527,6 +580,7 @@ jobs:
           GH_AW_AGENT_FILES: ".crush.json AGENTS.md CLAUDE.md GEMINI.md PI.md opencode.jsonc"
         run: bash "${RUNNER_TEMP}/gh-aw/actions/restore_base_github_folders.sh"
       - name: Download container images
+<<<<<<< HEAD
         run: bash "${RUNNER_TEMP}/gh-aw/actions/download_docker_images.sh"
           ghcr.io/github/gh-aw-firewall/agent:0.25.40@sha256:14ff567e8d9d4c2fbc5e55c973488381c71d7e0fdbe72d30ee7b8a738fd86504
           ghcr.io/github/gh-aw-firewall/api-proxy:0.25.40@sha256:2883ca3e5ae9f330cafdd9345bfd4ae17fc8da36c96d4c9a1f76e922b4c45280
@@ -534,14 +588,23 @@ jobs:
           ghcr.io/github/gh-aw-mcpg:v0.3.6@sha256:2bb8eef86006a4c5963c55616a9c51c32f27bfdecb023b8aa6f91f6718d9171c
           ghcr.io/github/github-mcp-server:v1.0.3@sha256:2ac27ef03461ef2b877031b838a7d1fd7f12b12d4ace7796d8cad91446d55959
           node:lts-alpine@sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f
+=======
+        run: bash "${RUNNER_TEMP}/gh-aw/actions/download_docker_images.sh" ghcr.io/github/gh-aw-firewall/agent:0.25.40@sha256:14ff567e8d9d4c2fbc5e55c973488381c71d7e0fdbe72d30ee7b8a738fd86504 ghcr.io/github/gh-aw-firewall/api-proxy:0.25.40@sha256:2883ca3e5ae9f330cafdd9345bfd4ae17fc8da36c96d4c9a1f76e922b4c45280 ghcr.io/github/gh-aw-firewall/squid:0.25.40@sha256:b084f4a2c771f584ee68084ced52fa6b3245197a1889645d817462d307d3ac51 ghcr.io/github/gh-aw-mcpg:v0.3.6@sha256:2bb8eef86006a4c5963c55616a9c51c32f27bfdecb023b8aa6f91f6718d9171c ghcr.io/github/github-mcp-server:v1.0.3@sha256:2ac27ef03461ef2b877031b838a7d1fd7f12b12d4ace7796d8cad91446d55959 node:lts-alpine@sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f
+>>>>>>> upstream/main
       - name: Generate Safe Outputs Config
         run: |
           mkdir -p "${RUNNER_TEMP}/gh-aw/safeoutputs"
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
+<<<<<<< HEAD
           cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_5da9b82e1101e931_EOF'
           {"add_comment":{"footer":false,"max":1,"target":"${{ env.PR_NUMBER }}"},"create_pull_request_review_comment":{"max":10,"side":"RIGHT","target":"${{ env.PR_NUMBER }}"},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"false"},"reply_to_pull_request_review_comment":{"footer":false,"max":10,"target":"${{ env.PR_NUMBER }}"},"report_incomplete":{},"submit_pull_request_review":{"allowed_events":["COMMENT"],"footer":"none","max":1,"target":"${{ env.PR_NUMBER }}"}}
           GH_AW_SAFE_OUTPUTS_CONFIG_5da9b82e1101e931_EOF
+=======
+          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_88f48c9c3860f21d_EOF'
+          {"add_comment":{"footer":false,"max":1,"target":"${{ env.PR_NUMBER }}"},"create_pull_request_review_comment":{"max":10,"side":"RIGHT","target":"${{ env.PR_NUMBER }}"},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"false"},"reply_to_pull_request_review_comment":{"footer":false,"max":10,"target":"${{ env.PR_NUMBER }}"},"report_incomplete":{},"submit_pull_request_review":{"allowed_events":["COMMENT"],"footer":"none","max":1,"target":"${{ env.PR_NUMBER }}"}}
+          GH_AW_SAFE_OUTPUTS_CONFIG_88f48c9c3860f21d_EOF
+>>>>>>> upstream/main
       - name: Generate Safe Outputs Tools
         env:
           GH_AW_TOOLS_META_JSON: |
@@ -806,9 +869,15 @@ jobs:
           MCP_GATEWAY_GID=$(id -g 2>/dev/null || echo '0')
           DOCKER_SOCK_GID=$(stat -c '%g' /var/run/docker.sock 2>/dev/null || echo '0')
           export MCP_GATEWAY_DOCKER_COMMAND='docker run -i --rm --network host --add-host host.docker.internal:127.0.0.1 --user '"${MCP_GATEWAY_UID}"':'"${MCP_GATEWAY_GID}"' --group-add '"${DOCKER_SOCK_GID}"' -v /var/run/docker.sock:/var/run/docker.sock -e MCP_GATEWAY_PORT -e MCP_GATEWAY_DOMAIN -e MCP_GATEWAY_API_KEY -e MCP_GATEWAY_PAYLOAD_DIR -e MCP_GATEWAY_PAYLOAD_SIZE_THRESHOLD -e DEBUG -e MCP_GATEWAY_LOG_DIR -e GH_AW_MCP_LOG_DIR -e GH_AW_SAFE_OUTPUTS -e GH_AW_SAFE_OUTPUTS_CONFIG_PATH -e GH_AW_SAFE_OUTPUTS_TOOLS_PATH -e GH_AW_ASSETS_BRANCH -e GH_AW_ASSETS_MAX_SIZE_KB -e GH_AW_ASSETS_ALLOWED_EXTS -e DEFAULT_BRANCH -e GITHUB_MCP_SERVER_TOKEN -e GITHUB_MCP_GUARD_MIN_INTEGRITY -e GITHUB_MCP_GUARD_REPOS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_WORKSPACE -e GITHUB_TOKEN -e GITHUB_RUN_ID -e GITHUB_RUN_NUMBER -e GITHUB_RUN_ATTEMPT -e GITHUB_JOB -e GITHUB_ACTION -e GITHUB_EVENT_NAME -e GITHUB_EVENT_PATH -e GITHUB_ACTOR -e GITHUB_ACTOR_ID -e GITHUB_TRIGGERING_ACTOR -e GITHUB_WORKFLOW -e GITHUB_WORKFLOW_REF -e GITHUB_WORKFLOW_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_REF_TYPE -e GITHUB_HEAD_REF -e GITHUB_BASE_REF -e GH_AW_SAFE_OUTPUTS_PORT -e GH_AW_SAFE_OUTPUTS_API_KEY -v /tmp/gh-aw/mcp-payloads:/tmp/gh-aw/mcp-payloads:rw -v /opt:/opt:ro -v /tmp:/tmp:rw -v '"${GITHUB_WORKSPACE}"':'"${GITHUB_WORKSPACE}"':rw ghcr.io/github/gh-aw-mcpg:v0.3.6'
+<<<<<<< HEAD
 
           GH_AW_NODE=$(which node 2>/dev/null || command -v node 2>/dev/null || echo node)
           cat << GH_AW_MCP_CONFIG_9e19c2e69e045643_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
+=======
+          
+          GH_AW_NODE=$(which node 2>/dev/null || command -v node 2>/dev/null || echo node)
+          cat << GH_AW_MCP_CONFIG_5ba7bfac5a3bf7b1_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
+>>>>>>> upstream/main
           {
             "mcpServers": {
               "github": {
@@ -851,7 +920,11 @@ jobs:
               "payloadDir": "${MCP_GATEWAY_PAYLOAD_DIR}"
             }
           }
+<<<<<<< HEAD
           GH_AW_MCP_CONFIG_9e19c2e69e045643_EOF
+=======
+          GH_AW_MCP_CONFIG_5ba7bfac5a3bf7b1_EOF
+>>>>>>> upstream/main
       - name: Mount MCP servers as CLIs
         id: mount-mcp-clis
         continue-on-error: true
@@ -959,7 +1032,7 @@ jobs:
           ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
           ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
           ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
-          ANTHROPIC_MODEL: opus[1m]
+          ANTHROPIC_MODEL: opus
           BASH_DEFAULT_TIMEOUT_MS: 60000
           BASH_MAX_TIMEOUT_MS: 60000
           CLAUDE_CODE_DISABLE_FAST_MODE: 1
@@ -1184,8 +1257,12 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Claude Reviewer"
+<<<<<<< HEAD
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository
             }}/.github/workflows/reviewer-claude.lock.yml@${{ github.ref }}
+=======
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/reviewer-claude.lock.yml@${{ github.ref }}
+>>>>>>> upstream/main
           GH_AW_INFO_VERSION: "2.1.111"
       - name: Download agent output artifact
         id: download-agent-output
@@ -1320,8 +1397,12 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Claude Reviewer"
+<<<<<<< HEAD
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository
             }}/.github/workflows/reviewer-claude.lock.yml@${{ github.ref }}
+=======
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/reviewer-claude.lock.yml@${{ github.ref }}
+>>>>>>> upstream/main
           GH_AW_INFO_VERSION: "2.1.111"
       - name: Download agent output artifact
         id: download-agent-output
@@ -1348,10 +1429,14 @@ jobs:
           rm -rf /tmp/gh-aw/sandbox/firewall/logs
           rm -rf /tmp/gh-aw/sandbox/firewall/audit
       - name: Download container images
+<<<<<<< HEAD
         run: bash "${RUNNER_TEMP}/gh-aw/actions/download_docker_images.sh"
           ghcr.io/github/gh-aw-firewall/agent:0.25.40@sha256:14ff567e8d9d4c2fbc5e55c973488381c71d7e0fdbe72d30ee7b8a738fd86504
           ghcr.io/github/gh-aw-firewall/api-proxy:0.25.40@sha256:2883ca3e5ae9f330cafdd9345bfd4ae17fc8da36c96d4c9a1f76e922b4c45280
           ghcr.io/github/gh-aw-firewall/squid:0.25.40@sha256:b084f4a2c771f584ee68084ced52fa6b3245197a1889645d817462d307d3ac51
+=======
+        run: bash "${RUNNER_TEMP}/gh-aw/actions/download_docker_images.sh" ghcr.io/github/gh-aw-firewall/agent:0.25.40@sha256:14ff567e8d9d4c2fbc5e55c973488381c71d7e0fdbe72d30ee7b8a738fd86504 ghcr.io/github/gh-aw-firewall/api-proxy:0.25.40@sha256:2883ca3e5ae9f330cafdd9345bfd4ae17fc8da36c96d4c9a1f76e922b4c45280 ghcr.io/github/gh-aw-firewall/squid:0.25.40@sha256:b084f4a2c771f584ee68084ced52fa6b3245197a1889645d817462d307d3ac51
+>>>>>>> upstream/main
       - name: Check if detection needed
         id: detection_guard
         if: always()
@@ -1444,7 +1529,7 @@ jobs:
           ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
           ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
           ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
-          ANTHROPIC_MODEL: opus[1m]
+          ANTHROPIC_MODEL: opus
           BASH_DEFAULT_TIMEOUT_MS: 60000
           BASH_MAX_TIMEOUT_MS: 60000
           CLAUDE_CODE_DISABLE_FAST_MODE: 1
@@ -1505,14 +1590,45 @@ jobs:
 
   pre_activation:
     if: >
+<<<<<<< HEAD
       !github.event.repository.fork && ( github.event_name ==
       'workflow_dispatch' || ( github.event.sender.type != 'Bot' &&
+=======
+      (github.event_name != 'issue_comment' && github.event_name != 'pull_request_review_comment' || contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) && (!github.event.repository.fork && (
+      github.event_name == 'workflow_dispatch' ||
+      (
+      github.event.sender.type != 'Bot' &&
+>>>>>>> upstream/main
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
       github.event_name == 'pull_request_target' && ( ( github.event.action ==
       'labeled' && github.event.label.name == 'reviewer:claude' ) || (
       github.event.action != 'labeled' &&
+<<<<<<< HEAD
       contains(github.event.pull_request.labels.*.name, 'reviewer:claude') ) ) )
       )
+=======
+      contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
+      )
+      )
+      ) ||
+      (
+      contains(github.event.comment.body, '@claude') &&
+      (
+      contains(github.event.pull_request.labels.*.name, 'reviewer:claude') ||
+      contains(github.event.issue.labels.*.name, 'reviewer:claude')
+      ) &&
+      (
+      github.event_name == 'pull_request_review_comment' ||
+      (
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request
+      )
+      )
+      )
+      )
+      )
+      ))
+>>>>>>> upstream/main
     runs-on: ubuntu-slim
     outputs:
       activated: ${{ steps.check_membership.outputs.is_team_member == 'true' }}
@@ -1527,8 +1643,12 @@ jobs:
           job-name: ${{ github.job }}
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Claude Reviewer"
+<<<<<<< HEAD
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository
             }}/.github/workflows/reviewer-claude.lock.yml@${{ github.ref }}
+=======
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/reviewer-claude.lock.yml@${{ github.ref }}
+>>>>>>> upstream/main
           GH_AW_INFO_VERSION: "2.1.111"
       - name: Check team membership for workflow
         id: check_membership
@@ -1576,7 +1696,7 @@ jobs:
       GH_AW_DETECTION_REASON: ${{ needs.detection.outputs.detection_reason }}
       GH_AW_EFFECTIVE_TOKENS: ${{ needs.agent.outputs.effective_tokens }}
       GH_AW_ENGINE_ID: "claude"
-      GH_AW_ENGINE_MODEL: "opus[1m]"
+      GH_AW_ENGINE_MODEL: "opus"
       GH_AW_ENGINE_VERSION: "2.1.111"
       GH_AW_WORKFLOW_ID: "reviewer-claude"
       GH_AW_WORKFLOW_NAME: "Claude Reviewer"
@@ -1599,8 +1719,12 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Claude Reviewer"
+<<<<<<< HEAD
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository
             }}/.github/workflows/reviewer-claude.lock.yml@${{ github.ref }}
+=======
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/reviewer-claude.lock.yml@${{ github.ref }}
+>>>>>>> upstream/main
           GH_AW_INFO_VERSION: "2.1.111"
       - name: Download agent output artifact
         id: download-agent-output
