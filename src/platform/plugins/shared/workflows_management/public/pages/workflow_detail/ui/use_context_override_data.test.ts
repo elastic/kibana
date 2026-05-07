@@ -103,7 +103,7 @@ describe('useContextOverrideData', () => {
       triggers: [
         {
           type: 'manual',
-          inputs: { type: 'object' },
+          inputs: { type: 'object', properties: { name: { type: 'string' } } },
         },
       ],
     };
@@ -126,7 +126,7 @@ describe('useContextOverrideData', () => {
         enabled: true,
         spaceId: 'default',
       },
-      inputsDefinition: { type: 'object' },
+      inputsDefinition: { properties: { name: { type: 'string' } }, type: 'object' },
     });
     expect(contextData).toEqual({ context: 'data' });
   });

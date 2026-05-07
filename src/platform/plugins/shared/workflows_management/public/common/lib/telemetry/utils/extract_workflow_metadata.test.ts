@@ -489,11 +489,11 @@ describe('extractWorkflowMetadata', () => {
       expect(result.inputCount).toBe(0);
     });
 
-    it('returns 0 for non-array inputs (e.g., JSON schema object)', () => {
+    it('returns 1 for for JSON schema object with one property', () => {
       const result = metadata({
         inputs: { properties: { a: { type: 'string' } } },
       });
-      expect(result.inputCount).toBe(0);
+      expect(result.inputCount).toBe(1);
     });
   });
 

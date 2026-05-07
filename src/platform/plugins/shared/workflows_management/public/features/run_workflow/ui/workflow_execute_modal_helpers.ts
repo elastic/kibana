@@ -9,7 +9,7 @@
 
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
-import { getNormalizedInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowTriggerTab } from './types';
 
 export type NormalizedWorkflowInputs = ReturnType<typeof normalizeFieldsToJsonSchema>;
@@ -55,7 +55,7 @@ export function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTrig
     return 'alert';
   }
 
-  const normalizedInputs = getNormalizedInputsFromDefinition(definition);
+  const normalizedInputs = getInputsFromDefinition(definition);
 
   if (normalizedInputs && hasWorkflowInputFields(normalizedInputs)) {
     return 'manual';
