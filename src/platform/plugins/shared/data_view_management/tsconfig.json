@@ -51,6 +51,7 @@
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/cps-utils",
     "@kbn/cps",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",
