@@ -10,15 +10,14 @@
 import type { JSONSchema7 } from 'json-schema';
 import type { Document } from 'yaml';
 import { parseDocument } from 'yaml';
-import type { z } from '@kbn/zod/v4';
 import type { WorkflowOutput, WorkflowYaml } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 import type { JsonSchema } from '../schema/common/json_model_shape_schema';
-import type {
-  LegacyWorkflowInput,
-  LegacyWorkflowInputSchema,
+import {
+  isManualTrigger,
+  type LegacyWorkflowInput,
+  type WorkflowInput,
 } from '../schema/triggers/manual_trigger_schema';
-import { getInputsFromDefinition } from '../utils';
 
 export type NormalizableFieldSchema =
   | JsonModelSchemaType
@@ -71,7 +70,7 @@ function convertLegacyFieldToJsonSchemaProperty(field: LegacyWorkflowInput): JSO
  * @returns The fields in the new JSON Schema object format
  */
 export function convertLegacyFieldsToJsonSchema(
-  legacyFields: Array<z.infer<typeof LegacyWorkflowInputSchema>>
+  legacyFields: LegacyWorkflowInput[]
 ): JsonModelSchemaType {
   const properties: Record<string, JsonSchema> = {};
   const required: string[] = [];
@@ -131,23 +130,49 @@ export function normalizeFieldsToJsonSchema(
   return undefined;
 }
 
-export function getNormalizedInputsFromDefinition(
-  definition: WorkflowYaml | null
-): Record<string, unknown> | undefined {
-  const inputsInDefinition = getInputsFromDefinition(definition);
+/**
+ * Resolves workflow inputs from the definition and normalizes them to JSON Schema object form.
+ *
+ * When inputs exist and can be normalized, the return value is always {@link JsonModelSchemaType}
+ * (never the legacy array-of-fields shape).
+ *
+ * Supports the legacy inputs format (array of field definitions) by converting it via
+ * {@link normalizeFieldsToJsonSchema}.
+ *
+ * Falls back to root-level `inputs` on the definition for backward compatibility when the manual
+ * trigger block has no inputs.
+ */
+export const getInputsFromDefinition = (
+  definition: WorkflowYaml | Partial<WorkflowYaml> | undefined | null
+): JsonModelSchemaType | undefined => {
+  const manualTriggerInDefinition = definition?.triggers?.find((trigger) =>
+    isManualTrigger(trigger)
+  );
+  let inputsInDefinition = manualTriggerInDefinition?.inputs;
 
-  if (inputsInDefinition) {
-    return normalizeFieldsToJsonSchema(inputsInDefinition);
+  if (!inputsInDefinition) {
+    // Backward compatibility with workflows that still use root-level inputs
+    inputsInDefinition = (definition as Record<string, unknown>)?.inputs as WorkflowInput;
   }
 
-  return undefined;
-}
+  return normalizeFieldsToJsonSchema(inputsInDefinition);
+};
 
+/**
+ * Returns normalized workflow inputs (JSON Schema object form) from a definition and/or raw YAML.
+ *
+ * First uses {@link getInputsFromDefinition} on `definition`. When that yields nothing (for example
+ * the definition object is partial or stale), parses `yaml` when provided (either a YAML string or
+ * a `Document` from the `yaml` package), converts it to JSON, and runs {@link getInputsFromDefinition} on that
+ * result so inputs can still be recovered from the editor buffer.
+ *
+ * Parse or extraction failures are ignored; the function returns `undefined` in those cases.
+ */
 export function extractNormalizedInputsFromYaml(
   definition: WorkflowYaml | null,
   yaml?: Document | string | null
 ): Record<string, unknown> | undefined {
-  const inputsFromDefinition = getNormalizedInputsFromDefinition(definition);
+  const inputsFromDefinition = getInputsFromDefinition(definition);
 
   if (inputsFromDefinition) {
     return inputsFromDefinition;
@@ -167,7 +192,7 @@ export function extractNormalizedInputsFromYaml(
     }
 
     const yamlJson = yamlDoc.toJSON() as WorkflowYaml;
-    return getNormalizedInputsFromDefinition(yamlJson);
+    return getInputsFromDefinition(yamlJson);
   } catch {
     // Ignore errors when extracting from YAML
   }

@@ -8,8 +8,8 @@
  */
 
 import { isWellKnownWorkflowTriggerSource, WORKFLOW_EVENTS_VALUES_SET } from '@kbn/workflows';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import { getInputsFromDefinition } from '@kbn/workflows/spec/utils';
 import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
 
 /**
@@ -280,12 +280,7 @@ export function extractWorkflowMetadata(
   // Count inputs
   const inputs = getInputsFromDefinition(workflow);
 
-  const inputCount =
-    inputs == null
-      ? 0
-      : Array.isArray(inputs)
-      ? inputs.length
-      : Object.keys(inputs.properties ?? {}).length;
+  const inputCount = !inputs ? 0 : Object.keys(inputs.properties ?? {}).length;
 
   // Count constants
   const consts = (workflow as { consts?: Record<string, unknown> }).consts || {};

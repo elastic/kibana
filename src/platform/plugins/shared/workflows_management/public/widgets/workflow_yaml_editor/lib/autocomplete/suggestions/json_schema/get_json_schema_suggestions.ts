@@ -9,7 +9,7 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import { monaco } from '@kbn/monaco';
-import { getInputsFromDefinition } from '@kbn/workflows/spec/utils';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 import { getInputPropertyName } from '../../context/inputs_utils';
 

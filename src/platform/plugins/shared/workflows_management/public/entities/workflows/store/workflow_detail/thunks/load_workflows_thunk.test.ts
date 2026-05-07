@@ -21,8 +21,9 @@ jest.mock('@kbn/workflows-ui', () => ({
   })),
 }));
 
-// Mock normalizeFieldsToJsonSchema
+// Mock normalizeFieldsToJsonSchema; keep real getInputsFromDefinition for thunk behavior
 jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
+  ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
   normalizeFieldsToJsonSchema: jest.fn((fields) => (fields ? { type: 'object' } : undefined)),
 }));
 
