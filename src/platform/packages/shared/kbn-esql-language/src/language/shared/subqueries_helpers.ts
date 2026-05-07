@@ -31,8 +31,19 @@ export function findSubquery(
   Walker.walk(queryAst, {
     visitParens: (node, parent) => {
       const isForkBranch = parent?.type === 'command' && parent.name === 'fork';
+      // The grammar currently allows expression subqueries only as the right
+      // operand of IN-family binary expressions. Keep this structural: future
+      // binary operators with subquery RHS can use the same AST shape.
+      const isUnsupportedFunctionSubquery =
+        parent?.type === 'function' &&
+        !(parent.subtype === 'binary-expression' && parent.args[1] === node);
 
-      if (isSubQuery(node) && within(offset, node) && !isForkBranch) {
+      if (
+        isSubQuery(node) &&
+        within(offset, node) &&
+        !isForkBranch &&
+        !isUnsupportedFunctionSubquery
+      ) {
         const candidate = node.child;
 
         // Skip non-ES|QL subqueries (e.g. PromQL nodes) which don't have commands.
