@@ -20,14 +20,14 @@ import type { AnalyticsServiceStart, ApplicationStart, CoreStart } from '@kbn/co
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWorkflowsApi, useWorkflowsCapabilities, type WorkflowApi } from '@kbn/workflows-ui';
-import { PLUGIN_ID } from '@kbn/workflows-management-plugin/common';
-import type { TelemetryServiceClient } from '@kbn/workflows-management-plugin/public/common/lib/telemetry/types';
-import { WorkflowsBaseTelemetry } from '@kbn/workflows-management-plugin/public/common/service/telemetry';
-import { queryClient } from '@kbn/workflows-management-plugin/public/shared/lib/query_client';
 import {
+  PLUGIN_ID,
+  queryClient,
+  WorkflowsBaseTelemetry,
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,
-} from '@kbn/workflows-management-plugin/public/widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
+  type TelemetryServiceClient,
+} from '@kbn/workflows-management-plugin/public';
 
 interface WorkflowYamlData {
   yaml: string;

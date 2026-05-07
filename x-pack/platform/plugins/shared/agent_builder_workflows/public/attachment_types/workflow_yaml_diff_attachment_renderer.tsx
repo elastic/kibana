@@ -18,7 +18,7 @@ import { monaco } from '@kbn/monaco';
 import {
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,
-} from '@kbn/workflows-management-plugin/public/widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
+} from '@kbn/workflows-management-plugin/public';
 
 interface WorkflowYamlDiffData {
   beforeYaml: string;
