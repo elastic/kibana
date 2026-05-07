@@ -122,10 +122,10 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
             {actionId && (
               <EuiFlexItem grow={false} css={actionsGroupCss}>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
-                  {showExport && (
+                  {showExport && exportQueryId && (
                     <EuiFlexItem grow={false}>
                       <ExportResultsButton
-                        actionId={exportQueryId as string}
+                        actionId={exportQueryId}
                         isLive={!scheduleId}
                         liveQueryId={actionId}
                         scheduleId={scheduleId}

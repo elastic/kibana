@@ -510,6 +510,29 @@ describe('useExportResults', () => {
       expect(mocks.addDanger).toHaveBeenCalledWith('Too many results');
     });
 
+    it('should surface the server message verbatim on 400 too-many-results error', async () => {
+      const { kibana, mocks } = createMockServices();
+      useKibanaMock.mockReturnValue(kibana as unknown as ReturnType<typeof useKibana>);
+
+      // Server-side guardrail rejects exports above 500k rows with this message shape.
+      const tooManyResults =
+        'Export limited to 500,000 results. Found 750000. Please add filters to narrow results.';
+      mocks.fetch.mockRejectedValueOnce({
+        body: { message: tooManyResults, statusCode: 400 },
+      });
+
+      const { result } = renderHook(() =>
+        useExportResults({ actionId: 'action-abc', isLive: true })
+      );
+
+      await act(async () => {
+        await result.current.exportResults('ndjson');
+      });
+
+      expect(mocks.addDanger).toHaveBeenCalledWith(tooManyResults);
+      expect(mocks.addDanger).not.toHaveBeenCalledWith(expect.stringContaining('permission'));
+    });
+
     it('should show unauthorized danger toast on 403 error', async () => {
       const { kibana, mocks } = createMockServices();
       useKibanaMock.mockReturnValue(kibana as unknown as ReturnType<typeof useKibana>);

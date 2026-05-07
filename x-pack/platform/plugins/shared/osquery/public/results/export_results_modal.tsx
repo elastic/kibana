@@ -24,14 +24,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import type { ExportFormat } from './use_export_results';
+
 /**
  * Threshold above which we surface a size warning in the modal. The server
  * hard-caps exports at 500k rows; warning at 100k keeps low-spec clients from
  * being surprised by a multi-hundred-MB download.
  */
 const LARGE_EXPORT_THRESHOLD = 100_000;
-
-import type { ExportFormat } from './use_export_results';
 
 const FORMAT_OPTIONS = [
   {
@@ -93,6 +93,19 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
     () => ({ 'data-test-subj': 'osqueryExportFilteredCheckboxTooltip' } as const),
     []
   );
+
+  const exportButtonLabel = useMemo(() => {
+    const buttonCount = exportFiltered ? filteredTotal : total ?? filteredTotal;
+
+    return buttonCount != null
+      ? i18n.translate('xpack.osquery.exportModal.exportWithCount', {
+          defaultMessage: 'Export {count} {count, plural, one {row} other {rows}}',
+          values: { count: buttonCount },
+        })
+      : i18n.translate('xpack.osquery.exportModal.export', {
+          defaultMessage: 'Export',
+        });
+  }, [exportFiltered, filteredTotal, total]);
 
   return (
     <EuiModal
@@ -185,18 +198,7 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
           isDisabled={!format}
           data-test-subj="osqueryExportConfirmButton"
         >
-          {(() => {
-            const buttonCount = exportFiltered ? filteredTotal : total ?? filteredTotal;
-
-            return buttonCount != null
-              ? i18n.translate('xpack.osquery.exportModal.exportWithCount', {
-                  defaultMessage: 'Export {count} {count, plural, one {row} other {rows}}',
-                  values: { count: buttonCount },
-                })
-              : i18n.translate('xpack.osquery.exportModal.export', {
-                  defaultMessage: 'Export',
-                });
-          })()}
+          {exportButtonLabel}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
