@@ -35,6 +35,13 @@ export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } f
 export { reinstallPackageForInstallation } from './reinstall';
 export { removeInstallation } from './remove';
 export { updateCustomIntegration, incrementVersionAndUpdate } from './update_custom_integration';
+export {
+  handleNamespaceTemplateRestoreAfterPackageInstall,
+  insertNamespaceCustomTemplate,
+  isNamespaceCustomizationEnabledForPackage,
+  syncNamespaceTemplates,
+} from './namespace_datastream_templates';
+export type { SyncNamespaceTemplatesSummary } from './namespace_datastream_templates';
 export class PackageNotInstalledError extends Error {
   constructor(pkgkey: string) {
     super(`${pkgkey} is not installed`);

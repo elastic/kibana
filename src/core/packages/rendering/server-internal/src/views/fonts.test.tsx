@@ -15,8 +15,14 @@ import { Fonts } from './fonts';
 
 const TEST_URL = '/test-base-path';
 
-const getRenderedCss = () => {
-  const markup = renderToStaticMarkup(<Fonts url={TEST_URL} />);
+const getRenderedCss = (optimizeFontLoading?: boolean) => {
+  const markup = renderToStaticMarkup(
+    optimizeFontLoading === undefined ? (
+      <Fonts url={TEST_URL} />
+    ) : (
+      <Fonts url={TEST_URL} optimizeFontLoading={optimizeFontLoading} />
+    )
+  );
   const dom = load(markup);
 
   return dom('style').html() ?? '';
@@ -26,12 +32,14 @@ const getFontFaceBlock = ({
   family,
   style,
   weight,
+  optimizeFontLoading,
 }: {
   family: string;
   style: 'normal' | 'italic';
   weight: string | number;
+  optimizeFontLoading?: boolean;
 }) => {
-  const blocks = getRenderedCss().match(/@font-face\s*{[\s\S]*?}/g) ?? [];
+  const blocks = getRenderedCss(optimizeFontLoading).match(/@font-face\s*{[\s\S]*?}/g) ?? [];
   const block = blocks.find(
     (candidate) =>
       candidate.includes(`font-family: '${family}';`) &&
@@ -45,12 +53,35 @@ const getFontFaceBlock = ({
 };
 
 describe('Fonts', () => {
+  it('includes font-display: swap when optimizeFontLoading is true', () => {
+    const html = renderToStaticMarkup(<Fonts url="/ui" optimizeFontLoading={true} />);
+    expect(html).toContain('font-display: swap');
+  });
+
+  it('does not include font-display: swap when optimizeFontLoading is false', () => {
+    const html = renderToStaticMarkup(<Fonts url="/ui" optimizeFontLoading={false} />);
+    expect(html).not.toContain('font-display: swap');
+  });
+
+  it('does not include font-display: swap when optimizeFontLoading is undefined', () => {
+    const html = renderToStaticMarkup(<Fonts url="/ui" />);
+    expect(html).not.toContain('font-display: swap');
+  });
+
+  it('renders Inter, Roboto Mono, and Elastic UI Numeric font-face declarations', () => {
+    const html = renderToStaticMarkup(<Fonts url="/ui" />);
+    expect(html).toContain("font-family: 'Inter'");
+    expect(html).toContain("font-family: 'Roboto Mono'");
+    expect(html).toContain("font-family: 'Elastic UI Numeric'");
+  });
+
   it('renders optional font-face declarations when configured', () => {
     expect(
       getFontFaceBlock({
         family: 'Elastic UI Numeric',
         style: 'normal',
         weight: '100 900',
+        optimizeFontLoading: true,
       })
     ).toMatchInlineSnapshot(`
 "@font-face {
@@ -70,6 +101,7 @@ describe('Fonts', () => {
         family: 'Inter',
         style: 'normal',
         weight: 100,
+        optimizeFontLoading: false,
       })
     ).toMatchInlineSnapshot(`
 "@font-face {
@@ -87,6 +119,7 @@ describe('Fonts', () => {
         family: 'Roboto Mono',
         style: 'normal',
         weight: 400,
+        optimizeFontLoading: false,
       })
     ).toMatchInlineSnapshot(`
 "@font-face {

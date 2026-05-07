@@ -43,6 +43,7 @@
     "@kbn/search-types",
     "@kbn/xstate-utils",
     "@kbn/datemath",
+    "@kbn/data-lifecycle-phases",
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/charts-theme",
     "@kbn/index-management-shared-types",
