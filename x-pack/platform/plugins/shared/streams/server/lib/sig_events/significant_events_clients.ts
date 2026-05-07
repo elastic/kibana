@@ -78,10 +78,9 @@ export async function initializeSignificantEventsTemplates({
           dataStream: definition,
           elasticsearchClient: esClient,
           logger,
-          lazyCreation: true,
         });
       } catch (error) {
-        logger.error(
+        logger.info(
           `Failed to initialize template for ${definition.name}: ${
             error instanceof Error ? error.message : String(error)
           }`

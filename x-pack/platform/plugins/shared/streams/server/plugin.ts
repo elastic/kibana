@@ -147,7 +147,6 @@ export class StreamsPlugin
     );
 
     const significantEventsServices = createSignificantEventsServices(this.logger);
-
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const featureService = new FeatureService(core, this.logger);
