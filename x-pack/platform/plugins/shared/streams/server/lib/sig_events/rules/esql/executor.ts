@@ -15,7 +15,7 @@ import type { PersistenceServices } from '@kbn/rule-registry-plugin/server';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
-import { MAX_ALERTS_PER_EXECUTION } from './common';
+import { MAX_ALERTS_PER_EXECUTION, MAX_DEDUP_IDS, MATCH_LOOKBACK_MINUTES } from './common';
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
 import type { EsqlRuleInstanceState, EsqlRuleParams } from './types';
@@ -42,7 +42,7 @@ export async function getRuleExecutor(
   const esqlRequest = buildEsqlSearchRequest({
     query: params.query,
     timestampField: params.timestampField,
-    from: now.clone().subtract(2, 'minutes').toISOString(),
+    from: now.clone().subtract(MATCH_LOOKBACK_MINUTES, 'minutes').toISOString(),
     to: now.clone().toISOString(),
     previousOriginalDocumentIds,
   });
@@ -56,7 +56,7 @@ export async function getRuleExecutor(
   if (results.length === 0) {
     return {
       state: {
-        previousOriginalDocumentIds: [],
+        previousOriginalDocumentIds,
       },
     };
   }
@@ -92,9 +92,13 @@ export async function getRuleExecutor(
     (alert) => alertDocIdToDocumentIdMap.get(alert._id)!
   );
 
+  // Previous IDs come first, new IDs are appended — slice(-N) keeps the most recent ones.
+  const mergedIds = [...new Set([...previousOriginalDocumentIds, ...originalDocumentIds])];
+
   return {
     state: {
-      previousOriginalDocumentIds: originalDocumentIds,
+      previousOriginalDocumentIds:
+        mergedIds.length > MAX_DEDUP_IDS ? mergedIds.slice(-MAX_DEDUP_IDS) : mergedIds,
     },
   };
 }

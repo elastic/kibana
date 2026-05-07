@@ -491,7 +491,11 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
       <AnomalyTableProvider
-        criteriaFields={hostToCriteria(hostDetails)}
+        criteriaFields={hostToCriteria({
+          hostItem: hostDetails,
+          euid: euidApi?.euid,
+          entityRecord: entityStoreV2Enabled ? hostEntityFromStoreResult?.entityRecord : undefined,
+        })}
         startDate={from}
         endDate={to}
         skip={isInitializing}
