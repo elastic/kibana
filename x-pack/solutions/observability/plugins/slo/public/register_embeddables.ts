@@ -34,7 +34,6 @@ export const registerEmbeddables = ({
   sloClient,
   kibanaVersion,
 }: RegisterEmbeddablesDeps) => {
-  // const [coreStart, pluginsStart] = await core.getStartServices();
   plugins.presentationUtil.registerPanelPlacementSettings(
     SLO_OVERVIEW_EMBEDDABLE_ID,
     (serializedState?: OverviewEmbeddableState) => {
