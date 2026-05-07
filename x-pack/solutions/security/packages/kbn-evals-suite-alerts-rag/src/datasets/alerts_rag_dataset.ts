@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import type { AlertsRagCategory, AlertsRagExample } from '../dataset';
+import type {
+  AlertDocument,
+  AlertDocumentSource,
+  AlertsRagCategory,
+  AlertsRagExample,
+} from '../dataset';
+import { validateAlertContext } from '../dataset';
 
-export type { AlertsRagCategory, AlertsRagExample };
+export type { AlertDocument, AlertDocumentSource, AlertsRagCategory, AlertsRagExample };
+export { validateAlertContext };
 
 /**
  * LangSmith dataset: "Alerts RAG Regression (Episodes 1-8)"
