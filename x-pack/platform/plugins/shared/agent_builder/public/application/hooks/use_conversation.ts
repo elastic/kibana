@@ -33,7 +33,7 @@ export const useConversation = () => {
   const { conversationsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? '');
-  const { activeStream, byConversationId } = useSendMessageContext();
+  const { activeStreams, byConversationId } = useSendMessageContext();
 
   // Disable the query when this conversation is being written to by a stream, OR when
   // its cached state shows a HITL pause, OR when there's an unpersisted error in the
@@ -45,7 +45,7 @@ export const useConversation = () => {
     queryClient.getQueryData<Conversation>(queryKey)?.rounds?.at(-1)?.status ===
     ConversationRoundStatus.awaitingPrompt;
 
-  const isThisConversationStreaming = activeStream?.conversationId === conversationId;
+  const isThisConversationStreaming = Boolean(conversationId && activeStreams.has(conversationId));
 
   const hasUnpersistedError = conversationId
     ? Boolean(byConversationId[conversationId]?.error)
