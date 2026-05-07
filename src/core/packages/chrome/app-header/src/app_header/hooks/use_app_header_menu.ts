@@ -19,7 +19,7 @@ import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
 
 const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem => ({
-  label: i18n.translate('chrome.appHeader.feedbackMenuItemLabel', {
+  label: i18n.translate('core.chrome.appHeader.feedbackMenuItemLabel', {
     defaultMessage: 'Feedback',
   }),
   id: 'feedback',
@@ -30,7 +30,7 @@ const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem 
 });
 
 const createDocumentationMenuItem = (href: string): AppMenuStaticItem => ({
-  label: i18n.translate('chrome.appHeader.documentationMenuItemLabel', {
+  label: i18n.translate('core.chrome.appHeader.documentationMenuItemLabel', {
     defaultMessage: 'Documentation',
   }),
   id: 'documentation',
