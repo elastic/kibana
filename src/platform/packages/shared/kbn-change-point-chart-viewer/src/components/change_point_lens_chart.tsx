@@ -27,6 +27,7 @@ import {
 } from '../constants';
 import { buildFocusedViewTimeRange } from '../utils/build_change_point_tab_queries';
 import { useChangePointLensProps } from '../hooks/use_change_point_lens_props';
+import { ChangePointBadge } from './change_point_badge';
 import type { ChangePointCardModel } from '../utils/derive_change_point_cards';
 import type { UnifiedChangePointGridProps } from '../types';
 
@@ -52,7 +53,7 @@ const DEFAULT_DISABLED_ACTIONS = [
 
 const chartContainerCss = css`
   position: relative;
-  height: 100%;
+  flex: 1;
 
   & > div {
     position: absolute;
@@ -127,23 +128,22 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   }, [card.annotationEvents, timeColumn, valueColumn]);
 
   // If any annotation falls before the Discover time range, extend `from` so Lens doesn't clip it.
-  // Only applies to absolute ISO time ranges; relative expressions (e.g. 'now-30d') are left alone
-  // because their computed boundary typically already encloses change points within the user's window.
+  // fetchParams.timeRange is always resolved to absolute ISO by processFetchParams, so the
+  // comparison with annotation datetime strings is always safe.
   const chartTimeRange = useMemo((): TimeRange => {
-    const { relativeTimeRange } = fetchParams;
-    if (!card.annotationEvents.length) return relativeTimeRange;
-    const { from, to } = relativeTimeRange;
-    if (from.startsWith('now') || from.startsWith('$')) return relativeTimeRange;
+    const { timeRange } = fetchParams;
+    if (!card.annotationEvents.length) return timeRange;
+    const { from, to } = timeRange;
 
     const earliestAnnotation = card.annotationEvents.reduce(
       (min, e) => (e.datetime < min ? e.datetime : min),
       card.annotationEvents[0].datetime
     );
 
-    return earliestAnnotation < from ? { from: earliestAnnotation, to } : relativeTimeRange;
-    // fetchParams.relativeTimeRange is covered by the dependency array
+    return earliestAnnotation < from ? { from: earliestAnnotation, to } : timeRange;
+    // fetchParams.timeRange is covered by the dependency array
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [card.annotationEvents, fetchParams.relativeTimeRange]);
+  }, [card.annotationEvents, fetchParams.timeRange]);
 
   const lensProps = useChangePointLensProps({
     lensInstanceId: `changePointMiniLens-${card.id}`,
@@ -165,7 +165,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
 
     const timeRange = buildFocusedViewTimeRange(
       card.annotationEvents,
-      lensProps.timeRange ?? fetchParams.relativeTimeRange
+      lensProps.timeRange ?? fetchParams.timeRange
     );
 
     return timeRange
@@ -195,11 +195,13 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
           },
         ]
       : [];
-  }, [actions, card.annotationEvents, fetchParams.relativeTimeRange, lensProps]);
+  }, [actions, card.annotationEvents, fetchParams.timeRange, lensProps]);
 
   return (
     <div
       css={css`
+        display: flex;
+        flex-direction: column;
         height: ${CHART_HEIGHT_PX}px;
         outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
         border-radius: ${euiTheme.border.radius.medium};
@@ -207,6 +209,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
       ref={chartRef}
       data-test-subj={`changePointLensChart-${cardIndex}`}
     >
+      {/* Chart area fills the remaining height */}
       {lensProps ? (
         <div css={chartContainerCss}>
           <EmbeddableRendererContext.Provider value={EMBEDDABLE_QUICK_ACTIONS}>
@@ -224,7 +227,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
         </div>
       ) : (
         <EuiFlexGroup
-          style={{ height: '100%' }}
+          style={{ flex: 1 }}
           justifyContent="center"
           alignItems="center"
           responsive={false}
@@ -234,6 +237,19 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
+
+      {/* Badge row — sits below the chart, right-aligned, never overlaps chart content */}
+      <div
+        css={css`
+          flex-shrink: 0;
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+        `}
+      >
+        <ChangePointBadge changePointTypes={card.changePointTypes} minPvalue={card.minPvalue} />
+      </div>
     </div>
   );
 };

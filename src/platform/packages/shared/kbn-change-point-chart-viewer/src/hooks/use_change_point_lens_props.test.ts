@@ -49,7 +49,11 @@ type HookProps = Parameters<typeof useChangePointLensProps>[0];
 
 // ---- stub data ----
 
-const timeRangeStub: TimeRange = { from: 'now-30d', to: 'now' };
+const relativeTimeRangeStub: TimeRange = { from: 'now-30d', to: 'now' };
+const absoluteTimeRangeStub: TimeRange = {
+  from: '2024-01-01T00:00:00.000Z',
+  to: '2024-01-31T23:59:59.000Z',
+};
 
 const attributesStub = {
   title: 'test chart',
@@ -70,7 +74,8 @@ const makeFetchParams = (
   overrides: Partial<HookProps['fetchParams']> = {}
 ): HookProps['fetchParams'] =>
   ({
-    relativeTimeRange: timeRangeStub,
+    relativeTimeRange: relativeTimeRangeStub,
+    timeRange: absoluteTimeRangeStub,
     searchSessionId: 'session-1',
     esqlVariables: [],
     lastReloadRequestTime: 0,
@@ -103,7 +108,7 @@ describe('getChangePointLensProps', () => {
     const result = getChangePointLensProps({
       id: 'lens-1',
       attributes: attributesStub,
-      timeRange: timeRangeStub,
+      timeRange: absoluteTimeRangeStub,
       esqlVariables: [],
     });
 
@@ -118,12 +123,12 @@ describe('getChangePointLensProps', () => {
     const result = getChangePointLensProps({
       id: 'lens-42',
       attributes: attributesStub,
-      timeRange: timeRangeStub,
+      timeRange: absoluteTimeRangeStub,
       esqlVariables,
     });
 
     expect(result.id).toBe('lens-42');
-    expect(result.timeRange).toBe(timeRangeStub);
+    expect(result.timeRange).toBe(absoluteTimeRangeStub);
     expect(result.attributes).toBe(attributesStub);
     expect(result.esqlVariables).toBe(esqlVariables);
   });
@@ -132,7 +137,7 @@ describe('getChangePointLensProps', () => {
     const result = getChangePointLensProps({
       id: 'x',
       attributes: attributesStub,
-      timeRange: timeRangeStub,
+      timeRange: absoluteTimeRangeStub,
       esqlVariables: undefined,
       searchSessionId: 'sess-1',
       lastReloadRequestTime: 999,
@@ -146,7 +151,7 @@ describe('getChangePointLensProps', () => {
     const result = getChangePointLensProps({
       id: 'x',
       attributes: attributesStub,
-      timeRange: timeRangeStub,
+      timeRange: absoluteTimeRangeStub,
       esqlVariables: undefined,
     });
 
@@ -166,13 +171,24 @@ describe('useChangePointLensProps', () => {
     (LensConfigBuilder as jest.Mock).mockImplementation(() => ({ build: mockBuild }));
   });
 
-  it('uses the timeRange override in preference to fetchParams.relativeTimeRange', async () => {
-    const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-31T23:59:59.000Z' };
-    const props = makeDefaultProps({ timeRange });
+  it('uses the timeRange override in preference to fetchParams.timeRange', async () => {
+    const timeRangeOverride = { from: '2024-03-01T00:00:00.000Z', to: '2024-03-31T23:59:59.000Z' };
+    const props = makeDefaultProps({ timeRange: timeRangeOverride });
     const { result } = renderHook(() => useChangePointLensProps(props));
 
     await waitFor(() => expect(result.current).toBeDefined());
-    expect(result.current?.timeRange).toEqual(timeRange);
+    expect(result.current?.timeRange).toEqual(timeRangeOverride);
+  });
+
+  it('falls back to fetchParams.timeRange when no timeRange override is provided', async () => {
+    // Guards the `timeRangeOverride ?? fetchParams.timeRange` fallback path.
+    // fetchParams.timeRange is the resolved absolute range from the last Discover fetch,
+    // matching the unified histogram pattern.
+    const props = makeDefaultProps();
+    const { result } = renderHook(() => useChangePointLensProps(props));
+
+    await waitFor(() => expect(result.current).toBeDefined());
+    expect(result.current?.timeRange).toEqual(absoluteTimeRangeStub);
   });
 
   it('sets attributes.description when a description is provided', async () => {

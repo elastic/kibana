@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { UnifiedDataTableSummaryColumnHeader } from '@kbn/unified-data-table';
 
 const TOOLTIP_TITLE = i18n.translate(
   'discover.contextAwareness.changePointPvalueColumnHeader.tooltipTitle',
@@ -26,26 +26,18 @@ const TOOLTIP_CONTENT = i18n.translate(
 
 interface ChangePointPvalueColumnHeaderProps {
   columnDisplayName?: string;
+  headerRowHeight?: number;
 }
 
 export const ChangePointPvalueColumnHeader: React.FC<ChangePointPvalueColumnHeaderProps> = ({
   columnDisplayName,
+  headerRowHeight,
 }) => (
-  <EuiFlexGroup gutterSize="xs" alignItems="center">
-    <EuiFlexItem grow={false} component="span">
-      <EuiIconTip
-        data-test-subj="change-point-pvalue-header-icon"
-        type="info"
-        content={TOOLTIP_CONTENT}
-        title={TOOLTIP_TITLE}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-      component="span"
-      css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-    >
-      {columnDisplayName ?? 'pvalue'}
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <UnifiedDataTableSummaryColumnHeader
+    columnDisplayName={columnDisplayName ?? 'pvalue'}
+    headerRowHeight={headerRowHeight}
+    tooltipTitle={TOOLTIP_TITLE}
+    tooltipContent={TOOLTIP_CONTENT}
+    iconTipDataTestSubj="change-point-pvalue-header-icon"
+  />
 );

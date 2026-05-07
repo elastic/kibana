@@ -8,10 +8,3 @@
  */
 
 export { createChangePointDataSourceProfileProvider } from './profile';
-export type { ChangePointDataSourceResolvedContext } from './profile';
-export {
-  CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
-  isChangePointDataSourceContext,
-} from './change_point_context';
-export type { ChangePointLensDataSourceContext } from './change_point_context';
-export type { ChangePointPvalueCellContext } from './change_point_pvalue_cell';

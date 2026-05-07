@@ -168,7 +168,11 @@ export const useChangePointLensProps = ({
       getChangePointLensProps({
         id: lensInstanceId,
         searchSessionId: fetchParams.searchSessionId,
-        timeRange: timeRangeOverride ?? fetchParams.relativeTimeRange,
+        // timeRangeOverride may extend the Discover range backward to include early annotations;
+        // Lens must fetch that extended range so those annotations are actually visible in the chart.
+        // Falls back to fetchParams.timeRange — the resolved absolute range from the last Discover
+        // fetch — matching the unified histogram pattern (use_lens_props.ts).
+        timeRange: timeRangeOverride ?? fetchParams.timeRange,
         esqlVariables: fetchParams.esqlVariables,
         attributes,
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,

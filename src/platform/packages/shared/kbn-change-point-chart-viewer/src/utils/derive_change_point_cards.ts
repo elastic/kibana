@@ -345,7 +345,9 @@ export const buildChangePointCards = (params: {
       if (!datetime) continue;
 
       const label = isByMode
-        ? 'Change point'
+        ? i18n.translate('changePointChartViewer.card.changePointLabel', {
+            defaultMessage: 'Change point',
+          })
         : `${serializeCell(row[typeColumnId])} (p=${formatPvalueLabel(row[pvalueColumnId])})`;
       annotationEvents.push({ name: label, datetime });
       // Track the most significant (lowest) p-value and distinct types for sorting/filtering.

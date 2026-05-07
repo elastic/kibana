@@ -57,10 +57,11 @@ export const createChangePointDataSourceProfileProvider =
           if (!pvalueColumnId) return base;
           return {
             ...base,
-            [pvalueColumnId]: ({ column }: CustomGridColumnProps) => ({
+            [pvalueColumnId]: ({ column, headerRowHeight }: CustomGridColumnProps) => ({
               ...column,
               display: React.createElement(ChangePointPvalueColumnHeader, {
                 columnDisplayName: column.displayAsText,
+                headerRowHeight,
               }),
             }),
           };
