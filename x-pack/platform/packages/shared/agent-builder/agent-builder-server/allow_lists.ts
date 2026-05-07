@@ -82,6 +82,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.session}.subscribe_to_webhook`,
   `${internalNamespaces.session}.unsubscribe`,
   `${internalNamespaces.session}.send_message`,
+  `${internalNamespaces.session}.list_sessions`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];

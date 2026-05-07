@@ -218,7 +218,11 @@ export const fromEs = (document: Document): Conversation => {
 };
 
 export const fromEsWithoutRounds = (document: Document): ConversationWithoutRounds => {
-  return convertBaseFromEs(document);
+  const base = convertBaseFromEs(document);
+  return {
+    ...base,
+    ...(document._source!.state && { state: document._source!.state }),
+  };
 };
 
 export const toEs = (conversation: Conversation, space: string): ConversationProperties => {

@@ -106,6 +106,7 @@ class ConversationClientImpl implements ConversationClient {
         'created_at',
         'updated_at',
         'session_mode',
+        'state',
       ],
       query: {
         bool: {

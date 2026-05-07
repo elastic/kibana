@@ -33,6 +33,7 @@ export const SESSION_TOOL_IDS = [
   'session.subscribe_to_webhook',
   'session.unsubscribe',
   'session.send_message',
+  'session.list_sessions',
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -406,6 +407,45 @@ export const createSessionTools = (sessions: SessionsStart): BuiltinToolDefiniti
     },
   };
 
+  // -------------------------------------------------------------------------
+  // session.list_sessions
+  // -------------------------------------------------------------------------
+  const listSessionsSchema = z.object({
+    agent_id: z
+      .string()
+      .optional()
+      .describe('Filter sessions to a specific agent ID. Omit to list all sessions in the space.'),
+  });
+
+  const listSessions: BuiltinToolDefinition<typeof listSessionsSchema> = {
+    id: 'session.list_sessions',
+    type: ToolType.builtin,
+    tags: [],
+    description:
+      'List standing sessions visible to the current user in this space. ' +
+      'Returns session IDs, names, statuses, and subscription counts. ' +
+      'Use the returned session_id values with session.send_message to communicate with other sessions.',
+    schema: listSessionsSchema,
+    handler: async (params, context) => {
+      const client = sessions.getScopedClient({ request: context.request });
+      try {
+        const sessionList = await client.list({ agent_id: params.agent_id });
+        const summary = sessionList.map((s) => ({
+          session_id: s.id,
+          name: s.title,
+          agent_id: s.agent_id,
+          status: s.state?.standing_session?.status ?? 'unknown',
+          subscriptions: s.state?.standing_session?.trigger_subscriptions?.length ?? 0,
+          last_active_at: s.state?.standing_session?.last_active_at,
+        }));
+        return otherResult(JSON.stringify(summary));
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        return errResult(`Could not list sessions: ${msg}`);
+      }
+    },
+  };
+
   return [
     setIdle,
     terminate,
@@ -415,5 +455,6 @@ export const createSessionTools = (sessions: SessionsStart): BuiltinToolDefiniti
     subscribeToWebhook,
     unsubscribe,
     sendMessage,
+    listSessions,
   ];
 };
