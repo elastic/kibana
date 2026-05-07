@@ -7,30 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
-
-export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
-export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
 export const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
+
+/**
+ * The following constants are kept here to avoid a circular plugin dependency.
+ * The canonical definitions live in @kbn/agent-builder-workflows-plugin/common,
+ * but that plugin depends on workflowsManagement, so workflows_management cannot
+ * import from it.
+ */
+export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 export const WORKFLOW_SML_TYPE = 'workflow';
-
-const workflowTool = <TName extends string>(
-  toolName: TName
-): `${typeof internalNamespaces.workflows}.${TName}` => {
-  return `${internalNamespaces.workflows}.${toolName}`;
-};
-
-export const workflowTools = {
-  insertStep: workflowTool('workflow_insert_step'),
-  modifyStep: workflowTool('workflow_modify_step'),
-  modifyStepProperty: workflowTool('workflow_modify_step_property'),
-  modifyProperty: workflowTool('workflow_modify_property'),
-  deleteStep: workflowTool('workflow_delete_step'),
-  setYaml: workflowTool('workflow_set_yaml'),
-  getStepDefinitions: workflowTool('get_step_definitions'),
-  getTriggerDefinitions: workflowTool('get_trigger_definitions'),
-  validateWorkflow: workflowTool('validate_workflow'),
-  getExamples: workflowTool('get_examples'),
-  getConnectors: workflowTool('get_connectors'),
-  executeStep: workflowTool('workflow_execute_step'),
-} as const;
