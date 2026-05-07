@@ -111,22 +111,7 @@ export function initializeDashboardServices(
         stateConfig.api.updateRefId(savedObjectId);
         return savedObjectId;
       },
-      checkForDuplicateTitle: async (
-        newTitle: string,
-        isTitleDuplicateConfirmed: boolean,
-        onTitleDuplicate: () => void
-      ) => {
-        await attributeService.checkForDuplicateTitle({
-          newTitle,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-          newCopyOnSave: false,
-          newDescription: '',
-          displayName: '',
-          lastSavedTitle: '',
-          copyOnSave: false,
-        });
-      },
+      hasLibraryItemWithTitle: attributeService.hasLibraryItemWithTitle,
       canLinkToLibrary: async () =>
         !getLatestState().ref_id && !isTextBasedLanguage(getLatestState()),
       canUnlinkFromLibrary: async () => Boolean(getLatestState().ref_id),
