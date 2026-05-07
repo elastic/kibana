@@ -28,6 +28,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DETAIL_PANEL_CONTENT_MAX_HEIGHT } from '../graph_view/constants';
 import type { OTelComponentType } from '../graph_view/constants';
 
 import type { MetricGroup } from './use_component_metrics';
@@ -38,7 +39,7 @@ interface ComponentMetricsTabProps {
   componentType: OTelComponentType;
 }
 
-const SUPPORTED_METRIC_TYPES: OTelComponentType[] = ['exporter', 'processor', 'receiver'];
+export const SUPPORTED_METRIC_TYPES: OTelComponentType[] = ['exporter', 'processor', 'receiver'];
 
 type IntervalId = '5m' | '15m' | '1h';
 
@@ -84,7 +85,7 @@ const CHART_HEIGHT = 200;
 
 const scrollContainerStyle = css`
   overflow-y: auto;
-  max-height: 390px;
+  max-height: ${DETAIL_PANEL_CONTENT_MAX_HEIGHT}px;
 `;
 
 const loadingContainerStyle = css`

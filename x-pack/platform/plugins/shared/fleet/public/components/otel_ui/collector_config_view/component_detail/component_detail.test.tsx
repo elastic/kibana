@@ -291,7 +291,7 @@ describe('OTelComponentDetail', () => {
     expect(result.getByText(/exporters:/)).toBeInTheDocument();
   });
 
-  it('switches to Metrics tab and shows unsupported message for pipeline', () => {
+  it('does not render Metrics tab for pipeline', () => {
     const result = testRenderer.render(
       <OTelComponentDetail
         componentId="logs/default"
@@ -301,8 +301,6 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    fireEvent.click(result.getByTestId('otelComponentDetailTab-metrics'));
-    expect(result.getByTestId('otelComponentDetailMetricsUnsupported')).toBeInTheDocument();
-    expect(result.queryByText(/receivers:/)).not.toBeInTheDocument();
+    expect(result.queryByTestId('otelComponentDetailTab-metrics')).not.toBeInTheDocument();
   });
 });
