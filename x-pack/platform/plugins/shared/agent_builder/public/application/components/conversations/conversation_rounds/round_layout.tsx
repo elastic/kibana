@@ -19,7 +19,8 @@ import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
-import { RoundThinking } from './round_thinking/round_thinking';
+import { RoundEventsHeader } from './round_events_header';
+import { RoundSteps } from './round_thinking/steps/round_steps';
 import { RoundResponse } from './round_response/round_response';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { RoundError } from './round_error/round_error';
@@ -111,6 +112,14 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     pendingPrompts.length > 0 &&
     !isResuming;
 
+  const hasMessage = Boolean(response?.message);
+  const showAgentReasoning = isLoadingCurrentRound && !hasMessage && Boolean(agentReasoning);
+
+  const displayedSteps = useMemo(
+    () => (showAgentReasoning && steps.length > 0 ? steps.slice(0, -1) : steps),
+    [steps, showAgentReasoning]
+  );
+
   const cumulativeAttachmentRefs = useMemo(() => {
     if (!response?.message) return undefined;
     return computeCumulativeRefs(allRounds, roundIndex);
@@ -182,18 +191,22 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         />
       </EuiFlexItem>
 
-      {/* Thinking - treat awaiting prompt as loading to show last reasoning event */}
-      <EuiFlexItem grow={false}>
-        {isErrorCurrentRound ? (
+      {/* Error */}
+      {isErrorCurrentRound && (
+        <EuiFlexItem grow={false}>
           <RoundError error={error} errorSteps={rawRound.steps} onRetry={retrySendMessage} />
-        ) : (
-          <RoundThinking
-            steps={steps}
+        </EuiFlexItem>
+      )}
+
+      {/* Steps container — last step hidden when shown as agentReasoning label */}
+      {displayedSteps.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <RoundSteps
+            steps={displayedSteps}
             isLoading={isLoadingCurrentRound || Boolean(isAwaitingPrompt)}
-            rawRound={rawRound}
           />
-        )}
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
 
       {/* Todos */}
       {todosStep && (
@@ -218,28 +231,33 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
           </EuiFlexItem>
         ))}
 
-      {/* Response Message - hidden when awaiting confirmation */}
+      {/* Header + Response — bound together; rendered whenever response renders */}
       {!isAwaitingPrompt && (
-        <EuiFlexItem grow={false}>
-          <EuiFlexItem>
-            <RoundResponse
-              hasError={isErrorCurrentRound}
-              response={response}
-              steps={steps}
-              isLoading={isLoadingCurrentRound}
-              isLastRound={isCurrentRound}
+        <>
+          <EuiFlexItem grow={false}>
+            <RoundEventsHeader isStreaming={isLoadingCurrentRound} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexItem>
+              <RoundResponse
+                hasError={isErrorCurrentRound}
+                response={response}
+                steps={steps}
+                isLoading={isLoadingCurrentRound}
+                isLastRound={isCurrentRound}
+                conversationAttachments={conversationAttachments}
+                attachmentRefs={cumulativeAttachmentRefs}
+                conversationId={conversationId}
+              />
+            </EuiFlexItem>
+            <EuiSpacer />
+            <RoundAttachmentReferences
+              attachmentRefs={input.attachment_refs}
               conversationAttachments={conversationAttachments}
-              attachmentRefs={cumulativeAttachmentRefs}
-              conversationId={conversationId}
+              actorFilter={[ATTACHMENT_REF_ACTOR.agent, ATTACHMENT_REF_ACTOR.system]}
             />
           </EuiFlexItem>
-          <EuiSpacer />
-          <RoundAttachmentReferences
-            attachmentRefs={input.attachment_refs}
-            conversationAttachments={conversationAttachments}
-            actorFilter={[ATTACHMENT_REF_ACTOR.agent, ATTACHMENT_REF_ACTOR.system]}
-          />
-        </EuiFlexItem>
+        </>
       )}
 
       {/* Add spacing after the final round so that text is not cut off by the scroll mask */}

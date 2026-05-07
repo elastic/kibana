@@ -81,6 +81,12 @@ export const subscribeToChatEvents = ({
         setAgentReasoning(event.data.message);
       }
     } else if (isReasoningEvent(event)) {
+      // Transient reasoning is never rendered (RoundSteps filters !step.transient),
+      // so clearing the streaming text buffer for it would wipe legitimate content
+      // with no visible reasoning step taking its place.
+      if (!event.data.transient) {
+        conversationActions.clearAssistantMessage();
+      }
       conversationActions.addReasoningStep({
         step: createReasoningStep({
           reasoning: event.data.reasoning,
@@ -101,6 +107,11 @@ export const subscribeToChatEvents = ({
           tool_origin: event.data.tool_origin,
         }),
       });
+      const toolCallReasoning = i18n.translate('xpack.agentBuilder.chatEvents.toolCallStarted', {
+        defaultMessage: 'Calling tool {toolId}',
+        values: { toolId: event.data.tool_id },
+      });
+      setAgentReasoning(toolCallReasoning);
     } else if (isBrowserToolCallEvent(event)) {
       const toolId = event.data.tool_id;
       if (toolId && browserToolExecutor && browserApiTools) {
