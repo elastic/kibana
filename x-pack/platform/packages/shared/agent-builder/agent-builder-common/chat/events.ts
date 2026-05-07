@@ -355,7 +355,9 @@ export const isBackgroundAgentCompleteEvent = (
 
 export const TODOS_UPDATED_UI_EVENT = 'todos_updated' as const;
 
-export type TodosUpdatedUiEventData = { todos: TodoItem[] };
+export interface TodosUpdatedUiEventData {
+  todos: TodoItem[];
+}
 
 export const isTodosUpdatedEvent = (event: AgentBuilderEvent<string, any>) => {
   return isToolUiEvent<typeof TODOS_UPDATED_UI_EVENT, TodosUpdatedUiEventData>(
