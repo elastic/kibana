@@ -2944,14 +2944,14 @@
             "section": "def-common.ToolType",
             "text": "ToolType"
           },
-          ", Record<string, unknown>>, \"type\" | \"readonly\" | \"configuration\">,",
+          ", Record<string, unknown>>, \"type\" | \"readonly\" | \"experimental\" | \"configuration\">,",
           "BuiltInToolSpecificConfig",
           "<",
           "output",
           "<RunInput>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 138,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2976,7 +2976,7 @@
               ".builtin"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 146,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2994,7 +2994,7 @@
               "RunInput"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 150,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3038,7 +3038,7 @@
               "<TResult>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 154,
+            "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3113,7 +3113,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 158,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4247,6 +4247,21 @@
         "children": [
           {
             "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.InternalToolDefinition.experimental",
+            "type": "boolean",
+            "tags": [],
+            "label": "experimental",
+            "description": [
+              "\nWhen true, this tool is only available when experimental features are enabled."
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
             "id": "def-common.InternalToolDefinition.isAvailable",
             "type": "Function",
             "tags": [],
@@ -4282,7 +4297,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 28,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4305,7 +4320,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-                "lineNumber": 58,
+                "lineNumber": 62,
                 "columnNumber": 3,
                 "deprecated": false,
                 "docsReferencedTypeName": "ToolAvailabilityContext",
@@ -4334,7 +4349,7 @@
               "<TSchema>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 32,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4380,7 +4395,7 @@
               ">>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 36,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4407,7 +4422,7 @@
               "<TConfig> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 40,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4432,7 +4447,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 45,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4451,7 +4466,7 @@
               "<Record<string, unknown>> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 51,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11111,7 +11126,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-        "lineNumber": 57,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11134,7 +11149,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 58,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "docsReferencedTypeName": "ToolAvailabilityContext",
@@ -11730,12 +11745,12 @@
             "section": "def-common.EsqlToolDefinition",
             "text": "EsqlToolDefinition"
           },
-          ", \"readonly\"> & ",
+          ", \"readonly\" | \"experimental\"> & ",
           "BuiltInToolSpecificConfig",
           "<Record<string, unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 168,
+        "lineNumber": 173,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11751,12 +11766,12 @@
         "signature": [
           "Omit<",
           "IndexSearchToolDefinition",
-          ", \"readonly\"> & ",
+          ", \"readonly\" | \"experimental\"> & ",
           "BuiltInToolSpecificConfig",
           "<Record<string, unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 169,
+        "lineNumber": 174,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11803,7 +11818,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 172,
+        "lineNumber": 177,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11819,12 +11834,12 @@
         "signature": [
           "Omit<",
           "WorkflowToolDefinition",
-          ", \"readonly\"> & ",
+          ", \"readonly\" | \"experimental\"> & ",
           "BuiltInToolSpecificConfig",
           "<Record<string, unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 170,
+        "lineNumber": 175,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12128,7 +12143,7 @@
           "[] | undefined"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 123,
+        "lineNumber": 128,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12155,7 +12170,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 135,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "docsReferencedTypeName": "ToolCallWithResult",
