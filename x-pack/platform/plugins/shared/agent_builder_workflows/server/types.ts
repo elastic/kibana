@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AgentBuilderPluginSetup,
-  AgentBuilderPluginStart,
-} from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,

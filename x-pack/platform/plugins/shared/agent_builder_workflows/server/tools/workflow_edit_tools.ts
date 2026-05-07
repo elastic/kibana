@@ -10,6 +10,13 @@ import { ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
+import {
+  WORKFLOW_YAML_ATTACHMENT_TYPE,
+  WORKFLOW_YAML_CHANGED_EVENT,
+  WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
+} from '@kbn/workflows/common/constants';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { EditResult, StepDefinition } from './yaml_edit_utils';
 import {
   deleteStep,
@@ -18,15 +25,8 @@ import {
   modifyStepProperty,
   modifyWorkflowProperty,
 } from './yaml_edit_utils';
-import {
-  WORKFLOW_YAML_ATTACHMENT_TYPE,
-  WORKFLOW_YAML_CHANGED_EVENT,
-  WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
-} from '@kbn/workflows/common/constants';
 import { workflowTools } from '../../common/constants';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 

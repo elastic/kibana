@@ -9,8 +9,8 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { getWorkflowExamples, WORKFLOW_EXAMPLE_IDS } from '@kbn/workflows';
 import { loadWorkflowExampleContent } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
-import { workflowTools } from '../../common/constants';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import { workflowTools } from '../../common/constants';
 
 export function registerGetExamplesTool(agentBuilder: AgentBuilderPluginSetup): void {
   agentBuilder.tools.register({

@@ -10,6 +10,8 @@ import type { ConnectorContractUnion } from '@kbn/workflows';
 import { builtInStepDefinitions } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { StepDefinitionForAgent } from './get_step_definitions_tool';
 import {
   formatBuiltInStep,
@@ -17,9 +19,7 @@ import {
   resolveConnectors,
 } from './get_step_definitions_tool';
 import { workflowTools } from '../../common/constants';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 
 const extractStepTypes = (yaml: string): string[] => {
   const parsed = parseYamlToJSONWithoutValidation(yaml);

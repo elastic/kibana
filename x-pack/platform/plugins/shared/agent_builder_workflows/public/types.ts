@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AgentBuilderPluginSetup,
-  AgentBuilderPluginStart,
-} from '@kbn/agent-builder-browser';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
 
 export interface PluginSetupDependencies {

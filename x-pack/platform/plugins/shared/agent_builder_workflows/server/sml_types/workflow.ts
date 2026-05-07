@@ -7,10 +7,7 @@
 
 import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import {
-  WORKFLOW_SML_TYPE,
-  WORKFLOW_YAML_ATTACHMENT_TYPE,
-} from '@kbn/workflows/common/constants';
+import { WORKFLOW_SML_TYPE, WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   workflowIndexName,

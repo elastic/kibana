@@ -11,9 +11,9 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import { z } from '@kbn/zod/v4';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { workflowTools } from '../../common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import { workflowTools } from '../../common/constants';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 

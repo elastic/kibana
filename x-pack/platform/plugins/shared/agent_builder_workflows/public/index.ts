@@ -12,7 +12,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new AgentBuilderWorkflowsPlugin();
 }
 
-export type {
-  AgentBuilderWorkflowsPluginSetup,
-  AgentBuilderWorkflowsPluginStart,
-} from './types';
+export type { AgentBuilderWorkflowsPluginSetup, AgentBuilderWorkflowsPluginStart } from './types';
