@@ -410,9 +410,10 @@ describe('serializeScoutTestingScope', () => {
       kind: 'dependency-tree',
       affectedModuleIds: new Set(['@kbn/foo', '@kbn/bar']),
     };
-    // For dependency-tree, the serializer sources affectedModules from the
-    // scope itself (the second arg is unused in this branch).
-    expect(serializeScoutTestingScope(scope, new Set())).toEqual({
+    // By contract `resolveScoutTestingScope` builds `scope.affectedModuleIds`
+    // from the same data as the `affectedModules` arg — the serializer just
+    // reuses the explicit arg.
+    expect(serializeScoutTestingScope(scope, new Set(['@kbn/foo', '@kbn/bar']))).toEqual({
       kind: 'dependency-tree',
       skipNonScoutTests: false,
       affectedModules: ['@kbn/bar', '@kbn/foo'],

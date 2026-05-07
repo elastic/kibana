@@ -17,11 +17,10 @@ echo '--- Update Scout Test Config Manifests'
 # so they do not cause extra modules to be considered "changed" in the next step.
 node scripts/scout.js update-test-config-manifests --concurrencyLimit 3
 
-# ---------------------------------------------------------------------------
-# Shared selective-testing prelude: produce code_changes.json + testing_scope.json
-# (strategy-agnostic). Both the configs and lanes branches below — plus other
-# pipeline steps (e.g. FTR/Jest pick) — consume the resulting artifacts.
-# ---------------------------------------------------------------------------
+# Resolve Scout's selective-testing scope once, before either distribution
+# strategy runs. Both artifacts produced below (code_changes.json and
+# testing_scope.json) are consumed by the configs/lanes branches further down
+# and by other pipeline steps (e.g. FTR/Jest run-order pick).
 
 # PR builds: GITHUB_PR_MERGE_BASE is computed by set_git_merge_base() in util.sh.
 # On-merge builds: falls back to HEAD~1 (parent of the merge commit).
@@ -42,8 +41,8 @@ echo '--- Resolve Scout selective-testing scope'
 # consumed by `scout resolve-testing-scope` below.
 ts-node "$(dirname "${0}")/resolve_selective_testing.ts"
 
-# Compute the resolved scope (full / tests-only / dependency-tree) once, here,
-# and publish it so every downstream consumer reads the same decision.
+# Decide the scope once (full / tests-only / dependency-tree) so every
+# downstream step uses the same decision.
 SELECTIVE_SCOUT_FLAG=()
 if [[ "${SELECTIVE_TESTING_ENABLED:-}" == "true" ]] \
   && ! is_pr_with_label "scout:run-all-tests"; then
@@ -60,9 +59,8 @@ node scripts/scout resolve-testing-scope \
   "${SELECTIVE_SCOUT_FLAG[@]}"
 
 buildkite-agent artifact upload "$CODE_CHANGES_FILE"
-# Hand-off artifact for downstream steps (configs/lanes filter, FTR/Jest skip):
-# a tiny JSON with the resolved scope and a pre-computed 'skipNonScoutTests'
-# boolean (true only on a tests-only diff).
+# Read by the configs/lanes branches below, and by FTR/Jest to skip
+# non-Scout tests when the diff is tests-only.
 buildkite-agent artifact upload "$TESTING_SCOPE_FILE"
 
 SCOUT_TEST_DISTRIBUTION_STRATEGY="${SCOUT_TEST_DISTRIBUTION_STRATEGY:-configs}"

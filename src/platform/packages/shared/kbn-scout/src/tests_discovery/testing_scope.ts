@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { minimatch } from 'minimatch';
+import { Minimatch } from 'minimatch';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -24,34 +24,52 @@ import type { CodeChanges } from './code_changes';
 const PLAYWRIGHT_CONFIG = 'playwright.config.ts';
 const PARALLEL_PLAYWRIGHT_CONFIG = 'parallel.playwright.config.ts';
 
-const matchesAny = (file: string, patterns: readonly string[]): boolean =>
-  patterns.some((p) => minimatch(file, p, { dot: true }));
+// Pre-compile glob patterns once at module load; `minimatch(file, pattern, ...)`
+// compiles the pattern on every call, which dominates the per-file cost when
+// matching N changed files against M patterns.
+const compileMatchers = (patterns: readonly string[]): readonly Minimatch[] =>
+  patterns.map((p) => new Minimatch(p, { dot: true }));
 
-const filterExisting = (configs: readonly string[], repoRoot: string): string[] =>
-  configs.filter((rel) => fs.existsSync(path.join(repoRoot, rel)));
+const CRITICAL_FILES_MATCHERS = compileMatchers(CRITICAL_FILES_SCOUT);
+const NOISE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_NOISE_PATTERNS);
+const SCOPE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_SCOPE_GLOBS);
+
+const matchesAny = (file: string, matchers: readonly Minimatch[]): boolean =>
+  matchers.some((m) => m.match(file));
+
+const filterExisting = (
+  configs: readonly string[],
+  repoRoot: string,
+  existsCache?: Map<string, boolean>
+): string[] =>
+  configs.filter((rel) => {
+    const cached = existsCache?.get(rel);
+    if (cached !== undefined) return cached;
+    const exists = fs.existsSync(path.join(repoRoot, rel));
+    existsCache?.set(rel, exists);
+    return exists;
+  });
 
 /**
  * Returns true when at least one changed file matches the Scout critical-files list.
  * A critical-files hit forces a full Scout suite run (selective testing skipped).
  */
 export const criticalScoutFilesTouched = (changedFiles: readonly string[]): boolean =>
-  changedFiles.some((file) => matchesAny(file, CRITICAL_FILES_SCOUT));
+  changedFiles.some((file) => matchesAny(file, CRITICAL_FILES_MATCHERS));
 
 /**
  * Returns true when, after dropping noise files (READMEs, markdown, changelogs),
- * every remaining changed file lives inside a Scout test scope.
- *
- * Empty diffs (or diffs that contain only noise) do NOT qualify — there is
- * nothing to fast-path.
+ * every remaining changed file lives inside a Scout test scope. Empty diffs
+ * (or noise-only diffs) return false — there is nothing to fast-path.
  */
 export const isScoutTestsOnlyDiff = (changedFiles: readonly string[]): boolean => {
-  const meaningful = changedFiles.filter(
-    (file) => !matchesAny(file, SCOUT_TESTS_ONLY_NOISE_PATTERNS)
-  );
-  if (meaningful.length === 0) {
-    return false;
+  let sawMeaningful = false;
+  for (const file of changedFiles) {
+    if (matchesAny(file, NOISE_MATCHERS)) continue;
+    sawMeaningful = true;
+    if (!matchesAny(file, SCOPE_MATCHERS)) return false;
   }
-  return meaningful.every((file) => matchesAny(file, SCOUT_TESTS_ONLY_SCOPE_GLOBS));
+  return sawMeaningful;
 };
 
 /**
@@ -66,7 +84,11 @@ export const isScoutTestsOnlyDiff = (changedFiles: readonly string[]): boolean =
  *
  * The resolver never crosses ui ↔ api or scout ↔ scout_<custom> scopes.
  */
-export const deriveScoutConfigsForFile = (file: string, repoRoot: string): string[] => {
+export const deriveScoutConfigsForFile = (
+  file: string,
+  repoRoot: string,
+  existsCache?: Map<string, boolean>
+): string[] => {
   const match = file.match(SCOUT_TEST_SCOPE_PATTERN);
   if (!match) {
     return [];
@@ -76,33 +98,38 @@ export const deriveScoutConfigsForFile = (file: string, repoRoot: string): strin
   const scope = `${prefix}/test/${scoutDir}/${type}`;
 
   if (rest.startsWith('tests/')) {
-    return filterExisting([`${scope}/${PLAYWRIGHT_CONFIG}`], repoRoot);
+    return filterExisting([`${scope}/${PLAYWRIGHT_CONFIG}`], repoRoot, existsCache);
   }
 
   if (rest.startsWith('parallel_tests/')) {
-    return filterExisting([`${scope}/${PARALLEL_PLAYWRIGHT_CONFIG}`], repoRoot);
+    return filterExisting([`${scope}/${PARALLEL_PLAYWRIGHT_CONFIG}`], repoRoot, existsCache);
   }
 
   // Shared scope file (fixtures/, helpers, constants, page_objects/, .meta/, ...)
   // or the playwright config itself: map to whichever configs exist in the scope.
   return filterExisting(
     [`${scope}/${PLAYWRIGHT_CONFIG}`, `${scope}/${PARALLEL_PLAYWRIGHT_CONFIG}`],
-    repoRoot
+    repoRoot,
+    existsCache
   );
 };
 
 /**
- * Map a list of changed file paths to the union of owning Playwright configs.
- * The returned set is suitable for affected-configs filtering in
- * `discover-playwright-configs`.
+ * Map a list of changed files to the union of owning Playwright configs.
+ * Used as the affected-configs filter in `discover-playwright-configs` and
+ * `create-test-tracks`.
  */
 export const deriveScoutConfigsForFiles = (
   files: readonly string[],
   repoRoot: string
 ): Set<string> => {
+  // Many changed files typically share the same scope (e.g. multiple spec
+  // edits in one plugin). Memoise existence checks across the whole batch so
+  // we don't re-stat the same playwright.config.ts once per file.
+  const existsCache = new Map<string, boolean>();
   const configs = new Set<string>();
   for (const file of files) {
-    for (const config of deriveScoutConfigsForFile(file, repoRoot)) {
+    for (const config of deriveScoutConfigsForFile(file, repoRoot, existsCache)) {
       configs.add(config);
     }
   }
@@ -110,9 +137,9 @@ export const deriveScoutConfigsForFiles = (
 };
 
 /**
- * Shape-agnostic outcome of the Scout selective-testing decision tree. Consumers
- * (e.g. discover-playwright-configs, create-test-tracks) translate the scope
- * into their own filtering of test items.
+ * Outcome of the Scout selective-testing decision. Consumers
+ * (`discover-playwright-configs`, `create-test-tracks`) dispatch on `kind` to
+ * apply the matching filter to their own test items.
  *
  *   - 'full'             : run everything (selective testing disabled, or the
  *                          diff touches a critical Scout file).
@@ -130,19 +157,15 @@ export type ScoutTestingScope =
 /**
  * Decide which Scout testing scope to apply for a given diff.
  *
- * The function is intentionally pure with respect to data shapes: it takes a
- * `CodeChanges` object and returns a discriminated `ScoutTestingScope` that
- * any consumer (configs CLI, tracks CLI, or future skip-checks) can dispatch on.
- *
  * Decision tree (only when `selectiveTesting` is true and `codeChanges` is set):
  *   1. Critical Scout files touched      -> { kind: 'full', reason: 'critical-files' }
  *   2. Diff is exclusively Scout tests   -> { kind: 'tests-only', affectedConfigPaths }
  *   3. Otherwise                         -> { kind: 'dependency-tree', affectedModuleIds }
  *
  * When selective testing is disabled OR no code-changes file was provided, the
- * scope is `{ kind: 'full', reason: 'selective-disabled' }`. Marking semantics
- * (per-item `isAffected`) are deliberately NOT part of the scope — consumers
- * derive that from `codeChanges.affectedModules` independently.
+ * scope is `{ kind: 'full', reason: 'selective-disabled' }`. Per-item `isAffected`
+ * marking is NOT part of the scope — consumers derive it from
+ * `codeChanges.affectedModules` independently.
  */
 export const resolveScoutTestingScope = (
   codeChanges: CodeChanges | null,
@@ -175,20 +198,18 @@ export const resolveScoutTestingScope = (
 };
 
 /**
- * Serialised, file-friendly view of a `ScoutTestingScope`. This is the public
- * hand-off contract published by `scout resolve-testing-scope` and consumed by
- * every downstream step (configs CLI, lanes CLI, FTR/Jest skip check, ...).
+ * JSON shape produced by `scout resolve-testing-scope` and read by every
+ * downstream step (configs CLI, lanes CLI, FTR/Jest skip check).
  *
  * Field semantics:
- *   - `kind` / `reason`        : the decision (mirrors ScoutTestingScope).
- *   - `skipNonScoutTests`      : pre-computed boolean; true only for
- *                                `kind: 'tests-only'`. Downstream short-circuits
- *                                read this without re-implementing dispatch.
- *   - `affectedModules`        : ALWAYS present (sorted, possibly empty). Used
- *                                both as the dependency-tree filter set AND for
- *                                generic "isAffected" labeling regardless of kind.
- *   - `affectedConfigs`        : present only when `kind === 'tests-only'`. The
- *                                exact set of Playwright configs to run.
+ *   - `kind` / `reason`   : the decision (mirrors ScoutTestingScope).
+ *   - `skipNonScoutTests` : pre-computed boolean; true only for `kind: 'tests-only'`.
+ *                           Lets short-circuits avoid re-implementing dispatch.
+ *   - `affectedModules`   : ALWAYS present (sorted, possibly empty). Used both as
+ *                           the dependency-tree filter set AND for generic
+ *                           "isAffected" labeling regardless of kind.
+ *   - `affectedConfigs`   : present only when `kind === 'tests-only'`; the exact
+ *                           set of Playwright configs to run.
  */
 export interface SerializedScoutTestingScope {
   kind: ScoutTestingScope['kind'];
@@ -199,13 +220,9 @@ export interface SerializedScoutTestingScope {
 }
 
 /**
- * Convert a `ScoutTestingScope` into a JSON-serialisable shape suitable for
- * sharing across pipeline steps (e.g. as a Buildkite artifact).
- *
- * `affectedModules` is sourced from the original `CodeChanges` and is always
- * included — even when the scope is `full` or `tests-only` — so consumers
- * can mark items as "affected" for CI labeling regardless of which selective-
- * testing branch is active.
+ * Convert a `ScoutTestingScope` into the JSON shape shared across pipeline
+ * steps. `affectedModules` is always included (even for `full` / `tests-only`
+ * scopes) so consumers can label items as "affected" regardless of kind.
  */
 export const serializeScoutTestingScope = (
   scope: ScoutTestingScope,
@@ -228,19 +245,20 @@ export const serializeScoutTestingScope = (
         affectedConfigs: Array.from(scope.affectedConfigPaths).sort(),
       };
     case 'dependency-tree':
+      // By contract `scope.affectedModuleIds === affectedModules` in this
+      // branch (set by `resolveScoutTestingScope`), so reuse the pre-sorted
+      // array instead of allocating + sorting a fresh copy.
       return {
         kind: 'dependency-tree',
         skipNonScoutTests: false,
-        // Note: scope.affectedModuleIds === affectedModules in this branch.
-        affectedModules: Array.from(scope.affectedModuleIds).sort(),
+        affectedModules: sortedModules,
       };
   }
 };
 
 /**
- * Write the serialised scope to disk, creating the parent directory if needed.
- * Used by `scout resolve-testing-scope` to publish a tiny, stable hand-off
- * artifact for other pipeline steps (configs/lanes filter, FTR/Jest skip).
+ * Write the serialised scope to `outputPath`, creating the parent directory
+ * if needed. Called by `scout resolve-testing-scope`.
  */
 export const writeScoutTestingScope = (
   scope: ScoutTestingScope,
@@ -277,8 +295,8 @@ const isSerializedScoutTestingScope = (value: unknown): value is SerializedScout
 
 /**
  * Read and validate a testing-scope JSON file produced by `scout
- * resolve-testing-scope`. Throws (via createFailError) on missing/invalid
- * input — downstream consumers must not silently fall back to a wrong mode.
+ * resolve-testing-scope`. Throws on missing/invalid input — downstream
+ * consumers must not silently fall back to a wrong mode.
  */
 export const readScoutTestingScope = (filePath: string): SerializedScoutTestingScope => {
   const absolutePath = path.isAbsolute(filePath) ? filePath : path.join(REPO_ROOT, filePath);
