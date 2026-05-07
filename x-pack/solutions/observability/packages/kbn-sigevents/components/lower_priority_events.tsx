@@ -201,6 +201,7 @@ export function LowerPriorityEvents({ events, onRemediate }: LowerPriorityEvents
               color="text"
               onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                 e.stopPropagation();
+                onRemediate?.(item.title, item.event_id);
               }}
               aria-label={i18n.translate(
                 'xpack.observability.lowerPriorityEvents.attachActionAria',
