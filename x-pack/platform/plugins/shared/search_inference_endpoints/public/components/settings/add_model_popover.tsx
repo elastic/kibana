@@ -9,11 +9,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useConnectors } from '../../hooks/use_connectors';
 import { getConnectorIcon } from '../../utils/connector_display';
-
 interface AddModelPopoverProps {
   existingEndpointIds: string[];
   onAdd: (endpointId: string) => void;
@@ -69,10 +67,9 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
           data-test-subj="add-model-button"
           color="text"
         >
-          <FormattedMessage
-            id="xpack.searchInferenceEndpoints.settings.addModel"
-            defaultMessage="Add a model"
-          />
+          {i18n.translate('xpack.searchInferenceEndpoints.settings.addModel', {
+            defaultMessage: 'Add a model',
+          })}
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
