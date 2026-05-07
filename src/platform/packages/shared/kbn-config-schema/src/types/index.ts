@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { SchemaStructureEntry, SchemaValidationOptions, TypeOptions } from './type';
+export type {
+  SchemaStructureEntry,
+  SchemaValidationOptions,
+  TypeOptions,
+  TypeOptionsValidate,
+} from './type';
 export { Type } from './type';
 export { AnyType } from './any_type';
 export type { ArrayOptions } from './array_type';
@@ -24,6 +29,7 @@ export type { IntersectionTypeOptions } from './intersection_type';
 export { IntersectionType } from './intersection_type';
 export { LiteralType } from './literal_type';
 export { MaybeType } from './maybe_type';
+export { NullableType } from './nullable_type';
 export type { MapOfOptions } from './map_type';
 export { MapOfType } from './map_type';
 export type { NumberOptions } from './number_type';
@@ -41,7 +47,7 @@ export { RecordOfType } from './record_type';
 export { StreamType } from './stream_type';
 export type { StringOptions } from './string_type';
 export { StringType } from './string_type';
-export type { UnionTypeOptions } from './union_type';
+export type { UnionTypeOptions, UnionSchemaOutputs } from './union_type';
 export { UnionType } from './union_type';
 export type { PropsWithDiscriminator, ObjectResultUnionType } from './discriminated_union_type';
 export { DiscriminatedUnionType } from './discriminated_union_type';

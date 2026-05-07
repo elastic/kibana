@@ -12,6 +12,10 @@ import { expectType } from 'tsd';
 import { offeringBasedSchema, schema } from '../..';
 import type { Props, TypeOf } from './object_type';
 
+function legacyDescribe(zh: unknown): Record<string, unknown> {
+  return (zh as { describe(): Record<string, unknown> }).describe();
+}
+
 test('returns value by default', () => {
   const type = schema.object({
     name: schema.string(),
@@ -30,7 +34,7 @@ test('meta', () => {
     },
     { meta: { id: 'test_id' } }
   );
-  expect(get(type.getSchema().describe(), 'flags.id')).toEqual('test_id');
+  expect(get(legacyDescribe(type.getSchema()), 'flags.id')).toEqual('test_id');
 });
 
 test('returns empty object if undefined', () => {

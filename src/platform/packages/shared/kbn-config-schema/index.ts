@@ -31,10 +31,12 @@ import type {
   StringOptions,
   TypeOf,
   TypeOptions,
+  TypeOptionsValidate,
   URIOptions,
   UnionTypeOptions,
   PropsWithDiscriminator,
   ObjectResultUnionType,
+  UnionSchemaOutputs,
 } from './src/types';
 import {
   AnyType,
@@ -49,6 +51,7 @@ import {
   LiteralType,
   MapOfType,
   MaybeType,
+  NullableType,
   NeverType,
   NumberType,
   ObjectType,
@@ -62,11 +65,23 @@ import {
   Lazy,
 } from './src/types';
 
-export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
-export { ObjectType, Type };
+export type {
+  AnyType,
+  ConditionalType,
+  TypeOf,
+  Props,
+  SchemaStructureEntry,
+  NullableProps,
+  ObjectResultType,
+  TypeOptions,
+  TypeOptionsValidate,
+  UnionTypeOptions,
+  UnionSchemaOutputs,
+};
+export { ObjectType, Type, UnionType };
 export type { SchemaValidationOptions } from './src/types';
 export { ByteSizeValue } from './src/byte_size_value';
-export { SchemaTypeError, ValidationError } from './src/errors';
+export { SchemaTypeError, SchemaTypesError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
 export { offeringBasedSchema } from './src/helpers';
 
@@ -126,7 +141,7 @@ function maybe<V>(type: Type<V>): Type<V | undefined> {
 }
 
 function nullable<V>(type: Type<V>): Type<V | null> {
-  return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
+  return new NullableType(type);
 }
 
 function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P> {
@@ -320,11 +335,11 @@ function oneOf<A, B, C>(
 ): Type<A | B | C>;
 function oneOf<A, B>(types: [Type<A>, Type<B>], options?: UnionTypeOptions<A | B>): Type<A | B>;
 function oneOf<A>(types: [Type<A>], options?: UnionTypeOptions<A>): Type<A>;
-function oneOf<RTS extends Array<Type<any>>>(
+function oneOf<const RTS extends readonly Type<any>[]>(
   types: RTS,
-  options?: UnionTypeOptions<any>
-): Type<any> {
-  return new UnionType(types, options);
+  options?: UnionTypeOptions<UnionSchemaOutputs<RTS>>
+): Type<UnionSchemaOutputs<RTS>> {
+  return new UnionType(types, options as UnionTypeOptions<any>);
 }
 
 function discriminatedUnion<

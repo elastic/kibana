@@ -4,36 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { TypeOf } from '@kbn/config-schema';
 import type { RuleParamsV1, RuleResponseV1 } from '../../../response';
-import type {
-  actionSchemaV1,
-  actionFrequencySchemaV1,
-  createParamsSchemaV1,
-  createBodySchemaV1,
-} from '..';
+import type { actionSchemaV1, actionFrequencySchemaV1, createParamsSchemaV1 } from '..';
+import type { fallbackCreateBodySchema } from '../schemas/v1';
 
 export type CreateRuleAction = TypeOf<typeof actionSchemaV1>;
 export type CreateRuleActionFrequency = TypeOf<typeof actionFrequencySchemaV1>;
 
 export type CreateRuleRequestParams = TypeOf<typeof createParamsSchemaV1>;
-type CreateBodySchema = TypeOf<typeof createBodySchemaV1>;
 
-export interface CreateRuleRequestBody<Params extends RuleParamsV1 = never> {
-  name: CreateBodySchema['name'];
-  rule_type_id: CreateBodySchema['rule_type_id'];
-  enabled: CreateBodySchema['enabled'];
-  consumer: CreateBodySchema['consumer'];
-  tags: CreateBodySchema['tags'];
-  throttle?: CreateBodySchema['throttle'];
-  params: Params;
-  schedule: CreateBodySchema['schedule'];
-  actions: CreateBodySchema['actions'];
-  notify_when?: CreateBodySchema['notify_when'];
-  alert_delay?: CreateBodySchema['alert_delay'];
-  flapping?: CreateBodySchema['flapping'];
-  artifacts?: CreateBodySchema['artifacts'];
-}
+/**
+ * Uses the fallback object branch shape plus a generic `params`, matching validated request
+ * bodies while avoiding `unknown` from `TypeOf<schema.oneOf(...)>` under this toolchain.
+ */
+type FallbackCreateBody = TypeOf<typeof fallbackCreateBodySchema>;
+
+export type CreateRuleRequestBody<Params extends RuleParamsV1 = never> = Omit<
+  FallbackCreateBody,
+  'params'
+> & { params: Params };
 
 export interface CreateRuleResponse<Params extends RuleParamsV1 = never> {
   body: RuleResponseV1<Params>;

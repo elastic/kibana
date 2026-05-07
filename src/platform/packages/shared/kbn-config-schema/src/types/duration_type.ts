@@ -8,17 +8,18 @@
  */
 
 import typeDetect from 'type-detect';
+import { z as zod } from '@kbn/zod';
 import type { Duration } from '../duration';
-import { ensureDuration } from '../duration';
-import { SchemaTypeError } from '../errors';
-import { internals } from '../internals';
+import { ensureDuration, isDuration } from '../duration';
+import { SchemaTypeError, ValidationError } from '../errors';
 import type { Reference } from '../references';
+
+import type { SchemaValidationOptions, TypeOptions } from './interfaces';
 import { Type } from './type';
 
 export type DurationValueType = Duration | string | number;
 
 export interface DurationOptions {
-  // we need to special-case defaultValue as we want to handle string inputs too
   defaultValue?: DurationValueType | Reference<DurationValueType> | (() => DurationValueType);
   validate?: (value: Duration) => string | void;
   min?: DurationValueType;
@@ -40,32 +41,92 @@ export class DurationType extends Type<Duration> {
       defaultValue = options.defaultValue;
     }
 
-    let schema = internals.duration();
-    if (options.min) {
-      schema = schema.min(options.min);
+    // Zod v4 `z.custom()` ignores the callback return value — coercion must happen in `preprocess`
+    // (same pattern as ByteSizeType).
+    let schema: zod.ZodTypeAny = zod.preprocess(
+      (data: unknown) => {
+        try {
+          if (isDuration(data)) {
+            return data;
+          }
+          if (typeof data === 'string' || typeof data === 'number') {
+            return ensureDuration(data);
+          }
+          return data;
+        } catch (e: any) {
+          throw new SchemaTypeError(e?.message ?? String(e), []);
+        }
+      },
+      zod.custom<Duration>((val): val is Duration => isDuration(val))
+    );
+
+    if (options.min !== undefined) {
+      const limit = ensureDuration(options.min);
+      schema = schema.refine(
+        (v: unknown) => (v as Duration).asMilliseconds() >= limit.asMilliseconds(),
+        {
+          message: `Value must be equal to or greater than [${limit.toString()}]`,
+        }
+      );
     }
-    if (options.max) {
-      schema = schema.max(options.max);
+    if (options.max !== undefined) {
+      const limit = ensureDuration(options.max);
+      schema = schema.refine(
+        (v: unknown) => (v as Duration).asMilliseconds() <= limit.asMilliseconds(),
+        {
+          message: `Value must be equal to or less than [${limit.toString()}]`,
+        }
+      );
     }
 
-    super(schema, { validate: options.validate, defaultValue });
+    super(schema, { validate: options.validate, defaultValue } as TypeOptions<Duration>);
   }
 
-  protected handleError(
-    type: string,
-    { message, value, limit }: Record<string, any>,
-    path: string[]
-  ) {
+  /**
+   * Fail fast on impossible JS types before Zod's preprocess/custom pipeline (matches legacy Joi messages).
+   */
+  protected validateWithFrame(
+    frame: import('../validation_frame').ValidationFrame,
+    value: unknown,
+    context: Record<string, unknown>,
+    namespace?: string,
+    validationOptions?: SchemaValidationOptions
+  ): Duration {
+    if (
+      value !== undefined &&
+      !isDuration(value) &&
+      typeof value !== 'string' &&
+      typeof value !== 'number'
+    ) {
+      throw new ValidationError(
+        new SchemaTypeError(
+          `expected value of type [moment.Duration] but got [${typeDetect(value)}]`,
+          []
+        ),
+        namespace
+      );
+    }
+    return super.validateWithFrame(frame, value, context, namespace, validationOptions);
+  }
+
+  protected structureTypeLabel(): string {
+    return 'duration';
+  }
+
+  protected handleError(type: string, { message, value }: Record<string, any>, path: string[]) {
     switch (type) {
       case 'any.required':
-      case 'duration.base':
+      case 'invalid_type':
         return `expected value of type [moment.Duration] but got [${typeDetect(value)}]`;
-      case 'duration.parse':
+      case 'custom': {
+        // `z.custom()` fails with a generic "Invalid input" message; keep legacy Joi-style copy.
+        if (message === 'Invalid input') {
+          return `expected value of type [moment.Duration] but got [${typeDetect(value)}]`;
+        }
         return new SchemaTypeError(message, path);
-      case 'duration.min':
-        return `Value must be equal to or greater than [${limit.toString()}]`;
-      case 'duration.max':
-        return `Value must be equal to or less than [${limit.toString()}]`;
+      }
+      default:
+        return undefined;
     }
   }
 }

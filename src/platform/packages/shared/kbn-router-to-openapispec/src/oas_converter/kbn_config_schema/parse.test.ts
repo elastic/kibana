@@ -13,12 +13,7 @@ import { isJoiToJsonSpecialSchemas, joi2JsonInternal } from './parse';
 describe('isJoiToJsonSpecialSchemas', () => {
   test.each([
     [joi2JsonInternal(schema.object({ foo: schema.string() }).getSchema()), false],
-    [
-      joi2JsonInternal(
-        schema.object({ foo: schema.string() }, { meta: { id: 'yes' } }).getSchema()
-      ),
-      true,
-    ],
+    [joi2JsonInternal(schema.object({ foo: schema.string() }, { meta: { id: 'yes' } })), true],
     [{}, false],
   ])('correctly detects special schemas %#', (input, output) => {
     expect(isJoiToJsonSpecialSchemas(input)).toBe(output);

@@ -7,42 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectType } from '@kbn/config-schema';
-import { Type } from '@kbn/config-schema';
-import { internals } from '@kbn/config-schema/src/internals';
-import type { ObjectResultType, Props, TypeOptions } from '@kbn/config-schema/src/types';
-import { SchemaTypeError, SchemaTypesError } from '@kbn/config-schema/src/errors';
+import type {
+  ObjectType,
+  ObjectResultType,
+  Props,
+  TypeOptions,
+  UnionTypeOptions,
+  Type,
+} from '@kbn/config-schema';
+import { SchemaTypeError, SchemaTypesError, UnionType } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 
 type SomeObjectType = ObjectType<any>;
 
+/** Output type for `objectUnion([typeA, typeB, ...])` — union of each branch output `V`. */
+export type ObjectUnionOutputs<T extends [SomeObjectType, ...SomeObjectType[]]> = {
+  [K in keyof T]: T[K] extends Type<infer V> ? V : never;
+}[number];
+
 /**
  * A custom schema type used in lens for object unions with ability to extend
  */
-export function objectUnion<T extends [SomeObjectType, ...SomeObjectType[]]>(
+export function objectUnion<const T extends [SomeObjectType, ...SomeObjectType[]]>(
   types: T,
-  options?: TypeOptions<T[number]['type']>
-) {
-  return new ObjectUnionType(types, options);
+  options?: TypeOptions<ObjectUnionOutputs<T>>
+): ObjectUnionType<T, ObjectUnionOutputs<T>> {
+  return new ObjectUnionType<T, ObjectUnionOutputs<T>>(types, options);
 }
 
 /**
- * Extends `Type` with duplicate logic from `UnionType` from `@kbn/config-schema`
+ * Extends {@link UnionType} with Lens-specific `extends()` for object branches.
  */
-export class ObjectUnionType<RTS extends Array<SomeObjectType>, T> extends Type<T> {
-  private readonly unionTypes: RTS;
-  private readonly typeOptions?: TypeOptions<T>;
+export class ObjectUnionType<RTS extends Array<SomeObjectType>, T> extends UnionType<RTS, T> {
+  /** Lens-only options merged in {@link extends}; must not shadow {@link Type}'s `typeOptions`. */
+  private readonly objectUnionOptions?: TypeOptions<T>;
 
   constructor(types: RTS, options?: TypeOptions<T>) {
-    let schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
-
-    if (options?.meta?.id) {
-      schema = schema.id(options.meta.id);
-    }
-
-    super(schema, options);
-    this.unionTypes = types;
-    this.typeOptions = options;
+    super(types, options as UnionTypeOptions<T>);
+    this.objectUnionOptions = options;
   }
 
   /**
@@ -73,15 +75,21 @@ export class ObjectUnionType<RTS extends Array<SomeObjectType>, T> extends Type<
       return t.extends(props); // no overriding type.options
     }) as RTS; // these types are correct but need to be forced to work
     const newOptions = {
-      ...this.typeOptions,
+      ...this.objectUnionOptions,
       ...options,
     } as TypeOptions<ObjectResultType<P> & T>;
     return new ObjectUnionType<RTS, ObjectResultType<P> & T>(newTypes, newOptions);
   }
 
-  protected handleError(type: string, { value, details }: Record<string, any>, path: string[]) {
+  protected handleError(
+    type: string,
+    context: Record<string, any>,
+    path: string[]
+  ): string | SchemaTypesError | undefined {
+    const { value, details } = context;
     switch (type) {
       case 'any.required':
+      case 'invalid_type':
         return `expected at least one defined value but got [${typeDetect(value)}]`;
       case 'alternatives.match':
         return new SchemaTypesError(
@@ -97,6 +105,8 @@ export class ObjectUnionType<RTS extends Array<SomeObjectType>, T> extends Type<
               : new SchemaTypeError(e.message, childPathWithIndex);
           })
         );
+      default:
+        return undefined;
     }
   }
 }

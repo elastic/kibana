@@ -15,7 +15,7 @@ import { createCtx } from './context';
 describe('postProcessMutations', () => {
   test('walks inner objects first so that "required" fields are populated correctly', () => {
     const parsed = joi2JsonInternal(
-      schema.object({ foo: schema.object({ bar: schema.string() }) }).getSchema()
+      schema.object({ foo: schema.object({ bar: schema.string() }) })
     );
     postProcessMutations({
       ctx: createCtx(),

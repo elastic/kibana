@@ -7,25 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference as InternalReference } from 'joi';
-import { internals } from '../internals';
+import { get } from 'lodash';
+import type { z } from '@kbn/zod';
+import { z as zod } from '@kbn/zod';
+
+import { getValidationFrame } from '../validation_frame';
+
+const REF_BRAND = Symbol.for('@kbn/config-schema/Reference');
 
 export class Reference<T> {
+  public readonly [REF_BRAND] = true;
+
   public static isReference<V>(value: V | Reference<V> | undefined): value is Reference<V> {
-    return (
-      value != null &&
-      typeof (value as Reference<V>).getSchema === 'function' &&
-      internals.isRef((value as Reference<V>).getSchema())
+    return Boolean(
+      value && typeof value === 'object' && (value as Reference<V>)[REF_BRAND] === true
     );
   }
 
-  private readonly internalSchema: InternalReference;
+  constructor(public readonly path: string, public readonly kind: 'context' | 'sibling') {}
 
-  constructor(key: string) {
-    this.internalSchema = internals.ref(key);
+  public getSchema(): z.ZodTypeAny {
+    return zod.any();
   }
 
-  public getSchema() {
-    return this.internalSchema;
+  public resolve(): unknown {
+    const frame = getValidationFrame();
+    if (!frame) {
+      return undefined;
+    }
+    if (this.kind === 'context') {
+      return frame.context[this.path];
+    }
+    return get(frame.siblingRoot, this.path);
   }
 }

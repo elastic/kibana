@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { schema } from '@kbn/config-schema';
 
@@ -385,6 +386,9 @@ export const sharedOas = {
     },
   ],
 };
+
+/** Expected OpenAPI doc for {@link createTestRouters} when the body schema is pure Zod ({@link createSharedZodSchema}). */
+export const sharedOasZodRoutes = cloneDeep(sharedOas);
 
 export function createSharedConfigSchema() {
   return schema.object({

@@ -44,7 +44,11 @@ import {
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import { getHistogramColumn } from '../../columns/date_histogram';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import type { MetricConfig } from '../../schema';
+import type { LensApiAllOperations, MetricConfig } from '../../schema';
+import type {
+  LensApiAllMetricOrFormulaOperations,
+  LensApiESQLColumnWithFormat,
+} from '../../schema/metric_ops';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiBucketOperations } from '../../schema/bucket_ops';
 import { generateLayer } from '../utils';
@@ -139,11 +143,15 @@ function fromCompareAPIToLensState(compareToConfig: MetricApiCompareType): {
   };
 }
 
-function isSecondaryMetric(metric: MetricConfig['metrics'][number]): metric is SecondaryMetricType {
+function isSecondaryMetric<T extends { type: string }>(
+  metric: T
+): metric is Extract<T, { type: 'secondary' }> {
   return metric.type === 'secondary';
 }
 
-function isPrimaryMetric(metric: MetricConfig['metrics'][number]): metric is PrimaryMetricType {
+function isPrimaryMetric<T extends { type: string }>(
+  metric: T
+): metric is Extract<T, { type: 'primary' }> {
   return metric.type === 'primary';
 }
 
@@ -554,12 +562,17 @@ function reverseBuildVisualizationState(
 
 function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState['layers'] {
   const [primaryMetric, secondaryMetric] = layer.metrics ?? [];
-  if (!isAPIColumnOfMetricType(primaryMetric) || isSecondaryMetric(primaryMetric)) {
+  if (
+    !isAPIColumnOfMetricType(primaryMetric as LensApiAllOperations) ||
+    isSecondaryMetric(primaryMetric)
+  ) {
     throw Error('The primary metric must refer to a metric operation.');
   }
-  const newPrimaryColumns = fromMetricAPItoLensState(primaryMetric);
+  const newPrimaryColumns = fromMetricAPItoLensState(
+    primaryMetric as LensApiAllMetricOrFormulaOperations
+  );
   const newSecondaryColumns = secondaryMetric
-    ? fromMetricAPItoLensState(secondaryMetric)
+    ? fromMetricAPItoLensState(secondaryMetric as LensApiAllMetricOrFormulaOperations)
     : undefined;
 
   const layers: Record<string, PersistedIndexPatternLayer> = {
@@ -612,7 +625,9 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
 
   if (primaryMetric.background_chart?.type === 'bar') {
     const columnName = getAccessorName('max');
-    const newColumn = fromMetricAPItoLensState(primaryMetric.background_chart.max_value);
+    const newColumn = fromMetricAPItoLensState(
+      primaryMetric.background_chart.max_value as LensApiAllMetricOrFormulaOperations
+    );
 
     addLayerColumn(defaultLayer, columnName, newColumn);
     if (trendLineLayer) {
@@ -633,14 +648,35 @@ function getValueColumns(layer: MetricConfigESQL) {
   }
   return [
     ...(layer.breakdown_by
-      ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown_by)]
+      ? [
+          getValueColumn(
+            getAccessorName('breakdown'),
+            layer.breakdown_by as LensApiESQLColumnWithFormat
+          ),
+        ]
       : []),
-    getValueColumn(getAccessorName('metric'), primaryMetric, 'number'),
+    getValueColumn(
+      getAccessorName('metric'),
+      primaryMetric as LensApiESQLColumnWithFormat,
+      'number'
+    ),
     ...(primaryMetric.background_chart?.type === 'bar'
-      ? [getValueColumn(getAccessorName('max'), primaryMetric.background_chart.max_value, 'number')]
+      ? [
+          getValueColumn(
+            getAccessorName('max'),
+            primaryMetric.background_chart.max_value as LensApiESQLColumnWithFormat,
+            'number'
+          ),
+        ]
       : []),
     ...(secondaryMetric
-      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric, 'number')]
+      ? [
+          getValueColumn(
+            getAccessorName('secondary'),
+            secondaryMetric as LensApiESQLColumnWithFormat,
+            'number'
+          ),
+        ]
       : []),
   ];
 }

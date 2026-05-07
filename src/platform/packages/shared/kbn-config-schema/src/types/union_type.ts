@@ -8,60 +8,131 @@
  */
 
 import typeDetect from 'type-detect';
-import { SchemaTypeError, SchemaTypesError } from '../errors';
-import { internals } from '../internals';
-import type { ExtendsDeepOptions } from './type';
-import { Type, type TypeOptions } from './type';
+import type { z } from '@kbn/zod';
+import { z as zod } from '@kbn/zod';
+
+import type { SchemaTypeError } from '../errors';
+import { SchemaTypesError, ValidationError } from '../errors';
+import type {
+  ExtendsDeepOptions,
+  SchemaStructureEntry,
+  SchemaValidationOptions,
+  TypeOptions,
+} from './interfaces';
+import { prependPathSegment, unwrapValidationError } from './error_utils';
+import { Reference } from '../references';
+import { Type } from './type';
 
 export type UnionTypeOptions<T> = TypeOptions<T>;
 
-export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
-  private readonly unionTypes: RTS;
-  private readonly typeOptions?: UnionTypeOptions<T>;
+/** Output type for `schema.oneOf([...])` — union of each branch validated output. */
+export type UnionSchemaOutputs<RTS extends readonly Type<any>[]> = {
+  [K in keyof RTS]: RTS[K] extends { readonly type: infer V } ? V : never;
+}[number];
+
+export class UnionType<
+  RTS extends readonly Type<any>[],
+  T = UnionSchemaOutputs<RTS>
+> extends Type<T> {
+  protected readonly unionTypes: RTS;
+  private readonly unionOptions?: UnionTypeOptions<T>;
 
   constructor(types: RTS, options?: UnionTypeOptions<T>) {
-    let schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
-
+    let schema: z.ZodTypeAny;
+    if (types.length === 1) {
+      schema = types[0].getInternalSchema();
+    } else {
+      const zodTypes = types.map((t) => t.getInternalSchema()) as [
+        z.ZodTypeAny,
+        z.ZodTypeAny,
+        ...z.ZodTypeAny[]
+      ];
+      schema = zod.union(zodTypes);
+    }
     if (options?.meta?.id) {
-      schema = schema.id(options.meta.id);
+      schema = schema.meta({ id: options.meta.id });
+    }
+    super(schema, options as any);
+    this.unionTypes = types;
+    this.unionOptions = options;
+  }
+
+  protected validateWithFrame(
+    _frame: import('../validation_frame').ValidationFrame,
+    value: unknown,
+    context: Record<string, unknown>,
+    namespace?: string,
+    validationOptions?: SchemaValidationOptions
+  ): T {
+    let val: unknown = value;
+    if (val === undefined && this.typeOptions.defaultValue !== undefined) {
+      const def = this.typeOptions.defaultValue;
+      if (typeof def === 'function') {
+        val = (def as () => T)();
+      } else if (Reference.isReference(def)) {
+        val = def.resolve() as T;
+      } else {
+        val = def as T;
+      }
     }
 
-    super(schema, options);
-    this.unionTypes = types;
-    this.typeOptions = options;
+    const errors: SchemaTypeError[] = [];
+
+    for (let i = 0; i < this.unionTypes.length; i++) {
+      try {
+        return this.unionTypes[i].validate(val, context, undefined, validationOptions) as T;
+      } catch (e) {
+        const inner = unwrapValidationError(e);
+        if (!inner) {
+          throw e;
+        }
+        if (this.unionTypes.length === 1) {
+          throw new ValidationError(inner, namespace);
+        }
+        errors.push(prependPathSegment(String(i), inner));
+      }
+    }
+
+    throw new ValidationError(
+      new SchemaTypesError('types that failed validation:', [], errors),
+      namespace
+    );
   }
 
   public extendsDeep(options: ExtendsDeepOptions) {
     return new UnionType(
-      this.unionTypes.map((t) => t.extendsDeep(options)),
-      this.typeOptions
+      this.unionTypes.map((t) => t.extendsDeep(options)) as unknown as RTS,
+      this.unionOptions
     );
   }
 
-  protected handleError(type: string, { value, details }: Record<string, any>, path: string[]) {
-    switch (type) {
-      case 'any.required':
-        return `expected at least one defined value but got [${typeDetect(value)}]`;
-      case 'alternatives.match':
-        return new SchemaTypesError(
-          'types that failed validation:',
-          path,
-          details.map((detail: AlternativeErrorDetail, index: number) => {
-            const e = detail.context.error;
-            const childPathWithIndex = e.path.slice();
-            childPathWithIndex.splice(path.length, 0, index.toString());
-
-            return e instanceof SchemaTypesError
-              ? new SchemaTypesError(e.message, childPathWithIndex, e.errors)
-              : new SchemaTypeError(e.message, childPathWithIndex);
-          })
-        );
+  public addLazyRegistryEntries(map: Map<string, unknown>): void {
+    for (const t of this.unionTypes) {
+      t.addLazyRegistryEntries(map);
     }
   }
-}
 
-interface AlternativeErrorDetail {
-  context: {
-    error: SchemaTypeError;
-  };
+  protected handleError(
+    type: string,
+    context: Record<string, any>,
+    _path: string[]
+  ): string | SchemaTypeError | undefined {
+    const { value } = context;
+    switch (type) {
+      case 'any.required':
+      case 'invalid_type':
+        return `expected at least one defined value but got [${typeDetect(value)}]`;
+      default:
+        return undefined;
+    }
+  }
+
+  public getSchemaStructure(): SchemaStructureEntry[] {
+    const path: string[] = [];
+    return [{ path, type: this.structureTypeLabel() }];
+  }
+
+  protected structureTypeLabel(): string {
+    return this.unionTypes.map((t) => t.getStructureLabel()).join('|');
+  }
 }

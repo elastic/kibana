@@ -8,14 +8,13 @@
  */
 
 import typeDetect from 'type-detect';
-import type { ByteSizeValue } from '../byte_size_value';
-import { ensureByteSizeValue } from '../byte_size_value';
+import { z as zod } from '@kbn/zod';
+import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';
 import { SchemaTypeError } from '../errors';
-import { internals } from '../internals';
+
 import { Type } from './type';
 
 export interface ByteSizeOptions {
-  // we need to special-case defaultValue as we want to handle string inputs too
   validate?: (value: ByteSizeValue) => string | void;
   defaultValue?: ByteSizeValue | string | number;
   min?: ByteSizeValue | string | number;
@@ -24,37 +23,60 @@ export interface ByteSizeOptions {
 
 export class ByteSizeType extends Type<ByteSizeValue> {
   constructor(options: ByteSizeOptions = {}) {
-    let schema = internals.bytes();
+    let core = zod.preprocess(
+      (value: unknown) => {
+        try {
+          if (value instanceof ByteSizeValue) {
+            return value;
+          }
+          if (typeof value === 'string' || typeof value === 'number') {
+            return ensureByteSizeValue(value);
+          }
+          return value;
+        } catch (e: any) {
+          throw new SchemaTypeError(e?.message ?? String(e), []);
+        }
+      },
+      zod.custom<ByteSizeValue>((val): val is ByteSizeValue => val instanceof ByteSizeValue)
+    );
 
     if (options.min !== undefined) {
-      schema = schema.min(options.min);
+      const limit = ensureByteSizeValue(options.min);
+      core = core.refine((v) => !v.isLessThan(limit), {
+        message: `Value must be equal to or greater than [${limit.toString()}]`,
+      });
     }
-
     if (options.max !== undefined) {
-      schema = schema.max(options.max);
+      const limit = ensureByteSizeValue(options.max);
+      core = core.refine((v) => !v.isGreaterThan(limit), {
+        message: `Value must be equal to or less than [${limit.toString()}]`,
+      });
     }
 
-    super(schema, {
+    super(core, {
       defaultValue: ensureByteSizeValue(options.defaultValue),
       validate: options.validate,
     });
   }
 
-  protected handleError(
-    type: string,
-    { limit, message, value }: Record<string, any>,
-    path: string[]
-  ) {
+  protected structureTypeLabel(): string {
+    return 'bytes';
+  }
+
+  protected handleError(type: string, { message, value }: Record<string, any>, path: string[]) {
     switch (type) {
       case 'any.required':
-      case 'bytes.base':
+      case 'invalid_type':
         return `expected value of type [ByteSize] but got [${typeDetect(value)}]`;
-      case 'bytes.parse':
+      case 'custom': {
+        // `z.custom()` fails with a generic "Invalid input" message; keep legacy Joi-style copy.
+        if (message === 'Invalid input') {
+          return `expected value of type [ByteSize] but got [${typeDetect(value)}]`;
+        }
         return new SchemaTypeError(message, path);
-      case 'bytes.min':
-        return `Value must be equal to or greater than [${limit.toString()}]`;
-      case 'bytes.max':
-        return `Value must be equal to or less than [${limit.toString()}]`;
+      }
+      default:
+        return undefined;
     }
   }
 }

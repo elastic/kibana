@@ -191,10 +191,9 @@ test('error preserves full path', () => {
 test('meta', () => {
   const stringSchema = schema.string();
   const type = schema.mapOf(schema.string(), stringSchema);
-  const result = type
-    .getSchema()
-    .describe()
-    .metas![0][META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]();
+  const metaBag = type.getSchema().meta() as Record<string, unknown> | undefined;
+  const getter = metaBag?.[META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES];
+  const result = typeof getter === 'function' ? (getter as () => unknown)() : undefined;
 
   expect(result).toBe(stringSchema.getSchema());
 });
@@ -372,12 +371,12 @@ test('handles references', () => {
       schema.contextRef('scenario'),
       'context',
       schema.object({
-        value: schema.string({ defaultValue: schema.contextRef('context_value') }),
         sibling: schema.string({ defaultValue: 'sibling#1' }),
+        value: schema.string({ defaultValue: schema.contextRef('context_value') }),
       }),
       schema.object({
-        value: schema.string({ defaultValue: schema.siblingRef('sibling') }),
         sibling: schema.string({ defaultValue: 'sibling#1' }),
+        value: schema.string({ defaultValue: schema.siblingRef('sibling') }),
       })
     )
   );

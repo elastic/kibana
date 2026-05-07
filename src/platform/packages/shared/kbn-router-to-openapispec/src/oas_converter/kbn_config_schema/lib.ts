@@ -7,53 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import joi from 'joi';
 import type { Type } from '@kbn/config-schema';
-import { isConfigSchema } from '@kbn/config-schema';
-import { get } from 'lodash';
+import { isConfigSchema, metaFields } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
+import { isZod, z as zodV4 } from '@kbn/zod';
 import type { OpenAPIV3 } from 'openapi-types';
+
 import type { ConvertOptions, KnownParameters } from '../../type';
-import { isReferenceObject } from '../common';
 import { collapseArrayUnion } from '../collapse_array_union';
-import { parse } from './parse';
-
-import type { IContext } from './post_process_mutations';
-import { createCtx } from './post_process_mutations';
-
-const isObjectType = (schema: joi.Schema | joi.Description): boolean => {
-  return schema.type === 'object';
-};
-
-const isRecordType = (schema: joi.Schema | joi.Description): boolean => {
-  return schema.type === 'record';
-};
-
-// See the `schema.nullable` type in @kbn/config-schema
-export const isNullableObjectType = (schema: joi.Schema | joi.Description): boolean => {
-  if (schema.type === 'alternatives') {
-    const { matches } = joi.isSchema(schema) ? schema.describe() : schema;
-    return (
-      matches.length === 2 &&
-      matches.every(
-        (match: { schema: joi.Description }) =>
-          match.schema.type === 'object' ||
-          (match.schema.type === 'any' &&
-            get(match, 'schema.flags.only') === true &&
-            get(match, 'schema.allow')?.length === 1 &&
-            get(match, 'schema.allow.0') === null)
-      )
-    );
-  }
-  return false;
-};
-
-const isEmptyObjectAllowsUnknowns = (schema: joi.Description) => {
-  return (
-    isObjectType(schema) &&
-    Object.keys(schema.keys).length === 0 &&
-    get(schema, 'flags.unknown') === true
-  );
-};
+import { validatePathParameters } from '../common';
+import { convert as zodConvert, unwrapZodType } from '../zod/lib';
 
 const createError = (message: string) => {
   return new Error(`[@kbn/config-schema converter] ${message}`);
@@ -65,123 +28,242 @@ function assertInstanceOfKbnConfigSchema(schema: unknown): asserts schema is Typ
   }
 }
 
-export const unwrapKbnConfigSchema = (schema: unknown): joi.Schema => {
+export const unwrapKbnConfigSchema = (schema: unknown): z.ZodTypeAny => {
   assertInstanceOfKbnConfigSchema(schema);
-  return schema.getSchema();
+  const inner = zodSchemaFromKbnType(schema);
+  if (!isZod(inner)) {
+    throw createError('Expected @kbn/config-schema Type to wrap a Zod schema');
+  }
+  return inner;
 };
 
-export const convert = (kbnConfigSchema: unknown, { sharedSchemas, env }: ConvertOptions = {}) => {
-  const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  const { result, shared } = parse({ schema, ctx: createCtx({ sharedSchemas, env }) });
-  return { schema: result, shared };
-};
+function getZodDefType(s: z.ZodTypeAny): string | undefined {
+  return (s as { _zod?: { def?: { type?: string } } })._zod?.def?.type;
+}
+
+function getZodRegistryMeta(s: z.ZodTypeAny): Record<string, unknown> {
+  return (zodV4.globalRegistry.get(s as z.ZodTypeAny) ?? {}) as Record<string, unknown>;
+}
+
+function shouldExcludeFromOasLikeLegacyJoi(inner: z.ZodTypeAny): boolean {
+  const u = unwrapZodType(inner, true);
+  const def = (u as { _zod?: { def?: { type?: string; shape?: object; catchall?: unknown } } })._zod
+    ?.def;
+
+  if (def?.type === 'any') {
+    const reg = getZodRegistryMeta(u);
+    if (reg[metaFields.META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]) {
+      return false;
+    }
+    return true;
+  }
+
+  if (def?.type === 'never') {
+    return true;
+  }
+
+  if (def?.type === 'object' && def.shape && Object.keys(def.shape).length === 0 && def.catchall) {
+    return getZodDefType(def.catchall as z.ZodTypeAny) === 'unknown';
+  }
+
+  return false;
+}
 
 export const getParamSchema = (knownParameters: KnownParameters, schemaKey: string) => {
   return (
     knownParameters[schemaKey] ??
-    // Handle special path parameters
     knownParameters[schemaKey + '*'] ??
     knownParameters[schemaKey + '?*']
   );
 };
 
-const convertObjectMembersToParameterObjects = (
-  ctx: IContext,
-  schema: joi.Schema,
-  knownParameters: KnownParameters = {},
-  isPathParameter = false
-) => {
-  let properties: OpenAPIV3.SchemaObject['properties'];
-  const required = new Map<string, boolean>();
-  if (isNullableObjectType(schema)) {
-    const { result } = parse({ schema, ctx });
-    if (result.anyOf) {
-      properties = result.anyOf.find(
-        (s): s is OpenAPIV3.SchemaObject => !isReferenceObject(s) && s.type === 'object'
-      )?.properties;
-    } else if (result.type === 'object') {
-      properties = result.properties;
+function branchIsNullLike(o: z.ZodTypeAny): boolean {
+  const t = getZodDefType(o);
+  if (t === 'null') {
+    return true;
+  }
+  if (t === 'literal') {
+    const d = (o as { _zod?: { def?: { value?: unknown; values?: unknown[] } } })._zod?.def;
+    if (d?.value === null) {
+      return true;
     }
-  } else if (isObjectType(schema)) {
-    const { result } = parse({ schema, ctx });
-    if ('$ref' in result)
-      throw new Error(
-        `Found a reference to "${result.$ref}". Runtime types with IDs are not supported in path or query parameters.`
-      );
-    properties = (result as OpenAPIV3.SchemaObject).properties!;
-    (result.required ?? []).forEach((key) => required.set(key, true));
-  } else if (isRecordType(schema)) {
-    return [];
-  } else {
-    throw createError(`Expected record, object or nullable object type, but got '${schema.type}'`);
+    return Array.isArray(d?.values) && (d!.values as unknown[]).includes(null);
+  }
+  return false;
+}
+
+export function isNullableObjectType(schema: unknown): boolean {
+  let zodLike: unknown = schema;
+  if (isConfigSchema(schema)) {
+    zodLike = zodSchemaFromKbnType(schema as Type<any>);
+  }
+  if (!isZod(zodLike)) {
+    return false;
+  }
+  const u = unwrapZodType(zodLike as z.ZodTypeAny, true);
+  const def = (u as { _zod?: { def?: { type?: string; options?: z.ZodTypeAny[] } } })._zod?.def;
+  if (def?.type !== 'union' || !Array.isArray(def.options)) {
+    return false;
+  }
+  const branches = def.options as z.ZodTypeAny[];
+  const hasNull = branches.some((o) => branchIsNullLike(unwrapZodType(o, true)));
+  const hasObject = branches.some((o) => getZodDefType(unwrapZodType(o, true)) === 'object');
+  return hasNull && hasObject;
+}
+
+export function zodSchemaFromKbnType(schema: Type<any>): z.ZodTypeAny {
+  return schema.getInternalSchema();
+}
+
+function unwrapNullableObjectUnionForParams(inner: z.ZodTypeAny): z.ZodTypeAny {
+  const u = unwrapZodType(inner, true);
+  const def = (u as { _zod?: { def?: { type?: string; options?: z.ZodTypeAny[] } } })._zod?.def;
+  if (def?.type === 'union' && Array.isArray(def.options)) {
+    const objBranch = def.options
+      .map((o) => unwrapZodType(o as z.ZodTypeAny, true))
+      .find((o) => getZodDefType(o) === 'object');
+    if (objBranch) {
+      return objBranch;
+    }
+  }
+  return u;
+}
+
+function assertRouteParamsSchemaHasNoMetaId(unwrapped: z.ZodTypeAny): void {
+  const surface = unwrapZodType(unwrapped, true);
+  if (getZodDefType(surface) !== 'object') {
+    return;
+  }
+  const meta = getZodRegistryMeta(surface);
+  const id = meta.id;
+  if (typeof id === 'string' && id.length > 0) {
+    throw createError(
+      `${id} references are not supported for OpenAPI path/query parameter extraction`
+    );
+  }
+}
+
+function optionalizeObjectShape(obj: z.ZodObject<any>): z.ZodObject<any> {
+  const shape = obj.shape as z.ZodRawShape;
+  let result = obj;
+  for (const key of Object.keys(shape)) {
+    result = result.extend({ [key]: (shape[key] as z.ZodTypeAny).optional() } as z.ZodRawShape);
+  }
+  return result;
+}
+
+export const convert = (kbnConfigSchema: unknown, opts?: ConvertOptions) => {
+  const inner = unwrapKbnConfigSchema(kbnConfigSchema);
+  const surface = unwrapZodType(inner, true);
+  const defType = getZodDefType(surface);
+
+  if (defType !== 'object' && defType !== 'union' && defType !== 'intersection') {
+    const wrapped = zodV4.object({ value: inner });
+    const converted = zodConvert(wrapped, opts);
+    if ('$ref' in converted.schema) {
+      return converted;
+    }
+    const valueSchema = converted.schema.properties?.value as OpenAPIV3.SchemaObject | undefined;
+    if (valueSchema) {
+      return {
+        schema: valueSchema,
+        shared: converted.shared,
+      };
+    }
   }
 
-  if (!properties) {
-    throw createError(`Could not extract properties from ${schema.describe()}`);
-  }
-
-  return Object.entries(properties).map(([schemaKey, schemaObject]) => {
-    const paramSchema = getParamSchema(knownParameters, schemaKey);
-    if (!paramSchema && isPathParameter) {
-      throw createError(`Unknown parameter: ${schemaKey}, are you sure this is in your path?`);
-    }
-    const isSubSchemaRequired = required.has(schemaKey);
-    let description: undefined | string;
-    let finalSchema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
-    if (!isReferenceObject(schemaObject)) {
-      const { description: des, ...rest } = schemaObject;
-      description = des;
-      finalSchema = !isPathParameter ? collapseArrayUnion(rest) : rest;
-    } else {
-      finalSchema = schemaObject;
-    }
-    return {
-      name: schemaKey,
-      in: isPathParameter ? 'path' : 'query',
-      required: isPathParameter || isSubSchemaRequired,
-      schema: finalSchema,
-      description,
-    };
-  });
+  return zodConvert(inner, opts);
 };
 
-export const convertQuery = (kbnConfigSchema: unknown) => {
-  const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  const ctx = createCtx();
-  const result = convertObjectMembersToParameterObjects(ctx, schema, {}, false);
-  return {
-    query: result,
-    shared: ctx.getSharedSchemas(),
-  };
+export const convertQuery = (kbnConfigSchema: unknown, opts?: ConvertOptions) => {
+  const rawInner = unwrapKbnConfigSchema(kbnConfigSchema);
+  let inner = unwrapNullableObjectUnionForParams(rawInner);
+  let nullableObject = false;
+  if (isNullableObjectType(rawInner)) {
+    nullableObject = true;
+    const surface = unwrapZodType(inner, true);
+    if (getZodDefType(surface) === 'object') {
+      inner = optionalizeObjectShape(surface as z.ZodObject<any>);
+    }
+  }
+  assertRouteParamsSchemaHasNoMetaId(inner);
+  const converted = zodConvert(inner, opts);
+  if (
+    '$ref' in converted.schema ||
+    converted.schema.type !== 'object' ||
+    !converted.schema.properties
+  ) {
+    throw createError('Query schema must be an _object_ schema validator!');
+  }
+
+  const required = new Set(converted.schema.required ?? []);
+  const query = Object.entries(converted.schema.properties).map(([name, value]) => {
+    const schema = collapseArrayUnion(value as OpenAPIV3.SchemaObject);
+    return {
+      name,
+      in: 'query' as const,
+      required: nullableObject ? false : required.has(name),
+      schema,
+      description: !('$ref' in schema) ? schema.description : undefined,
+    };
+  });
+
+  return { query, shared: converted.shared };
 };
 
 export const convertPathParameters = (
   kbnConfigSchema: unknown,
-  knownParameters: { [paramName: string]: { optional: boolean } }
+  knownParameters: KnownParameters,
+  opts?: ConvertOptions
 ) => {
-  const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  if (!isObjectType(schema) && !isNullableObjectType(schema)) {
-    throw createError('Input parser for path params expected to be an object schema');
+  const inner = unwrapNullableObjectUnionForParams(unwrapKbnConfigSchema(kbnConfigSchema));
+  assertRouteParamsSchemaHasNoMetaId(inner);
+  const converted = zodConvert(inner, opts);
+  if (
+    '$ref' in converted.schema ||
+    converted.schema.type !== 'object' ||
+    !converted.schema.properties
+  ) {
+    throw createError('Parameters schema must be an _object_ schema validator!');
   }
-  const ctx = createCtx(); // For now context is not shared between body, params and queries
-  const result = convertObjectMembersToParameterObjects(ctx, schema, knownParameters, true);
-  return {
-    params: result,
-    shared: ctx.getSharedSchemas(),
-  };
+
+  const schemaKeys = Object.keys(converted.schema.properties);
+  validatePathParameters(Object.keys(knownParameters), schemaKeys);
+
+  const params = schemaKeys.map((name) => {
+    const schema = converted.schema.properties![name] as
+      | OpenAPIV3.SchemaObject
+      | OpenAPIV3.ReferenceObject;
+    return {
+      name,
+      in: 'path' as const,
+      required: true,
+      schema,
+      description: !('$ref' in schema) ? schema.description : undefined,
+    };
+  });
+
+  return { params, shared: converted.shared };
 };
 
 export const is = (schema: unknown): boolean => {
-  if (isConfigSchema(schema)) {
-    const description = schema.getSchema().describe();
-    // We ignore "any" @kbn/config-schema for the purposes of OAS generation...
-    if (
-      (description.type === 'any' && !('allow' in description)) ||
-      isEmptyObjectAllowsUnknowns(description)
-    ) {
-      return false;
-    }
-    return true;
+  if (!isConfigSchema(schema)) {
+    return false;
   }
-  return false;
+  const typeInstance = schema as Type<any>;
+  const inner = zodSchemaFromKbnType(typeInstance);
+  if (!isZod(inner)) {
+    return false;
+  }
+  let structural = unwrapZodType(inner, true);
+  const barePlaceholderAny =
+    getZodDefType(structural) === 'any' &&
+    !getZodRegistryMeta(structural)[metaFields.META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES];
+  if (barePlaceholderAny) {
+    structural = unwrapZodType(typeInstance.getSchema() as z.ZodTypeAny, true);
+  }
+  if (shouldExcludeFromOasLikeLegacyJoi(structural)) {
+    return false;
+  }
+  return true;
 };

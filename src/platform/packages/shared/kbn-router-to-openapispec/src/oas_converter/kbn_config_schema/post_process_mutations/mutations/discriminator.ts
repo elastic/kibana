@@ -38,14 +38,36 @@ const getDiscriminatorStringValue = (
   return undefined;
 };
 
-export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
-  const firstSchema = isReferenceObject(schema.anyOf?.[0])
-    ? ctx.derefSharedSchema(schema.anyOf?.[0].$ref)
-    : schema.anyOf?.[0];
-  if (!firstSchema) return;
-  if (!(META_FIELD_X_OAS_DISCRIMINATOR in firstSchema)) return;
+const inferDiscriminatorPropertyName = (schemas: OpenAPIV3.SchemaObject[]): string | undefined => {
+  const keys = new Set<string>();
+  schemas.forEach((schema) => Object.keys(schema.properties ?? {}).forEach((k) => keys.add(k)));
 
-  if (!schema.anyOf?.every((entry) => isReferenceObject(entry))) {
+  for (const key of keys) {
+    const values = schemas.map((schema) => getDiscriminatorStringValue(schema, key));
+    const literalCount = values.filter((v): v is string => typeof v === 'string').length;
+    if (literalCount >= 2) {
+      return key;
+    }
+  }
+  return undefined;
+};
+
+export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
+  const variants = schema.oneOf ?? schema.anyOf;
+  const firstSchema = isReferenceObject(variants?.[0])
+    ? ctx.derefSharedSchema(variants?.[0].$ref)
+    : variants?.[0];
+  if (!firstSchema) return;
+
+  const propertyNameFromMeta = firstSchema[
+    META_FIELD_X_OAS_DISCRIMINATOR as keyof OpenAPIV3.SchemaObject
+  ] as string;
+  const hasMetadata = Boolean(propertyNameFromMeta);
+
+  if (!variants?.every((entry) => isReferenceObject(entry))) {
+    if (!hasMetadata) {
+      return;
+    }
     throw new Error(
       dedent`When using schema.discriminator ensure that every entry schema has an ID.
 
@@ -70,13 +92,17 @@ export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObje
     );
   }
 
-  const propertyName = firstSchema[
-    META_FIELD_X_OAS_DISCRIMINATOR as keyof OpenAPIV3.SchemaObject
-  ] as string;
+  const sharedSchemas = variants
+    .map((entry) => ctx.derefSharedSchema((entry as OpenAPIV3.ReferenceObject).$ref))
+    .filter((s): s is OpenAPIV3.SchemaObject => s !== undefined);
+  const propertyName = propertyNameFromMeta || inferDiscriminatorPropertyName(sharedSchemas);
+  if (!propertyName) {
+    return;
+  }
 
   deleteField(firstSchema, META_FIELD_X_OAS_DISCRIMINATOR);
 
-  schema.oneOf = schema.anyOf;
+  schema.oneOf = variants;
   deleteField(schema, 'anyOf');
 
   let catchAllIdx = -1;
@@ -88,23 +114,17 @@ export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObje
       throw new Error(
         `Shared schema ${entry.$ref} not found. This is likely a bug in the OAS generator.`
       );
-    if (META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE in sharedSchema) {
+    const discriminatorValue = getDiscriminatorStringValue(sharedSchema, propertyName);
+    if (
+      META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE in sharedSchema ||
+      discriminatorValue === undefined
+    ) {
+      if (!(META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE in sharedSchema)) {
+        (sharedSchema as Record<string, unknown>)[META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE] =
+          true;
+      }
       catchAllIdx = idx;
       return;
-    }
-
-    const discriminatorValue = getDiscriminatorStringValue(sharedSchema, propertyName);
-
-    if (discriminatorValue === undefined) {
-      throw new Error(
-        dedent`Could not derive OpenAPI discriminator.mapping for discriminated union branch ${
-          entry.$ref
-        }.
-
-        Each non-default branch must declare "${propertyName}" as a single-string enum (from schema.literal) so the OAS generator can build discriminator.mapping.
-
-        Debug details: ${JSON.stringify(sharedSchema.properties?.[propertyName])}.`
-      );
     }
 
     if (discriminatorValue in mapping) {

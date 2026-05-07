@@ -9,4 +9,8 @@
 
 import { Reference } from './reference';
 
-export class SiblingReference<T> extends Reference<T> {}
+export class SiblingReference<T> extends Reference<T> {
+  constructor(path: string) {
+    super(path, 'sibling');
+  }
+}

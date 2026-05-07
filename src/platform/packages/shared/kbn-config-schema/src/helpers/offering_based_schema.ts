@@ -10,6 +10,10 @@
 import { schema } from '../..';
 import type { Type, TypeOptions } from '../types';
 
+function defaultNeverBranch<V>(): Type<V> {
+  return schema.never() as Type<V>;
+}
+
 /**
  * Helper to apply different validations depending on whether Kibana is running the Serverless or Traditional offering.
  *
@@ -59,7 +63,11 @@ export function offeringBasedSchema<V>(opts: {
   traditional?: Type<V>;
   options?: TypeOptions<V>;
 }) {
-  const { serverless = schema.never(), traditional = schema.never(), options } = opts;
+  const {
+    serverless = defaultNeverBranch<V>(),
+    traditional = defaultNeverBranch<V>(),
+    options,
+  } = opts;
   return schema.conditional(
     schema.contextRef('serverless'),
     true,

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { metaFields } from '@kbn/config-schema';
 import { z, isZod } from '@kbn/zod';
 import { isPassThroughAny } from '@kbn/zod-helpers/v4';
 import type { OpenAPIV3 } from 'openapi-types';
@@ -77,9 +78,11 @@ const unwrapZodOptionalDefault = (
       description = !description ? (innerType as any).description : description;
       innerType = (innerType as any)._zod.def.innerType;
     } else if (defType === 'default') {
-      defaultValue = (innerType as any)._zod.def.defaultValue;
-      if (typeof defaultValue === 'function') {
-        defaultValue = (defaultValue as () => unknown)();
+      if (typeof defaultValue === 'undefined') {
+        defaultValue = (innerType as any)._zod.def.defaultValue;
+        if (typeof defaultValue === 'function') {
+          defaultValue = (defaultValue as () => unknown)();
+        }
       }
       description = !description ? (innerType as any).description : description;
       innerType = (innerType as any)._zod.def.innerType;
@@ -98,7 +101,8 @@ const unwrapZodOptionalDefault = (
  * - If `out._zod.def.type === 'transform'`, the original schema is in `in` (e.g. z.string().transform(fn))
  * - Otherwise, the meaningful schema is in `out` (e.g. DeepStrict wrapping: pipe(unknown.check(), schema))
  */
-const unwrapZodType = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTypeAny => {
+/** Exported for @kbn/config-schema bridge (unwrap defaults/pipes before structural checks). */
+export const unwrapZodType = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTypeAny => {
   const defType = getDefType(type);
 
   if (defType === 'lazy') {
@@ -257,7 +261,7 @@ const getPassThroughShape = (knownParameters: KnownParameters, isPathParameter =
   return passThroughShape as z.ZodRawShape;
 };
 
-export const convertQuery = (schema: unknown) => {
+export const convertQuery = (schema: unknown, _opts?: ConvertOptions) => {
   assertInstanceOfZodType(schema);
   const unwrappedSchema = unwrapZodType(schema, true);
 
@@ -277,7 +281,11 @@ export const convertQuery = (schema: unknown) => {
   };
 };
 
-export const convertPathParameters = (schema: unknown, knownParameters: KnownParameters) => {
+export const convertPathParameters = (
+  schema: unknown,
+  knownParameters: KnownParameters,
+  _opts?: ConvertOptions
+) => {
   assertInstanceOfZodType(schema);
   const unwrappedSchema = unwrapZodType(schema, true);
   const paramKeys = Object.keys(knownParameters);
@@ -317,7 +325,9 @@ function applyJsonDescription(jsonSchema: Record<string, any>, description?: str
     try {
       return { ...jsonSchema, ...JSON.parse(description) };
     } catch {
-      // not JSON, leave as-is
+      if (jsonSchema.description === undefined) {
+        return { ...jsonSchema, description };
+      }
     }
   }
   return jsonSchema;
@@ -396,6 +406,43 @@ const zodV4OasComponentRegistry = new WeakMap<object, string>();
 
 const OAS_EXTENSIONS_MARKER = 'x-kbn-oas-extensions';
 
+const createDedupingMetadataRegistry = () => {
+  const assignedBySchema = new WeakMap<z.ZodTypeAny, string>();
+  const schemaById = new Map<string, z.ZodTypeAny>();
+
+  return {
+    get(schema: z.ZodTypeAny) {
+      const meta = (z.globalRegistry.get(schema) ?? {}) as Record<string, unknown>;
+      const id = meta.id;
+      if (typeof id !== 'string' || id.length === 0) {
+        return meta;
+      }
+
+      const assigned = assignedBySchema.get(schema);
+      if (assigned) {
+        return assigned === id ? meta : { ...meta, id: assigned };
+      }
+
+      const currentOwner = schemaById.get(id);
+      if (!currentOwner || currentOwner === schema) {
+        assignedBySchema.set(schema, id);
+        schemaById.set(id, schema);
+        return meta;
+      }
+
+      let counter = 2;
+      let uniqueId = `${id}_${counter}`;
+      while (schemaById.has(uniqueId) && schemaById.get(uniqueId) !== schema) {
+        counter += 1;
+        uniqueId = `${id}_${counter}`;
+      }
+      assignedBySchema.set(schema, uniqueId);
+      schemaById.set(uniqueId, schema);
+      return { ...meta, id: uniqueId };
+    },
+  };
+};
+
 /**
  * Register a Zod schema so that the OAS converter emits it as a named
  * component (`$ref: '#/components/schemas/<name>'`) instead of inlining it.
@@ -450,17 +497,40 @@ const getZodMeta = (schema: z.ZodType): ZodSchemaMeta =>
 const getStableComponentName = (schema: z.ZodType): string | undefined =>
   zodV4OasComponentRegistry.get(schema as object) ?? getZodMeta(schema).id;
 
+/** Resolves `meta.id` / registry names under optional/default/pipe wrappers (nested object refs). */
+function getStableComponentNameDeep(schema: z.ZodType): string | undefined {
+  let current: z.ZodTypeAny = schema as z.ZodTypeAny;
+  for (let depth = 0; depth < 24; depth++) {
+    const name = getStableComponentName(current);
+    if (typeof name === 'string' && name.length > 0) {
+      return name;
+    }
+    const next = unwrapZodType(current, true);
+    if (next === current) {
+      return undefined;
+    }
+    current = next;
+  }
+  return undefined;
+}
+
 function normalizeOasMetaExtensions(
   schema: z.ZodType,
   env: ConvertOptions['env']
 ): NormalizedOasMetaExtensions | undefined {
-  const { openapi: meta } = getZodMeta(schema);
-  const autoDisc = meta?.discriminator ? null : buildAutoDiscriminator(schema);
+  const registry = (z.globalRegistry.get(schema as z.ZodTypeAny) ?? {}) as Record<string, unknown>;
+  const openapiMeta = (registry.openapi ?? {}) as OasMetaExtensions;
+  const availability =
+    openapiMeta.availability ??
+    (registry[metaFields.META_FIELD_X_OAS_AVAILABILITY] as
+      | OasMetaExtensions['availability']
+      | undefined);
+  const autoDisc = openapiMeta?.discriminator ? null : buildAutoDiscriminator(schema);
   const autoDiscriminator = autoDisc?.discriminator;
-  const { availability, ...rest } = meta ?? {};
+  const { availability: _availabilityFromOpenapi, ...restOpenapi } = openapiMeta;
   const xState = getXState(availability, env ?? { serverless: false });
   const extensions = {
-    ...rest,
+    ...restOpenapi,
     ...(autoDiscriminator ? { discriminator: autoDiscriminator } : {}),
     ...(xState !== undefined ? { 'x-state': xState } : {}),
   };
@@ -522,6 +592,27 @@ function rewriteDefsRefs(obj: unknown, replacements: Record<string, string>): un
   return result;
 }
 
+function rewriteRootRef(obj: unknown, targetRef: string): unknown {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => rewriteRootRef(item, targetRef));
+  }
+
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+    if (key === '$ref' && value === '#') {
+      result[key] = targetRef;
+    } else {
+      result[key] = rewriteRootRef(value, targetRef);
+    }
+  }
+  return result;
+}
+
 /**
  * Extract `$defs` from a JSON Schema produced by `z.toJSONSchema()`, move
  * the entries into `shared` (→ `components/schemas`), and rewrite all
@@ -560,6 +651,7 @@ function extractDefsToShared(
 
       shared[uniqueKey] = {
         ...rest,
+        title: (rest as Record<string, unknown>).title ?? stableId,
         ...(oasExt as OasMetaExtensions | undefined),
       } as OpenAPIV3.SchemaObject;
     } else {
@@ -626,8 +718,13 @@ function hoistMarkedSchemas(
 
     shared[name] = {
       ...processed,
+      title: (processed as Record<string, unknown>).title ?? name,
       ...(oasExt as OasMetaExtensions | undefined),
     } as OpenAPIV3.SchemaObject;
+    shared[name] = rewriteRootRef(
+      shared[name] as Record<string, unknown>,
+      `#/components/schemas/${name}`
+    ) as OpenAPIV3.SchemaObject;
 
     return { $ref: `#/components/schemas/${name}` };
   }
@@ -651,8 +748,8 @@ function mergeInlineOasExtensions(node: unknown): unknown {
   }
 
   const obj = node as Record<string, unknown>;
-  if ('$ref' in obj) {
-    return obj;
+  if ('$ref' in obj && typeof obj.$ref === 'string') {
+    return { $ref: obj.$ref };
   }
 
   const { [OAS_EXTENSIONS_MARKER]: oasExt, openapi: _openapi, ...rest } = obj;
@@ -664,6 +761,96 @@ function mergeInlineOasExtensions(node: unknown): unknown {
 
   if (oasExt && typeof oasExt === 'object') {
     Object.assign(result, oasExt);
+  }
+
+  delete result[metaFields.META_FIELD_X_OAS_AVAILABILITY];
+
+  return result;
+}
+
+function applyDefaultsFromSource(source: z.ZodTypeAny, target: unknown): void {
+  if (typeof target !== 'object' || target === null || Array.isArray(target)) {
+    return;
+  }
+
+  const targetObj = target as Record<string, unknown>;
+  const { defaultValue } = unwrapZodOptionalDefault(unwrapZodLazy(source));
+  const isImplicitEmptyObjectDefault =
+    typeof defaultValue === 'object' &&
+    defaultValue !== null &&
+    !Array.isArray(defaultValue) &&
+    Object.keys(defaultValue as Record<string, unknown>).length === 0;
+  if (
+    defaultValue !== undefined &&
+    targetObj.default === undefined &&
+    !isImplicitEmptyObjectDefault
+  ) {
+    targetObj.default = defaultValue;
+  }
+  const sourceUnwrapped = unwrapZodType(source, true);
+  const sourceType = getDefType(sourceUnwrapped);
+
+  if (sourceType === 'object' && targetObj.properties && typeof targetObj.properties === 'object') {
+    const shape = (sourceUnwrapped as any)._zod?.def?.shape as z.ZodRawShape | undefined;
+    if (!shape) {
+      return;
+    }
+    for (const [key, propTarget] of Object.entries(
+      targetObj.properties as Record<string, unknown>
+    )) {
+      const propSource = shape[key] as z.ZodTypeAny | undefined;
+      if (
+        !propSource ||
+        typeof propTarget !== 'object' ||
+        propTarget === null ||
+        Array.isArray(propTarget)
+      ) {
+        continue;
+      }
+      const { defaultValue: propertyDefaultValue } = unwrapZodOptionalDefault(
+        unwrapZodLazy(propSource)
+      );
+      const isImplicitEmptyObjectPropertyDefault =
+        typeof propertyDefaultValue === 'object' &&
+        propertyDefaultValue !== null &&
+        !Array.isArray(propertyDefaultValue) &&
+        Object.keys(propertyDefaultValue as Record<string, unknown>).length === 0;
+      if (
+        propertyDefaultValue !== undefined &&
+        (propTarget as Record<string, unknown>).default === undefined &&
+        !isImplicitEmptyObjectPropertyDefault
+      ) {
+        (propTarget as Record<string, unknown>).default = propertyDefaultValue;
+      }
+      applyDefaultsFromSource(propSource, propTarget);
+    }
+    return;
+  }
+
+  if (sourceType === 'array' && targetObj.items && typeof targetObj.items === 'object') {
+    const itemSource = (sourceUnwrapped as any)._zod?.def?.element as z.ZodTypeAny | undefined;
+    if (itemSource) {
+      applyDefaultsFromSource(itemSource, targetObj.items);
+    }
+  }
+}
+
+function removeIpv4Pattern(node: unknown): unknown {
+  if (typeof node !== 'object' || node === null) {
+    return node;
+  }
+
+  if (Array.isArray(node)) {
+    return node.map((item) => removeIpv4Pattern(item));
+  }
+
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+    result[key] = removeIpv4Pattern(value);
+  }
+
+  if (result.format === 'ipv4' && 'pattern' in result) {
+    delete result.pattern;
   }
 
   return result;
@@ -757,40 +944,246 @@ function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, un
   return result;
 }
 
-export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
-  const unwrapped = unwrapZodType(schema, true);
+/**
+ * Walk structural containers and unwrap defaults/pipes so `z.toJSONSchema` does not hit
+ * `pipeProcessor` / `defaultProcessor` with missing `ctx.seen` entries (Zod v4 quirk).
+ * Patch only keys that change via `.extend` so sibling schemas keep stable identity for `meta.id`.
+ */
+function deepUnwrapForJsonSchema(root: z.ZodTypeAny): z.ZodTypeAny {
+  const visit = (t: z.ZodTypeAny): z.ZodTypeAny => {
+    if (getDefType(t) === 'lazy') {
+      return t;
+    }
+    const u = unwrapZodType(t, true);
+    if (getDefType(u) === 'lazy') {
+      return u;
+    }
+    const dt = getDefType(u);
 
-  // Use Zod's native toJSONSchema
-  const raw = z.toJSONSchema(unwrapped as unknown as z.ZodType, {
-    unrepresentable: 'any',
-    io: 'input',
-    override: ({ zodSchema, jsonSchema: js }) => {
-      // z.never() is "unrepresentable" and gets converted to {} (any) by
-      // the 'any' strategy. In JSON Schema / OpenAPI, the correct
-      // representation of "never" is { not: {} }, so fix it up here.
-      if ('_zod' in zodSchema && (zodSchema as any)._zod?.def?.type === 'never') {
-        // Clear all existing keys and set { not: {} }
-        for (const key of Object.keys(js)) {
-          delete (js as any)[key];
+    if (dt !== 'object' && dt !== 'array' && dt !== 'union') {
+      return u;
+    }
+
+    if (dt === 'object') {
+      const obj = u as z.ZodObject<any>;
+      const def = (obj as any)._zod.def;
+      const originalShape = def.shape as z.ZodRawShape;
+      const keys = Object.keys(originalShape);
+      let patched = obj;
+      let changed = false;
+      for (const key of keys) {
+        const origChild = originalShape[key] as z.ZodTypeAny;
+        const next = visit(origChild);
+        if (next !== origChild) {
+          patched = patched.extend({ [key]: next } as z.ZodRawShape);
+          changed = true;
         }
-        (js as any).not = {};
-        return;
       }
+      return changed ? patched : obj;
+    }
 
-      const zSchema = zodSchema as unknown as z.ZodType;
-
-      const stableName = getStableComponentName(zSchema);
-      if (stableName) {
-        (js as any)[COMPONENT_ID_MARKER] = stableName;
-        delete (js as any).id;
+    if (dt === 'array') {
+      const arr = u as z.ZodArray<any>;
+      const def = (arr as any)._zod.def;
+      const nextEl = visit(def.element);
+      if (nextEl === def.element) {
+        return arr;
       }
-
-      const oasExtensions = normalizeOasMetaExtensions(zSchema, opts.env);
-      if (oasExtensions) {
-        (js as any)[OAS_EXTENSIONS_MARKER] = oasExtensions;
+      let cloned = arr.clone({ ...def, element: nextEl });
+      const metaBag = z.globalRegistry.get(arr as z.ZodTypeAny);
+      if (metaBag && typeof metaBag === 'object' && Object.keys(metaBag).length > 0) {
+        cloned = cloned.meta(metaBag as Record<string, unknown>);
       }
-    },
-  }) as Record<string, any>;
+      return cloned;
+    }
+
+    if (dt === 'union') {
+      const uni = u as z.ZodUnion<any>;
+      const def = (uni as any)._zod.def;
+      const optsIn = def.options as z.ZodTypeAny[];
+      const optsOut = optsIn.map((opt) => visit(opt));
+      const changed = optsOut.some((o, i) => o !== optsIn[i]);
+      if (!changed) {
+        return uni;
+      }
+      let cloned = uni.clone({ ...def, options: optsOut });
+      const metaBag = z.globalRegistry.get(uni as z.ZodTypeAny);
+      if (metaBag && typeof metaBag === 'object' && Object.keys(metaBag).length > 0) {
+        cloned = cloned.meta(metaBag as Record<string, unknown>);
+      }
+      return cloned;
+    }
+
+    return u;
+  };
+
+  return visit(root);
+}
+
+/**
+ * Map/record Types use `z.any().meta({ x-oas-get-additional-properties: () => value })`; the getter
+ * does not survive `z.toJSONSchema()`. Expand to `z.record(z.string(), value)` for OAS only.
+ * Defined after {@link deepUnwrapForJsonSchema} so record values can be unwrapped safely.
+ */
+function materializeMapRecordForOas(root: z.ZodTypeAny): z.ZodTypeAny {
+  const visit = (t: z.ZodTypeAny): z.ZodTypeAny => {
+    if (getDefType(t) === 'lazy') {
+      return t;
+    }
+
+    // Preserve `z.optional()` wrappers (e.g. `schema.maybe(...)`) when materializing inner `z.any()`
+    // record placeholders. `unwrapZodType` would strip optional before we see `any`, which drops
+    // registry/meta such as `x-oas-optional` and breaks OpenAPI `required` computation downstream.
+    if (getDefType(t) === 'optional') {
+      const inner = (t as any)._zod.def.innerType as z.ZodTypeAny;
+      const materializedInner = visit(inner);
+      if (materializedInner === inner) {
+        return t;
+      }
+      let rebuilt = materializedInner.optional();
+      const optionalMeta = z.globalRegistry.get(t as z.ZodTypeAny);
+      if (
+        optionalMeta &&
+        typeof optionalMeta === 'object' &&
+        Object.keys(optionalMeta).length > 0
+      ) {
+        rebuilt = rebuilt.meta(optionalMeta as Record<string, unknown>);
+      }
+      return rebuilt;
+    }
+
+    const u = unwrapZodType(t, true);
+    if (getDefType(u) === 'lazy') {
+      return t;
+    }
+
+    const reg = z.globalRegistry.get(u as z.ZodTypeAny) as Record<string, unknown> | undefined;
+    const fn = reg?.[metaFields.META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES];
+    if (typeof fn === 'function' && getDefType(u) === 'any') {
+      const innerRaw = (fn as () => z.ZodTypeAny)();
+      let valSchema = unwrapZodType(innerRaw, true);
+      valSchema = deepUnwrapForJsonSchema(valSchema);
+      let rec = z.record(z.string(), valSchema);
+      const metaBag = z.globalRegistry.get(u as z.ZodTypeAny) as
+        | Record<string, unknown>
+        | undefined;
+      if (metaBag && typeof metaBag === 'object') {
+        const { [metaFields.META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]: _drop, ...restMeta } =
+          metaBag;
+        if (Object.keys(restMeta).length > 0) {
+          rec = rec.meta(restMeta as Record<string, unknown>);
+        }
+      }
+      return rec;
+    }
+
+    const dt = getDefType(u);
+    if (dt === 'object') {
+      const obj = u as z.ZodObject<any>;
+      const shape = obj.shape as z.ZodRawShape;
+      let nextObj = obj;
+      let changed = false;
+      for (const k of Object.keys(shape)) {
+        const nk = visit(shape[k] as z.ZodTypeAny);
+        if (nk !== shape[k]) {
+          nextObj = nextObj.extend({ [k]: nk } as z.ZodRawShape);
+          changed = true;
+        }
+      }
+      return changed ? nextObj : t;
+    }
+
+    if (dt === 'array') {
+      const arr = u as z.ZodArray<any>;
+      const def = (arr as any)._zod.def;
+      const nel = visit(def.element as z.ZodTypeAny);
+      if (nel === def.element) {
+        return t;
+      }
+      let cloned = arr.clone({ ...def, element: nel });
+      const metaBag = z.globalRegistry.get(arr as z.ZodTypeAny);
+      if (metaBag && typeof metaBag === 'object') {
+        cloned = cloned.meta(metaBag as Record<string, unknown>);
+      }
+      return cloned;
+    }
+
+    if (dt === 'union') {
+      const uni = u as z.ZodUnion<any>;
+      const def = (uni as any)._zod.def;
+      const optsIn = def.options as z.ZodTypeAny[];
+      const optsOut = optsIn.map((opt) => visit(opt));
+      const changed = optsOut.some((o, i) => o !== optsIn[i]);
+      if (!changed) {
+        return t;
+      }
+      let cloned = uni.clone({ ...def, options: optsOut });
+      const metaBag = z.globalRegistry.get(uni as z.ZodTypeAny);
+      if (metaBag && typeof metaBag === 'object') {
+        cloned = cloned.meta(metaBag as Record<string, unknown>);
+      }
+      return cloned;
+    }
+
+    return t;
+  };
+
+  return visit(root);
+}
+
+export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
+  const rootWrapper = unwrapZodLazy(schema);
+  const { description: rootDescription } = unwrapZodOptionalDefault(rootWrapper);
+  const unwrapped = unwrapZodType(schema, true);
+  const prepared = materializeMapRecordForOas(unwrapped);
+
+  const runToJsonSchema = (root: z.ZodTypeAny) =>
+    z.toJSONSchema(root as unknown as z.ZodType, {
+      unrepresentable: 'any',
+      io: 'input',
+      metadata: createDedupingMetadataRegistry() as unknown as typeof z.globalRegistry,
+      override: ({ zodSchema, jsonSchema: js }) => {
+        // z.never() is "unrepresentable" and gets converted to {} (any) by
+        // the 'any' strategy. In JSON Schema / OpenAPI, the correct
+        // representation of "never" is { not: {} }, so fix it up here.
+        if ('_zod' in zodSchema && (zodSchema as any)._zod?.def?.type === 'never') {
+          // Clear all existing keys and set { not: {} }
+          for (const key of Object.keys(js)) {
+            delete (js as any)[key];
+          }
+          (js as any).not = {};
+          return;
+        }
+
+        const zSchema = zodSchema as unknown as z.ZodType;
+
+        const stableName = getStableComponentNameDeep(zSchema);
+        if (stableName) {
+          (js as any)[COMPONENT_ID_MARKER] = stableName;
+          delete (js as any).id;
+        }
+
+        const oasExtensions = normalizeOasMetaExtensions(zSchema, opts.env);
+        if (oasExtensions) {
+          (js as any)[OAS_EXTENSIONS_MARKER] = oasExtensions;
+        }
+      },
+    }) as Record<string, any>;
+
+  let raw: Record<string, any>;
+  try {
+    raw = runToJsonSchema(prepared);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (
+      err instanceof TypeError &&
+      (msg.includes("setting 'ref'") || msg.includes('undefined') || msg.includes('ref'))
+    ) {
+      raw = runToJsonSchema(deepUnwrapForJsonSchema(prepared));
+    } else {
+      throw err;
+    }
+  }
 
   // Remove $schema (not valid inside OpenAPI schema objects)
   const { $schema, $defs, ...jsonSchema } = raw;
@@ -831,16 +1224,19 @@ export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
   // here so they still become named components).
   processedSchema = hoistMarkedSchemas(processedSchema, shared) as Record<string, unknown>;
   processedSchema = mergeInlineOasExtensions(processedSchema) as Record<string, unknown>;
+  processedSchema = removeIpv4Pattern(processedSchema) as Record<string, unknown>;
 
   for (const [key, value] of Object.entries(shared)) {
     shared[key] = mergeInlineOasExtensions(
       hoistMarkedSchemas(value, shared)
     ) as OpenAPIV3.SchemaObject;
+    shared[key] = removeIpv4Pattern(shared[key]) as OpenAPIV3.SchemaObject;
   }
 
   // Apply the same JSON-description post-processing
-  const description = (unwrapped as any).description;
+  const description = rootDescription ?? (prepared as any).description;
   const processed = applyJsonDescription(processedSchema as Record<string, any>, description);
+  applyDefaultsFromSource(rootWrapper, processed);
 
   return {
     shared,

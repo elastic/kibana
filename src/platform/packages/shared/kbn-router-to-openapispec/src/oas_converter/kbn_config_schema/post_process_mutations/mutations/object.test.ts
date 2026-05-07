@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { metaFields, schema } from '@kbn/config-schema';
+import type { OpenAPIV3 } from 'openapi-types';
+import { createCtx } from '../context';
 import { joi2JsonInternal } from '../../parse';
 import { processObject } from './object';
+
+const { META_FIELD_X_OAS_OPTIONAL } = metaFields;
 
 test.each([
   [schema.object({}), { type: 'object', properties: {}, additionalProperties: false }],
@@ -36,8 +40,44 @@ test.each([
       required: ['key1'],
     },
   ],
+  [
+    schema.object({ opt: schema.maybe(schema.string()) }),
+    {
+      type: 'object',
+      properties: {
+        opt: { type: 'string' },
+      },
+      additionalProperties: false,
+    },
+  ],
 ])('processObject %#', (input, result) => {
-  const parsed = joi2JsonInternal(input.getSchema());
+  const parsed = joi2JsonInternal(input.getInternalSchema());
   processObject(parsed);
   expect(parsed).toEqual(result);
+});
+
+test('processObject omits optional fields from required when property uses $ref to shared schema with x-oas-optional', () => {
+  const ctx = createCtx();
+  ctx.addSharedSchema('security_query_roles_sort', {
+    type: 'object',
+    properties: { field: { type: 'string' } },
+    required: ['field'],
+    [META_FIELD_X_OAS_OPTIONAL]: true,
+  } as OpenAPIV3.SchemaObject);
+  const parent: Record<string, unknown> = {
+    type: 'object',
+    properties: {
+      sort: { $ref: '#/components/schemas/security_query_roles_sort' },
+      name: { type: 'string' },
+    },
+    required: ['sort', 'name'],
+    additionalProperties: false,
+  };
+  processObject(parent as Parameters<typeof processObject>[0], ctx);
+  expect(parent.required).toEqual(['name']);
+  expect(
+    (ctx.getSharedSchemas().security_query_roles_sort as Record<string, unknown>)[
+      META_FIELD_X_OAS_OPTIONAL
+    ]
+  ).toBeUndefined();
 });

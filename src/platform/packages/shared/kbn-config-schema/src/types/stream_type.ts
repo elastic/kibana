@@ -8,18 +8,29 @@
  */
 
 import typeDetect from 'type-detect';
-import type { Stream } from 'stream';
-import { internals } from '../internals';
-import type { TypeOptions } from './type';
+import { Stream } from 'stream';
+import { z as zod } from '@kbn/zod';
+
+import type { TypeOptions } from './interfaces';
 import { Type } from './type';
 
 export class StreamType extends Type<Stream> {
   constructor(options?: TypeOptions<Stream>) {
-    super(internals.stream(), options);
+    super(
+      zod.custom<Stream>(
+        (val): val is Stream => val instanceof Stream,
+        'expected value of type [Stream]'
+      ),
+      options
+    );
+  }
+
+  protected structureTypeLabel(): string {
+    return 'stream';
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {
-    if (type === 'any.required' || type === 'stream.base') {
+    if (type === 'any.required' || type === 'invalid_type' || type === 'custom') {
       return `expected value of type [Stream] but got [${typeDetect(value)}]`;
     }
   }

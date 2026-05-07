@@ -7,22 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { internals } from '../internals';
+import { z as zod } from '@kbn/zod';
+
 import { Type } from './type';
 
 export class LiteralType<T> extends Type<T> {
-  private expectedValue: T;
+  public readonly expectedValue: T;
 
   constructor(value: T) {
-    super(internals.any().valid(value));
+    super(zod.literal(value as any), {});
     this.expectedValue = value;
   }
 
-  protected handleError(type: string) {
-    switch (type) {
-      case 'any.required':
-      case 'any.only':
-        return `expected value to equal [${this.expectedValue}]`;
-    }
+  protected structureTypeLabel(): string {
+    return String(this.expectedValue);
+  }
+
+  protected handleError(_type: string) {
+    return `expected value to equal [${this.expectedValue}]`;
   }
 }

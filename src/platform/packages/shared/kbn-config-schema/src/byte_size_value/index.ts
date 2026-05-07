@@ -90,7 +90,13 @@ export const mb = (value: number) => kb(value * 1024);
 export const gb = (value: number) => mb(value * 1024);
 export const tb = (value: number) => gb(value * 1024);
 
-export function ensureByteSizeValue(value?: ByteSizeValue | string | number) {
+export function ensureByteSizeValue(value: ByteSizeValue | string | number): ByteSizeValue;
+export function ensureByteSizeValue(
+  value?: ByteSizeValue | string | number
+): ByteSizeValue | undefined;
+export function ensureByteSizeValue(
+  value?: ByteSizeValue | string | number
+): ByteSizeValue | undefined {
   if (typeof value === 'string') {
     return ByteSizeValue.parse(value);
   }
