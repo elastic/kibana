@@ -34,6 +34,103 @@ import {
   useAiAssistantPriorUsage,
 } from './use_ai_assistant_prior_usage';
 
+interface ShowToastParams {
+  notifications: NotificationsStart;
+  i18nService: I18nStart;
+  theme: ThemeServiceStart;
+  userProfile: UserProfileServiceStart;
+  genAiSettingsUrl: string;
+}
+
+interface ShowCtaToastParams extends ShowToastParams {
+  canRevertToAssistant: boolean;
+}
+
+function showRevertToast({
+  notifications,
+  i18nService,
+  theme,
+  userProfile,
+  genAiSettingsUrl,
+}: ShowToastParams) {
+  notifications.toasts.addSuccess({
+    title: i18n.translate('xpack.agentBuilder.announcement.revertToast.title', {
+      defaultMessage: 'Reverted to AI Assistant',
+    }),
+    text: toMountPoint(
+      <>
+        <p>
+          {i18n.translate('xpack.agentBuilder.announcement.revertToast.body', {
+            defaultMessage: 'All users in this space will now use the AI Assistant.',
+          })}
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.agentBuilder.announcement.revertToast.manageLink"
+            defaultMessage="Manage further changes in {link}"
+            values={{
+              link: (
+                <EuiLink href={genAiSettingsUrl}>
+                  {'GenAI '}
+                  <span style={{ whiteSpace: 'nowrap' }}>
+                    {'Settings '}
+                    <EuiIcon type="popout" size="s" aria-hidden="true" />
+                  </span>
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      </>,
+      { i18n: i18nService, theme, userProfile }
+    ),
+  });
+}
+
+function showCtaToast({
+  notifications,
+  i18nService,
+  theme,
+  userProfile,
+  canRevertToAssistant,
+  genAiSettingsUrl,
+}: ShowCtaToastParams) {
+  notifications.toasts.addSuccess({
+    title: i18n.translate('xpack.agentBuilder.announcement.ctaToast.title', {
+      defaultMessage: "You're now using AI Agent",
+    }),
+    ...(canRevertToAssistant && {
+      text: toMountPoint(
+        <>
+          <p>
+            {i18n.translate('xpack.agentBuilder.announcement.ctaToast.body', {
+              defaultMessage: 'All users in this space will use AI Agent.',
+            })}
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.agentBuilder.announcement.ctaToast.manageLink"
+              defaultMessage="Manage further changes in {link}"
+              values={{
+                link: (
+                  <EuiLink href={genAiSettingsUrl}>
+                    {'GenAI '}
+                    <span style={{ whiteSpace: 'nowrap' }}>
+                      {'Settings '}
+                      <EuiIcon type="popout" size="s" aria-hidden="true" />
+                    </span>
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </>,
+        { i18n: i18nService, theme, userProfile }
+      ),
+    }),
+  });
+}
+
 export function AgentBuilderAnnouncementModalController() {
   const { services } = useKibana<{
     spaces?: SpacesPluginStart;
@@ -96,6 +193,17 @@ export function AgentBuilderAnnouncementModalController() {
           source: 'agent_builder_nav_control',
           ...telemetryContext,
         });
+        const genAiSettingsUrl = services.application.getUrlForApp('management', {
+          path: '/ai/genAiSettings',
+        });
+        showCtaToast({
+          notifications: services.notifications,
+          i18nService: services.i18n,
+          theme: services.theme,
+          userProfile: services.userProfile,
+          canRevertToAssistant,
+          genAiSettingsUrl,
+        });
         setIsDismissed(true);
       }}
       onRevert={async () => {
@@ -109,37 +217,12 @@ export function AgentBuilderAnnouncementModalController() {
           const genAiSettingsUrl = services.application.getUrlForApp('management', {
             path: '/ai/genAiSettings',
           });
-          services.notifications.toasts.addSuccess({
-            title: i18n.translate('xpack.agentBuilder.announcement.revertToast.title', {
-              defaultMessage: 'Reverted to AI Assistant',
-            }),
-            text: toMountPoint(
-              <>
-                <p>
-                  {i18n.translate('xpack.agentBuilder.announcement.revertToast.body', {
-                    defaultMessage: 'All users in this space will now use the AI Assistant.',
-                  })}
-                </p>
-                <p>
-                  <FormattedMessage
-                    id="xpack.agentBuilder.announcement.revertToast.manageLink"
-                    defaultMessage="Manage further changes in {link}"
-                    values={{
-                      link: (
-                        <EuiLink href={genAiSettingsUrl}>
-                          {'GenAI '}
-                          <span style={{ whiteSpace: 'nowrap' }}>
-                            {'Settings '}
-                            <EuiIcon type="popout" size="s" aria-hidden="true" />
-                          </span>
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              </>,
-              { i18n: services.i18n, theme: services.theme, userProfile: services.userProfile }
-            ),
+          showRevertToast({
+            notifications: services.notifications,
+            i18nService: services.i18n,
+            theme: services.theme,
+            userProfile: services.userProfile,
+            genAiSettingsUrl,
           });
         } catch (_err) {
           // silent
