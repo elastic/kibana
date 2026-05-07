@@ -57,11 +57,13 @@ export function initializeViewModeManager({
   const canUserEditDashboard = isDashboardInEditAccessMode || canUserManageAccessControl;
 
   function getInitialViewMode() {
-    if (
-      isManagedAndLocked ||
-      !getDashboardCapabilities().showWriteControls ||
-      !canUserEditDashboard
-    ) {
+    // Managed dashboards always *default* to view mode even when the
+    // `dashboard:allowEditingManagedDashboards` setting is on — entering
+    // edit mode has to be a deliberate user action via the Edit button,
+    // not an auto-resume from a prior session's unsaved-edits backup.
+    // The bypass below in `setViewMode` is what lets the Edit click
+    // actually take effect.
+    if (isManaged || !getDashboardCapabilities().showWriteControls || !canUserEditDashboard) {
       return 'view';
     }
 
