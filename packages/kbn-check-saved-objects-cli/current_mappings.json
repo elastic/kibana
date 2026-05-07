@@ -1476,10 +1476,6 @@
       }
     }
   },
-  "entity-store-ccs-state": {
-    "dynamic": false,
-    "properties": {}
-  },
   "entity-definition": {
     "dynamic": false,
     "properties": {
@@ -1626,6 +1622,10 @@
         "type": "keyword"
       }
     }
+  },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
   },
   "entity-store-global-state": {
     "dynamic": false,
@@ -4870,6 +4870,9 @@
         "type": "keyword"
       },
       "entityType": {
+        "type": "keyword"
+      },
+      "errorCode": {
         "type": "keyword"
       },
       "message": {
