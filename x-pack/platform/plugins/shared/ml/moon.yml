@@ -145,6 +145,8 @@ dependsOn:
   - '@kbn/file-upload-plugin'
   - '@kbn/file-upload'
   - '@kbn/file-upload-common'
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
@@ -158,6 +160,7 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - __mocks__/**/*
+    - test/scout/**/*
     - common/**/*.json
     - public/**/*.json
     - server/**/*.json

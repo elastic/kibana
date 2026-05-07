@@ -13,6 +13,7 @@ plugins:
     - lens
     - logstash
     - maps
+    - ml
     - observability
     - observability_onboarding
     - painless_lab
