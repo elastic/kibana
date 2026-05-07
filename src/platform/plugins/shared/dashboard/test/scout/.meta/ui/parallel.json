@@ -1,5 +1,5 @@
 {
-  "sha1": "7f972f6609b25c7f81ccd4a70abd4eca02a0d52a",
+  "sha1": "ed9e8c3347a58be18965899eedf4b6e85cf181a3",
   "tests": [
     {
       "id": "98600d12651f127-aa69b48f5334963",
@@ -51,6 +51,26 @@
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/async_dashboard.spec.ts",
         "line": 52,
         "column": 12
+      }
+    },
+    {
+      "id": "3e4259fe911aa15-3d9ded58f5789be",
+      "title": "Dashboard add panel flyout renders add panel flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_add_panel_flyout.spec.ts",
+        "line": 82,
+        "column": 14
       }
     },
     {
@@ -315,42 +335,6 @@
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
         "line": 117,
         "column": 12
-      }
-    },
-    {
-      "id": "423881a4b2073fc-96f9b7edc4e596f",
-      "title": "Dashboard panel listing (includes observability group) renders panel groups and panel count",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_panel_listing_obs_group.spec.ts",
-        "line": 65,
-        "column": 14
-      }
-    },
-    {
-      "id": "1ce2a7a22b5143b-7e437a63d08c8ab",
-      "title": "Dashboard panel listing renders panel groups and panel count",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_panel_listing.spec.ts",
-        "line": 51,
-        "column": 14
       }
     },
     {
