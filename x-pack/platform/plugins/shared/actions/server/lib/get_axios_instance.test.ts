@@ -417,7 +417,6 @@ describe('getAxiosInstance', () => {
       })
     );
   });
-
 });
 
 describe('buildUserAgent', () => {
