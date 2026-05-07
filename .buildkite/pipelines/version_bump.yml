@@ -2,7 +2,8 @@ notify:
   - slack:
       channels:
         - '#kibana-operations-alerts'
-    if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/) && (build.state == 'passed' || build.state == 'failed')
+    if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/) &&
+      (build.state == 'passed' || build.state == 'failed')
   - slack:
       channels:
         - '#mission-control'
@@ -30,9 +31,9 @@ steps:
     depends_on: bump-version
     agents:
       image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
-      cpu: 250m
-      memory: 512Mi
-      ephemeralStorage: 1Gi
+      cpu: 2
+      memory: 4G
+      ephemeralStorage: 10G
     command:
       - echo "Starting DRA artifacts retrieval..."
     timeout_in_minutes: 240

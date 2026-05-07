@@ -228,7 +228,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
    * Gates skill + tool registration so the feature can ship dark and be enabled per environment.
    */
-  pciComplianceAgentBuilder: false,
+  pciComplianceAgentBuilder: true,
 
   /**
    * Enables the new flyout using the EUI flyout system
