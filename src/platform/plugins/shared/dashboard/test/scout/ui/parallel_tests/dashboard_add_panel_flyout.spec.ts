@@ -13,7 +13,24 @@ import { expect } from '@kbn/scout/ui';
 import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
 
 const getExpected = (config: ScoutTestConfig) => {
-  if (config.projectType === 'es' || config.projectType === 'security') {
+  if (config.projectType === 'es') {
+    // In ES serverless, xpack.ml.ad.enabled is false, so the 3 Anomaly Detection
+    // actions (swim lane, anomaly charts, single metric viewer) fail isCompatible
+    // and are excluded from the flyout.
+    return {
+      groups: [
+        'visualizationsGroup',
+        'controlsGroup',
+        'annotation-and-navigationGroup',
+        'mlGroup',
+        'logs-aiopsGroup',
+        'legacyGroup',
+      ],
+      count: 17,
+    };
+  }
+
+  if (config.projectType === 'security') {
     return {
       groups: [
         'visualizationsGroup',
@@ -47,8 +64,7 @@ const getExpected = (config: ScoutTestConfig) => {
  * This test exists to ensures additions to menu
  * notify our team and can be reviewed by design.
  */
-// Failing: See https://github.com/elastic/kibana/issues/268101
-spaceTest.describe.skip(
+spaceTest.describe(
   'Dashboard add panel flyout',
   {
     tag: [
@@ -88,7 +104,9 @@ spaceTest.describe.skip(
 
       await spaceTest.step('verify panel groups', async () => {
         const groups = await pageObjects.dashboard.getAddPanelFlyoutGroups();
-        expect(groups).toStrictEqual(expectedGroups);
+        // Sort before comparing: some groups share the same sort order value and their
+        // relative position is non-deterministic (depends on async action registration order).
+        expect([...groups].sort()).toStrictEqual([...expectedGroups].sort());
       });
 
       await spaceTest.step('verify total panel count', async () => {
