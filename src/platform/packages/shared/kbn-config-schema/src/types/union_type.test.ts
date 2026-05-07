@@ -153,6 +153,20 @@ test('handles maybe', () => {
   expect(type.validate('test')).toBe('test');
 });
 
+test('rejects undefined for single object branch when every key is optional (Joi parity)', () => {
+  const type = schema.oneOf([
+    schema.object({
+      text: schema.maybe(schema.string()),
+      limit: schema.maybe(schema.number()),
+    }),
+  ]);
+
+  expect(() => type.validate(undefined)).toThrowErrorMatchingInlineSnapshot(
+    `"expected at least one defined value but got [undefined]"`
+  );
+  expect(type.validate({})).toEqual({});
+});
+
 test('fails if not matching type', () => {
   const type = schema.oneOf([schema.string()]);
 

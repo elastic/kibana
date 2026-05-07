@@ -11,8 +11,7 @@ import typeDetect from 'type-detect';
 import type { z } from '@kbn/zod';
 import { z as zod } from '@kbn/zod';
 
-import type { SchemaTypeError } from '../errors';
-import { SchemaTypesError, ValidationError } from '../errors';
+import { SchemaTypeError, SchemaTypesError, ValidationError } from '../errors';
 import type {
   ExtendsDeepOptions,
   SchemaStructureEntry,
@@ -21,7 +20,26 @@ import type {
 } from './interfaces';
 import { prependPathSegment, unwrapValidationError } from './error_utils';
 import { Reference } from '../references';
+import { MaybeType } from './maybe_type';
+import { ObjectType } from './object_type';
 import { Type } from './type';
+
+/**
+ * Joi parity: `oneOf([schema.object({ only schema.maybe(...) })])` must reject `undefined` even though
+ * `{}` would validate — otherwise required parent keys accept missing values when inner coerces
+ * `undefined` → `{}`.
+ */
+function isOnlyMaybeObjectBranch(branch: Type<any>): branch is ObjectType<any> {
+  if (!(branch instanceof ObjectType)) {
+    return false;
+  }
+  const props = branch.getPropSchemas();
+  const keys = Object.keys(props);
+  if (keys.length === 0) {
+    return false;
+  }
+  return Object.values(props).every((p) => p instanceof MaybeType);
+}
 
 export type UnionTypeOptions<T> = TypeOptions<T>;
 
@@ -74,6 +92,18 @@ export class UnionType<
       } else {
         val = def as T;
       }
+    }
+
+    if (
+      val === undefined &&
+      this.unionTypes.length === 1 &&
+      this.typeOptions.defaultValue === undefined &&
+      isOnlyMaybeObjectBranch(this.unionTypes[0])
+    ) {
+      throw new ValidationError(
+        new SchemaTypeError(`expected at least one defined value but got [${typeDetect(val)}]`, []),
+        namespace
+      );
     }
 
     const errors: SchemaTypeError[] = [];

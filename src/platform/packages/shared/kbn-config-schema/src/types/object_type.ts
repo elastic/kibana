@@ -319,19 +319,6 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
 
     const src = val as Record<string, unknown>;
 
-    if (policy === 'forbid') {
-      for (const key of Object.keys(src)) {
-        if (!(key in this.props)) {
-          throw new ValidationError(
-            new SchemaTypeError(`Additional properties are not allowed ('${key}' was unexpected)`, [
-              key,
-            ]),
-            namespace
-          );
-        }
-      }
-    }
-
     const output: Record<string, unknown> = {};
     const frame = getValidationFrame();
     // Validate in schema declaration order so `schema.siblingRef` / conditionals see earlier keys
@@ -363,6 +350,19 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
         const validated = propType.validate(raw, context, undefined, childValidationOptions);
         if (!(propType instanceof NeverType && raw === undefined)) {
           output[key] = validated;
+        }
+      }
+    }
+
+    if (policy === 'forbid') {
+      for (const key of Object.keys(src)) {
+        if (!(key in this.props)) {
+          throw new ValidationError(
+            new SchemaTypeError(`Additional properties are not allowed ('${key}' was unexpected)`, [
+              key,
+            ]),
+            namespace
+          );
         }
       }
     }
