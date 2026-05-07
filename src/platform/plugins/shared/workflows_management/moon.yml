@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/navigation-plugin'
   - '@kbn/config-schema'
   - '@kbn/workflows'
+  - '@kbn/human-readable-id'
   - '@kbn/workflows-ui'
   - '@kbn/workflows-yaml'
   - '@kbn/zod'

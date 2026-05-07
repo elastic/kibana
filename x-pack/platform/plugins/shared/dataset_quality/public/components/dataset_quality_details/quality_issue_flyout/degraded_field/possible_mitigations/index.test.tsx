@@ -82,6 +82,11 @@ describe('PossibleDegradedFieldMitigations', () => {
       application: {
         navigateToApp: jest.fn(),
       },
+      notifications: {
+        toasts: {
+          addSuccess: jest.fn(),
+        },
+      },
       share: {
         url: {
           locators: {
