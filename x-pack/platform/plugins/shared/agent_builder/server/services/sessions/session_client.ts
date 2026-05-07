@@ -183,7 +183,12 @@ export class SessionClientImpl implements SessionClient {
     const conversationClient = await this.conversationService.getScopedClient({
       request: this.request,
     });
-    return conversationClient.list({ agentId: options?.agent_id, sessionMode: 'standing' });
+    const results = await conversationClient.list({
+      agentId: options?.agent_id,
+      sessionMode: 'standing',
+    });
+    // Exclude terminated sessions by default — they are not actionable and clutter the list.
+    return results.filter((s) => s.state?.standing_session?.status !== 'terminated');
   }
 
   async terminate(conversationId: string): Promise<void> {

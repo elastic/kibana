@@ -68,7 +68,7 @@ const navLabels = {
     defaultMessage: 'Agents',
   }),
   sessions: i18n.translate('xpack.agentBuilder.routeConfig.sessions', {
-    defaultMessage: 'Sessions',
+    defaultMessage: 'Bots',
   }),
 };
 

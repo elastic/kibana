@@ -37,10 +37,10 @@ import { SessionStatusBadge } from './session_status_badge';
 
 const labels = {
   title: i18n.translate('xpack.agentBuilder.sessions.view.title', {
-    defaultMessage: 'Sessions',
+    defaultMessage: 'Bots',
   }),
   newSession: i18n.translate('xpack.agentBuilder.sessions.view.newSession', {
-    defaultMessage: 'New session',
+    defaultMessage: 'New bot',
   }),
   columnName: i18n.translate('xpack.agentBuilder.sessions.view.column.name', {
     defaultMessage: 'Name',
@@ -64,10 +64,10 @@ const labels = {
     defaultMessage: 'Terminate',
   }),
   emptyState: i18n.translate('xpack.agentBuilder.sessions.view.emptyState', {
-    defaultMessage: 'No sessions yet. Create one to get started.',
+    defaultMessage: 'No bots yet. Create one to get started.',
   }),
   modalTitle: i18n.translate('xpack.agentBuilder.sessions.view.modal.title', {
-    defaultMessage: 'New session',
+    defaultMessage: 'New bot',
   }),
   modalNameLabel: i18n.translate('xpack.agentBuilder.sessions.view.modal.nameLabel', {
     defaultMessage: 'Name',

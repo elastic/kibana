@@ -71,7 +71,7 @@ const conversationListScrollRegionLabel = i18n.translate(
 );
 
 const sessionsLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.sessions', {
-  defaultMessage: 'Sessions',
+  defaultMessage: 'Bots',
 });
 
 const newSessionLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.newSession', {

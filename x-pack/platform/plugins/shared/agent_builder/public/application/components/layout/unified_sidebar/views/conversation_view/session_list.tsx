@@ -19,7 +19,7 @@ import {
 } from '../../../../conversations/conversation_list_item_styles';
 
 const noSessionsLabel = i18n.translate('xpack.agentBuilder.sidebar.sessionList.noSessions', {
-  defaultMessage: 'No sessions',
+  defaultMessage: 'No bots',
 });
 
 const statusDotColors: Record<StandingSessionStatus, string> = {

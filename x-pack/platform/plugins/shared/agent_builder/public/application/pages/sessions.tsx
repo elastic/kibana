@@ -12,7 +12,7 @@ import { appPaths } from '../utils/app_paths';
 import { AgentBuilderSessionsView } from '../components/sessions/sessions_view';
 
 const sessionsTitle = i18n.translate('xpack.agentBuilder.sessions.title', {
-  defaultMessage: 'Sessions',
+  defaultMessage: 'Bots',
 });
 
 export const AgentBuilderSessionsPage: React.FC = () => {

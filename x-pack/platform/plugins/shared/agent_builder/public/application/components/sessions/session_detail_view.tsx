@@ -18,7 +18,7 @@ import { queryKeys } from '../../query_keys';
 
 const standingSessionLabel = i18n.translate(
   'xpack.agentBuilder.sessionDetail.standingSessionLabel',
-  { defaultMessage: 'Standing Session' }
+  { defaultMessage: 'Bot' }
 );
 
 const subscriptionsLabel = (count: number) =>
