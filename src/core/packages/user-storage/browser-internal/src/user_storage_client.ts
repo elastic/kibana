@@ -21,10 +21,8 @@ export interface UserStorageClientParams {
 }
 
 /**
- * Browser-side {@link IUserStorageClient}. Holds a synchronous in-memory
- * cache seeded from server-injected metadata. Mirrors the read/observable
- * surface of `UiSettingsClientCommon`, simplified for user-storage's coarser
- * write semantics (no batching, no validation roundtrip).
+ * Browser-side {@link IUserStorageClient}: a synchronous in-memory cache
+ * seeded from server-injected metadata, with HTTP-backed writes.
  *
  * @internal
  */

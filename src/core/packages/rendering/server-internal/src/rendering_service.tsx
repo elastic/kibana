@@ -74,9 +74,7 @@ export class RenderingService {
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
   private readonly logger: Logger;
-  // Set in `start()`; render() may fire pre-start in theory (e.g. status page
-  // during boot), so the field is treated as possibly-undefined and the
-  // metadata falls back to empty values in that case.
+  // Optional so `render()` is safe to call before `start()` runs.
   private userStorageStart?: UserStorageServiceStart;
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('rendering');
@@ -198,13 +196,8 @@ export class RenderingService {
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
-    // Kick off the user-storage fetch concurrently with the settings reads
-    // below. The browser uses these values to seed its local cache so the
-    // first paint reflects the user's customizations (e.g. side-nav order)
-    // without a flash of defaults. Skipped for anonymous pages because user
-    // storage requires a profile_uid, and bounded by a 50ms timeout so a
-    // slow ES read never blocks first paint — see clusterInfo below for
-    // the same pattern.
+    // 50ms budget inside `fetchUserStorageValues` so a slow ES read never
+    // blocks first paint. Anonymous pages have no profile_uid, so skip.
     const userStorageValuesPromise: Promise<Record<string, unknown>> = isAnonymousPage
       ? Promise.resolve({})
       : this.fetchUserStorageValues(request);
@@ -427,8 +420,7 @@ export class RenderingService {
       defer(() => client.getAll()).pipe(
         timeout(50),
         catchError((err) => {
-          // Expected for first-login (no SO yet) and for ES-slow scenarios.
-          // Log at debug to keep first-login from spamming warn-level logs.
+          // debug, not warn: first-login (no SO yet) is the common case.
           this.logger.debug(
             `Falling back to default userStorage values for render: ${
               err instanceof Error ? err.message : String(err)

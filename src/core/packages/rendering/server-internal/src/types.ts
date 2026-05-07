@@ -69,11 +69,7 @@ export interface RenderingSetupDeps {
 /** @internal */
 export interface RenderingStartDeps {
   featureFlags: FeatureFlagsStart;
-  /**
-   * Optional because `render()` defensively handles `userStorage` being
-   * absent (renders empty `userStorage.values` into the metadata, browser
-   * falls back to defaults). In practice `start()` always passes it.
-   */
+  /** Optional so `render()` is safe to call before `start()` runs. */
   userStorage?: UserStorageServiceStart;
 }
 

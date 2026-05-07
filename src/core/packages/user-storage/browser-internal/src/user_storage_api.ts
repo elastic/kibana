@@ -13,8 +13,7 @@ const BASE_PATH = '/internal/user_storage';
 
 /**
  * Thin HTTP wrapper over the user-storage internal routes. Each method maps
- * to a single round-trip; callers (the {@link UserStorageClient}) own caching
- * and observable state.
+ * to one HTTP round-trip; no caching.
  *
  * @internal
  */
