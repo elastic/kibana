@@ -101,6 +101,9 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/std'
   - '@kbn/core-saved-objects-common'
+  - '@kbn/esql-types'
+  - '@kbn/esql-language'
+  - '@kbn/esql-utils'
 tags:
   - plugin
   - prod
