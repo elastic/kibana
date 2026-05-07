@@ -21,9 +21,11 @@ export type AlertsRagCategory =
   | 'temporal_query'
   | 'field_specific_lookup';
 
-/** Required fields on every alert document provided as RAG context. */
+/** Required and commonly-used fields on every alert document provided as RAG context. */
 export interface AlertDocumentSource {
   '@timestamp': string;
+  host?: { name: string };
+  user?: { name: string };
   kibana: {
     alert: {
       rule: { name: string };
