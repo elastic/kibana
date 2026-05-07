@@ -73,6 +73,8 @@ export {
   IMPACT_OPTIONS,
   VERDICT_COLORS,
   IMPACT_COLORS,
+  getVerdictColor,
+  getImpactColor,
   EVIDENCE_RESULTS,
   EXPOSURE_VALUES,
   SIG_EVENT_DOC_TYPES,

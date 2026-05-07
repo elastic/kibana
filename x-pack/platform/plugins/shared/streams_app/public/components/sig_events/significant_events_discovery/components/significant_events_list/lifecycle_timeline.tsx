@@ -25,9 +25,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { VERDICT_COLORS } from '@kbn/streams-plugin/common';
+import { getVerdictColor } from '@kbn/streams-plugin/common';
 import type {
-  Verdict,
   SigEventDocType,
   LifecycleDiscovery,
   LifecycleVerdict,
@@ -399,10 +398,12 @@ const VerdictItem = React.memo(({ verdict: v }: { verdict: LifecycleVerdict }) =
       <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <strong>{TRANSLATIONS.lifecycle.verdictStep}</strong>
+          <EuiText size="s">
+            <strong>{TRANSLATIONS.lifecycle.verdictStep}</strong>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={VERDICT_COLORS[v.verdict as Verdict] ?? 'default'}>{v.verdict}</EuiBadge>
+          <EuiBadge color={getVerdictColor(v.verdict)}>{v.verdict}</EuiBadge>
         </EuiFlexItem>
         {v.original_verdict && v.original_verdict !== v.verdict && (
           <EuiFlexItem grow={false}>

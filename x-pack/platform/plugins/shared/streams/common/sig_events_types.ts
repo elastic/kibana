@@ -36,6 +36,16 @@ export const IMPACT_COLORS: Record<Impact, string> = {
   low: 'hollow',
 };
 
+export const getVerdictColor = (verdict: string): string => {
+  const colors: Record<string, string> = VERDICT_COLORS;
+  return colors[verdict] ?? 'default';
+};
+
+export const getImpactColor = (impact: string): string => {
+  const colors: Record<string, string> = IMPACT_COLORS;
+  return colors[impact] ?? 'hollow';
+};
+
 // ---------------------------------------------------------------------------
 // Shared sub-schemas (reused by both SigEvent and Lifecycle schemas)
 // ---------------------------------------------------------------------------
@@ -75,20 +85,20 @@ export const sigEventEvidenceSchema = z.object({
 export const sigEventSchema = z.object({
   id: z.string(),
   '@timestamp': z.string(),
-  event_id: z.string(),
-  discovery_id: z.string(),
-  discovery_slug: z.string(),
-  title: z.string(),
-  summary: z.string(),
-  root_cause: z.string(),
-  verdict: z.string(),
-  criticality: z.number(),
-  impact: z.string(),
-  recommended_action: z.string(),
-  rule_names: z.array(z.string()),
-  stream_names: z.array(z.string()),
-  recommendations: z.array(z.string()),
-  last_reviewed_at: z.string(),
+  event_id: z.string().optional().default(''),
+  discovery_id: z.string().optional().default(''),
+  discovery_slug: z.string().optional().default(''),
+  title: z.string().optional().default(''),
+  summary: z.string().optional().default(''),
+  root_cause: z.string().optional().default(''),
+  verdict: z.string().optional().default(''),
+  criticality: z.number().optional().default(0),
+  impact: z.string().optional().default(''),
+  recommended_action: z.string().optional().default(''),
+  rule_names: z.array(z.string()).optional().default([]),
+  stream_names: z.array(z.string()).optional().default([]),
+  recommendations: z.array(z.string()).optional().default([]),
+  last_reviewed_at: z.string().optional().default(''),
   cause_kis: z.array(causeKiSchema).optional().default([]),
   evidences: z.array(sigEventEvidenceSchema).optional().default([]),
   dependency_edges: z.array(dependencyEdgeSchema).optional().default([]),

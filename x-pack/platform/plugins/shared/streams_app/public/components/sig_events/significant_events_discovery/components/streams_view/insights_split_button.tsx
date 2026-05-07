@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+// TODO: Currently unused — kept because we plan to wire the new multi-step
+// discovery pipeline to this button so it can trigger sig-events discovery
+// from the Streams tab.
+
 import type { InferenceConnector } from '@kbn/inference-common';
 import React, { useCallback, useMemo } from 'react';
 import {

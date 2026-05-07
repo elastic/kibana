@@ -23,12 +23,13 @@ import {
   type EuiSelectableOption,
   type CriteriaWithPagination,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import {
-  VERDICT_COLORS,
-  IMPACT_COLORS,
   VERDICT_OPTIONS,
   IMPACT_OPTIONS,
+  getVerdictColor,
+  getImpactColor,
 } from '@kbn/streams-plugin/common';
 import type { Verdict, Impact, SigEvent } from '@kbn/streams-plugin/common';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
@@ -78,7 +79,15 @@ const FilterPopover = ({
       panelPaddingSize="none"
     >
       <EuiSelectable options={options} onChange={onChange}>
-        {(list) => <div style={{ width: 200 }}>{list}</div>}
+        {(list) => (
+          <div
+            css={css`
+              width: 200px;
+            `}
+          >
+            {list}
+          </div>
+        )}
       </EuiSelectable>
     </EuiPopover>
   );
@@ -105,9 +114,7 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     field: 'verdict',
     name: TRANSLATIONS.columns.verdict,
     width: '110px',
-    render: (verdict: Verdict) => (
-      <EuiBadge color={VERDICT_COLORS[verdict] ?? 'default'}>{verdict}</EuiBadge>
-    ),
+    render: (verdict: string) => <EuiBadge color={getVerdictColor(verdict)}>{verdict}</EuiBadge>,
   },
   {
     field: 'title',
@@ -145,9 +152,7 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     field: 'impact',
     name: TRANSLATIONS.columns.impact,
     width: '90px',
-    render: (impact: Impact) => (
-      <EuiBadge color={IMPACT_COLORS[impact] ?? 'hollow'}>{impact}</EuiBadge>
-    ),
+    render: (impact: string) => <EuiBadge color={getImpactColor(impact)}>{impact}</EuiBadge>,
   },
   {
     field: 'criticality',
@@ -251,7 +256,7 @@ export const SignificantEventsList = () => {
       onTableChange({
         page: criteria.page ? { index: criteria.page.index, size: criteria.page.size } : undefined,
         sort: criteria.sort
-          ? { field: criteria.sort.field as string, direction: criteria.sort.direction }
+          ? { field: criteria.sort.field, direction: criteria.sort.direction }
           : undefined,
       });
     },
@@ -271,7 +276,7 @@ export const SignificantEventsList = () => {
   const sorting = useMemo(
     () => ({
       sort: {
-        field: sort.field as keyof SigEvent,
+        field: sort.field,
         direction: sort.direction,
       },
     }),
@@ -281,7 +286,7 @@ export const SignificantEventsList = () => {
   const rowProps = useCallback(
     (item: SigEvent) => ({
       onClick: () => setSelectedEvent(item),
-      style: { cursor: 'pointer' as const },
+      style: { cursor: 'pointer' },
     }),
     []
   );

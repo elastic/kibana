@@ -23,8 +23,8 @@ import {
   EuiLoadingSpinner,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { VERDICT_COLORS, IMPACT_COLORS } from '@kbn/streams-plugin/common';
-import type { Verdict, Impact, SigEvent } from '@kbn/streams-plugin/common';
+import { getVerdictColor, getImpactColor } from '@kbn/streams-plugin/common';
+import type { SigEvent } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 import { LifecycleTimeline } from './lifecycle_timeline';
@@ -62,14 +62,10 @@ export const EventFlyout = ({ event, onClose }: EventFlyoutProps) => {
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiBadge color={VERDICT_COLORS[event.verdict as Verdict] ?? 'default'}>
-              {event.verdict}
-            </EuiBadge>
+            <EuiBadge color={getVerdictColor(event.verdict)}>{event.verdict}</EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color={IMPACT_COLORS[event.impact as Impact] ?? 'hollow'}>
-              {event.impact}
-            </EuiBadge>
+            <EuiBadge color={getImpactColor(event.impact)}>{event.impact}</EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />

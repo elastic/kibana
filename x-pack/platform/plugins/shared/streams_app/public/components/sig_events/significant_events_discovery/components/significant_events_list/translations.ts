@@ -162,7 +162,7 @@ export const TRANSLATIONS = {
         'Statistical significance of the change point. Lower = more significant. 0 = extreme.',
     }),
     exposed: i18n.translate('xpack.streams.lifecycle.exposed', {
-      defaultMessage: '⚠ exposed',
+      defaultMessage: 'exposed',
     }),
     rawDocument: i18n.translate('xpack.streams.lifecycle.rawDocument', {
       defaultMessage: 'Raw document',

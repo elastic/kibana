@@ -17,11 +17,7 @@ import type {
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-
-const EVENTS_INDEX = 'sigevents-events-ms';
-const DISCOVERIES_INDEX = 'sigevents-discoveries-ms';
-const VERDICTS_INDEX = 'sigevents-verdicts-ms';
-const DETECTIONS_INDEX = 'sigevents-detections-ms';
+import { EVENTS_INDEX, DISCOVERIES_INDEX, VERDICTS_INDEX, DETECTIONS_INDEX } from './constants';
 
 const DEFAULT_EVIDENCE_RESULT: (typeof EVIDENCE_RESULTS)[number] = 'empty';
 
@@ -92,6 +88,7 @@ const esVerdictSourceSchema = z.object({
 const esEventSourceSchema = z.object({
   discovery_id: z.string().optional(),
   rule_names: z.array(z.string()).optional(),
+  stream_names: z.array(z.string()).optional(),
 });
 
 const esDetectionSourceSchema = z.object({
@@ -220,7 +217,11 @@ const getLifecycleRoute = createServerRoute({
 
     const eventResponse = await client.get({ index: EVENTS_INDEX, id: eventId });
     const eventSource = esEventSourceSchema.parse(eventResponse._source);
-    const { discovery_id: discoveryId, rule_names: ruleNames = [] } = eventSource;
+    const {
+      discovery_id: discoveryId,
+      rule_names: ruleNames = [],
+      stream_names: streamNames = [],
+    } = eventSource;
 
     if (!discoveryId) {
       return { event_id: eventId, detections: [], discoveries: [], verdicts: [] };
@@ -245,7 +246,14 @@ const getLifecycleRoute = createServerRoute({
             size: 500,
             sort: [{ '@timestamp': 'asc' }],
             _source: DETECTION_SOURCE_FIELDS,
-            query: { bool: { filter: [{ terms: { rule_name: ruleNames } }] } },
+            query: {
+              bool: {
+                filter: [
+                  { terms: { rule_name: ruleNames } },
+                  ...(streamNames.length > 0 ? [{ terms: { stream_name: streamNames } }] : []),
+                ],
+              },
+            },
           })
         : Promise.resolve(null),
     ]);

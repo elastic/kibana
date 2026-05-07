@@ -11,8 +11,7 @@ import { sigEventSchema } from '../../../../../common';
 import type { SigEvent, SigEventsListResponse } from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-
-const EVENTS_INDEX = 'sigevents-events-ms';
+import { EVENTS_INDEX } from './constants';
 
 const SEARCH_FIELDS = ['title', 'summary', 'root_cause', 'rule_names', 'stream_names'];
 
@@ -75,8 +74,15 @@ const listSigEventsRoute = createServerRoute({
       search: z.string().optional().describe('Free text search'),
       from: z.string().optional().describe('Start of time range (ISO string)'),
       to: z.string().optional().describe('End of time range (ISO string)'),
-      page: z.coerce.number().optional().default(1).describe('Page number (1-based)'),
-      perPage: z.coerce.number().optional().default(25).describe('Items per page'),
+      page: z.coerce.number().int().min(1).optional().default(1).describe('Page number (1-based)'),
+      perPage: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .optional()
+        .default(25)
+        .describe('Items per page'),
       sortField: z.string().optional().default('@timestamp').describe('Field to sort by'),
       sortDirection: z.enum(['asc', 'desc']).optional().default('desc').describe('Sort direction'),
     }),
@@ -138,7 +144,7 @@ const listSigEventsRoute = createServerRoute({
       size: perPage,
       from: offset,
       sort: [{ [validatedSortField]: sortDirection }],
-      track_total_hits: true,
+      track_total_hits: 10000,
       _source: { excludes: LIST_SOURCE_EXCLUDES },
       query: {
         bool: {

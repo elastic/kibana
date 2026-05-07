@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import type { Verdict, Impact } from '@kbn/streams-plugin/common';
+import type { Verdict, Impact, SigEvent } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 
@@ -26,7 +26,7 @@ export interface SigEventsPagination {
 }
 
 export interface SigEventsSort {
-  field: string;
+  field: keyof SigEvent;
   direction: 'asc' | 'desc';
 }
 
@@ -64,8 +64,8 @@ export const useSigEventsList = () => {
 
   const queryParams = useMemo(() => {
     const params: Record<string, unknown> = {
-      page: String(pagination.page),
-      perPage: String(pagination.perPage),
+      page: pagination.page,
+      perPage: pagination.perPage,
       sortField: sort.field,
       sortDirection: sort.direction,
     };
@@ -98,7 +98,7 @@ export const useSigEventsList = () => {
       sort: tableSort,
     }: {
       page?: { index: number; size: number };
-      sort?: { field: string; direction: 'asc' | 'desc' };
+      sort?: { field: keyof SigEvent; direction: 'asc' | 'desc' };
     }) => {
       if (tablePage) {
         setPagination({ page: tablePage.index + 1, perPage: tablePage.size });
