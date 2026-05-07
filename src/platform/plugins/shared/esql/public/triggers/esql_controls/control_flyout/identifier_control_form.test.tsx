@@ -155,7 +155,7 @@ describe('IdentifierControlForm', () => {
         selected_options: ['column2'],
         variable_name: 'myField',
         variable_type: ESQLVariableType.FIELDS,
-        esql_query: 'FROM foo | STATS BY',
+        source_esql_query: 'FROM foo | STATS BY',
         control_type: EsqlControlType.STATIC_VALUES,
       } as OptionsListESQLControlState;
       const { findByTestId } = render(
@@ -186,7 +186,7 @@ describe('IdentifierControlForm', () => {
         selected_options: ['column2'],
         variable_name: 'myField',
         variable_type: ESQLVariableType.FIELDS,
-        esql_query: 'FROM foo | STATS BY',
+        source_esql_query: 'FROM foo | STATS BY',
         control_type: EsqlControlType.STATIC_VALUES,
       } as OptionsListESQLControlState;
       const onEditControlSpy = jest.fn();

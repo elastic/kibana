@@ -192,6 +192,14 @@ export const optionsListESQLControlSchema = schema.discriminatedUnion('control_t
           description: 'A fixed list of option strings displayed in the control.',
         },
       }),
+      source_esql_query: schema.maybe(
+        schema.string({
+          meta: {
+            description:
+              'The ES|QL query the control was created from. Not evaluated at runtime; persisted only so the available identifiers list (e.g. fields) can be repopulated when the control is edited.',
+          },
+        })
+      ),
     },
     {
       meta: {

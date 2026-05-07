@@ -157,6 +157,11 @@ export function IdentifierControlForm({
       variable_name: variableNameWithoutQuestionmark,
       variable_type: variableType,
       control_type: EsqlControlType.STATIC_VALUES as StaticESQLControl['control_type'],
+      // Persist the originating query for FIELDS controls so the available
+      // identifiers list can be repopulated when the control is edited.
+      ...(variableType === ESQLVariableType.FIELDS && queryString
+        ? { source_esql_query: queryString }
+        : {}),
     };
     if (!isEqual(state, initialState)) {
       setControlState(state);

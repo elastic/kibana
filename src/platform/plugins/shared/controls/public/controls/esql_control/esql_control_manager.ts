@@ -27,7 +27,7 @@ import type {
   OptionsListSelection,
 } from '@kbn/controls-schemas';
 import type { TimeRange } from '@kbn/es-query';
-import type { ESQLControlVariable, QueryESQLControl } from '@kbn/esql-types';
+import type { ESQLControlVariable, QueryESQLControl, StaticESQLControl } from '@kbn/esql-types';
 import {
   EsqlControlType,
   ESQLVariableType,
@@ -66,7 +66,7 @@ type ComparatorsReturnType<ControlType = ESQLOptionsListRuntimeState['control_ty
       | 'available_options'
     > &
       (ControlType extends EsqlControlType.STATIC_VALUES
-        ? {}
+        ? Pick<StaticESQLControl, 'source_esql_query'>
         : Pick<QueryESQLControl, 'esql_query'>)
   >;
 
@@ -83,7 +83,7 @@ export const getSelectionComparators = <Type = ESQLOptionsListRuntimeState['cont
     available_options: 'deepEquality',
     ...(controlType === EsqlControlType.VALUES_FROM_QUERY
       ? { esql_query: 'referenceEquality' }
-      : {}),
+      : { source_esql_query: 'referenceEquality' }),
   } as ComparatorsReturnType<Type>;
 };
 
@@ -109,6 +109,9 @@ export function initializeESQLControlManager(
     initialState.variable_type as ESQLVariableType
   );
   const esqlQuery$ = new BehaviorSubject<string>(isEsqlQueryControl ? initialState.esql_query : '');
+  const sourceEsqlQuery$ = new BehaviorSubject<string | undefined>(
+    isStaticControl ? initialState.source_esql_query : undefined
+  );
   let valuesColumnType: string | undefined;
   const totalCardinality$ = new BehaviorSubject<number>(
     isStaticControl ? initialState.available_options.length : 0
@@ -317,7 +320,8 @@ export function initializeESQLControlManager(
       variableName$,
       singleSelect$,
       variableType$,
-      esqlQuery$
+      esqlQuery$,
+      sourceEsqlQuery$
     ).pipe(map(() => undefined)),
     reinitializeState: (lastSaved?: ESQLOptionsListRuntimeState) => {
       setSelectedOptions(lastSaved?.selected_options ?? []);
@@ -331,6 +335,9 @@ export function initializeESQLControlManager(
       hasInitialFetch = false;
       availableOptions$.next(lastSaved?.available_options ?? []);
       esqlQuery$.next(isQueryESQLControl(lastSaved) ? lastSaved.esql_query : '');
+      sourceEsqlQuery$.next(
+        isStaticESQLControl(lastSaved) ? lastSaved.source_esql_query : undefined
+      );
     },
     getLatestState: (): OptionsListESQLControlState => {
       return {
@@ -343,6 +350,9 @@ export function initializeESQLControlManager(
           ? {
               control_type: EsqlControlType.STATIC_VALUES,
               available_options: availableOptions$.getValue(),
+              ...(sourceEsqlQuery$.getValue() !== undefined && {
+                source_esql_query: sourceEsqlQuery$.getValue(),
+              }),
             }
           : { control_type: EsqlControlType.VALUES_FROM_QUERY, esql_query: esqlQuery$.getValue() }),
       };
