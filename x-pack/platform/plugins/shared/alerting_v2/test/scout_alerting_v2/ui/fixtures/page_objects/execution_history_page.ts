@@ -12,7 +12,10 @@ export class ExecutionHistoryPage {
   public readonly retryButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.emptyPrompt = this.page.testSubj.locator('executionHistoryEmptyPrompt');
+    // EuiBasicTable renders `noItemsMessage` in both an a11y `<caption>` and the
+    // visible `<td>`, so the empty-prompt test-subj appears twice. Scope to the
+    // cell so we match only the visible copy.
+    this.emptyPrompt = this.page.getByRole('cell').getByTestId('executionHistoryEmptyPrompt');
     this.retryButton = this.page.testSubj.locator('executionHistoryRetryButton');
   }
 
