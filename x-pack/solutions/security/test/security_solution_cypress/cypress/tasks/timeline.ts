@@ -38,7 +38,6 @@ import {
   OPEN_TIMELINE_ICON,
   PIN_EVENT,
   QUERY_EVENT_COUNT,
-  QUERY_TAB_BUTTON,
   RESET_FIELDS,
   SAVE_DATA_PROVIDER_BTN,
   SAVE_FILTER_BTN,
@@ -292,7 +291,7 @@ export const attachTimelineToExistingCase = () => {
 
 export const closeTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).click();
-  cy.get(QUERY_TAB_BUTTON).should('not.be.visible');
+  cy.get(TIMELINE_FLYOUT).should('not.be.visible');
 };
 
 export const createNewTimeline = () => {
