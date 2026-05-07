@@ -254,17 +254,20 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
       name: '',
       render: (item: ErrorPattern) => {
         const href = getDiscoverUrl(item);
+        const label = i18n.translate('xpack.fleet.collectorDetail.errorPatterns.viewInDiscover', {
+          defaultMessage: 'Explore matching logs in Kibana Discover',
+        });
         return href ? (
-          <EuiButtonIcon
-            iconType="productDiscover"
-            size="xs"
-            color="text"
-            href={href}
-            target="_blank"
-            aria-label={i18n.translate('xpack.fleet.collectorDetail.errorPatterns.viewInDiscover', {
-              defaultMessage: 'Explore matching logs in Kibana Discover',
-            })}
-          />
+          <EuiToolTip content={label} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="productDiscover"
+              size="xs"
+              color="text"
+              href={href}
+              target="_blank"
+              aria-label={label}
+            />
+          </EuiToolTip>
         ) : null;
       },
     },

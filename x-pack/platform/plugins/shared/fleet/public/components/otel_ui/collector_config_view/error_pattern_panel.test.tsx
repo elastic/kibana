@@ -93,18 +93,14 @@ describe('ErrorPatternPanel', () => {
     fireEvent.click(result.getByTestId('errorPatternLevelToggle-warning'));
 
     expect(result.getByText('Exporter queue nearing capacity')).toBeInTheDocument();
-    expect(
-      result.queryByText('Failed to export spans connection refused')
-    ).not.toBeInTheDocument();
+    expect(result.queryByText('Failed to export spans connection refused')).not.toBeInTheDocument();
   });
 
   it('shows correct counts in toggle buttons', () => {
     const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
 
     expect(result.getByTestId('errorPatternLevelToggle-error')).toHaveTextContent('Errors (2)');
-    expect(result.getByTestId('errorPatternLevelToggle-warning')).toHaveTextContent(
-      'Warnings (1)'
-    );
+    expect(result.getByTestId('errorPatternLevelToggle-warning')).toHaveTextContent('Warnings (1)');
   });
 
   it('shows empty message when no patterns exist', () => {
