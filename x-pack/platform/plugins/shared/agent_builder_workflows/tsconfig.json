@@ -13,6 +13,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/agent-context-layer-plugin",
-    "@kbn/workflows-management-plugin"
+    "@kbn/workflows-management-plugin",
+    "@kbn/zod"
   ]
 }
