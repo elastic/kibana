@@ -12,6 +12,7 @@ import {
   CaseCreatedTriggerId,
   CaseUpdatedTriggerId,
   AttachmentsAddedTriggerId,
+  CommentsAddedTriggerId,
 } from '../../../common/workflows/triggers';
 
 /**
@@ -56,5 +57,18 @@ export function registerCasesWorkflowEventBridge(
       },
       event.request
     );
+
+    // if it's comments, also emit the comments added trigger
+    if (enhancedAttachmentType === 'comment') {
+      const { attachmentType, attachmentIds, ...payload } = event.payload;
+      void forward(
+        CommentsAddedTriggerId,
+        {
+          ...payload,
+          commentIds: attachmentIds,
+        },
+        event.request
+      );
+    }
   });
 }

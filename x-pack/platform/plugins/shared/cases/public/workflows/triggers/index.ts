@@ -23,4 +23,7 @@ export function registerCasesTriggerDefinitions(
   workflowsExtensions.registerTriggerDefinition(() =>
     import('./attachments_added').then((m) => m.attachmentsAddedTriggerPublicDefinition)
   );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./comments_added').then((m) => m.commentsAddedTriggerPublicDefinition)
+  );
 }

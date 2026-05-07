@@ -28,6 +28,15 @@ export interface CaseUpdatedEventPayload extends BaseCaseEventPayload {
 }
 
 /**
+ * Event: case status changed
+ */
+export interface CaseStatusChangedEventPayload extends BaseCaseEventPayload {
+  readonly caseId: string;
+  readonly previousStatus: string;
+  readonly status: string;
+}
+
+/**
  * Event: attachments added
  */
 export interface AttachmentsAddedEventPayload extends BaseCaseEventPayload {
@@ -36,9 +45,10 @@ export interface AttachmentsAddedEventPayload extends BaseCaseEventPayload {
   readonly attachmentType: string;
 }
 
-export interface CasesDomainEventPayloadByType {
+interface CasesDomainEventPayloadByType {
   readonly caseCreated: CaseCreatedEventPayload;
   readonly caseUpdated: CaseUpdatedEventPayload;
+  readonly caseStatusChanged: CaseStatusChangedEventPayload;
   readonly attachmentsAdded: AttachmentsAddedEventPayload;
 }
 

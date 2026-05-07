@@ -33,29 +33,13 @@ describe('CasesEventBus', () => {
     eventBus.emitCaseUpdated(request, {
       caseId: 'case-1',
       owner: 'securitySolution',
-      updatedFields: ['status'],
+      updatedFields: ['title'],
     });
 
     expect(listener).toHaveBeenCalledWith({
       type: 'caseUpdated',
       request,
-      payload: { caseId: 'case-1', owner: 'securitySolution', updatedFields: ['status'] },
+      payload: { caseId: 'case-1', owner: 'securitySolution', updatedFields: ['title'] },
     });
-  });
-
-  it('removes listeners', () => {
-    const eventBus = new CasesEventBus();
-    const listener = jest.fn();
-
-    eventBus.onAttachmentsAdded(listener);
-    eventBus.removeAttachmentsAddedListener(listener);
-    eventBus.emitAttachmentsAdded(request, {
-      caseId: 'case-1',
-      attachmentIds: ['attachment-1'],
-      attachmentType: 'comment',
-      owner: 'securitySolution',
-    });
-
-    expect(listener).not.toHaveBeenCalled();
   });
 });

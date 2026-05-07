@@ -10,6 +10,7 @@ import {
   caseCreatedTriggerCommonDefinition,
   caseUpdatedTriggerCommonDefinition,
   attachmentsAddedTriggerCommonDefinition,
+  commentsAddedTriggerCommonDefinition,
 } from '../../../common/workflows/triggers';
 
 export function registerCaseWorkflowTriggers(
@@ -22,4 +23,5 @@ export function registerCaseWorkflowTriggers(
   workflowsExtensions.registerTriggerDefinition(caseCreatedTriggerCommonDefinition);
   workflowsExtensions.registerTriggerDefinition(caseUpdatedTriggerCommonDefinition);
   workflowsExtensions.registerTriggerDefinition(attachmentsAddedTriggerCommonDefinition);
+  workflowsExtensions.registerTriggerDefinition(commentsAddedTriggerCommonDefinition);
 }

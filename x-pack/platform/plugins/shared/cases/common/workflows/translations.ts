@@ -512,6 +512,13 @@ export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION 
   }
 );
 
+export const COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.commentsAdded.eventSchema.commentIds',
+  {
+    defaultMessage: 'The IDs of the comments that were added.',
+  }
+);
+
 export const CUSTOM_FIELD_CAN_BE_USED_MESSAGE = (fieldName: string) =>
   i18n.translate('xpack.cases.workflowSteps.shared.customFieldCanBeUsedMessage', {
     defaultMessage: 'Custom field "{fieldName}" can be updated by this step.',

@@ -14,6 +14,7 @@ import {
   CASE_UPDATED_TRIGGER_EVENT_SCHEMA_UPDATED_FIELDS_DESCRIPTION,
   ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION,
   ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION,
+  COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION,
 } from '../translations';
 
 export const CaseCreatedTriggerId = 'cases.caseCreated' as const;
@@ -56,4 +57,17 @@ const attachmentsAddedEventSchema = baseCaseEventSchema.extend({
 export const attachmentsAddedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: AttachmentsAddedTriggerId,
   eventSchema: attachmentsAddedEventSchema,
+};
+
+export const CommentsAddedTriggerId = 'cases.commentsAdded' as const;
+
+const CommentsAddedEventSchema = baseCaseEventSchema.extend({
+  commentIds: z
+    .array(z.string())
+    .meta({ description: COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION }),
+});
+
+export const commentsAddedTriggerCommonDefinition: CommonTriggerDefinition = {
+  id: CommentsAddedTriggerId,
+  eventSchema: CommentsAddedEventSchema,
 };

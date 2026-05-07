@@ -11,6 +11,7 @@ import {
   CaseCreatedTriggerId,
   CaseUpdatedTriggerId,
   AttachmentsAddedTriggerId,
+  CommentsAddedTriggerId,
 } from '../../../common/workflows/triggers';
 import { CasesEventBus } from '../../events/event_bus';
 import { registerCasesWorkflowEventBridge } from './event_bridge';
@@ -43,7 +44,7 @@ describe('registerCasesWorkflowEventBridge', () => {
     eventBus.emitAttachmentsAdded(request, {
       caseId: 'case-1',
       attachmentIds: ['attachment-1'],
-      attachmentType: 'comment',
+      attachmentType: 'alert',
       owner: 'securitySolution',
     });
 
@@ -64,7 +65,7 @@ describe('registerCasesWorkflowEventBridge', () => {
     expect(mockClient.emitEvent).toHaveBeenNthCalledWith(3, AttachmentsAddedTriggerId, {
       caseId: 'case-1',
       attachmentIds: ['attachment-1'],
-      attachmentType: 'comment',
+      attachmentType: 'alert',
       owner: 'securitySolution',
     });
   });
@@ -83,6 +84,29 @@ describe('registerCasesWorkflowEventBridge', () => {
       caseId: 'case-1',
       attachmentIds: ['attachment-1'],
       attachmentType: 'comment',
+      owner: 'securitySolution',
+    });
+  });
+
+  it('emits comment added triggers when comment attachments were emitted', async () => {
+    eventBus.emitAttachmentsAdded(request, {
+      caseId: 'case-1',
+      attachmentIds: ['attachment-1'],
+      attachmentType: 'comment',
+      owner: 'securitySolution',
+    });
+
+    await flushMicrotasks();
+
+    expect(mockClient.emitEvent).toHaveBeenNthCalledWith(1, AttachmentsAddedTriggerId, {
+      caseId: 'case-1',
+      attachmentIds: ['attachment-1'],
+      attachmentType: 'comment',
+      owner: 'securitySolution',
+    });
+    expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, CommentsAddedTriggerId, {
+      caseId: 'case-1',
+      commentIds: ['attachment-1'],
       owner: 'securitySolution',
     });
   });

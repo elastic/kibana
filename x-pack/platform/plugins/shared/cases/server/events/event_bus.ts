@@ -14,16 +14,13 @@ import type {
   CaseCreatedEventPayload,
   CaseUpdatedEventPayload,
   AttachmentsAddedEventPayload,
+  CaseStatusChangedEventPayload,
 } from './types';
 
 export const CASE_CREATED_EVENT = 'caseCreated';
 export const CASE_UPDATED_EVENT = 'caseUpdated';
 export const ATTACHMENTS_ADDED_EVENT = 'attachmentsAdded';
-
-export type CasesEventName =
-  | typeof CASE_CREATED_EVENT
-  | typeof CASE_UPDATED_EVENT
-  | typeof ATTACHMENTS_ADDED_EVENT;
+export const CASE_STATUS_CHANGED_EVENT = 'caseStatusChanged';
 
 export type CasesEventBusListener<TType extends CasesDomainEventType = CasesDomainEventType> = (
   event: CasesEventPayload<TType>
@@ -39,39 +36,35 @@ export class CasesEventBus extends EventEmitter {
     this.setMaxListeners(50);
   }
 
-  emitCaseCreated(request: KibanaRequest, payload: CaseCreatedEventPayload): void {
+  emitCaseCreated(request: KibanaRequest, payload: CaseCreatedEventPayload) {
     this.emit(CASE_CREATED_EVENT, { type: 'caseCreated', payload, request });
   }
 
-  emitCaseUpdated(request: KibanaRequest, payload: CaseUpdatedEventPayload): void {
+  emitCaseUpdated(request: KibanaRequest, payload: CaseUpdatedEventPayload) {
     this.emit(CASE_UPDATED_EVENT, { type: 'caseUpdated', payload, request });
   }
 
-  emitAttachmentsAdded(request: KibanaRequest, payload: AttachmentsAddedEventPayload): void {
+  emitCaseStatusChanged(request: KibanaRequest, payload: CaseStatusChangedEventPayload) {
+    this.emit(CASE_STATUS_CHANGED_EVENT, { type: 'caseStatusChanged', payload, request });
+  }
+
+  emitAttachmentsAdded(request: KibanaRequest, payload: AttachmentsAddedEventPayload) {
     this.emit(ATTACHMENTS_ADDED_EVENT, { type: 'attachmentsAdded', payload, request });
   }
 
-  onCaseCreated(listener: CasesEventBusListener<'caseCreated'>): void {
+  onCaseCreated(listener: CasesEventBusListener<'caseCreated'>) {
     this.on(CASE_CREATED_EVENT, listener);
   }
 
-  onCaseUpdated(listener: CasesEventBusListener<'caseUpdated'>): void {
+  onCaseUpdated(listener: CasesEventBusListener<'caseUpdated'>) {
     this.on(CASE_UPDATED_EVENT, listener);
   }
 
-  onAttachmentsAdded(listener: CasesEventBusListener<'attachmentsAdded'>): void {
+  onCaseStatusChanged(listener: CasesEventBusListener<'caseStatusChanged'>) {
+    this.on(CASE_STATUS_CHANGED_EVENT, listener);
+  }
+
+  onAttachmentsAdded(listener: CasesEventBusListener<'attachmentsAdded'>) {
     this.on(ATTACHMENTS_ADDED_EVENT, listener);
-  }
-
-  removeCaseCreatedListener(listener: CasesEventBusListener<'caseCreated'>): void {
-    this.off(CASE_CREATED_EVENT, listener);
-  }
-
-  removeCaseUpdatedListener(listener: CasesEventBusListener<'caseUpdated'>): void {
-    this.off(CASE_UPDATED_EVENT, listener);
-  }
-
-  removeAttachmentsAddedListener(listener: CasesEventBusListener<'attachmentsAdded'>): void {
-    this.off(ATTACHMENTS_ADDED_EVENT, listener);
   }
 }
