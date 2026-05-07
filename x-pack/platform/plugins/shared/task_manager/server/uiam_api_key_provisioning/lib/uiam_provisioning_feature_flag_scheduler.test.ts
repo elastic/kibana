@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import { Subject, of } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { CoreStart } from '@kbn/core/server';
@@ -26,7 +27,7 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     jest.clearAllMocks();
   });
 
-  function makeCore(flag$: ReturnType<typeof of> | Subject<boolean>): CoreStart {
+  function makeCore(flag$: Observable<boolean>): CoreStart {
     return {
       featureFlags: { getBooleanValue$: jest.fn().mockReturnValue(flag$) },
     } as unknown as CoreStart;
