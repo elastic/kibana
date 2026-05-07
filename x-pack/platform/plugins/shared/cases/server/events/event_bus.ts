@@ -14,17 +14,26 @@ import type {
   CaseCreatedEventPayload,
   CaseUpdatedEventPayload,
   AttachmentsAddedEventPayload,
-  CaseStatusChangedEventPayload,
 } from './types';
+import type { Case } from '../../common';
+import type { CaseSavedObjectTransformed } from '../common/types/case';
 
 export const CASE_CREATED_EVENT = 'caseCreated';
 export const CASE_UPDATED_EVENT = 'caseUpdated';
 export const ATTACHMENTS_ADDED_EVENT = 'attachmentsAdded';
 export const CASE_STATUS_CHANGED_EVENT = 'caseStatusChanged';
 
+interface CaseUpdatedExtraInfo {
+  previousCase?: CaseSavedObjectTransformed;
+  updatedCase?: Case;
+}
+
 export type CasesEventBusListener<TType extends CasesDomainEventType = CasesDomainEventType> = (
   event: CasesEventPayload<TType>
 ) => void | Promise<void>;
+
+export type CaseUpdatedEventBusListener<TType extends CasesDomainEventType = CasesDomainEventType> =
+  (event: CasesEventPayload<TType>, extraInfo: CaseUpdatedExtraInfo) => void | Promise<void>;
 
 /**
  * Typed internal event bus for Cases domain events.
@@ -40,12 +49,12 @@ export class CasesEventBus extends EventEmitter {
     this.emit(CASE_CREATED_EVENT, { type: 'caseCreated', payload, request });
   }
 
-  emitCaseUpdated(request: KibanaRequest, payload: CaseUpdatedEventPayload) {
-    this.emit(CASE_UPDATED_EVENT, { type: 'caseUpdated', payload, request });
-  }
-
-  emitCaseStatusChanged(request: KibanaRequest, payload: CaseStatusChangedEventPayload) {
-    this.emit(CASE_STATUS_CHANGED_EVENT, { type: 'caseStatusChanged', payload, request });
+  emitCaseUpdated(
+    request: KibanaRequest,
+    payload: CaseUpdatedEventPayload,
+    extraInfo: CaseUpdatedExtraInfo
+  ) {
+    this.emit(CASE_UPDATED_EVENT, { type: 'caseUpdated', payload, request }, extraInfo);
   }
 
   emitAttachmentsAdded(request: KibanaRequest, payload: AttachmentsAddedEventPayload) {
@@ -56,12 +65,8 @@ export class CasesEventBus extends EventEmitter {
     this.on(CASE_CREATED_EVENT, listener);
   }
 
-  onCaseUpdated(listener: CasesEventBusListener<'caseUpdated'>) {
+  onCaseUpdated(listener: CaseUpdatedEventBusListener<'caseUpdated'>) {
     this.on(CASE_UPDATED_EVENT, listener);
-  }
-
-  onCaseStatusChanged(listener: CasesEventBusListener<'caseStatusChanged'>) {
-    this.on(CASE_STATUS_CHANGED_EVENT, listener);
   }
 
   onAttachmentsAdded(listener: CasesEventBusListener<'attachmentsAdded'>) {

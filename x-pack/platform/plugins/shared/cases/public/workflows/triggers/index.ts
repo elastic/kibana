@@ -21,6 +21,9 @@ export function registerCasesTriggerDefinitions(
     import('./case_updated').then((m) => m.caseUpdatedTriggerPublicDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>
+    import('./case_status_updated').then((m) => m.caseStatusUpdatedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
     import('./attachments_added').then((m) => m.attachmentsAddedTriggerPublicDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>

@@ -30,11 +30,15 @@ describe('CasesEventBus', () => {
     const listener = jest.fn();
 
     eventBus.onCaseUpdated(listener);
-    eventBus.emitCaseUpdated(request, {
-      caseId: 'case-1',
-      owner: 'securitySolution',
-      updatedFields: ['title'],
-    });
+    eventBus.emitCaseUpdated(
+      request,
+      {
+        caseId: 'case-1',
+        owner: 'securitySolution',
+        updatedFields: ['title'],
+      },
+      { previousCase: undefined, updatedCase: undefined }
+    );
 
     expect(listener).toHaveBeenCalledWith({
       type: 'caseUpdated',

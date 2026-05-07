@@ -9,6 +9,7 @@ import type { CasesServerSetupDependencies } from '../../types';
 import {
   caseCreatedTriggerCommonDefinition,
   caseUpdatedTriggerCommonDefinition,
+  caseStatusUpdatedTriggerCommonDefinition,
   attachmentsAddedTriggerCommonDefinition,
   commentsAddedTriggerCommonDefinition,
 } from '../../../common/workflows/triggers';
@@ -22,6 +23,7 @@ export function registerCaseWorkflowTriggers(
 
   workflowsExtensions.registerTriggerDefinition(caseCreatedTriggerCommonDefinition);
   workflowsExtensions.registerTriggerDefinition(caseUpdatedTriggerCommonDefinition);
+  workflowsExtensions.registerTriggerDefinition(caseStatusUpdatedTriggerCommonDefinition);
   workflowsExtensions.registerTriggerDefinition(attachmentsAddedTriggerCommonDefinition);
   workflowsExtensions.registerTriggerDefinition(commentsAddedTriggerCommonDefinition);
 }

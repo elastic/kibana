@@ -12,6 +12,7 @@ import {
   CaseUpdatedTriggerId,
   AttachmentsAddedTriggerId,
   CommentsAddedTriggerId,
+  CaseStatusUpdatedTriggerId,
 } from '../../../common/workflows/triggers';
 import { CasesEventBus } from '../../events/event_bus';
 import { registerCasesWorkflowEventBridge } from './event_bridge';
@@ -36,11 +37,15 @@ describe('registerCasesWorkflowEventBridge', () => {
 
   it('forwards cases events to workflows extensions', async () => {
     eventBus.emitCaseCreated(request, { caseId: 'case-1', owner: 'securitySolution' });
-    eventBus.emitCaseUpdated(request, {
-      caseId: 'case-1',
-      owner: 'securitySolution',
-      updatedFields: ['status'],
-    });
+    eventBus.emitCaseUpdated(
+      request,
+      {
+        caseId: 'case-1',
+        owner: 'securitySolution',
+        updatedFields: ['title'],
+      },
+      { previousCase: undefined, updatedCase: undefined }
+    );
     eventBus.emitAttachmentsAdded(request, {
       caseId: 'case-1',
       attachmentIds: ['attachment-1'],
@@ -60,13 +65,45 @@ describe('registerCasesWorkflowEventBridge', () => {
     expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, CaseUpdatedTriggerId, {
       caseId: 'case-1',
       owner: 'securitySolution',
-      updatedFields: ['status'],
+      updatedFields: ['title'],
     });
     expect(mockClient.emitEvent).toHaveBeenNthCalledWith(3, AttachmentsAddedTriggerId, {
       caseId: 'case-1',
       attachmentIds: ['attachment-1'],
       attachmentType: 'alert',
       owner: 'securitySolution',
+    });
+  });
+
+  it('forwards a status trigger event if necessary', async () => {
+    eventBus.emitCaseUpdated(
+      request,
+      {
+        caseId: 'case-1',
+        owner: 'securitySolution',
+        updatedFields: ['status'],
+      },
+      {
+        // @ts-expect-error - we just care about the status
+        previousCase: { attributes: { status: 'in-progress' } },
+        // @ts-expect-error - we just care about the status
+        updatedCase: { status: 'closed' },
+      }
+    );
+
+    await flushMicrotasks();
+
+    expect(mockClient.emitEvent).toHaveBeenCalledTimes(2);
+    expect(mockClient.emitEvent).toHaveBeenNthCalledWith(1, CaseUpdatedTriggerId, {
+      caseId: 'case-1',
+      owner: 'securitySolution',
+      updatedFields: ['status'],
+    });
+    expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, CaseStatusUpdatedTriggerId, {
+      caseId: 'case-1',
+      owner: 'securitySolution',
+      previousStatus: 'in-progress',
+      status: 'closed',
     });
   });
 

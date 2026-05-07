@@ -13,6 +13,7 @@ import {
   CaseUpdatedTriggerId,
   AttachmentsAddedTriggerId,
   CommentsAddedTriggerId,
+  CaseStatusUpdatedTriggerId,
 } from '../../../common/workflows/triggers';
 
 /**
@@ -40,8 +41,22 @@ export function registerCasesWorkflowEventBridge(
     void forward(CaseCreatedTriggerId, event.payload, event.request);
   });
 
-  casesEventBus.onCaseUpdated((event) => {
+  casesEventBus.onCaseUpdated((event, { previousCase, updatedCase }) => {
     void forward(CaseUpdatedTriggerId, event.payload, event.request);
+
+    const { updatedFields, ...reducedPayload } = event.payload;
+    if (updatedFields && previousCase && updatedCase && updatedFields.includes('status')) {
+      const status = updatedCase.status;
+      const previousStatus = previousCase.attributes.status;
+
+      if (status && previousStatus && status !== previousStatus) {
+        void forward(
+          CaseStatusUpdatedTriggerId,
+          { ...reducedPayload, status, previousStatus },
+          event.request
+        );
+      }
+    }
   });
 
   casesEventBus.onAttachmentsAdded((event) => {

@@ -15,6 +15,8 @@ import {
   ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION,
   ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION,
   COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION,
+  CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION,
+  CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION,
 } from '../translations';
 
 export const CaseCreatedTriggerId = 'cases.caseCreated' as const;
@@ -41,6 +43,22 @@ const caseUpdatedEventSchema = baseCaseEventSchema.extend({
 export const caseUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CaseUpdatedTriggerId,
   eventSchema: caseUpdatedEventSchema,
+};
+
+export const CaseStatusUpdatedTriggerId = 'cases.caseStatusUpdated' as const;
+
+const caseStatusUpdatedEventSchema = baseCaseEventSchema.extend({
+  status: z
+    .string()
+    .meta({ description: CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION }),
+  previousStatus: z
+    .string()
+    .meta({ description: CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION }),
+});
+
+export const caseStatusUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
+  id: CaseStatusUpdatedTriggerId,
+  eventSchema: caseStatusUpdatedEventSchema,
 };
 
 export const AttachmentsAddedTriggerId = 'cases.attachmentsAdded' as const;
