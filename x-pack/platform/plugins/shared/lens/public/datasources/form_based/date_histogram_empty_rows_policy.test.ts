@@ -44,14 +44,14 @@ describe('applyDateHistogramEmptyRowsPolicyToDatasourceState', () => {
     },
   });
 
-  it('turns empty rows off for line and area chart states', () => {
+  it('turns empty rows off for bar chart states', () => {
     const datasourceState = createDatasourceState();
 
     const updatedState = applyDateHistogramEmptyRowsPolicyToDatasourceState(
       datasourceState,
       'lnsXY',
       {
-        preferredSeriesType: SeriesTypes.LINE,
+        preferredSeriesType: SeriesTypes.BAR,
       }
     );
 

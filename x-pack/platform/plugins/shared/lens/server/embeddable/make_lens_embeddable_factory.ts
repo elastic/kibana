@@ -34,7 +34,6 @@ import {
   commonMigratePartitionMetrics,
   commonMigrateIndexPatternDatasource,
   commonMigrateMetricFormatter,
-  commonDisableDateHistogramEmptyRowsForFixedCharts,
 } from '../migrations/common_migrations';
 import type {
   CustomVisualizationMigrations,
@@ -177,9 +176,7 @@ export const makeLensEmbeddableFactory =
                 const lensState = state as unknown as SavedObject<LensDocShape860>;
                 return {
                   ...lensState,
-                  attributes: commonDisableDateHistogramEmptyRowsForFixedCharts(
-                    commonMigrateMetricFormatter(lensState.attributes)
-                  ),
+                  attributes: commonMigrateMetricFormatter(lensState.attributes),
                 } as unknown as SerializableRecord;
               },
               // FOLLOW THESE GUIDELINES IF YOU ARE ADDING A NEW MIGRATION!

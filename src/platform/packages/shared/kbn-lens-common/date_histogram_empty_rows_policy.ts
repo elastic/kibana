@@ -27,22 +27,14 @@ interface StateWithShape {
 
 export interface DateHistogramEmptyRowsPolicy {
   defaultValue: boolean;
-  isUserConfigurable: boolean;
 }
-
-const FORCE_OFF_POLICY: DateHistogramEmptyRowsPolicy = {
-  defaultValue: false,
-  isUserConfigurable: false,
-};
 
 const DEFAULT_OFF_POLICY: DateHistogramEmptyRowsPolicy = {
   defaultValue: false,
-  isUserConfigurable: true,
 };
 
 const DEFAULT_ON_POLICY: DateHistogramEmptyRowsPolicy = {
   defaultValue: true,
-  isUserConfigurable: true,
 };
 
 const XY_BAR_SERIES_TYPES = new Set<string>([
@@ -54,19 +46,10 @@ const XY_BAR_SERIES_TYPES = new Set<string>([
   SeriesTypes.BAR_HORIZONTAL_PERCENTAGE_STACKED,
 ]);
 
-const XY_AREA_SERIES_TYPES = new Set<string>([
-  SeriesTypes.AREA,
-  SeriesTypes.AREA_STACKED,
-  SeriesTypes.AREA_PERCENTAGE_STACKED,
-]);
-
-const PARTITION_FORCE_OFF_SHAPES = new Set<string>([
+const PARTITION_DEFAULT_OFF_SHAPES = new Set<string>([
   PARTITION_CHART_TYPES.PIE,
   PARTITION_CHART_TYPES.DONUT,
   PARTITION_CHART_TYPES.TREEMAP,
-]);
-
-const PARTITION_DEFAULT_OFF_SHAPES = new Set<string>([
   PARTITION_CHART_TYPES.WAFFLE,
   PARTITION_CHART_TYPES.MOSAIC,
 ]);
@@ -96,23 +79,12 @@ export const getDateHistogramEmptyRowsPolicy = (
   switch (visualizationType) {
     case XY_VISUALIZATION_ID:
       if (subVisualizationId && XY_BAR_SERIES_TYPES.has(subVisualizationId)) {
-        return FORCE_OFF_POLICY;
-      }
-
-      if (
-        subVisualizationId === SeriesTypes.LINE ||
-        (subVisualizationId && XY_AREA_SERIES_TYPES.has(subVisualizationId))
-      ) {
         return DEFAULT_OFF_POLICY;
       }
 
       return;
 
     case PARTITION_VISUALIZATION_ID:
-      if (subVisualizationId && PARTITION_FORCE_OFF_SHAPES.has(subVisualizationId)) {
-        return FORCE_OFF_POLICY;
-      }
-
       if (subVisualizationId && PARTITION_DEFAULT_OFF_SHAPES.has(subVisualizationId)) {
         return DEFAULT_OFF_POLICY;
       }
@@ -120,7 +92,7 @@ export const getDateHistogramEmptyRowsPolicy = (
       return;
 
     case LENS_HEATMAP_ID:
-      return FORCE_OFF_POLICY;
+      return DEFAULT_OFF_POLICY;
 
     case LENS_METRIC_ID:
     case TAGCLOUD_VISUALIZATION_ID:

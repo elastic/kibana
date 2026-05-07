@@ -10,7 +10,6 @@ import type { Filter } from '@kbn/es-query';
 import {
   getLensDataViewMigrations,
   getLensFilterMigrations,
-  commonDisableDateHistogramEmptyRowsForFixedCharts,
   commonMigratePartitionChartGroups,
   commonMigrateMetricFormatter,
 } from './common_migrations';
@@ -258,81 +257,6 @@ describe('Lens migrations', () => {
             format: { id: lensFormatId, params: { compact: true } },
           });
         }
-      }
-    );
-  });
-
-  describe('disable empty rows for fixed charts', () => {
-    const createVisualizationAttributes = (
-      visualizationType: string,
-      visualization: Record<string, unknown>
-    ) =>
-      ({
-        filters: [],
-        title: 'Chart',
-        expression: '',
-        visualizationType,
-        state: {
-          datasourceMetaData: {
-            filterableIndexPatterns: [],
-          },
-          datasourceStates: {
-            formBased: {
-              currentIndexPatternId: 'logs-*',
-              layers: {
-                layer1: {
-                  columnOrder: ['x'],
-                  columns: {
-                    x: {
-                      dataType: 'date',
-                      isBucketed: true,
-                      label: '@timestamp',
-                      operationType: 'date_histogram',
-                      params: {
-                        interval: 'auto',
-                        includeEmptyRows: true,
-                      },
-                      scale: 'interval',
-                      sourceField: '@timestamp',
-                    },
-                  },
-                },
-              },
-            },
-          },
-          visualization,
-          query: { query: '', language: 'kuery' },
-          filters: [],
-        },
-      } as unknown as LensDocShape860<unknown>);
-
-    it.each([
-      ['lnsXY', { preferredSeriesType: 'bar_stacked' }],
-      ['lnsHeatmap', {}],
-      ['lnsPie', { shape: 'treemap' }],
-    ])('turns empty rows off for fixed charts (%s)', (visualizationType, visualization) => {
-      const migrated = commonDisableDateHistogramEmptyRowsForFixedCharts(
-        createVisualizationAttributes(visualizationType, visualization)
-      );
-
-      expect(
-        migrated.state.datasourceStates.formBased.layers.layer1.columns.x.params
-      ).toHaveProperty('includeEmptyRows', false);
-    });
-
-    it.each([
-      ['lnsMetric', {}],
-      ['lnsPie', { shape: 'waffle' }],
-    ])(
-      'keeps empty rows enabled for user-configurable charts (%s)',
-      (visualizationType, visualization) => {
-        const migrated = commonDisableDateHistogramEmptyRowsForFixedCharts(
-          createVisualizationAttributes(visualizationType, visualization)
-        );
-
-        expect(
-          migrated.state.datasourceStates.formBased.layers.layer1.columns.x.params
-        ).toHaveProperty('includeEmptyRows', true);
       }
     );
   });

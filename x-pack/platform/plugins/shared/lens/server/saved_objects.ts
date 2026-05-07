@@ -6,13 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type {
-  SavedObjectModelTransformationDoc,
-  SavedObjectModelUnsafeTransformFn,
-  SavedObjectsModelVersionMap,
-} from '@kbn/core-saved-objects-server';
 import type { CoreSetup } from '@kbn/core/server';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 
@@ -20,8 +15,6 @@ import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants
 import { getEditPath } from '../common/constants';
 import { getAllMigrations } from './migrations/saved_object_migrations';
 import type { CustomVisualizationMigrations } from './migrations/types';
-import type { LensDocShape860 } from './migrations/types';
-import { commonDisableDateHistogramEmptyRowsForFixedCharts } from './migrations/common_migrations';
 import { lensItemAttributesSchemaV0 } from './content_management/v0';
 
 /**
@@ -36,46 +29,6 @@ const lensSOSchemaV1 = lensItemAttributesSchemaV0.extends(
   },
   { unknowns: 'forbid' }
 );
-
-const disableDateHistogramEmptyRowsTransform: SavedObjectModelUnsafeTransformFn<
-  LensDocShape860<unknown>,
-  LensDocShape860<unknown>
-> = (document) => {
-  const transformedDocument: SavedObjectModelTransformationDoc<LensDocShape860<unknown>> = {
-    ...document,
-    attributes: commonDisableDateHistogramEmptyRowsForFixedCharts(document.attributes),
-  };
-
-  return { document: transformedDocument };
-};
-
-const lensModelVersions: SavedObjectsModelVersionMap = {
-  [1]: {
-    changes: [
-      {
-        // needed to trigger change from dynamic strict to dynamic false
-        type: 'mappings_addition' as const,
-        addedMappings: {},
-      },
-    ],
-    schemas: {
-      forwardCompatibility: lensSOSchemaV1.extendsDeep({ unknowns: 'ignore' }),
-      create: lensSOSchemaV1,
-    },
-  },
-  [2]: {
-    changes: [
-      {
-        type: 'unsafe_transform' as const,
-        transformFn: (typeSafeGuard) => typeSafeGuard(disableDateHistogramEmptyRowsTransform),
-      },
-    ],
-    schemas: {
-      forwardCompatibility: lensSOSchemaV1.extendsDeep({ unknowns: 'ignore' }),
-      create: lensSOSchemaV1,
-    },
-  },
-};
 
 export function setupSavedObjects(
   core: CoreSetup,
@@ -104,7 +57,21 @@ export function setupSavedObjects(
         DataViewPersistableStateService.getAllMigrations(),
         customVisualizationMigrations
       ),
-    modelVersions: lensModelVersions,
+    modelVersions: {
+      [1]: {
+        changes: [
+          {
+            // needed to trigger change from dynamic strict to dynamic false
+            type: 'mappings_addition',
+            addedMappings: {},
+          },
+        ],
+        schemas: {
+          forwardCompatibility: lensSOSchemaV1.extendsDeep({ unknowns: 'ignore' }),
+          create: lensSOSchemaV1,
+        },
+      },
+    },
     mappings: {
       dynamic: false,
       properties: {

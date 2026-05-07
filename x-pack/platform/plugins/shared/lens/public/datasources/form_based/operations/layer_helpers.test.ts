@@ -34,6 +34,7 @@ import type {
   OperationMetadata,
   FormBasedPrivateState,
   IndexPattern,
+  VisualizationDimensionGroupConfig,
 } from '@kbn/lens-common';
 import { operationDefinitionMap } from '.';
 import { documentField } from '../document_field';
@@ -117,6 +118,21 @@ const indexPattern = {
   isPersisted: true,
   spec: {},
 };
+
+const createVisualizationGroups = (defaultValue: boolean): VisualizationDimensionGroupConfig[] => [
+  {
+    groupId: 'x',
+    groupLabel: 'X',
+    accessors: [],
+    supportsMoreColumns: true,
+    filterOperations: () => true,
+    paramEditorCustomProps: {
+      dateHistogramEmptyRowsPolicy: {
+        defaultValue,
+      },
+    },
+  },
+];
 
 describe('state_helpers', () => {
   beforeEach(() => {
@@ -544,6 +560,24 @@ describe('state_helpers', () => {
           visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2'] }));
+    });
+
+    it('applies the visualization empty rows default when inserting a date histogram', () => {
+      const result = insertNewColumn({
+        layer: { indexPatternId: '1', columnOrder: [], columns: {} },
+        columnId: 'col1',
+        indexPattern,
+        op: 'date_histogram',
+        field: indexPattern.fields[0],
+        visualizationGroups: createVisualizationGroups(false),
+        targetGroup: 'x',
+      });
+
+      expect((result.columns.col1 as DateHistogramIndexPatternColumn).params).toEqual({
+        interval: 'auto',
+        includeEmptyRows: false,
+        dropPartials: false,
+      });
     });
 
     it('should call onOtherColumn changed on existing columns', () => {
@@ -975,6 +1009,35 @@ describe('state_helpers', () => {
       );
     });
 
+    it('applies the visualization empty rows default when switching from managed reference to date histogram', () => {
+      const result = replaceColumn({
+        layer: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'My formula',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'formula',
+            } as FormulaIndexPatternColumn,
+          },
+        },
+        columnId: 'col1',
+        indexPattern,
+        op: 'date_histogram',
+        field: indexPattern.fields[0],
+        visualizationGroups: createVisualizationGroups(false),
+        targetGroup: 'x',
+      }).columns.col1 as DateHistogramIndexPatternColumn;
+
+      expect(result.params).toEqual({
+        interval: 'auto',
+        includeEmptyRows: false,
+        dropPartials: false,
+      });
+    });
+
     it('should carry over params from old column if switching fields', () => {
       expect(
         replaceColumn({
@@ -1079,6 +1142,38 @@ describe('state_helpers', () => {
           operationType: 'date_histogram',
         })
       );
+    });
+
+    it('applies the visualization empty rows default when switching to date histogram', () => {
+      const result = replaceColumn({
+        layer: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Filters',
+              dataType: 'string',
+              isBucketed: true,
+              operationType: 'filters',
+              params: {
+                filters: [],
+              },
+            } as FiltersIndexPatternColumn,
+          },
+        },
+        indexPattern,
+        columnId: 'col1',
+        op: 'date_histogram',
+        field: indexPattern.fields[0],
+        visualizationGroups: createVisualizationGroups(false),
+        targetGroup: 'x',
+      }).columns.col1 as DateHistogramIndexPatternColumn;
+
+      expect(result.params).toEqual({
+        interval: 'auto',
+        includeEmptyRows: false,
+        dropPartials: false,
+      });
     });
 
     describe('labels', () => {

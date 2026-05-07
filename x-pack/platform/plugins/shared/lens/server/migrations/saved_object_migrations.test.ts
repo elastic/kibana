@@ -35,11 +35,6 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 describe('Lens migrations', () => {
   const migrations = getAllMigrations({}, {}, {});
-
-  it('does not register post-model-version legacy migrations', () => {
-    expect(migrations['9.4.0']).toBeUndefined();
-  });
-
   describe('7.7.0 missing dimensions in XY', () => {
     const context = {} as SavedObjectMigrationContext;
 
@@ -304,7 +299,7 @@ describe('Lens migrations', () => {
           ...example.attributes,
           expression: `kibana
 | kibana_context query="{\\"query\\":\\"\\",\\"language\\":\\"kuery\\"}" filters="[]"
-| lens_merge_tables layerIds="bd09dc71-a7e2-42d0-83bd-85df8291f03c" 
+| lens_merge_tables layerIds="bd09dc71-a7e2-42d0-83bd-85df8291f03c"
   tables={esaggs index="ff959d40-b880-11e8-a6d9-e546fe2bba5f" metricsAtAllLevels=false partialRows=false includeFormatHints=true aggConfigs="[{\\"id\\":\\"1d9cc16c-1460-41de-88f8-471932ecbc97\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"products.created_on\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"auto\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}},{\\"id\\":\\"66115819-8481-4917-a6dc-8ffb10dd02df\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}}]" timeFields=\"products.created_on\"}
 | xyVis xTitle="products.created_on" yTitle="Count of records" legend={legendConfig isVisible=true position="right"} layers={}`,
         },
@@ -2543,6 +2538,5 @@ describe('Lens migrations', () => {
       );
     });
   });
-
   // For 8.8.0 tests are already executed at unit level in common_migrations
 });

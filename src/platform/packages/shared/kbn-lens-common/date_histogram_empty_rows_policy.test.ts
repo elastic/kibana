@@ -18,50 +18,43 @@ import {
 } from './date_histogram_empty_rows_policy';
 
 describe('date histogram empty rows policy', () => {
-  it('forces empty rows off for bar subtypes', () => {
+  it('defaults empty rows off for bar subtypes', () => {
     expect(getDateHistogramEmptyRowsPolicy('lnsXY', SeriesTypes.BAR_HORIZONTAL_STACKED)).toEqual({
       defaultValue: false,
-      isUserConfigurable: false,
     });
   });
 
-  it('defaults empty rows off for line and area subtypes', () => {
-    expect(getDateHistogramEmptyRowsPolicy('lnsXY', SeriesTypes.AREA_PERCENTAGE_STACKED)).toEqual({
-      defaultValue: false,
-      isUserConfigurable: true,
-    });
-    expect(getDateHistogramEmptyRowsPolicy('lnsXY', SeriesTypes.LINE)).toEqual({
-      defaultValue: false,
-      isUserConfigurable: true,
-    });
+  it('does not override line and area defaults in this issue scope', () => {
+    expect(
+      getDateHistogramEmptyRowsPolicy('lnsXY', SeriesTypes.AREA_PERCENTAGE_STACKED)
+    ).toBeUndefined();
+    expect(getDateHistogramEmptyRowsPolicy('lnsXY', SeriesTypes.LINE)).toBeUndefined();
   });
 
-  it('forces empty rows off for pie-family shapes that should not expose the setting', () => {
+  it('defaults empty rows off for the supported partition chart shapes', () => {
     expect(getDateHistogramEmptyRowsPolicy('lnsPie', PARTITION_CHART_TYPES.DONUT)).toEqual({
       defaultValue: false,
-      isUserConfigurable: false,
     });
     expect(getDateHistogramEmptyRowsPolicy('lnsPie', PARTITION_CHART_TYPES.TREEMAP)).toEqual({
       defaultValue: false,
-      isUserConfigurable: false,
+    });
+    expect(getDateHistogramEmptyRowsPolicy('lnsPie', PARTITION_CHART_TYPES.WAFFLE)).toEqual({
+      defaultValue: false,
     });
   });
 
   it('defaults empty rows off for metric-style visualizations', () => {
     expect(getDateHistogramEmptyRowsPolicy(LENS_METRIC_ID)).toEqual({
       defaultValue: false,
-      isUserConfigurable: true,
     });
     expect(getDateHistogramEmptyRowsPolicy('lnsTagcloud')).toEqual({
       defaultValue: false,
-      isUserConfigurable: true,
     });
   });
 
   it('keeps empty rows on by default for tables', () => {
     expect(getDateHistogramEmptyRowsPolicy(LENS_DATATABLE_ID)).toEqual({
       defaultValue: true,
-      isUserConfigurable: true,
     });
   });
 
@@ -72,7 +65,6 @@ describe('date histogram empty rows policy', () => {
       })
     ).toEqual({
       defaultValue: false,
-      isUserConfigurable: false,
     });
   });
 
@@ -83,14 +75,12 @@ describe('date histogram empty rows policy', () => {
       })
     ).toEqual({
       defaultValue: false,
-      isUserConfigurable: true,
     });
   });
 
   it('returns the heatmap policy without needing a subtype', () => {
     expect(getDateHistogramEmptyRowsPolicyForVisualizationState(LENS_HEATMAP_ID, {})).toEqual({
       defaultValue: false,
-      isUserConfigurable: false,
     });
   });
 });

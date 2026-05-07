@@ -11,11 +11,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeMigrationFunctionMaps } from '@kbn/kibana-utils-plugin/common';
-import {
-  getDateHistogramEmptyRowsPolicyForVisualizationState,
-  LENS_ROW_HEIGHT_MODE as RowHeightMode,
-  type LegacyMetricState,
-} from '@kbn/lens-common';
+import { LENS_ROW_HEIGHT_MODE as RowHeightMode, type LegacyMetricState } from '@kbn/lens-common';
 import type {
   LensDocShapePre712,
   OperationTypePre712,
@@ -246,78 +242,6 @@ export const commonSetIncludeEmptyRowsDateHistogram = (
     }
   }
   return newAttributes;
-};
-
-export const commonDisableDateHistogramEmptyRowsForFixedCharts = (
-  attributes: LensDocShape860<unknown>
-) => {
-  const policy = getDateHistogramEmptyRowsPolicyForVisualizationState(
-    attributes.visualizationType,
-    attributes.state.visualization
-  );
-
-  if (!policy || policy.defaultValue || policy.isUserConfigurable) {
-    return attributes as LensDocShape860<unknown>;
-  }
-
-  if (!attributes.state.datasourceStates.formBased) {
-    return attributes as LensDocShape860<unknown>;
-  }
-
-  type LayersType = LensDocShape860['state']['datasourceStates']['formBased']['layers'];
-
-  let hasChanges = false;
-  const updatedLayers: LayersType = {};
-
-  for (const [layerId, layer] of Object.entries(
-    attributes.state.datasourceStates.formBased.layers
-  )) {
-    let layerHasChanges = false;
-    const updatedColumns: Record<string, Record<string, unknown>> = {};
-
-    for (const [columnId, column] of Object.entries(layer.columns)) {
-      if (column.operationType !== 'date_histogram') {
-        updatedColumns[columnId] = column;
-        continue;
-      }
-
-      const params = column.params as { includeEmptyRows?: boolean };
-      if (params?.includeEmptyRows === false) {
-        updatedColumns[columnId] = column;
-        continue;
-      }
-
-      layerHasChanges = true;
-      hasChanges = true;
-      updatedColumns[columnId] = {
-        ...column,
-        params: {
-          ...params,
-          includeEmptyRows: false,
-        },
-      };
-    }
-
-    updatedLayers[layerId] = layerHasChanges ? { ...layer, columns: updatedColumns } : layer;
-  }
-
-  if (!hasChanges) {
-    return attributes as LensDocShape860<unknown>;
-  }
-
-  return {
-    ...attributes,
-    state: {
-      ...attributes.state,
-      datasourceStates: {
-        ...attributes.state.datasourceStates,
-        formBased: {
-          ...attributes.state.datasourceStates.formBased,
-          layers: updatedLayers,
-        },
-      },
-    },
-  };
 };
 
 export const commonLockOldMetricVisSettings = (

@@ -332,29 +332,6 @@ describe('date_histogram', () => {
       ).toEqual([expect.objectContaining({ label: '42w' })]);
     });
 
-    it('hides the include empty rows switch when the visualization locks it', () => {
-      const updateLayerSpy = jest.fn();
-      const instance = shallow(
-        <InlineOptions
-          {...defaultOptions}
-          layer={layer}
-          paramEditorUpdater={updateLayerSpy}
-          columnId="col1"
-          currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
-          paramEditorCustomProps={{
-            dateHistogramEmptyRowsPolicy: {
-              defaultValue: false,
-              isUserConfigurable: false,
-            },
-          }}
-        />
-      );
-
-      expect(instance.find('[data-test-subj="indexPattern-include-empty-rows"]').exists()).toBe(
-        false
-      );
-    });
-
     it('should render current value for other index pattern', () => {
       const updateLayerSpy = jest.fn();
 
