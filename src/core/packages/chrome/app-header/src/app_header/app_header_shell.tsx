@@ -33,31 +33,46 @@ const resolveLayoutProps = (
   const resolved = padding ?? (sticky ? 'm' : 'none');
 
   if (resolved === 'none') {
-    return { paddingInline: undefined, bleedMargin: undefined };
+    return { paddingInline: undefined, paddingBlock: undefined, bleedMargin: undefined };
   }
 
   if (resolved === 'm') {
-    return { paddingInline: euiTheme.size.m, bleedMargin: undefined };
+    return {
+      paddingInline: euiTheme.size.m,
+      paddingBlock: euiTheme.size.m,
+      bleedMargin: undefined,
+    };
   }
 
   const bleedMargin = resolved.bleed === 'l' ? euiTheme.size.l : euiTheme.size.m;
   const size = resolved.size ?? resolved.bleed;
 
   let paddingInline: string | undefined;
+  let paddingBlock: string | undefined;
   if (size === 'l') {
-    paddingInline = euiTheme.size.l;
+    paddingInline = euiTheme.size.base;
+    paddingBlock = euiTheme.size.base;
   } else if (size === 'm') {
     paddingInline = euiTheme.size.m;
+    paddingBlock = euiTheme.size.m;
   }
 
-  return { paddingInline, bleedMargin };
+  return { paddingInline, paddingBlock, bleedMargin };
 };
 
-const useHeaderStyles = (sticky: boolean, padding: AppHeaderPadding | undefined) => {
+const useHeaderStyles = (
+  sticky: boolean,
+  padding: AppHeaderPadding | undefined,
+  hasTabs: boolean
+) => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
-    const { paddingInline, bleedMargin } = resolveLayoutProps(sticky, padding, euiTheme);
+    const { paddingInline, paddingBlock, bleedMargin } = resolveLayoutProps(
+      sticky,
+      padding,
+      euiTheme
+    );
 
     const root = css`
       ${sticky &&
@@ -99,6 +114,11 @@ const useHeaderStyles = (sticky: boolean, padding: AppHeaderPadding | undefined)
       gap: ${euiTheme.size.m};
       min-width: 0;
       min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
+      ${paddingBlock &&
+      css`
+        padding-block-start: ${paddingBlock};
+        padding-block-end: ${hasTabs ? euiTheme.size.xs : paddingBlock};
+      `}
     `;
 
     const titleCluster = css`
@@ -146,12 +166,12 @@ const useHeaderStyles = (sticky: boolean, padding: AppHeaderPadding | undefined)
       titleActionsReveal,
       tabsRow,
     };
-  }, [euiTheme, sticky, padding]);
+  }, [euiTheme, sticky, padding, hasTabs]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
   ({ title, badges, titleActions, trailing, tabs, sticky = true, padding }) => {
-    const styles = useHeaderStyles(sticky, padding);
+    const styles = useHeaderStyles(sticky, padding, !!tabs);
 
     return (
       <div css={styles.root} data-test-subj="appHeader">
