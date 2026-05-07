@@ -68,6 +68,7 @@ const SCHEDULE_FORM_ONLY_FIELDS: readonly (keyof ScheduleFormData)[] = [
   'splay_enabled',
   'splay_value',
   'splay_unit',
+  'splay_raw',
   'frequency',
   'repeat_every',
   'byweekday',
@@ -209,7 +210,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         // ScheduleSection-only fields are peeled off here so they don't leak
         // into the request body. The `interval` form field is the active
         // interval-mode value and is consumed by `serializeSchedule` below.
-        const restPayload = omit(restWithSchedule, SCHEDULE_FORM_ONLY_FIELDS);
+        // `rrule_schedule` is a PackItem field (not a ScheduleFormData field) so
+        // it is not in SCHEDULE_FORM_ONLY_FIELDS — strip it explicitly so a
+        // stale rrule_schedule from the loaded SO doesn't bleed into the payload
+        // when switching to interval mode.
+        const restPayload = omit(restWithSchedule, [...SCHEDULE_FORM_ONLY_FIELDS, 'rrule_schedule']);
 
         const mappedShards = !isEmpty(shards)
           ? (filter(
