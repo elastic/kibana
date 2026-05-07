@@ -36,12 +36,16 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth, logsSynthtraceEsClient }) => {
+    // Clean both APM and logs data: the landing redirect prefers logs > apm > onboarding,
+    // so APM data left over from another suite would short-circuit the onboarding redirect.
+    test.beforeEach(async ({ browserAuth, apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
       await browserAuth.loginAsAdmin();
+      await apmSynthtraceEsClient.clean();
       await logsSynthtraceEsClient.clean();
     });
 
-    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    test.afterAll(async ({ apiServices, apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
+      await apmSynthtraceEsClient.clean();
       await logsSynthtraceEsClient.clean();
       await apiServices.core.settings({
         'feature_flags.overrides': {
