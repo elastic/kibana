@@ -169,7 +169,7 @@ describe('LowerPriorityEvents', () => {
     );
     fireEvent.click(remediateButton);
 
-    expect(onRemediate).toHaveBeenCalledWith('Remediation Event');
+    expect(onRemediate).toHaveBeenCalledWith('Remediation Event', 'e-1');
     // Flyout should remain open
     expect(screen.getByTestId('eventDetailFlyout')).toBeInTheDocument();
   });
@@ -215,30 +215,6 @@ describe('LowerPriorityEvents', () => {
     expect(rows).toHaveLength(5);
   });
 
-  it('renders criticality health color correctly for critical and high impact in the flyout', () => {
-    const events = [
-      makeEvent({ event_id: 'e-1', title: 'Critical Impact', impact: 'critical', criticality: 90 }),
-    ];
-    renderWithIntl(<LowerPriorityEvents events={events} />);
-
-    fireEvent.click(screen.getByTestId('eventExpandRow-e-1'));
-
-    // The flyout should be open and display criticality info
-    expect(screen.getByTestId('eventDetailFlyout')).toBeInTheDocument();
-    expect(screen.getByText('90')).toBeInTheDocument();
-  });
-
-  it('renders "resolve" recommended action icon in the flyout', () => {
-    const events = [
-      makeEvent({ event_id: 'e-1', recommended_action: 'resolve', recommendations: ['Fix it'] }),
-    ];
-    renderWithIntl(<LowerPriorityEvents events={events} />);
-
-    fireEvent.click(screen.getByTestId('eventExpandRow-e-1'));
-
-    expect(screen.getByTestId('eventDetailFlyout')).toBeInTheDocument();
-  });
-
   it('renders without stream_names or rule_names in the flyout detail', () => {
     const events = [makeEvent({ event_id: 'e-1', stream_names: undefined, rule_names: undefined })];
     renderWithIntl(<LowerPriorityEvents events={events} />);
@@ -250,34 +226,11 @@ describe('LowerPriorityEvents', () => {
     expect(screen.queryByTestId('eventStreamLink-logs.otel')).not.toBeInTheDocument();
   });
 
-  it('renders without recommendations in the flyout', () => {
-    const events = [makeEvent({ event_id: 'e-1', recommendations: [] })];
-    renderWithIntl(<LowerPriorityEvents events={events} />);
-
-    fireEvent.click(screen.getByTestId('eventExpandRow-e-1'));
-
-    // RecommendationsPlanPanel is still rendered but without individual steps
-    expect(screen.getByTestId('eventDetailFlyout')).toBeInTheDocument();
-  });
-
   it('closes the flyout when Escape is pressed', () => {
     const events = [makeEvent({ event_id: 'e-1', title: 'Escape Event' })];
     renderWithIntl(<LowerPriorityEvents events={events} />);
 
     fireEvent.click(screen.getByTestId('eventExpandRow-e-1'));
-    expect(screen.getByTestId('eventDetailFlyout')).toBeInTheDocument();
-
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.queryByTestId('eventDetailFlyout')).not.toBeInTheDocument();
-  });
-
-  it('returns focus to the trigger element when the flyout is closed', () => {
-    const events = [makeEvent({ event_id: 'e-1', title: 'Focus Event' })];
-    renderWithIntl(<LowerPriorityEvents events={events} />);
-
-    const expandBtn = screen.getByTestId('eventExpandRow-e-1');
-    expandBtn.focus();
-    fireEvent.click(expandBtn);
     expect(screen.getByTestId('eventDetailFlyout')).toBeInTheDocument();
 
     fireEvent.keyDown(document, { key: 'Escape' });

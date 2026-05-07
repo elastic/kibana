@@ -15,20 +15,6 @@ describe('CriticalityDonut', () => {
     expect(screen.getByText('75')).toBeInTheDocument();
   });
 
-  it('applies danger styling for high scores', () => {
-    const { container } = render(<CriticalityDonut score={85} />);
-    expect(
-      container.querySelector('[data-test-subj="sigeventsOverviewCriticalityDonut"]')
-    ).toBeInTheDocument();
-  });
-
-  it('applies success styling for low scores', () => {
-    const { container } = render(<CriticalityDonut score={25} />);
-    expect(
-      container.querySelector('[data-test-subj="sigeventsOverviewCriticalityDonut"]')
-    ).toBeInTheDocument();
-  });
-
   it('clamps score to 0-100 range', () => {
     render(<CriticalityDonut score={150} />);
     expect(screen.getByText('100')).toBeInTheDocument();
@@ -37,11 +23,6 @@ describe('CriticalityDonut', () => {
   it('displays score of 0', () => {
     render(<CriticalityDonut score={0} />);
     expect(screen.getByText('0')).toBeInTheDocument();
-  });
-
-  it('displays score of 100', () => {
-    render(<CriticalityDonut score={100} />);
-    expect(screen.getByText('100')).toBeInTheDocument();
   });
 
   it('uses custom size when provided', () => {

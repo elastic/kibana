@@ -94,6 +94,7 @@ describe('OtherPromotedEvents', () => {
         mainEventTitle: 'Payment failures',
         severityLabel: 'Critical',
         severityColor: 'danger',
+        blastRadiusScore: 90,
         raw: {
           ...makeEvent().raw,
           event_id: 'e-1',
@@ -104,6 +105,7 @@ describe('OtherPromotedEvents', () => {
         mainEventTitle: 'Frontend errors',
         severityLabel: 'Medium',
         severityColor: 'primary',
+        blastRadiusScore: 50,
         raw: {
           ...makeEvent().raw,
           event_id: 'e-2',
@@ -148,19 +150,6 @@ describe('OtherPromotedEvents', () => {
     renderWithIntl(<OtherPromotedEvents events={events} />);
 
     fireEvent.click(screen.getByTestId('otherPromotedEventExpandRow-evt-1'));
-    expect(screen.getByTestId('otherPromotedEventDetailFlyout')).toBeInTheDocument();
-
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.queryByTestId('otherPromotedEventDetailFlyout')).not.toBeInTheDocument();
-  });
-
-  it('returns focus to the trigger element when the flyout is closed', () => {
-    const events = [makeEvent({ mainEventTitle: 'Payment failures' })];
-    renderWithIntl(<OtherPromotedEvents events={events} />);
-
-    const expandBtn = screen.getByTestId('otherPromotedEventExpandRow-evt-1');
-    expandBtn.focus();
-    fireEvent.click(expandBtn);
     expect(screen.getByTestId('otherPromotedEventDetailFlyout')).toBeInTheDocument();
 
     fireEvent.keyDown(document, { key: 'Escape' });

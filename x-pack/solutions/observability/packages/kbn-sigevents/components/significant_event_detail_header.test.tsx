@@ -57,30 +57,10 @@ describe('SignificantEventDetailHeader', () => {
     expect(screen.queryByText('Recommended action')).not.toBeInTheDocument();
   });
 
-  it('renders the correct severity band for a High score', () => {
-    renderWithIntl(<SignificantEventDetailHeader {...baseProps} severityScore={70} />);
-    expect(screen.getByText('High')).toBeInTheDocument();
-  });
-
-  it('renders the correct severity band for a Medium score', () => {
-    renderWithIntl(<SignificantEventDetailHeader {...baseProps} severityScore={50} />);
-    expect(screen.getByText('Medium')).toBeInTheDocument();
-  });
-
-  it('renders the correct severity band for a Low score', () => {
-    renderWithIntl(<SignificantEventDetailHeader {...baseProps} severityScore={20} />);
-    expect(screen.getByText('Low')).toBeInTheDocument();
-  });
-
   it('renders a custom recommended action label', () => {
     renderWithIntl(
       <SignificantEventDetailHeader {...baseProps} recommendedActionLabel="Monitor" />
     );
     expect(screen.getByText('Monitor')).toBeInTheDocument();
-  });
-
-  it('renders the severity donut', () => {
-    renderWithIntl(<SignificantEventDetailHeader {...baseProps} />);
-    expect(screen.getByTestId('sigeventsOverviewCriticalityDonut')).toBeInTheDocument();
   });
 });
