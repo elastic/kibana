@@ -15,11 +15,11 @@
 import React from 'react';
 import { EuiAccordion } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import type { FormFieldDescriptor } from '../schema_walker';
+import type { FieldDescriptor } from '../types';
 import { SchemaFormField } from './schema_form_field';
 
 interface SectionFieldProps {
-  descriptor: FormFieldDescriptor;
+  descriptor: FieldDescriptor;
   control: Control;
 }
 

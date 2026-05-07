@@ -7,45 +7,41 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { datatableConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils/config_builder/schema';
+import type { FieldDescriptor } from '../../../ui_schemas';
+import { uiSchemaRegistry } from '../../../ui_schemas';
+import { buildFieldDescriptors } from '../../../schema_walker';
+
+interface VizSchemaConfig {
+  schema: { getSchema: () => { describe: () => Record<string, unknown> } };
+}
+
+// Schema registry mapping viz IDs to their kbn-config-schema instances
+const vizSchemas: Record<string, VizSchemaConfig> = {
+  lnsDatatable: { schema: datatableConfigSchemaNoESQL },
+};
 
 // Cache — computed once on first request
-let cachedDescriptions: Record<string, unknown> | null = null;
+let cachedResult: Record<string, { fields: FieldDescriptor[] }> | null = null;
 
-function computeDescriptions(): Record<string, unknown> {
-  if (cachedDescriptions) return cachedDescriptions;
+function computeFieldDescriptors(): Record<string, { fields: FieldDescriptor[] }> {
+  if (cachedResult) return cachedResult;
 
-  const schemas: Record<
-    string,
-    { schema: { getSchema: () => { describe: () => unknown } }; excludeSections: string[] }
-  > = {
-    lnsDatatable: {
-      schema: datatableConfigSchemaNoESQL,
-      excludeSections: [
-        'type',
-        'title',
-        'description',
-        'data_source',
-        'layer_settings',
-        'metrics',
-        'rows',
-        'split_metrics_by',
-        'references',
-        'filters',
-        'time_shift',
-        'reduce_time_range',
-      ],
-    },
-  };
+  const result: Record<string, { fields: FieldDescriptor[] }> = {};
 
-  const result: Record<string, unknown> = {};
-  for (const [vizId, { schema, excludeSections }] of Object.entries(schemas)) {
-    result[vizId] = {
-      description: schema.getSchema().describe(),
-      excludeSections,
-    };
+  for (const [vizId, config] of Object.entries(vizSchemas)) {
+    const uiSchema = uiSchemaRegistry[vizId];
+    if (!uiSchema) continue;
+
+    const description = config.schema.getSchema().describe() as Record<string, unknown>;
+    const fields = buildFieldDescriptors(
+      description as Parameters<typeof buildFieldDescriptors>[0],
+      uiSchema
+    );
+
+    result[vizId] = { fields };
   }
 
-  cachedDescriptions = result;
+  cachedResult = result;
   return result;
 }
 
@@ -63,7 +59,7 @@ export function registerSchemaDescriptionsRoute(router: IRouter) {
     },
     async (context, request, response) => {
       return response.ok({
-        body: computeDescriptions(),
+        body: computeFieldDescriptors(),
       });
     }
   );

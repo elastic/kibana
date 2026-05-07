@@ -16,7 +16,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 import { SchemaFormField } from './schema_form_field';
-import type { FormFieldDescriptor } from '../schema_walker';
+import type { FieldDescriptor } from '../types';
 
 const Wrapper = ({
   children,
@@ -32,7 +32,7 @@ const Wrapper = ({
   return <Component />;
 };
 
-const renderField = (descriptor: FormFieldDescriptor, defaultValues?: Record<string, unknown>) => {
+const renderField = (descriptor: FieldDescriptor, defaultValues?: Record<string, unknown>) => {
   return render(
     <Wrapper defaultValues={defaultValues}>
       {(control) => <SchemaFormField descriptor={descriptor} control={control} />}

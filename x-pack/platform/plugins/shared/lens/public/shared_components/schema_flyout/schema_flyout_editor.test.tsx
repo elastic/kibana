@@ -14,33 +14,20 @@ import {
   extractSettingsFromState,
   mergeSettingsIntoState,
 } from './schema_flyout_editor';
-import type { FormFieldDescriptor } from './schema_walker';
+import type { FieldDescriptor } from './types';
 
-// Mock useKibana to provide http service
+// Mock useKibana to provide http service — stable reference to prevent useEffect loops
 const mockHttpGet = jest.fn();
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      http: {
-        get: mockHttpGet,
-      },
+const mockServices = {
+  services: {
+    http: {
+      get: mockHttpGet,
     },
-  }),
+  },
+};
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => mockServices,
 }));
-
-// Mock the schema_walker module
-jest.mock('./schema_walker', () => ({
-  walkSchemaDescription: jest.fn(),
-}));
-
-// Mock the fields module
-jest.mock('./fields', () => ({
-  SchemaFormField: ({ descriptor }: { descriptor: FormFieldDescriptor }) => (
-    <div data-test-subj={`field-${descriptor.path}`}>{descriptor.label}</div>
-  ),
-}));
-
-const { walkSchemaDescription } = jest.requireMock('./schema_walker');
 
 describe('getByPath', () => {
   it('returns nested value', () => {
@@ -82,7 +69,7 @@ describe('setByPath', () => {
 describe('extractSettingsFromState', () => {
   it('extracts leaf values from state', () => {
     const state = { styling: { paging: 10, density: { mode: 'compact' } } };
-    const fields: FormFieldDescriptor[] = [
+    const fields: FieldDescriptor[] = [
       {
         path: 'styling',
         type: 'section',
@@ -127,7 +114,6 @@ describe('SchemaFlyoutEditor', () => {
 
   it('renders nothing when fetch returns no data for visualization', async () => {
     mockHttpGet.mockResolvedValue({});
-    walkSchemaDescription.mockReturnValue([]);
 
     const { container } = render(
       <SchemaFlyoutEditor visualizationId="unknownViz" state={{}} setState={setState} />
@@ -142,12 +128,8 @@ describe('SchemaFlyoutEditor', () => {
 
   it('renders nothing when there are no visible fields', async () => {
     mockHttpGet.mockResolvedValue({
-      lnsDatatable: {
-        description: { type: 'object', keys: {} },
-        excludeSections: [],
-      },
+      lnsDatatable: { fields: [] },
     });
-    walkSchemaDescription.mockReturnValue([]);
 
     const { container } = render(
       <SchemaFlyoutEditor visualizationId="lnsDatatable" state={{}} setState={setState} />
@@ -161,25 +143,21 @@ describe('SchemaFlyoutEditor', () => {
   });
 
   it('renders form fields for a mapped visualization', async () => {
-    const mockFields: FormFieldDescriptor[] = [
-      { path: 'styling', type: 'section', label: 'Styling', children: [] },
-      { path: 'row_numbers', type: 'toggle', label: 'Row numbers' },
+    const mockFields: FieldDescriptor[] = [
+      { path: 'styling.density.mode', type: 'select', label: 'Density', widget: 'buttonGroup' },
+      { path: 'styling.row_numbers.visible', type: 'toggle', label: 'Show row numbers' },
     ];
 
     mockHttpGet.mockResolvedValue({
-      lnsDatatable: {
-        description: { type: 'object', keys: { styling: {}, row_numbers: {} } },
-        excludeSections: ['type'],
-      },
+      lnsDatatable: { fields: mockFields },
     });
-    walkSchemaDescription.mockReturnValue(mockFields);
 
     render(<SchemaFlyoutEditor visualizationId="lnsDatatable" state={{}} setState={setState} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('field-styling')).toBeInTheDocument();
+      expect(screen.getByTestId('schemaField-styling.density.mode')).toBeInTheDocument();
     });
-    expect(screen.getByTestId('field-row_numbers')).toBeInTheDocument();
+    expect(screen.getByTestId('schemaField-styling.row_numbers.visible')).toBeInTheDocument();
   });
 
   it('renders nothing when fetch fails', async () => {

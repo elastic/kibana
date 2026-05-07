@@ -9,8 +9,7 @@ import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { walkSchemaDescription } from './schema_walker';
-import type { FormFieldDescriptor } from './schema_walker';
+import type { FieldDescriptor } from './types';
 import { SchemaFormField } from './fields';
 
 interface SchemaFlyoutEditorProps {
@@ -19,9 +18,8 @@ interface SchemaFlyoutEditorProps {
   setState: (newState: unknown) => void;
 }
 
-interface VizSchemaData {
-  description: Record<string, unknown>;
-  excludeSections: string[];
+interface VizSchemaResponse {
+  fields: FieldDescriptor[];
 }
 
 /** Get a nested value by dot-delimited path */
@@ -64,9 +62,9 @@ export const setByPath = (obj: unknown, path: string, value: unknown): unknown =
 };
 
 /** Collect leaf paths from field descriptors */
-const collectLeafPaths = (fields: FormFieldDescriptor[]): string[] => {
+const collectLeafPaths = (fields: FieldDescriptor[]): string[] => {
   const paths: string[] = [];
-  const walk = (descriptors: FormFieldDescriptor[]) => {
+  const walk = (descriptors: FieldDescriptor[]) => {
     for (const f of descriptors) {
       if (f.children && f.children.length > 0) {
         walk(f.children);
@@ -81,7 +79,7 @@ const collectLeafPaths = (fields: FormFieldDescriptor[]): string[] => {
 
 export const extractSettingsFromState = (
   state: unknown,
-  fields: FormFieldDescriptor[]
+  fields: FieldDescriptor[]
 ): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
   const leafPaths = collectLeafPaths(fields);
@@ -105,39 +103,12 @@ export const mergeSettingsIntoState = (
   return result;
 };
 
-export const SchemaFlyoutEditor: React.FC<SchemaFlyoutEditorProps> = ({
-  visualizationId,
-  state,
-  setState,
-}) => {
-  const { services } = useKibana();
-  const [schemaDescriptions, setSchemaDescriptions] = useState<Record<
-    string,
-    VizSchemaData
-  > | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    services.http
-      ?.get<Record<string, VizSchemaData>>('/internal/lens/schema_descriptions')
-      .then((data) => {
-        if (!cancelled) setSchemaDescriptions(data);
-      })
-      .catch(() => {}); // silently fail — falls back to no flyout
-    return () => {
-      cancelled = true;
-    };
-  }, [services.http]);
-
-  const vizData = schemaDescriptions?.[visualizationId];
-
-  const fieldDescriptors = useMemo(() => {
-    if (!vizData) return [];
-    return walkSchemaDescription(vizData.description, {
-      excludePaths: vizData.excludeSections,
-    });
-  }, [vizData]);
-
+/** Inner form component — only mounted when field descriptors are available */
+const SchemaForm: React.FC<{
+  fieldDescriptors: FieldDescriptor[];
+  state: unknown;
+  setState: (newState: unknown) => void;
+}> = ({ fieldDescriptors, state, setState }) => {
   const defaultValues = useMemo(
     () => extractSettingsFromState(state, fieldDescriptors),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -152,17 +123,22 @@ export const SchemaFlyoutEditor: React.FC<SchemaFlyoutEditorProps> = ({
   const setStateRef = useRef(setState);
   setStateRef.current = setState;
 
+  const lastEmittedRef = useRef<string>(JSON.stringify(defaultValues));
+
   useEffect(() => {
     const subscription = methods.watch((values) => {
-      const newState = mergeSettingsIntoState(stateRef.current, values as Record<string, unknown>);
-      setStateRef.current(newState);
+      const serialized = JSON.stringify(values);
+      if (serialized !== lastEmittedRef.current) {
+        lastEmittedRef.current = serialized;
+        const newState = mergeSettingsIntoState(
+          stateRef.current,
+          values as Record<string, unknown>
+        );
+        setStateRef.current(newState);
+      }
     });
     return () => subscription.unsubscribe();
   }, [methods]);
-
-  if (!vizData || fieldDescriptors.length === 0) {
-    return null;
-  }
 
   return (
     <FormProvider {...methods}>
@@ -175,4 +151,35 @@ export const SchemaFlyoutEditor: React.FC<SchemaFlyoutEditorProps> = ({
       </EuiFlexGroup>
     </FormProvider>
   );
+};
+
+export const SchemaFlyoutEditor: React.FC<SchemaFlyoutEditorProps> = ({
+  visualizationId,
+  state,
+  setState,
+}) => {
+  const { services } = useKibana();
+  const [fieldDescriptors, setFieldDescriptors] = useState<FieldDescriptor[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    services.http
+      ?.get<Record<string, VizSchemaResponse>>('/internal/lens/schema_descriptions')
+      .then((data) => {
+        if (!cancelled) {
+          const vizData = data[visualizationId];
+          setFieldDescriptors(vizData?.fields ?? []);
+        }
+      })
+      .catch(() => {}); // silently fail — falls back to no flyout
+    return () => {
+      cancelled = true;
+    };
+  }, [services.http, visualizationId]);
+
+  if (fieldDescriptors.length === 0) {
+    return null;
+  }
+
+  return <SchemaForm fieldDescriptors={fieldDescriptors} state={state} setState={setState} />;
 };

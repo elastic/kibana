@@ -14,7 +14,7 @@
 
 import React from 'react';
 import type { Control } from 'react-hook-form';
-import type { FormFieldDescriptor } from '../schema_walker';
+import type { FieldDescriptor } from '../types';
 import { ToggleField } from './toggle_field';
 import { SelectField } from './select_field';
 import { NumberField } from './number_field';
@@ -22,7 +22,7 @@ import { TextField } from './text_field';
 import { SectionField } from './section_field';
 
 interface SchemaFormFieldProps {
-  descriptor: FormFieldDescriptor;
+  descriptor: FieldDescriptor;
   control: Control;
 }
 

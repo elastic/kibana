@@ -16,10 +16,10 @@ import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { useController } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
-import type { FormFieldDescriptor } from '../schema_walker';
+import type { FieldDescriptor } from '../types';
 
 interface TextFieldProps {
-  descriptor: FormFieldDescriptor;
+  descriptor: FieldDescriptor;
   control: Control;
 }
 
