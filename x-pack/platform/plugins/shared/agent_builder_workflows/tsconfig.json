@@ -14,6 +14,8 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-context-layer-plugin",
     "@kbn/workflows-management-plugin",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/agent-builder-genai-utils",
+    "@kbn/agent-builder-tools-base"
   ]
 }
