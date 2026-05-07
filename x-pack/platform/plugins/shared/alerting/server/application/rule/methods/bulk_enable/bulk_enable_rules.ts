@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
-import type {
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsFindResult,
-} from '@kbn/core/server';
+import type { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -48,12 +43,6 @@ import type { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
-
-/**
- * Updating too many rules in parallel can cause the denial of service of the
- * Elasticsearch cluster.
- */
-const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
 
 const getShouldScheduleTask = async (
   context: RulesClientContext,
@@ -168,50 +157,58 @@ const bulkEnableRulesWithOCC = async (
         {
           filter,
           type: RULE_SAVED_OBJECT_TYPE,
-          perPage: 100,
+          perPage: 50,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
         }
       )
   );
 
-  const rulesFinderRules: Array<SavedObjectsFindResult<RawRule>> = [];
-  const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-  const tasksToSchedule: TaskInstanceWithDeprecatedFields[] = [];
-  const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
-  const rulesToClearFlapping: Array<{ id: string; ruleTypeId: string }> = [];
+
+  const errors: BulkOperationError[] = [];
+  const taskIdsToEnable: string[] = [];
+  const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const ruleIdsToClearFlapping: string[] = [];
+  const ruleTypeIdsToClearFlapping: Record<string, boolean> = {};
+
+  const intervals: string[] = [];
   let scheduleValidationError = '';
 
   await withSpan(
-    { name: 'Get rules, collect them and their attributes', type: 'rules' },
+    { name: 'Process rules page by page: validate, enable, persist', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        rulesFinderRules.push(...response.saved_objects);
-      }
-      await rulesFinder.close();
+        for (const rule of response.saved_objects) {
+          const interval = rule.attributes.schedule?.interval;
+          if (interval) {
+            intervals.push(interval);
+          }
+        }
 
-      const updatedInterval = rulesFinderRules.map((rule) => rule.attributes.schedule?.interval);
+        if (!scheduleValidationError) {
+          const validationPayload = await validateScheduleLimit({
+            context,
+            updatedInterval: intervals,
+          });
 
-      const validationPayload = await validateScheduleLimit({
-        context,
-        updatedInterval,
-      });
+          if (validationPayload) {
+            scheduleValidationError = getRuleCircuitBreakerErrorMessage({
+              interval: validationPayload.interval,
+              intervalAvailable: validationPayload.intervalAvailable,
+              action: 'bulkEnable',
+              rules: intervals.length,
+            });
+          }
+        }
 
-      if (validationPayload) {
-        scheduleValidationError = getRuleCircuitBreakerErrorMessage({
-          interval: validationPayload.interval,
-          intervalAvailable: validationPayload.intervalAvailable,
-          action: 'bulkEnable',
-          rules: updatedInterval.length,
-        });
-      }
+        await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
 
-      await bulkMigrateLegacyActions({ context, rules: rulesFinderRules });
+        const pageRulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+        const pageTasksToSchedule: TaskInstanceWithDeprecatedFields[] = [];
+        const pageRulesToClearFlapping: Array<{ id: string; ruleTypeId: string }> = [];
 
-      await pMap(
-        rulesFinderRules,
-        async (rule) => {
+        for (const rule of response.saved_objects) {
           const ruleName = rule.attributes.name;
 
           const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
@@ -232,7 +229,7 @@ const bulkEnableRulesWithOCC = async (
             }
 
             if (isLifecycleAlert) {
-              rulesToClearFlapping.push({
+              pageRulesToClearFlapping.push({
                 id: rule.id,
                 ruleTypeId: ruleType.id,
               });
@@ -279,7 +276,7 @@ const bulkEnableRulesWithOCC = async (
             );
 
             if (shouldScheduleTask) {
-              tasksToSchedule.push({
+              pageTasksToSchedule.push({
                 id: rule.id,
                 taskType: `alerting:${rule.attributes.alertTypeId}`,
                 schedule: rule.attributes.schedule,
@@ -294,11 +291,11 @@ const bulkEnableRulesWithOCC = async (
                   alertInstances: {},
                 },
                 scope: ['alerting'],
-                enabled: false, // we create the task as disabled, taskManager.bulkEnable will enable them by randomising their schedule datetime
+                enabled: false,
               });
             }
 
-            rulesToEnable.push({
+            pageRulesToEnable.push({
               ...rule,
               attributes: updatedAttributes,
             });
@@ -334,56 +331,57 @@ const bulkEnableRulesWithOCC = async (
               })
             );
           }
-        },
-        {
-          concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
         }
-      );
+
+        if (pageTasksToSchedule.length > 0) {
+          await context.taskManager.bulkSchedule(pageTasksToSchedule);
+        }
+
+        if (pageRulesToEnable.length > 0) {
+          // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
+          // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
+          // bulk_disable, bulk_enable, etc. to fix this cast
+          const result = await bulkCreateRulesSo({
+            savedObjectsClient: context.unsecuredSavedObjectsClient,
+            bulkCreateRuleAttributes: pageRulesToEnable as Array<
+              SavedObjectsBulkCreateObject<RawRule>
+            >,
+            savedObjectsBulkCreateOptions: { overwrite: true },
+          });
+
+          const pageRuleIdsFailedToEnable = new Set<string>();
+
+          result.saved_objects.forEach((rule) => {
+            if (rule.error === undefined) {
+              if (rule.attributes.scheduledTaskId) {
+                taskIdsToEnable.push(rule.attributes.scheduledTaskId);
+              }
+              rules.push(rule);
+            } else {
+              pageRuleIdsFailedToEnable.add(rule.id);
+              errors.push({
+                message: rule.error.message ?? 'n/a',
+                status: rule.error.statusCode,
+                rule: {
+                  id: rule.id,
+                  name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
+                },
+              });
+            }
+          });
+
+          for (const { id, ruleTypeId } of pageRulesToClearFlapping) {
+            if (!pageRuleIdsFailedToEnable.has(id)) {
+              ruleIdsToClearFlapping.push(id);
+              ruleTypeIdsToClearFlapping[ruleTypeId] = true;
+            }
+          }
+        }
+      }
+      await rulesFinder.close();
     }
   );
 
-  if (tasksToSchedule.length > 0) {
-    await withSpan({ name: 'taskManager.bulkSchedule', type: 'tasks' }, () =>
-      context.taskManager.bulkSchedule(tasksToSchedule)
-    );
-  }
-
-  const result = await withSpan(
-    { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
-    () =>
-      // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
-      // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
-      // bulk_disable, bulk_enable, etc. to fix this cast
-      bulkCreateRulesSo({
-        savedObjectsClient: context.unsecuredSavedObjectsClient,
-        bulkCreateRuleAttributes: rulesToEnable as Array<SavedObjectsBulkCreateObject<RawRule>>,
-        savedObjectsBulkCreateOptions: {
-          overwrite: true,
-        },
-      })
-  );
-
-  // Get a map of all rules that failed to enable so we do not clear their flapping
-  const ruleIdsFailedToEnable: Record<string, boolean> = {};
-
-  result.saved_objects.forEach((rule) => {
-    if (rule.error) {
-      ruleIdsFailedToEnable[rule.id] = true;
-    }
-  });
-
-  // Remove all failed to enable rule ids and rule type ids
-  const ruleIdsToClearFlapping: string[] = [];
-  const ruleTypeIdsToClearFlapping: Record<string, boolean> = {};
-
-  rulesToClearFlapping.forEach(({ id, ruleTypeId }) => {
-    if (!ruleIdsFailedToEnable[id]) {
-      ruleIdsToClearFlapping.push(id);
-      ruleTypeIdsToClearFlapping[ruleTypeId] = true;
-    }
-  });
-
-  // Attempt to clear flapping from those rule ids
   if (context.alertsService && ruleIdsToClearFlapping.length) {
     try {
       await context.alertsService.clearAlertFlappingHistory({
@@ -394,7 +392,6 @@ const bulkEnableRulesWithOCC = async (
         ruleIds: ruleIdsToClearFlapping,
       });
     } catch (error) {
-      // Don't throw if we can't clear the flapping history for whatever reason
       context.logger.error(
         `Failure to clear flapping history from rule ${JSON.stringify(ruleIdsToClearFlapping)} - ${
           error.message
@@ -403,29 +400,8 @@ const bulkEnableRulesWithOCC = async (
     }
   }
 
-  const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-  const taskIdsToEnable: string[] = [];
-
-  result.saved_objects.forEach((rule) => {
-    if (rule.error === undefined) {
-      if (rule.attributes.scheduledTaskId) {
-        taskIdsToEnable.push(rule.attributes.scheduledTaskId);
-      }
-      rules.push(rule);
-    } else {
-      errors.push({
-        message: rule.error.message ?? 'n/a',
-        status: rule.error.statusCode,
-        rule: {
-          id: rule.id,
-          name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
-        },
-      });
-    }
-  });
   return {
     errors,
-    // TODO: delete the casting when we do versioning of bulk disable api
     rules: rules as Array<SavedObjectsBulkUpdateObject<RawRule>>,
     accListSpecificForBulkOperation: [taskIdsToEnable],
   };

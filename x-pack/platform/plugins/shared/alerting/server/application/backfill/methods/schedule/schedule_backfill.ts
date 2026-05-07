@@ -120,12 +120,12 @@ export async function scheduleBackfill(
       {
         filter: kueryNodeFilterWithAuth,
         type: RULE_SAVED_OBJECT_TYPE,
-        perPage: 100,
+        perPage: 50,
         ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
       }
     );
 
-  let rulesToSchedule: Array<SavedObjectsFindResult<RawRule>> = [];
+  const rulesToSchedule: Array<SavedObjectsFindResult<RawRule>> = [];
   for await (const response of rulesFinder.find()) {
     for (const rule of response.saved_objects) {
       context.auditLogger?.log(
@@ -140,7 +140,7 @@ export async function scheduleBackfill(
       );
     }
 
-    rulesToSchedule = [...response.saved_objects];
+    rulesToSchedule.push(...response.saved_objects);
   }
 
   const actionsClient = await context.getActionsClient();

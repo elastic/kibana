@@ -2455,7 +2455,7 @@ describe('BackfillClient', () => {
 
       expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        perPage: 100,
+        perPage: 50,
         hasReference: [{ id: '1', type: RULE_SAVED_OBJECT_TYPE }],
         namespaces: ['default'],
       });
@@ -2500,7 +2500,7 @@ describe('BackfillClient', () => {
 
       expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        perPage: 100,
+        perPage: 50,
         hasReference: [{ id: '1', type: RULE_SAVED_OBJECT_TYPE }],
       });
       expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
@@ -2546,7 +2546,7 @@ describe('BackfillClient', () => {
 
       expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        perPage: 100,
+        perPage: 50,
         hasReference: [
           { id: '1', type: RULE_SAVED_OBJECT_TYPE },
           { id: '2', type: RULE_SAVED_OBJECT_TYPE },
@@ -2572,7 +2572,7 @@ describe('BackfillClient', () => {
 
       expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        perPage: 100,
+        perPage: 50,
         hasReference: [
           { id: '1', type: RULE_SAVED_OBJECT_TYPE },
           { id: '2', type: RULE_SAVED_OBJECT_TYPE },
@@ -2959,7 +2959,7 @@ describe('BackfillClient', () => {
 
       expect(mockSavedObjectsRepository.createPointInTimeFinder).toHaveBeenCalledWith({
         type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        perPage: 100,
+        perPage: 50,
         hasReference: [{ id: '1', type: RULE_SAVED_OBJECT_TYPE }],
         filter: `
         (ad_hoc_run_params.attributes.start <= "${mockEnd.toISOString()}" and
@@ -3042,7 +3042,7 @@ describe('BackfillClient', () => {
 
       expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        perPage: 100,
+        perPage: 50,
         filter: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.initiatorId: "init-1"`,
       });
       expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([

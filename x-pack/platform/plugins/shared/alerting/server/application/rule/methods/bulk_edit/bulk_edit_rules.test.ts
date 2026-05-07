@@ -2731,7 +2731,7 @@ describe('bulkEdit()', () => {
           function: 'is',
           type: 'function',
         },
-        perPage: 100,
+        perPage: 50,
         type: RULE_SAVED_OBJECT_TYPE,
         namespaces: ['default'],
       });

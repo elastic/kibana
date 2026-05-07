@@ -164,19 +164,24 @@ const bulkDeleteWithOCC = async (
       context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
         filter,
         type: RULE_SAVED_OBJECT_TYPE,
-        perPage: 100,
+        perPage: 50,
         ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
       })
   );
 
-  const rulesToDelete: Array<SavedObject<RawRule>> = [];
   const apiKeyToRuleIdMapping: Record<string, string> = {};
   const uiamApiKeyToRuleIdMapping: Record<string, string> = {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
   const ruleNameToRuleIdMapping: Record<string, string> = {};
 
+  // Aggregated results across pages
+  const apiKeysToInvalidate = new Set<string>();
+  const taskIdsToDelete: string[] = [];
+  const errors: BulkOperationError[] = [];
+  const deletedRules: Array<SavedObject<RawRule>> = [];
+
   await withSpan(
-    { name: 'Get rules, collect them and their attributes', type: 'rules' },
+    { name: 'Process rules page by page: collect, untrack, delete', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
         await bulkMigrateLegacyActions({
@@ -184,6 +189,7 @@ const bulkDeleteWithOCC = async (
           rules: response.saved_objects,
           skipActionsValidation: true,
         });
+
         for (const rule of response.saved_objects) {
           const { apiKey, apiKeyCreatedByUser, uiamApiKey } = rule.attributes;
 
@@ -200,7 +206,6 @@ const bulkDeleteWithOCC = async (
           if (rule.attributes.scheduledTaskId) {
             taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
           }
-          rulesToDelete.push(rule);
 
           context.auditLogger?.log(
             ruleAuditEvent({
@@ -214,73 +219,73 @@ const bulkDeleteWithOCC = async (
             })
           );
         }
+
+        for (const { id, attributes } of response.saved_objects) {
+          await untrackRuleAlerts(context, id, attributes as RawRule);
+        }
+
+        const pageRuleIds = response.saved_objects.map((rule) => rule.id);
+        try {
+          const eventLogClient = await context.getEventLogClient();
+          await softDeleteGaps({
+            ruleIds: pageRuleIds,
+            logger: context.logger,
+            eventLogClient,
+            eventLogger: context.eventLogger,
+          });
+        } catch (error) {
+          context.logger.error(
+            `delete(): Failed to soft delete gaps for rules: ${pageRuleIds.join(',')}: ${
+              error.message
+            }`
+          );
+        }
+
+        // Bulk delete rules for this page
+        const result = await bulkDeleteRulesSo({
+          savedObjectsClient: context.unsecuredSavedObjectsClient,
+          ids: pageRuleIds,
+        });
+
+        const pageDeletedIds = new Set<string>();
+        result.statuses.forEach((status) => {
+          if (status.error === undefined) {
+            if (apiKeyToRuleIdMapping[status.id]) {
+              apiKeysToInvalidate.add(apiKeyToRuleIdMapping[status.id]);
+            }
+            if (uiamApiKeyToRuleIdMapping[status.id]) {
+              apiKeysToInvalidate.add(uiamApiKeyToRuleIdMapping[status.id]);
+            }
+            if (taskIdToRuleIdMapping[status.id]) {
+              taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
+            }
+            pageDeletedIds.add(status.id);
+          } else {
+            errors.push({
+              message: status.error.message ?? 'n/a',
+              status: status.error.statusCode,
+              rule: {
+                id: status.id,
+                name: ruleNameToRuleIdMapping[status.id] ?? 'n/a',
+              },
+            });
+          }
+        });
+
+        // Only save successfully deleted rules
+        for (const rule of response.saved_objects) {
+          if (pageDeletedIds.has(rule.id)) {
+            deletedRules.push(rule);
+          }
+        }
       }
       await rulesFinder.close();
     }
   );
 
-  for (const { id, attributes } of rulesToDelete) {
-    await untrackRuleAlerts(context, id, attributes as RawRule);
-  }
-
-  const ruleIds = rulesToDelete.map((rule) => rule.id);
-  try {
-    const eventLogClient = await context.getEventLogClient();
-    await softDeleteGaps({
-      ruleIds,
-      logger: context.logger,
-      eventLogClient,
-      eventLogger: context.eventLogger,
-    });
-  } catch (error) {
-    // Failing to soft delete gaps should not block the rule deletion
-    context.logger.error(
-      `delete(): Failed to soft delete gaps for rules: ${ruleIds.join(',')}: ${error.message}`
-    );
-  }
-
-  const result = await withSpan(
-    { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
-    () =>
-      bulkDeleteRulesSo({
-        savedObjectsClient: context.unsecuredSavedObjectsClient,
-        ids: rulesToDelete.map(({ id }) => id),
-      })
-  );
-
-  const deletedRuleIds: string[] = [];
-  const apiKeysToInvalidate = new Set<string>();
-  const taskIdsToDelete: string[] = [];
-  const errors: BulkOperationError[] = [];
-
-  result.statuses.forEach((status) => {
-    if (status.error === undefined) {
-      if (apiKeyToRuleIdMapping[status.id]) {
-        apiKeysToInvalidate.add(apiKeyToRuleIdMapping[status.id]);
-      }
-      if (uiamApiKeyToRuleIdMapping[status.id]) {
-        apiKeysToInvalidate.add(uiamApiKeyToRuleIdMapping[status.id]);
-      }
-      if (taskIdToRuleIdMapping[status.id]) {
-        taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
-      }
-      deletedRuleIds.push(status.id);
-    } else {
-      errors.push({
-        message: status.error.message ?? 'n/a',
-        status: status.error.statusCode,
-        rule: {
-          id: status.id,
-          name: ruleNameToRuleIdMapping[status.id] ?? 'n/a',
-        },
-      });
-    }
-  });
-  const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
-
   return {
     errors,
-    rules,
+    rules: deletedRules,
     accListSpecificForBulkOperation: [Array.from(apiKeysToInvalidate), taskIdsToDelete],
   };
 };

@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import type { KueryNode } from '@kbn/es-query';
-import type {
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsFindResult,
-} from '@kbn/core/server';
+import type { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import type { RuleParams } from '../../../application/rule/types';
 import type { ValidateScheduleLimitResult } from '../../../application/rule/methods/get_schedule_frequency';
 import { validateScheduleLimit } from '../../../application/rule/methods/get_schedule_frequency';
@@ -24,7 +19,6 @@ import {
   type BulkEditActionSkipResult,
   type RawRule,
 } from '../../../types';
-import { API_KEY_GENERATE_CONCURRENCY } from '../constants';
 import type { BulkEditOperationResult } from './retry_if_bulk_edit_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import type {
@@ -56,7 +50,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
       {
         filter: options.filter,
         type: RULE_SAVED_OBJECT_TYPE,
-        perPage: 100,
+        perPage: 50,
         ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
       }
     );
@@ -80,19 +74,16 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
 
     await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
 
-    await pMap(
-      response.saved_objects,
-      async (rule: SavedObjectsFindResult<RawRule>) =>
-        options.updateFn({
-          rule,
-          apiKeysMap,
-          rules,
-          skipped,
-          errors,
-          username,
-        }),
-      { concurrency: API_KEY_GENERATE_CONCURRENCY }
-    );
+    for (const rule of response.saved_objects) {
+      await options.updateFn({
+        rule,
+        apiKeysMap,
+        rules,
+        skipped,
+        errors,
+        username,
+      });
+    }
   }
   await rulesFinder.close();
 

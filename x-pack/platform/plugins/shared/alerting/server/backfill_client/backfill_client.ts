@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import pMap from 'p-map';
 import type {
   ISavedObjectsRepository,
   Logger,
@@ -336,47 +335,40 @@ export class BackfillClient {
       adHocSOsToCreate.length
     );
 
-    const chunkConcurrency = 2;
-    await pMap(
-      chunks,
-      async ({ startIndex, items }, idx) => {
-        try {
-          const response = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(items);
+    for (let idx = 0; idx < chunks.length; idx++) {
+      const { startIndex, items } = chunks[idx];
+      try {
+        const response = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(items);
 
-          // Place results in the correct positions
-          response.saved_objects.forEach((so, j) => {
-            orderedResults[startIndex + j] = so;
-          });
+        response.saved_objects.forEach((so, j) => {
+          orderedResults[startIndex + j] = so;
+        });
 
-          this.logger.debug(
-            `backfillClient.bulkQueue: created ${items.length} SOs(chunk ${idx + 1}/${
-              chunks.length
-            })`
+        this.logger.debug(
+          `backfillClient.bulkQueue: created ${items.length} SOs(chunk ${idx + 1}/${chunks.length})`
+        );
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        items.forEach((item, i) => {
+          const ruleId = item.references?.[0]?.id;
+          if (!ruleId) {
+            return;
+          }
+          orderedResults[startIndex + i] = {
+            ruleId,
+            ruleName: item.attributes.rule.name,
+            bulkCreateError: new Error(errorMessage),
+          };
+          this.logger.warn(`Error to schedule backfill for ruleId ${ruleId} - ${errorMessage}`);
+          auditLogger?.log(
+            adHocRunAuditEvent({
+              action: AdHocRunAuditAction.CREATE,
+              error: new Error(errorMessage),
+            })
           );
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          items.forEach((item, i) => {
-            const ruleId = item.references?.[0]?.id;
-            if (!ruleId) {
-              return;
-            }
-            orderedResults[startIndex + i] = {
-              ruleId,
-              ruleName: item.attributes.rule.name,
-              bulkCreateError: new Error(errorMessage),
-            };
-            this.logger.warn(`Error to schedule backfill for ruleId ${ruleId} - ${errorMessage}`);
-            auditLogger?.log(
-              adHocRunAuditEvent({
-                action: AdHocRunAuditAction.CREATE,
-                error: new Error(errorMessage),
-              })
-            );
-          });
-        }
-      },
-      { concurrency: chunkConcurrency }
-    );
+        });
+      }
+    }
 
     this.logger.info(
       `backfillClient.bulkQueue: created ${adHocSOsToCreate.length} SOs across ${chunks.length} chunks `
@@ -531,20 +523,18 @@ export class BackfillClient {
       // query for all ad hoc runs that reference this ruleId
       const adHocRunFinder = await unsecuredSavedObjectsClient.createPointInTimeFinder<AdHocRunSO>({
         type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        perPage: 100,
+        perPage: 50,
         hasReference: ruleIds.map((ruleId) => ({ id: ruleId, type: RULE_SAVED_OBJECT_TYPE })),
         ...(namespace ? { namespaces: [namespace] } : undefined),
       });
 
-      const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
       for await (const response of adHocRunFinder.find()) {
-        adHocRuns.push(...response.saved_objects);
+        await this.deleteAdHocRunsAndTasks({
+          unsecuredSavedObjectsClient,
+          adHocRuns: response.saved_objects,
+        });
       }
       await adHocRunFinder.close();
-      await this.deleteAdHocRunsAndTasks({
-        unsecuredSavedObjectsClient,
-        adHocRuns,
-      });
     } catch (error) {
       this.logger.warn(
         `Error deleting backfill jobs for rule IDs: ${ruleIds.join(',')} - ${error.message}`
@@ -564,23 +554,21 @@ export class BackfillClient {
     try {
       const adHocRunFinder = await unsecuredSavedObjectsClient.createPointInTimeFinder<AdHocRunSO>({
         type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        perPage: 100,
+        perPage: 50,
         filter: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.initiatorId: "${initiatorId}"`,
       });
-      const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
       for await (const response of adHocRunFinder.find()) {
-        adHocRuns.push(...response.saved_objects);
+        await this.deleteAdHocRunsAndTasks({
+          unsecuredSavedObjectsClient,
+          adHocRuns: response.saved_objects,
+          shouldUpdateGaps,
+          internalSavedObjectsRepository,
+          eventLogClient,
+          eventLogger,
+          actionsClient,
+        });
       }
       await adHocRunFinder.close();
-      await this.deleteAdHocRunsAndTasks({
-        unsecuredSavedObjectsClient,
-        adHocRuns,
-        shouldUpdateGaps,
-        internalSavedObjectsRepository,
-        eventLogClient,
-        eventLogger,
-        actionsClient,
-      });
     } catch (error) {
       this.logger.warn(
         `Error deleting backfill jobs for initiatorId ${initiatorId} - ${(error as Error).message}`
@@ -604,7 +592,7 @@ export class BackfillClient {
     // Create a point in time finder for efficient pagination
     const adHocRunFinder = await savedObjectsRepository.createPointInTimeFinder<AdHocRunSO>({
       type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-      perPage: 100,
+      perPage: 50,
       hasReference: [{ id: ruleId, type: RULE_SAVED_OBJECT_TYPE }],
       filter: ranges
         .map(
