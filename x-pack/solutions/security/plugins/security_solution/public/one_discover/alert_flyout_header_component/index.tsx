@@ -138,43 +138,35 @@ export const AlertFlyoutHeader = ({
     };
   }, [servicesPromise, storePromise]);
 
-  const isMissingMetadata = !hit.raw._id || !hit.raw._index;
-
-  const metadataCallout = isMissingMetadata ? (
-    <>
-      <EuiCallOut announceOnMount size="s" title={MISSING_METADATA_CALLOUT} />
-      <EuiSpacer size="s" />
-    </>
-  ) : null;
-  const remoteDocumentCallout = (
-    <RemoteDocumentCallout hit={hit}>
-      <EuiSpacer size="s" />
-    </RemoteDocumentCallout>
-  );
-
   if (!services || !store) {
-    return (
-      <>
-        {metadataCallout}
-        {remoteDocumentCallout}
-      </>
-    );
+    return null;
   }
+
+  const isMissingMetadata = !hit.raw._id || !hit.raw._index;
 
   return (
     <>
-      {metadataCallout}
-      {remoteDocumentCallout}
+      {isMissingMetadata ? (
+        <>
+          <EuiCallOut announceOnMount size="s" title={MISSING_METADATA_CALLOUT} />
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       {flyoutProviders({
         services,
         store,
         children: (
-          <Header
-            hit={hit}
-            renderCellActions={renderCellActions}
-            onAlertUpdated={onAlertUpdated}
-            onShowNotes={openNotesFlyout}
-          />
+          <>
+            <RemoteDocumentCallout hit={hit}>
+              <EuiSpacer size="s" />
+            </RemoteDocumentCallout>
+            <Header
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+              onShowNotes={openNotesFlyout}
+            />
+          </>
         ),
       })}
     </>
