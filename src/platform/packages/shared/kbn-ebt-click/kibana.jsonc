@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ebt-click",
+  "owner": [
+    "@elastic/obs-exploration"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

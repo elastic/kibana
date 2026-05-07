@@ -54,6 +54,16 @@ export interface ParsedPart {
   instanceId: string;
   /** The component's props as declared in JSX. */
   attributes: Record<string, unknown>;
+  /**
+   * The original component function from the React element's `type` field.
+   *
+   * Carried through from parsing so that the resolver can look up the
+   * per-component-instance resolver registered via `createComponent`. This
+   * is the only way to distinguish two custom parts that share the same
+   * part name but were created by different `createComponent` calls — the
+   * component function reference is unique per call.
+   */
+  componentType?: (...args: unknown[]) => unknown;
 }
 
 /**
@@ -102,6 +112,30 @@ export const parseDeclarativeChildren = (children: ReactNode, assembly: string):
   }
 
   return walkChildren(children, assembly);
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Component type helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Recursively unwraps `React.memo` and `React.forwardRef` wrappers to reach
+ * the underlying render function.
+ *
+ * - `React.memo` wraps as `{ $$typeof: REACT_MEMO_TYPE, type: <inner> }`.
+ * - `React.forwardRef` wraps as `{ $$typeof: REACT_FORWARD_REF_TYPE, render: <inner> }`.
+ *
+ * The loop handles arbitrarily deep nesting (e.g. `memo(forwardRef(fn))`).
+ * Returns `undefined` if the final unwrapped value is not a function.
+ */
+const unwrapComponentType = (type: unknown): ((...args: unknown[]) => unknown) | undefined => {
+  let current = type;
+  while (current !== null && typeof current === 'object') {
+    // React.memo wraps as { $$typeof, type }; forwardRef wraps as { $$typeof, render }.
+    const wrapped = current as Record<string, unknown>;
+    current = wrapped.type ?? wrapped.render;
+  }
+  return typeof current === 'function' ? (current as (...args: unknown[]) => unknown) : undefined;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -158,13 +192,16 @@ const walkChildren = (children: ReactNode, assembly: string): ParsedItem[] => {
     const preset = getPresetId(child, assembly);
     // Empty strings are treated as "no explicit id" (falsy check below).
     const propsId = typeof props.id === 'string' ? props.id : undefined;
-    // `child.type` is a declarative component function at this point
-    // (string HTML tags were filtered by `getPartType` above), but
-    // TypeScript's React types don't model `displayName` on
-    // `JSXElementConstructor`, so a cast through `unknown` is needed.
+    // `child.type` is a declarative component function at this point (string
+    // HTML tags were filtered by `getPartType` above), but consumers may wrap
+    // their component in `React.memo(...)` or `React.forwardRef(...)`, which
+    // produce an object with `$$typeof` rather than a bare function. Unwrap
+    // those wrappers recursively so the resolver WeakMap lookup works regardless
+    // of how deeply the component was decorated (e.g. memo(forwardRef(fn))).
+    const componentFn = unwrapComponentType(child.type as unknown);
     const displayName =
-      typeof child.type !== 'string'
-        ? (child.type as unknown as { displayName?: string }).displayName
+      componentFn !== undefined
+        ? (componentFn as unknown as { displayName?: string }).displayName
         : undefined;
     const seenIds = getSeenIds(partName);
 
@@ -192,7 +229,14 @@ const walkChildren = (children: ReactNode, assembly: string): ParsedItem[] => {
     seenIds.add(instanceId);
 
     // Props are the attributes -- no parser transformation.
-    result.push({ type: 'part', part: partName, preset, instanceId, attributes: props });
+    result.push({
+      type: 'part',
+      part: partName,
+      preset,
+      instanceId,
+      attributes: props,
+      componentType: componentFn,
+    });
   };
 
   Children.forEach(children, processChild);
