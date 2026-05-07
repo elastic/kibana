@@ -55,7 +55,7 @@ export const AppMenuOverflowButton = ({
   const button = (
     <EuiButtonIcon
       iconType="ellipsis"
-      size="xs"
+      size="s"
       aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
         defaultMessage: 'More',
       })}
