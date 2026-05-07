@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createUserService } from '../services/user_service/user_service.mock';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { RulesClient } from './rules_client';
@@ -18,19 +18,13 @@ export function createRulesClient(): {
 } {
   const { rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService();
   const request = httpServerMock.createKibanaRequest();
-  const http = httpServiceMock.createStartContract();
   const taskManager = taskManagerMock.createStart();
   const { userService } = createUserService();
 
-  http.basePath.get.mockReturnValue('/s/default');
-
-  const rulesClient = new RulesClient(
-    request,
-    http,
-    rulesSavedObjectService,
-    taskManager,
-    userService
-  );
+  const rulesClient = new RulesClient({
+    services: { request, rulesSavedObjectService, taskManager, userService },
+    options: { spaceId: 'default' },
+  });
 
   return { rulesClient, mockSavedObjectsClient };
 }
