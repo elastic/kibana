@@ -10,8 +10,10 @@ export {
   agentBuilderPublicEbtEvents,
   agentBuilderServerEbtEvents,
   type AgentBuilderTelemetryEventsMap,
+  type AgentBuilderUiClickElementKind,
   type AgentBuilderEventTypes,
   type ReportSkillCreatedParams,
   type ReportSkillUpdatedParams,
   type ReportSkillDeletedParams,
+  type ReportUiClickParams,
 } from './agent_builder_events';

@@ -1,0 +1,136 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  classifyInteractiveKind,
+  isClickableTarget,
+  isInteractiveDisabled,
+  resolveAgentBuilderUiClickPayload,
+} from './agent_builder_ui_click_resolve';
+
+describe('agent_builder_ui_click_resolve', () => {
+  describe('classifyInteractiveKind', () => {
+    it('classifies button', () => {
+      const el = document.createElement('button');
+      expect(classifyInteractiveKind(el)).toBe('button');
+    });
+
+    it('classifies link with href', () => {
+      const el = document.createElement('a');
+      el.setAttribute('href', '#');
+      expect(classifyInteractiveKind(el)).toBe('link');
+    });
+
+    it('classifies role=button', () => {
+      const el = document.createElement('div');
+      el.setAttribute('role', 'button');
+      expect(classifyInteractiveKind(el)).toBe('role_button');
+    });
+  });
+
+  describe('isClickableTarget', () => {
+    it('returns false for bare div', () => {
+      expect(isClickableTarget(document.createElement('div'))).toBe(false);
+    });
+
+    it('returns true for anchor with href', () => {
+      const a = document.createElement('a');
+      a.setAttribute('href', '/x');
+      expect(isClickableTarget(a)).toBe(true);
+    });
+  });
+
+  describe('isInteractiveDisabled', () => {
+    it('returns true for disabled button', () => {
+      const btn = document.createElement('button');
+      btn.disabled = true;
+      expect(isInteractiveDisabled(btn)).toBe(true);
+    });
+
+    it('returns true when aria-disabled is true', () => {
+      const btn = document.createElement('button');
+      btn.setAttribute('aria-disabled', 'true');
+      expect(isInteractiveDisabled(btn)).toBe(true);
+    });
+  });
+
+  describe('resolveAgentBuilderUiClickPayload', () => {
+    let root: HTMLElement;
+
+    beforeEach(() => {
+      root = document.createElement('div');
+      document.body.appendChild(root);
+    });
+
+    afterEach(() => {
+      root.remove();
+    });
+
+    function clickEvent(target: Element, button = 0) {
+      const ev = new MouseEvent('click', { bubbles: true, cancelable: true, button });
+      Object.defineProperty(ev, 'target', { value: target, enumerable: true });
+      return ev;
+    }
+
+    it('returns null when button is not primary', () => {
+      const btn = document.createElement('button');
+      btn.setAttribute('data-test-subj', 'x');
+      root.appendChild(btn);
+      expect(resolveAgentBuilderUiClickPayload(clickEvent(btn, 2), root, '/agents')).toBeNull();
+    });
+
+    it('returns null when no interactive ancestor', () => {
+      const span = document.createElement('span');
+      root.appendChild(span);
+      expect(resolveAgentBuilderUiClickPayload(clickEvent(span), root, '/agents')).toBeNull();
+    });
+
+    it('returns null when interactive control is disabled', () => {
+      const btn = document.createElement('button');
+      btn.disabled = true;
+      btn.setAttribute('data-test-subj', 'disabledBtn');
+      root.appendChild(btn);
+      expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/agents')).toBeNull();
+    });
+
+    it('uses data-test-subj on the button', () => {
+      const btn = document.createElement('button');
+      btn.setAttribute('data-test-subj', 'mySaveBtn');
+      root.appendChild(btn);
+      expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/manage/agents')).toEqual({
+        target_test_subj: 'mySaveBtn',
+        element_kind: 'button',
+        location_pathname: '/manage/agents',
+      });
+    });
+
+    it('walks up to nearest data-test-subj', () => {
+      const wrap = document.createElement('div');
+      wrap.setAttribute('data-test-subj', 'panelActions');
+      const btn = document.createElement('button');
+      wrap.appendChild(btn);
+      root.appendChild(wrap);
+      expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/')).toEqual({
+        target_test_subj: 'panelActions',
+        element_kind: 'button',
+        location_pathname: '/',
+      });
+    });
+
+    it('classifies link with href', () => {
+      const a = document.createElement('a');
+      a.setAttribute('href', 'https://example.com');
+      a.setAttribute('data-test-subj', 'docLink');
+      root.appendChild(a);
+      expect(resolveAgentBuilderUiClickPayload(clickEvent(a), root, '/x')).toEqual({
+        target_test_subj: 'docLink',
+        element_kind: 'link',
+        location_pathname: '/x',
+      });
+    });
+  });
+});
