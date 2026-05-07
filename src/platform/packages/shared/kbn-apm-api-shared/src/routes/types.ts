@@ -15,11 +15,15 @@ export interface WithResponse<T> {
   readonly [__response]: T;
 }
 
-export type ExtractResponse<T> = T extends WithResponse<infer R extends Record<string, any>>
-  ? R
+export type ExtractResponse<T> = T extends WithResponse<infer R>
+  ? R extends void
+    ? void
+    : R extends Record<string, any>
+    ? R
+    : Record<string, never>
   : Record<string, never>;
 
-export function defineRoute<TResponse extends Record<string, any>>() {
+export function defineRoute<TResponse extends Record<string, any> | void>() {
   return <
     const TEndpoint extends string,
     TParams extends RouteParamsRT | undefined = undefined

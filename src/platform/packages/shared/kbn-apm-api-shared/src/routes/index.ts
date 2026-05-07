@@ -16,6 +16,7 @@ import { agentExplorerRouteDefinitions } from './agent_explorer';
 import { alertsRouteDefinitions } from './alerts';
 import { assistantFunctionsRouteDefinitions } from './assistant_functions';
 import { correlationsRouteDefinitions } from './correlations';
+import { customDashboardsRouteDefinitions } from './custom_dashboards';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -29,6 +30,7 @@ export const routeDefinitions = {
   alerts: alertsRouteDefinitions,
   assistantFunctions: assistantFunctionsRouteDefinitions,
   correlations: correlationsRouteDefinitions,
+  customDashboards: customDashboardsRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;

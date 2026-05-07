@@ -23,3 +23,4 @@ export * from './src/downstream_dependencies';
 export * from './src/latency_aggregation_types';
 export * from './src/apm_timeseries';
 export type * from './src/correlations';
+export * from './src/custom_dashboards';
