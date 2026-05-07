@@ -101,7 +101,7 @@ const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
 
 const nonInteractiveFitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
   ...fitViewOptions,
-  maxZoom: 1,
+  maxZoom: 0.85,
 };
 
 /**
