@@ -6,8 +6,8 @@
  */
 
 import { tags } from '@kbn/evals';
-import { evaluate } from '../../src/evaluate';
-import { alertsRagDataset } from '../../src/datasets';
+import { evaluate } from '../src/evaluate';
+import { alertsRagDataset } from '../src/datasets';
 
 const ELASTIC_ASSISTANT_CAPABILITIES_PATH = '/internal/elastic_assistant/capabilities';
 const ACTIONS_CONNECTOR_PATH = '/api/actions/connector';
