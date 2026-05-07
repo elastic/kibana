@@ -16,6 +16,3 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new WorkflowsPlugin(initializerContext);
 }
 export type { WorkflowsPublicPluginSetup, WorkflowsPublicPluginStart } from './types';
-
-// Used by the agent-builder-workflows plugin
-export { PLUGIN_ID } from '../common';

@@ -26,10 +26,8 @@ import {
   WORKFLOWS_MONACO_EDITOR_THEME,
   type WorkflowApi,
 } from '@kbn/workflows-ui';
-import {
-  PLUGIN_ID,
-  type WorkflowsPublicPluginStart,
-} from '@kbn/workflows-management-plugin/public';
+import { PLUGIN_ID as WORKFLOW_PLUGIN_ID } from '@kbn/workflows-management-plugin/common';
+import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
 
 interface WorkflowYamlData {
   yaml: string;
@@ -202,7 +200,7 @@ const WorkflowYamlCanvasContent: React.FC<{
         }),
         { toastLifeTimeMs: 2000 }
       );
-      application.navigateToApp(PLUGIN_ID, { path: result.id });
+      application.navigateToApp(WORKFLOW_PLUGIN_ID, { path: result.id });
     } catch (error) {
       notifications.toasts.addDanger({
         title: i18n.translate(
@@ -261,7 +259,7 @@ const WorkflowYamlCanvasContent: React.FC<{
         icon: 'popout',
         type: ActionButtonType.SECONDARY,
         handler: () => {
-          application.navigateToApp(PLUGIN_ID, { path: workflowId });
+          application.navigateToApp(WORKFLOW_PLUGIN_ID, { path: workflowId });
         },
       });
     }
@@ -324,7 +322,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
   trackAppContext();
 
   const isOnWorkflowPage = (workflowId: string): boolean =>
-    currentAppId === PLUGIN_ID && currentLocation.includes(workflowId);
+    currentAppId === WORKFLOW_PLUGIN_ID && currentLocation.includes(workflowId);
 
   return {
     getLabel: (attachment) =>
@@ -358,7 +356,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
           icon: 'popout',
           type: ActionButtonType.SECONDARY,
           handler: () => {
-            application.navigateToApp(PLUGIN_ID, { path: attachment.data.workflowId });
+            application.navigateToApp(WORKFLOW_PLUGIN_ID, { path: attachment.data.workflowId });
           },
         });
       }
