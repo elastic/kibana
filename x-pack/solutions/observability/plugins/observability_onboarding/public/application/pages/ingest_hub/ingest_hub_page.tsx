@@ -1988,7 +1988,13 @@ export const IngestHubPage: React.FC = () => {
                 gutterSize="none"
                 alignItems="stretch"
                 /* EuiFlexGroup replaces `css`; default flex-grow:1 stretched this column inside grow={1} */
-                style={{ gap: 24, flexGrow: 0, alignSelf: 'flex-start', width: '100%', minWidth: 0 }}
+                style={{
+                  gap: 24,
+                  flexGrow: 0,
+                  alignSelf: 'flex-start',
+                  width: '100%',
+                  minWidth: 0,
+                }}
               >
                 <EuiFlexGroup
                   alignItems="flexStart"
@@ -2037,15 +2043,15 @@ export const IngestHubPage: React.FC = () => {
                       '/app/management/security/api_keys'
                     }
                     createApiKeyDataTestSubj="obsOnboardingIngestHubV3CreateApiKey"
-                    onApiKeyCreated={(result) => {
-                      const endpoint = API_ENDPOINTS.find((e) => e.id === version3ApiEndpointId);
+                    onApiKeyCreated={(result, endpointId) => {
+                      const endpoint = API_ENDPOINTS.find((e) => e.id === endpointId);
                       if (
                         endpoint &&
                         (endpoint.keyType === 'api_key' || endpoint.keyType === 'kibana_note')
                       ) {
                         setVersion3ApiEndpointSecrets((prev) => ({
                           ...prev,
-                          [version3ApiEndpointId]: result.encoded,
+                          [endpointId]: result.encoded,
                         }));
                       }
                     }}
@@ -2062,15 +2068,15 @@ export const IngestHubPage: React.FC = () => {
                       '/app/management/security/api_keys'
                     }
                     createApiKeyDataTestSubj="obsOnboardingIngestHubV2CreateApiKey"
-                    onApiKeyCreated={(result) => {
-                      const endpoint = API_ENDPOINTS.find((e) => e.id === version2ApiEndpointId);
+                    onApiKeyCreated={(result, endpointId) => {
+                      const endpoint = API_ENDPOINTS.find((e) => e.id === endpointId);
                       if (
                         endpoint &&
                         (endpoint.keyType === 'api_key' || endpoint.keyType === 'kibana_note')
                       ) {
                         setVersion2ApiEndpointSecrets((prev) => ({
                           ...prev,
-                          [version2ApiEndpointId]: result.encoded,
+                          [endpointId]: result.encoded,
                         }));
                       }
                     }}

@@ -15,10 +15,7 @@ import { AwsOnboardingPage } from './aws_onboarding_page';
 import { KubernetesOnboardingPage } from './kubernetes_onboarding_page';
 import { IntegrationHeader } from '../header/integration_header';
 
-const allTiles = [
-  ...SECTIONS.flatMap((s) => s.tiles),
-  ...POPULAR_INTEGRATION_TILES,
-];
+const allTiles = [...SECTIONS.flatMap((s) => s.tiles), ...POPULAR_INTEGRATION_TILES];
 
 const FallbackDetailPage: React.FC<{ displayName: string; logoSrc?: string }> = ({
   displayName,
@@ -28,11 +25,7 @@ const FallbackDetailPage: React.FC<{ displayName: string; logoSrc?: string }> = 
   return (
     <PageTemplate
       customHeader={
-        <IntegrationHeader
-          logoSrc={logoSrc}
-          logoAlt={displayName}
-          title={displayName}
-        />
+        <IntegrationHeader logoSrc={logoSrc} logoAlt={displayName} title={displayName} />
       }
     >
       <EuiEmptyPrompt
@@ -54,13 +47,11 @@ export const IntegrationDetailPage = () => {
     return <KubernetesOnboardingPage />;
   }
 
-  if (integration === 'aws') {
+  if (integration === 'aws' || integration === 'aws-cloudwatch') {
     return <AwsOnboardingPage />;
   }
 
-  const tile = allTiles.find(
-    (t) => t.id === integration || t.id === `popular-${integration}`
-  );
+  const tile = allTiles.find((t) => t.id === integration || t.id === `popular-${integration}`);
   const displayName = tile?.name ?? integration ?? '';
 
   return <FallbackDetailPage displayName={displayName} logoSrc={tile?.logoUrl} />;
