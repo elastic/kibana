@@ -163,10 +163,7 @@ describe('runResolveTestingScope', () => {
   });
 
   it('keeps skipNonScoutTests=false for non-tests-only scopes even with --allow-skip-non-scout-tests', () => {
-    writeCodeChanges(
-      ['pkg/test/scout/ui/tests/foo.spec.ts', 'pkg/public/foo.ts'],
-      ['@kbn/foo']
-    );
+    writeCodeChanges(['pkg/test/scout/ui/tests/foo.spec.ts', 'pkg/public/foo.ts'], ['@kbn/foo']);
     setFlags({
       codeChanges: codeChangesPath,
       scopeOutput: scopeOutputPath,
