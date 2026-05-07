@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
-  type EuiDataGridStyle,
   type EuiResizeObserverProps,
   EuiIconTip,
   EuiResizeObserver,
   EuiScreenReaderOnly,
-  mathWithUnits,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -23,31 +20,30 @@ import ColumnHeaderTruncateContainer from '../../column_header_truncate_containe
 
 export interface ActionsHeaderProps {
   maxWidth: number;
-  cellPadding?: EuiDataGridStyle['cellPadding'];
 }
 
-export const ActionsHeader = ({ maxWidth, cellPadding = 's' }: ActionsHeaderProps) => {
-  const { euiTheme } = useEuiTheme();
-  const [showText, setShowText] = useState(false);
+const HEADER_CELL_SELECTOR = '.unifiedDataTable__headerCell';
 
-  // Mirrors EUI's internal cellPadding -> size mapping (data_grid.styles.ts).
-  // Header cell applies the value on all sides, so horizontal padding = 2 * value.
-  const horizontalPaddingPx = useMemo(() => {
-    const resolved =
-      cellPadding === 'l'
-        ? euiTheme.size.s
-        : cellPadding === 'm'
-        ? mathWithUnits(euiTheme.size.m, (x) => x / 2)
-        : euiTheme.size.xs;
-    return parseInt(resolved, 10) * 2;
-  }, [cellPadding, euiTheme]);
+const getHorizontalPadding = (node: HTMLElement | null): number => {
+  const cell = node?.closest<HTMLElement>(HEADER_CELL_SELECTOR);
+  if (!cell) return 0;
+  const style = window.getComputedStyle(cell);
+  const left = parseFloat(style.paddingLeft) || 0;
+  const right = parseFloat(style.paddingRight) || 0;
+  return left + right;
+};
+
+export const ActionsHeader = ({ maxWidth }: ActionsHeaderProps) => {
+  const [showText, setShowText] = useState(false);
+  const ghostRef = useRef<HTMLSpanElement | null>(null);
 
   const measure: EuiResizeObserverProps['onResize'] = useCallback(
     (dimensions) => {
       if (!dimensions) return;
-      setShowText(dimensions.width < maxWidth - horizontalPaddingPx);
+      const horizontalPadding = getHorizontalPadding(ghostRef.current);
+      setShowText(dimensions.width < maxWidth - horizontalPadding);
     },
-    [maxWidth, horizontalPaddingPx]
+    [maxWidth]
   );
 
   const actionsText = i18n.translate('unifiedDataTable.controlColumnsActionHeader', {
@@ -75,7 +71,10 @@ export const ActionsHeader = ({ maxWidth, cellPadding = 's' }: ActionsHeaderProp
       <EuiResizeObserver onResize={measure}>
         {(resizeRef) => (
           <span
-            ref={resizeRef}
+            ref={(el) => {
+              ghostRef.current = el;
+              (resizeRef as (node: HTMLElement | null) => void)(el);
+            }}
             css={css`
               position: absolute;
               visibility: hidden;

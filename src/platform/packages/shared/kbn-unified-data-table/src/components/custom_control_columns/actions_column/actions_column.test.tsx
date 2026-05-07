@@ -308,28 +308,6 @@ describe('getActionsColumn', () => {
         expect(actionsHeaderSpy).toHaveBeenCalledWith(
           {
             maxWidth: expectedWidth,
-            cellPadding: undefined,
-          },
-          {}
-        );
-      });
-
-      it('should forward cellPadding to the header cell render function', () => {
-        const actionsHeaderSpy = jest.spyOn(actionsHeader, 'ActionsHeader');
-
-        const result = getActionsColumn({
-          baseColumns,
-          rowAdditionalLeadingControls:
-            rowAdditionalLeadingControls as unknown as RowControlColumn[],
-          externalControlColumns,
-          cellPadding: 'l',
-        });
-
-        render(result?.headerCellRender());
-        expect(actionsHeaderSpy).toHaveBeenCalledWith(
-          {
-            maxWidth: expectedWidth,
-            cellPadding: 'l',
           },
           {}
         );

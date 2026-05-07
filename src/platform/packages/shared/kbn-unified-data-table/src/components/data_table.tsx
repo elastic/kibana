@@ -1132,7 +1132,6 @@ const InternalUnifiedDataTable = React.forwardRef<
         baseColumns: leadColumnsExtraContent,
         rowAdditionalLeadingControls,
         externalControlColumns,
-        cellPadding: gridStyle.cellPadding,
         visibleRowActions,
       });
       if (actionsColumn) {
@@ -1147,7 +1146,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       externalControlColumns,
       getRowIndicator,
       rowAdditionalLeadingControls,
-      gridStyle.cellPadding,
       visibleRowActions,
     ]);
 
