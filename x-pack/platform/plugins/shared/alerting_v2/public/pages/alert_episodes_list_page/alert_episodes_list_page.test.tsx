@@ -18,6 +18,7 @@ import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 
 jest.mock('@kbn/unified-data-table', () => ({
   DataLoadingState: { loading: 'loading', loaded: 'loaded' },
+  ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
   UnifiedDataTable: jest.fn(() => null),
 }));
 

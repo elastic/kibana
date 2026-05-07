@@ -1,0 +1,19 @@
+# Vectordb Project Config
+
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'vectordb']
+
+xpack.search.enabled: false
+xpack.osquery.enabled: false
+
+## Cloud settings
+xpack.cloud.serverless.project_type: vectordb
+
+## Enable the Serverless Vectordb plugin
+xpack.serverless.vectordb.enabled: true
+
+## Set the home route
+uiSettings.overrides.defaultRoute: /app/vectordb
+
+# Specify in telemetry the project type
+telemetry.labels.serverless: vectordb
