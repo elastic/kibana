@@ -37,9 +37,24 @@ export TESTING_SCOPE_FILE=".scout/testing_scope.json"
 
 echo '--- Resolve Scout selective-testing scope'
 
-# Build the generic code-changes file (changed files + affected @kbn/ modules)
-# consumed by `scout resolve-testing-scope` below.
-ts-node "$(dirname "${0}")/resolve_selective_testing.ts"
+# TEMP — REMOVE BEFORE MERGE: stub a tests-only diff so CI exercises the fast
+# path regardless of what's actually in the PR. Picks a single spec under
+# parallel_tests/, which should resolve to exactly one affected Playwright
+# config (parallel.playwright.config.ts) in discover_enhanced.
+cat > "$CODE_CHANGES_FILE" <<'EOF'
+{
+  "mergeBase": "ci-stub-tests-only",
+  "changedFiles": [
+    "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts"
+  ],
+  "affectedModules": ["@kbn/discover-enhanced-plugin"]
+}
+EOF
+echo "Using stubbed code_changes.json (CI verification — REMOVE BEFORE MERGE)"
+cat "$CODE_CHANGES_FILE"
+
+# Real bridge disabled while the stub is in place.
+# ts-node "$(dirname "${0}")/resolve_selective_testing.ts"
 
 # Decide the scope once (full / tests-only / dependency-tree) so every
 # downstream step uses the same decision.
