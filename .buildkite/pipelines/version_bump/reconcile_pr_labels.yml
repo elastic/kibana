@@ -6,3 +6,8 @@ steps:
     command: .buildkite/scripts/steps/version_bump/reconcile_pr_labels.sh
     env:
       DRY_RUN: 'true'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
