@@ -19,6 +19,7 @@ import type { AiopsPluginStartDeps } from '../types';
 
 import type { ChangePointChartActionContext } from './change_point_action_context';
 import type { ChangePointEmbeddableState } from '../../common/embeddables/change_point_chart/types';
+import { hasCapabilities } from './has_capabilities';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -51,7 +52,7 @@ export function createAddChangePointChartAction(
         defaultMessage: 'Change point detection',
       }),
     async isCompatible(context: EmbeddableApiContext) {
-      return Boolean(await parentApiIsCompatible(context.embeddable));
+      return hasCapabilities(coreStart) && Boolean(await parentApiIsCompatible(context.embeddable));
     },
     async execute(context) {
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);

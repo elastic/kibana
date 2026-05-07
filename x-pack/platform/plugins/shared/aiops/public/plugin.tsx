@@ -26,19 +26,19 @@ export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
 {
   public setup(core: AiopsCoreSetup, { embeddable, cases, uiActions }: AiopsPluginSetupDeps) {
+    if (embeddable) {
+      registerEmbeddables(embeddable, core);
+    }
+
+    if (uiActions) {
+      registerAiopsUiActions(uiActions, core);
+    }
+
     core.getStartServices().then(([coreStart, pluginStart]) => {
       const { canUseAiops } = coreStart.application.capabilities.ml;
       const aiopsEnabled = coreStart.application.capabilities.aiops.enabled;
 
       if (canUseAiops && aiopsEnabled) {
-        if (embeddable) {
-          registerEmbeddables(embeddable, core);
-        }
-
-        if (uiActions) {
-          registerAiopsUiActions(uiActions, coreStart, pluginStart);
-        }
-
         if (cases) {
           registerCases(cases, coreStart, pluginStart);
         }

@@ -35,6 +35,7 @@ import {
 } from './initialize_change_point_controls';
 import type { ChangePointEmbeddableApi } from './types';
 import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
+import { ensureCapabilities } from '../ensure_capabilities';
 
 export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
 
@@ -45,6 +46,7 @@ export const getChangePointChartEmbeddableFactory = (
     type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
+      ensureCapabilities(coreStart);
 
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const titleManager = initializeTitleManager(initialState);

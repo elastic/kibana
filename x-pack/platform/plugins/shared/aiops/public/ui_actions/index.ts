@@ -6,24 +6,20 @@
  */
 
 import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
 import {
   ADD_PANEL_TRIGGER,
   CATEGORIZE_FIELD_TRIGGER,
   ON_OPEN_PANEL_MENU,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { AiopsPluginStartDeps } from '../types';
+import type { AiopsCoreSetup } from '../plugin';
 
-export function registerAiopsUiActions(
-  uiActions: UiActionsSetup,
-  coreStart: CoreStart,
-  pluginStart: AiopsPluginStartDeps
-) {
+export function registerAiopsUiActions(uiActions: UiActionsSetup, core: AiopsCoreSetup) {
   uiActions.addTriggerActionAsync(
     ADD_PANEL_TRIGGER,
     'create-pattern-analysis-embeddable',
     async () => {
-      const { createAddPatternAnalysisEmbeddableAction } = await import('./actions');
+      const [{ createAddPatternAnalysisEmbeddableAction }, [coreStart, pluginStart]] =
+        await Promise.all([import('./actions'), core.getStartServices()]);
       const addPatternAnalysisAction = createAddPatternAnalysisEmbeddableAction(
         coreStart,
         pluginStart
@@ -32,18 +28,27 @@ export function registerAiopsUiActions(
     }
   );
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, 'create-change-point-chart', async () => {
-    const { createAddChangePointChartAction } = await import('./actions');
+    const [{ createAddChangePointChartAction }, [coreStart, pluginStart]] = await Promise.all([
+      import('./actions'),
+      core.getStartServices(),
+    ]);
     const addChangePointChartAction = createAddChangePointChartAction(coreStart, pluginStart);
     return addChangePointChartAction;
   });
 
   uiActions.addTriggerActionAsync(CATEGORIZE_FIELD_TRIGGER, 'ACTION_CATEGORIZE_FIELD', async () => {
-    const { createCategorizeFieldAction } = await import('./actions');
+    const [{ createCategorizeFieldAction }, [coreStart, pluginStart]] = await Promise.all([
+      import('./actions'),
+      core.getStartServices(),
+    ]);
     return createCategorizeFieldAction(coreStart, pluginStart);
   });
 
   uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'open-change-point-in-ml-app', async () => {
-    const { createOpenChangePointInMlAppAction } = await import('./actions');
+    const [{ createOpenChangePointInMlAppAction }, [coreStart, pluginStart]] = await Promise.all([
+      import('./actions'),
+      core.getStartServices(),
+    ]);
     const openChangePointInMlAppAction = createOpenChangePointInMlAppAction(coreStart, pluginStart);
     return openChangePointInMlAppAction;
   });
@@ -52,7 +57,8 @@ export function registerAiopsUiActions(
     ADD_PANEL_TRIGGER,
     'create-log-rate-analysis-embeddable',
     async () => {
-      const { createAddLogRateAnalysisEmbeddableAction } = await import('./actions');
+      const [{ createAddLogRateAnalysisEmbeddableAction }, [coreStart, pluginStart]] =
+        await Promise.all([import('./actions'), core.getStartServices()]);
       const addLogRateAnalysisAction = createAddLogRateAnalysisEmbeddableAction(
         coreStart,
         pluginStart

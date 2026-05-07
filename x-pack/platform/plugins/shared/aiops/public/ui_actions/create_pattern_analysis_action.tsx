@@ -20,6 +20,7 @@ import type { PatternAnalysisEmbeddableApi } from '../embeddables/pattern_analys
 
 import type { PatternAnalysisActionContext } from './pattern_analysis_action_context';
 import { DEFAULT_MINIMUM_TIME_RANGE_OPTION } from '../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
+import { hasCapabilities } from './has_capabilities';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -42,7 +43,7 @@ export function createAddPatternAnalysisEmbeddableAction(
         defaultMessage: 'Pattern analysis',
       }),
     async isCompatible(context: EmbeddableApiContext) {
-      return Boolean(await parentApiIsCompatible(context.embeddable));
+      return hasCapabilities(coreStart) && Boolean(await parentApiIsCompatible(context.embeddable));
     },
     async execute(context) {
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
