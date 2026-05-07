@@ -330,7 +330,7 @@ const ActionsConnectorsList = ({
                     'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.earsDisabledDescription',
                     {
                       defaultMessage:
-                        'EARS authentication is disabled. Enable it via xpack.actions.ears.enabled in kibana.yml.',
+                        'EARS authentication is disabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.',
                     }
                   )}
                   position="right"
