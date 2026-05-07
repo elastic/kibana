@@ -36,7 +36,7 @@ export interface OtelAppenderTlsConfig {
    * How strictly to verify the server certificate (aligned with Elasticsearch client semantics).
    * Defaults to `full`.
    */
-  verificationMode?: 'none' | 'certificate' | 'full';
+  verificationMode: 'none' | 'certificate' | 'full';
 }
 
 /**

@@ -29,9 +29,8 @@ describe('resolveTlsMaterial', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  it('returns undefined when ssl is absent or empty', () => {
+  it('returns undefined when ssl is absent', () => {
     expect(resolveTlsMaterial(undefined)).toBeUndefined();
-    expect(resolveTlsMaterial({})).toBeUndefined();
   });
 
   it('reads PEM files from paths', () => {
@@ -39,13 +38,16 @@ describe('resolveTlsMaterial', () => {
     const pemContent = '-----BEGIN CERTIFICATE-----\nABC\n-----END CERTIFICATE-----';
     writeFileSync(caPath, pemContent, 'utf8');
 
-    const resolved = resolveTlsMaterial({ certificateAuthorities: caPath });
+    const resolved = resolveTlsMaterial({
+      certificateAuthorities: caPath,
+      verificationMode: 'full',
+    });
     expect(resolved?.ca?.toString()).toBe(pemContent);
   });
 
   it('accepts inline PEM for certificate authorities', () => {
     const pem = '-----BEGIN CERTIFICATE-----\nINLINE\n-----END CERTIFICATE-----';
-    const resolved = resolveTlsMaterial({ certificateAuthorities: pem });
+    const resolved = resolveTlsMaterial({ certificateAuthorities: pem, verificationMode: 'full' });
     expect(resolved?.ca?.toString()).toBe(pem);
   });
 
@@ -55,7 +57,10 @@ describe('resolveTlsMaterial', () => {
     writeFileSync(ca1, '-----BEGIN CERTIFICATE-----\nONE\n-----END CERTIFICATE-----');
     writeFileSync(ca2, '-----BEGIN CERTIFICATE-----\nTWO\n-----END CERTIFICATE-----');
 
-    const resolved = resolveTlsMaterial({ certificateAuthorities: [ca1, ca2] });
+    const resolved = resolveTlsMaterial({
+      certificateAuthorities: [ca1, ca2],
+      verificationMode: 'full',
+    });
     expect(Array.isArray(resolved?.ca)).toBe(true);
     expect((resolved?.ca as Buffer[]).map((b) => b.toString())).toEqual([
       '-----BEGIN CERTIFICATE-----\nONE\n-----END CERTIFICATE-----',
@@ -64,9 +69,12 @@ describe('resolveTlsMaterial', () => {
   });
 
   it('throws a clear error when a certificate path is unreadable', () => {
-    expect(() => resolveTlsMaterial({ certificateAuthorities: join(dir, 'nope.pem') })).toThrow(
-      /Unable to load ssl\.certificateAuthorities\[0\]/
-    );
+    expect(() =>
+      resolveTlsMaterial({
+        certificateAuthorities: join(dir, 'nope.pem'),
+        verificationMode: 'full',
+      })
+    ).toThrow(/Unable to load ssl\.certificateAuthorities\[0\]/);
   });
 
   it('resolves client certificate and key', () => {
@@ -79,6 +87,7 @@ describe('resolveTlsMaterial', () => {
       certificate: certPath,
       key: keyPath,
       keyPassphrase: 'secret',
+      verificationMode: 'full',
     });
     expect(resolved?.cert?.toString()).toContain('CERT');
     expect(resolved?.key?.toString()).toContain('KEY');

@@ -46,23 +46,14 @@ export interface ResolvedOtelTls {
   verificationMode: 'full' | 'certificate' | 'none';
 }
 
-const sslBlockHasEffect = (config: OtelAppenderTlsConfig): boolean =>
-  config.certificateAuthorities != null ||
-  config.certificate != null ||
-  config.key != null ||
-  config.keyPassphrase != null ||
-  config.verificationMode != null;
-
 /**
  * Reads certificate material from disk or accepts inline PEM strings.
  * Returns `undefined` when there is nothing to apply (no `ssl` block or empty block).
  */
 export const resolveTlsMaterial = (config?: OtelAppenderTlsConfig): ResolvedOtelTls | undefined => {
-  if (!config || !sslBlockHasEffect(config)) {
+  if (!config) {
     return undefined;
   }
-
-  const verificationMode = config.verificationMode ?? 'full';
 
   let ca: Buffer | Buffer[] | undefined;
   if (config.certificateAuthorities != null) {
@@ -89,7 +80,7 @@ export const resolveTlsMaterial = (config?: OtelAppenderTlsConfig): ResolvedOtel
     cert,
     key,
     passphrase: config.keyPassphrase,
-    verificationMode,
+    verificationMode: config.verificationMode,
   };
 };
 
