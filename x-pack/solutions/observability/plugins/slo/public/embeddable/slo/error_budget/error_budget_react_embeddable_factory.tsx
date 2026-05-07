@@ -29,6 +29,7 @@ import {
 import { SloErrorBudget } from './error_budget_burn_down';
 import type { ErrorBudgetApi, ErrorBudgetEmbeddableState } from './types';
 import type { ErrorBudgetCustomState } from '../../../../common/embeddables/error_budget/types';
+import { ensureLicense } from '../ensure_license';
 
 const getErrorBudgetPanelTitle = () =>
   i18n.translate('xpack.slo.errorBudgetEmbeddable.title', {
@@ -53,6 +54,7 @@ export const getErrorBudgetEmbeddableFactory = ({
       uuid,
       parentApi,
     }) => {
+      await ensureLicense(pluginsStart.licensing);
       const deps = { ...coreStart, ...pluginsStart };
       const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
       const titleManager = initializeTitleManager(initialState);
