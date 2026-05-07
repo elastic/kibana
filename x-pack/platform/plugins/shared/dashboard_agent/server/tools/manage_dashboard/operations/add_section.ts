@@ -86,9 +86,4 @@ export const addSectionOperation = defineOperation({
       panels: [...dashboardData.panels, nextSection],
     };
   },
-  collectVisualizationCreationRequests: (operation) =>
-    operation.panels?.map((panelInput) => ({
-      operationType: operation.operation,
-      panelInput,
-    })) ?? [],
 });

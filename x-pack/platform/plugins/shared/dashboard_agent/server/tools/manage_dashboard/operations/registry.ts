@@ -15,9 +15,8 @@ import { editVisualizationPanelsOperation } from './edit_visualization_panels';
 import { removePanelsOperation } from './remove_panels';
 import { removeSectionOperation } from './remove_section';
 import { setMetadataOperation } from './set_metadata';
-import type { OperationExecutionContext, OperationHandler } from './types';
+import type { OperationExecutionContext } from './types';
 import { updatePanelLayoutsOperation } from './update_panel_layouts';
-import type { VisualizationCreationRequest } from './visualization_creation';
 
 const operationDefinitions = [
   setMetadataOperation,
@@ -40,17 +39,8 @@ export const dashboardOperationSchema = z.discriminatedUnion(
 
 export type DashboardOperation = z.infer<typeof dashboardOperationSchema>;
 
-type AnyVisualizationCreationCollector = (
-  operation: DashboardOperation
-) => VisualizationCreationRequest[];
-
-type AnyOperationHandler = OperationHandler<DashboardOperation>;
-
-const handlerByType = new Map(
-  operationDefinitions.map((definition) => [
-    definition.schema.shape.operation.value,
-    definition.handler,
-  ])
+const operationDefinitionByType = new Map(
+  operationDefinitions.map((definition) => [definition.schema.shape.operation.value, definition])
 );
 
 export const executeOperationHandler = async ({
@@ -64,45 +54,10 @@ export const executeOperationHandler = async ({
   operationIndex: number;
   context: OperationExecutionContext;
 }): Promise<DashboardAttachmentData> => {
-  const handler = handlerByType.get(operation.operation) as AnyOperationHandler | undefined;
-  if (!handler) {
+  const definition = operationDefinitionByType.get(operation.operation);
+  if (!definition) {
     throw new Error(`No handler for ${operation.operation}`);
   }
 
-  return handler({ dashboardData, operation, operationIndex, context });
-};
-
-const visualizationCreationCollectorByType = new Map(
-  operationDefinitions.flatMap((definition) =>
-    definition.collectVisualizationCreationRequests
-      ? [
-          [
-            definition.schema.shape.operation.value,
-            definition.collectVisualizationCreationRequests,
-          ] as const,
-        ]
-      : []
-  )
-);
-
-export const collectVisualizationCreationRequests = (
-  operations: DashboardOperation[]
-): Map<number, VisualizationCreationRequest[]> => {
-  const requestsByOperationIndex = new Map<number, VisualizationCreationRequest[]>();
-
-  for (const [operationIndex, operation] of operations.entries()) {
-    const collect = visualizationCreationCollectorByType.get(operation.operation) as
-      | AnyVisualizationCreationCollector
-      | undefined;
-    if (!collect) {
-      continue;
-    }
-
-    const requests = collect(operation);
-    if (requests.length > 0) {
-      requestsByOperationIndex.set(operationIndex, requests);
-    }
-  }
-
-  return requestsByOperationIndex;
+  return definition.handler({ dashboardData, operation, operationIndex, context });
 };

@@ -52,10 +52,4 @@ export const createVisualizationPanelsOperation = defineOperation({
 
     return nextDashboardData;
   },
-  collectVisualizationCreationRequests: (operation) =>
-    operation.panels.map((panelInput) => ({
-      operationType: operation.operation,
-      panelInput,
-      sectionId: panelInput.sectionId,
-    })),
 });
