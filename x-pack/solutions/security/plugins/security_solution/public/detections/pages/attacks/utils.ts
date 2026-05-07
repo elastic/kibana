@@ -16,21 +16,6 @@ export interface ResolveAttackFlyoutParamsConfig {
   attackId: string;
 }
 
-const expandableFlyoutStateFromAttackMeta = ({
-  attackId,
-  indexName,
-}: {
-  attackId: string;
-  indexName: string;
-}) =>
-  expandableFlyoutStateRightPanelOnly({
-    id: AttackDetailsRightPanelKey,
-    params: {
-      attackId,
-      indexName,
-    },
-  });
-
 /**
  * Resolves url parameters for the attack details flyout, serialized as rison.
  * Preserves existing flyout query when present (e.g. user opened a share link that already encoded flyout state).
@@ -41,5 +26,11 @@ export const resolveAttackFlyoutParams = (
 ) =>
   resolveFlyoutUrlParam(
     currentParamsString,
-    expandableFlyoutStateFromAttackMeta({ attackId, indexName: index })
+    expandableFlyoutStateRightPanelOnly({
+      id: AttackDetailsRightPanelKey,
+      params: {
+        attackId,
+        indexName: index,
+      },
+    })
   );

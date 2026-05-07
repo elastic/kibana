@@ -19,14 +19,13 @@ import { HEADER_SHARE_BUTTON_TEST_ID } from '../constants/test_ids';
  * Actions displayed in the navigation header of the attack details flyout
  */
 export const AttackHeaderActions: VFC = memo(() => {
-  const { attackId, indexName, isPreviewMode } = useAttackDetailsContext();
+  const { attackId, indexName } = useAttackDetailsContext();
   const { timestamp } = useHeaderData();
 
   const attackDetailsLink = useGetAttackFlyoutLink({
     attackId,
     indexName,
     timestamp: timestamp ?? undefined,
-    isPreviewMode,
   });
 
   return (

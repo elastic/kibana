@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { DEFAULT_PREVIEW_INDEX } from '../../../../common/constants';
 
 import { buildAttackDetailPath } from '../../../../common/utils/attack_detail_path';
 import { useAppUrl } from '../../../common/lib/kibana/hooks';
@@ -15,7 +14,6 @@ export interface UseGetAttackFlyoutLinkProps {
   attackId: string;
   indexName: string;
   timestamp: string | undefined;
-  isPreviewMode: boolean;
 }
 
 /**
@@ -25,13 +23,11 @@ export const useGetAttackFlyoutLink = ({
   attackId,
   indexName,
   timestamp,
-  isPreviewMode,
 }: UseGetAttackFlyoutLinkProps): string | null => {
   const { getAppUrl } = useAppUrl();
-  const isPreviewIndex = indexName.includes(DEFAULT_PREVIEW_INDEX);
 
   const attackDetailsLink = useMemo(() => {
-    if (isPreviewMode || isPreviewIndex || !timestamp) {
+    if (!timestamp) {
       return null;
     }
     const path = buildAttackDetailPath({
@@ -41,7 +37,7 @@ export const useGetAttackFlyoutLink = ({
     });
     const url = getAppUrl({ path });
     return `${window.location.origin}${url}`;
-  }, [attackId, getAppUrl, indexName, isPreviewIndex, isPreviewMode, timestamp]);
+  }, [attackId, getAppUrl, indexName, timestamp]);
 
   return attackDetailsLink;
 };

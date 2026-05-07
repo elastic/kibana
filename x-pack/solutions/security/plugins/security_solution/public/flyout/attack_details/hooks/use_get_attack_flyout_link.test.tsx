@@ -33,24 +33,11 @@ describe('useGetAttackFlyoutLink', () => {
         attackId,
         indexName,
         timestamp,
-        isPreviewMode: false,
       })
     );
 
     const path = `${ATTACK_DETAILS_REDIRECT_PATH}/${attackId}?index=${indexName}&timestamp=${timestamp}`;
     expect(result.current).toBe(`http://localhost${path}`);
-  });
-
-  it('returns null in preview mode', () => {
-    const { result } = renderHook(() =>
-      useGetAttackFlyoutLink({
-        attackId,
-        indexName,
-        timestamp,
-        isPreviewMode: true,
-      })
-    );
-    expect(result.current).toBeNull();
   });
 
   it('returns null when timestamp is missing', () => {
@@ -59,19 +46,6 @@ describe('useGetAttackFlyoutLink', () => {
         attackId,
         indexName,
         timestamp: undefined,
-        isPreviewMode: false,
-      })
-    );
-    expect(result.current).toBeNull();
-  });
-
-  it('returns null for preview index pattern', () => {
-    const { result } = renderHook(() =>
-      useGetAttackFlyoutLink({
-        attackId,
-        indexName: '.preview.alerts-security.alerts-default',
-        timestamp,
-        isPreviewMode: false,
       })
     );
     expect(result.current).toBeNull();

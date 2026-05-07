@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { expandableFlyoutStateFromEventMeta } from '../../../flyout/shared/utils/expandable_flyout_state_from_event_meta';
-import { resolveFlyoutUrlParam } from '../../../flyout/shared/utils/expandable_flyout_url_state';
+import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
+import {
+  expandableFlyoutStateRightPanelOnly,
+  resolveFlyoutUrlParam,
+} from '../../../flyout/shared/utils/expandable_flyout_url_state';
 
 export interface ResolveFlyoutParamsConfig {
   index: string;
@@ -25,5 +28,12 @@ export const resolveFlyoutParams = (
 ) =>
   resolveFlyoutUrlParam(
     currentParamsString,
-    expandableFlyoutStateFromEventMeta({ index, eventId: alertId, scopeId: 'alerts-page' })
+    expandableFlyoutStateRightPanelOnly({
+      id: DocumentDetailsRightPanelKey,
+      params: {
+        id: alertId,
+        indexName: index,
+        scopeId: 'alerts-page',
+      },
+    })
   );

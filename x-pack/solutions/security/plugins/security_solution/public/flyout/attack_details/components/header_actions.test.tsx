@@ -18,7 +18,6 @@ jest.mock('../context', () => ({
   useAttackDetailsContext: () => ({
     attackId: 'a1',
     indexName: '.alerts-attack',
-    isPreviewMode: false,
   }),
 }));
 jest.mock('../hooks/use_header_data', () => ({

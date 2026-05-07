@@ -22,11 +22,11 @@ import { resolveAttackFlyoutParams } from './utils';
 jest.mock('../../../common/lib/kibana');
 
 const testAttackId = 'test-attack-id';
+const mockRouteParams: { attackId?: string } = { attackId: testAttackId };
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useParams: () => ({
-    attackId: testAttackId,
-  }),
+  useParams: () => mockRouteParams,
 }));
 
 const testIndex = '.someTestIndex';
@@ -34,6 +34,10 @@ const testTimestamp = '2023-04-20T12:00:00.000Z';
 const mockPathname = `${ATTACK_DETAILS_REDIRECT_PATH}/${testAttackId}`;
 
 describe('AttackDetailsRedirect', () => {
+  beforeEach(() => {
+    mockRouteParams.attackId = testAttackId;
+  });
+
   afterEach(() => {
     mockHistory.replace.mockClear();
   });
@@ -111,6 +115,37 @@ describe('AttackDetailsRedirect', () => {
         hash: '',
         pathname: ATTACKS_PATH,
         search: `?${expectedSearchParam.toString()}`,
+        state: undefined,
+      });
+    });
+  });
+
+  describe('when attackId is missing', () => {
+    it('redirects to the attacks list', () => {
+      delete mockRouteParams.attackId;
+
+      const historyMock = {
+        ...mockHistory,
+        location: {
+          hash: '',
+          pathname: ATTACK_DETAILS_REDIRECT_PATH,
+          search: '',
+          state: '',
+        },
+      };
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <AttackDetailsRedirect />
+          </Router>
+        </TestProviders>
+      );
+
+      expect(historyMock.replace).toHaveBeenCalledWith({
+        hash: '',
+        pathname: ATTACKS_PATH,
+        search: '',
         state: undefined,
       });
     });
