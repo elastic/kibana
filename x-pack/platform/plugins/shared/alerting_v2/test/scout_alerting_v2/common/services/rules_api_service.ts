@@ -24,6 +24,7 @@ export interface RulesApiService {
   delete: (id: string) => Promise<void>;
   bulkDelete: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
   bulkDisable: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
+  bulkEnable: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
   cleanUp: () => Promise<void>;
 }
 
@@ -44,17 +45,6 @@ export const getRulesApiService = ({
       const response = await kbnClient.request<BulkOperationResponse>({
         method: 'POST',
         path: `${RULE_API_PATH}/_bulk_delete`,
-        headers: COMMON_HEADERS,
-        body: params,
-      });
-      return response.data;
-    });
-
-  const bulkDisable = (params: BulkOperationParams) =>
-    measurePerformanceAsync(log, 'rules.bulkDisable', async () => {
-      const response = await kbnClient.request<BulkOperationResponse>({
-        method: 'POST',
-        path: `${RULE_API_PATH}/_bulk_disable`,
         headers: COMMON_HEADERS,
         body: params,
       });
@@ -105,11 +95,27 @@ export const getRulesApiService = ({
           retries: 0,
         });
       }),
-
     bulkDelete,
-
-    bulkDisable,
-
+    bulkDisable: (params: BulkOperationParams) =>
+      measurePerformanceAsync(log, 'rules.bulkDisable', async () => {
+        const response = await kbnClient.request<BulkOperationResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_bulk_disable`,
+          headers: COMMON_HEADERS,
+          body: params,
+        });
+        return response.data;
+      }),
+    bulkEnable: (params: BulkOperationParams) =>
+      measurePerformanceAsync(log, 'rules.bulkEnable', async () => {
+        const response = await kbnClient.request<BulkOperationResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_bulk_enable`,
+          headers: COMMON_HEADERS,
+          body: params,
+        });
+        return response.data;
+      }),
     cleanUp: () =>
       measurePerformanceAsync(log, 'rules.cleanUp', async () => {
         await bulkDelete({ match_all: true });

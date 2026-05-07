@@ -25,7 +25,7 @@ const { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } = testData;
  * Isolated cases for the alerting_v2 rule executor's persisted output.
  *
  */
-apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
+apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
   const SOURCE_INDEX = 'test-alerting-v2-rule-executor-source';
   /**
    * Time we let the executor run between assertions when verifying that no new
@@ -41,6 +41,7 @@ apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
         'host.name': { type: 'keyword' },
         severity: { type: 'keyword' },
         value: { type: 'long' },
+        'event.created': { type: 'date' },
       },
     });
   });
@@ -72,7 +73,7 @@ apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
 
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
-        metadata: { name: 'executor-shape-single-row' },
+        metadata: { name: 'executor-shape-one-event-per-row' },
         time_field: '@timestamp',
         schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
@@ -118,7 +119,7 @@ apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
 
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
-          metadata: { name: 'executor-shape-single-row' },
+          metadata: { name: 'executor-shape-data-field' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
@@ -295,7 +296,7 @@ apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
 
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
-        metadata: { name: 'executor-shape-single-row' },
+        metadata: { name: 'executor-grouping-multiple-docs-per-group' },
         time_field: '@timestamp',
         schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
@@ -416,7 +417,7 @@ apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-fallback-a", "host-grouping-fallback-b")`,
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-fallback-a", "host-grouping-fallback-b") | KEEP host.name, severity, value`,
             },
           },
           recovery_policy: { type: 'no_breach' },
@@ -432,6 +433,73 @@ apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
 
       expect(breachEvents).toHaveLength(2);
       expect(breachEvents[0].group_hash).not.toBe(breachEvents[1].group_hash);
+
+      const dataByHost = breachEvents.reduce<Record<string, Record<string, unknown>>>(
+        (acc, event) => {
+          acc[event.data['host.name'] as string] = event.data;
+          return acc;
+        },
+        {}
+      );
+
+      expect(dataByHost['host-grouping-fallback-a']).toMatchObject({
+        'host.name': 'host-grouping-fallback-a',
+        severity: 'high',
+        value: 1,
+      });
+
+      expect(dataByHost['host-grouping-fallback-b']).toMatchObject({
+        'host.name': 'host-grouping-fallback-b',
+        severity: 'high',
+        value: 2,
+      });
+    }
+  );
+
+  apiTest(
+    'tolerates trailing whitespace and newlines in evaluation.query.base',
+    async ({ apiServices }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-trim-trailing-ws',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-trim-trailing-whitespace' },
+          time_field: '@timestamp',
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          evaluation: {
+            query: {
+              // Intentional trailing whitespace and newlines: the executor
+              // is expected to normalize the query before sending it to ES|QL.
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-trim-trailing-ws" | STATS count = COUNT(*) BY host.name | WHERE count >= 1   \n   \t  `,
+            },
+          },
+          recovery_policy: { type: 'no_breach' },
+          grouping: { fields: ['host.name'] },
+          state_transition: { pending_count: 0, recovering_count: 0 },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+
+      expect(breachEvents.length).toBeGreaterThanOrEqual(1);
+      expect(breachEvents[0].data).toMatchObject({
+        'host.name': 'host-trim-trailing-ws',
+        count: 1,
+      });
     }
   );
 
@@ -520,6 +588,159 @@ apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
   });
 
   apiTest(
+    'defaults the lookback window to schedule.every when no lookback is set',
+    async ({ apiServices }) => {
+      // 30s in the past — outside the 5s default (= schedule.every) lookback,
+      // but inside the 1m lookback used by the rest of the suite. If the
+      // executor mistakenly fell back to a longer default, this doc would match.
+      const thirtySecondsAgo = new Date(Date.now() - 30_000).toISOString();
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': thirtySecondsAgo,
+            'host.name': 'host-lookback-default',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-lookback-default' },
+          time_field: '@timestamp',
+          schedule: { every: SCHEDULE_INTERVAL },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-default" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          recovery_policy: { type: 'no_breach' },
+          grouping: { fields: ['host.name'] },
+          state_transition: { pending_count: 0, recovering_count: 0 },
+        })
+      );
+
+      await wait(WAIT_TIME_MS);
+
+      const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
+      expect(events).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'uses the configured time_field for the lookback range filter',
+    async ({ apiServices }) => {
+      // Two docs whose `@timestamp` is fresh but whose `event.created` differs:
+      //   - host-time-field-in:  event.created within the 1m lookback
+      //   - host-time-field-out: event.created 5m ago, outside the lookback
+      // Only the first should match if the executor honors `time_field`.
+      const now = new Date().toISOString();
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60_000).toISOString();
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': now,
+            'event.created': now,
+            'host.name': 'host-time-field-in',
+            severity: 'high',
+            value: 1,
+          },
+          {
+            '@timestamp': now,
+            'event.created': fiveMinutesAgo,
+            'host.name': 'host-time-field-out',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-time-field-custom' },
+          time_field: 'event.created',
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-time-field-in", "host-time-field-out") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          recovery_policy: { type: 'no_breach' },
+          grouping: { fields: ['host.name'] },
+          state_transition: { pending_count: 0, recovering_count: 0 },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      // Allow extra ticks so a regression that *also* lets the out-of-range
+      // doc through would have time to surface a second event.
+      await wait(WAIT_TIME_MS);
+
+      const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+
+      const matchedHosts = new Set(breachEvents.map((event) => event.data['host.name']));
+      expect(matchedHosts.has('host-time-field-in')).toBe(true);
+      expect(matchedHosts.has('host-time-field-out')).toBe(false);
+    }
+  );
+
+  apiTest(
+    'binds the ?_tstart and ?_tend reserved ES|QL params to the lookback window',
+    async ({ apiServices }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-esql-reserved-params',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      // The ES|QL request fails outright if the query references
+      // unbound params, so seeing a breach event proves the executor
+      // wired both `?_tstart` and `?_tend` from the lookback window.
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-esql-reserved-params' },
+          time_field: '@timestamp',
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-esql-reserved-params" AND @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          recovery_policy: { type: 'no_breach' },
+          grouping: { fields: ['host.name'] },
+          state_transition: { pending_count: 0, recovering_count: 0 },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+
+      expect(breachEvents.length).toBeGreaterThanOrEqual(1);
+      expect(breachEvents[0].data).toMatchObject({
+        'host.name': 'host-esql-reserved-params',
+        count: 1,
+      });
+    }
+  );
+
+  apiTest(
     'emits a recovered event under no_breach policy when a previously breaching group stops breaching',
     async ({ apiServices, esClient }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
@@ -573,6 +794,60 @@ apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
 
       expect(recoveredEvents.length).toBeGreaterThanOrEqual(1);
       expect(recoveredEvents[0].group_hash).toBe(breachedHash);
+    }
+  );
+
+  apiTest(
+    'does not emit recovery events for kind: "signal" rules when previously matching groups stop matching',
+    async ({ apiServices, esClient }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-signal-no-recovery',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'signal',
+          metadata: { name: 'executor-signal-no-recovery' },
+          time_field: '@timestamp',
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-signal-no-recovery" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          // Even with a recovery policy configured, signal-kind rules must
+          // never emit recovery events.
+          recovery_policy: { type: 'no_breach' },
+          grouping: { fields: ['host.name'] },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      await esClient.deleteByQuery({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': 'host-signal-no-recovery' } },
+        refresh: true,
+        wait_for_completion: true,
+      });
+
+      // Wait for several scheduler ticks so any erroneous recovery event
+      // would have been written by now.
+      await wait(WAIT_TIME_MS);
+
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+
+      expect(recoveredEvents).toHaveLength(0);
     }
   );
 
@@ -663,6 +938,457 @@ apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
     }
   );
 
+  apiTest(
+    'emits one recovery event per active group when recovery_policy.type=query matches multiple',
+    async ({ apiServices, esClient }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-recovery-query-multi-a',
+            severity: 'high',
+            value: 1,
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-recovery-query-multi-b',
+            severity: 'high',
+            value: 2,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-recovery-query-multi' },
+          time_field: '@timestamp',
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-recovery-query-multi-a", "host-recovery-query-multi-b") AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          recovery_policy: {
+            type: 'query',
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-recovery-query-multi-a", "host-recovery-query-multi-b") AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          grouping: { fields: ['host.name'] },
+          state_transition: { pending_count: 0, recovering_count: 0 },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, { status: 'breached' });
+
+      const breachedEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+
+      const breachedHashes = new Set(breachedEvents.map((event) => event.group_hash));
+      expect(breachedHashes.size).toBe(2);
+
+      // Stop both groups from breaching and emit recovery rows for both.
+      await esClient.deleteByQuery({
+        index: SOURCE_INDEX,
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'host.name': ['host-recovery-query-multi-a', 'host-recovery-query-multi-b'],
+                },
+              },
+              { term: { severity: 'high' } },
+            ],
+          },
+        },
+        refresh: true,
+        wait_for_completion: true,
+      });
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-recovery-query-multi-a',
+            severity: 'recovered',
+            value: 0,
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-recovery-query-multi-b',
+            severity: 'recovered',
+            value: 0,
+          },
+        ],
+      });
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, { status: 'recovered' });
+
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+
+      const recoveredHashes = new Set(recoveredEvents.map((event) => event.group_hash));
+      expect(recoveredHashes.size).toBe(2);
+      // Every recovered hash must correspond to a previously breached group.
+      for (const hash of recoveredHashes) {
+        expect(breachedHashes.has(hash)).toBe(true);
+      }
+    }
+  );
+
+  apiTest(
+    'does not recover a group when recovery_policy.type=query returns no matching active group',
+    async ({ apiServices, esClient }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-recovery-query-no-match',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-recovery-query-no-match' },
+          time_field: '@timestamp',
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-no-match" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          recovery_policy: {
+            type: 'query',
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-other-host" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          grouping: { fields: ['host.name'] },
+          state_transition: { pending_count: 0, recovering_count: 0 },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      await esClient.deleteByQuery({
+        index: SOURCE_INDEX,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'host.name': 'host-recovery-query-no-match' } },
+              { term: { severity: 'high' } },
+            ],
+          },
+        },
+        refresh: true,
+        wait_for_completion: true,
+      });
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-recovery-query-other-host',
+            severity: 'recovered',
+            value: 0,
+          },
+        ],
+      });
+
+      await wait(WAIT_TIME_MS);
+
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+
+      expect(recoveredEvents).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'does not recover a group when recovery_policy.type=query returns zero rows',
+    async ({ apiServices, esClient }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-recovery-query-empty',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      // The recovery query targets `severity == "recovered"`, but no doc with
+      // that severity is ever indexed, so the query will always return zero
+      // rows. The active group must remain non-recovered.
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-recovery-query-empty' },
+          time_field: '@timestamp',
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-empty" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          recovery_policy: {
+            type: 'query',
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-empty" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          grouping: { fields: ['host.name'] },
+          state_transition: { pending_count: 0, recovering_count: 0 },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      // Drop the breaching doc so the main query no longer matches. The
+      // recovery query still returns zero rows, exercising the "empty
+      // ES|QL response" branch in `buildQueryRecoveryAlertEvents`.
+      await esClient.deleteByQuery({
+        index: SOURCE_INDEX,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'host.name': 'host-recovery-query-empty' } },
+              { term: { severity: 'high' } },
+            ],
+          },
+        },
+        refresh: true,
+        wait_for_completion: true,
+      });
+
+      await wait(WAIT_TIME_MS);
+
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+
+      expect(recoveredEvents).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'emits recovery events only for groups that stop breaching when others keep breaching',
+    async ({ apiServices, esClient }) => {
+      // Both groups breach first.
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-partial-recovery-a',
+            severity: 'high',
+            value: 1,
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-partial-recovery-b',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-partial-recovery' },
+          time_field: '@timestamp',
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-partial-recovery-a", "host-partial-recovery-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          recovery_policy: { type: 'no_breach' },
+          grouping: { fields: ['host.name'] },
+          state_transition: { pending_count: 0, recovering_count: 0 },
+        })
+      );
+
+      // Wait until both groups have breached so both are tracked as active.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, { status: 'breached' });
+
+      const breachedEventsBefore = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+      const hashesByHost = new Map<string, string>(
+        breachedEventsBefore.map((event) => [event.data['host.name'] as string, event.group_hash])
+      );
+      const hashA = hashesByHost.get('host-partial-recovery-a');
+      const hashB = hashesByHost.get('host-partial-recovery-b');
+      expect(hashA).toBeDefined();
+      expect(hashB).toBeDefined();
+
+      const initialBreachCountB = breachedEventsBefore.filter(
+        (event) => event.data['host.name'] === 'host-partial-recovery-b'
+      ).length;
+
+      // Drop only host-a's data — host-b keeps breaching. Re-index host-b
+      // so it stays inside the lookback window throughout the rest of the
+      // test, even on slower runs.
+      await esClient.deleteByQuery({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': 'host-partial-recovery-a' } },
+        refresh: true,
+        wait_for_completion: true,
+      });
+
+      const reIndexHostB = async () => {
+        await apiServices.alertingV2.sourceIndex.indexDocs({
+          index: SOURCE_INDEX,
+          docs: [
+            {
+              '@timestamp': new Date().toISOString(),
+              'host.name': 'host-partial-recovery-b',
+              severity: 'high',
+              value: 1,
+            },
+          ],
+        });
+      };
+      await reIndexHostB();
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'recovered' });
+
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+
+      // Only host-a should be in the recovered set.
+      const recoveredHashes = new Set(recoveredEvents.map((event) => event.group_hash));
+      expect(recoveredHashes.has(hashA!)).toBe(true);
+      expect(recoveredHashes.has(hashB!)).toBe(false);
+
+      // Strong check: host-b should keep producing *new* breach events
+      // alongside host-a's recoveries — a regression that recovers all
+      // active groups when any group stops breaching would not increase
+      // host-b's breach count.
+      await reIndexHostB();
+      await expect
+        .poll(
+          async () => {
+            const events = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+              status: 'breached',
+            });
+            return events.filter((event) => event.data['host.name'] === 'host-partial-recovery-b')
+              .length;
+          },
+          { timeout: testData.POLL_TIMEOUT_MS, intervals: [testData.POLL_INTERVAL_MS] }
+        )
+        .toBeGreaterThan(initialBreachCountB);
+    }
+  );
+
+  apiTest(
+    'emits both breach and recovery events in the same execution when one group recovers and another keeps breaching',
+    async ({ apiServices, esClient }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-mixed-execution-a',
+            severity: 'high',
+            value: 1,
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-mixed-execution-b',
+            severity: 'high',
+            value: 2,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-mixed-execution' },
+          time_field: '@timestamp',
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-mixed-execution-a", "host-mixed-execution-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          recovery_policy: { type: 'no_breach' },
+          grouping: { fields: ['host.name'] },
+          state_transition: { pending_count: 0, recovering_count: 0 },
+        })
+      );
+
+      // Both groups must be active before we drop one of them; otherwise the
+      // "recovery on first execution" race could mask either branch.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, { status: 'breached' });
+
+      const breachedBefore = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+      const initialBreachCountB = breachedBefore.filter(
+        (event) => event.data['host.name'] === 'host-mixed-execution-b'
+      ).length;
+
+      // Drop host-a only and keep refreshing host-b inside the lookback so
+      // the same execution sees host-b as breaching while host-a recovers.
+      await esClient.deleteByQuery({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': 'host-mixed-execution-a' } },
+        refresh: true,
+        wait_for_completion: true,
+      });
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-mixed-execution-b',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      // Wait until host-a is in the recovered set AND host-b has produced
+      // a NEW breach event after the recovery threshold. Strong assertion:
+      // both branches of `CreateRecoveryEventsStep` (append recovery events
+      // to the existing breach batch) ran in the same pipeline tick.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'recovered' });
+      await expect
+        .poll(
+          async () => {
+            const events = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+              status: 'breached',
+            });
+            return events.filter((event) => event.data['host.name'] === 'host-mixed-execution-b')
+              .length;
+          },
+          { timeout: testData.POLL_TIMEOUT_MS, intervals: [testData.POLL_INTERVAL_MS] }
+        )
+        .toBeGreaterThan(initialBreachCountB);
+
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+      expect(recoveredEvents.length).toBeGreaterThan(0);
+    }
+  );
+
   apiTest('writes zero events when the ES|QL query returns no rows', async ({ apiServices }) => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
@@ -740,6 +1466,72 @@ apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
 
     expect(after).toBe(baseline);
   });
+
+  apiTest(
+    'resumes producing events after a disabled rule is re-enabled',
+    async ({ apiServices }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-reenabled',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-resume-reenabled' },
+          time_field: '@timestamp',
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-reenabled" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          recovery_policy: { type: 'no_breach' },
+          grouping: { fields: ['host.name'] },
+          state_transition: { pending_count: 0, recovering_count: 0 },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      await apiServices.alertingV2.rules.bulkDisable({ ids: [rule.id] });
+
+      // Drain any in-flight execution and capture a stable baseline so we can
+      // assert that *new* events are produced after re-enabling.
+      await wait(WAIT_TIME_MS);
+      const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
+
+      await apiServices.alertingV2.rules.bulkEnable({ ids: [rule.id] });
+
+      // Refresh the breaching doc so it is inside the lookback window when the
+      // re-enabled rule next executes — this isolates the re-enable behavior
+      // from any flakiness around the first post-enable schedule tick.
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-reenabled',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      await expect
+        .poll(async () => (await apiServices.alertingV2.ruleEvents.find(rule.id)).length, {
+          timeout: testData.POLL_TIMEOUT_MS,
+          intervals: [testData.POLL_INTERVAL_MS],
+        })
+        .toBeGreaterThan(baseline);
+    }
+  );
 
   apiTest('a deleted rule writes no new events', async ({ apiServices }) => {
     await apiServices.alertingV2.sourceIndex.indexDocs({
