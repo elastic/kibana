@@ -8,3 +8,13 @@
  */
 
 export const I18N_RC = '.i18nrc.json';
+
+/**
+ * Fast pre-filter: skip files that can't possibly contain i18n call sites,
+ * avoiding expensive ts.transpileModule on the vast majority of source files.
+ *
+ * Checks for `@kbn/i18n` imports (also matches `@kbn/i18n-react`) to short-circuit
+ * early, plus usage-pattern fallbacks for edge cases like re-exported i18n helpers.
+ */
+export const I18N_CALL_PATTERN =
+  /@kbn\/i18n|\btranslate\(|FormattedMessage|defineMessages|\.formatMessage\(/;
