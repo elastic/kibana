@@ -49,8 +49,9 @@ export const createSecurityDocumentProfileProviders = (
           renderFooter = (props) => (
             <EnhancedAlertFlyoutFooterLazy
               {...props}
-              providerServices={providerServices}
               fallbackRenderFooter={prevDocViewer.renderFooter}
+              providerServices={providerServices}
+              refreshData={params.actions.refreshData}
             />
           );
         }
@@ -68,8 +69,9 @@ export const createSecurityDocumentProfileProviders = (
           renderHeader = (props) => (
             <EnhancedAlertFlyoutHeaderLazy
               {...props}
-              providerServices={providerServices}
               fallbackRenderHeader={prevDocViewer.renderHeader}
+              providerServices={providerServices}
+              refreshData={params.actions.refreshData}
             />
           );
         }
@@ -93,7 +95,11 @@ export const createSecurityDocumentProfileProviders = (
                 title: i18n.overviewTabTitle(isAlert),
                 order: 0,
                 render: (props) => (
-                  <EnhancedAlertEventOverviewLazy {...props} providerServices={providerServices} />
+                  <EnhancedAlertEventOverviewLazy
+                    {...props}
+                    providerServices={providerServices}
+                    refreshData={params.actions.refreshData}
+                  />
                 ),
               });
             }
