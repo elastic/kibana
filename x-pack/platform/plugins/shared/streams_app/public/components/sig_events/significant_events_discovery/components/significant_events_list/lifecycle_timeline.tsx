@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import {
   EuiTimeline,
   EuiTimelineItem,
@@ -140,33 +141,40 @@ const DetectionItem = React.memo(({ detection }: { detection: LifecycleDetection
   >
     <EuiPanel paddingSize="s" color="plain" hasBorder>
       <EuiText size="xs" color="subdued">
-        {formatTimestamp(detection.detected_at)}
+        {formatTimestamp(detection.timestamp)}
       </EuiText>
       <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            <strong>{detection.rule_name}</strong>
+            <strong>{TRANSLATIONS.lifecycle.detectionStep}</strong>: {detection.rule_name}
           </EuiText>
         </EuiFlexItem>
         {detection.superseded && (
           <EuiFlexItem grow={false}>
-            <EuiBadge color="default">{TRANSLATIONS.lifecycle.resolved}</EuiBadge>
+            <EuiBadge color="default">{TRANSLATIONS.lifecycle.superseded}</EuiBadge>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{detection.stream_name}</EuiBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {detection.event_count} {TRANSLATIONS.lifecycle.eventsDetected}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="warning">{detection.change_point_type}</EuiBadge>
-        </EuiFlexItem>
+        {detection.stream_name && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{detection.stream_name}</EuiBadge>
+          </EuiFlexItem>
+        )}
+        {detection.alert_count > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {detection.alert_count} {TRANSLATIONS.lifecycle.eventsDetected}
+            </EuiText>
+          </EuiFlexItem>
+        )}
+        {detection.change_point_type && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="warning">{detection.change_point_type}</EuiBadge>
+          </EuiFlexItem>
+        )}
         {detection.p_value != null && (
           <EuiFlexItem grow={false}>
             <EuiToolTip content={TRANSLATIONS.lifecycle.pValueTooltip}>
@@ -443,40 +451,80 @@ const VerdictItem = React.memo(({ verdict: v }: { verdict: LifecycleVerdict }) =
 // Main component
 // ---------------------------------------------------------------------------
 
+interface TimelineEntry {
+  timestamp: number;
+  key: string;
+  node: ReactNode;
+}
+
 interface LifecycleTimelineProps {
-  discovery: LifecycleDiscovery | null;
+  detections: LifecycleDetection[];
+  discoveries: LifecycleDiscovery[];
   verdicts: LifecycleVerdict[];
   eventTimestamp: string;
 }
 
 export const LifecycleTimeline = React.memo(
-  ({ discovery, verdicts, eventTimestamp }: LifecycleTimelineProps) => (
-    <EuiTimeline>
-      {discovery?.detections.map((detection) => (
-        <DetectionItem key={detection.detection_id} detection={detection} />
-      ))}
+  ({ detections, discoveries, verdicts, eventTimestamp }: LifecycleTimelineProps) => {
+    const sortedItems = useMemo(() => {
+      const entries: TimelineEntry[] = [];
 
-      {discovery && <DiscoveryItem discovery={discovery} />}
+      for (const detection of detections) {
+        entries.push({
+          timestamp: new Date(detection.timestamp).getTime(),
+          key: `detection-${detection.detection_id}`,
+          node: <DetectionItem detection={detection} />,
+        });
+      }
 
-      {verdicts.map((v) => (
-        <VerdictItem key={v.id} verdict={v} />
-      ))}
+      for (const discovery of discoveries) {
+        entries.push({
+          timestamp: new Date(discovery.timestamp).getTime(),
+          key: `discovery-${discovery.id}`,
+          node: <DiscoveryItem discovery={discovery} />,
+        });
+      }
 
-      <EuiTimelineItem
-        icon="document"
-        iconAriaLabel={TRANSLATIONS.lifecycle.eventCreated}
-        verticalAlign="top"
-      >
-        <EuiPanel paddingSize="s" color="plain" hasBorder>
-          <EuiText size="xs" color="subdued">
-            {formatTimestamp(eventTimestamp)}
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiText size="s">
-            <strong>{TRANSLATIONS.lifecycle.eventCreated}</strong>
-          </EuiText>
-        </EuiPanel>
-      </EuiTimelineItem>
-    </EuiTimeline>
-  )
+      for (const v of verdicts) {
+        entries.push({
+          timestamp: new Date(v.timestamp).getTime(),
+          key: `verdict-${v.id}`,
+          node: <VerdictItem verdict={v} />,
+        });
+      }
+
+      entries.push({
+        timestamp: new Date(eventTimestamp).getTime(),
+        key: 'event-created',
+        node: (
+          <EuiTimelineItem
+            icon="document"
+            iconAriaLabel={TRANSLATIONS.lifecycle.eventCreated}
+            verticalAlign="top"
+          >
+            <EuiPanel paddingSize="s" color="plain" hasBorder>
+              <EuiText size="xs" color="subdued">
+                {formatTimestamp(eventTimestamp)}
+              </EuiText>
+              <EuiSpacer size="xs" />
+              <EuiText size="s">
+                <strong>{TRANSLATIONS.lifecycle.eventCreated}</strong>
+              </EuiText>
+            </EuiPanel>
+          </EuiTimelineItem>
+        ),
+      });
+
+      entries.sort((a, b) => a.timestamp - b.timestamp);
+      return entries;
+    }, [detections, discoveries, verdicts, eventTimestamp]);
+
+    return (
+      <EuiTimeline>
+        {sortedItems.map((entry) => (
+          <React.Fragment key={entry.key}>{entry.node}</React.Fragment>
+        ))}
+      </EuiTimeline>
+    );
+  }
 );

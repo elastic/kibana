@@ -162,7 +162,8 @@ export const EventFlyout = ({ event, onClose }: EventFlyoutProps) => {
           <EuiLoadingSpinner size="m" />
         ) : lifecycle ? (
           <LifecycleTimeline
-            discovery={lifecycle.discovery}
+            detections={lifecycle.detections}
+            discoveries={lifecycle.discoveries}
             verdicts={lifecycle.verdicts}
             eventTimestamp={event['@timestamp']}
           />

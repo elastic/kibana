@@ -126,11 +126,11 @@ export const lifecycleCauseKiSchema = causeKiSchema;
 
 export const lifecycleDetectionSchema = z.object({
   detection_id: z.string(),
+  timestamp: z.string(),
   rule_name: z.string(),
   stream_name: z.string(),
-  detected_at: z.string(),
-  event_count: z.number(),
-  change_point_type: z.string(),
+  alert_count: z.number(),
+  change_point_type: z.string().nullable(),
   p_value: z.number().nullable(),
   superseded: z.boolean(),
 });
@@ -144,7 +144,6 @@ export const lifecycleDiscoverySchema = z.object({
   criticality: z.number().nullable(),
   impact: z.string().nullable(),
   confidence: z.number().nullable(),
-  detections: z.array(lifecycleDetectionSchema),
   evidences: z.array(lifecycleEvidenceSchema),
   dependency_edges: z.array(lifecycleDependencyEdgeSchema),
   infra_components: z.array(lifecycleInfraComponentSchema),
@@ -172,7 +171,8 @@ export const lifecycleVerdictSchema = z.object({
 
 export const sigEventLifecycleSchema = z.object({
   event_id: z.string(),
-  discovery: lifecycleDiscoverySchema.nullable(),
+  detections: z.array(lifecycleDetectionSchema),
+  discoveries: z.array(lifecycleDiscoverySchema),
   verdicts: z.array(lifecycleVerdictSchema),
 });
 

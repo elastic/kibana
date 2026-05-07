@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { EVIDENCE_RESULTS, EXPOSURE_VALUES } from '../../../../../common';
 import type {
   LifecycleEvidence,
+  LifecycleDetection,
   LifecycleDiscovery,
   LifecycleVerdict,
   SigEventLifecycle,
@@ -39,15 +40,6 @@ const esEvidenceSchema = z.object({
   confirmed: z.boolean().optional(),
 });
 
-const esEmbeddedDetectionSchema = z.object({
-  detection_id: z.string(),
-  rule_name: z.string(),
-  stream_name: z.string(),
-  detected_at: z.string(),
-  event_count: z.number(),
-  change_point_type: z.string(),
-});
-
 const esDiscoverySourceSchema = z.object({
   '@timestamp': z.string(),
   title: z.string().optional(),
@@ -56,7 +48,6 @@ const esDiscoverySourceSchema = z.object({
   criticality: z.number().optional(),
   impact: z.string().optional(),
   confidence: z.number().optional(),
-  detections: z.array(esEmbeddedDetectionSchema).optional(),
   evidences: z.array(esEvidenceSchema).optional(),
   dependency_edges: z
     .array(
@@ -104,10 +95,15 @@ const esEventSourceSchema = z.object({
 });
 
 const esDetectionSourceSchema = z.object({
+  '@timestamp': z.string(),
+  detection_id: z.string(),
   rule_name: z.string(),
+  stream_name: z.string().optional(),
+  alert_count: z.number().optional(),
   superseded: z.boolean().optional(),
   detection_evidence: z
     .object({
+      change_point_type: z.string().optional(),
       p_value: z.number().optional(),
     })
     .optional(),
@@ -128,29 +124,22 @@ const mapEvidence = (ev: z.infer<typeof esEvidenceSchema>): LifecycleEvidence =>
   confirmed: ev.confirmed,
 });
 
-const buildDetectionExtras = (
-  hits: Array<{ _source?: unknown }>,
-  relevantRules: Set<string>
-): Map<string, { p_value: number | null; superseded: boolean }> => {
-  const extras = new Map<string, { p_value: number | null; superseded: boolean }>();
-  for (const hit of hits) {
-    const src = esDetectionSourceSchema.parse(hit._source);
-    if (relevantRules.has(src.rule_name) && !extras.has(src.rule_name)) {
-      extras.set(src.rule_name, {
-        p_value: src.detection_evidence?.p_value ?? null,
-        superseded: src.superseded ?? false,
-      });
-    }
-  }
-  return extras;
+const mapDetection = (hit: { _source?: unknown }): LifecycleDetection => {
+  const src = esDetectionSourceSchema.parse(hit._source);
+  return {
+    detection_id: src.detection_id,
+    timestamp: src['@timestamp'],
+    rule_name: src.rule_name,
+    stream_name: src.stream_name ?? '',
+    alert_count: src.alert_count ?? 0,
+    change_point_type: src.detection_evidence?.change_point_type ?? null,
+    p_value: src.detection_evidence?.p_value ?? null,
+    superseded: src.superseded ?? false,
+  };
 };
 
-const mapDiscovery = (
-  hit: { _id?: string; _source?: unknown },
-  detectionExtras: Map<string, { p_value: number | null; superseded: boolean }>
-): LifecycleDiscovery => {
+const mapDiscovery = (hit: { _id?: string; _source?: unknown }): LifecycleDiscovery => {
   const src = esDiscoverySourceSchema.parse(hit._source);
-  const embeddedDetections = src.detections ?? [];
 
   return {
     id: hit._id ?? '',
@@ -161,11 +150,6 @@ const mapDiscovery = (
     criticality: src.criticality ?? null,
     impact: src.impact || null,
     confidence: src.confidence ?? null,
-    detections: embeddedDetections.map((d) => ({
-      ...d,
-      p_value: detectionExtras.get(d.rule_name)?.p_value ?? null,
-      superseded: detectionExtras.get(d.rule_name)?.superseded ?? false,
-    })),
     evidences: (src.evidences ?? []).map(mapEvidence),
     dependency_edges: src.dependency_edges ?? [],
     infra_components: src.infra_components ?? [],
@@ -199,7 +183,16 @@ const mapVerdict = (hit: { _id?: string; _source?: unknown }): LifecycleVerdict 
 // Route
 // ---------------------------------------------------------------------------
 
-const DETECTION_SOURCE_FIELDS = ['rule_name', 'superseded', 'detection_evidence.p_value'];
+const DETECTION_SOURCE_FIELDS = [
+  '@timestamp',
+  'detection_id',
+  'rule_name',
+  'stream_name',
+  'alert_count',
+  'superseded',
+  'detection_evidence.change_point_type',
+  'detection_evidence.p_value',
+];
 
 const getLifecycleRoute = createServerRoute({
   endpoint: 'GET /internal/streams/sig_events/{eventId}/lifecycle',
@@ -229,13 +222,14 @@ const getLifecycleRoute = createServerRoute({
     const { discovery_id: discoveryId, rule_names: ruleNames = [] } = eventSource;
 
     if (!discoveryId) {
-      return { event_id: eventId, discovery: null, verdicts: [] };
+      return { event_id: eventId, detections: [], discoveries: [], verdicts: [] };
     }
 
-    const [discoveryResult, verdictsResult, detectionsResult] = await Promise.all([
+    const [discoveriesResult, verdictsResult, detectionsResult] = await Promise.all([
       client.search({
         index: DISCOVERIES_INDEX,
-        size: 1,
+        size: 50,
+        sort: [{ '@timestamp': 'asc' }],
         query: { bool: { filter: [{ term: { discovery_id: discoveryId } }] } },
       }),
       client.search({
@@ -247,31 +241,22 @@ const getLifecycleRoute = createServerRoute({
       ruleNames.length > 0
         ? client.search({
             index: DETECTIONS_INDEX,
-            size: 50,
-            sort: [{ '@timestamp': 'desc' }],
+            size: 500,
+            sort: [{ '@timestamp': 'asc' }],
             _source: DETECTION_SOURCE_FIELDS,
-            collapse: { field: 'rule_name' },
             query: { bool: { filter: [{ terms: { rule_name: ruleNames } }] } },
           })
         : Promise.resolve(null),
     ]);
 
-    let discovery: LifecycleDiscovery | null = null;
-    if (discoveryResult.hits.hits.length) {
-      const embeddedRuleNames = new Set(
-        (esDiscoverySourceSchema.parse(discoveryResult.hits.hits[0]._source).detections ?? []).map(
-          (d) => d.rule_name
-        )
-      );
-      const extras = detectionsResult
-        ? buildDetectionExtras(detectionsResult.hits.hits, embeddedRuleNames)
-        : new Map();
-      discovery = mapDiscovery(discoveryResult.hits.hits[0], extras);
-    }
+    const detections: LifecycleDetection[] = detectionsResult
+      ? detectionsResult.hits.hits.map(mapDetection)
+      : [];
 
+    const discoveries = discoveriesResult.hits.hits.map(mapDiscovery);
     const verdicts = verdictsResult.hits.hits.map(mapVerdict);
 
-    return { event_id: eventId, discovery, verdicts };
+    return { event_id: eventId, detections, discoveries, verdicts };
   },
 });
 

@@ -145,8 +145,8 @@ export const TRANSLATIONS = {
     noData: i18n.translate('xpack.streams.lifecycle.noData', {
       defaultMessage: 'No data available',
     }),
-    resolved: i18n.translate('xpack.streams.lifecycle.resolved', {
-      defaultMessage: 'resolved',
+    superseded: i18n.translate('xpack.streams.lifecycle.superseded', {
+      defaultMessage: 'superseded',
     }),
     confirmed: i18n.translate('xpack.streams.lifecycle.confirmed', {
       defaultMessage: 'confirmed',
