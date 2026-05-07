@@ -12,7 +12,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
 export const JobIdInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const [jobId, setJobId] = useState(jobCreator.jobId);
   const titleId = useGeneratedHtmlId({ prefix: 'jobIdInput' });
@@ -39,6 +39,13 @@ export const JobIdInput: FC = () => {
     jobCreatorUpdate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
+
+  useEffect(() => {
+    if (jobCreator.jobId !== jobId) {
+      setJobId(jobCreator.jobId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreatorUpdated]);
 
   return (
     <Description validation={validation} titleId={titleId}>

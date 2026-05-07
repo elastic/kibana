@@ -10,15 +10,20 @@ import type {
   ConversationRound,
   ConversationRoundStep,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 
-export const newConversationId = 'new';
-export const createNewConversation = (): Conversation => {
+export const createNewConversation = ({
+  id,
+  agentId,
+}: {
+  id: string;
+  agentId: string;
+}): Conversation => {
   const now = new Date().toISOString();
   return {
-    id: newConversationId,
-    agent_id: agentBuilderDefaultAgentId,
+    id,
+    agent_id: agentId,
     user: { id: '', username: '' },
     title: '',
     created_at: now,
