@@ -29,6 +29,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/logging-mocks",
     "@kbn/core-http-server",
-    "@kbn/workflows-yaml"
+    "@kbn/workflows-yaml",
+    "@kbn/react-query"
   ]
 }
