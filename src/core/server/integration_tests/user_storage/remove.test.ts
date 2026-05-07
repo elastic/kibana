@@ -27,8 +27,6 @@ import type { UserStorageDefinition, IUserStorageClient } from '@kbn/core-user-s
 const PROFILE_UID = 'integration-test-profile-uid';
 
 describe('UserStorage remove() / null-merge behavior', () => {
-  jest.setTimeout(120_000);
-
   let servers: TestUtils;
   let esServer: TestElasticsearchUtils;
   let kbn: TestKibanaUtils;
