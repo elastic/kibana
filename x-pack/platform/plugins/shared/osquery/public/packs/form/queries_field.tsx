@@ -20,6 +20,8 @@ import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
 import { getSupportedPlatforms } from '../queries/platforms/helpers';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
+import type { ScheduleFormData } from '../../components/schedule_section';
+import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
 
 interface QueriesFieldProps {
   euiFieldProps: EuiComboBoxProps<{}>;
@@ -40,6 +42,54 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
 
   const { setValue } = useFormContext();
   const { name: packName } = useWatch();
+  const isRRuleSchedulingEnabled = useIsExperimentalFeatureEnabled('rruleScheduling');
+
+  // Snapshot of the pack-level schedule form fields, used to seed per-query
+  // schedule defaults inside the QueryFlyout. We deliberately read each field
+  // explicitly rather than spreading `useWatch()` so renames in either form
+  // surface as type errors.
+  const packScheduleFormFields = useWatch();
+  const packDefaultSchedule = useMemo<ScheduleFormData | undefined>(() => {
+    if (!isRRuleSchedulingEnabled) {
+      return undefined;
+    }
+
+    const {
+      schedule_type,
+      interval,
+      start_date,
+      end_date,
+      end_date_enabled,
+      splay_enabled,
+      splay_value,
+      splay_unit,
+      frequency,
+      repeat_every,
+      byweekday,
+      bymonthday,
+      bymonth,
+    } = packScheduleFormFields as Partial<ScheduleFormData>;
+
+    if (schedule_type === undefined) {
+      return undefined;
+    }
+
+    return {
+      schedule_type,
+      interval: interval ?? 3600,
+      start_date: start_date ?? '',
+      end_date: end_date ?? '',
+      end_date_enabled: end_date_enabled ?? false,
+      splay_enabled: splay_enabled ?? false,
+      splay_value: splay_value ?? 5,
+      splay_unit: splay_unit ?? 'minutes',
+      frequency: frequency ?? 'daily',
+      repeat_every: repeat_every ?? 1,
+      byweekday: byweekday ?? [],
+      bymonthday: bymonthday ?? 1,
+      bymonth: bymonth ?? 1,
+    };
+  }, [isRRuleSchedulingEnabled, packScheduleFormFields]);
 
   const handleNameChange = useCallback(
     (newName: string) => isEmpty(packName) && setValue('name', newName),
@@ -79,14 +129,14 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
     (updatedQuery: any) =>
       new Promise<void>((resolve) => {
         if (showEditQueryFlyout >= 0) {
+          // The flyout's onSave hands us the serialized SO shape (with
+          // `schedule_type`/`rrule_schedule` set when overriding). We store
+          // it as-is on the field array so the deserializer can reconstruct
+          // the user's choices the next time the flyout opens — picking out
+          // individual fields here would silently drop schedule overrides.
           update(
             showEditQueryFlyout,
-            produce({}, (draft: PackQueryFormData) => {
-              draft.id = updatedQuery.id;
-              draft.interval = updatedQuery.interval;
-              draft.query = updatedQuery.query;
-              draft.timeout = updatedQuery.timeout;
-
+            produce(updatedQuery, (draft: PackQueryFormData) => {
               if (updatedQuery.platform?.length) {
                 draft.platform = updatedQuery.platform;
               }
@@ -98,9 +148,6 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
               if (updatedQuery.ecs_mapping) {
                 draft.ecs_mapping = updatedQuery.ecs_mapping;
               }
-
-              draft.snapshot = updatedQuery.snapshot;
-              draft.removed = updatedQuery.removed;
 
               return draft;
             })
@@ -209,6 +256,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
       {showAddQueryFlyout && (
         <QueryFlyout
           uniqueQueryIds={uniqueQueryIds}
+          packDefaultSchedule={packDefaultSchedule}
           onSave={handleAddQuery}
           onClose={handleHideAddFlyout}
         />
@@ -218,6 +266,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
           uniqueQueryIds={uniqueQueryIds}
           // @ts-expect-error update types
           defaultValue={fieldValue[showEditQueryFlyout]}
+          packDefaultSchedule={packDefaultSchedule}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}
         />

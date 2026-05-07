@@ -54,12 +54,24 @@ jest.mock('../../saved_queries/saved_queries_dropdown', () => ({
 }));
 
 import { QueryFlyout } from './query_flyout';
+import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
+import { DEFAULT_SCHEDULE_FORM_VALUES } from '../../components/schedule_section';
 
-const renderFlyout = (props: Partial<React.ComponentProps<typeof QueryFlyout>> = {}) =>
+type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
+
+const defaultExperimentalFeatures: ExperimentalFeatures = { ...allowedExperimentalValues };
+
+const renderFlyout = (
+  props: Partial<React.ComponentProps<typeof QueryFlyout>> = {},
+  experimentalFeatures: ExperimentalFeatures = defaultExperimentalFeatures
+) =>
   render(
     <EuiProvider>
       <IntlProvider locale="en">
-        <QueryFlyout uniqueQueryIds={[]} onSave={jest.fn()} onClose={jest.fn()} {...props} />
+        <ExperimentalFeaturesProvider value={experimentalFeatures}>
+          <QueryFlyout uniqueQueryIds={[]} onSave={jest.fn()} onClose={jest.fn()} {...props} />
+        </ExperimentalFeaturesProvider>
       </IntlProvider>
     </EuiProvider>
   );
@@ -146,6 +158,62 @@ describe('QueryFlyout', () => {
       await waitFor(() => {
         expect(screen.queryByText('ID must be unique')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('schedule override (D11 same-mode constraint)', () => {
+    const rruleEnabled: ExperimentalFeatures = {
+      ...defaultExperimentalFeatures,
+      rruleScheduling: true,
+    };
+
+    it('locks schedule type selector to pack mode when override is on (rrule pack)', async () => {
+      renderFlyout(
+        {
+          packDefaultSchedule: { ...DEFAULT_SCHEDULE_FORM_VALUES, schedule_type: 'rrule' },
+        },
+        rruleEnabled
+      );
+
+      // Toggle override on
+      const overrideSwitch = screen.getByTestId('osquery-query-override-pack-schedule');
+      await act(async () => {
+        fireEvent.click(overrideSwitch);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('osquery-schedule-type-locked-help')).toBeInTheDocument();
+      });
+
+      const intervalRadio = screen.getByRole('radio', { name: /Interval/i });
+      const rruleRadio = screen.getByRole('radio', { name: /Date & time/i });
+      expect(intervalRadio).toBeDisabled();
+      expect(rruleRadio).toBeDisabled();
+      expect(rruleRadio).toBeChecked();
+    });
+
+    it('locks schedule type selector to pack mode when override is on (interval pack)', async () => {
+      renderFlyout(
+        {
+          packDefaultSchedule: { ...DEFAULT_SCHEDULE_FORM_VALUES, schedule_type: 'interval' },
+        },
+        rruleEnabled
+      );
+
+      const overrideSwitch = screen.getByTestId('osquery-query-override-pack-schedule');
+      await act(async () => {
+        fireEvent.click(overrideSwitch);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('osquery-schedule-type-locked-help')).toBeInTheDocument();
+      });
+
+      const intervalRadio = screen.getByRole('radio', { name: /Interval/i });
+      const rruleRadio = screen.getByRole('radio', { name: /Date & time/i });
+      expect(intervalRadio).toBeDisabled();
+      expect(rruleRadio).toBeDisabled();
+      expect(intervalRadio).toBeChecked();
     });
   });
 

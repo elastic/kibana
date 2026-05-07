@@ -116,6 +116,20 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
 
           const { attributes } = newPackSO;
 
+          // Schedule fields (`schedule_type`, `interval`, `rrule_schedule`) are
+          // copied from the source via `...restAttributes` above. Surface them
+          // in the response, discriminated by the active `schedule_type` so
+          // stale per-mode fields do not leak.
+          const responseScheduleFields: Pick<
+            PackResponseData,
+            'schedule_type' | 'interval' | 'rrule_schedule'
+          > =
+            attributes.schedule_type === 'rrule'
+              ? { schedule_type: 'rrule', rrule_schedule: attributes.rrule_schedule }
+              : attributes.schedule_type === 'interval'
+              ? { schedule_type: 'interval', interval: attributes.interval }
+              : {};
+
           const data: PackResponseData = {
             name: attributes.name,
             description: attributes.description,
@@ -131,6 +145,7 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             policy_ids: [], // No policy assignments — references are empty
             shards: attributes.shards,
             saved_object_id: newPackSO.id,
+            ...responseScheduleFields,
           };
 
           return response.ok({

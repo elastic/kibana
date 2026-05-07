@@ -36,17 +36,24 @@ import {
  * One-time migration that assigns stable `schedule_id` + `start_date` to every
  * pack query that doesn't already have them. The task marks itself as completed
  * after the first successful run; subsequent executions are no-ops.
+ *
+ * `isRruleFeatureEnabled` flows the wire-boundary feature-flag gate (D25) into
+ * the policy push the backfill triggers — even though backfill itself never
+ * touches RRULE state, it re-emits the policy doc and SHOULD honor the flag
+ * for consistency with create/update_pack routes.
  */
 export const backfillScheduleIds = async ({
   coreStart,
   osqueryContext,
   logger,
   abortController,
+  isRruleFeatureEnabled = false,
 }: {
   coreStart: CoreStart;
   osqueryContext: OsqueryAppContextService;
   logger: Logger;
   abortController?: AbortController;
+  isRruleFeatureEnabled?: boolean;
 }): Promise<{ hadFailures: boolean }> => {
   const internalClient = await getInternalSavedObjectsClient(coreStart);
 
@@ -121,11 +128,46 @@ export const backfillScheduleIds = async ({
                   unset(draft, 'id');
                   removePackFromPolicy(draft, packSO.attributes.name, spaceId);
                   set(draft, `${packPath}.pack_id`, packSO.id);
-                  set(
-                    draft,
-                    `${packPath}.queries`,
-                    convertSOQueriesToPackConfig(updatedQueries, spaceId)
+                  // D13 wire format: pack-level schedule travels as
+                  // `default_*_schedule` slots; per-query map carries only
+                  // overrides plus per-query metadata. D25: feature-flag
+                  // gating at the wire boundary.
+                  const packConfigPayload = convertSOQueriesToPackConfig(
+                    updatedQueries,
+                    spaceId,
+                    {
+                      schedule_type: packSO.attributes.schedule_type,
+                      interval: packSO.attributes.interval,
+                      rrule_schedule: packSO.attributes.rrule_schedule,
+                    },
+                    { isRruleFeatureEnabled }
                   );
+                  set(draft, `${packPath}.queries`, packConfigPayload.queries);
+                  if (packConfigPayload.default_native_schedule != null) {
+                    set(
+                      draft,
+                      `${packPath}.default_native_schedule`,
+                      packConfigPayload.default_native_schedule
+                    );
+                  } else {
+                    unset(draft, `${packPath}.default_native_schedule`);
+                  }
+
+                  if (packConfigPayload.default_rrule_schedule != null) {
+                    set(
+                      draft,
+                      `${packPath}.default_rrule_schedule`,
+                      packConfigPayload.default_rrule_schedule
+                    );
+                  } else {
+                    unset(draft, `${packPath}.default_rrule_schedule`);
+                  }
+
+                  if (packConfigPayload.default_space_id != null) {
+                    set(draft, `${packPath}.default_space_id`, packConfigPayload.default_space_id);
+                  } else {
+                    unset(draft, `${packPath}.default_space_id`);
+                  }
 
                   return draft;
                 })

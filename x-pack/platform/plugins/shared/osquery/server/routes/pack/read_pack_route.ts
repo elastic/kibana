@@ -17,7 +17,7 @@ import type { PackSavedObject } from '../../common/types';
 import { PLUGIN_ID } from '../../../common';
 
 import { packSavedObjectType } from '../../../common/types';
-import { convertSOQueriesToPack } from './utils';
+import { buildDiscriminatedScheduleResponseFields, convertSOQueriesToPack } from './utils';
 import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
 import { readPacksRequestParamsSchema } from '../../../common/api';
@@ -102,8 +102,16 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           saved_object_id: id,
           queries: mapValues(
             convertSOQueriesToPack(attributes.queries),
-            ({ schedule_id: _s, start_date: _d, ...restQuery }) => restQuery
+            // `schedule_id` is preserved so the pack-detail UI can query
+            // scheduled-result docs by their stable `schedule_id` field
+            // (`logs-osquery_manager.result-*` no longer carries a derivable
+            // `action_id` for native osqueryd-scheduled queries).
+            ({ start_date: _d, ...restQuery }) => restQuery
           ),
+          // Discriminated by `schedule_type` so prior-mode fields left on the SO
+          // by transition merges (e.g. legacy `interval` after switch to rrule)
+          // are not surfaced to consumers — D14.
+          ...buildDiscriminatedScheduleResponseFields(attributes),
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,
           read_only: attributes.version !== undefined && osqueryPackAssetReference,

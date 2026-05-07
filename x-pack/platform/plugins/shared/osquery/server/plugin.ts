@@ -137,6 +137,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
               osqueryContext: this.osqueryAppContextService,
               logger: this.logger,
               abortController,
+              isRruleFeatureEnabled: experimentalFeatures.rruleScheduling,
             });
 
             return { state: { completed: !hadFailures } };
@@ -157,6 +158,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   public start(core: CoreStart, plugins: StartPlugins) {
     this.logger.debug('osquery: Started');
     this.coreStart = core;
+    const config = createConfig(this.initializerContext);
+    const experimentalFeatures = config.experimentalFeatures;
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
     this.osqueryAppContextService.start({
       ...plugins.fleet,
@@ -244,7 +247,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
                     spaceScopedClient,
                     allPacks.saved_objects,
                     this.osqueryAppContextService,
-                    soClient.getCurrentNamespace()
+                    soClient.getCurrentNamespace(),
+                    experimentalFeatures.rruleScheduling
                   );
                 }
               }

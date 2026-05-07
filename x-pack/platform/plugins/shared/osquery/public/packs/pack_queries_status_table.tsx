@@ -352,8 +352,19 @@ ScheduledQueryExpandedContent.displayName = 'ScheduledQueryExpandedContent';
 
 interface ScheduledQueryLastResultsProps {
   actionId?: string;
+  /**
+   * Stable scheduled-query UUID. When present takes precedence over
+   * `actionId` for the scheduled-result lookup — `action_id` no longer
+   * exists on docs from native-osqueryd-scheduled queries.
+   */
+  scheduleId?: string;
   queryId?: string;
-  interval: number;
+  /**
+   * Per-query interval (seconds). Optional because rrule-scheduled queries
+   * have no fixed inter-run gap; the result hook falls back to a default
+   * window when this is omitted.
+   */
+  interval?: number;
 }
 
 interface ScheduledQueryErrorsProps {
@@ -366,10 +377,12 @@ interface ScheduledQueryErrorsProps {
 
 const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   actionId,
+  scheduleId,
   interval,
 }) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
+    scheduleId,
     interval,
   });
 
@@ -408,9 +421,14 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   );
 };
 
-const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionId, interval }) => {
+const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({
+  actionId,
+  scheduleId,
+  interval,
+}) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
+    scheduleId,
     interval,
   });
 
@@ -433,9 +451,14 @@ const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionId,
   );
 };
 
-const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionId, interval }) => {
+const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({
+  actionId,
+  scheduleId,
+  interval,
+}) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
+    scheduleId,
     interval,
   });
   if (isLoading) {
@@ -624,19 +647,31 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   const renderLastResultsColumn = useCallback(
     (item: PackQueryFormData) => (
-      <ScheduledQueryLastResults actionId={actionIdForQuery(item.id)} interval={item.interval} />
+      <ScheduledQueryLastResults
+        actionId={actionIdForQuery(item.id)}
+        scheduleId={item.schedule_id}
+        interval={item.interval}
+      />
     ),
     [actionIdForQuery]
   );
   const renderDocsColumn = useCallback(
     (item: PackQueryFormData) => (
-      <DocsColumnResults actionId={actionIdForQuery(item.id)} interval={item.interval} />
+      <DocsColumnResults
+        actionId={actionIdForQuery(item.id)}
+        scheduleId={item.schedule_id}
+        interval={item.interval}
+      />
     ),
     [actionIdForQuery]
   );
   const renderAgentsColumn = useCallback(
     (item: PackQueryFormData) => (
-      <AgentsColumnResults actionId={actionIdForQuery(item.id)} interval={item.interval} />
+      <AgentsColumnResults
+        actionId={actionIdForQuery(item.id)}
+        scheduleId={item.schedule_id}
+        interval={item.interval}
+      />
     ),
     [actionIdForQuery]
   );

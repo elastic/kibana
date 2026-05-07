@@ -28,8 +28,10 @@ import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import {
+  buildDiscriminatedScheduleResponseFields,
   convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
+  extractAndValidatePackScheduleFromBody,
   findMatchingShards,
   getInitialPolicies,
   makePackKey,
@@ -99,17 +101,20 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const username = currentUser?.username ?? undefined;
         const profileUid = currentUser?.profile_uid ?? undefined;
 
-        const {
-          name,
-          description,
-          queries: rawQueries,
-          enabled,
-          policy_ids,
-          shards = {},
-        } = request.body;
+        const { name, description, enabled, policy_ids, shards = {} } = request.body;
+
+        const scheduleExtraction = extractAndValidatePackScheduleFromBody(
+          request.body,
+          osqueryContext.experimentalFeatures.rruleScheduling
+        );
+        if (!scheduleExtraction.ok) {
+          return response.badRequest({ body: scheduleExtraction.error });
+        }
+
+        const { packSchedule, queries: gatedRawQueries } = scheduleExtraction.result;
 
         const now = moment().toISOString();
-        const queries = mapValues(rawQueries, (queryData) => ({
+        const queries = mapValues(gatedRawQueries ?? {}, (queryData) => ({
           ...queryData,
           schedule_id: uuidv4(),
           start_date: now,
@@ -169,6 +174,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             updated_by: username,
             updated_by_profile_uid: profileUid,
             shards: convertShardsToArray(shards),
+            ...(packSchedule.schedule_type ? { schedule_type: packSchedule.schedule_type } : {}),
+            ...(packSchedule.interval != null ? { interval: packSchedule.interval } : {}),
+            ...(packSchedule.rrule_schedule ? { rrule_schedule: packSchedule.rrule_schedule } : {}),
           },
           {
             references,
@@ -194,10 +202,24 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     }
 
                     const packKey = makePackKey(packSO.attributes.name, spaceId);
+                    // D13 wire format: pack-level schedule travels as
+                    // `default_*_schedule`; per-query map carries only
+                    // overrides plus per-query metadata. D25: the converter
+                    // honors the feature flag at the wire boundary so
+                    // disabling the flag falls back to legacy interval
+                    // emission even if the SO carries RRULE state.
+                    const packConfigPayload = convertSOQueriesToPackConfig(
+                      queries,
+                      spaceId,
+                      packSchedule,
+                      {
+                        isRruleFeatureEnabled: osqueryContext.experimentalFeatures.rruleScheduling,
+                      }
+                    );
                     set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
                       shard: policyShards[agentPolicyId] ?? 100,
                       pack_id: packSO.id,
-                      queries: convertSOQueriesToPackConfig(queries, spaceId),
+                      ...packConfigPayload,
                     });
 
                     return draft;
@@ -211,6 +233,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         set(packSO, 'attributes.queries', queries);
 
         const { attributes } = packSO;
+
+        // Mirror the discriminated response shape used in read/find/update
+        // routes — D14. Only the fields matching the active `schedule_type`
+        // are surfaced.
+        const responseScheduleFields = buildDiscriminatedScheduleResponseFields(attributes);
 
         const data: PackResponseData = {
           name: attributes.name,
@@ -227,6 +254,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           policy_ids: attributes.policy_ids,
           shards: attributes.shards,
           saved_object_id: packSO.id,
+          ...responseScheduleFields,
         };
 
         return response.ok({

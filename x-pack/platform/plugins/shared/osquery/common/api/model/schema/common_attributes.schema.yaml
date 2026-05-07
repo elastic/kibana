@@ -196,6 +196,10 @@ components:
           $ref: '#/components/schemas/RemovedOrUndefined'
         snapshot:
           $ref: '#/components/schemas/SnapshotOrUndefined'
+        schedule_type:
+          $ref: '#/components/schemas/ScheduleTypeOrUndefined'
+        rrule_schedule:
+          $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
 
     ArrayQueries:
       type: array
@@ -222,6 +226,10 @@ components:
           $ref: '#/components/schemas/RemovedOrUndefined'
         snapshot:
           $ref: '#/components/schemas/SnapshotOrUndefined'
+        schedule_type:
+          $ref: '#/components/schemas/ScheduleTypeOrUndefined'
+        rrule_schedule:
+          $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
 
     ObjectQueries:
       type: object
@@ -279,6 +287,60 @@ components:
       type: object
       additionalProperties:
         type: number
+
+    ScheduleType:
+      description: 'Discriminator for the active scheduling mode. `interval` uses native osqueryd interval scheduling; `rrule` uses osquerybeat RRULE-based recurrence scheduling.'
+      example: 'rrule'
+      type: string
+      enum:
+        - interval
+        - rrule
+
+    ScheduleTypeOrUndefined:
+      $ref: '#/components/schemas/ScheduleType'
+      nullable: true
+
+    RRuleScheduleConfig:
+      description: 'RRULE schedule configuration consumed by osquerybeat. The `rrule` field is the fully serialized RFC 5545 string. DTSTART is NOT included; osquerybeat uses the separate `start_date` field.'
+      type: object
+      required:
+        - rrule
+        - start_date
+      properties:
+        rrule:
+          description: 'RFC 5545 RRULE string, e.g. `FREQ=WEEKLY;BYDAY=MO,WE,FR`.'
+          example: 'FREQ=DAILY'
+          type: string
+        start_date:
+          description: 'RFC 3339 datetime string for the schedule start.'
+          example: '2026-01-01T00:00:00.000Z'
+          type: string
+          format: date-time
+        end_date:
+          description: 'Optional RFC 3339 datetime string for the schedule end.'
+          example: '2026-12-31T23:59:59.000Z'
+          type: string
+          format: date-time
+        splay:
+          description: 'Optional Go duration string (e.g. `30s`, `5m`, `1h`). Maximum 12 hours.'
+          example: '5m'
+          type: string
+        timeout:
+          description: 'Optional per-query timeout in seconds.'
+          type: integer
+
+    RRuleScheduleConfigOrUndefined:
+      $ref: '#/components/schemas/RRuleScheduleConfig'
+      nullable: true
+
+    PackInterval:
+      description: 'Pack-level interval in seconds. Used when `schedule_type` is `interval`. Mutually exclusive with `rrule_schedule`.'
+      example: 3600
+      type: integer
+
+    PackIntervalOrUndefined:
+      $ref: '#/components/schemas/PackInterval'
+      nullable: true
 
     DefaultSuccessResponse:
       type: object

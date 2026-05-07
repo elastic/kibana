@@ -22,6 +22,9 @@ import {
   ECSMappingArrayOrUndefined,
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
+  ScheduleTypeOrUndefined,
+  PackIntervalOrUndefined,
+  RRuleScheduleConfigOrUndefined,
 } from '../model/schema/common_attributes.gen';
 
 /**
@@ -77,6 +80,9 @@ export const CopyPacksResponse = lazySchema(() =>
           })
         )
         .optional(),
+      schedule_type: ScheduleTypeOrUndefined.optional(),
+      interval: PackIntervalOrUndefined.optional(),
+      rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
     }),
   })
 );

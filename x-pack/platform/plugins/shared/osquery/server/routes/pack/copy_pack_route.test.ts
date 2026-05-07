@@ -278,6 +278,183 @@ describe('copyPackRoute', () => {
     expect(createOptions.references).toEqual([]);
   });
 
+  it('copies RRULE schedule fields and surfaces them in the response', async () => {
+    const sourceWithRrule = {
+      ...sourcePackSO,
+      attributes: {
+        ...sourcePackSO.attributes,
+        schedule_type: 'rrule' as const,
+        rrule_schedule: {
+          rrule: 'FREQ=WEEKLY;BYDAY=MO,WE,FR',
+          start_date: '2024-01-01T00:00:00.000Z',
+        },
+      },
+    };
+
+    const mockSavedObjectsClient = {
+      get: jest.fn().mockResolvedValue(sourceWithRrule),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      create: jest.fn().mockResolvedValue({
+        id: 'new-pack-id',
+        attributes: {
+          name: 'my-pack_copy',
+          description: 'Test pack description',
+          queries: sourceWithRrule.attributes.queries,
+          enabled: false,
+          shards: [],
+          schedule_type: 'rrule',
+          rrule_schedule: sourceWithRrule.attributes.rrule_schedule,
+          created_at: '2025-06-01T00:00:00.000Z',
+          created_by: 'tester',
+          updated_at: '2025-06-01T00:00:00.000Z',
+          updated_by: 'tester',
+        },
+      }),
+    };
+
+    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+      mockSavedObjectsClient
+    );
+    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: { id: 'source-pack-id' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
+    expect(createArgs.schedule_type).toBe('rrule');
+    expect(createArgs.rrule_schedule).toEqual(sourceWithRrule.attributes.rrule_schedule);
+    expect(createArgs.interval).toBeUndefined();
+
+    const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
+    expect(responseBody.data.schedule_type).toBe('rrule');
+    expect(responseBody.data.rrule_schedule).toEqual(sourceWithRrule.attributes.rrule_schedule);
+    expect(responseBody.data.interval).toBeUndefined();
+  });
+
+  it('copies pack-level interval schedule and discriminates the response', async () => {
+    const sourceWithInterval = {
+      ...sourcePackSO,
+      attributes: {
+        ...sourcePackSO.attributes,
+        schedule_type: 'interval' as const,
+        interval: 1800,
+      },
+    };
+
+    const mockSavedObjectsClient = {
+      get: jest.fn().mockResolvedValue(sourceWithInterval),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      create: jest.fn().mockResolvedValue({
+        id: 'new-pack-id',
+        attributes: {
+          name: 'my-pack_copy',
+          description: 'Test pack description',
+          queries: sourceWithInterval.attributes.queries,
+          enabled: false,
+          shards: [],
+          schedule_type: 'interval',
+          interval: 1800,
+          created_at: '2025-06-01T00:00:00.000Z',
+          created_by: 'tester',
+          updated_at: '2025-06-01T00:00:00.000Z',
+          updated_by: 'tester',
+        },
+      }),
+    };
+
+    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+      mockSavedObjectsClient
+    );
+    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: { id: 'source-pack-id' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
+    expect(createArgs.schedule_type).toBe('interval');
+    expect(createArgs.interval).toBe(1800);
+
+    const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
+    expect(responseBody.data.schedule_type).toBe('interval');
+    expect(responseBody.data.interval).toBe(1800);
+    expect(responseBody.data.rrule_schedule).toBeUndefined();
+  });
+
+  // L5 (architect-review follow-up): the copy route spreads `restAttributes`,
+  // so any forward-compat `_unknown` parts encoded in the RRULE string survive
+  // verbatim. This test guards against future destructure changes that might
+  // accidentally strip schedule fields.
+  it('preserves RRULE _unknown parts (forward-compat) on copy', async () => {
+    const sourceWithUnknownParts = {
+      ...sourcePackSO,
+      attributes: {
+        ...sourcePackSO.attributes,
+        schedule_type: 'rrule' as const,
+        // The RRULE string contains parts the parser does not recognize
+        // (BYHOUR, WKST). The string must be carried through the copy
+        // verbatim so the agent receives identical wire bytes.
+        rrule_schedule: {
+          rrule: 'FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;WKST=MO',
+          start_date: '2024-01-01T00:00:00.000Z',
+        },
+      },
+    };
+
+    const mockSavedObjectsClient = {
+      get: jest.fn().mockResolvedValue(sourceWithUnknownParts),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      create: jest.fn().mockResolvedValue({
+        id: 'new-pack-id',
+        attributes: {
+          name: 'my-pack_copy',
+          description: 'Test pack description',
+          queries: sourceWithUnknownParts.attributes.queries,
+          enabled: false,
+          shards: [],
+          schedule_type: 'rrule',
+          rrule_schedule: sourceWithUnknownParts.attributes.rrule_schedule,
+          created_at: '2025-06-01T00:00:00.000Z',
+          created_by: 'tester',
+          updated_at: '2025-06-01T00:00:00.000Z',
+          updated_by: 'tester',
+        },
+      }),
+    };
+
+    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+      mockSavedObjectsClient
+    );
+    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: { id: 'source-pack-id' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
+    expect(createArgs.schedule_type).toBe('rrule');
+    expect(createArgs.rrule_schedule.rrule).toBe('FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;WKST=MO');
+
+    const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
+    expect(responseBody.data.rrule_schedule.rrule).toBe('FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;WKST=MO');
+  });
+
   it('strips version and read_only from prebuilt pack copy', async () => {
     const prebuiltPackSO = {
       ...sourcePackSO,

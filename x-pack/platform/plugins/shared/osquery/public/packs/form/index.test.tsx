@@ -15,6 +15,7 @@ import { ThemeProvider } from '@emotion/react';
 
 import { PackForm } from '.';
 import { queryClient } from '../../query_client';
+import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
 
 const mockUseRouterNavigate = jest.fn();
 
@@ -63,7 +64,9 @@ const renderWithContext = (Element: React.ReactElement) =>
         }}
       >
         <IntlProvider locale={'en'}>
-          <QueryClientProvider client={queryClient}>{Element}</QueryClientProvider>
+          <QueryClientProvider client={queryClient}>
+            <ExperimentalFeaturesProvider>{Element}</ExperimentalFeaturesProvider>
+          </QueryClientProvider>
         </IntlProvider>
       </ThemeProvider>
     </EuiProvider>
