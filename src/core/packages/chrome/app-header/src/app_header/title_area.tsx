@@ -47,7 +47,7 @@ export const TitleArea = React.memo<TitleAreaProps>(({ title, back }) => {
 
   return (
     <div css={styles.wrapper}>
-      {hasBack && <BackButton targets={backTargets} />}
+      {hasBack && <BackButton targets={backTargets} showLabel={!title} />}
       {title && (
         <EuiTitle size="xs" css={!hasBack ? styles.titleOffset : undefined}>
           <h1 className="eui-textTruncate">{title}</h1>

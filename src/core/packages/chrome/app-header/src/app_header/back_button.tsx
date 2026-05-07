@@ -11,6 +11,8 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiIcon,
+  EuiLink,
   EuiPopover,
   EuiToolTip,
   useEuiTheme,
@@ -38,15 +40,22 @@ const useBackButtonStyles = () => {
       color: ${euiTheme.colors.textSubdued};
     `;
 
-    return { button };
+    const link = css`
+      display: inline-flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+    `;
+
+    return { button, link };
   }, [euiTheme]);
 };
 
 export interface BackButtonProps {
   targets: BackNavigation[];
+  showLabel?: boolean;
 }
 
-export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
+export const BackButton = React.memo<BackButtonProps>(({ targets, showLabel }) => {
   const styles = useBackButtonStyles();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -54,7 +63,7 @@ export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const primary = targets[0];
-  const tooltip = primary?.backDestinationLabel
+  const label = primary?.backDestinationLabel
     ? getBackToLabel(primary.backDestinationLabel)
     : backLabel;
 
@@ -62,30 +71,42 @@ export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
     return null;
   }
 
-  const buttonIcon = (
-    <EuiButtonIcon
-      iconType="sortLeft"
+  const hasMultipleTargets = targets.length > 1;
+
+  const trigger = showLabel ? (
+    <EuiLink
       color="text"
-      display="empty"
-      size="xs"
-      css={styles.button}
-      aria-label={tooltip}
-      data-test-subj="appHeaderBack"
-      {...(targets.length > 1
+      css={styles.link}
+      {...(hasMultipleTargets
         ? { onClick: togglePopover }
         : { href: primary.backHref, onClick: primary.backOnClick })}
-    />
+      data-test-subj="appHeaderBack"
+    >
+      <EuiIcon type="sortLeft" aria-hidden />
+      {label}
+    </EuiLink>
+  ) : (
+    <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="sortLeft"
+        color="text"
+        display="empty"
+        size="xs"
+        css={styles.button}
+        aria-label={label}
+        data-test-subj="appHeaderBack"
+        {...(hasMultipleTargets
+          ? { onClick: togglePopover }
+          : { href: primary.backHref, onClick: primary.backOnClick })}
+      />
+    </EuiToolTip>
   );
 
-  if (targets.length > 1) {
+  if (hasMultipleTargets) {
     return (
       <EuiPopover
-        aria-label={tooltip}
-        button={
-          <EuiToolTip content={tooltip} delay="long">
-            {buttonIcon}
-          </EuiToolTip>
-        }
+        aria-label={label}
+        button={trigger}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
@@ -108,11 +129,7 @@ export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
     );
   }
 
-  return (
-    <EuiToolTip content={tooltip} delay="long">
-      {buttonIcon}
-    </EuiToolTip>
-  );
+  return trigger;
 });
 
 BackButton.displayName = 'BackButton';
