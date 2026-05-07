@@ -93,6 +93,7 @@ spaceTest.describe(
       await spaceTest.step('verify total panel count', async () => {
         const addPanelActions = await pageObjects.dashboard.getAddPanelFlyoutActions();
         log.debug(`Add panel actions: ${addPanelActions.join(',')}`);
+        expect(addPanelActions).toStrictEqual([]);
         expect(addPanelActions).toHaveLength(expectedCount);
       });
     });
