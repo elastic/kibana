@@ -11,8 +11,8 @@ import {
   AddEvaluationDatasetExamplesRequestParams,
   EVALS_DATASET_EXAMPLES_URL,
   INTERNAL_API_ACCESS,
-  buildRouteValidationWithZod,
 } from '@kbn/evals-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PLUGIN_ID } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -90,8 +90,8 @@ export const registerAddExamplesRoute = ({
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
           const datasetClient = evalsContext.datasetService.getClient(esClient);
 
-          const dataset = await datasetClient.get(datasetId);
-          if (!dataset) {
+          const exists = await datasetClient.datasetExists(datasetId);
+          if (!exists) {
             return response.notFound({
               body: { message: `Evaluation dataset not found: ${datasetId}` },
             });

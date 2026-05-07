@@ -10,7 +10,6 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
 import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
-import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../hooks/sig_events/use_unbacked_queries_count';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi, type PromoteResult } from '../../../../hooks/sig_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
@@ -43,7 +42,6 @@ export function useKnowledgeIndicatorActions({
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
-      queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: ['features', streamName] }),
       queryClient.invalidateQueries({ queryKey: ['features', 'all'] }),
     ]);
