@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
@@ -25,11 +25,11 @@ import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import useMountedState from 'react-use/lib/useMountedState';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
-import { addFromLibrary } from '../../add_panel_from_library';
 
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
@@ -42,6 +42,29 @@ export function DashboardEmptyScreen() {
   const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
+
+  const openAddFromLibrary = useCallback(() => {
+    openLazyFlyout({
+      core: coreServices,
+      parentApi: dashboardApi,
+      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+        const { AddPanelFlyout } = await import(
+          '../../../dashboard_app/top_nav/add_panel_button/components/add_panel_flyout'
+        );
+        return (
+          <AddPanelFlyout
+            dashboardApi={dashboardApi}
+            ariaLabelledBy={ariaLabelledBy}
+            initialTab="library"
+          />
+        );
+      },
+      flyoutProps: {
+        'data-test-subj': 'dashboardAddPanel',
+        triggerId: 'dashboardAddTopNavButton',
+      },
+    });
+  }, [dashboardApi]);
 
   const styles = useMemoCss(emptyScreenStyles);
 
@@ -114,11 +137,7 @@ export function DashboardEmptyScreen() {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              flush="left"
-              iconType="folderOpen"
-              onClick={() => addFromLibrary(dashboardApi)}
-            >
+            <EuiButtonEmpty flush="left" iconType="folderOpen" onClick={openAddFromLibrary}>
               {i18n.translate('dashboard.emptyScreen.addFromLibrary', {
                 defaultMessage: 'Add from library',
               })}

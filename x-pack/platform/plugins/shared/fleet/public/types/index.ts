@@ -80,6 +80,8 @@ export type {
   GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
+  BulkDeleteEnrollmentAPIKeysRequest,
+  BulkDeleteEnrollmentAPIKeysResponse,
   PostStandaloneAgentAPIKeyRequest,
   PostStandaloneAgentAPIKeyResponse,
   PostLogstashApiKeyResponse,
