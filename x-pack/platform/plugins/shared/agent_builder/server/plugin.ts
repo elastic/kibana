@@ -46,6 +46,7 @@ import {
   registerAgentSessionTriggerTasks,
   registerAgentSessionAlertConnectorType,
 } from './services/sessions';
+import { createWorkflowSessionTool } from './services/sessions/workflow_session_tool';
 
 export class AgentBuilderPlugin
   implements
@@ -231,6 +232,20 @@ export class AgentBuilderPlugin
     sessionTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
     });
+
+    if (setupDeps.workflowsManagement) {
+      const workflowSessionTool = createWorkflowSessionTool(
+        {
+          getScopedClient: ({ request }) => {
+            const services = this.serviceManager.internalStart;
+            if (!services) throw new Error('Session service not yet initialized');
+            return services.sessions.getScopedClient({ request });
+          },
+        },
+        setupDeps.workflowsManagement.management
+      );
+      serviceSetups.tools.register(workflowSessionTool);
+    }
 
     return {
       tools: {

@@ -83,6 +83,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.session}.unsubscribe`,
   `${internalNamespaces.session}.send_message`,
   `${internalNamespaces.session}.list_sessions`,
+  `${internalNamespaces.session}.run_workflow`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
