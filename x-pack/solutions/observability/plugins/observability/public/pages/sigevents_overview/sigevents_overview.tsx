@@ -152,7 +152,26 @@ export function SigeventsOverviewPage() {
     data: overviewData,
   } = useFetchSystemOverview();
 
-  const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
+  const eventIdParam = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('eventId');
+  }, [location.search]);
+
+  const isDetailFlyoutOpen = eventIdParam !== null && eventIdParam === eventData?.raw.event_id;
+
+  const handleSelectedEventChange = useCallback(
+    (eventId: string | null) => {
+      const params = new URLSearchParams(location.search);
+      if (eventId) {
+        params.set('eventId', eventId);
+      } else {
+        params.delete('eventId');
+      }
+      history.replace({ search: params.toString() });
+    },
+    [history, location.search]
+  );
+
   const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
   const [conversationKey, setConversationKey] = useState(0);
   const [attachments, setAttachments] = useState<EmbeddableConversationProps['attachments']>([]);
@@ -164,8 +183,10 @@ export function SigeventsOverviewPage() {
   const overviewRef = useRef<HTMLDivElement | null>(null);
 
   const closeDetailFlyout = useCallback(() => {
-    setIsDetailFlyoutOpen(false);
-  }, []);
+    const params = new URLSearchParams(location.search);
+    params.delete('eventId');
+    history.replace({ search: params.toString() });
+  }, [history, location.search]);
 
   const { open: openFlyoutFocus } = useFlyoutFocusManagement({
     isOpen: isDetailFlyoutOpen,
@@ -175,8 +196,13 @@ export function SigeventsOverviewPage() {
 
   const openDetailFlyout = useCallback(() => {
     openFlyoutFocus();
-    setIsDetailFlyoutOpen(true);
-  }, [openFlyoutFocus]);
+    const eventId = eventData?.raw.event_id;
+    if (eventId) {
+      const params = new URLSearchParams(location.search);
+      params.set('eventId', eventId);
+      history.replace({ search: params.toString() });
+    }
+  }, [openFlyoutFocus, history, location.search, eventData?.raw.event_id]);
 
   const buildRemediationPrompt = useCallback((eventTitle: string) => {
     return i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
@@ -592,6 +618,8 @@ export function SigeventsOverviewPage() {
                     onViewDetails={openDetailFlyout}
                     onRemediate={handleRemediate}
                     onRemediateEvent={handleRemediateEvent}
+                    selectedEventId={eventIdParam}
+                    onSelectedEventChange={handleSelectedEventChange}
                   />
                 ) : (
                   <SigeventsOverview
@@ -600,6 +628,8 @@ export function SigeventsOverviewPage() {
                     lowerPriorityEvents={overviewData?.acknowledgedEvents}
                     onViewDetails={openDetailFlyout}
                     onRemediateEvent={handleRemediateEvent}
+                    selectedEventId={eventIdParam}
+                    onSelectedEventChange={handleSelectedEventChange}
                   />
                 )}
               </div>

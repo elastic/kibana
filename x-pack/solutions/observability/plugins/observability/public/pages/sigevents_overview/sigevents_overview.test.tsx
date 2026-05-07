@@ -30,7 +30,7 @@ jest.mock('@kbn/sigevents', () => {
       loading: false,
       error: null,
       data: {
-        raw: {},
+        raw: { event_id: 'test-event-id' },
         state: 'critical',
         blastRadiusScore: 90,
         mainEventTitle: 'Test significant event',

@@ -61,23 +61,46 @@ const formatDetectedAt = (timestamp: string): string => {
 export interface LowerPriorityEventsProps {
   events: EventDocument[];
   onRemediate?: (eventTitle: string, eventId: string) => void;
+  selectedEventId?: string | null;
+  onSelectedEventChange?: (eventId: string | null) => void;
 }
 
-export function LowerPriorityEvents({ events, onRemediate }: LowerPriorityEventsProps) {
+export function LowerPriorityEvents({
+  events,
+  onRemediate,
+  selectedEventId: controlledEventId,
+  onSelectedEventChange,
+}: LowerPriorityEventsProps) {
   const { euiTheme } = useEuiTheme();
   const {
     http: {
       basePath: { prepend },
     },
   } = useKibana().services;
-  const [selectedEvent, setSelectedEvent] = useState<EventDocument | null>(null);
+  const [internalEventId, setInternalEventId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<keyof EventDocument>('criticality');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'eventDetailFlyout' });
 
+  const isControlled = controlledEventId !== undefined;
+  const activeEventId = isControlled ? controlledEventId : internalEventId;
+  const selectedEvent = events.find((e) => e.event_id === activeEventId) ?? null;
+
+  const setActiveEventId = useCallback(
+    (eventId: string | null) => {
+      if (onSelectedEventChange) {
+        onSelectedEventChange(eventId);
+      }
+      if (!isControlled) {
+        setInternalEventId(eventId);
+      }
+    },
+    [onSelectedEventChange, isControlled]
+  );
+
   const closeFlyout = useCallback(() => {
-    setSelectedEvent(null);
-  }, []);
+    setActiveEventId(null);
+  }, [setActiveEventId]);
 
   const { open: openFlyout } = useFlyoutFocusManagement({
     isOpen: !!selectedEvent,
@@ -87,14 +110,14 @@ export function LowerPriorityEvents({ events, onRemediate }: LowerPriorityEvents
 
   const toggleEvent = useCallback(
     (item: EventDocument) => {
-      if (selectedEvent?.event_id === item.event_id) {
+      if (activeEventId === item.event_id) {
         closeFlyout();
       } else {
         openFlyout();
-        setSelectedEvent(item);
+        setActiveEventId(item.event_id);
       }
     },
-    [selectedEvent, closeFlyout, openFlyout]
+    [activeEventId, closeFlyout, openFlyout, setActiveEventId]
   );
 
   const onTableChange = useCallback(({ sort }: Criteria<EventDocument>) => {

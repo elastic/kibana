@@ -157,7 +157,7 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
 // Substring patterns matched case-insensitively against event titles.
 // LLM-generated titles are non-deterministic, so we fuzzy-match on
 // keywords that will appear regardless of exact phrasing.
-export const DEMO_DENIED_TITLE_PATTERNS = ['credit card', 'payment charge failure'];
+export const DEMO_DENIED_TITLE_PATTERNS = ['credit card'];
 
 /** Returns true when the title matches any denied pattern (case-insensitive substring). */
 export const isDeniedTitle = (title: string): boolean => {

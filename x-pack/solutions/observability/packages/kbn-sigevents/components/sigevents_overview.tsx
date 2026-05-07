@@ -61,6 +61,8 @@ export interface SigeventsOverviewProps {
   onRemediate?: () => void;
   onRemediateEvent?: (eventTitle: string, eventId: string) => void;
   onViewDetails?: () => void;
+  selectedEventId?: string | null;
+  onSelectedEventChange?: (eventId: string | null) => void;
 }
 
 export function SigeventsOverview({
@@ -79,6 +81,8 @@ export function SigeventsOverview({
   onRemediate,
   onRemediateEvent,
   onViewDetails,
+  selectedEventId,
+  onSelectedEventChange,
 }: SigeventsOverviewProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -209,7 +213,12 @@ export function SigeventsOverview({
         {hasLowerPriorityEvents && (
           <>
             <EuiSpacer size="l" />
-            <LowerPriorityEvents events={lowerPriorityEvents} onRemediate={onRemediateEvent} />
+            <LowerPriorityEvents
+              events={lowerPriorityEvents}
+              onRemediate={onRemediateEvent}
+              selectedEventId={selectedEventId}
+              onSelectedEventChange={onSelectedEventChange}
+            />
           </>
         )}
       </div>
@@ -258,7 +267,12 @@ export function SigeventsOverview({
       {otherPromotedEvents && otherPromotedEvents.length > 0 && (
         <>
           <EuiSpacer size="l" />
-          <OtherPromotedEvents events={otherPromotedEvents} onRemediate={onRemediateEvent} />
+          <OtherPromotedEvents
+            events={otherPromotedEvents}
+            onRemediate={onRemediateEvent}
+            selectedEventId={selectedEventId}
+            onSelectedEventChange={onSelectedEventChange}
+          />
         </>
       )}
     </div>

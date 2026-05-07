@@ -39,6 +39,8 @@ type RecommendedAction = LatestSignificantEventData['raw']['recommended_action']
 export interface OtherPromotedEventsProps {
   events: LatestSignificantEventData[];
   onRemediate?: (eventTitle: string, eventId: string) => void;
+  selectedEventId?: string | null;
+  onSelectedEventChange?: (eventId: string | null) => void;
 }
 
 interface OtherPromotedEventRow {
@@ -60,16 +62,37 @@ const SEVERITY_PRIORITY: Record<LatestSignificantEventData['severityColor'], num
   subdued: 3,
 };
 
-export function OtherPromotedEvents({ events, onRemediate }: OtherPromotedEventsProps) {
+export function OtherPromotedEvents({
+  events,
+  onRemediate,
+  selectedEventId: controlledEventId,
+  onSelectedEventChange,
+}: OtherPromotedEventsProps) {
   const { euiTheme } = useEuiTheme();
-  const [selectedEvent, setSelectedEvent] = useState<LatestSignificantEventData | null>(null);
+  const [internalEventId, setInternalEventId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortableField>('severity');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'otherPromotedEventFlyout' });
 
+  const isControlled = controlledEventId !== undefined;
+  const activeEventId = isControlled ? controlledEventId : internalEventId;
+  const selectedEvent = events.find((e) => e.raw.event_id === activeEventId) ?? null;
+
+  const setActiveEventId = useCallback(
+    (eventId: string | null) => {
+      if (onSelectedEventChange) {
+        onSelectedEventChange(eventId);
+      }
+      if (!isControlled) {
+        setInternalEventId(eventId);
+      }
+    },
+    [onSelectedEventChange, isControlled]
+  );
+
   const closeFlyout = useCallback(() => {
-    setSelectedEvent(null);
-  }, []);
+    setActiveEventId(null);
+  }, [setActiveEventId]);
 
   const { open: openFlyout } = useFlyoutFocusManagement({
     isOpen: !!selectedEvent,
@@ -79,14 +102,14 @@ export function OtherPromotedEvents({ events, onRemediate }: OtherPromotedEvents
 
   const toggleEvent = useCallback(
     (item: LatestSignificantEventData) => {
-      if (selectedEvent?.raw.event_id === item.raw.event_id) {
+      if (activeEventId === item.raw.event_id) {
         closeFlyout();
       } else {
         openFlyout();
-        setSelectedEvent(item);
+        setActiveEventId(item.raw.event_id);
       }
     },
-    [selectedEvent, closeFlyout, openFlyout]
+    [activeEventId, closeFlyout, openFlyout, setActiveEventId]
   );
 
   const onTableChange = useCallback(({ sort }: Criteria<OtherPromotedEventRow>) => {
