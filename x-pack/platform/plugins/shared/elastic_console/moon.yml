@@ -35,10 +35,13 @@ tags:
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}
