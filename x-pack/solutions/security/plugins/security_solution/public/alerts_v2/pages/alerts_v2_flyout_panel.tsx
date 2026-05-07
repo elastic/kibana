@@ -10,6 +10,7 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiBasicTable,
+  EuiButtonIcon,
   EuiCallOut,
   EuiCodeBlock,
   EuiComment,
@@ -75,7 +76,24 @@ export interface AlertsV2DetailsPanelProps {
   params: AlertsV2DetailsPanelParams;
 }
 
-const eventColumns: Array<EuiBasicTableColumn<EpisodeEventRow>> = [
+const getEventColumns = (
+  toggleExpand: (id: string) => void,
+  expandedIds: Set<string>
+): Array<EuiBasicTableColumn<EpisodeEventRow>> => [
+  {
+    width: '40px',
+    isExpander: true,
+    render: (row: EpisodeEventRow) => {
+      const id = `${row['@timestamp']}-${row['episode.id']}`;
+      return (
+        <EuiButtonIcon
+          aria-label={expandedIds.has(id) ? 'Collapse' : 'Expand'}
+          iconType={expandedIds.has(id) ? 'arrowDown' : 'arrowRight'}
+          onClick={() => toggleExpand(id)}
+        />
+      );
+    },
+  },
   {
     field: '@timestamp',
     name: '@timestamp',
@@ -221,8 +239,21 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
   const services = useKibana().services;
   const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState<FlyoutTab>('overview');
+  const [expandedEventIds, setExpandedEventIds] = useState<Set<string>>(new Set());
 
   const onTabClick = useCallback((tab: FlyoutTab) => setSelectedTab(tab), []);
+
+  const toggleEventExpand = useCallback((id: string) => {
+    setExpandedEventIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
 
   const {
     data: eventRows = [],
@@ -560,7 +591,27 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
       ) : (
         <EuiBasicTable
           items={eventRows}
-          columns={eventColumns}
+          itemId={(row) => `${row['@timestamp']}-${row['episode.id']}`}
+          columns={getEventColumns(toggleEventExpand, expandedEventIds)}
+          itemIdToExpandedRowMap={Object.fromEntries(
+            eventRows
+              .filter((row) =>
+                expandedEventIds.has(`${row['@timestamp']}-${row['episode.id']}`)
+              )
+              .map((row) => [
+                `${row['@timestamp']}-${row['episode.id']}`,
+                <EuiCodeBlock
+                  key={`${row['@timestamp']}-${row['episode.id']}`}
+                  language="json"
+                  isCopyable
+                  overflowHeight={300}
+                  paddingSize="s"
+                  fontSize="s"
+                >
+                  {JSON.stringify(row, null, 2)}
+                </EuiCodeBlock>,
+              ])
+          )}
           tableCaption={i18n.FLYOUT_EVENTS_TITLE}
           tableLayout="auto"
           compressed
