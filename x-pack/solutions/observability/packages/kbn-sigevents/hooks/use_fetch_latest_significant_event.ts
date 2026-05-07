@@ -154,7 +154,16 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
 }
 
 // --- DEMO DENY LIST: remove to restore full event visibility ---
-export const DEMO_DENIED_EVENT_TITLES = ['payment \u2014 credit card data exposure'];
+// Substring patterns matched case-insensitively against event titles.
+// LLM-generated titles are non-deterministic, so we fuzzy-match on
+// keywords that will appear regardless of exact phrasing.
+export const DEMO_DENIED_TITLE_PATTERNS = ['credit card'];
+
+/** Returns true when the title matches any denied pattern (case-insensitive substring). */
+export const isDeniedTitle = (title: string): boolean => {
+  const lower = title.toLowerCase();
+  return DEMO_DENIED_TITLE_PATTERNS.some((pattern) => lower.includes(pattern));
+};
 
 export function useFetchLatestSignificantEvent(): {
   loading: boolean;
@@ -172,7 +181,9 @@ export function useFetchLatestSignificantEvent(): {
       query: {
         bool: {
           must: [{ term: { verdict: 'promoted' } }],
-          must_not: DEMO_DENIED_EVENT_TITLES.map((t) => ({ term: { 'title.keyword': t } })),
+          must_not: DEMO_DENIED_TITLE_PATTERNS.map((pattern) => ({
+            wildcard: { title: { value: `*${pattern}*`, case_insensitive: true } },
+          })),
         },
       },
       sort: [{ '@timestamp': { order: 'desc' as const } }],
@@ -212,7 +223,7 @@ export function useFetchLatestSignificantEvent(): {
     const docs = result.hits.hits
       .map((hit) => hit._source)
       .filter((doc): doc is SignificantEventDocument => doc !== undefined)
-      .filter((doc) => !DEMO_DENIED_EVENT_TITLES.includes(doc.title?.toLowerCase()));
+      .filter((doc) => !isDeniedTitle(doc.title ?? ''));
 
     // Primary event: highest-impact promoted event (critical > high > medium > low)
     const impactPriority: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };

@@ -11,7 +11,7 @@ import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
-import { DEMO_DENIED_EVENT_TITLES } from './use_fetch_latest_significant_event';
+import { DEMO_DENIED_TITLE_PATTERNS } from './use_fetch_latest_significant_event';
 
 interface SigeventsKibanaServices {
   data: DataPublicPluginStart;
@@ -63,10 +63,11 @@ export interface SystemOverviewData {
 }
 
 /**
- * Builds an ES|QL WHERE clause fragment that excludes denied titles.
+ * Builds an ES|QL WHERE clause fragment that excludes denied title patterns.
+ * Uses case-insensitive NOT LIKE for substring matching.
  */
 function buildDenyFilter(): string {
-  return DEMO_DENIED_EVENT_TITLES.map((t) => `title != "${t}"`).join(' AND ');
+  return DEMO_DENIED_TITLE_PATTERNS.map((p) => `NOT title LIKE "*${p}*"`).join(' AND ');
 }
 
 export function useFetchSystemOverview(): {
