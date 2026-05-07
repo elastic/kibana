@@ -8,8 +8,8 @@
 import type { FC, ReactNode } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
-import { Timestamp } from '../../document/components/timestamp';
+import { type DataTableRecord } from '@kbn/discover-utils';
+import { Timestamp } from './timestamp';
 import { DocumentSeverity } from '../../document/components/severity';
 import type { CellActionRenderer } from './cell_actions';
 import { noopCellActionRenderer } from './cell_actions';
@@ -73,7 +73,7 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <Timestamp hit={hit} size="xs" />
+              <Timestamp hit={hit} size={'xs'} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

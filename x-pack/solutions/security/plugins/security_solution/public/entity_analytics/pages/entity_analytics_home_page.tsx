@@ -182,11 +182,6 @@ const EntityAnalyticsHomePageContent = () => {
     return params.get('watchlistId') || undefined;
   }, [search]);
 
-  const selectedWatchlistName = useMemo(() => {
-    const params = new URLSearchParams(search);
-    return params.get('watchlistName') || undefined;
-  }, [search]);
-
   const setSelectedWatchlist = useCallback(
     (id?: string, name?: string) => {
       // Read the latest search from `history.location` to keep this callback's
@@ -320,7 +315,6 @@ const EntityAnalyticsHomePageContent = () => {
                 <EuiPanel hasBorder>
                   <DynamicRiskLevelPanel
                     watchlistId={selectedWatchlistId}
-                    watchlistName={selectedWatchlistName}
                     entityDataView={entityDataView}
                   />
                 </EuiPanel>
@@ -336,7 +330,6 @@ const EntityAnalyticsHomePageContent = () => {
           <EuiPanel hasBorder>
             <EntityAnalyticsEntitiesTable
               watchlistId={selectedWatchlistId}
-              watchlistName={selectedWatchlistName}
               entityDataView={entityDataView}
               entityDataViewLoading={entityDataViewLoading}
             />
@@ -353,12 +346,10 @@ const EntityAnalyticsHomePageContent = () => {
 
 const EntityAnalyticsEntitiesTable = ({
   watchlistId,
-  watchlistName,
   entityDataView,
   entityDataViewLoading,
 }: {
   watchlistId?: string;
-  watchlistName?: string;
   entityDataView: ReturnType<typeof useEntityStoreDataView>['dataView'];
   entityDataViewLoading: boolean;
 }) => {
@@ -376,20 +367,10 @@ const EntityAnalyticsEntitiesTable = ({
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
           <h3>
-            {watchlistId ? (
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitleWithWatchlist"
-                defaultMessage="{watchlistName} entities"
-                values={{
-                  watchlistName: watchlistName ?? watchlistId,
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
-                defaultMessage="Entities"
-              />
-            )}
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
+              defaultMessage="Entities"
+            />
           </h3>
         </EuiTitle>
       </EuiFlexItem>

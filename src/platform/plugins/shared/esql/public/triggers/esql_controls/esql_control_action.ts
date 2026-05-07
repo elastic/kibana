@@ -141,10 +141,10 @@ export class CreateESQLControlAction implements Action<Context> {
         isResizable: true,
         maxWidth: 800,
         triggerId: 'dashboard-controls-menu-button',
-        // When queryString is present (i.e. flyout opened from the ES|QL editor),
+        // When `onCancelControl` is present (i.e. flyout opened from the ES|QL editor),
         // use the local onClose as the onClose handler to ensure proper nested flyout closing behavior.
         // In other scenarios (opened directly from the dashboard), we keep the default close behavior.
-        ...(queryString && { onClose }),
+        ...(onCancelControl && { onClose }),
       },
     });
   }
