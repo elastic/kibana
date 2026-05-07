@@ -8,9 +8,7 @@ paths:
       summary: Retrieve endpoint exceptions per policy opt-in
       operationId: GetEndpointExceptionsPerPolicyOptIn
       x-codegen-enabled: true
-      x-labels: []
-      #      TODO: When the feature flag `endpointExceptionsMovedUnderManagement` is enabled, remove empty `x-labels` and un-comment the line below.
-      #      x-labels: [ ess, serverless ]
+      x-labels: [ ess, serverless ]
       x-internal: true
       responses:
         '200':
@@ -32,9 +30,7 @@ paths:
       summary: Opt-in to endpoint exceptions per policy
       operationId: PerformEndpointExceptionsPerPolicyOptIn
       x-codegen-enabled: true
-      x-labels: []
-      #      TODO: When the feature flag `endpointExceptionsMovedUnderManagement` is enabled, remove empty `x-labels` and un-comment the line below.
-      #      x-labels: [ ess, serverless ]
+      x-labels: [ ess, serverless ]
       x-internal: true
       responses:
         '200':

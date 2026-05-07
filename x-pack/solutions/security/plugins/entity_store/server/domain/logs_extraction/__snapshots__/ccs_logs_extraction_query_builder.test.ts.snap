@@ -7,7 +7,7 @@ FROM remote:metrics-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
+      AND (NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) OR NOT(\`host.name\` IS NULL) AND COALESCE(\`host.name\` != \\"\\", TRUE) OR NOT(\`host.hostname\` IS NULL) AND COALESCE(\`host.hostname\` != \\"\\", TRUE))
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
  _src_entity_source1 = MV_FIRST(event.dataset),
  _src_entity_source2 = MV_FIRST(data_stream.dataset),
@@ -176,7 +176,7 @@ FROM remote:logs-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
+      AND (NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) OR NOT(\`host.name\` IS NULL) AND COALESCE(\`host.name\` != \\"\\", TRUE) OR NOT(\`host.hostname\` IS NULL) AND COALESCE(\`host.hostname\` != \\"\\", TRUE))
       AND (
       @timestamp > TO_DATETIME(\\"2022-01-01T06:00:00.000Z\\")
       OR (
@@ -359,7 +359,7 @@ FROM remote:logs-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\"))
+      AND ((\`event.outcome\` IS NULL OR COALESCE(\`event.outcome\` != \\"failure\\", TRUE)) AND (NOT(\`user.email\` IS NULL) AND COALESCE(\`user.email\` != \\"\\", TRUE) OR NOT(\`user.id\` IS NULL) AND COALESCE(\`user.id\` != \\"\\", TRUE) OR NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", TRUE)))
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
  _src_entity_source1 = MV_FIRST(event.dataset),
  _src_entity_source2 = MV_FIRST(data_stream.dataset),
@@ -368,8 +368,8 @@ FROM remote:logs-*
  _src_entity_namespace0 = MV_FIRST(event.module),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\" AND NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" AND NOT (\`user.name\` == \\"root\\" OR \`user.name\` == \\"bin\\" OR \`user.name\` == \\"daemon\\" OR \`user.name\` == \\"sys\\" OR \`user.name\` == \\"nobody\\" OR \`user.name\` == \\"jenkins\\" OR \`user.name\` == \\"ansible\\" OR \`user.name\` == \\"deploy\\" OR \`user.name\` == \\"terraform\\" OR \`user.name\` == \\"gitlab-runner\\" OR \`user.name\` == \\"postgres\\" OR \`user.name\` == \\"mysql\\" OR \`user.name\` == \\"redis\\" OR \`user.name\` == \\"elasticsearch\\" OR \`user.name\` == \\"kafka\\" OR \`user.name\` == \\"admin\\" OR \`user.name\` == \\"operator\\" OR \`user.name\` == \\"service\\") AND (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR NOT (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR (\`event.kind\` != \\"enrichment\\" OR \`event.kind\` IS NULL) AND MV_CONTAINS(\`event.category\`, \\"iam\\") AND (MV_CONTAINS(\`event.type\`, \\"user\\") OR MV_CONTAINS(\`event.type\`, \\"creation\\") OR MV_CONTAINS(\`event.type\`, \\"deletion\\") OR MV_CONTAINS(\`event.type\`, \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
-| EVAL entity.id = CONCAT(\\"user:\\", CASE((\`entity.namespace\` == \\"local\\"), CASE((user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", host.id, \\"@\\", entity.namespace), NULL),
+ entity.namespace = CASE((NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", TRUE) AND NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) AND NOT (COALESCE(\`user.name\` == \\"root\\", FALSE) OR COALESCE(\`user.name\` == \\"bin\\", FALSE) OR COALESCE(\`user.name\` == \\"daemon\\", FALSE) OR COALESCE(\`user.name\` == \\"sys\\", FALSE) OR COALESCE(\`user.name\` == \\"nobody\\", FALSE) OR COALESCE(\`user.name\` == \\"jenkins\\", FALSE) OR COALESCE(\`user.name\` == \\"ansible\\", FALSE) OR COALESCE(\`user.name\` == \\"deploy\\", FALSE) OR COALESCE(\`user.name\` == \\"terraform\\", FALSE) OR COALESCE(\`user.name\` == \\"gitlab-runner\\", FALSE) OR COALESCE(\`user.name\` == \\"postgres\\", FALSE) OR COALESCE(\`user.name\` == \\"mysql\\", FALSE) OR COALESCE(\`user.name\` == \\"redis\\", FALSE) OR COALESCE(\`user.name\` == \\"elasticsearch\\", FALSE) OR COALESCE(\`user.name\` == \\"kafka\\", FALSE) OR COALESCE(\`user.name\` == \\"admin\\", FALSE) OR COALESCE(\`user.name\` == \\"operator\\", FALSE) OR COALESCE(\`user.name\` == \\"service\\", FALSE)) AND (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR NOT (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR (COALESCE(\`event.kind\` != \\"enrichment\\", TRUE) OR \`event.kind\` IS NULL) AND COALESCE(MV_CONTAINS(\`event.category\`, \\"iam\\"), FALSE) AND (COALESCE(MV_CONTAINS(\`event.type\`, \\"user\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"creation\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"deletion\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"group\\"), FALSE))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
+| EVAL entity.id = CONCAT(\\"user:\\", CASE((COALESCE(\`entity.namespace\` == \\"local\\", FALSE)), CASE((user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", host.id, \\"@\\", entity.namespace), NULL),
 true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
 (user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
 (user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
@@ -490,11 +490,11 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
  host.id = MV_DEDUPE(TOP(TO_STRING(host.id), 10)) WHERE TO_STRING(host.id) IS NOT NULL,
  host.name = LAST(TO_STRING(host.name), @timestamp) WHERE TO_STRING(host.name) IS NOT NULL
     BY entity.id
-| EVAL entity.name = CASE((\`entity.namespace\` == \\"local\\" AND NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.name)), entity.name)
-| EVAL entity.name = CASE((\`entity.namespace\` == \\"local\\" AND NOT (NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\")), TO_STRING(user.name), entity.name)
-| EVAL entity.name = CASE((\`entity.namespace\` != \\"local\\"), TO_STRING(user.name), entity.name),
-    entity.confidence = CASE((\`entity.namespace\` != \\"local\\"), \\"high\\", entity.confidence)
-| EVAL entity.confidence = CASE((\`entity.namespace\` == \\"local\\"), \\"medium\\", entity.confidence)
+| EVAL entity.name = CASE((COALESCE(\`entity.namespace\` == \\"local\\", FALSE) AND NOT(\`host.name\` IS NULL) AND COALESCE(\`host.name\` != \\"\\", TRUE)), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.name)), entity.name)
+| EVAL entity.name = CASE((COALESCE(\`entity.namespace\` == \\"local\\", FALSE) AND NOT (NOT(\`host.name\` IS NULL) AND COALESCE(\`host.name\` != \\"\\", TRUE))), TO_STRING(user.name), entity.name)
+| EVAL entity.name = CASE((COALESCE(\`entity.namespace\` != \\"local\\", TRUE)), TO_STRING(user.name), entity.name),
+    entity.confidence = CASE((COALESCE(\`entity.namespace\` != \\"local\\", TRUE)), \\"high\\", entity.confidence)
+| EVAL entity.confidence = CASE((COALESCE(\`entity.namespace\` == \\"local\\", FALSE)), \\"medium\\", entity.confidence)
 | KEEP entity*,
 event*,
 user*,

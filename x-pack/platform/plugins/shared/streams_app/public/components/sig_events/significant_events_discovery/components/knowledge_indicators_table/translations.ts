@@ -196,22 +196,6 @@ export const DELETE_MODAL_TITLE = (count: number) =>
     values: { count },
   });
 
-export const CREATE_RULES_BUTTON = i18n.translate(
-  'xpack.streams.knowledgeIndicators.createRulesButton',
-  { defaultMessage: 'Create rules' }
-);
-
-export const getRuleCountLabel = (count: number) =>
-  i18n.translate('xpack.streams.knowledgeIndicators.ruleCountLabel', {
-    defaultMessage: '{count, plural, one {# new rule} other {# new rules}}',
-    values: { count },
-  });
-
-export const PROMOTE_ALL_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.knowledgeIndicators.promoteAllErrorTitle',
-  { defaultMessage: 'Failed to promote queries' }
-);
-
 export const PROMOTE_SELECTED_LABEL = i18n.translate(
   'xpack.streams.knowledgeIndicators.promoteSelectedLabel',
   { defaultMessage: 'Promote selected' }

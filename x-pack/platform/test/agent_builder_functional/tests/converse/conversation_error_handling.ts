@@ -296,10 +296,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         llmProxy
       );
 
-      // Assert the first round is visible
-      const firstResponseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const firstResponseText = await firstResponseElement.getVisibleText();
-      expect(firstResponseText).to.contain(FIRST_RESPONSE);
+      // Assert the first round is visible. Wrapped in retry.try because the streaming
+      // text component animates tokens (~17ms each) and the test can read the DOM before
+      // the last token has painted on resource-constrained CI runs.
+      await retry.try(async () => {
+        const firstResponseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const firstResponseText = await firstResponseElement.getVisibleText();
+        expect(firstResponseText).to.contain(FIRST_RESPONSE);
+      });
 
       // setup interceptors to return 400 error
       await setupAgentDirectError({
@@ -320,10 +324,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.find('agentBuilderRoundError');
       await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
 
-      // Assert the previous round is still visible
-      const previousResponseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const previousResponseText = await previousResponseElement.getVisibleText();
-      expect(previousResponseText).to.contain(FIRST_RESPONSE);
+      // Assert the previous round is still visible. Same retry rationale as above.
+      await retry.try(async () => {
+        const previousResponseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const previousResponseText = await previousResponseElement.getVisibleText();
+        expect(previousResponseText).to.contain(FIRST_RESPONSE);
+      });
     });
   });
 }
