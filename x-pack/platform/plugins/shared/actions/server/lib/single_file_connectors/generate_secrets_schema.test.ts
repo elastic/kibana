@@ -116,7 +116,7 @@ describe('generateSecretsSchema', () => {
       expect(() =>
         validator.customValidator!({ authType: 'ears', provider: 'google' }, validatorServices)
       ).toThrow(
-        'EARS OAuth authentication is not enabled. Enable it via xpack.actions.ears.enabled in kibana.yml.'
+        'EARS OAuth authentication is not enabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.'
       );
     });
 
