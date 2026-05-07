@@ -476,7 +476,13 @@ export function SigeventsOverviewPage() {
       {isBannerVisible && !loading && !overviewLoading && !error && !overviewError && (
         <div css={stickyBannerStyles(euiTheme.size.l)}>
           <StatusHeaderBanner
-            variant={eventData ? 'critical' : 'noCriticalEvents'}
+            variant={
+              eventData &&
+              (overviewData?.sigEventsByPriority?.critical?.open > 0 ||
+                eventData.state === 'critical')
+                ? 'critical'
+                : 'noCriticalEvents'
+            }
             timestamp={lastUpdatedLabel}
             contentMaxWidth={MAX_CONTENT_WIDTH}
           />
@@ -521,7 +527,11 @@ export function SigeventsOverviewPage() {
                   />
                 ) : eventData ? (
                   <SigeventsOverview
-                    state={eventData.state}
+                    state={
+                      overviewData?.sigEventsByPriority?.critical?.open > 0
+                        ? 'critical'
+                        : eventData.state
+                    }
                     blastRadiusScore={eventData.blastRadiusScore}
                     mainEventTitle={eventData.mainEventTitle}
                     mainEventDescription={eventData.description}
