@@ -18,7 +18,7 @@ Some existing dashboards are failing to load when a pinned control has `"title":
 
 **Workaround**
 
-TBD
+We're working on a way to mitigate the issue and will update this page shortly.
 
 ::::
 
