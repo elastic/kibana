@@ -79,7 +79,8 @@ export const initRoutes = (
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext,
   trialCompanionDeps: TrialCompanionRoutesDeps,
-  enableDataGeneratorRoutes: boolean
+  enableDataGeneratorRoutes: boolean,
+  isDev: boolean
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -152,6 +153,7 @@ export const initRoutes = (
     logger,
     telemetrySender,
     ml,
+    isDev,
   });
   registerSiemMigrationsRoutes(router, config, logger);
 

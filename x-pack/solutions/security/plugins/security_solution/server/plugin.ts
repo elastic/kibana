@@ -650,7 +650,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.docLinks,
       this.endpointContext,
       trialCompanionDeps,
-      enableDataGeneratorRoutes
+      enableDataGeneratorRoutes,
+      pluginContext.env.mode.dev
     );
 
     registerEndpointRoutes(router, this.endpointContext);
