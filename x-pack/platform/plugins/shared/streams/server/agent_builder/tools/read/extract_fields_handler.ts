@@ -322,12 +322,16 @@ export const runExtractFieldsFlow = async (
       ? mergeSeedParsingProcessorIntoSuggestedPipeline(winning.processor, suggestion.pipeline)
       : { steps: [{ ...winning.processor }] };
 
-    // Existing steps are preserved by appending them after the heuristic
-    // extraction. Order matters: the new grok/dissect step extracts fields
-    // first, then any existing date/convert/rename steps run on those
-    // extracted fields. Keeping existing steps verbatim — never editing or
-    // reordering them — guarantees we don't silently break previously
-    // working processing.
+    // Existing steps keep their original position whenever it is structurally
+    // safe to do so — appending new extraction at the END preserves user
+    // intent for the common case where existing steps decorate or transform
+    // attributes.* and do not touch the seed source field.
+    //
+    // Safety override: if any existing step writes to, renames away from, or
+    // removes the seed source field (typically `body.text`), the new
+    // extraction must run BEFORE those steps; otherwise the source would be
+    // mutated or dropped before grok/dissect could read it. In that case we
+    // fall back to prepending new extraction at the start.
     //
     // `addDeterministicCustomIdentifiers` ensures every step (new + existing)
     // carries a `customIdentifier` that the transpiler turns into an ingest
@@ -336,8 +340,13 @@ export const runExtractFieldsFlow = async (
     // single untagged existing step would mis-classify every doc as
     // `partially_parsed` and report a 0% success rate even when every
     // processor ran cleanly.
+    const sourceFieldUsedByExisting = existingSteps.some((step) =>
+      stepWritesOrRemovesField(step, fieldName)
+    );
     const merged = addDeterministicCustomIdentifiers({
-      steps: [...newlyAdded.steps, ...existingSteps],
+      steps: sourceFieldUsedByExisting
+        ? [...newlyAdded.steps, ...existingSteps]
+        : [...existingSteps, ...newlyAdded.steps],
     });
 
     // Run a final simulation against the original raw documents so we can
@@ -371,8 +380,11 @@ export const runExtractFieldsFlow = async (
       );
     }
     if (existingSteps.length > 0) {
+      const placement = sourceFieldUsedByExisting
+        ? `New extraction was placed BEFORE the ${existingSteps.length} existing step(s) because at least one existing step writes to, renames, or removes the source field "${fieldName}".`
+        : `${existingSteps.length} existing step(s) kept their original position; new extraction was appended at the end.`;
       warnings.push(
-        `${existingSteps.length} existing processing step(s) preserved after the new extraction. Review that the new extraction does not duplicate or conflict with existing steps before applying.`
+        `${placement} Review that the new extraction does not duplicate or conflict with existing steps before applying.`
       );
       const conflictingExistingStep = existingSteps.find((step) =>
         isExtractionStepOnField(step, fieldName)
@@ -456,6 +468,27 @@ const isExtractionStepOnField = (step: unknown, fieldName: string): boolean => {
   if (typeof step !== 'object' || step === null) return false;
   const obj = step as { action?: unknown; from?: unknown };
   return (obj.action === 'grok' || obj.action === 'dissect') && obj.from === fieldName;
+};
+
+/**
+ * Detect whether an existing pipeline step would mutate or drop the seed
+ * source field before the new extraction runs. Used by the merge step to
+ * decide whether existing steps can keep their position (safe) or must be
+ * pushed after the new extraction (because they would otherwise alter the
+ * source the heuristic needs to read).
+ *
+ * Conservative — checks the common direct-modification cases. Condition
+ * blocks are intentionally not recursed: false positives there would push
+ * new extraction in front unnecessarily, which is never a correctness
+ * problem (it just reverts to the pre-fix layout).
+ */
+const stepWritesOrRemovesField = (step: unknown, fieldName: string): boolean => {
+  if (typeof step !== 'object' || step === null) return false;
+  const obj = step as { action?: unknown; from?: unknown; to?: unknown };
+  if (obj.to === fieldName) return true;
+  if (obj.action === 'remove' && obj.from === fieldName) return true;
+  if (obj.action === 'rename' && obj.from === fieldName) return true;
+  return false;
 };
 
 /**
