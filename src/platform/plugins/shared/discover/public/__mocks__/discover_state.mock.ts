@@ -399,8 +399,6 @@ export function getDiscoverInternalStateMock({
                 persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false,
               newDescription: persistedDiscoverSession?.description ?? 'new description',
               newTags: persistedDiscoverSession?.tags ?? [],
-              isTitleDuplicateConfirmed: false,
-              onTitleDuplicate: jest.fn(),
               ...params,
             })
           )
