@@ -35,6 +35,7 @@ describe('runResolveTestingScope', () => {
     codeChanges?: string;
     scopeOutput?: string;
     selectiveTesting?: boolean;
+    allowSkipNonScoutTests?: boolean;
   }) => {
     flagsReader.string.mockImplementation((name: string) => {
       if (name === 'code-changes') return overrides.codeChanges ?? '';
@@ -47,6 +48,7 @@ describe('runResolveTestingScope', () => {
     });
     flagsReader.boolean.mockImplementation((name: string) => {
       if (name === 'selective-testing') return overrides.selectiveTesting ?? false;
+      if (name === 'allow-skip-non-scout-tests') return overrides.allowSkipNonScoutTests ?? false;
       return false;
     });
   };
@@ -122,12 +124,10 @@ describe('runResolveTestingScope', () => {
     });
   });
 
-  it('writes a tests-only scope (skipNonScoutTests=true) for a Scout-tests-only diff', () => {
-    // Create the owning Playwright config so the resolver keeps it.
-    const configPath = 'pkg/test/scout/ui/playwright.config.ts';
-    fs.mkdirSync(path.join(tmpRoot, path.dirname(configPath)), { recursive: true });
-    fs.writeFileSync(path.join(tmpRoot, configPath), '');
-
+  it('writes a tests-only scope (skipNonScoutTests=false by default) for a Scout-tests-only diff', () => {
+    // We can't override REPO_ROOT trivially here; the test asserts the
+    // kind=tests-only outcome plus the affectedModules pass-through.
+    // affectedConfigs may be empty if the on-disk resolver lookup misses tmpRoot.
     writeCodeChanges(['pkg/test/scout/ui/tests/foo.spec.ts'], ['@kbn/pkg']);
     setFlags({
       codeChanges: codeChangesPath,
@@ -135,17 +135,50 @@ describe('runResolveTestingScope', () => {
       selectiveTesting: true,
     });
 
-    // Override REPO_ROOT for deriveScoutConfigsForFiles by pointing the
-    // resolver at our tmp root via the resolver default... we can't override
-    // REPO_ROOT trivially here. Instead, the test verifies the kind=tests-only
-    // / skipNonScoutTests=true outcome and the affectedModules pass-through.
-    // affectedConfigs may be empty if the on-disk resolver lookup misses tmpRoot.
+    runResolveTestingScope(flagsReader, log);
+    const written = readScoutTestingScope(scopeOutputPath);
+
+    expect(written.kind).toBe('tests-only');
+    // Default: even on a tests-only diff, non-Scout tests still run unless the
+    // caller opts in via --allow-skip-non-scout-tests (gated upstream by the
+    // 'ci:skip-non-scout-tests' label).
+    expect(written.skipNonScoutTests).toBe(false);
+    expect(written.affectedModules).toEqual(['@kbn/pkg']);
+  });
+
+  it('sets skipNonScoutTests=true on a tests-only diff when --allow-skip-non-scout-tests is set', () => {
+    writeCodeChanges(['pkg/test/scout/ui/tests/foo.spec.ts'], ['@kbn/pkg']);
+    setFlags({
+      codeChanges: codeChangesPath,
+      scopeOutput: scopeOutputPath,
+      selectiveTesting: true,
+      allowSkipNonScoutTests: true,
+    });
+
     runResolveTestingScope(flagsReader, log);
     const written = readScoutTestingScope(scopeOutputPath);
 
     expect(written.kind).toBe('tests-only');
     expect(written.skipNonScoutTests).toBe(true);
-    expect(written.affectedModules).toEqual(['@kbn/pkg']);
+  });
+
+  it('keeps skipNonScoutTests=false for non-tests-only scopes even with --allow-skip-non-scout-tests', () => {
+    writeCodeChanges(
+      ['pkg/test/scout/ui/tests/foo.spec.ts', 'pkg/public/foo.ts'],
+      ['@kbn/foo']
+    );
+    setFlags({
+      codeChanges: codeChangesPath,
+      scopeOutput: scopeOutputPath,
+      selectiveTesting: true,
+      allowSkipNonScoutTests: true,
+    });
+
+    runResolveTestingScope(flagsReader, log);
+    const written = readScoutTestingScope(scopeOutputPath);
+
+    expect(written.kind).toBe('dependency-tree');
+    expect(written.skipNonScoutTests).toBe(false);
   });
 
   it('writes a dependency-tree scope for a mixed source+test diff', () => {

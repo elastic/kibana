@@ -203,8 +203,11 @@ export const resolveScoutTestingScope = (
  *
  * Field semantics:
  *   - `kind` / `reason`   : the decision (mirrors ScoutTestingScope).
- *   - `skipNonScoutTests` : pre-computed boolean; true only for `kind: 'tests-only'`.
- *                           Lets short-circuits avoid re-implementing dispatch.
+ *   - `skipNonScoutTests` : actionable boolean for non-Scout consumers (e.g.
+ *                           the FTR/Jest skip step). True only when BOTH
+ *                           `kind: 'tests-only'` AND the producer was invoked
+ *                           with `allowSkipNonScoutTests` (gated by the
+ *                           `ci:skip-non-scout-tests` GitHub label upstream).
  *   - `affectedModules`   : ALWAYS present (sorted, possibly empty). Used both as
  *                           the dependency-tree filter set AND for generic
  *                           "isAffected" labeling regardless of kind.
@@ -223,10 +226,14 @@ export interface SerializedScoutTestingScope {
  * Convert a `ScoutTestingScope` into the JSON shape shared across pipeline
  * steps. `affectedModules` is always included (even for `full` / `tests-only`
  * scopes) so consumers can label items as "affected" regardless of kind.
+ *
+ * `allowSkipNonScoutTests` gates the actionable `skipNonScoutTests` field —
+ * see `SerializedScoutTestingScope` for the policy.
  */
 export const serializeScoutTestingScope = (
   scope: ScoutTestingScope,
-  affectedModules: ReadonlySet<string>
+  affectedModules: ReadonlySet<string>,
+  allowSkipNonScoutTests: boolean
 ): SerializedScoutTestingScope => {
   const sortedModules = Array.from(affectedModules).sort();
   switch (scope.kind) {
@@ -240,7 +247,7 @@ export const serializeScoutTestingScope = (
     case 'tests-only':
       return {
         kind: 'tests-only',
-        skipNonScoutTests: true,
+        skipNonScoutTests: allowSkipNonScoutTests,
         affectedModules: sortedModules,
         affectedConfigs: Array.from(scope.affectedConfigPaths).sort(),
       };
@@ -263,12 +270,17 @@ export const serializeScoutTestingScope = (
 export const writeScoutTestingScope = (
   scope: ScoutTestingScope,
   affectedModules: ReadonlySet<string>,
+  allowSkipNonScoutTests: boolean,
   outputPath: string
 ): void => {
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(
     outputPath,
-    `${JSON.stringify(serializeScoutTestingScope(scope, affectedModules), null, 2)}\n`
+    `${JSON.stringify(
+      serializeScoutTestingScope(scope, affectedModules, allowSkipNonScoutTests),
+      null,
+      2
+    )}\n`
   );
 };
 
