@@ -7,9 +7,8 @@ set -euo pipefail
 (buildkite-agent pipeline upload .buildkite/pipelines/pull_request/store_moon_cache.yml > /dev/null \
  && echo "Uploaded cache-warmup step" >&2) || echo "Failed to upload cache-warmup step" >&2
 
-# Upload critical-path steps (Build Kibana Distribution, Pick Test Group Run Order,
-# Scout Test Run Builder) early so agents start provisioning immediately,
-# in parallel with the dynamic pipeline generation below.
+# Upload Build Kibana Distribution early so its agent starts provisioning
+# immediately, in parallel with the dynamic pipeline generation below.
 (buildkite-agent pipeline upload .buildkite/pipelines/pull_request/early_steps.yml > /dev/null \
  && echo "Uploaded early critical-path steps" >&2) || echo "Failed to upload early critical-path steps" >&2
 
