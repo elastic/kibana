@@ -43,7 +43,7 @@ export async function search(
     }),
     meta: {
       page: soResponse.page,
-      per_page: soResponse.saved_objects.length,
+      per_page: soResponse.per_page,
       total: soResponse.total,
     },
   };

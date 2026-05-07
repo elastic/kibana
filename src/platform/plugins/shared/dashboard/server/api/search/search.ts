@@ -47,7 +47,7 @@ export async function search(
   });
 
   return {
-    dashboards: soResponse.saved_objects.map((so) => {
+    data: soResponse.saved_objects.map((so) => {
       const {
         dashboardState: { description, tags, time_range, title },
       } = transformDashboardOut(so.attributes, so.references);
@@ -68,7 +68,6 @@ export async function search(
         meta: getMeta(so),
       };
     }),
-    page: soResponse.page,
-    total: soResponse.total,
+    meta: { page: soResponse.page, per_page: soResponse.per_page, total: soResponse.total },
   };
 }

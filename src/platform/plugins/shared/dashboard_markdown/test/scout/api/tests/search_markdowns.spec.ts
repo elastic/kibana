@@ -42,8 +42,8 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(200);
     expect(response.body.meta.total).toBe(TOTAL_MARKDOWNS);
     expect(response.body.meta.page).toBe(1);
-    expect(response.body.meta.per_page).toBe(TOTAL_MARKDOWNS);
-    expect(response.body.data.length).toBeGreaterThan(1);
+    expect(response.body.meta.per_page).toBe(20);
+    expect(response.body.data).toHaveLength(20);
   });
 
   apiTest('should narrow results by query', async ({ apiClient }) => {
@@ -58,7 +58,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(200);
     expect(response.body.meta.total).toBe(1);
     expect(response.body.meta.page).toBe(1);
-    expect(response.body.meta.per_page).toBe(1);
+    expect(response.body.meta.per_page).toBe(20);
     expect(response.body.data).toHaveLength(1);
   });
 

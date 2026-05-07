@@ -8,9 +8,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-
-const MAX_PER_PAGE = 10000;
+import {
+  asCodeMetaSchema,
+  asCodeSearchRequestPaginationParamsSchema,
+  asCodeSearchResponseMetaSchema,
+} from '@kbn/as-code-shared-schemas';
 
 export const searchRequestQuerySchema = schema.object({
   query: schema.maybe(
@@ -21,20 +23,7 @@ export const searchRequestQuerySchema = schema.object({
       },
     })
   ),
-  page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The page of results to return. Defaults to `1`.',
-      },
-    })
-  ),
-  per_page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The number of results to return per page. Defaults to `20`.',
-      },
-    })
-  ),
+  ...asCodeSearchRequestPaginationParamsSchema.getPropSchemas(),
 });
 
 export const searchResponseBodySchema = schema.object({
@@ -50,20 +39,8 @@ export const searchResponseBodySchema = schema.object({
       meta: asCodeMetaSchema,
     }),
     {
-      meta: { description: 'The markdown library items matching the search query.' },
-      minSize: 0,
-      maxSize: MAX_PER_PAGE,
+      meta: { description: 'List of markdown library items matching the query.' },
     }
   ),
-  meta: schema.object({
-    page: schema.number({
-      meta: { description: 'The current page number.' },
-    }),
-    per_page: schema.number({
-      meta: { description: 'The number of markdown library items returned in the current page.' },
-    }),
-    total: schema.number({
-      meta: { description: 'The total number of markdown library items matching the query.' },
-    }),
-  }),
+  meta: asCodeSearchResponseMetaSchema,
 });
