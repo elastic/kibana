@@ -958,7 +958,7 @@ const ESQLEditorInternal = function ESQLEditor({
               setIsDataSourceBrowserOpen(false);
               suppressSuggestionsRef.current = true;
             }}
-            onAfterClose={() => editorRef.current?.focus()}
+            onCloseComplete={() => editorRef.current?.focus()}
           />,
           document.body
         )}
@@ -976,7 +976,7 @@ const ESQLEditorInternal = function ESQLEditor({
               setIsFieldsBrowserOpen(false);
               suppressSuggestionsRef.current = true;
             }}
-            onAfterClose={() => editorRef.current?.focus()}
+            onCloseComplete={() => editorRef.current?.focus()}
           />,
           document.body
         )}

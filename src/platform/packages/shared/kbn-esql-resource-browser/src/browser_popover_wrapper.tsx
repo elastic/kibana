@@ -57,7 +57,7 @@ export interface BrowserPopoverWrapperProps<TItem> {
   items: EuiSelectableOption[];
   isOpen: boolean;
   onClose: () => void;
-  onAfterClose?: () => void;
+  onCloseComplete?: () => void;
   onSelect: (changedOption: EuiSelectableOption | undefined) => void;
   isFilterOpen: boolean;
   setIsFilterOpen: (isOpen: boolean) => void;
@@ -85,7 +85,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   items,
   isOpen,
   onClose,
-  onAfterClose,
+  onCloseComplete,
   onSelect,
   isFilterOpen,
   setIsFilterOpen,
@@ -135,7 +135,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
       button={<div style={{ display: 'none' }} />}
       isOpen={isOpen}
       closePopover={onClose}
-      focusTrapProps={{ returnFocus: false, onDeactivation: onAfterClose }}
+      focusTrapProps={{ returnFocus: false, onDeactivation: onCloseComplete }}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       panelStyle={{

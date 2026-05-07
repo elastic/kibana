@@ -54,7 +54,7 @@ interface DataSourceBrowserProps {
   preloadedSources?: ESQLSourceResult[];
   selectedSources?: string[];
   onClose: () => void;
-  onAfterClose?: () => void;
+  onCloseComplete?: () => void;
   onSelect: (sourceName: string, change: DataSourceSelectionChange) => void;
   position?: { top?: number; left?: number };
 }
@@ -65,7 +65,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   preloadedSources,
   selectedSources = [],
   onClose,
-  onAfterClose,
+  onCloseComplete,
   onSelect,
   position,
 }) => {
@@ -375,7 +375,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       filterPanel={filterPanel}
       isOpen={isOpen}
       onClose={onClose}
-      onAfterClose={onAfterClose}
+      onCloseComplete={onCloseComplete}
       onSelect={handleSelectionChange}
       isFilterOpen={isFilterPopoverOpen}
       setIsFilterOpen={setIsFilterPopoverOpen}
