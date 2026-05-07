@@ -13,7 +13,7 @@ import {
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import { Network } from '../../network_details';
+import { Network } from '../../network';
 import { RuleDetails } from '../../rule';
 
 /**
