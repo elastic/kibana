@@ -60,3 +60,63 @@ describe('LogExtractionInstallParams additionalIndexPatterns', () => {
     }
   });
 });
+
+describe('LogExtractionInstallParams excludedIndexPatterns', () => {
+  it('accepts valid index patterns', () => {
+    const result = TestSchema.safeParse({
+      logExtraction: { excludedIndexPatterns: ['logs-proxy-*', 'metrics-debug', 'noisy_index'] },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts empty array', () => {
+    const result = TestSchema.safeParse({
+      logExtraction: { excludedIndexPatterns: [] },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects index patterns containing illegal characters', () => {
+    const result = TestSchema.safeParse({
+      logExtraction: { excludedIndexPatterns: ['invalid pattern'] },
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const issue = result.error.issues.find(
+        (i) => i.path[0] === 'logExtraction' && i.path[1] === 'excludedIndexPatterns'
+      );
+      expect(issue).toBeDefined();
+    }
+  });
+
+  it('reports path with index for invalid entry', () => {
+    const result = TestSchema.safeParse({
+      logExtraction: { excludedIndexPatterns: ['valid', 'bad one', 'also valid'] },
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const issue = result.error.issues.find(
+        (i) => Array.isArray(i.path) && i.path[1] === 'excludedIndexPatterns' && i.path[2] === 1
+      );
+      expect(issue).toBeDefined();
+    }
+  });
+
+  it('validates additional and excluded patterns independently', () => {
+    const result = TestSchema.safeParse({
+      logExtraction: {
+        additionalIndexPatterns: ['bad add'],
+        excludedIndexPatterns: ['bad exc'],
+      },
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const additional = result.error.issues.find(
+        (i) => i.path[1] === 'additionalIndexPatterns'
+      );
+      const excluded = result.error.issues.find((i) => i.path[1] === 'excludedIndexPatterns');
+      expect(additional).toBeDefined();
+      expect(excluded).toBeDefined();
+    }
+  });
+});

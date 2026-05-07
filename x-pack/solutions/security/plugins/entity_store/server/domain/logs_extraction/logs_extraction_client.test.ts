@@ -114,11 +114,17 @@ function createMockEngineDescriptor(
 }
 
 function createMockGlobalStateClient(
-  logExtractionOverrides?: Partial<{ lookbackPeriod: string; delay: string }>
+  logExtractionOverrides?: Partial<{
+    lookbackPeriod: string;
+    delay: string;
+    excludedIndexPatterns: string[];
+    additionalIndexPatterns: string[];
+  }>
 ): jest.Mocked<Pick<EntityStoreGlobalStateClient, 'find' | 'findOrThrow' | 'update'>> {
   const logsExtraction = LogExtractionConfig.parse({
     docsLimit: 10000,
-    additionalIndexPatterns: [],
+    additionalIndexPatterns: logExtractionOverrides?.additionalIndexPatterns ?? [],
+    excludedIndexPatterns: logExtractionOverrides?.excludedIndexPatterns ?? [],
     lookbackPeriod: logExtractionOverrides?.lookbackPeriod ?? '3h',
     delay: logExtractionOverrides?.delay ?? '1m',
   });
@@ -243,6 +249,39 @@ describe('LogsExtractionClient', () => {
           }),
         })
       );
+    });
+
+    it('threads excludedIndexPatterns into the extraction ES query as -pattern entries', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockGlobalStateClient = createMockGlobalStateClient({
+        excludedIndexPatterns: ['logs-proxy-*'],
+      });
+      client = new LogsExtractionClient({
+        logger: mockLogger,
+        namespace: 'default',
+        esClient: mockEsClient,
+        dataViewsService: mockDataViewsService,
+        engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
+        globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
+        ccsLogsExtractionClient:
+          mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
+      });
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+
+      await client.extractLogs('user');
+
+      const queries = mockExecuteEsqlQuery.mock.calls.map(([{ query }]) => query);
+      expect(queries.some((q) => q.includes('-logs-proxy-*'))).toBe(true);
     });
 
     it('should handle empty results from ESQL query', async () => {
@@ -944,6 +983,88 @@ describe('LogsExtractionClient', () => {
       expect(localIndexPatterns).not.toContain('.alerts-security.alerts-default');
       expect(remoteIndexPatterns).not.toContain('.alerts-security.alerts-default');
     });
+
+    it('appends local excluded patterns as ES negation entries to localIndexPatterns', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*,metrics-*'),
+      };
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+
+      const { localIndexPatterns, remoteIndexPatterns } =
+        await client.getLocalAndRemoteIndexPatterns([], ['logs-proxy-*', 'metrics-debug']);
+
+      expect(localIndexPatterns).toContain('-logs-proxy-*');
+      expect(localIndexPatterns).toContain('-metrics-debug');
+      expect(remoteIndexPatterns).not.toContain('-logs-proxy-*');
+    });
+
+    it('routes CCS-prefixed excluded patterns to remoteIndexPatterns', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*,remote_cluster:logs-*'),
+      };
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+
+      const { localIndexPatterns, remoteIndexPatterns } =
+        await client.getLocalAndRemoteIndexPatterns(
+          [],
+          ['remote_cluster:logs-proxy-*', 'logs-debug-*']
+        );
+
+      expect(remoteIndexPatterns).toContain('-remote_cluster:logs-proxy-*');
+      expect(localIndexPatterns).toContain('-logs-debug-*');
+      expect(localIndexPatterns).not.toContain('-remote_cluster:logs-proxy-*');
+      expect(remoteIndexPatterns).not.toContain('-logs-debug-*');
+    });
+
+    it('appends excluded patterns AFTER includes (ES negation requires this ordering)', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+
+      const { localIndexPatterns } = await client.getLocalAndRemoteIndexPatterns(
+        [],
+        ['logs-proxy-*']
+      );
+
+      const includeIdx = localIndexPatterns.indexOf('logs-*');
+      const excludeIdx = localIndexPatterns.indexOf('-logs-proxy-*');
+      expect(includeIdx).toBeGreaterThanOrEqual(0);
+      expect(excludeIdx).toBeGreaterThan(includeIdx);
+    });
+
+    it('is a no-op when excludedIndexPatterns is empty or omitted', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+
+      const omitted = await client.getLocalAndRemoteIndexPatterns();
+      const empty = await client.getLocalAndRemoteIndexPatterns([], []);
+
+      expect(omitted.localIndexPatterns).not.toContain(expect.stringMatching(/^-/));
+      expect(empty.localIndexPatterns).not.toContain(expect.stringMatching(/^-/));
+    });
+  });
+
+  describe('getLocalIndexPatterns', () => {
+    it('forwards excludedIndexPatterns and includes local negations only', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*,remote_cluster:logs-*'),
+      };
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+
+      const indexPatterns = await client.getLocalIndexPatterns(
+        [],
+        ['logs-proxy-*', 'remote_cluster:logs-debug-*']
+      );
+
+      expect(indexPatterns).toContain('-logs-proxy-*');
+      // CCS-prefixed exclude is routed to remote and not returned here
+      expect(indexPatterns).not.toContain('-remote_cluster:logs-debug-*');
+      // remote includes are also not returned
+      expect(indexPatterns).not.toContain('remote_cluster:logs-*');
+    });
   });
 
   describe('updateConfig', () => {
@@ -1038,6 +1159,44 @@ describe('LogsExtractionClient', () => {
         query: expect.stringContaining('STATS document_count = COUNT()'),
       });
       expect(mockIngestEntities).not.toHaveBeenCalled();
+    });
+
+    it('threads excludedIndexPatterns into the count ES query as -pattern entries', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockGlobalStateClient = createMockGlobalStateClient({
+        excludedIndexPatterns: ['logs-proxy-*'],
+      });
+      client = new LogsExtractionClient({
+        logger: mockLogger,
+        namespace: 'default',
+        esClient: mockEsClient,
+        dataViewsService: mockDataViewsService,
+        engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
+        globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
+        ccsLogsExtractionClient:
+          mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
+      });
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue({
+        columns: [{ name: 'document_count', type: 'long' }],
+        values: [[0]],
+      });
+
+      await client.getRemainingLogsCount('user');
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.stringContaining('-logs-proxy-*'),
+      });
     });
 
     it('should return 0 when ESQL response has no rows', async () => {

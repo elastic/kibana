@@ -188,7 +188,10 @@ export class LogsExtractionClient {
     try {
       const { config, engineState } = await this.getLogExtractionConfigAndState(type);
       const delayMs = parseDurationToMs(config.delay);
-      const indexPatterns = await this.getLocalIndexPatterns(config.additionalIndexPatterns);
+      const indexPatterns = await this.getLocalIndexPatterns(
+        config.additionalIndexPatterns,
+        config.excludedIndexPatterns
+      );
       const { fromDateISO } = this.getExtractionWindow(config, engineState, delayMs);
       const toDateISO = moment().utc().toISOString();
       const logsPageCursorStart = paginationFromOptionalFields(
@@ -243,7 +246,8 @@ export class LogsExtractionClient {
   }> {
     const { docsLimit, maxLogsPerPage } = config;
     const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
-      config.additionalIndexPatterns
+      config.additionalIndexPatterns,
+      config.excludedIndexPatterns
     );
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
@@ -659,11 +663,13 @@ export class LogsExtractionClient {
    * CCS extraction uses remote only.
    */
   public async getLocalAndRemoteIndexPatterns(
-    additionalIndexPatterns: string[] = []
+    additionalIndexPatterns: string[] = [],
+    excludedIndexPatterns: string[] = []
   ): Promise<{ localIndexPatterns: string[]; remoteIndexPatterns: string[] }> {
     const all = await this.getAllIndexPatternsIncludingRemote(additionalIndexPatterns);
     const alertsIndex = getAlertsIndexName(this.namespace);
     const withoutAlerts = all.filter((index) => index !== alertsIndex);
+
     const localIndexPatterns: string[] = [];
     const remoteIndexPatterns: string[] = [];
 
@@ -675,12 +681,26 @@ export class LogsExtractionClient {
       }
     });
 
+    // Append after includes: ES negation only subtracts from earlier entries in the same expression.
+    // e.g. `logs-*,-logs-proxy-*` excludes proxy logs, but `-logs-proxy-*,logs-*` does not.
+    excludedIndexPatterns.forEach((pattern) => {
+      if (isNonLocalIndexName(pattern)) {
+        remoteIndexPatterns.push(`-${pattern}`);
+      } else {
+        localIndexPatterns.push(`-${pattern}`);
+      }
+    });
+
     return { localIndexPatterns, remoteIndexPatterns };
   }
 
-  public async getLocalIndexPatterns(additionalIndexPatterns: string[] = []): Promise<string[]> {
+  public async getLocalIndexPatterns(
+    additionalIndexPatterns: string[] = [],
+    excludedIndexPatterns: string[] = []
+  ): Promise<string[]> {
     const { localIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
-      additionalIndexPatterns
+      additionalIndexPatterns,
+      excludedIndexPatterns
     );
     return localIndexPatterns;
   }
