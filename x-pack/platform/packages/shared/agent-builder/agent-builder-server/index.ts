@@ -145,5 +145,5 @@ export type {
   SessionClient,
   SessionsStart,
 } from './sessions';
-export { createSessionTools } from './tools/session_tools';
+export { createSessionTools, SESSION_TOOL_IDS } from './tools/session_tools';
 export { describeZodSchema, formatSchemaForLlm } from './tools';

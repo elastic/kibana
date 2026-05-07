@@ -21,6 +21,21 @@ import type { SessionsStart } from '../sessions';
 import { createOtherResult, createErrorResult } from './utils';
 
 // ---------------------------------------------------------------------------
+// Constant — all session tool IDs, used to inject them into standing session runs
+// ---------------------------------------------------------------------------
+
+export const SESSION_TOOL_IDS = [
+  'session.set_idle',
+  'session.terminate',
+  'session.subscribe_to_alert',
+  'session.subscribe_to_schedule',
+  'session.set_reminder',
+  'session.subscribe_to_webhook',
+  'session.unsubscribe',
+  'session.send_message',
+] as const;
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 

@@ -21,7 +21,7 @@ import {
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
-import { HookLifecycle } from '@kbn/agent-builder-server';
+import { HookLifecycle, SESSION_TOOL_IDS } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
@@ -165,13 +165,22 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
+  // For standing sessions, inject the session lifecycle tools regardless of agent config.
+  const effectiveAgentConfiguration =
+    conversation?.session_mode === 'standing'
+      ? {
+          ...agentConfiguration,
+          tools: [...agentConfiguration.tools, { tool_ids: [...SESSION_TOOL_IDS] }],
+        }
+      : agentConfiguration;
+
   const { staticTools, dynamicTools } = await selectTools({
     conversation: processedConversation,
     previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
     filteredSkills,
     skills,
     toolProvider,
-    agentConfiguration,
+    agentConfiguration: effectiveAgentConfiguration,
     attachmentsService: attachments,
     filestore,
     request,
