@@ -6,32 +6,35 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/data-streams';
-import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
+import type { GetFieldsOf, MappingsDefinition, ToPrimitives } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
+import type { Overwrite } from 'utility-types';
 
 export const DETECTIONS_DATA_STREAM = '.significant_events-detections';
 
 export const detectionsMappings = {
   dynamic: false,
   properties: {
-    '@timestamp': mappings.date(),
+    '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
     detection_id: mappings.keyword(),
     superseded: mappings.boolean(),
-    superseded_at: mappings.date(),
     rule_uuid: mappings.keyword(),
     rule_name: mappings.keyword(),
     stream: mappings.keyword(),
-    processed_by: mappings.keyword(),
-    detection_evidence: mappings.object({
-      properties: {
-        change_point_type: mappings.keyword(),
-        p_value: { type: 'double' } as const,
-      },
-    }),
   },
 } satisfies MappingsDefinition;
 
 export type StoredDetection = GetFieldsOf<typeof detectionsMappings>;
+
+export type Detection = Overwrite<
+  ToPrimitives<{
+    type: 'object';
+    properties: (typeof detectionsMappings)['properties'];
+  }>,
+  {
+    '@timestamp': string;
+  }
+>;
 
 export const detectionsDataStream: DataStreamDefinition<
   typeof detectionsMappings,

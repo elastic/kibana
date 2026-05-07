@@ -8,35 +8,13 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type CommonSearchOptions } from '../query_utils';
-import { runLatestEsqlQuery } from '../latest_query';
+import { runLatestSourceEsqlQuery } from '../latest_source_query';
 import {
   DETECTIONS_DATA_STREAM,
+  type Detection,
   type StoredDetection,
   type detectionsMappings,
 } from './data_stream';
-
-export interface Detection {
-  '@timestamp': string;
-  detection_id: string;
-  rule_uuid: string;
-  rule_name: string;
-  stream: string;
-  superseded?: boolean;
-  superseded_at?: string;
-  processed_by?: string;
-  detection_evidence?: {
-    change_point_type?: string;
-    p_value?: number;
-  };
-}
-
-const DETECTION_FIELDS: ReadonlyArray<keyof Detection & string> = [
-  '@timestamp',
-  'detection_id',
-  'rule_uuid',
-  'rule_name',
-  'stream',
-];
 
 export type DetectionDataStreamClient = IDataStreamClient<
   typeof detectionsMappings,
@@ -59,20 +37,13 @@ export class DetectionClient {
     });
   }
 
-  async find(options: CommonSearchOptions = {}): Promise<{ hits: Detection[] }> {
-    return runLatestEsqlQuery<Detection>({
+  async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: Detection[] }> {
+    return runLatestSourceEsqlQuery<Detection>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: DETECTIONS_DATA_STREAM,
-      fields: DETECTION_FIELDS,
-      stats: (query) => query.pipe`STATS @timestamp = MAX(@timestamp),
-              superseded = LATEST(superseded),
-              superseded_at = LATEST(superseded_at),
-              processed_by = LATEST(processed_by),
-              rule_name = LATEST(rule_name),
-              stream = LATEST(stream)
-          BY detection_id`,
+      groupBy: 'detection_id',
     });
   }
 }

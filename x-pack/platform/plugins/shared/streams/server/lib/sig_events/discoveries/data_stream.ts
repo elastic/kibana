@@ -6,26 +6,22 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/data-streams';
-import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
+import type { GetFieldsOf, MappingsDefinition, ToPrimitives } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
+import type { Overwrite } from 'utility-types';
 
 export const DISCOVERIES_DATA_STREAM = '.significant_events-discoveries';
 
 export const discoveriesMappings = {
   dynamic: false,
   properties: {
-    '@timestamp': mappings.date(),
+    '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
     status: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
     rule_names: mappings.keyword(),
     stream_names: mappings.keyword(),
-    closes: mappings.keyword(),
-    status_changed_at: mappings.date(),
-    status_changed_reason: mappings.keyword(),
     grouped_discovery_ids: mappings.keyword(),
-    closed_by_execution_id: mappings.keyword(),
-    superseded_by_execution_id: mappings.keyword(),
     title: mappings.text({
       fields: {
         keyword: { type: 'keyword', ignore_above: 512 },
@@ -51,6 +47,20 @@ export const discoveriesMappings = {
 } satisfies MappingsDefinition;
 
 export type StoredDiscovery = GetFieldsOf<typeof discoveriesMappings>;
+
+export type Discovery = Overwrite<
+  ToPrimitives<{
+    type: 'object';
+    properties: (typeof discoveriesMappings)['properties'];
+  }>,
+  {
+    '@timestamp': string;
+    rule_names: string[];
+    stream_names: string[];
+    grouped_discovery_ids: string[];
+    detections: Array<{ rule_uuid: string }>;
+  }
+>;
 
 export const discoveriesDataStream: DataStreamDefinition<
   typeof discoveriesMappings,

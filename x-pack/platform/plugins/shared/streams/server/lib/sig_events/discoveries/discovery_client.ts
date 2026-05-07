@@ -8,28 +8,13 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type CommonSearchOptions } from '../query_utils';
-import { runLatestEsqlQuery } from '../latest_query';
+import { runLatestSourceEsqlQuery } from '../latest_source_query';
 import {
   DISCOVERIES_DATA_STREAM,
+  type Discovery,
   type StoredDiscovery,
   type discoveriesMappings,
 } from './data_stream';
-
-export interface Discovery {
-  '@timestamp': string;
-  discovery_id: string;
-  discovery_slug: string;
-  status: string;
-  title: string;
-}
-
-const DISCOVERY_FIELDS: ReadonlyArray<keyof Discovery & string> = [
-  '@timestamp',
-  'discovery_id',
-  'discovery_slug',
-  'status',
-  'title',
-];
 
 export type DiscoveryDataStreamClient = IDataStreamClient<
   typeof discoveriesMappings,
@@ -52,18 +37,13 @@ export class DiscoveryClient {
     });
   }
 
-  async find(options: CommonSearchOptions = {}): Promise<{ hits: Discovery[] }> {
-    return runLatestEsqlQuery<Discovery>({
+  async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: Discovery[] }> {
+    return runLatestSourceEsqlQuery<Discovery>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: DISCOVERIES_DATA_STREAM,
-      fields: DISCOVERY_FIELDS,
-      stats: (query) => query.pipe`STATS @timestamp = MAX(@timestamp),
-              status = LATEST(status),
-              discovery_slug = LATEST(discovery_slug),
-              title = LATEST(\`title.keyword\`)
-          BY discovery_id`,
+      groupBy: 'discovery_id',
     });
   }
 }

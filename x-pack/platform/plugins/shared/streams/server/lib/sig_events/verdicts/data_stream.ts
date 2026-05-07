@@ -6,22 +6,22 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/data-streams';
-import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
+import type { GetFieldsOf, MappingsDefinition, ToPrimitives } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
+import type { Overwrite } from 'utility-types';
 
 export const VERDICTS_DATA_STREAM = '.significant_events-verdicts';
 
 export const verdictsMappings = {
   dynamic: false,
   properties: {
-    '@timestamp': mappings.date(),
+    '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
     verdict: mappings.keyword(),
     verdict_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
     rule_names: mappings.keyword(),
     stream_names: mappings.keyword(),
-    grouped_into: mappings.keyword(),
     recommended_action: mappings.keyword(),
     title: mappings.text({
       fields: {
@@ -49,11 +49,6 @@ export const verdictsMappings = {
         semantic: { type: 'semantic_text' },
       },
     }),
-    delta_reasoning: mappings.text({
-      fields: {
-        semantic: { type: 'semantic_text' },
-      },
-    }),
     recommendations: mappings.text({
       fields: {
         semantic: { type: 'semantic_text' },
@@ -63,6 +58,18 @@ export const verdictsMappings = {
 } satisfies MappingsDefinition;
 
 export type StoredVerdict = GetFieldsOf<typeof verdictsMappings>;
+
+export type Verdict = Overwrite<
+  ToPrimitives<{
+    type: 'object';
+    properties: (typeof verdictsMappings)['properties'];
+  }>,
+  {
+    '@timestamp': string;
+    rule_names: string[];
+    stream_names: string[];
+  }
+>;
 
 export const verdictsDataStream: DataStreamDefinition<typeof verdictsMappings, StoredVerdict> = {
   name: VERDICTS_DATA_STREAM,

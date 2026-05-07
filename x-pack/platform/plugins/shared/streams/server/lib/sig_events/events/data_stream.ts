@@ -6,23 +6,22 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/data-streams';
-import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
+import type { GetFieldsOf, MappingsDefinition, ToPrimitives } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
+import type { Overwrite } from 'utility-types';
 
 export const EVENTS_DATA_STREAM = '.significant_events-events';
 
 export const eventsMappings = {
   dynamic: false,
   properties: {
-    '@timestamp': mappings.date(),
+    '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
     verdict: mappings.keyword(),
     event_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
     rule_names: mappings.keyword(),
     stream_names: mappings.keyword(),
-    grouped_into: mappings.keyword(),
-    last_reviewed_at: mappings.date(),
     verdict_id: mappings.keyword(),
     recommended_action: mappings.keyword(),
     title: mappings.text({
@@ -50,6 +49,18 @@ export const eventsMappings = {
 } satisfies MappingsDefinition;
 
 export type StoredEvent = GetFieldsOf<typeof eventsMappings>;
+
+export type SigEvent = Overwrite<
+  ToPrimitives<{
+    type: 'object';
+    properties: (typeof eventsMappings)['properties'];
+  }>,
+  {
+    '@timestamp': string;
+    rule_names: string[];
+    stream_names: string[];
+  }
+>;
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
