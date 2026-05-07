@@ -108,8 +108,6 @@ export const Act2SomethingIsWrong: Story = {
     blastRadiusScore: mainPromotedEvent?.blastRadiusScore ?? 90,
     mainEventTitle: mainPromotedEvent?.mainEventTitle ?? 'payment — charge processing failures',
     mainEventDescription: mainPromotedEvent?.description,
-    severityLabel: mainPromotedEvent?.severityLabel ?? 'Critical',
-    severityColor: mainPromotedEvent?.severityColor ?? 'danger',
     impactedServices: mainPromotedEvent?.impactedServices ?? [
       { id: 'payment', label: 'payment', iconType: 'layers' },
       { id: 'checkout', label: 'checkout', iconType: 'layers' },

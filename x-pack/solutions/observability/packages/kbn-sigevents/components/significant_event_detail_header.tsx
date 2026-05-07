@@ -11,25 +11,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiBadgeProps, EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { MetadataIconCard } from './metadata_icon_card';
+import { getSeverityFromScore } from './event_utils';
 
 export interface SignificantEventDetailHeaderProps {
   title: string;
   detectedAtLabel?: string;
-  severityLabel: string;
-  severityColor: EuiBadgeProps['color'];
-  criticalityLabel?: string;
-  criticalityColor?: EuiBadgeProps['color'];
-  impactLabel?: string;
-  impactColor?: EuiBadgeProps['color'];
+  severityScore?: number;
   recommendedActionLabel?: string;
   recommendedActionIconType?: EuiIconProps['type'];
   hideMetadataCards?: boolean;
@@ -40,16 +34,6 @@ const DEFAULT_DETECTED_AT_LABEL = i18n.translate(
   { defaultMessage: 'Detected 5 minutes ago' }
 );
 
-const DEFAULT_CRITICALITY_LABEL = i18n.translate(
-  'xpack.observability.sigeventsOverview.sigEvents.defaultCriticalityLabel',
-  { defaultMessage: 'High' }
-);
-
-const DEFAULT_IMPACT_LABEL = i18n.translate(
-  'xpack.observability.sigeventsOverview.sigEvents.defaultImpactLabel',
-  { defaultMessage: 'High' }
-);
-
 const DEFAULT_RECOMMENDED_ACTION_LABEL = i18n.translate(
   'xpack.observability.sigeventsOverview.sigEvents.defaultRecommendedActionLabel',
   { defaultMessage: 'Escalate' }
@@ -58,12 +42,7 @@ const DEFAULT_RECOMMENDED_ACTION_LABEL = i18n.translate(
 export const SignificantEventDetailHeader = ({
   title,
   detectedAtLabel = DEFAULT_DETECTED_AT_LABEL,
-  severityLabel,
-  severityColor,
-  criticalityLabel = DEFAULT_CRITICALITY_LABEL,
-  criticalityColor,
-  impactLabel = DEFAULT_IMPACT_LABEL,
-  impactColor = 'danger',
+  severityScore = 90,
   recommendedActionLabel = DEFAULT_RECOMMENDED_ACTION_LABEL,
   recommendedActionIconType = 'warning',
   hideMetadataCards = false,
@@ -77,19 +56,11 @@ export const SignificantEventDetailHeader = ({
     color: ${euiTheme.colors.textSubdued};
   `;
 
+  const severity = useMemo(() => getSeverityFromScore(severityScore), [severityScore]);
+
   const severityCardTitle = i18n.translate(
     'xpack.observability.sigeventsOverview.sigEvents.metaSeverityTitle',
     { defaultMessage: 'Severity' }
-  );
-
-  const criticalityCardTitle = i18n.translate(
-    'xpack.observability.sigeventsOverview.sigEvents.metaCriticalityTitle',
-    { defaultMessage: 'Criticality' }
-  );
-
-  const impactCardTitle = i18n.translate(
-    'xpack.observability.sigeventsOverview.sigEvents.metaImpactTitle',
-    { defaultMessage: 'Impact' }
   );
 
   const recommendedActionCardTitle = i18n.translate(
@@ -97,68 +68,62 @@ export const SignificantEventDetailHeader = ({
     { defaultMessage: 'Recommended action' }
   );
 
-  const resolvedCriticalityColor: EuiBadgeProps['color'] = useMemo(() => {
-    if (criticalityColor) return criticalityColor;
-    if (severityColor === 'danger') return 'danger';
-    if (severityColor === 'warning') return 'warning';
-    return 'hollow';
-  }, [criticalityColor, severityColor]);
-
   return (
     <div data-test-subj="sigeventsOverviewSignificantEventDetailHeader">
       <EuiTitle size="s">
         <h2>{title}</h2>
       </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="xs" css={detectedAtCss}>
-        <EuiIcon type="clock" size="s" aria-hidden />
-        <span>{detectedAtLabel}</span>
-      </EuiText>
 
       {!hideMetadataCards ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup
-            gutterSize="s"
-            responsive={true}
-            wrap
-            data-test-subj="sigeventsOverviewSignificantEventDetailHeaderMetadata"
-          >
-            <EuiFlexItem grow={true}>
-              <MetadataIconCard
-                hideIcon
-                title={severityCardTitle}
-                value={<EuiBadge color={severityColor}>{severityLabel}</EuiBadge>}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <MetadataIconCard
-                hideIcon
-                title={criticalityCardTitle}
-                value={<EuiBadge color={resolvedCriticalityColor}>{criticalityLabel}</EuiBadge>}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <MetadataIconCard
-                hideIcon
-                title={impactCardTitle}
-                value={<EuiBadge color={impactColor}>{impactLabel}</EuiBadge>}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <MetadataIconCard
-                hideIcon
-                title={recommendedActionCardTitle}
-                value={
-                  <EuiBadge color="warning" iconType={recommendedActionIconType}>
-                    {recommendedActionLabel}
-                  </EuiBadge>
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      ) : null}
+        <EuiFlexGroup
+          gutterSize="m"
+          responsive={false}
+          wrap
+          alignItems="center"
+          css={css`
+            margin-top: ${euiTheme.size.s};
+          `}
+          data-test-subj="sigeventsOverviewSignificantEventDetailHeaderMetadata"
+        >
+          <EuiFlexItem grow={false} css={css({ whiteSpace: 'nowrap' })}>
+            <EuiText size="xs" css={detectedAtCss}>
+              <EuiIcon type="clock" size="s" aria-hidden />
+              <span>{detectedAtLabel}</span>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={css({ whiteSpace: 'nowrap' })}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {severityCardTitle}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color={severity.badgeColor}>{severity.label}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={css({ whiteSpace: 'nowrap' })}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {recommendedActionCardTitle}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning" iconType={recommendedActionIconType}>
+                  {recommendedActionLabel}
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EuiText size="xs" css={detectedAtCss}>
+          <EuiIcon type="clock" size="s" aria-hidden />
+          <span>{detectedAtLabel}</span>
+        </EuiText>
+      )}
     </div>
   );
 };

@@ -14,13 +14,14 @@ import {
   EuiHorizontalRule,
   EuiText,
 } from '@elastic/eui';
-import type { EuiBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CriticalityDonut } from './criticality_donut';
 import { DependencyChainMap } from './dependency_chain_map';
 import { InfoPanel } from './info_panel';
 import { RecommendationsPlanPanel } from './recommendations_plan_panel';
 import { RootCausePanel } from './root_cause_panel';
 import { SignificantEventDetailHeader } from './significant_event_detail_header';
+import { getSeverityFromScore, getRecommendedActionBadgeColor } from './event_utils';
 import type { RecommendationStep } from '.';
 
 export interface EvidenceItem {
@@ -50,14 +51,11 @@ export interface SignificantEventDetailFields {
   id: string;
   label: string;
   subtitle: string;
-  severityLabel: string;
-  severityColor: EuiBadgeProps['color'];
   summary: string;
   rootCause: string;
   recommendations: string[];
   recommendedAction: 'escalate' | 'monitor' | 'resolve' | 'investigate';
   criticality: number;
-  impact: string;
   ruleNames: string[];
   streamNames: string[];
   evidences: EvidenceItem[];
@@ -96,24 +94,7 @@ export function SignificantEventDetailBody(props: SignificantEventDetailBodyProp
     [rawEvent]
   );
 
-  const impactColor: EuiBadgeProps['color'] = useMemo(() => {
-    if (event.severityColor === 'danger') return 'danger';
-    if (event.severityColor === 'warning') return 'warning';
-    return 'primary';
-  }, [event.severityColor]);
-
-  const criticalityColor: EuiBadgeProps['color'] = useMemo(() => {
-    if (event.criticality >= 80) return 'danger';
-    if (event.criticality >= 60) return 'warning';
-    return 'hollow';
-  }, [event.criticality]);
-
-  const criticalityLabel = useMemo(() => {
-    if (event.criticality >= 80) return 'Critical';
-    if (event.criticality >= 60) return 'High';
-    if (event.criticality >= 40) return 'Medium';
-    return 'Low';
-  }, [event.criticality]);
+  const severity = useMemo(() => getSeverityFromScore(event.criticality), [event.criticality]);
 
   const impactingLabel = useMemo(() => {
     const exposedEdges = event.dependencyEdges.filter((e) => e.exposure === 'exposed');
@@ -172,25 +153,16 @@ export function SignificantEventDetailBody(props: SignificantEventDetailBodyProp
           'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermSeverity',
           { defaultMessage: 'Severity' }
         ),
-        description: <EuiBadge color={event.severityColor}>{event.severityLabel}</EuiBadge>,
-      },
-      {
-        title: i18n.translate(
-          'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermCriticality',
-          { defaultMessage: 'Criticality' }
-        ),
         description: (
-          <EuiBadge color={criticalityColor}>
-            {criticalityLabel} ({event.criticality})
-          </EuiBadge>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={severity.badgeColor}>{severity.label}</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CriticalityDonut score={event.criticality} size={32} strokeWidth={6} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
-      },
-      {
-        title: i18n.translate(
-          'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermImpact',
-          { defaultMessage: 'Impact' }
-        ),
-        description: <EuiBadge color={impactColor}>{event.impact}</EuiBadge>,
       },
       {
         title: i18n.translate(
@@ -204,7 +176,11 @@ export function SignificantEventDetailBody(props: SignificantEventDetailBodyProp
           'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermRecommendedAction',
           { defaultMessage: 'Recommended action' }
         ),
-        description: <EuiBadge color={impactColor}>{recommendedActionLabel}</EuiBadge>,
+        description: (
+          <EuiBadge color="warning" iconType={recommendedActionIconType}>
+            {recommendedActionLabel}
+          </EuiBadge>
+        ),
       },
       {
         title: i18n.translate(
@@ -222,17 +198,14 @@ export function SignificantEventDetailBody(props: SignificantEventDetailBodyProp
       },
     ];
   }, [
-    criticalityColor,
-    criticalityLabel,
     event.criticality,
-    event.impact,
     event.ruleNames,
-    event.severityColor,
-    event.severityLabel,
     event.streamNames,
-    impactColor,
     impactingLabel,
+    recommendedActionIconType,
     recommendedActionLabel,
+    severity.badgeColor,
+    severity.label,
   ]);
 
   const recommendationSteps: RecommendationStep[] = useMemo(
@@ -256,12 +229,7 @@ export function SignificantEventDetailBody(props: SignificantEventDetailBodyProp
           <SignificantEventDetailHeader
             title={event.label}
             detectedAtLabel={detectedAtLabel}
-            severityLabel={event.severityLabel}
-            severityColor={event.severityColor}
-            criticalityLabel={criticalityLabel}
-            criticalityColor={criticalityColor}
-            impactLabel={event.impact}
-            impactColor={impactColor}
+            severityScore={event.criticality}
             recommendedActionLabel={recommendedActionLabel}
             recommendedActionIconType={recommendedActionIconType}
           />
@@ -383,7 +351,7 @@ export function SignificantEventDetailBody(props: SignificantEventDetailBodyProp
         <RecommendationsPlanPanel
           steps={recommendationSteps}
           escalateBadgeLabel={recommendedActionLabel}
-          escalateBadgeColor={impactColor}
+          escalateBadgeColor={getRecommendedActionBadgeColor(event.recommendedAction)}
           escalateBadgeIconType={recommendedActionIconType}
           onRemediate={onRemediate}
           onOpenDetails={onOpenDetails}

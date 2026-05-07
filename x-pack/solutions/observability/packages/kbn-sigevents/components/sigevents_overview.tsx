@@ -51,8 +51,6 @@ export interface SigeventsOverviewProps {
   description?: string;
   mainEventTitle?: string;
   mainEventDescription?: string;
-  severityLabel?: string;
-  severityColor?: 'danger' | 'warning' | 'primary' | 'subdued';
   impactedServices?: ImpactedService[];
   impactedCards?: ImpactedCardItem[];
   healthyMetrics?: HealthyMetricCardItem[];
@@ -71,8 +69,6 @@ export function SigeventsOverview({
   description,
   mainEventTitle,
   mainEventDescription,
-  severityLabel,
-  severityColor,
   impactedServices,
   impactedCards = DEFAULT_IMPACTED_CARDS,
   healthyMetrics,
@@ -261,8 +257,6 @@ export function SigeventsOverview({
         blastRadiusScore={blastRadiusScore}
         title={mainEventTitle}
         description={mainEventDescription}
-        severityLabel={severityLabel}
-        severityColor={severityColor}
         impactedServices={impactedServices}
         lastUpdatedLabel={lastUpdatedLabel}
         onRemediate={onRemediate}

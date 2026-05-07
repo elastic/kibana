@@ -5,9 +5,35 @@
  * 2.0.
  */
 
-import type { EuiHealthProps } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
 import type { EventDocument } from '../hooks/use_fetch_system_overview';
 import type { SignificantEventDetailFields } from './significant_event_detail_body';
+
+export type SeverityBand = 'Critical' | 'High' | 'Medium' | 'Low';
+
+export interface SeverityInfo {
+  label: SeverityBand;
+  color: 'danger' | 'warning' | 'primary' | 'subdued';
+  badgeColor: EuiBadgeProps['color'];
+  state: 'critical' | 'warning' | 'healthy';
+}
+
+/**
+ * Derives the severity band, badge color, and overall state from a 0-100 score.
+ * Bands: Critical (80-100), High (60-79), Medium (40-59), Low (0-39).
+ */
+export const getSeverityFromScore = (score: number): SeverityInfo => {
+  if (score >= 80) {
+    return { label: 'Critical', color: 'danger', badgeColor: 'danger', state: 'critical' };
+  }
+  if (score >= 60) {
+    return { label: 'High', color: 'warning', badgeColor: 'warning', state: 'warning' };
+  }
+  if (score >= 40) {
+    return { label: 'Medium', color: 'primary', badgeColor: 'primary', state: 'warning' };
+  }
+  return { label: 'Low', color: 'subdued', badgeColor: 'default', state: 'healthy' };
+};
 
 export const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -43,25 +69,8 @@ export const getRecommendedActionIcon = (
   }
 };
 
-export const getImpactBadgeColor = (
-  impact: EventDocument['impact'] | string
-): 'warning' | 'primary' | 'default' | 'danger' => {
-  switch (impact) {
-    case 'critical':
-      return 'danger';
-    case 'high':
-      return 'warning';
-    case 'medium':
-      return 'primary';
-    case 'low':
-    default:
-      return 'default';
-  }
-};
-
 /**
- * Maps a severity color token to a badge color.
- * Useful when the data already provides a color key (e.g. LatestSignificantEventData).
+ * @deprecated Use getSeverityFromScore instead. Kept for backward compat during migration.
  */
 export const getSeverityBadgeColor = (
   color: 'danger' | 'warning' | 'primary' | 'subdued' | string
@@ -76,22 +85,6 @@ export const getSeverityBadgeColor = (
     case 'subdued':
     default:
       return 'default';
-  }
-};
-
-export const getCriticalityHealthColor = (
-  impact: EventDocument['impact']
-): EuiHealthProps['color'] => {
-  switch (impact) {
-    case 'critical':
-      return 'danger';
-    case 'high':
-      return 'warning';
-    case 'medium':
-      return 'primary';
-    case 'low':
-    default:
-      return 'subdued';
   }
 };
 
@@ -115,22 +108,24 @@ export const normalizeRecommendations = (value: unknown): string[] => {
  */
 export const adaptEventDocumentToDetailFields = (
   event: EventDocument
-): SignificantEventDetailFields => ({
-  id: event.event_id,
-  label: event.title,
-  subtitle: '',
-  severityLabel: capitalize(event.impact),
-  severityColor: getImpactBadgeColor(event.impact),
-  summary: event.summary,
-  rootCause: event.root_cause,
-  recommendations: normalizeRecommendations(event.recommendations),
-  recommendedAction: event.recommended_action,
-  criticality: event.criticality,
-  impact: capitalize(event.impact),
-  ruleNames: event.rule_names ?? [],
-  streamNames: event.stream_names ?? [],
-  evidences: [],
-  dependencyEdges: [],
-  causeKis: [],
-  timestamp: event['@timestamp'],
-});
+): SignificantEventDetailFields => {
+  const severity = getSeverityFromScore(event.criticality);
+  return {
+    id: event.event_id,
+    label: event.title,
+    subtitle: '',
+    severityLabel: severity.label,
+    severityColor: severity.badgeColor,
+    summary: event.summary,
+    rootCause: event.root_cause,
+    recommendations: normalizeRecommendations(event.recommendations),
+    recommendedAction: event.recommended_action,
+    criticality: event.criticality,
+    ruleNames: event.rule_names ?? [],
+    streamNames: event.stream_names ?? [],
+    evidences: [],
+    dependencyEdges: [],
+    causeKis: [],
+    timestamp: event['@timestamp'],
+  };
+};

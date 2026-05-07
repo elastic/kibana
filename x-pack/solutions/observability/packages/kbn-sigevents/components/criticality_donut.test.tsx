@@ -53,9 +53,6 @@ describe('CriticalityDonut', () => {
 
   it('has appropriate aria-label for accessibility', () => {
     render(<CriticalityDonut score={85} />);
-    expect(screen.getByRole('img')).toHaveAttribute(
-      'aria-label',
-      'Criticality score 85 out of 100'
-    );
+    expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Severity score 85 out of 100');
   });
 });

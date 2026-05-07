@@ -50,8 +50,8 @@ describe('LowerPriorityEvents', () => {
 
   it('renders the table with events', () => {
     const events = [
-      makeEvent({ event_id: 'e-1', title: 'Event Alpha', criticality: 80, impact: 'critical' }),
-      makeEvent({ event_id: 'e-2', title: 'Event Beta', criticality: 40, impact: 'low' }),
+      makeEvent({ event_id: 'e-1', title: 'Event Alpha', criticality: 80 }),
+      makeEvent({ event_id: 'e-2', title: 'Event Beta', criticality: 40 }),
     ];
     renderWithIntl(<LowerPriorityEvents events={events} />);
 
@@ -61,12 +61,12 @@ describe('LowerPriorityEvents', () => {
     expect(screen.getByText('Event Beta')).toBeInTheDocument();
   });
 
-  it('renders impact badges with correct labels', () => {
+  it('renders severity badges derived from criticality scores', () => {
     const events = [
-      makeEvent({ event_id: 'e-1', impact: 'critical' }),
-      makeEvent({ event_id: 'e-2', impact: 'high' }),
-      makeEvent({ event_id: 'e-3', impact: 'medium' }),
-      makeEvent({ event_id: 'e-4', impact: 'low' }),
+      makeEvent({ event_id: 'e-1', criticality: 90 }),
+      makeEvent({ event_id: 'e-2', criticality: 70 }),
+      makeEvent({ event_id: 'e-3', criticality: 50 }),
+      makeEvent({ event_id: 'e-4', criticality: 20 }),
     ];
     renderWithIntl(<LowerPriorityEvents events={events} />);
 

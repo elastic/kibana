@@ -31,7 +31,7 @@ import {
   capitalize,
   getRecommendedActionBadgeColor,
   getRecommendedActionIcon,
-  getSeverityBadgeColor,
+  getSeverityFromScore,
 } from './event_utils';
 
 type RecommendedAction = LatestSignificantEventData['raw']['recommended_action'];
@@ -172,9 +172,10 @@ export function OtherPromotedEvents({ events, onRemediate }: OtherPromotedEvents
       }),
       sortable: true,
       width: '110px',
-      render: (_value: unknown, item: OtherPromotedEventRow) => (
-        <EuiBadge color={getSeverityBadgeColor(item.severityColor)}>{item.severity}</EuiBadge>
-      ),
+      render: (_value: unknown, item: OtherPromotedEventRow) => {
+        const sev = getSeverityFromScore(item.source.blastRadiusScore);
+        return <EuiBadge color={sev.badgeColor}>{sev.label}</EuiBadge>;
+      },
     },
     {
       field: 'action',
@@ -287,8 +288,7 @@ function OtherPromotedEventFlyout({
         <div id={flyoutHeadingId}>
           <SignificantEventDetailHeader
             title={event.detailFields.label || event.mainEventTitle}
-            severityLabel={event.detailFields.severityLabel || event.severityLabel}
-            severityColor={event.detailFields.severityColor || event.severityColor}
+            severityScore={event.blastRadiusScore}
           />
         </div>
       </EuiFlyoutHeader>

@@ -33,10 +33,12 @@ export const CriticalityDonut = ({
     const offset = c * (1 - clamped / 100);
 
     let arc: string;
-    if (clamped >= 70) {
+    if (clamped >= 80) {
       arc = euiTheme.colors.severity.danger;
-    } else if (clamped >= 40) {
+    } else if (clamped >= 60) {
       arc = euiTheme.colors.severity.warning;
+    } else if (clamped >= 40) {
+      arc = euiTheme.colors.primary;
     } else {
       arc = euiTheme.colors.severity.success;
     }
@@ -50,6 +52,7 @@ export const CriticalityDonut = ({
       labelColor: euiTheme.colors.vis.euiColorVisText7,
     };
   }, [
+    euiTheme.colors.primary,
     euiTheme.colors.severity.danger,
     euiTheme.colors.severity.success,
     euiTheme.colors.severity.warning,
@@ -63,7 +66,7 @@ export const CriticalityDonut = ({
   const clamped = Math.min(100, Math.max(0, score));
 
   const label = i18n.translate('xpack.observability.sigeventsOverview.criticalityDonut.ariaLabel', {
-    defaultMessage: 'Criticality score {score} out of 100',
+    defaultMessage: 'Severity score {score} out of 100',
     values: { score: clamped },
   });
 
@@ -114,7 +117,7 @@ export const CriticalityDonut = ({
           css={css`
             color: ${labelColor};
             font-family: ${euiTheme.font.familyCode};
-            font-size: 1.275rem;
+            font-size: ${Math.max(size * 0.36, 8)}px;
             font-weight: 400;
             line-height: 1;
           `}

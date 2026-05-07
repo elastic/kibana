@@ -14,8 +14,7 @@ const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I1
 
 const baseProps = {
   title: 'Fleet Server Dependency Chain',
-  severityLabel: 'Critical',
-  severityColor: 'danger' as const,
+  severityScore: 90,
 };
 
 describe('SignificantEventDetailHeader', () => {
@@ -36,20 +35,17 @@ describe('SignificantEventDetailHeader', () => {
     expect(screen.getByText('Detected Jan 18 @ 14:12')).toBeInTheDocument();
   });
 
-  it('renders the four metadata cards by default', () => {
+  it('renders the severity and recommended action metadata cards by default', () => {
     renderWithIntl(<SignificantEventDetailHeader {...baseProps} />);
 
     expect(
       screen.getByTestId('sigeventsOverviewSignificantEventDetailHeaderMetadata')
     ).toBeInTheDocument();
     expect(screen.getByText('Severity')).toBeInTheDocument();
-    expect(screen.getByText('Criticality')).toBeInTheDocument();
-    expect(screen.getByText('Impact')).toBeInTheDocument();
     expect(screen.getByText('Recommended action')).toBeInTheDocument();
 
-    // default values
-    expect(screen.getAllByText('Critical').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('High').length).toBeGreaterThanOrEqual(2);
+    // score of 90 → Critical band
+    expect(screen.getByText('Critical')).toBeInTheDocument();
     expect(screen.getByText('Escalate')).toBeInTheDocument();
   });
 
@@ -61,35 +57,30 @@ describe('SignificantEventDetailHeader', () => {
     expect(screen.queryByText('Recommended action')).not.toBeInTheDocument();
   });
 
-  it('renders custom metadata labels', () => {
-    renderWithIntl(
-      <SignificantEventDetailHeader
-        {...baseProps}
-        criticalityLabel="Medium"
-        criticalityColor="warning"
-        impactLabel="Low"
-        impactColor="success"
-        recommendedActionLabel="Monitor"
-      />
-    );
+  it('renders the correct severity band for a High score', () => {
+    renderWithIntl(<SignificantEventDetailHeader {...baseProps} severityScore={70} />);
+    expect(screen.getByText('High')).toBeInTheDocument();
+  });
+
+  it('renders the correct severity band for a Medium score', () => {
+    renderWithIntl(<SignificantEventDetailHeader {...baseProps} severityScore={50} />);
     expect(screen.getByText('Medium')).toBeInTheDocument();
+  });
+
+  it('renders the correct severity band for a Low score', () => {
+    renderWithIntl(<SignificantEventDetailHeader {...baseProps} severityScore={20} />);
     expect(screen.getByText('Low')).toBeInTheDocument();
+  });
+
+  it('renders a custom recommended action label', () => {
+    renderWithIntl(
+      <SignificantEventDetailHeader {...baseProps} recommendedActionLabel="Monitor" />
+    );
     expect(screen.getByText('Monitor')).toBeInTheDocument();
   });
 
-  it('derives criticalityColor from severityColor=warning when not provided', () => {
-    renderWithIntl(<SignificantEventDetailHeader {...baseProps} severityColor="warning" />);
-    // Should render without error - the criticality health indicator inherits warning color
-    expect(screen.getByTestId('sigeventsOverviewSignificantEventDetailHeader')).toBeInTheDocument();
-  });
-
-  it('derives criticalityColor from severityColor=success when not provided', () => {
-    renderWithIntl(<SignificantEventDetailHeader {...baseProps} severityColor="success" />);
-    expect(screen.getByTestId('sigeventsOverviewSignificantEventDetailHeader')).toBeInTheDocument();
-  });
-
-  it('falls back to subdued criticalityColor for unknown severityColor', () => {
-    renderWithIntl(<SignificantEventDetailHeader {...baseProps} severityColor="primary" />);
-    expect(screen.getByTestId('sigeventsOverviewSignificantEventDetailHeader')).toBeInTheDocument();
+  it('renders the severity donut', () => {
+    renderWithIntl(<SignificantEventDetailHeader {...baseProps} />);
+    expect(screen.getByTestId('sigeventsOverviewCriticalityDonut')).toBeInTheDocument();
   });
 });

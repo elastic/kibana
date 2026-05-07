@@ -63,7 +63,6 @@ const makeEvent = (
     recommendations: [],
     recommendedAction: 'escalate',
     criticality: 70,
-    impact: 'high',
     ruleNames: ['Rule A'],
     streamNames: ['logs.otel'],
     evidences: [],

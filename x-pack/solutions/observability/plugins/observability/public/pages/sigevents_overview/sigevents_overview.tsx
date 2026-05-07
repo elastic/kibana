@@ -450,8 +450,6 @@ export function SigeventsOverviewPage() {
                     blastRadiusScore={eventData.blastRadiusScore}
                     mainEventTitle={eventData.mainEventTitle}
                     mainEventDescription={eventData.description}
-                    severityLabel={eventData.severityLabel}
-                    severityColor={eventData.severityColor}
                     impactedServices={eventData.impactedServices}
                     impactedCards={eventData.impactedCards}
                     healthyMetrics={healthyMetrics}
@@ -512,8 +510,7 @@ export function SigeventsOverviewPage() {
             <div id={flyoutHeadingId}>
               <SignificantEventDetailHeader
                 title={detailFields.label}
-                severityLabel={detailFields.severityLabel}
-                severityColor={detailFields.severityColor}
+                severityScore={detailFields.criticality}
               />
             </div>
           </EuiFlyoutHeader>

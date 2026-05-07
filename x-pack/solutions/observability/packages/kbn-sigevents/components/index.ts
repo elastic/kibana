@@ -67,3 +67,6 @@ export type { DependencyChainMapProps } from './dependency_chain_map';
 
 export { SignificantEventDetailHeader } from './significant_event_detail_header';
 export type { SignificantEventDetailHeaderProps } from './significant_event_detail_header';
+
+export { getSeverityFromScore } from './event_utils';
+export type { SeverityBand, SeverityInfo } from './event_utils';

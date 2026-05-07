@@ -18,68 +18,6 @@ const meta: Meta<typeof SignificantEventDetailBody> = {
 export default meta;
 type Story = StoryObj<typeof SignificantEventDetailBody>;
 
-const paymentCreditCardExposure: SignificantEventDetailFields = {
-  id: '8228db7f-f2d4-4958-9651-ef1305c33708-0b096020-6215-47df-bde7-0006727340ca-payment__credit-card-data-exposure-in-logs',
-  label: 'Payment — credit card data exposure in logs',
-  subtitle: 'logs.otel',
-  severityLabel: 'Critical',
-  severityColor: 'danger',
-  summary:
-    'The credit card data exposure rule is firing steadily (stationary change type) with 404 alerts at 2026-05-01T14:36Z on logs.otel. Recent payment-service charge request logs contain plaintext credit card fields in the logged request payload, creating an active PCI-DSS compliance and data security issue.',
-  rootCause:
-    'The payment service is logging the full incoming charge request object before any redaction occurs, including the credit card number and CVV fields, causing plaintext sensitive payment data to be emitted into application logs during normal checkout → payment flows. The payment-service knowledge indicator confirms this is a Node.js gRPC service (port 50051) in the otel-demo namespace where charge request payloads are serialized to JSON and written to application logs without field-level redaction.',
-  recommendations: [
-    'Immediately restrict access to logs.otel for the payment service deployment (resource.attributes.k8s.deployment.name: "payment") to prevent further exposure of plaintext card data already written to the log store.',
-    'Deploy a hotfix to the payment service to redact or omit the credit card fields from the charge request object before it is passed to the logger — the serialization occurs before any redaction in the current code path.',
-    'Audit log retention and access controls for logs.otel covering the payment service since the onset of this exposure; determine whether any log export, forwarding, or archival pipelines have transmitted the affected records downstream.',
-  ],
-  recommendedAction: 'escalate',
-  criticality: 85,
-  impact: 'critical',
-  ruleNames: ['Credit card data exposure in logs'],
-  streamNames: ['logs.otel'],
-  evidences: [
-    {
-      description:
-        'Matched log events where body text includes credit card field names; results show the payment service logging charge request payloads with plaintext credit card fields in the serialized request object.',
-      esqlQuery:
-        'FROM logs.otel, logs.otel.*\n| WHERE @timestamp >= NOW() - 120 minutes AND @timestamp <= NOW()\n| WHERE (body.text : "creditCardNumber") OR (body.text : "creditCardCvv")\n| KEEP @timestamp, body.text\n| SORT @timestamp DESC\n| LIMIT 5',
-      result: 'found',
-      rowCount: 5,
-      collectedAt: '2026-05-01T14:38:59.718Z',
-      ruleName: 'Credit card data exposure in logs',
-      streamName: 'logs.otel',
-    },
-    {
-      description:
-        'Re-verification returned 4 rows with the most recent at 14:51:12Z (~85 minutes before review time). Pattern is consistent — payment service logging charge request payloads containing plaintext credit card fields on every charge request received.',
-      esqlQuery:
-        'FROM logs.otel, logs.otel.*\n| WHERE @timestamp >= NOW() - 120 minutes AND @timestamp <= NOW()\n| WHERE (body.text : "creditCardNumber") OR (body.text : "creditCardCvv")\n| KEEP @timestamp, body.text\n| SORT @timestamp DESC\n| LIMIT 5',
-      result: 'found',
-      rowCount: 4,
-      collectedAt: '2026-05-01T16:16:36Z',
-      ruleName: 'Credit card data exposure in logs',
-      streamName: 'logs.otel',
-      confirmed: true,
-    },
-  ],
-  dependencyEdges: [
-    {
-      source: 'checkout',
-      target: 'payment',
-      protocol: 'internal',
-      exposure: 'exposed',
-    },
-  ],
-  causeKis: [
-    {
-      name: 'payment-service',
-      streamName: 'logs.otel',
-    },
-  ],
-  timestamp: '2026-05-01T16:31:00+00:00',
-};
-
 const paymentProcessingFailures: SignificantEventDetailFields = {
   id: '6378a33b-4d01-4754-9c10-738fb45efc5b-cfb50bec-4473-470d-ab61-c139688e5442-payment__payment-processing-failures',
   label: 'Payment — processing failures',
@@ -97,7 +35,6 @@ const paymentProcessingFailures: SignificantEventDetailFields = {
   ],
   recommendedAction: 'escalate',
   criticality: 85,
-  impact: 'critical',
   ruleNames: ['Payment processing failures'],
   streamNames: ['logs.otel'],
   evidences: [
@@ -169,22 +106,12 @@ const stderrOutputEvent: SignificantEventDetailFields = {
   ],
   recommendedAction: 'monitor',
   criticality: 65,
-  impact: 'high',
   ruleNames: ['Stderr output across services'],
   streamNames: ['logs.otel'],
   evidences: [],
   dependencyEdges: [],
   causeKis: [],
   timestamp: '2026-05-01T16:31:00+00:00',
-};
-
-export const CreditCardExposure: Story = {
-  args: {
-    event: paymentCreditCardExposure,
-    detectedAtLabel: 'Detected 5 minutes ago',
-    onRemediate: action('onRemediate'),
-    onOpenDetails: action('onOpenDetails'),
-  },
 };
 
 export const PaymentProcessingFailures: Story = {
@@ -207,7 +134,7 @@ export const ElevatedStderrOutput: Story = {
 
 export const HideHeader: Story = {
   args: {
-    event: paymentCreditCardExposure,
+    event: paymentProcessingFailures,
     hideHeader: true,
     onRemediate: action('onRemediate'),
     onOpenDetails: action('onOpenDetails'),

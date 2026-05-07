@@ -15,7 +15,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ImpactedService } from '../components/main_significant_event';
 import type { ImpactedCardItem } from '../components/sigevents_overview';
 import type { SignificantEventDetailFields } from '../components/significant_event_detail_body';
-import { normalizeRecommendations } from '../components/event_utils';
+import { normalizeRecommendations, getSeverityFromScore } from '../components/event_utils';
 
 interface SigeventsKibanaServices {
   data: DataPublicPluginStart;
@@ -37,27 +37,8 @@ export interface LatestSignificantEventData {
   timestamp: string;
 }
 
-function mapImpactToSeverity(impact: SignificantEventDocument['impact']): {
-  label: string;
-  color: 'danger' | 'warning' | 'primary' | 'subdued';
-  state: 'critical' | 'warning' | 'healthy';
-} {
-  switch (impact) {
-    case 'critical':
-      return { label: 'Critical', color: 'danger', state: 'critical' };
-    case 'high':
-      return { label: 'High', color: 'warning', state: 'warning' };
-    case 'medium':
-      return { label: 'Medium', color: 'primary', state: 'warning' };
-    case 'low':
-      return { label: 'Low', color: 'subdued', state: 'healthy' };
-    default:
-      return { label: 'Unknown', color: 'subdued', state: 'healthy' };
-  }
-}
-
 function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEventData {
-  const severity = mapImpactToSeverity(doc.impact);
+  const severity = getSeverityFromScore(doc.criticality ?? 0);
 
   // Prefer blast_radius (confirmed items) when available; fall back to dependency_edges
   const confirmedBlastRadius = (doc.blast_radius ?? [])
@@ -132,7 +113,6 @@ function mapDocumentToData(doc: SignificantEventDocument): LatestSignificantEven
     recommendations: normalizeRecommendations(doc.recommendations),
     recommendedAction: doc.recommended_action ?? 'monitor',
     criticality: doc.criticality ?? 0,
-    impact: doc.impact ?? 'low',
     ruleNames: doc.rule_names ?? [],
     streamNames: doc.stream_names ?? [],
     evidences: (doc.evidences ?? []).map((ev) => ({

@@ -24,6 +24,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CriticalityDonut } from './criticality_donut';
 import { DevModePlaceholder } from './dev_mode_placeholder';
+import { getSeverityFromScore } from './event_utils';
 
 const CARD_BORDER_RADIUS = '8px';
 const DONUT_SIZE = 75;
@@ -37,8 +38,6 @@ export interface ImpactedService {
 
 export interface MainSignificantEventProps {
   blastRadiusScore?: number;
-  severityLabel?: string;
-  severityColor?: EuiBadgeProps['color'];
   lastUpdatedLabel?: React.ReactNode;
   title?: string;
   impactedServices?: ImpactedService[];
@@ -51,11 +50,6 @@ export interface MainSignificantEventProps {
 }
 
 const DEFAULT_SCORE = 90;
-
-const DEFAULT_SEVERITY_LABEL = i18n.translate(
-  'xpack.observability.sigeventsOverview.mainSignificantEvent.severityCritical',
-  { defaultMessage: 'Critical' }
-);
 
 const DEFAULT_LAST_UPDATED_LABEL = i18n.translate(
   'xpack.observability.sigeventsOverview.mainSignificantEvent.lastUpdated',
@@ -86,8 +80,6 @@ const DEFAULT_IMPACTED_SERVICES: ImpactedService[] = [
 export function MainSignificantEvent(props: MainSignificantEventProps) {
   const {
     blastRadiusScore = DEFAULT_SCORE,
-    severityLabel = DEFAULT_SEVERITY_LABEL,
-    severityColor = 'danger',
     lastUpdatedLabel = DEFAULT_LAST_UPDATED_LABEL,
     title = DEFAULT_TITLE,
     impactedServices = DEFAULT_IMPACTED_SERVICES,
@@ -100,6 +92,7 @@ export function MainSignificantEvent(props: MainSignificantEventProps) {
   } = props;
 
   const { euiTheme } = useEuiTheme();
+  const severity = getSeverityFromScore(blastRadiusScore);
 
   const hasPlaceholderData =
     props.blastRadiusScore === undefined ||
@@ -163,8 +156,8 @@ export function MainSignificantEvent(props: MainSignificantEventProps) {
                 gutterSize="s"
               >
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={severityColor} iconType="dot">
-                    {severityLabel}
+                  <EuiBadge color={severity.badgeColor} iconType="dot">
+                    {severity.label}
                   </EuiBadge>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

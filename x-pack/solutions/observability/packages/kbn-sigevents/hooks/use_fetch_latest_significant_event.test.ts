@@ -234,7 +234,7 @@ describe('useFetchLatestSignificantEvent', () => {
     expect(result.current.data!.severityColor).toBe('subdued');
   });
 
-  it('maps unknown impact to healthy/unknown state', async () => {
+  it('maps low criticality score to healthy/Low state regardless of impact field', async () => {
     const unknownDoc = {
       ...promotedDocs[0],
       impact: 'something_else',
@@ -255,7 +255,7 @@ describe('useFetchLatestSignificantEvent', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.data!.state).toBe('healthy');
-    expect(result.current.data!.severityLabel).toBe('Unknown');
+    expect(result.current.data!.severityLabel).toBe('Low');
     expect(result.current.data!.severityColor).toBe('subdued');
   });
 

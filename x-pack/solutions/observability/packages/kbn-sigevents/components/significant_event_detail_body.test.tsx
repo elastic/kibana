@@ -28,7 +28,6 @@ describe('SignificantEventDetailBody', () => {
     ],
     recommendedAction: 'escalate' as const,
     criticality: 85,
-    impact: 'critical',
     ruleNames: ['Fleet dependency failures'],
     streamNames: ['logs.otel'],
     evidences: [
@@ -91,17 +90,15 @@ describe('SignificantEventDetailBody', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('renders all four metadata cards with the expected titles', () => {
+  it('renders the severity and recommended action metadata cards', () => {
     renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
     expect(screen.getAllByText('Severity').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Criticality').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Impact').length).toBeGreaterThan(0);
     expect(screen.getByText('Recommended action')).toBeInTheDocument();
   });
 
   it('renders the values derived from event data inside the metadata cards', () => {
     renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
-    // Severity badge value (from event.severityLabel)
+    // Severity badge value (derived from criticality score 85 → Critical)
     expect(screen.getAllByText('Critical').length).toBeGreaterThan(0);
     // Recommended action derived from recommendedAction field
     expect(screen.getAllByText('Escalate').length).toBeGreaterThan(0);

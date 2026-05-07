@@ -16,10 +16,6 @@ const meta: Meta<typeof MainSignificantEvent> = {
     blastRadiusScore: {
       control: { type: 'range', min: 0, max: 100 },
     },
-    severityColor: {
-      control: 'select',
-      options: ['danger', 'warning', 'success', 'hollow', 'primary'],
-    },
   },
 };
 
@@ -39,8 +35,6 @@ export const ModerateScore: Story = {
   args: {
     ...Default.args,
     blastRadiusScore: 55,
-    severityLabel: 'Medium',
-    severityColor: 'warning',
   },
 };
 
@@ -48,8 +42,6 @@ export const LowScore: Story = {
   args: {
     ...Default.args,
     blastRadiusScore: 25,
-    severityLabel: 'Low',
-    severityColor: 'success',
   },
 };
 

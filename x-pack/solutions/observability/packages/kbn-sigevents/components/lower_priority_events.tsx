@@ -35,7 +35,7 @@ import {
   capitalize,
   getRecommendedActionBadgeColor,
   getRecommendedActionIcon,
-  getImpactBadgeColor,
+  getSeverityFromScore,
   adaptEventDocumentToDetailFields,
 } from './event_utils';
 
@@ -155,21 +155,20 @@ export function LowerPriorityEvents({ events, onRemediate }: LowerPriorityEvents
       },
     },
     {
-      field: 'impact',
-      name: i18n.translate('xpack.observability.lowerPriorityEvents.impactColumn', {
-        defaultMessage: 'Impact',
+      field: 'criticality',
+      name: i18n.translate('xpack.observability.lowerPriorityEvents.severityColumn', {
+        defaultMessage: 'Severity',
       }),
       sortable: true,
       width: '100px',
-      render: (impact: EventDocument['impact']) => (
-        <EuiBadge color={getImpactBadgeColor(impact)}>
-          {impact.charAt(0).toUpperCase() + impact.slice(1)}
-        </EuiBadge>
-      ),
+      render: (criticality: number) => {
+        const sev = getSeverityFromScore(criticality);
+        return <EuiBadge color={sev.badgeColor}>{sev.label}</EuiBadge>;
+      },
     },
     {
       field: 'criticality',
-      name: i18n.translate('xpack.observability.lowerPriorityEvents.criticalityColumn', {
+      name: i18n.translate('xpack.observability.lowerPriorityEvents.scoreColumn', {
         defaultMessage: 'Score',
       }),
       sortable: true,
@@ -339,8 +338,7 @@ function EventDetailFlyout({
           <SignificantEventDetailHeader
             title={event.title}
             detectedAtLabel={detectedAtLabel}
-            severityLabel={detailFields.severityLabel}
-            severityColor={detailFields.severityColor}
+            severityScore={event.criticality}
           />
         </div>
       </EuiFlyoutHeader>
