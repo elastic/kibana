@@ -7,7 +7,7 @@ navigation_title: Best practices
 Best practices specific to Scout **API tests**.
 
 :::::{tip}
-For guidance that applies to both UI and API tests, see the [general Scout best practices](./best-practices.md). Scout is built on Playwright, so the official [Playwright Best Practices](https://playwright.dev/docs/best-practices) also apply.
+For guidance that applies to both UI and API tests, see the [general Scout best practices](./scout-best-practices.md). Scout is built on Playwright, so the official [Playwright Best Practices](https://playwright.dev/docs/best-practices) also apply.
 :::::
 
 ## Validate endpoints with `apiClient` [validate-endpoints-with-apiclient-for-readable-and-scoped-tests]
@@ -44,7 +44,7 @@ apiTest('returns data for viewer', async ({ apiClient }) => {
 
 :::::
 
-This pattern validates both endpoint behavior and the [permission model](./best-practices.md#test-with-minimal-permissions-avoid-admin-when-possible).
+This pattern validates both endpoint behavior and the [permission model](./scout-best-practices.md#test-with-minimal-permissions-avoid-admin-when-possible).
 
 ## Choose the right auth pattern [choose-the-right-auth-pattern]
 
@@ -97,7 +97,7 @@ apiTest('returns autocomplete definitions', async ({ apiClient }) => {
 
 ## Related guides
 
-- [General best practices](./best-practices.md) — apply to both UI and API tests
+- [General best practices](./scout-best-practices.md) — apply to both UI and API tests
 - [Write API tests](./write-api-tests.md)
 - [API authentication](./api-auth.md)
 - [API services](./api-services.md)

@@ -7,7 +7,7 @@ navigation_title: Best practices
 Best practices specific to Scout **UI tests**.
 
 :::::{tip}
-For guidance that applies to both UI and API tests, see the [general Scout best practices](./best-practices.md). Scout is built on Playwright, so the official [Playwright Best Practices](https://playwright.dev/docs/best-practices) also apply.
+For guidance that applies to both UI and API tests, see the [general Scout best practices](./scout-best-practices.md). Scout is built on Playwright, so the official [Playwright Best Practices](https://playwright.dev/docs/best-practices) also apply.
 :::::
 
 ## Prefer parallel runs [run-tests-in-parallel-whenever-possible]
@@ -357,7 +357,7 @@ For setup details, see [Reuse role helpers](./browser-auth.md#scout-browser-auth
 
 ## Related guides
 
-- [General best practices](./best-practices.md) — apply to both UI and API tests
+- [General best practices](./scout-best-practices.md) — apply to both UI and API tests
 - [Write UI tests](./write-ui-tests.md)
 - [Browser authentication](./browser-auth.md)
 - [Page objects](./page-objects.md)
