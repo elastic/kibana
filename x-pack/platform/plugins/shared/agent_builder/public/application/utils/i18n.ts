@@ -93,6 +93,9 @@ export const labels = {
     // Table columns and labels
     toolIdLabel: i18n.translate('xpack.agentBuilder.tools.idLabel', { defaultMessage: 'ID' }),
     tagsLabel: i18n.translate('xpack.agentBuilder.tools.tagsLabel', { defaultMessage: 'Labels' }),
+    experimentalLabel: i18n.translate('xpack.agentBuilder.tools.experimentalLabel', {
+      defaultMessage: 'Experimental',
+    }),
     toolsLabel: i18n.translate('xpack.agentBuilder.tools.toolsLabel', { defaultMessage: 'Tools' }),
     selectToolColumnHeader: i18n.translate('xpack.agentBuilder.tools.selectToolColumnHeader', {
       defaultMessage: 'Select tool',

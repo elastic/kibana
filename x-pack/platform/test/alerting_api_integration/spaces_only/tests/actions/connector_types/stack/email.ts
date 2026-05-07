@@ -112,6 +112,92 @@ export default function emailTest({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('rejects requests with no valid recipients', () => {
+      it('rejects via validateParams when to/cc/bcc are all empty arrays', async () => {
+        const from = `bob@${EmailDomainAllowed}`;
+        const conn = await createConnector(from);
+        expect(conn.status).to.be(200);
+        const { id } = conn.body;
+
+        // validateParams throws Boom.badRequest, which the action executor
+        // wraps as { status: 'error', errorSource: 'user' } in a 200 response.
+        const { status, body } = await runConnector(id, [], [], []);
+        expect(status).to.be(200);
+        expect(body?.status).to.be('error');
+        expect(body?.message).to.match(
+          /At least one entry in \[to\], \[cc\], or \[bcc\] is required/
+        );
+        expect(body?.errorSource).to.be('user');
+      });
+
+      it('rejects via validateParams when to/cc/bcc contain only empty/whitespace strings', async () => {
+        const from = `bob@${EmailDomainAllowed}`;
+        const conn = await createConnector(from);
+        expect(conn.status).to.be(200);
+        const { id } = conn.body;
+
+        // validateParams filters blanks before the recipients-required check,
+        // so the same wrapped error path fires as for fully-empty arrays.
+        const { status, body } = await runConnector(id, ['', '  '], [' '], ['']);
+        expect(status).to.be(200);
+        expect(body?.status).to.be('error');
+        expect(body?.message).to.match(
+          /At least one entry in \[to\], \[cc\], or \[bcc\] is required/
+        );
+        expect(body?.errorSource).to.be('user');
+      });
+
+      it('succeeds when only Cc has a valid recipient', async () => {
+        const from = `bob@${EmailDomainAllowed}`;
+        const conn = await createConnector(from);
+        expect(conn.status).to.be(200);
+        const { id } = conn.body;
+
+        const cc = [`jim@${EmailDomainAllowed}`];
+
+        const { status, body } = await runConnector(id, [], cc, []);
+        expect(status).to.be(200);
+        expect(body?.status).to.be('ok');
+
+        const { message } = body?.data || {};
+        expect(addressesFromMessage(message, 'cc')).to.eql(cc);
+        expect(addressesFromMessage(message, 'to')).to.eql([]);
+      });
+
+      it('succeeds when only Bcc has a valid recipient', async () => {
+        const from = `bob@${EmailDomainAllowed}`;
+        const conn = await createConnector(from);
+        expect(conn.status).to.be(200);
+        const { id } = conn.body;
+
+        const bcc = [`joe@${EmailDomainAllowed}`];
+
+        const { status, body } = await runConnector(id, [], [], bcc);
+        expect(status).to.be(200);
+        expect(body?.status).to.be('ok');
+
+        // Bcc isn't echoed in the rendered headers, but the envelope carries it.
+        const envelopeTo = body?.data?.envelope?.to ?? [];
+        expect(envelopeTo.sort()).to.eql(bcc);
+      });
+
+      it('ignores empty/whitespace entries alongside a valid recipient', async () => {
+        const from = `bob@${EmailDomainAllowed}`;
+        const conn = await createConnector(from);
+        expect(conn.status).to.be(200);
+        const { id } = conn.body;
+
+        const validTo = `jeb@${EmailDomainAllowed}`;
+        const { status, body } = await runConnector(id, ['', validTo, '  '], [''], []);
+        expect(status).to.be(200);
+        expect(body?.status).to.be('ok');
+
+        const { message } = body?.data || {};
+        expect(addressesFromMessage(message, 'to')).to.eql([validTo]);
+        expect(addressesFromMessage(message, 'cc')).to.eql([]);
+      });
+    });
+
     describe('export, import, then execute email connector', () => {
       afterEach(() => objectRemover.removeAll());
 

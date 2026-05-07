@@ -514,6 +514,42 @@ describe('params validation', () => {
     `);
   });
 
+  test('params validation fails when no recipients are provided', () => {
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: [],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: At least one entry in [to], [cc], or [bcc] is required"`
+    );
+  });
+
+  test('params validation fails when recipients only contain empty/whitespace strings', () => {
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['', ' '],
+          cc: [''],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: At least one entry in [to], [cc], or [bcc] is required"`
+    );
+  });
+
   test('params validation for emails calls validateEmailAddresses', async () => {
     const configUtils = actionsConfigMock.create();
     configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
@@ -1324,6 +1360,56 @@ describe('execute()', () => {
         },
       }
     `);
+  });
+
+  test('returns error when all recipient arrays are empty', async () => {
+    sendEmailMock.mockReset();
+
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...params,
+        to: [],
+        cc: [],
+        bcc: [],
+      },
+    };
+
+    const result = await connectorType.executor(customExecutorOptions);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "errorSource": "user",
+        "message": "At least one entry in [to], [cc], or [bcc] is required",
+        "status": "error",
+      }
+    `);
+    expect(sendEmailMock).not.toHaveBeenCalled();
+  });
+
+  test('returns error when all recipients are empty strings', async () => {
+    sendEmailMock.mockReset();
+
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...params,
+        to: ['', ' '],
+        cc: [''],
+        bcc: [],
+      },
+    };
+
+    const result = await connectorType.executor(customExecutorOptions);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "errorSource": "user",
+        "message": "At least one entry in [to], [cc], or [bcc] is required",
+        "status": "error",
+      }
+    `);
+    expect(sendEmailMock).not.toHaveBeenCalled();
   });
 
   test('returns expected result when an error is thrown', async () => {

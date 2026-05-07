@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { newConversationId } from './new_conversation';
-
 export const appPaths = {
   root: '/',
 
@@ -14,8 +12,7 @@ export const appPaths = {
   agent: {
     root: ({ agentId }: { agentId: string }) => `/agents/${agentId}`,
     conversations: {
-      new: ({ agentId }: { agentId: string }) =>
-        `/agents/${agentId}/conversations/${newConversationId}`,
+      new: ({ agentId }: { agentId: string }) => `/agents/${agentId}/conversations/new`,
       byId: ({ agentId, conversationId }: { agentId: string; conversationId: string }) =>
         `/agents/${agentId}/conversations/${conversationId}`,
     },

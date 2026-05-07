@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import {
   ScrapeInputSchema,
@@ -93,7 +93,7 @@ export const FirecrawlConnector: ConnectorSpec = {
     types: ['bearer'],
   },
 
-  schema: z.object({}),
+  schema: lazySchema(() => z.object({})),
 
   actions: {
     scrape: {
