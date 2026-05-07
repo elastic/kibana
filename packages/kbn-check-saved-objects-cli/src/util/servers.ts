@@ -31,9 +31,9 @@ export async function startElasticsearch(): Promise<TestElasticsearchUtils> {
   return await startES();
 }
 
-export async function setupKibana(): Promise<Root> {
+export async function getKibanaServer(): Promise<Root> {
   const kibanaLog = resolve(os.tmpdir(), 'kibana.log');
-  const kibanaRoot = createRootWithCorePlugins(
+  return createRootWithCorePlugins(
     {
       logging: {
         loggers: [
@@ -63,9 +63,6 @@ export async function setupKibana(): Promise<Root> {
       dev: true,
     }
   );
-  await kibanaRoot.preboot();
-  await kibanaRoot.setup();
-  return kibanaRoot;
 }
 
 export async function stopKibana(kibanaServer: Root) {

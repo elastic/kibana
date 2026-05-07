@@ -14,6 +14,7 @@ import type { ParsedMetricItem } from '../../../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { METRIC_TYPE_DESCRIPTIONS } from '../components';
 import { OverviewTabMetadata } from './overview_tab_metadata';
+import { METRIC_SOURCE_KIND } from '../hooks/use_metric_source_kind';
 
 jest.mock('../../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {
@@ -43,16 +44,67 @@ describe('OverviewTabMetadata', () => {
   });
 
   describe('basic rendering', () => {
-    it('renders main description list', () => {
+    it('renders the description list and hides the source row when no staticIndexName is provided', () => {
       const metricItem = createMockMetric({
         dataStream: 'my-data-stream',
         fieldTypes: [ES_FIELD_TYPES.LONG],
       });
-      const { getByTestId, getByText } = render(<OverviewTabMetadata metricItem={metricItem} />);
+      const { getByTestId, getByText, queryByText, queryByTestId } = render(
+        <OverviewTabMetadata metricItem={metricItem} />
+      );
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDescriptionList')).toBeInTheDocument();
-      expect(getByText('my-data-stream')).toBeInTheDocument();
       expect(getByText('long')).toBeInTheDocument();
+      expect(queryByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).not.toBeInTheDocument();
+      expect(
+        queryByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')
+      ).not.toBeInTheDocument();
+      expect(queryByText('my-data-stream')).not.toBeInTheDocument();
+      expect(queryByText('Data stream')).not.toBeInTheDocument();
+      expect(queryByText('Index')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('source row', () => {
+    it('renders the static Index row when staticIndexName is an index', () => {
+      const { getByTestId, getByText } = render(
+        <OverviewTabMetadata
+          metricItem={createMockMetric()}
+          staticIndexName={{ indexName: 'my-source', kind: METRIC_SOURCE_KIND.INDEX }}
+        />
+      );
+
+      expect(getByText('Index')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).toHaveTextContent(
+        'my-source'
+      );
+    });
+
+    it('renders the static Data stream row when staticIndexName is a data stream', () => {
+      const { getByTestId, getByText } = render(
+        <OverviewTabMetadata
+          metricItem={createMockMetric()}
+          staticIndexName={{ indexName: 'logs-foo-default', kind: METRIC_SOURCE_KIND.DATA_STREAM }}
+        />
+      );
+
+      expect(getByText('Data stream')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')).toHaveTextContent(
+        'logs-foo-default'
+      );
+    });
+
+    it('omits the static source row when staticIndexName is not provided', () => {
+      const { queryByTestId, queryByText } = render(
+        <OverviewTabMetadata metricItem={createMockMetric({ dataStream: 'my-source' })} />
+      );
+
+      expect(queryByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).not.toBeInTheDocument();
+      expect(
+        queryByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')
+      ).not.toBeInTheDocument();
+      expect(queryByText('Index')).not.toBeInTheDocument();
+      expect(queryByText('Data stream')).not.toBeInTheDocument();
     });
   });
 

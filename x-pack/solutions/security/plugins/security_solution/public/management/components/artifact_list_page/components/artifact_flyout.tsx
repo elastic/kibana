@@ -470,6 +470,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     return (
       <EuiFlyout
+        session="never"
         size={size}
         onClose={handleFlyoutClose}
         data-test-subj={dataTestSubj}

@@ -9,7 +9,7 @@
 
 import { Listr, PRESET_TIMER } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
-import { setupKibana, startElasticsearch, stopElasticsearch, stopKibana } from '../util';
+import { getKibanaServer, startElasticsearch, stopElasticsearch, stopKibana } from '../util';
 import type { MigrationAlgorithm, TaskContext } from './types';
 import { automatedRollbackTests, getSnapshots, validateSOChanges, validateTestFlow } from './tasks';
 
@@ -85,7 +85,7 @@ export function runCheckSavedObjectsCli() {
           {
             title: 'Start Kibana to obtain type registry',
             task: async (ctx) => {
-              ctx.kibanaServer = await setupKibana();
+              ctx.kibanaServer = await getKibanaServer();
               const coreStart = await ctx.kibanaServer.start();
               ctx.registeredTypes = coreStart!.savedObjects.getTypeRegistry().getAllTypes();
               ctx.encryptedSavedObjects = coreStart._plugins?.get('encryptedSavedObjects');
