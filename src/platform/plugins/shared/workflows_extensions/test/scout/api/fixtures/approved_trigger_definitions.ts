@@ -37,7 +37,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'cases.caseStatusUpdated',
-    schemaHash: '',
+    schemaHash: '168673364f93e74cb472da685175d4acccc4b9a5bd851c2f9c62bbb8da15c7df',
   },
   {
     id: 'cases.attachmentsAdded',
