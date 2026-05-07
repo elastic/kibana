@@ -586,6 +586,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should show metrics for all nodes when grouping by service type', async () => {
+        // NOTE: `schema` is intentionally omitted. The host `nodeFilter`
+        // (see metrics_data_access `inventory_models/host/index.ts`) returns
+        // `[]` when `schema` is undefined and adds an ECS module filter
+        // (`event.module: system` OR `metricset.module: system`) when
+        // `schema: 'ecs'`. This test asserts both `service.type: mysql` and
+        // `service.type: system` groups exist; the mysql-module docs do not
+        // satisfy the ECS module filter, so pinning `schema: 'ecs'` here
+        // would drop the mysql group and break the assertion.
         const snapshot = await fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -595,7 +603,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
-          schema: 'ecs',
           groupBy: [{ field: 'service.type' }],
           includeTimeseries: true,
         });
