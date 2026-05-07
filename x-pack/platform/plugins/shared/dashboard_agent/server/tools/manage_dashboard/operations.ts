@@ -11,12 +11,14 @@ import type { ResolveVisualizationConfig } from './inline_visualization';
 import type { VisualizationFailure } from './utils';
 import type { OperationExecutionContext } from './operations/types';
 import {
-  collectVisualizationCreationRequests,
   dashboardOperationSchema,
   executeOperationHandler,
   type DashboardOperation,
 } from './operations/registry';
-import { resolveVisualizationCreationRequests } from './operations/visualization_creation';
+import {
+  collectVisualizationCreationRequests,
+  resolveVisualizationCreationRequests,
+} from './operations/visualization_creation';
 
 export { dashboardOperationSchema };
 export type { DashboardOperation };

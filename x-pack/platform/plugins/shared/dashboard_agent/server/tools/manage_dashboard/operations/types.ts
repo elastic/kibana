@@ -10,10 +10,7 @@ import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-ag
 import type { z } from '@kbn/zod/v4';
 import type { ResolveVisualizationConfig } from '../inline_visualization';
 import type { VisualizationFailure } from '../utils';
-import type {
-  ResolvedVisualizationCreationRequest,
-  VisualizationCreationRequest,
-} from './visualization_creation';
+import type { ResolvedVisualizationCreationRequest } from './visualization_creation';
 
 export interface OperationExecutionContext {
   logger: Logger;
@@ -32,20 +29,27 @@ export interface OperationHandlerParams<TOperation> {
   context: OperationExecutionContext;
 }
 
-export type OperationHandler<TOperation> = (
+type OperationHandler<TOperation> = (
   params: OperationHandlerParams<TOperation>
 ) => DashboardAttachmentData | Promise<DashboardAttachmentData>;
 
 type OperationSchema = z.ZodObject<{ operation: z.ZodLiteral<string> }>;
 
-export interface OperationDefinition<TSchema extends OperationSchema> {
+export interface OperationDefinition<
+  TSchema extends OperationSchema,
+  TOperation = z.infer<TSchema>
+> {
   schema: TSchema;
-  handler: OperationHandler<z.infer<TSchema>>;
-  collectVisualizationCreationRequests?: (
-    operation: z.infer<TSchema>
-  ) => VisualizationCreationRequest[];
+  handler: OperationHandler<TOperation>;
 }
 
 export const defineOperation = <TSchema extends OperationSchema>(
   definition: OperationDefinition<TSchema>
-) => definition;
+): OperationDefinition<TSchema, unknown> => ({
+  schema: definition.schema,
+  handler: ({ operation, ...params }) =>
+    definition.handler({
+      ...params,
+      operation: definition.schema.parse(operation),
+    }),
+});
