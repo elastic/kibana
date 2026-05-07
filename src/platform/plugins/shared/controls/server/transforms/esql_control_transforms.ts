@@ -53,7 +53,7 @@ export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
           single_select: single_select ?? DEFAULT_ESQL_OPTIONS_LIST_STATE.single_select,
           variable_name: variable_name ?? '',
           variable_type: variable_type as OptionsListESQLControlState['variable_type'],
-          ...(typeof title === 'string' && { title }), // title may be null, so just return undefined in this case
+          ...(title && { title }),
         };
         return control_type === EsqlControlType.STATIC_VALUES
           ? {

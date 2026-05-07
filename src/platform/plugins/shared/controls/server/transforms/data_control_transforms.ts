@@ -72,7 +72,7 @@ export function transformDataControlOut<
   const convertedState = {
     ...DEFAULT_DATA_CONTROL_STATE,
     data_view_id: dataViewId,
-    ...(typeof title === 'string' && { title }), // title may be null, so just return undefined in this case
+    ...(title && { title }),
     ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
     ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
     field_name: field_name ?? '',
