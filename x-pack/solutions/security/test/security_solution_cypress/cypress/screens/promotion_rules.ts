@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-type QueryKey = 'match' | 'range';
-
-export type Query = {
-  [key in QueryKey]?: any;
-};
+export const BASIC_RULES_TAB = '[data-test-subj="configurationsTab-basic_rules"]';
