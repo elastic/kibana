@@ -26,6 +26,7 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
+import { EntitiesOverview } from './entities_overview';
 import { PrevalenceDetails } from '../../prevalence';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
@@ -36,6 +37,8 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../shared/hooks/use_default_flyout_properties';
+import { UserPanel } from '../../../flyout/entity_details/user_right';
+import { HostPanel } from '../../../flyout/entity_details/host_right';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -171,6 +174,62 @@ export const InsightsSection = memo(
       );
     }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
 
+    const onShowUserDetails = useCallback(
+      ({ userName, entityId }: { userName: string; entityId?: string }) => {
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <UserPanel
+                contextID="UserEntityOverview"
+                scopeId=""
+                isPreviewMode={false}
+                userName={userName}
+                entityId={entityId}
+                hideNavigation
+              />
+            ),
+          }),
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: 'start',
+          }
+        );
+      },
+      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
+    );
+
+    const onShowHostDetails = useCallback(
+      ({ hostName, entityId }: { hostName: string; entityId?: string }) => {
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <HostPanel
+                contextID="HostEntityOverview"
+                scopeId=""
+                isPreviewMode={false}
+                hostName={hostName}
+                entityId={entityId}
+                hideNavigation
+              />
+            ),
+          }),
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: 'start',
+          }
+        );
+      },
+      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
+    );
+
     const onShowPrevalenceDetails = useCallback(() => {
       overlays.openSystemFlyout(
         flyoutProviders({
@@ -213,6 +272,13 @@ export const InsightsSection = memo(
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={INSIGHTS_SECTION_TITLE}
       >
+        <EntitiesOverview
+          hit={hit}
+          renderCellActions={renderCellActions}
+          showIcon={false}
+          onShowUserDetails={onShowUserDetails}
+          onShowHostDetails={onShowHostDetails}
+        />
         {isAlert && (
           <ThreatIntelligenceOverview
             hit={hit}

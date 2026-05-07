@@ -69,7 +69,7 @@ import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { USER_PREVIEW_BANNER } from '../../../../flyout_v2/document/components/user_entity_overview';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';

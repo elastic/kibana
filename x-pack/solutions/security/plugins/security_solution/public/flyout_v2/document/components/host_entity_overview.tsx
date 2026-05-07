@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiSkeletonText,
   EuiText,
+  EuiToolTip,
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
@@ -27,38 +29,44 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { buildHostNamesFilter } from '../../../../../common/search_strategy';
-import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { useDocumentDetailsContext } from '../../shared/context';
-import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
-import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
-import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
-import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
-import type { DescriptionList } from '../../../../../common/utility_types';
+import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
+import type { RiskSeverity } from '../../../../common/search_strategy';
+import { buildHostNamesFilter } from '../../../../common/search_strategy';
+import { HOST_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { getRiskFromEntityRecord } from '../../../flyout/entity_details/shared/entity_store_risk_utils';
+import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
+import type { DescriptionList } from '../../../../common/utility_types';
 import {
   FirstLastSeen,
   FirstLastSeenType,
-} from '../../../../common/components/first_last_seen/first_last_seen';
-import { EntityType } from '../../../../../common/entity_analytics/types';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { DescriptionListStyled } from '../../../../common/components/page';
-import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
-import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
-import { getField, isRiskSeverity, normalizeRiskLevel } from '../../shared/utils';
-import { CellActions } from '../../shared/components/cell_actions';
+} from '../../../common/components/first_last_seen/first_last_seen';
+import { EntityType } from '../../../../common/entity_analytics/types';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { DescriptionListStyled } from '../../../common/components/page';
+import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
+import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
+import {
+  getField,
+  isRiskSeverity,
+  normalizeRiskLevel,
+} from '../../../flyout/document_details/shared/utils';
+import {
+  noopCellActionRenderer,
+  type CellActionRenderer,
+} from '../../shared/components/cell_actions';
 import {
   FAMILY,
   HOST_RISK_LEVEL,
   LAST_SEEN,
-} from '../../../../overview/components/host_overview/translations';
+} from '../../../overview/components/host_overview/translations';
 import {
   ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
@@ -70,14 +78,15 @@ import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
 } from './test_ids';
-import { RiskScoreDocTooltip } from '../../../../overview/components/common';
-import { PreviewLink } from '../../../shared/components/preview_link';
-import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
-import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
-import { AlertCountInsight } from '../../shared/components/alert_count_insight';
-import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
-import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { RiskScoreDocTooltip } from '../../../overview/components/common';
+import { PreviewLink } from '../../../flyout/shared/components/preview_link';
+import { MisconfigurationsInsight } from '../../../flyout/document_details/shared/components/misconfiguration_insight';
+import { VulnerabilitiesInsight } from '../../../flyout/document_details/shared/components/vulnerabilities_insight';
+import { AlertCountInsight } from '../../../flyout/document_details/shared/components/alert_count_insight';
+import { useNavigateToHostDetails } from '../../../flyout/entity_details/host_right/hooks/use_navigate_to_host_details';
+import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 const HOST_ICON = 'storage';
 const HOST_ENTITY_OVERVIEW_ID = 'host-entity-overview';
@@ -96,6 +105,20 @@ export interface HostEntityOverviewProps {
    * so Overview section uses the same entity store data used to decide visibility.
    */
   entityRecord?: EntityStoreRecord | null;
+  /**
+   * Scope id used by cell actions and preview link.
+   */
+  scopeId?: string;
+  /**
+   * Renderer for cell actions on field values. Falls back to a no-op when not provided.
+   */
+  renderCellActions?: CellActionRenderer;
+  /**
+   * When provided, overrides the default expandable-flyout-based navigation.
+   * Required for flyout_v2, where the expandable-flyout actions have no listener.
+   * Called with `undefined` for the host name link and with a path for alert/misconfig links.
+   */
+  onShowDetails?: (path?: EntityDetailsPath) => void;
 }
 
 export const HOST_PREVIEW_BANNER = {
@@ -113,8 +136,10 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   hostName,
   identityFields,
   entityRecord: entityRecordProp,
+  scopeId = '',
+  renderCellActions = noopCellActionRenderer,
+  onShowDetails,
 }) => {
-  const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
@@ -146,7 +171,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     entityId: storeHostEntityId,
     identityFields,
     entityType: 'host',
-    skip: !entityStoreV2Enabled,
+    skip: !entityStoreV2Enabled || entityRecordProp != null,
   });
   const entityRecord = entityRecordProp ?? entityFromStore.entityRecord;
 
@@ -210,16 +235,17 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     () => [
       {
         title: FAMILY,
-        description: hostOSFamilyValue ? (
-          <CellActions field={'host.os.family'} value={hostOSFamilyValue}>
-            {hostOSFamilyValue}
-          </CellActions>
-        ) : (
-          getEmptyTagValue()
-        ),
+        description: hostOSFamilyValue
+          ? renderCellActions({
+              field: 'host.os.family',
+              value: hostOSFamilyValue,
+              scopeId,
+              children: <>{hostOSFamilyValue}</>,
+            }) ?? getEmptyTagValue()
+          : getEmptyTagValue(),
       },
     ],
-    [hostOSFamilyValue]
+    [hostOSFamilyValue, renderCellActions, scopeId]
   );
 
   const hostLastSeen: DescriptionList[] = useMemo(
@@ -304,7 +330,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     })
   );
 
-  const openDetailsPanel = useNavigateToHostDetails({
+  const navigateToHostDetails = useNavigateToHostDetails({
     hostName,
     entityId: entityRecord?.entity?.id,
     scopeId,
@@ -315,6 +341,14 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     isPreviewMode: true, // setting to true to always open a new host flyout
     contextID: 'HostEntityOverview',
   });
+  const openDetailsPanel = onShowDetails ?? navigateToHostDetails;
+
+  const handleNameClick = useCallback(() => onShowDetails?.(), [onShowDetails]);
+  const nameTextStyles = css`
+    font-size: ${xsFontSize};
+    font-weight: ${euiTheme.font.weight.bold};
+  `;
+  const nameText = <EuiText css={nameTextStyles}>{hostName}</EuiText>;
 
   return (
     <EuiFlexGroup
@@ -329,22 +363,31 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
             <EuiIcon type={HOST_ICON} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <PreviewLink
-              field="host.name"
-              value={hostName}
-              entityId={entityRecord?.entity?.id}
-              scopeId={scopeId}
-              data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
-            >
-              <EuiText
-                css={css`
-                  font-size: ${xsFontSize};
-                  font-weight: ${euiTheme.font.weight.bold};
-                `}
+            {onShowDetails ? (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.securitySolution.flyout.document.insights.entities.hostPreviewTooltip',
+                  { defaultMessage: 'Show host details' }
+                )}
               >
-                {hostName}
-              </EuiText>
-            </PreviewLink>
+                <EuiLink
+                  onClick={handleNameClick}
+                  data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
+                >
+                  {nameText}
+                </EuiLink>
+              </EuiToolTip>
+            ) : (
+              <PreviewLink
+                field="host.name"
+                value={hostName}
+                entityId={entityRecord?.entity?.id}
+                scopeId={scopeId}
+                data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
+              >
+                {nameText}
+              </PreviewLink>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

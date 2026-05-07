@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { USER_PREVIEW_BANNER, UserEntityOverview } from './user_entity_overview';
-import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
+import { useFirstLastSeen } from '../../../common/containers/use_first_last_seen';
 import {
   ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
@@ -20,15 +20,14 @@ import {
   ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
 } from './test_ids';
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
-import { mockContextValue } from '../../shared/mocks/mock_context';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { DocumentDetailsContext } from '../../shared/context';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
+import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
-import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
+import { UserPreviewPanelKey } from '../../../flyout/entity_details/user_right';
+import { useAlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 const userName = 'user';
 const identityFields = { 'user.name': userName };
@@ -49,7 +48,7 @@ const panelContextValue = {
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -64,9 +63,7 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock(
-  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
-);
+jest.mock('../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status');
 const mockAlertData = {
   open: {
     total: 2,
@@ -78,34 +75,36 @@ const mockAlertData = {
 };
 
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
-jest.mock('../../../../common/containers/use_global_time', () => {
+jest.mock('../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };
 });
 
 const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../sourcerer/containers', () => {
+jest.mock('../../../sourcerer/containers', () => {
   return {
     useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
 });
 
 const mockUseUserDetails = useObservedUserDetails as jest.Mock;
-jest.mock('../../../../explore/users/containers/users/observed_details');
+jest.mock('../../../explore/users/containers/users/observed_details');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
+jest.mock('../../../entity_analytics/api/hooks/use_risk_score');
 
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
-jest.mock('../../../../common/containers/use_first_last_seen');
+jest.mock('../../../common/containers/use_first_last_seen');
 
 const renderUserEntityOverview = () =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={panelContextValue}>
-        <UserEntityOverview userName={userName} identityFields={identityFields} />
-      </DocumentDetailsContext.Provider>
+      <UserEntityOverview
+        userName={userName}
+        identityFields={identityFields}
+        scopeId={panelContextValue.scopeId}
+      />
     </TestProviders>
   );
 
@@ -168,9 +167,11 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} identityFields={identityFields} />
-          </DocumentDetailsContext.Provider>
+          <UserEntityOverview
+            userName={userName}
+            identityFields={identityFields}
+            scopeId={panelContextValue.scopeId}
+          />
         </TestProviders>
       );
       expect(getByTestId(ENTITIES_USER_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -183,9 +184,11 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} identityFields={identityFields} />
-          </DocumentDetailsContext.Provider>
+          <UserEntityOverview
+            userName={userName}
+            identityFields={identityFields}
+            scopeId={panelContextValue.scopeId}
+          />
         </TestProviders>
       );
       expect(getByTestId(ENTITIES_USER_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -198,9 +201,11 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId } = render(
         <TestProviders>
-          <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} identityFields={identityFields} />
-          </DocumentDetailsContext.Provider>
+          <UserEntityOverview
+            userName={userName}
+            identityFields={identityFields}
+            scopeId={panelContextValue.scopeId}
+          />
         </TestProviders>
       );
 

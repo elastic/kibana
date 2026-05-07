@@ -73,6 +73,38 @@ jest.mock('./prevalence_overview', () => ({
 jest.mock('./threat_intelligence_overview', () => ({
   ThreatIntelligenceOverview: () => <div data-test-subj="threatIntelligenceOverviewMock" />,
 }));
+jest.mock('./entities_overview', () => ({
+  EntitiesOverview: ({
+    onShowUserDetails,
+    onShowHostDetails,
+  }: {
+    onShowUserDetails?: (params: { userName: string; entityId?: string }) => void;
+    onShowHostDetails?: (params: { hostName: string; entityId?: string }) => void;
+  }) => (
+    <div data-test-subj="entitiesOverviewMock">
+      <button
+        type="button"
+        data-test-subj="entitiesOverviewMockUserButton"
+        onClick={() => onShowUserDetails?.({ userName: 'test-user', entityId: 'user:1' })}
+      >
+        {'Show user'}
+      </button>
+      <button
+        type="button"
+        data-test-subj="entitiesOverviewMockHostButton"
+        onClick={() => onShowHostDetails?.({ hostName: 'test-host', entityId: 'host:1' })}
+      >
+        {'Show host'}
+      </button>
+    </div>
+  ),
+}));
+jest.mock('../../../flyout/entity_details/user_right', () => ({
+  UserPanel: () => <div data-test-subj="userPanelMock" />,
+}));
+jest.mock('../../../flyout/entity_details/host_right', () => ({
+  HostPanel: () => <div data-test-subj="hostPanelMock" />,
+}));
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -218,6 +250,36 @@ describe('InsightsSection', () => {
       expect.any(Function)
     );
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens a system flyout when clicking the user entity link', () => {
+    const { getByTestId } = renderInsightsSection();
+
+    fireEvent.click(getByTestId('entitiesOverviewMockUserButton'));
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
+  });
+
+  it('opens a system flyout when clicking the host entity link', () => {
+    const { getByTestId } = renderInsightsSection();
+
+    fireEvent.click(getByTestId('entitiesOverviewMockHostButton'));
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
   });
 
   it('disables timeline interactions when not in Security Solution', () => {

@@ -17,9 +17,9 @@ import {
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 import { HostPreviewPanelKey } from '../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../document_details/right/components/host_entity_overview';
+import { HOST_PREVIEW_BANNER } from '../../../flyout_v2/document/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../document_details/right/components/user_entity_overview';
+import { USER_PREVIEW_BANNER } from '../../../flyout_v2/document/components/user_entity_overview';
 import {
   NetworkPanelKey,
   NetworkPreviewPanelKey,

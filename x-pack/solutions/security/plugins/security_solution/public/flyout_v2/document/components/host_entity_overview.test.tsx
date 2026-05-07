@@ -8,10 +8,10 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import { HostEntityOverview, HOST_PREVIEW_BANNER } from './host_entity_overview';
-import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
-import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
+import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
+import { useFirstLastSeen } from '../../../common/containers/use_first_last_seen';
 import {
   ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
@@ -22,15 +22,14 @@ import {
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
   ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
 } from './test_ids';
-import { DocumentDetailsContext } from '../../shared/context';
-import { mockContextValue } from '../../shared/mocks/mock_context';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
-import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
-import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { HostPreviewPanelKey } from '../../../flyout/entity_details/host_right';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
+import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+import { useAlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 const hostName = 'host';
 const identityFields = { 'host.name': hostName };
@@ -52,7 +51,7 @@ jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
 
@@ -61,9 +60,7 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock(
-  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
-);
+jest.mock('../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status');
 const mockAlertData = {
   open: {
     total: 2,
@@ -75,8 +72,8 @@ const mockAlertData = {
 };
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: () => ({
@@ -88,34 +85,36 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
-jest.mock('../../../../common/containers/use_global_time', () => {
+jest.mock('../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };
 });
 
 const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../sourcerer/containers', () => {
+jest.mock('../../../sourcerer/containers', () => {
   return {
     useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
 });
 
 const mockUseHostDetails = useHostDetails as jest.Mock;
-jest.mock('../../../../explore/hosts/containers/hosts/details');
+jest.mock('../../../explore/hosts/containers/hosts/details');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
+jest.mock('../../../entity_analytics/api/hooks/use_risk_score');
 
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
-jest.mock('../../../../common/containers/use_first_last_seen');
+jest.mock('../../../common/containers/use_first_last_seen');
 
 const renderHostEntityContent = () =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={panelContextValue}>
-        <HostEntityOverview hostName={hostName} identityFields={identityFields} />
-      </DocumentDetailsContext.Provider>
+      <HostEntityOverview
+        hostName={hostName}
+        identityFields={identityFields}
+        scopeId={panelContextValue.scopeId}
+      />
     </TestProviders>
   );
 
@@ -155,9 +154,11 @@ describe('<HostEntityContent />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <HostEntityOverview hostName={hostName} identityFields={identityFields} />
-        </DocumentDetailsContext.Provider>
+        <HostEntityOverview
+          hostName={hostName}
+          identityFields={identityFields}
+          scopeId={panelContextValue.scopeId}
+        />
       </TestProviders>
     );
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -169,9 +170,11 @@ describe('<HostEntityContent />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <HostEntityOverview hostName={hostName} identityFields={identityFields} />
-        </DocumentDetailsContext.Provider>
+        <HostEntityOverview
+          hostName={hostName}
+          identityFields={identityFields}
+          scopeId={panelContextValue.scopeId}
+        />
       </TestProviders>
     );
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();

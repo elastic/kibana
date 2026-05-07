@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiSkeletonText,
   EuiText,
+  EuiToolTip,
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
@@ -22,42 +24,44 @@ import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-securi
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { buildUserNamesFilter } from '../../../../../common/search_strategy';
-import type { ESQuery } from '../../../../../common/typed_json';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { useDocumentDetailsContext } from '../../shared/context';
-import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
-import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
-import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
-import type { DescriptionList } from '../../../../../common/utility_types';
-import type { IdentityFields } from '../../shared/utils';
+import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
+import type { RiskSeverity } from '../../../../common/search_strategy';
+import { buildUserNamesFilter } from '../../../../common/search_strategy';
+import type { ESQuery } from '../../../../common/typed_json';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { getRiskFromEntityRecord } from '../../../flyout/entity_details/shared/entity_store_risk_utils';
+import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
+import type { DescriptionList } from '../../../../common/utility_types';
+import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 import {
   getField,
   isRiskSeverity,
   mergeLegacyIdentityWhenStoreEntityMissing,
   normalizeRiskLevel,
-} from '../../shared/utils';
-import { CellActions } from '../../shared/components/cell_actions';
+} from '../../../flyout/document_details/shared/utils';
+import {
+  noopCellActionRenderer,
+  type CellActionRenderer,
+} from '../../shared/components/cell_actions';
 import {
   FirstLastSeen,
   FirstLastSeenType,
-} from '../../../../common/components/first_last_seen/first_last_seen';
-import { EntityType } from '../../../../../common/entity_analytics/types';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { DescriptionListStyled } from '../../../../common/components/page';
-import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
-import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+} from '../../../common/components/first_last_seen/first_last_seen';
+import { EntityType } from '../../../../common/entity_analytics/types';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { DescriptionListStyled } from '../../../common/components/page';
+import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
+import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import {
   LAST_SEEN,
   USER_DOMAIN,
   USER_RISK_LEVEL,
-} from '../../../../overview/components/user_overview/translations';
+} from '../../../overview/components/user_overview/translations';
 import {
   ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
@@ -68,14 +72,15 @@ import {
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_USER_OVERVIEW_TEST_ID,
 } from './test_ids';
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
-import { RiskScoreDocTooltip } from '../../../../overview/components/common';
-import { PreviewLink } from '../../../shared/components/preview_link';
-import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
-import { AlertCountInsight } from '../../shared/components/alert_count_insight';
-import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
-import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
+import { RiskScoreDocTooltip } from '../../../overview/components/common';
+import { PreviewLink } from '../../../flyout/shared/components/preview_link';
+import { MisconfigurationsInsight } from '../../../flyout/document_details/shared/components/misconfiguration_insight';
+import { AlertCountInsight } from '../../../flyout/document_details/shared/components/alert_count_insight';
+import { useNavigateToUserDetails } from '../../../flyout/entity_details/user_right/hooks/use_navigate_to_user_details';
+import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 const USER_ICON = 'user';
 const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
@@ -92,6 +97,20 @@ export interface UserEntityOverviewProps {
    * so Overview section uses the same entity store data used to decide visibility.
    */
   entityRecord?: EntityStoreRecord | null;
+  /**
+   * Scope id used by cell actions and preview link.
+   */
+  scopeId?: string;
+  /**
+   * Renderer for cell actions on field values. Falls back to a no-op when not provided.
+   */
+  renderCellActions?: CellActionRenderer;
+  /**
+   * When provided, overrides the default expandable-flyout-based navigation.
+   * Required for flyout_v2, where the expandable-flyout actions have no listener.
+   * Called with `undefined` for the username link and with a path for alert/misconfig links.
+   */
+  onShowDetails?: (path?: EntityDetailsPath) => void;
 }
 
 export const USER_PREVIEW_BANNER = {
@@ -109,8 +128,10 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   userName,
   identityFields,
   entityRecord,
+  scopeId = '',
+  renderCellActions = noopCellActionRenderer,
+  onShowDetails,
 }) => {
-  const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
@@ -209,7 +230,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     queryId: USER_ENTITY_OVERVIEW_ID,
   });
 
-  const openDetailsPanel = useNavigateToUserDetails({
+  const navigateToUserDetails = useNavigateToUserDetails({
     userName,
     identityFields: userIdentityFields,
     entityId: entityRecord?.entity?.id,
@@ -220,6 +241,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     isPreviewMode: true, // setting to true to always open a new user flyout
     contextID: 'UserEntityOverview',
   });
+  const openDetailsPanel = onShowDetails ?? navigateToUserDetails;
 
   const userDetailsForDomain = entityStoreV2Enabled ? entityRecord : userDetails;
   const userDomainValue = useMemo(
@@ -230,16 +252,17 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     () => [
       {
         title: USER_DOMAIN,
-        description: userDomainValue ? (
-          <CellActions field={'user.domain'} value={userDomainValue}>
-            {userDomainValue}
-          </CellActions>
-        ) : (
-          getEmptyTagValue()
-        ),
+        description: userDomainValue
+          ? renderCellActions({
+              field: 'user.domain',
+              value: userDomainValue,
+              scopeId,
+              children: <>{userDomainValue}</>,
+            }) ?? getEmptyTagValue()
+          : getEmptyTagValue(),
       },
     ],
-    [userDomainValue]
+    [userDomainValue, renderCellActions, scopeId]
   );
 
   const userLastSeen: DescriptionList[] = useMemo(
@@ -311,6 +334,13 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   }, [userRiskData]);
 
   const displayName = entityRecord?.entity?.name ?? userName;
+
+  const handleNameClick = useCallback(() => onShowDetails?.(), [onShowDetails]);
+  const nameTextStyles = css`
+    font-size: ${xsFontSize};
+    font-weight: ${euiTheme.font.weight.bold};
+  `;
+  const nameText = <EuiText css={nameTextStyles}>{displayName}</EuiText>;
   return (
     <EuiFlexGroup
       direction="column"
@@ -324,22 +354,31 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
             <EuiIcon type={USER_ICON} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <PreviewLink
-              field="user.name"
-              value={userName}
-              entityId={entityRecord?.entity?.id}
-              scopeId={scopeId}
-              data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
-            >
-              <EuiText
-                css={css`
-                  font-size: ${xsFontSize};
-                  font-weight: ${euiTheme.font.weight.bold};
-                `}
+            {onShowDetails ? (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.securitySolution.flyout.document.insights.entities.userPreviewTooltip',
+                  { defaultMessage: 'Show user details' }
+                )}
               >
-                {displayName}
-              </EuiText>
-            </PreviewLink>
+                <EuiLink
+                  onClick={handleNameClick}
+                  data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
+                >
+                  {nameText}
+                </EuiLink>
+              </EuiToolTip>
+            ) : (
+              <PreviewLink
+                field="user.name"
+                value={userName}
+                entityId={entityRecord?.entity?.id}
+                scopeId={scopeId}
+                data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
+              >
+                {nameText}
+              </PreviewLink>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
