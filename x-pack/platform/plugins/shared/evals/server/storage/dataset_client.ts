@@ -18,6 +18,7 @@ import { DATASET_UUID_NAMESPACE, MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-com
 import type { DatasetStorageProperties } from './datasets_storage';
 import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
 import { ExampleAlreadyExistsError } from './example_already_exists_error';
+import { ExampleNotFoundError } from './example_not_found_error';
 import type { datasetsStorageSettings } from './datasets_storage';
 import type { DatasetExampleStorageProperties } from './examples_storage';
 import type { datasetExamplesStorageSettings } from './examples_storage';
@@ -168,6 +169,21 @@ export class DatasetClient {
     };
   }
 
+  async datasetExists(datasetId: string): Promise<boolean> {
+    const response = await this.datasetsStorage.search({
+      track_total_hits: false,
+      size: 1,
+      _source: ['name'],
+      query: {
+        term: {
+          _id: datasetId,
+        },
+      },
+    });
+
+    return response.hits.hits.length > 0;
+  }
+
   async getByName(name: string): Promise<DatasetWithExamples | undefined> {
     const response = await this.datasetsStorage.search({
       track_total_hits: false,
@@ -258,8 +274,8 @@ export class DatasetClient {
   }
 
   async delete(datasetId: string): Promise<boolean> {
-    const dataset = await this.getDatasetById(datasetId);
-    if (!dataset) {
+    const exists = await this.datasetExists(datasetId);
+    if (!exists) {
       return false;
     }
 
@@ -324,11 +340,17 @@ export class DatasetClient {
 
   async updateExample(
     exampleId: string,
-    updates: Partial<Pick<DatasetExampleStorageProperties, 'input' | 'output' | 'metadata'>>
-  ): Promise<ExampleDocument | undefined> {
+    updates: Partial<Pick<DatasetExampleStorageProperties, 'input' | 'output' | 'metadata'>>,
+    expectedDatasetId: string
+  ): Promise<ExampleDocument> {
+    const ownerDatasetId = await this.getExampleDatasetId(exampleId);
+    if (!ownerDatasetId || ownerDatasetId !== expectedDatasetId) {
+      throw new ExampleNotFoundError(exampleId);
+    }
+
     const existing = await this.getExampleById(exampleId);
     if (!existing) {
-      return undefined;
+      throw new ExampleNotFoundError(exampleId);
     }
 
     const updatedExample = normalizeExample({
@@ -365,13 +387,17 @@ export class DatasetClient {
 
     await this.touchDataset(existing.dataset_id);
 
-    return this.getExampleById(updatedId);
+    const updated = await this.getExampleById(updatedId);
+    if (!updated) {
+      throw new Error(`Failed to read back updated example "${updatedId}"`);
+    }
+    return updated;
   }
 
-  async deleteExample(exampleId: string): Promise<boolean> {
-    const existing = await this.getExampleById(exampleId);
-    if (!existing) {
-      return false;
+  async deleteExample(exampleId: string, expectedDatasetId: string): Promise<void> {
+    const datasetId = await this.getExampleDatasetId(exampleId);
+    if (!datasetId || datasetId !== expectedDatasetId) {
+      throw new ExampleNotFoundError(exampleId);
     }
 
     const response = await this.examplesStorage.delete({
@@ -379,33 +405,55 @@ export class DatasetClient {
     });
 
     if (response.result === 'deleted') {
-      await this.touchDataset(existing.dataset_id);
+      await this.touchDataset(datasetId);
     }
-
-    return response.result === 'deleted';
   }
 
   async deleteExamplesByDatasetId(datasetId: string): Promise<{ deleted: number }> {
-    const examples = await this.getExamplesByDatasetId(datasetId);
-    if (examples.length === 0) {
+    const searchResponse = await this.examplesStorage.search({
+      track_total_hits: true,
+      size: MAX_EXAMPLES_PER_DATASET,
+      _source: ['dataset_id'],
+      query: {
+        term: {
+          dataset_id: datasetId,
+        },
+      },
+    });
+
+    const total =
+      typeof searchResponse.hits.total === 'number'
+        ? searchResponse.hits.total
+        : searchResponse.hits.total?.value ?? 0;
+    if (total > MAX_EXAMPLES_PER_DATASET) {
+      throw new Error(
+        `Dataset "${datasetId}" has ${total} examples, exceeding the maximum of ${MAX_EXAMPLES_PER_DATASET}`
+      );
+    }
+
+    const ids = searchResponse.hits.hits
+      .filter((hit): hit is typeof hit & { _id: string } => typeof hit._id === 'string')
+      .map((hit) => hit._id);
+
+    if (ids.length === 0) {
       return { deleted: 0 };
     }
 
-    const response = await this.examplesStorage.bulk({
-      operations: examples.map((example) => ({
+    const bulkResponse = await this.examplesStorage.bulk({
+      operations: ids.map((id) => ({
         delete: {
-          _id: example.id,
+          _id: id,
         },
       })),
       throwOnFail: false,
     });
 
-    const { failed } = summarizeBulkResult(response.items);
+    const { failed } = summarizeBulkResult(bulkResponse.items);
     if (failed > 0) {
       throw new Error(`Failed to delete examples for dataset "${datasetId}"`);
     }
 
-    return { deleted: examples.length };
+    return { deleted: ids.length };
   }
 
   async upsert(
@@ -572,6 +620,21 @@ export class DatasetClient {
       id: hit._id,
       ...hit._source,
     };
+  }
+
+  private async getExampleDatasetId(exampleId: string): Promise<string | undefined> {
+    const response = await this.examplesStorage.search({
+      track_total_hits: false,
+      size: 1,
+      _source: ['dataset_id'],
+      query: {
+        term: {
+          _id: exampleId,
+        },
+      },
+    });
+
+    return response.hits.hits[0]?._source?.dataset_id;
   }
 
   private async getExamplesCountByDatasetId(datasetIds: string[]): Promise<Map<string, number>> {

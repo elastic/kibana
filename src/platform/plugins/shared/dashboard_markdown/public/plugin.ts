@@ -13,6 +13,8 @@ import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { ContentManagementPublicSetup } from '@kbn/content-management-plugin/public';
+import type { ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public/plugin';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { ADD_MARKDOWN_ACTION_ID, CONVERT_LEGACY_MARKDOWN_ACTION_ID } from './constants';
 import {
   APP_ICON,
@@ -22,10 +24,13 @@ import {
 } from '../common/constants';
 import { setKibanaServices } from './services/kibana_services';
 import type { MarkdownEmbeddableState } from '../server';
+import { setupLegacyVis } from './legacy_vis/setup';
 
 export interface MarkdownSetupDeps {
-  embeddable: EmbeddableSetup;
   contentManagement: ContentManagementPublicSetup;
+  embeddable: EmbeddableSetup;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
+  visualizations: VisualizationsSetup;
 }
 
 export interface MarkdownStartDeps {
@@ -37,7 +42,7 @@ export class DashboardMarkdownPlugin
 {
   public setup(
     core: CoreSetup<MarkdownStartDeps>,
-    { embeddable, contentManagement }: MarkdownSetupDeps
+    { contentManagement, embeddable, expressions, visualizations }: MarkdownSetupDeps
   ) {
     embeddable.registerEmbeddablePublicDefinition(MARKDOWN_EMBEDDABLE_TYPE, async () => {
       const { markdownEmbeddableFactory } = await import('./async_services');
@@ -72,6 +77,8 @@ export class DashboardMarkdownPlugin
       savedObjectName: APP_NAME,
       getIconForSavedObject: () => APP_ICON,
     });
+
+    setupLegacyVis(core.getStartServices, expressions, visualizations);
   }
 
   public start(core: CoreStart, plugins: MarkdownStartDeps) {
