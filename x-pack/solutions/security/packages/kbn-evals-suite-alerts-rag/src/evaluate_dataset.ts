@@ -14,7 +14,7 @@ import type {
   Example,
   GroundTruth,
 } from '@kbn/evals';
-import { createRagEvaluators } from '@kbn/evals';
+import { createRagEvaluators, withRetry } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AlertDocument, AlertsRagCategory, AlertsRagExample } from './dataset';
 import { createAlertsFaithfulnessEvaluator } from './evaluators/alerts_rag_faithfulness_evaluator';
@@ -154,16 +154,29 @@ export const createEvaluateAlertsRagDataset = ({
           const { question, context } = input;
           log.debug(`Alerts RAG task: "${question}" with ${context.length} alert documents`);
           const contextText = buildAlertContextText(context);
-          const response = await inferenceClient.chatComplete({
-            system:
-              'You are a security analyst. Answer questions about the provided security alerts accurately and concisely. Reference specific alert IDs when relevant.',
-            messages: [
-              {
-                role: MessageRole.User,
-                content: `Security alerts:\n\n${contextText}\n\nQuestion: ${question}`,
+          const response = await withRetry(
+            () =>
+              inferenceClient.chatComplete({
+                system:
+                  'You are a security analyst. Answer questions about the provided security alerts accurately and concisely. Reference specific alert IDs when relevant.',
+                messages: [
+                  {
+                    role: MessageRole.User,
+                    content: `Security alerts:\n\n${contextText}\n\nQuestion: ${question}`,
+                  },
+                ],
+              }),
+            {
+              label: 'AlertsRAG task chatComplete',
+              onRetry: ({ attempt, maxAttempts, delayMs, error }) => {
+                log.warning(
+                  `AlertsRAG task: chatComplete rate limited (attempt ${attempt}/${maxAttempts}); retrying in ${delayMs}ms. Error: ${
+                    error instanceof Error ? error.message : String(error)
+                  }`
+                );
               },
-            ],
-          });
+            }
+          );
           return { answer: response.content };
         },
       },

@@ -9,6 +9,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
+import { withRetry } from '@kbn/evals';
 import type { AlertsRagDatasetExample, AlertsRagTaskOutput } from '../evaluate_dataset';
 import type { AlertDocument } from '../dataset';
 import { ALERTS_RAG_THRESHOLDS } from '../thresholds';
@@ -95,10 +96,23 @@ export const createAlertsFaithfulnessEvaluator = ({
     const userPrompt = buildUserPrompt(question, contextText, answer);
 
     try {
-      const response = await inferenceClient.chatComplete({
-        system: SYSTEM_PROMPT,
-        messages: [{ role: MessageRole.User, content: userPrompt }],
-      });
+      const response = await withRetry(
+        () =>
+          inferenceClient.chatComplete({
+            system: SYSTEM_PROMPT,
+            messages: [{ role: MessageRole.User, content: userPrompt }],
+          }),
+        {
+          label: `${EVALUATOR_NAME} chatComplete`,
+          onRetry: ({ attempt, maxAttempts, delayMs, error }) => {
+            log.warning(
+              `${EVALUATOR_NAME}: chatComplete rate limited (attempt ${attempt}/${maxAttempts}); retrying in ${delayMs}ms. Error: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+          },
+        }
+      );
 
       const parsed = parseFaithfulnessResponse(response.content);
       if (!parsed) {
