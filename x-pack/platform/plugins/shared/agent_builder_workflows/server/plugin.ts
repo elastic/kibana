@@ -17,8 +17,17 @@ import type {
   AgentBuilderWorkflowsPluginStart,
 } from './types';
 import { WorkflowsAiTelemetryClient } from './telemetry/workflows_ai_telemetry_client';
-import { registerWorkflowAgentBuilderIntegration } from './register_workflow_agent_builder_integration';
 import { createWorkflowSmlType } from './sml_types/workflow';
+import { registerWorkflowYamlAttachment } from './attachment_types/workflow_yaml_attachment';
+import { registerWorkflowYamlDiffAttachment } from './attachment_types/workflow_yaml_diff_attachment';
+import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
+import { registerGetConnectorsTool } from './tools/get_connectors_tool';
+import { registerGetExamplesTool } from './tools/get_examples_tool';
+import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
+import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitions_tool';
+import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
+import { registerWorkflowEditTools } from './tools/workflow_edit_tools';
+import { registerWorkflowExecuteStepTool } from './tools/workflow_execute_step_tool';
 import { getWorkflowExecutionStatusTool } from './tools/get_workflow_execution_status';
 import { resumeWorkflowExecutionTool } from './tools/resume_workflow_execution';
 
@@ -50,15 +59,26 @@ export class AgentBuilderWorkflowsPlugin
 
     const aiTelemetryClient = new WorkflowsAiTelemetryClient(coreSetup.analytics, this.logger);
 
-    registerWorkflowAgentBuilderIntegration({
-      agentBuilder,
-      logger: this.logger,
-      api,
-      aiTelemetryClient,
-    });
+    // Workflow tools
+    registerValidateWorkflowTool(agentBuilder, api);
+    registerGetStepDefinitionsTool(agentBuilder, api);
+    registerGetTriggerDefinitionsTool(agentBuilder);
+    registerGetConnectorsTool(agentBuilder, api);
+    registerGetExamplesTool(agentBuilder);
+    registerWorkflowExecuteStepTool(agentBuilder, api);
+    registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
 
+    // Workflow attachment types
+    registerWorkflowYamlAttachment(agentBuilder, api);
+    registerWorkflowYamlDiffAttachment(agentBuilder);
+
+    // Workflow authoring skill
+    agentBuilder.skills.register(workflowAuthoringSkill);
+
+    // Workflow SML type for the agent context layer
     agentContextLayer.registerType(createWorkflowSmlType(api));
 
+    // Platform-level workflow execution tools
     const platformTools: Array<BuiltinToolDefinition<any>> = [
       getWorkflowExecutionStatusTool({ workflowsManagement }),
       resumeWorkflowExecutionTool({ workflowsManagement }),
