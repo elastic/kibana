@@ -49,7 +49,3 @@ export const CRITICAL_FILES_JEST_INTEGRATION_TESTS = [
   '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
   '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
 ];
-
-// CRITICAL_FILES_SCOUT was moved to '@kbn/scout-info' and is consumed by
-// `node scripts/scout discover-playwright-configs --change-summary` (the
-// Scout CLI now owns Scout-specific selective-testing decisions).
