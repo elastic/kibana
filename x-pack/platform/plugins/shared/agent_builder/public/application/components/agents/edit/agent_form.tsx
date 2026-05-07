@@ -291,6 +291,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             tools={tools}
             isLoading={isLoading}
             isFormDisabled={isFormDisabled || !canEditAgent}
+            enableElasticCapabilities={enableElasticCapabilities}
           />
         ),
         append: (
@@ -317,6 +318,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             skills={skills}
             isLoading={isLoading}
             isFormDisabled={isFormDisabled || !manageAgents}
+            enableElasticCapabilities={enableElasticCapabilities}
           />
         ),
         append: (
@@ -345,6 +347,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                   plugins={plugins}
                   isLoading={isLoading}
                   isFormDisabled={isFormDisabled || !manageAgents}
+                  enableElasticCapabilities={enableElasticCapabilities}
                 />
               ),
               append: (
@@ -381,6 +384,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       activePluginsCount,
       manageAgents,
       isExperimentalFeaturesEnabled,
+      enableElasticCapabilities,
     ]
   );
 

@@ -18,6 +18,7 @@ interface ToolsTabProps {
   tools: ToolDefinition[];
   isLoading: boolean;
   isFormDisabled: boolean;
+  enableElasticCapabilities: boolean;
 }
 
 export const ToolsTab: React.FC<ToolsTabProps> = ({
@@ -25,6 +26,7 @@ export const ToolsTab: React.FC<ToolsTabProps> = ({
   tools,
   isLoading,
   isFormDisabled,
+  enableElasticCapabilities,
 }) => {
   const [showActiveOnly, setShowActiveOnly] = useState(false);
   const showActiveOnlyChangeHandler = !isFormDisabled ? setShowActiveOnly : undefined;
@@ -44,6 +46,7 @@ export const ToolsTab: React.FC<ToolsTabProps> = ({
             disabled={isFormDisabled}
             showActiveOnly={showActiveOnly || isFormDisabled}
             onShowActiveOnlyChange={showActiveOnlyChangeHandler}
+            enableElasticCapabilities={enableElasticCapabilities}
           />
         )}
       />
