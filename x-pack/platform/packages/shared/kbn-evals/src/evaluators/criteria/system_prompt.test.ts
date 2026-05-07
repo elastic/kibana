@@ -43,7 +43,7 @@ describe('criteria evaluator system prompt', () => {
   });
 
   it('includes a worked example for a disjunctive criterion satisfied by the second branch', () => {
-    expect(systemPrompt).toMatch(/Worked example B|disjunctive criterion/i);
+    expect(systemPrompt).toMatch(/Example B|disjunctive criterion/i);
     expect(systemPrompt).toMatch(
       /clearly state (that )?no .* (data )?is (not )?available|no login data is available/i
     );
@@ -52,5 +52,11 @@ describe('criteria evaluator system prompt', () => {
   it('explains that conjunctive ("AND") criteria require both parts to hold', () => {
     expect(systemPrompt).toMatch(/conjunctive/i);
     expect(systemPrompt).toMatch(/both parts must hold/i);
+  });
+
+  it('carves out an Exception for criteria that explicitly require success or a return value', () => {
+    expect(systemPrompt).toMatch(/\*\*Exception:\*\*/);
+    expect(systemPrompt).toMatch(/successfully executes|returns|catches/i);
+    expect(systemPrompt).toMatch(/resolution matters|evaluate (the )?return|evaluate resolution/i);
   });
 });
