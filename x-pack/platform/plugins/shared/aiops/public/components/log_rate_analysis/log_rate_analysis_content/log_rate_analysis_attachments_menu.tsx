@@ -6,8 +6,7 @@
  */
 
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import { LazySavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
-import { withSuspense } from '@kbn/shared-ux-utility';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
@@ -32,8 +31,6 @@ import { CASES_TOAST_MESSAGES_TITLES } from '../../../cases/constants';
 import { useCasesModal } from '../../../hooks/use_cases_modal';
 import { useDataSource } from '../../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 interface LogRateAnalysisAttachmentsMenuProps {
   windowParameters?: WindowParameters;
