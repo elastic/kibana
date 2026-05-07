@@ -2730,6 +2730,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 
 # Security Solution initialization
 /x-pack/solutions/security/plugins/security_solution/common/api/initialization @elastic/security-detection-engine @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/public/common/components/initialization @elastic/security-detection-engine @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization @elastic/security-detection-engine @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/create_list_indices @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views @elastic/security-threat-hunting
