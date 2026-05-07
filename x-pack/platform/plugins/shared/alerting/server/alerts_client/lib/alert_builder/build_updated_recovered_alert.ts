@@ -15,6 +15,7 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
+  ALERT_TRACKED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import type { RawAlertInstance } from '@kbn/alerting-state-types';
@@ -28,6 +29,7 @@ interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   legacyRawAlert: RawAlertInstance;
   runTimestamp?: string;
   timestamp: string;
+  tracked: boolean;
   rule: AlertRule;
 }
 
@@ -41,6 +43,7 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   legacyRawAlert,
   runTimestamp,
   timestamp,
+  tracked,
 }: BuildUpdatedRecoveredAlertOpts<AlertData>): Alert & AlertData => {
   // Make sure that any alert fields that are updatable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
@@ -57,9 +60,9 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     // Set latest flapping history
     [ALERT_FLAPPING_HISTORY]: legacyRawAlert.meta?.flappingHistory,
     // For an "ongoing recovered" alert, we do not want to update the execution UUID to the current one so it does
-    // not get returned for summary alerts. In the future, we may want to restore this and add another field to the
-    // alert doc indicating that this is an ongoing recovered alert that can be used for querying.
+    // not get returned for summary alerts.
     [ALERT_RULE_EXECUTION_UUID]: get(alert, ALERT_RULE_EXECUTION_UUID),
+    [ALERT_TRACKED]: tracked,
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
   };
 

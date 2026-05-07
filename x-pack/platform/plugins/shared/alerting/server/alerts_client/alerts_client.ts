@@ -159,7 +159,6 @@ export class AlertsClient<
       try {
         this.trackedAlerts = await getTrackedAlerts<AlertData>({
           ruleId: this.options.rule.id,
-          lookBackWindow: opts.flappingSettings.lookBackWindow,
           maxAlertLimit: this.legacyAlertsClient.getMaxAlertLimit() || DEFAULT_MAX_ALERTS,
           activeAlertsFromState: opts.activeAlertsFromState,
           recoveredAlertsFromState: opts.recoveredAlertsFromState,
