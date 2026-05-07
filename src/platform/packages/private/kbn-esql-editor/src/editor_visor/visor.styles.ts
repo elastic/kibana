@@ -138,10 +138,18 @@ export const visorStyles = (
       }
     `,
     nlInputWrapper: css`
-      height: ${euiTheme.size.xl};
+      min-height: ${euiTheme.size.xl};
       padding-right: ${euiTheme.size.xs};
       overflow: visible;
       position: relative;
+    `,
+    searchInner: css`
+      width: 100%;
+    `,
+    submitButtonWrapper: css`
+      padding-right: ${euiTheme.size.xs};
+      padding-left: ${euiTheme.size.xs};
+      flex-shrink: 0;
     `,
     nlInput: css`
       box-shadow: none !important;

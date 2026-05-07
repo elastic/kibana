@@ -81,6 +81,7 @@ describe('Quick search visor', () => {
 
   let props: QuickSearchVisorProps;
   beforeEach(() => {
+    window.localStorage.clear();
     (corePluginMock.http.get as jest.Mock).mockImplementation((url: string) => {
       if (url.includes('/internal/esql/autocomplete/sources/')) {
         return Promise.resolve([

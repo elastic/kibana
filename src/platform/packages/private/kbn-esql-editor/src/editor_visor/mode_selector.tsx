@@ -28,11 +28,18 @@ const modeOptions: Array<EuiComboBoxOptionOption<VisorMode>> = [
 
 interface ModeSelectorProps {
   onModeChange: (mode: VisorMode) => void;
+  initialMode?: VisorMode;
 }
 
-export function ModeSelector({ onModeChange }: ModeSelectorProps) {
+export function ModeSelector({ onModeChange, initialMode }: ModeSelectorProps) {
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<VisorMode>>>(
-    [modeOptions[0]]
+    () => {
+      const initial =
+        initialMode != null
+          ? modeOptions.find((option) => option.value === initialMode)
+          : undefined;
+      return [initial ?? modeOptions[0]];
+    }
   );
   const inputRefSet = useRef(false);
 
