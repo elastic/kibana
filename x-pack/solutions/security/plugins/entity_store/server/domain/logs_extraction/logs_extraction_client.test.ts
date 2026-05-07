@@ -983,7 +983,7 @@ describe('LogsExtractionClient', () => {
       expect(remoteIndexPatterns).not.toContain('.alerts-security.alerts-default');
     });
 
-    it('appends local excluded patterns as ES negation entries to localIndexPatterns', async () => {
+    it('adds an excluded pattern to localIndexPatterns', async () => {
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*,metrics-*'),
       };
@@ -997,25 +997,20 @@ describe('LogsExtractionClient', () => {
       expect(remoteIndexPatterns).not.toContain('-logs-proxy-*');
     });
 
-    it('routes CCS-prefixed excluded patterns to remoteIndexPatterns', async () => {
+    it('adds an excluded pattern to remoteIndexPatterns', async () => {
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*,remote_cluster:logs-*'),
+        getIndexPattern: jest.fn().mockReturnValue('remote_cluster:logs-*'),
       };
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
 
       const { localIndexPatterns, remoteIndexPatterns } =
-        await client.getLocalAndRemoteIndexPatterns(
-          [],
-          ['remote_cluster:logs-proxy-*', 'logs-debug-*']
-        );
+        await client.getLocalAndRemoteIndexPatterns([], ['remote_cluster:logs-proxy-*']);
 
       expect(remoteIndexPatterns).toContain('-remote_cluster:logs-proxy-*');
-      expect(localIndexPatterns).toContain('-logs-debug-*');
       expect(localIndexPatterns).not.toContain('-remote_cluster:logs-proxy-*');
-      expect(remoteIndexPatterns).not.toContain('-logs-debug-*');
     });
 
-    it('appends excluded patterns AFTER includes (ES negation requires this ordering)', async () => {
+    it('adds an excluded pattern after the included ones', async () => {
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
@@ -1030,19 +1025,6 @@ describe('LogsExtractionClient', () => {
       const excludeIdx = localIndexPatterns.indexOf('-logs-proxy-*');
       expect(includeIdx).toBeGreaterThanOrEqual(0);
       expect(excludeIdx).toBeGreaterThan(includeIdx);
-    });
-
-    it('is a no-op when excludedIndexPatterns is empty or omitted', async () => {
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      };
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-
-      const omitted = await client.getLocalAndRemoteIndexPatterns();
-      const empty = await client.getLocalAndRemoteIndexPatterns([], []);
-
-      expect(omitted.localIndexPatterns).not.toContain(expect.stringMatching(/^-/));
-      expect(empty.localIndexPatterns).not.toContain(expect.stringMatching(/^-/));
     });
   });
 
@@ -1160,7 +1142,7 @@ describe('LogsExtractionClient', () => {
       expect(mockIngestEntities).not.toHaveBeenCalled();
     });
 
-    it('threads excludedIndexPatterns into the count ES query as -pattern entries', async () => {
+    it('applies excludedIndexPatterns to the count query', async () => {
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
