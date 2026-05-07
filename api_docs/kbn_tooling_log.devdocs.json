@@ -85,6 +85,7 @@
                 "lineNumber": 46,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLogTextWriterConfig",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -109,6 +110,7 @@
                 "lineNumber": 46,
                 "columnNumber": 58,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLogOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -714,6 +716,7 @@
                 "lineNumber": 18,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogLevel",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -766,6 +769,7 @@
                 "lineNumber": 33,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "Message",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -873,6 +877,7 @@
                 "lineNumber": 91,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLogTextWriterConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -923,6 +928,7 @@
                 "lineNumber": 103,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "Message",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1007,6 +1013,7 @@
                 "lineNumber": 132,
                 "columnNumber": 74,
                 "deprecated": false,
+                "docsReferencedTypeName": "Message",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1122,6 +1129,7 @@
             "lineNumber": 55,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "LogLevel",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1159,6 +1167,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1514,6 +1523,7 @@
                 "lineNumber": 22,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "Message",
                 "trackAdoption": false,
                 "isRequired": true
               }

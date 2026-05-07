@@ -9,7 +9,7 @@ paths:
       description: Get a list of all live queries.
       operationId: OsqueryFindLiveQueries
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: kuery
           in: query
@@ -48,19 +48,58 @@ paths:
             application/json:
               schema:
                 $ref: './find_live_query.schema.yaml#/components/schemas/FindLiveQueryResponse'
+              examples:
+                liveQueriesList:
+                  summary: A list of recent live queries
+                  value:
+                    data:
+                      total: 1
+                      items:
+                        - _source:
+                            action_id: '3c42c847-eb30-4452-80e0-728584042334'
+                            expiration: '2023-10-31T00:00:00Z'
+                            '@timestamp': '2023-10-31T00:00:00Z'
+                            agents:
+                              - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                            user_id: 'elastic'
+                            queries:
+                              - action_id: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+                                id: '6724a474-cbba-41ef-a1aa-66aebf0879e2'
+                                query: 'select * from uptime;'
+                                saved_query_id: '42ba9c50-0cc5-11ed-aa1d-2b27890bc90d'
+                                ecs_mapping:
+                                  host.uptime:
+                                    field: 'total_seconds'
+                                agents:
+                                  - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
 
     post:
       summary: Create a live query
       description: Create and run a live query.
       operationId: OsqueryCreateLiveQuery
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: './create_live_query.schema.yaml#/components/schemas/CreateLiveQueryRequestBody'
+            examples:
+              singleQueryAllAgents:
+                summary: Run a single query on all agents
+                value:
+                  query: 'select * from uptime;'
+                  agent_all: true
+                  ecs_mapping:
+                    host.uptime:
+                      field: 'total_seconds'
+              targetedQuery:
+                summary: Run a query against specific agents
+                value:
+                  query: 'select * from processes;'
+                  agent_ids:
+                    - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
       responses:
         '200':
           description: Indicates a successful call.
@@ -68,6 +107,27 @@ paths:
             application/json:
               schema:
                 $ref: './create_live_query.schema.yaml#/components/schemas/CreateLiveQueryResponse'
+              examples:
+                liveQueryCreated:
+                  summary: Live query created
+                  value:
+                    data:
+                      action_id: '3c42c847-eb30-4452-80e0-728584042334'
+                      '@timestamp': '2022-07-26T09:59:32.220Z'
+                      expiration: '2022-07-26T10:04:32.220Z'
+                      type: 'INPUT_ACTION'
+                      input_type: 'osquery'
+                      agent_all: true
+                      agents:
+                        - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                      user_id: 'elastic'
+                      queries:
+                        - action_id: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+                          id: '6724a474-cbba-41ef-a1aa-66aebf0879e2'
+                          query: 'select * from uptime;'
+                          timeout: 120
+                          agents:
+                            - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
 
   /api/osquery/live_queries/{id}:
     get:
@@ -75,7 +135,7 @@ paths:
       description: Get the details of a live query using the query ID.
       operationId: OsqueryGetLiveQueryDetails
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: id
           in: path
@@ -92,6 +152,151 @@ paths:
             application/json:
               schema:
                 $ref: './find_live_query.schema.yaml#/components/schemas/FindLiveQueryDetailsResponse'
+              examples:
+                liveQueryDetails:
+                  summary: Live query details with execution status
+                  value:
+                    data:
+                      action_id: '3c42c847-eb30-4452-80e0-728584042334'
+                      expiration: '2022-07-26T10:04:32.220Z'
+                      '@timestamp': '2022-07-26T09:59:32.220Z'
+                      agents:
+                        - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                      user_id: 'elastic'
+                      status: 'completed'
+                      queries:
+                        - action_id: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+                          id: '6724a474-cbba-41ef-a1aa-66aebf0879e2'
+                          query: 'select * from uptime;'
+                          agents:
+                            - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                          docs: 1
+                          failed: 0
+                          pending: 0
+                          responded: 1
+                          successful: 1
+                          status: 'completed'
+
+  /api/osquery/live_queries/{id}/results/{actionId}/_export:
+    post:
+      summary: Export live query results
+      description: >
+        Export the results of a live query action as a downloadable file. The
+        response is a streaming file attachment in the requested format.
+
+        This endpoint is gated behind the `exportResults` experimental feature
+        flag and must be enabled in `kibana.yml` before use:
+
+        ```yaml
+        xpack.osquery.enableExperimental:
+          - exportResults
+        ```
+      operationId: OsqueryExportLiveQueryResults
+      x-codegen-enabled: true
+      x-labels: [ ]
+      #      x-labels: [ess]
+      #      x-state: Added in 9.5.0
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'The ID of the live query (parent action ID).'
+          schema:
+            description: 'The ID of the live query.'
+            type: string
+            example: '3c42c847-eb30-4452-80e0-728584042334'
+        - name: actionId
+          in: path
+          required: true
+          description: 'The query action ID whose results are exported. Filters the export to rows for this specific per-agent action.'
+          schema:
+            description: 'The ID of the query action.'
+            type: string
+            example: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+        - name: format
+          in: query
+          required: true
+          description: 'The output format of the exported file.'
+          schema:
+            $ref: '../export/export_results.schema.yaml#/components/schemas/ExportFormat'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '../export/export_results.schema.yaml#/components/schemas/ExportRequestBody'
+      responses:
+        '200':
+          description: >
+            A downloadable file in the requested format. The `Content-Disposition`
+            header contains the suggested filename.
+          headers:
+            Content-Disposition:
+              description: 'Attachment disposition with a generated filename, e.g. `attachment; filename="osquery-results-{actionId}-{timestamp}.ndjson"`.'
+              schema:
+                type: string
+                example: 'attachment; filename="osquery-results-609c4c66-ba3d-43fa-afdd-53e244577aa0-2026-04-30T09-12-00-000Z.ndjson"'
+          content:
+            application/ndjson:
+              schema:
+                description: >
+                  Newline-delimited JSON stream. The first line is a metadata
+                  object; each subsequent line is a result row.
+                type: string
+                format: binary
+              example: |
+                {"_meta":{"action_id":"609c4c66-ba3d-43fa-afdd-53e244577aa0","query":"SELECT * FROM users;","timestamp":"2026-04-30T09:12:00.000Z","exported_by":"elastic","format":"ndjson","total_results":2}}
+                {"@timestamp":"2026-04-30T09:11:58.321Z","agent":{"id":"980a6b73-0b03-4d1e-8915-67c202e4a980","name":"prod-host-1"},"user":{"id":"1000","name":"ubuntu"}}
+                {"@timestamp":"2026-04-30T09:11:58.456Z","agent":{"id":"980a6b73-0b03-4d1e-8915-67c202e4a980","name":"prod-host-1"},"user":{"id":"0","name":"root"}}
+            application/json:
+              schema:
+                description: >
+                  A JSON object with `_meta` (export metadata) and `results` (all
+                  result rows). Rows are held in memory before writing; prefer
+                  `ndjson` for large exports.
+                $ref: '../export/export_results.schema.yaml#/components/schemas/ExportJsonResponse'
+            text/csv:
+              schema:
+                description: >
+                  CSV file with a header row derived from the ECS mapping of the
+                  originating query (when available). No metadata block is
+                  included in CSV output.
+                type: string
+                format: binary
+              example: |
+                agent.name,agent.id,user.id,user.name
+                prod-host-1,980a6b73-0b03-4d1e-8915-67c202e4a980,1000,ubuntu
+                prod-host-1,980a6b73-0b03-4d1e-8915-67c202e4a980,0,root
+        '400':
+          description: >
+            Bad request. Possible causes: invalid or missing `format` query
+            parameter, malformed KQL in the request body, invalid `esFilters`,
+            or the result count exceeds the 500,000-row limit.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Export limited to 500,000 results. Found 500,001. Please add filters to narrow results.'
+        '404':
+          description: >
+            The parent live query action `{id}` was found but does not contain
+            a query whose `action_id` matches `{actionId}`. This typically means
+            the `id` and `actionId` URL parameters refer to different queries.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Live query action not found'
+        '403':
+          description: >
+            The authenticated user does not have the `osquery-readLiveQueries`
+            privilege required to export live query results.
 
   /api/osquery/live_queries/{id}/results/{actionId}:
     get:
@@ -99,7 +304,7 @@ paths:
       description: Get the results of a live query using the query action ID.
       operationId: OsqueryGetLiveQueryResults
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: id
           in: path
@@ -154,3 +359,24 @@ paths:
             application/json:
               schema:
                 $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsResponse'
+              examples:
+                liveQueryResults:
+                  summary: Result rows from a live query execution
+                  value:
+                    data:
+                      total: 2
+                      edges:
+                        - _id: 'doc1'
+                          _source:
+                            action_id: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+                            agent:
+                              id: '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                            osquery:
+                              total_seconds: '12345'
+                        - _id: 'doc2'
+                          _source:
+                            action_id: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+                            agent:
+                              id: '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                            osquery:
+                              total_seconds: '67890'

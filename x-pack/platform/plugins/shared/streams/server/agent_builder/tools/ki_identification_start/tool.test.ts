@@ -6,7 +6,7 @@
  */
 
 import { createKiIdentificationStartTool } from './tool';
-import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
+import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
 import { OnboardingStep } from '@kbn/streams-schema';
 
 describe('createKiIdentificationStartTool', () => {

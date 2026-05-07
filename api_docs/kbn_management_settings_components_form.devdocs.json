@@ -10,7 +10,15 @@
         "tags": [],
         "label": "Form",
         "description": [
-          "\nComponent for displaying a set of {@link FieldRow} in a form."
+          "\nComponent for displaying a set of ",
+          {
+            "pluginId": "@kbn/management-settings-components-form",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFormPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " in a form."
         ],
         "signature": [
           "(props: ",
@@ -39,6 +47,7 @@
             "lineNumber": 46,
             "columnNumber": 22,
             "deprecated": false,
+            "docsReferencedTypeName": "FormProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -53,7 +62,15 @@
         "tags": [],
         "label": "FormKibanaProvider",
         "description": [
-          "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FormProvider}."
+          "\nKibana-specific Provider that maps Kibana plugins and services to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-form",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFormPluginApi",
+            "section": "def-public.FormProvider",
+            "text": "FormProvider"
+          },
+          "."
         ],
         "signature": [
           "({ children, ...deps }: React.PropsWithChildren<",
@@ -108,7 +125,15 @@
         "tags": [],
         "label": "FormProvider",
         "description": [
-          "\nReact Provider that provides services to a {@link Form} component and its dependents."
+          "\nReact Provider that provides services to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-form",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFormPluginApi",
+            "section": "def-public.Form",
+            "text": "Form"
+          },
+          " component and its dependents."
         ],
         "signature": [
           "({ children, ...services }: ",
@@ -135,6 +160,7 @@
             "lineNumber": 32,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "FormProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -153,7 +179,15 @@
         "tags": [],
         "label": "FormKibanaDependencies",
         "description": [
-          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a {@link Form} component and its dependents."
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a ",
+          {
+            "pluginId": "@kbn/management-settings-components-form",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFormPluginApi",
+            "section": "def-public.Form",
+            "text": "Form"
+          },
+          " component and its dependents."
         ],
         "signature": [
           "KibanaDependencies & ",
@@ -187,7 +221,15 @@
         "tags": [],
         "label": "FormServices",
         "description": [
-          "\nContextual services used by a {@link Form} component and its dependents."
+          "\nContextual services used by a ",
+          {
+            "pluginId": "@kbn/management-settings-components-form",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFormPluginApi",
+            "section": "def-public.Form",
+            "text": "Form"
+          },
+          " component and its dependents."
         ],
         "signature": [
           {

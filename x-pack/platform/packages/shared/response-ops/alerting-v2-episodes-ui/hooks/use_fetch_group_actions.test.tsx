@@ -34,7 +34,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: [],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );
@@ -50,6 +50,8 @@ describe('useFetchGroupActions', () => {
         last_snooze_action: 'snooze',
         snooze_expiry: '2035-01-02T12:00:00.000Z',
         tags: ['t1', 't2'],
+        last_snooze_actor: 'actor-snooze',
+        last_deactivate_actor: 'actor-deactivate',
       },
     ];
     fetchGroupActionsMock.mockResolvedValue(rows);
@@ -58,7 +60,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: ['gh-1'],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );
@@ -72,6 +74,8 @@ describe('useFetchGroupActions', () => {
       lastSnoozeAction: 'snooze',
       snoozeExpiry: '2035-01-02T12:00:00.000Z',
       tags: ['t1', 't2'],
+      lastSnoozeActor: 'actor-snooze',
+      lastDeactivateActor: 'actor-deactivate',
     });
   });
 
@@ -84,6 +88,8 @@ describe('useFetchGroupActions', () => {
         last_snooze_action: null,
         snooze_expiry: null,
         tags: 'solo',
+        last_snooze_actor: null,
+        last_deactivate_actor: null,
       },
     ];
     fetchGroupActionsMock.mockResolvedValue(rows);
@@ -92,7 +98,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: ['gh-2'],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );
@@ -110,6 +116,8 @@ describe('useFetchGroupActions', () => {
         last_snooze_action: null,
         snooze_expiry: null,
         tags: null,
+        last_snooze_actor: null,
+        last_deactivate_actor: null,
       },
     ];
     fetchGroupActionsMock.mockResolvedValue(rows);
@@ -118,7 +126,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: ['gh-3'],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );
@@ -136,6 +144,8 @@ describe('useFetchGroupActions', () => {
         last_snooze_action: 'snooze',
         snooze_expiry: null,
         tags: [],
+        last_snooze_actor: null,
+        last_deactivate_actor: null,
       },
       {
         group_hash: 'dup',
@@ -144,6 +154,8 @@ describe('useFetchGroupActions', () => {
         last_snooze_action: null,
         snooze_expiry: null,
         tags: [],
+        last_snooze_actor: null,
+        last_deactivate_actor: null,
       },
     ];
     fetchGroupActionsMock.mockResolvedValue(rows);
@@ -152,7 +164,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: ['dup'],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );

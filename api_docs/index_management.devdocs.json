@@ -400,6 +400,7 @@
               "lineNumber": 102,
               "columnNumber": 30,
               "deprecated": false,
+              "docsReferencedTypeName": "IndexManagementAppMountParams",
               "trackAdoption": false,
               "isRequired": true
             }
