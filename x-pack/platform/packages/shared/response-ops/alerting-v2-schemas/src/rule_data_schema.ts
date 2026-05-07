@@ -185,6 +185,31 @@ const noDataSchema = z
   .strict()
   .describe('No data handling configuration.');
 
+/** Origin (optional) */
+
+export const originSchema = z
+  .string()
+  .min(1)
+  .max(128)
+  .describe('Where the rule was created, e.g. "discover", "rule_builder", "agent_builder".');
+
+/** Builder config (optional) */
+
+export const builderConfigSchema = z
+  .object({
+    type: z
+      .string()
+      .min(1)
+      .max(128)
+      .describe('Builder type identifier, e.g. "threshold", "latency_threshold".'),
+    config: z
+      .string()
+      .max(4096)
+      .describe('JSON-serialized builder form state (opaque to the server).'),
+  })
+  .strict()
+  .describe('Guided rule builder configuration for reconstructing the form on edit.');
+
 /** Artifacts (optional) */
 
 const artifactSchema = z
@@ -229,6 +254,8 @@ const createRuleDataBaseSchema = z
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
     artifacts: z.array(artifactSchema).optional(),
+    origin: originSchema.optional(),
+    builder_config: builderConfigSchema.optional(),
   })
   .strip();
 
@@ -280,6 +307,8 @@ export const updateRuleDataSchema = z
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).optional().nullable(),
+    origin: originSchema.optional(),
+    builder_config: builderConfigSchema.optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();

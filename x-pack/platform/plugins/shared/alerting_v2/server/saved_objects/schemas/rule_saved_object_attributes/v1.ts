@@ -87,6 +87,13 @@ export const ruleSavedObjectAttributesSchema = schema.object({
       { maxSize: 100 }
     )
   ),
+  origin: schema.maybe(schema.string()),
+  builder_config: schema.maybe(
+    schema.object({
+      type: schema.string(),
+      config: schema.string(),
+    })
+  ),
   // Server-managed fields
   enabled: schema.boolean(),
   createdBy: schema.nullable(schema.string()),

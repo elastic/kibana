@@ -151,6 +151,8 @@ export interface RuleRequestCommon {
     recovering_timeframe?: string;
   };
   artifacts?: RuleArtifactPayload;
+  origin?: string;
+  builder_config?: { type: string; config: string };
 }
 
 const mapArtifacts = (artifacts: FormValues['artifacts']): RuleRequestCommon['artifacts'] => {
@@ -201,6 +203,8 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     recovery_policy: mapRecoveryPolicy(recoveryPolicy),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
+    ...(formValues.origin ? { origin: formValues.origin } : {}),
+    ...(formValues.builderConfig ? { builder_config: formValues.builderConfig } : {}),
   };
 };
 
@@ -287,5 +291,9 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
     stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),
     ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
+    ...(rule.origin ? { origin: rule.origin } : {}),
+    ...(rule.builder_config
+      ? { builderConfig: { type: rule.builder_config.type, config: rule.builder_config.config } }
+      : {}),
   };
 };

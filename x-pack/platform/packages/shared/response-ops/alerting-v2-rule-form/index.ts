@@ -27,6 +27,20 @@ export { RuleResultsPreview } from './form';
 // Context - for consumers who need custom integrations
 export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './form';
 
+export {
+  KindField,
+  AlertConditionsFieldGroup,
+  AttachmentRunbookFieldGroup,
+  RuleDetailsFieldGroup,
+  RuleExecutionFieldGroup,
+} from './form';
+
+export { QueryResultsGrid } from './form';
+export type { QueryResultsGridProps } from './form';
+
+export { ShowRequestModal } from './form';
+export type { BuildRequestBody } from './form';
+
 // Mappers
 export {
   deriveAlertDelayModeFromStateTransition,
@@ -41,6 +55,9 @@ export {
 export type {
   FormValues,
   StateTransitionDelayMode,
+  RecoveryPolicy,
+  StateTransition,
+  RuleArtifact,
   DynamicRuleFormProps,
   StandaloneRuleFormProps,
   RuleFormServices,

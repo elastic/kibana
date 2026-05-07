@@ -19,7 +19,11 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RequestCodeBlock, type ShowRequestActivePage } from './request_code_block';
+import {
+  RequestCodeBlock,
+  type ShowRequestActivePage,
+  type BuildRequestBody,
+} from './request_code_block';
 
 const TITLE_CREATE = i18n.translate('xpack.alertingV2.ruleForm.showRequest.titleCreate', {
   defaultMessage: 'Create alerting rule request',
@@ -48,9 +52,10 @@ const TAB_UPDATE = i18n.translate('xpack.alertingV2.ruleForm.showRequest.tabUpda
 interface ShowRequestModalProps {
   ruleId?: string;
   onClose: () => void;
+  buildRequestBody?: BuildRequestBody;
 }
 
-export const ShowRequestModal = ({ ruleId, onClose }: ShowRequestModalProps) => {
+export const ShowRequestModal = ({ ruleId, onClose, buildRequestBody }: ShowRequestModalProps) => {
   const [activeTab, setActiveTab] = useState<ShowRequestActivePage>(ruleId ? 'update' : 'create');
 
   const title = activeTab === 'update' ? TITLE_UPDATE : TITLE_CREATE;
@@ -100,6 +105,7 @@ export const ShowRequestModal = ({ ruleId, onClose }: ShowRequestModalProps) => 
         <RequestCodeBlock
           activeTab={activeTab}
           ruleId={ruleId}
+          buildRequestBody={buildRequestBody}
           data-test-subj="showRequestModalCodeBlock"
         />
       </EuiModalBody>

@@ -21,13 +21,21 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
-import { StandaloneRuleForm, mapRuleResponseToFormValues } from '@kbn/alerting-v2-rule-form';
-import type { FormValues } from '@kbn/alerting-v2-rule-form';
+import {
+  StandaloneRuleForm,
+  mapRuleResponseToFormValues,
+  deriveAlertDelayModeFromStateTransition,
+  deriveRecoveryDelayModeFromStateTransition,
+} from '@kbn/alerting-v2-rule-form';
+import type { FormValues, StateTransition } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { ruleKeys } from '../../hooks/query_key_factory';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
+import { ThresholdRuleFormContent } from '../rule_builders/threshold_alert/threshold_alert_form_content';
+import type { ThresholdRuleFormValues } from '../rule_builders/threshold_alert/types';
+import { BUILDER_TYPE } from '../rule_builders/threshold_alert/types';
 
 const DEFAULT_QUERY = 'FROM logs-*\n| LIMIT 1';
 
@@ -35,16 +43,33 @@ const CLONE_NAME_SUFFIX = i18n.translate('xpack.alertingV2.ruleFormPage.cloneNam
   defaultMessage: ' (clone)',
 });
 
+const parseBuilderConfig = (
+  builderConfig?: { type: string; config: string } | null
+): Partial<ThresholdRuleFormValues> | undefined => {
+  if (!builderConfig || builderConfig.type !== BUILDER_TYPE) {
+    return undefined;
+  }
+  try {
+    return JSON.parse(builderConfig.config) as Partial<ThresholdRuleFormValues>;
+  } catch {
+    return undefined;
+  }
+};
+
 export const RuleFormPage = () => {
   const { id: ruleId } = useParams<{ id?: string }>();
   const { search } = useLocation();
-  const cloneFromId = new URLSearchParams(search).get('cloneFrom');
+  const params = new URLSearchParams(search);
+  const mode = params.get('mode');
+  const cloneFromId = params.get('cloneFrom');
 
   let content: React.ReactNode;
   if (ruleId) {
     content = <FetchedRuleFormPage ruleId={ruleId} mode="edit" />;
   } else if (cloneFromId) {
     content = <FetchedRuleFormPage ruleId={cloneFromId} mode="clone" />;
+  } else if (mode === 'threshold_alert') {
+    content = <ThresholdRuleFormPageContent />;
   } else {
     content = <RuleFormPageContent />;
   }
@@ -101,6 +126,53 @@ const FetchedRuleFormPage = ({ ruleId, mode }: FetchedRuleFormPageProps) => {
     );
   }
 
+  const builderInitialValues = parseBuilderConfig(rule.builder_config);
+
+  if (builderInitialValues) {
+    const stateTransition: StateTransition = {
+      pendingCount: rule.state_transition?.pending_count ?? null,
+      pendingTimeframe: rule.state_transition?.pending_timeframe ?? null,
+      recoveringCount: rule.state_transition?.recovering_count ?? null,
+      recoveringTimeframe: rule.state_transition?.recovering_timeframe ?? null,
+    };
+
+    const ruleName = isClone ? `${rule.metadata.name}${CLONE_NAME_SUFFIX}` : rule.metadata.name;
+
+    return (
+      <ThresholdRuleFormPageContent
+        ruleId={isClone ? undefined : ruleId}
+        initialValues={{
+          ...builderInitialValues,
+          kind: rule.kind,
+          metadata: {
+            name: ruleName,
+            description: rule.metadata.description,
+            tags: rule.metadata.tags,
+          },
+          schedule: {
+            every: rule.schedule.every,
+            lookback: rule.schedule.lookback ?? '5m',
+          },
+          ...(rule.recovery_policy
+            ? {
+                recoveryPolicy: {
+                  type: rule.recovery_policy.type,
+                  ...(rule.recovery_policy.query
+                    ? { query: { base: rule.recovery_policy.query.base } }
+                    : {}),
+                },
+              }
+            : {}),
+          stateTransition,
+          stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
+          stateTransitionRecoveryDelayMode:
+            deriveRecoveryDelayModeFromStateTransition(stateTransition),
+          ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
+        }}
+      />
+    );
+  }
+
   const initialQuery = rule.evaluation?.query?.base ?? DEFAULT_QUERY;
   const initialValues = mapRuleResponseToFormValues(rule);
 
@@ -125,6 +197,52 @@ interface RuleFormPageContentProps {
   initialQuery?: string;
   initialValues?: Partial<FormValues>;
 }
+
+interface ThresholdRuleFormPageContentProps {
+  ruleId?: string;
+  initialValues?: Partial<ThresholdRuleFormValues>;
+}
+
+const ThresholdRuleFormPageContent = ({
+  ruleId,
+  initialValues,
+}: ThresholdRuleFormPageContentProps) => {
+  const isEditing = Boolean(ruleId);
+  const http = useService(CoreStart('http'));
+  const notifications = useService(CoreStart('notifications'));
+  const application = useService(CoreStart('application'));
+  const thresholdData = useService(PluginStart('data')) as DataPublicPluginStart;
+  const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
+  const lens = useService(PluginStart('lens')) as LensPublicStart;
+
+  useBreadcrumbs(isEditing ? 'edit' : 'create');
+
+  const pageTitle = isEditing ? (
+    <FormattedMessage id="xpack.alertingV2.createRule.editPageTitle" defaultMessage="Edit rule" />
+  ) : (
+    <FormattedMessage
+      id="xpack.alertingV2.createRule.thresholdPageTitle"
+      defaultMessage="Create threshold rule"
+    />
+  );
+
+  return (
+    <>
+      <EuiPageHeader pageTitle={pageTitle} />
+      <EuiSpacer size="m" />
+      <ThresholdRuleFormContent
+        http={http}
+        notifications={notifications}
+        application={application}
+        data={thresholdData}
+        dataViews={dataViews}
+        lens={lens}
+        initialValues={initialValues}
+        ruleId={ruleId}
+      />
+    </>
+  );
+};
 
 const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPageContentProps) => {
   const isEditing = Boolean(ruleId);

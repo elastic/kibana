@@ -56,6 +56,11 @@ export interface RuleArtifact {
   value: string;
 }
 
+export interface BuilderConfig {
+  type: string;
+  config: string;
+}
+
 /**
  * State transition configuration for alert-type rules.
  */
@@ -83,4 +88,6 @@ export interface FormValues {
   stateTransitionAlertDelayMode: StateTransitionDelayMode;
   stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
+  origin?: string;
+  builderConfig?: BuilderConfig;
 }

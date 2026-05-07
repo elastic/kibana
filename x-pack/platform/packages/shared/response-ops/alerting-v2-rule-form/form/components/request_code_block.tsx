@@ -35,21 +35,26 @@ const stringifyRequest = (formValues: FormValues, activeTab: ShowRequestActivePa
   }
 };
 
+export type BuildRequestBody = (activeTab: ShowRequestActivePage) => string;
+
 interface RequestCodeBlockProps {
   activeTab: ShowRequestActivePage;
   ruleId?: string;
+  buildRequestBody?: BuildRequestBody;
   'data-test-subj'?: string;
 }
 
 export const RequestCodeBlock = ({
   activeTab,
   ruleId,
+  buildRequestBody,
   'data-test-subj': dataTestSubj,
 }: RequestCodeBlockProps) => {
   const { getValues } = useFormContext<FormValues>();
-  const formValues = getValues();
 
-  const formattedRequest = stringifyRequest(formValues, activeTab);
+  const formattedRequest = buildRequestBody
+    ? buildRequestBody(activeTab)
+    : stringifyRequest(getValues(), activeTab);
 
   const method = activeTab === 'update' ? 'PATCH' : 'POST';
   const path =

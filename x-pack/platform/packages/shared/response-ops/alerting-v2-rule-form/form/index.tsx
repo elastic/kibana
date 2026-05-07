@@ -48,11 +48,29 @@ export const RuleResultsPreview = () => (
   </Suspense>
 );
 
-export type { FormValues, StateTransitionDelayMode } from './types';
+export type {
+  FormValues,
+  StateTransitionDelayMode,
+  RecoveryPolicy,
+  StateTransition,
+  RuleArtifact,
+} from './types';
 export type { DynamicRuleFormProps } from './dynamic_rule_form';
 export type { StandaloneRuleFormProps } from './standalone_rule_form';
 export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
 export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './contexts';
+
+export { KindField } from './fields/kind_field';
+export { QueryResultsGrid } from './fields/query_results_grid';
+export type { QueryResultsGridProps } from './fields/query_results_grid';
+export {
+  AlertConditionsFieldGroup,
+  AttachmentRunbookFieldGroup,
+  RuleDetailsFieldGroup,
+  RuleExecutionFieldGroup,
+} from './field_groups';
+export { ShowRequestModal } from './components/show_request_modal';
+export type { BuildRequestBody } from './components/request_code_block';
 export {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,

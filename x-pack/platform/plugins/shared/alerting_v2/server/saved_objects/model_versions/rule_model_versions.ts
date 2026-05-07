@@ -16,4 +16,23 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       create: ruleSavedObjectAttributesSchemaV1,
     },
   },
+  '2': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          origin: { type: 'keyword' },
+          builder_config: {
+            properties: {
+              type: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV1,
+    },
+  },
 };

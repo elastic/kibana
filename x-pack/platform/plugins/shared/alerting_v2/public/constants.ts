@@ -29,6 +29,7 @@ export {
 
 export const paths = {
   ruleCreate: `${ALERTING_V2_RULES_BASE_PATH}/create`,
+  thresholdRuleCreate: `${ALERTING_V2_RULES_BASE_PATH}/create?mode=threshold_alert`,
   ruleEdit: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
   ruleDetails: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(id)}`,
   ruleList: ALERTING_V2_RULES_BASE_PATH,
