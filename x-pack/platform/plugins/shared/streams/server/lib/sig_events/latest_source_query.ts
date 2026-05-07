@@ -25,7 +25,7 @@ export const runLatestSourceEsqlQuery = async <T>({
   index,
   groupBy,
 }: RunLatestSourceEsqlQueryArgs): Promise<{ hits: T[] }> => {
-  let query = esql.from([index], ['_source']).where`\`kibana.space_ids\` == ${space}`;
+  let query = esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
 
   if (options.from !== undefined) {
     const fromIso = new Date(options.from).toISOString();
@@ -37,8 +37,15 @@ export const runLatestSourceEsqlQuery = async <T>({
     query = query.where`@timestamp <= TO_DATETIME(${toIso})`;
   }
 
+  // pick the latest events by group
   query = query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(groupBy)}`
-    .where`@timestamp == latest_ts`.keep('_source');
+    .where`@timestamp == latest_ts`;
+
+  // use _id as a tiebreak in case multiple events share the same timestamp
+  query = query.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${esql.col(groupBy)}`
+    .where`_id == tiebreaker_id`;
+
+  query = query.keep('_source');
 
   const response = (await esClient.esql.query({
     query: query.print(),
