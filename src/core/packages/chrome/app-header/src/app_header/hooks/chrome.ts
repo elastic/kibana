@@ -24,4 +24,3 @@ export function useLegacyActionMenu(): MountPoint | undefined {
 export function useHasLegacyActionMenu(): boolean {
   return !!useLegacyActionMenu();
 }
-

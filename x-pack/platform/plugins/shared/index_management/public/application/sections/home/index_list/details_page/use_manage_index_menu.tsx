@@ -201,7 +201,9 @@ export function useManageIndexMenu({
         label: i18n.translate('xpack.idxMgmt.indexActionsMenu.closeIndexLabel', {
           defaultMessage: 'Close index',
         }),
-        run: () => { closeIndices(); },
+        run: () => {
+          closeIndices();
+        },
         testId: 'closeIndexMenuButton',
       });
       items.push({
@@ -210,7 +212,9 @@ export function useManageIndexMenu({
         label: i18n.translate('xpack.idxMgmt.indexActionsMenu.forceMergeIndexLabel', {
           defaultMessage: 'Force merge index',
         }),
-        run: () => { modalRef.current?.openModal({ kind: 'forcemerge' }); },
+        run: () => {
+          modalRef.current?.openModal({ kind: 'forcemerge' });
+        },
         testId: 'forcemergeIndexMenuButton',
       });
       items.push({
@@ -219,7 +223,9 @@ export function useManageIndexMenu({
         label: i18n.translate('xpack.idxMgmt.indexActionsMenu.refreshIndexLabel', {
           defaultMessage: 'Refresh index',
         }),
-        run: () => { refreshIndices(); },
+        run: () => {
+          refreshIndices();
+        },
         testId: 'refreshIndexMenuButton',
       });
       items.push({
@@ -228,7 +234,9 @@ export function useManageIndexMenu({
         label: i18n.translate('xpack.idxMgmt.indexActionsMenu.clearIndexCacheLabel', {
           defaultMessage: 'Clear index cache',
         }),
-        run: () => { clearCacheIndices(); },
+        run: () => {
+          clearCacheIndices();
+        },
         testId: 'clearCacheIndexMenuButton',
       });
       items.push({
@@ -237,7 +245,9 @@ export function useManageIndexMenu({
         label: i18n.translate('xpack.idxMgmt.indexActionsMenu.flushIndexLabel', {
           defaultMessage: 'Flush index',
         }),
-        run: () => { flushIndices(); },
+        run: () => {
+          flushIndices();
+        },
         testId: 'flushIndexMenuButton',
       });
     } else if (!allOpen && enableIndexActions) {
@@ -247,7 +257,9 @@ export function useManageIndexMenu({
         label: i18n.translate('xpack.idxMgmt.indexActionsMenu.openIndexLabel', {
           defaultMessage: 'Open index',
         }),
-        run: () => { openIndices(); },
+        run: () => {
+          openIndices();
+        },
         testId: 'openIndexMenuButton',
       });
     }
@@ -258,7 +270,9 @@ export function useManageIndexMenu({
       label: i18n.translate('xpack.idxMgmt.indexActionsMenu.deleteIndexLabel', {
         defaultMessage: 'Delete index',
       }),
-      run: () => { modalRef.current?.openModal({ kind: 'delete' }); },
+      run: () => {
+        modalRef.current?.openModal({ kind: 'delete' });
+      },
       testId: 'deleteIndexMenuButton',
     });
 
@@ -275,14 +289,18 @@ export function useManageIndexMenu({
             id: `extension-${actionIndex}`,
             order: order++,
             label: buttonLabel,
-            run: () => { performExtensionAction(requestMethod, successMessage); },
+            run: () => {
+              performExtensionAction(requestMethod, successMessage);
+            },
           });
         } else if (renderConfirmModal) {
           items.push({
             id: `extension-${actionIndex}`,
             order: order++,
             label: buttonLabel,
-            run: () => { modalRef.current?.openModal({ kind: 'extension', actionIndex }); },
+            run: () => {
+              modalRef.current?.openModal({ kind: 'extension', actionIndex });
+            },
           });
         }
       }
@@ -307,7 +325,9 @@ export function useManageIndexMenu({
           defaultMessage: 'Convert to lookup index',
         }),
         disableButton: !isConvertable,
-        run: () => { modalRef.current?.openModal({ kind: 'convertToLookup' }); },
+        run: () => {
+          modalRef.current?.openModal({ kind: 'convertToLookup' });
+        },
         testId: 'convertToLookupIndexButton',
       });
     }

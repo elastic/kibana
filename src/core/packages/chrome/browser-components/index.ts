@@ -11,7 +11,11 @@ export { ChromeComponentsProvider } from './src/context';
 export type { ChromeComponentsDeps } from './src/context';
 
 export { ClassicHeader } from './src/classic';
-export { ProjectHeader, ChromeAppHeaderRenderer, useHasChromeAppHeaderContent } from './src/project';
+export {
+  ProjectHeader,
+  ChromeAppHeaderRenderer,
+  useHasChromeAppHeaderContent,
+} from './src/project';
 export { GlobalHeader, GlobalHeaderShell, HeaderActionButton } from './src/chrome_next';
 export type { GlobalHeaderShellProps, HeaderActionButtonProps } from './src/chrome_next';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
