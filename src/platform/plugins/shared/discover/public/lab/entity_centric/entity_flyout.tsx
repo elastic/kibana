@@ -7,43 +7,135 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
+  EuiBadge,
   EuiBetaBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiIcon,
+  EuiNotificationBadge,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+  EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { OverviewTab } from './overview_tab';
+import { buildFakeEntityOverview } from './fake_entity_overview';
 
 interface EntityFlyoutProps {
   readonly serviceName: string;
   readonly onClose: () => void;
 }
 
+type TabId = 'overview' | 'metrics' | 'logs' | 'alerts' | 'relationships' | 'security';
+
 export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
+  const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
+  const [activeTab, setActiveTab] = useState<TabId>('overview');
+
+  const overview = useMemo(() => buildFakeEntityOverview(serviceName), [serviceName]);
+
+  const tabs = useMemo<Array<{ id: TabId; label: string; appendBadge?: number }>>(
+    () => [
+      {
+        id: 'overview',
+        label: i18n.translate('discover.entityCentricLab.flyout.tabs.overview', {
+          defaultMessage: 'Overview',
+        }),
+      },
+      {
+        id: 'metrics',
+        label: i18n.translate('discover.entityCentricLab.flyout.tabs.metrics', {
+          defaultMessage: 'Metrics',
+        }),
+      },
+      {
+        id: 'logs',
+        label: i18n.translate('discover.entityCentricLab.flyout.tabs.logs', {
+          defaultMessage: 'Logs',
+        }),
+      },
+      {
+        id: 'alerts',
+        label: i18n.translate('discover.entityCentricLab.flyout.tabs.alerts', {
+          defaultMessage: 'Alerts',
+        }),
+      },
+      {
+        id: 'relationships',
+        label: i18n.translate('discover.entityCentricLab.flyout.tabs.relationships', {
+          defaultMessage: 'Relationships',
+        }),
+      },
+      {
+        id: 'security',
+        label: i18n.translate('discover.entityCentricLab.flyout.tabs.security', {
+          defaultMessage: 'Security',
+        }),
+        appendBadge: overview.securityIssueCount,
+      },
+    ],
+    [overview.securityIssueCount]
+  );
+
   return (
     <EuiFlyout
       ownFocus
       onClose={onClose}
       size="m"
-      aria-labelledby="entityCentricLabFlyoutTitle"
+      aria-labelledby={titleId}
       data-test-subj="entityCentricLabFlyout"
     >
       <EuiFlyoutHeader hasBorder>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          justifyContent="flexEnd"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="share"
+              color="text"
+              aria-label={i18n.translate('discover.entityCentricLab.flyout.shareAriaLabel', {
+                defaultMessage: 'Share',
+              })}
+              data-test-subj="entityCentricLabFlyoutShare"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="gear"
+              color="text"
+              aria-label={i18n.translate('discover.entityCentricLab.flyout.settingsAriaLabel', {
+                defaultMessage: 'Settings',
+              })}
+              data-test-subj="entityCentricLabFlyoutSettings"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2 id="entityCentricLabFlyoutTitle" data-test-subj="entityCentricLabFlyoutTitle">
-                {serviceName}
+            <EuiTitle size="l">
+              <h2 id={titleId} data-test-subj="entityCentricLabFlyoutTitle">
+                {overview.displayName}
               </h2>
             </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="iInCircle" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBetaBadge
@@ -55,31 +147,101 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="discover.entityCentricLab.flyout.subtitle"
-            defaultMessage="Service entity"
-          />
+        <EuiText size="xs" color="subdued">
+          {i18n.translate('discover.entityCentricLab.flyout.lastUpdate', {
+            defaultMessage: 'Last update {lastUpdate}',
+            values: { lastUpdate: overview.lastUpdate },
+          })}
         </EuiText>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
+          {overview.tags.map((tag) => (
+            <EuiFlexItem grow={false} key={tag.label}>
+              <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+          <EuiFlexItem>
+            <EuiTabs bottomBorder={false}>
+              {tabs.map((tab) => (
+                <EuiTab
+                  key={tab.id}
+                  isSelected={tab.id === activeTab}
+                  onClick={() => setActiveTab(tab.id)}
+                  data-test-subj={`entityCentricLabFlyoutTab-${tab.id}`}
+                  append={
+                    tab.appendBadge !== undefined ? (
+                      <EuiNotificationBadge color="accent" size="s">
+                        {tab.appendBadge}
+                      </EuiNotificationBadge>
+                    ) : undefined
+                  }
+                >
+                  {tab.label}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="plus"
+              color="text"
+              aria-label={i18n.translate('discover.entityCentricLab.flyout.addTabAriaLabel', {
+                defaultMessage: 'Add tab',
+              })}
+              data-test-subj="entityCentricLabFlyoutAddTab"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="discover.entityCentricLab.flyout.placeholder"
-              defaultMessage="Entity details for {serviceName} will appear here."
-              values={{ serviceName: <strong>{serviceName}</strong> }}
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="discover.entityCentricLab.flyout.todo"
-              defaultMessage="This is a placeholder. Health, dependencies, recent changes and SLOs will be added next."
-            />
-          </p>
-        </EuiText>
+        {activeTab === 'overview' ? (
+          <OverviewTab overview={overview} />
+        ) : (
+          <PlaceholderTab tabId={activeTab} />
+        )}
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="discuss"
+              data-test-subj="entityCentricLabFlyoutAddToChat"
+              onClick={() => undefined}
+            >
+              {i18n.translate('discover.entityCentricLab.flyout.addToChat', {
+                defaultMessage: 'Add to chat',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              iconType="arrowDown"
+              iconSide="right"
+              data-test-subj="entityCentricLabFlyoutTakeAction"
+              onClick={() => undefined}
+            >
+              {i18n.translate('discover.entityCentricLab.flyout.takeAction', {
+                defaultMessage: 'Take action',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };
+
+const PlaceholderTab = ({ tabId }: { tabId: TabId }) => (
+  <EuiText color="subdued">
+    <p data-test-subj={`entityCentricLabPlaceholderTab-${tabId}`}>
+      {i18n.translate('discover.entityCentricLab.flyout.placeholderTab', {
+        defaultMessage: 'The “{tabId}” tab is not implemented yet in this prototype.',
+        values: { tabId },
+      })}
+    </p>
+  </EuiText>
+);
