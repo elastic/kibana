@@ -464,8 +464,8 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 `csp.object_src` {applies_to}`stack: ga 9.3`
 :   Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/object-src).
 
-`csp.form_action` {applies_to}`stack: ga 9.3`
-:   Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action). Rules may not contain `nonce-*` or `none` and will not override the defaults. **Default: [`'self'`]**
+`csp.form_action` {applies_to}`stack: ga 9.5`
+:   Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action). Rules may not contain `none` and will not override the defaults. **Default: [`'self'`]**
 
 `csp.report_uri`
 :   Add sources for the [Content Security Policy `report-uri` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri).
