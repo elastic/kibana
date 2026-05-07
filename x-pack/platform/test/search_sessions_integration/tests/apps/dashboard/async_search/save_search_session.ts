@@ -124,6 +124,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle('TSVB');
 
+        // wait for all panels to finish rendering so that their search polling requests
+        // have had time to propagate search IDs into the session saved object
+        await dashboard.waitForRenderComplete();
+
         // check that searches saved into the session
         await searchSessionsManagement.goTo();
 
