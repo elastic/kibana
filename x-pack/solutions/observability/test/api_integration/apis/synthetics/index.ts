@@ -30,6 +30,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./add_monitor_project'));
     loadTestFile(require.resolve('./add_monitor_private_location'));
     loadTestFile(require.resolve('./edit_monitor'));
+    loadTestFile(require.resolve('./update_monitor_bulk'));
     loadTestFile(require.resolve('./sync_global_params'));
     loadTestFile(require.resolve('./sync_global_params_spaces'));
     loadTestFile(require.resolve('./add_edit_params'));
