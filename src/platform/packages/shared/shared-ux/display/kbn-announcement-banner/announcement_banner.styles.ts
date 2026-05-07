@@ -143,6 +143,7 @@ export const announcementBannerStyles = {
       layout: 'superNarrow',
       styles: `
         align-self: flex-start;
+        inline-size: 100%;
       `,
     })}
 
