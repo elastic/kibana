@@ -21,6 +21,13 @@ export interface Detection {
   rule_uuid: string;
   rule_name: string;
   stream: string;
+  superseded?: boolean;
+  superseded_at?: string;
+  processed_by?: string;
+  detection_evidence?: {
+    change_point_type?: string;
+    p_value?: number;
+  };
 }
 
 const DETECTION_FIELDS: ReadonlyArray<keyof Detection & string> = [
@@ -60,7 +67,9 @@ export class DetectionClient {
       index: DETECTIONS_DATA_STREAM,
       fields: DETECTION_FIELDS,
       stats: (query) => query.pipe`STATS @timestamp = MAX(@timestamp),
-              rule_uuid = LATEST(rule_uuid),
+              superseded = LATEST(superseded),
+              superseded_at = LATEST(superseded_at),
+              processed_by = LATEST(processed_by),
               rule_name = LATEST(rule_name),
               stream = LATEST(stream)
           BY detection_id`,

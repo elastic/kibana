@@ -16,14 +16,33 @@ export const eventsMappings = {
   properties: {
     '@timestamp': mappings.date(),
     verdict: mappings.keyword(),
-    verdict_id: mappings.keyword(),
     event_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
-    foo: mappings.keyword(),
+    rule_names: mappings.keyword(),
+    stream_names: mappings.keyword(),
+    grouped_into: mappings.keyword(),
+    last_reviewed_at: mappings.date(),
+    verdict_id: mappings.keyword(),
+    recommended_action: mappings.keyword(),
     title: mappings.text({
       fields: {
         keyword: { type: 'keyword', ignore_above: 512 },
+        semantic: { type: 'semantic_text' },
+      },
+    }),
+    summary: mappings.text({
+      fields: {
+        semantic: { type: 'semantic_text' },
+      },
+    }),
+    root_cause: mappings.text({
+      fields: {
+        semantic: { type: 'semantic_text' },
+      },
+    }),
+    recommendations: mappings.text({
+      fields: {
         semantic: { type: 'semantic_text' },
       },
     }),

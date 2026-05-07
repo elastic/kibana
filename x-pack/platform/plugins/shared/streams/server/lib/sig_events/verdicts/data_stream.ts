@@ -19,9 +19,43 @@ export const verdictsMappings = {
     verdict_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
+    rule_names: mappings.keyword(),
+    stream_names: mappings.keyword(),
+    grouped_into: mappings.keyword(),
+    recommended_action: mappings.keyword(),
     title: mappings.text({
       fields: {
         keyword: { type: 'keyword', ignore_above: 512 },
+        semantic: { type: 'semantic_text' },
+      },
+    }),
+    summary: mappings.text({
+      fields: {
+        semantic: { type: 'semantic_text' },
+      },
+    }),
+    root_cause: mappings.text({
+      fields: {
+        semantic: { type: 'semantic_text' },
+      },
+    }),
+    verdict_summary: mappings.text({
+      fields: {
+        semantic: { type: 'semantic_text' },
+      },
+    }),
+    assessment_note: mappings.text({
+      fields: {
+        semantic: { type: 'semantic_text' },
+      },
+    }),
+    delta_reasoning: mappings.text({
+      fields: {
+        semantic: { type: 'semantic_text' },
+      },
+    }),
+    recommendations: mappings.text({
+      fields: {
         semantic: { type: 'semantic_text' },
       },
     }),

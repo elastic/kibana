@@ -18,10 +18,33 @@ export const discoveriesMappings = {
     status: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
+    rule_names: mappings.keyword(),
+    stream_names: mappings.keyword(),
+    closes: mappings.keyword(),
+    status_changed_at: mappings.date(),
+    status_changed_reason: mappings.keyword(),
+    grouped_discovery_ids: mappings.keyword(),
+    closed_by_execution_id: mappings.keyword(),
+    superseded_by_execution_id: mappings.keyword(),
     title: mappings.text({
       fields: {
         keyword: { type: 'keyword', ignore_above: 512 },
         semantic: { type: 'semantic_text' },
+      },
+    }),
+    summary: mappings.text({
+      fields: {
+        semantic: { type: 'semantic_text' },
+      },
+    }),
+    root_cause: mappings.text({
+      fields: {
+        semantic: { type: 'semantic_text' },
+      },
+    }),
+    detections: mappings.object({
+      properties: {
+        rule_uuid: mappings.keyword(),
       },
     }),
   },

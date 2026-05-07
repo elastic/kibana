@@ -16,9 +16,18 @@ export const detectionsMappings = {
   properties: {
     '@timestamp': mappings.date(),
     detection_id: mappings.keyword(),
+    superseded: mappings.boolean(),
+    superseded_at: mappings.date(),
     rule_uuid: mappings.keyword(),
     rule_name: mappings.keyword(),
     stream: mappings.keyword(),
+    processed_by: mappings.keyword(),
+    detection_evidence: mappings.object({
+      properties: {
+        change_point_type: mappings.keyword(),
+        p_value: { type: 'double' } as const,
+      },
+    }),
   },
 } satisfies MappingsDefinition;
 
