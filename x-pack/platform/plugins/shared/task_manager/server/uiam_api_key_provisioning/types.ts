@@ -41,6 +41,14 @@ export interface UiamConvertResponse {
 export interface TaskApiKeyToConvertAttributes {
   /** System API key string to send to UIAM convert (mirrors `apiKey` on the rule) */
   apiKey: string;
+  /**
+   * Required so the partial `bulkUpdate` payload includes `taskType` and ESO can
+   * compute the same AAD that was used when the doc was originally encrypted.
+   * The Task ESO type lists `taskType` in `attributesToIncludeInAAD` (see
+   * `task_manager_dependencies/server/plugin.ts`); omitting it would corrupt
+   * `uiamApiKey` (and silently strip `apiKey` on subsequent reads).
+   */
+  taskType: string;
   userScope: TaskUserScope;
 }
 

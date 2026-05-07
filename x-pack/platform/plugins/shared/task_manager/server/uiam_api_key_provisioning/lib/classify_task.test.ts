@@ -10,17 +10,31 @@ import { classifyTasksForUiamProvisioning } from './classify_task';
 describe('classifyTasksForUiamProvisioning', () => {
   it('counts skips and collects convert candidates', () => {
     const tasks = [
-      { id: '1', apiKey: undefined },
-      { id: '2', apiKey: 'k2', uiamApiKey: 'u', userScope: { uiamApiKeyId: 'id' } },
+      { id: '1', taskType: 'alerting:.index-threshold', apiKey: undefined },
+      {
+        id: '2',
+        taskType: 'alerting:.index-threshold',
+        apiKey: 'k2',
+        uiamApiKey: 'u',
+        userScope: { uiamApiKeyId: 'id' },
+      },
       {
         id: '3',
+        taskType: 'alerting:.index-threshold',
         apiKey: 'k3',
         uiamApiKey: undefined,
         userScope: { apiKeyId: 'es3', apiKeyCreatedByUser: false },
       },
-      { id: '3b', apiKey: 'k3b', uiamApiKey: undefined, userScope: {} },
+      {
+        id: '3b',
+        taskType: 'alerting:.index-threshold',
+        apiKey: 'k3b',
+        uiamApiKey: undefined,
+        userScope: {},
+      },
       {
         id: '4',
+        taskType: 'alerting:.index-threshold',
         apiKey: 'k4',
         uiamApiKey: undefined,
         userScope: { apiKeyId: 'ukey', apiKeyCreatedByUser: true },
@@ -41,6 +55,7 @@ describe('classifyTasksForUiamProvisioning', () => {
         taskId: '3',
         attributes: {
           apiKey: 'k3',
+          taskType: 'alerting:.index-threshold',
           userScope: { apiKeyId: 'es3', apiKeyCreatedByUser: false },
         },
         version: undefined,
@@ -48,9 +63,10 @@ describe('classifyTasksForUiamProvisioning', () => {
     ]);
   });
 
-  it('carries userScope, apiKey, and version on each convert payload', () => {
+  it('carries userScope, apiKey, taskType, and version on each convert payload', () => {
     const tasks = Array.from({ length: 10 }, (_, i) => ({
       id: String(i),
+      taskType: `task_type_${i}`,
       apiKey: `k${i}`,
       uiamApiKey: undefined,
       userScope: { apiKeyId: `es${i}`, apiKeyCreatedByUser: false },
@@ -62,6 +78,7 @@ describe('classifyTasksForUiamProvisioning', () => {
     for (const [i, a] of result.apiKeysToConvert.entries()) {
       expect(a.taskId).toBe(String(i));
       expect(a.attributes.apiKey).toBe(`k${i}`);
+      expect(a.attributes.taskType).toBe(`task_type_${i}`);
       expect(a.attributes.userScope).toEqual({ apiKeyId: `es${i}`, apiKeyCreatedByUser: false });
       expect(a.version).toBe(i % 2 === 0 ? `v${i}` : undefined);
     }

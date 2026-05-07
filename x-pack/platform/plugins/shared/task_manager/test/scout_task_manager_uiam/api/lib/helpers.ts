@@ -93,7 +93,7 @@ export interface EnsureProvisioningQuietNextRunOpts {
   apiClient: ApiClientFixture;
   cookieHeader: CookieHeader;
   provisioningTaskId: string;
-  /** Next `runAt` must be later than `Date.now()` + this (default 30m; recurring schedule is 1h). */
+  /** Next `runAt` must be later than `Date.now()` + this (default 30m; recurring schedule is 1d). */
   minNextRunAheadMs?: number;
   /** Max wait for the provisioning task doc to appear. */
   discoveryTimeoutMs?: number;
@@ -104,7 +104,7 @@ export interface EnsureProvisioningQuietNextRunOpts {
 
 /**
  * Ensures the UIAM provisioning task's next `runAt` is far enough out that Task Manager will not
- * claim it soon (default: >30m, consistent with a post-run ~1h reschedule). If not, calls
+ * claim it soon (default: >30m, consistent with a post-run ~1d reschedule). If not, calls
  * `run_soon`, waits for a run to finish and the doc to show that quiet `runAt`.
  *
  * @returns `runs` from `task.state` (same as {@link readProvisioningTaskScheduleSnapshot}) and

@@ -110,7 +110,8 @@ describe('UiamApiKeyProvisioningTask', () => {
     markApiKeysForInvalidationMock.mockResolvedValue(undefined);
   });
 
-  const createTask = () => new UiamApiKeyProvisioningTask({ logger, analytics });
+  const createTask = () =>
+    new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
 
   it('end-to-end: fetches, converts, bulk-updates, writes status, and bumps state', async () => {
     const uiamConvert = jest.fn().mockResolvedValue({

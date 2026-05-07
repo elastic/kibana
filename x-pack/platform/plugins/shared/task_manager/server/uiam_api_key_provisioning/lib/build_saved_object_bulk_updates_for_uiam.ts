@@ -11,12 +11,25 @@ import { TASK_SO_NAME } from '../../saved_objects';
 import type { TaskUserScope } from '../../task';
 import type { UiamKeyResult } from '../types';
 
+/** Shape of attributes sent in a UIAM provisioning partial bulkUpdate. */
+interface UiamBulkUpdateAttrs {
+  uiamApiKey: string;
+  userScope: TaskUserScope;
+  /**
+   * `taskType` is in the Task ESO `attributesToIncludeInAAD` set, so it must be
+   * included on every partial encrypt-update — otherwise `uiamApiKey` is encrypted
+   * with a mismatched AAD and decrypt fails on subsequent reads (and ESO strips
+   * `apiKey` along with it). See `task_manager_dependencies/server/plugin.ts`.
+   */
+  taskType: string;
+}
+
 /**
  * {@link markApiKeysForInvalidation} targets from task SO bulk updates built by
  * {@link buildSavedObjectBulkUpdatesForUiamKeys} (attributes carry UIAM id + secret).
  */
 export const invalidationTargetsFromUiamTaskBulkUpdates = (
-  updates: Array<SavedObjectsBulkUpdateObject<{ uiamApiKey: string; userScope: TaskUserScope }>>
+  updates: Array<SavedObjectsBulkUpdateObject<UiamBulkUpdateAttrs>>
 ): InvalidationTarget[] => {
   const targets: InvalidationTarget[] = [];
   for (const u of updates) {
@@ -43,7 +56,7 @@ export const invalidationTargetsFromUiamTaskBulkUpdates = (
  */
 export const buildSavedObjectBulkUpdatesForUiamKeys = (
   converted: UiamKeyResult[]
-): Array<SavedObjectsBulkUpdateObject<{ uiamApiKey: string; userScope: TaskUserScope }>> =>
+): Array<SavedObjectsBulkUpdateObject<UiamBulkUpdateAttrs>> =>
   converted.map((c) => {
     const mergedUserScope: TaskUserScope = {
       ...c.attributes.userScope,
@@ -55,6 +68,9 @@ export const buildSavedObjectBulkUpdatesForUiamKeys = (
       attributes: {
         uiamApiKey: c.uiamApiKey,
         userScope: mergedUserScope,
+        // Carry the original taskType so ESO computes a consistent AAD when
+        // encrypting `uiamApiKey` on this partial update. See `UiamBulkUpdateAttrs`.
+        taskType: c.attributes.taskType,
       },
       ...(c.version ? { version: c.version } : {}),
       mergeAttributes: true,

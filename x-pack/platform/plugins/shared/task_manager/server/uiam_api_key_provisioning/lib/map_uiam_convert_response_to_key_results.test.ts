@@ -29,6 +29,7 @@ describe('mapUiamConvertResponseToKeyResults', () => {
         taskId: 'task-a',
         attributes: {
           apiKey: 'k1',
+          taskType: 'alerting:.index-threshold',
           userScope: { apiKeyId: 'es1', apiKeyCreatedByUser: false },
         },
         version: 'v9',
@@ -58,6 +59,7 @@ describe('mapUiamConvertResponseToKeyResults', () => {
         taskId: 'task-b',
         attributes: {
           apiKey: 'k1',
+          taskType: 'alerting:.index-threshold',
           userScope: { apiKeyId: 'es1', apiKeyCreatedByUser: false },
         },
       },
@@ -93,6 +95,7 @@ describe('mapUiamConvertResponseToKeyResults', () => {
         taskId: 'a',
         attributes: {
           apiKey: 'k0',
+          taskType: 'alerting:.index-threshold',
           userScope: { apiKeyId: 'e0', apiKeyCreatedByUser: false },
         },
       },
@@ -100,6 +103,7 @@ describe('mapUiamConvertResponseToKeyResults', () => {
         taskId: 'b',
         attributes: {
           apiKey: 'k1',
+          taskType: 'alerting:.index-threshold',
           userScope: { apiKeyId: 'e1', apiKeyCreatedByUser: false },
         },
       },

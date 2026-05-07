@@ -30,7 +30,7 @@ export type ClassifyTaskResult =
 export const classifyTaskForUiamProvisioning = (
   task: TaskForClassification
 ): ClassifyTaskResult => {
-  const { id, apiKey, uiamApiKey, userScope } = task;
+  const { id, apiKey, uiamApiKey, userScope, taskType } = task;
   if (!apiKey) {
     return {
       action: 'skip',
@@ -64,6 +64,7 @@ export const classifyTaskForUiamProvisioning = (
       taskId: id,
       attributes: {
         apiKey,
+        taskType,
         userScope,
       },
       version: task.version,

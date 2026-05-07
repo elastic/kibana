@@ -20,6 +20,7 @@ describe('buildSavedObjectBulkUpdatesForUiamKeys', () => {
         uiamApiKeyId: 'uiam-a',
         attributes: {
           apiKey: 'k',
+          taskType: 'alerting:.index-threshold',
           userScope: { apiKeyId: 'es-a', apiKeyCreatedByUser: false },
         },
         version: '1',
@@ -30,6 +31,7 @@ describe('buildSavedObjectBulkUpdatesForUiamKeys', () => {
         uiamApiKeyId: 'uiam-b',
         attributes: {
           apiKey: 'k2',
+          taskType: 'actions:.email',
           userScope: { apiKeyId: 'es-b', apiKeyCreatedByUser: false, spaceId: 's' },
         },
       },
@@ -42,6 +44,7 @@ describe('buildSavedObjectBulkUpdatesForUiamKeys', () => {
         attributes: {
           uiamApiKey: 'b64a',
           userScope: { apiKeyId: 'es-a', apiKeyCreatedByUser: false, uiamApiKeyId: 'uiam-a' },
+          taskType: 'alerting:.index-threshold',
         },
         version: '1',
         mergeAttributes: true,
@@ -57,10 +60,27 @@ describe('buildSavedObjectBulkUpdatesForUiamKeys', () => {
             spaceId: 's',
             uiamApiKeyId: 'uiam-b',
           },
+          taskType: 'actions:.email',
         },
         mergeAttributes: true,
       },
     ]);
+  });
+
+  it('always carries taskType in the partial update payload (required for ESO AAD)', () => {
+    const updates = buildSavedObjectBulkUpdatesForUiamKeys([
+      {
+        taskId: 'a',
+        uiamApiKey: 'b64a',
+        uiamApiKeyId: 'uiam-a',
+        attributes: {
+          apiKey: 'k',
+          taskType: 'task_manager:invalidate_api_keys',
+          userScope: { apiKeyId: 'es-a', apiKeyCreatedByUser: false },
+        },
+      },
+    ]);
+    expect(updates[0].attributes?.taskType).toBe('task_manager:invalidate_api_keys');
   });
 });
 
@@ -73,6 +93,7 @@ describe('invalidationTargetsFromUiamTaskBulkUpdates', () => {
         uiamApiKeyId: 'uiam-a',
         attributes: {
           apiKey: 'k',
+          taskType: 'task_manager:invalidate_api_keys',
           userScope: { apiKeyId: 'es-a', apiKeyCreatedByUser: false },
         },
       },

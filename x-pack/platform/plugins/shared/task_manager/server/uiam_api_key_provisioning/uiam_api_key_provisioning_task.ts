@@ -61,16 +61,29 @@ interface RegisterUiamApiKeyProvisioningTaskOpts {
 
 export class UiamApiKeyProvisioningTask {
   private readonly logger: Logger;
+  private readonly isServerless: boolean;
   private readonly analytics: AnalyticsServiceSetup;
   private readonly featureFlagScheduler: UiamProvisioningFeatureFlagScheduler;
 
-  constructor({ logger, analytics }: { logger: Logger; analytics: AnalyticsServiceSetup }) {
+  constructor({
+    logger,
+    isServerless,
+    analytics,
+  }: {
+    logger: Logger;
+    isServerless: boolean;
+    analytics: AnalyticsServiceSetup;
+  }) {
     this.logger = logger;
+    this.isServerless = isServerless;
     this.analytics = analytics;
     this.featureFlagScheduler = new UiamProvisioningFeatureFlagScheduler(logger);
   }
 
   register(opts: RegisterUiamApiKeyProvisioningTaskOpts): void {
+    if (!this.isServerless) {
+      return;
+    }
     const { coreSetup, taskTypeDictionary } = opts;
     taskTypeDictionary.registerTaskDefinitions({
       [TASK_TYPE]: {
@@ -94,6 +107,9 @@ export class UiamApiKeyProvisioningTask {
     taskScheduling: TaskScheduling;
     removeIfExists: (id: string) => Promise<void>;
   }): Promise<void> {
+    if (!this.isServerless) {
+      return;
+    }
     this.featureFlagScheduler.start({
       core,
       taskScheduling,
@@ -204,6 +220,12 @@ export class UiamApiKeyProvisioningTask {
       if (response === null) {
         throw new Error('License required for the UIAM convert API is not enabled');
       }
+      // If UIAM returns a result count that doesn't match the request, we throw before
+      // mapUiamConvertResponseToKeyResults runs, so any keys minted server-side are not
+      // captured in our result and cannot be invalidated client-side. The convert API is
+      // expected to return one result per requested key; treat a mismatch as exceptional
+      // and accept the minted-but-orphaned keys as a bounded leak (same trade-off the
+      // alerting bulkUpdate-throw path makes for the same reason).
       if (response.results.length !== apiKeysToConvert.length) {
         throw new Error(
           'Number of converted API keys does not match the number of API keys to convert'

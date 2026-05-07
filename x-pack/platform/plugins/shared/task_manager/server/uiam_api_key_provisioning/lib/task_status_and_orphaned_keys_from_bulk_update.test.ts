@@ -18,7 +18,11 @@ describe('statusDocsAndOrphanedUiamKeysFromTaskBulkUpdate', () => {
           taskId: 'a',
           uiamApiKey: 'YTpmb28',
           uiamApiKeyId: 'id-a',
-          attributes: { apiKey: 'k', userScope: { apiKeyId: 'es', apiKeyCreatedByUser: false } },
+          attributes: {
+            apiKey: 'k',
+            taskType: 'alerting:.index-threshold',
+            userScope: { apiKeyId: 'es', apiKeyCreatedByUser: false },
+          },
         },
       ],
     ]);

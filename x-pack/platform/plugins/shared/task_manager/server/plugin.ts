@@ -314,6 +314,7 @@ export class TaskManagerPlugin
 
     this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
       logger: this.logger,
+      isServerless,
       analytics: core.analytics,
     });
     this.uiamApiKeyProvisioningTask.register({
