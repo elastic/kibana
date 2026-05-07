@@ -807,7 +807,7 @@
             "label": "selectSingleOption",
             "description": [],
             "signature": [
-              "(value: string, options?: { optionTestSubj?: string | undefined; optionRoleName?: string | undefined; }) => Promise<void>"
+              "(value: string, options?: { optionTestSubj?: string | undefined; optionRoleName?: string | undefined; optionVisibilityTimeoutMs?: number | undefined; }) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
             "lineNumber": 150,
@@ -856,8 +856,8 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                    "lineNumber": 152,
-                    "columnNumber": 16,
+                    "lineNumber": 153,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -872,8 +872,26 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                    "lineNumber": 152,
-                    "columnNumber": 41,
+                    "lineNumber": 154,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout-search",
+                    "id": "def-common.EuiComboBoxWrapper.selectSingleOption.$2.optionVisibilityTimeoutMs",
+                    "type": "number",
+                    "tags": [],
+                    "label": "optionVisibilityTimeoutMs",
+                    "description": [
+                      "Use for combos backed by slow suggestion APIs so other suites keep default waits."
+                    ],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
+                    "lineNumber": 155,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -890,10 +908,10 @@
             "label": "setCustomSingleOption",
             "description": [],
             "signature": [
-              "(value: string) => Promise<void>"
+              "(value: string, options?: { settleTimeoutMs?: number | undefined; }) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 165,
+            "lineNumber": 180,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -909,11 +927,44 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                "lineNumber": 165,
-                "columnNumber": 31,
+                "lineNumber": 181,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-search",
+                "id": "def-common.EuiComboBoxWrapper.setCustomSingleOption.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
+                "lineNumber": 182,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/scout-search",
+                    "id": "def-common.EuiComboBoxWrapper.setCustomSingleOption.$2.settleTimeoutMs",
+                    "type": "number",
+                    "tags": [],
+                    "label": "settleTimeoutMs",
+                    "description": [
+                      "Use when confirming selection may lag after Enter (slow suggestions / CI)."
+                    ],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
+                    "lineNumber": 183,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -929,7 +980,7 @@
               "() => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 173,
+            "lineNumber": 198,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3458,15 +3509,7 @@
             "section": "def-common.KibanaUrl",
             "text": "KibanaUrl"
           },
-          "; } & { config: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutTestConfig",
-            "text": "ScoutTestConfig"
-          },
-          "; } & { debuggingPort: number; } & { debuggingPort: number; }>"
+          "; } & { config: any; } & { debuggingPort: number; } & { debuggingPort: number; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/index.ts",
         "lineNumber": 16,
@@ -3848,15 +3891,7 @@
           "ScoutSpaceParallelFixture",
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
-          "; config: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutTestConfig",
-            "text": "ScoutTestConfig"
-          },
-          "; } & ",
+          "; config: any; } & ",
           {
             "pluginId": "@kbn/scout-search",
             "scope": "common",
@@ -4032,15 +4067,7 @@
             "section": "def-common.KibanaUrl",
             "text": "KibanaUrl"
           },
-          "; } & { config: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutTestConfig",
-            "text": "ScoutTestConfig"
-          },
-          "; } & ",
+          "; } & { config: any; } & ",
           {
             "pluginId": "@kbn/scout-search",
             "scope": "common",
@@ -11690,18 +11717,12 @@
           {
             "parentPluginId": "@kbn/scout-search",
             "id": "def-common.ScoutParallelWorkerFixtures.config",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "config",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/scout",
-                "scope": "common",
-                "docId": "kibKbnScoutPluginApi",
-                "section": "def-common.ScoutTestConfig",
-                "text": "ScoutTestConfig"
-              }
+              "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
             "lineNumber": 56,
@@ -12036,212 +12057,6 @@
       },
       {
         "parentPluginId": "@kbn/scout-search",
-        "id": "def-common.ScoutTestConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "ScoutTestConfig",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-        "lineNumber": 12,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.serverless",
-            "type": "boolean",
-            "tags": [],
-            "label": "serverless",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 13,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.http2",
-            "type": "boolean",
-            "tags": [],
-            "label": "http2",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 14,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.uiam",
-            "type": "boolean",
-            "tags": [],
-            "label": "uiam",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 15,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.projectType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "projectType",
-            "description": [],
-            "signature": [
-              "\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 16,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.organizationId",
-            "type": "string",
-            "tags": [],
-            "label": "organizationId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 17,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.isCloud",
-            "type": "boolean",
-            "tags": [],
-            "label": "isCloud",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 18,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.cloudHostName",
-            "type": "string",
-            "tags": [],
-            "label": "cloudHostName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 19,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.cloudUsersFilePath",
-            "type": "string",
-            "tags": [],
-            "label": "cloudUsersFilePath",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 20,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.license",
-            "type": "string",
-            "tags": [],
-            "label": "license",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 21,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.hosts",
-            "type": "Object",
-            "tags": [],
-            "label": "hosts",
-            "description": [],
-            "signature": [
-              "{ kibana: string; elasticsearch: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 22,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.auth",
-            "type": "Object",
-            "tags": [],
-            "label": "auth",
-            "description": [],
-            "signature": [
-              "{ username: string; password: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 26,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.linkedProject",
-            "type": "Object",
-            "tags": [],
-            "label": "linkedProject",
-            "description": [],
-            "signature": [
-              "{ hosts: { elasticsearch: string; }; auth: { username: string; password: string; }; } | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 30,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-search",
-            "id": "def-common.ScoutTestConfig.metadata",
-            "type": "Any",
-            "tags": [],
-            "label": "metadata",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 39,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout-search",
         "id": "def-common.ScoutTestFixtures",
         "type": "Interface",
         "tags": [],
@@ -12487,18 +12302,12 @@
           {
             "parentPluginId": "@kbn/scout-search",
             "id": "def-common.ScoutWorkerFixtures.config",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "config",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/scout",
-                "scope": "common",
-                "docId": "kibKbnScoutPluginApi",
-                "section": "def-common.ScoutTestConfig",
-                "text": "ScoutTestConfig"
-              }
+              "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
             "lineNumber": 75,
@@ -12936,6 +12745,25 @@
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/test/scout_page/index.ts",
         "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-search",
+        "id": "def-common.ScoutTestConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ScoutTestConfig",
+        "description": [
+          "\nShape of the JSON files Scout reads to point tests at a deployment\n(`local.json`, `cloud_ech.json`, `cloud_mki.json`). The canonical schema\nwith required/optional/conditional rules lives in `./test_config.schema.ts`."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.ts",
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
