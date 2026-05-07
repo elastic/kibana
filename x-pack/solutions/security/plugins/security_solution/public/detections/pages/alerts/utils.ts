@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { encode } from '@kbn/rison';
-import { expandableFlyoutStateFromEventMeta } from '../../../flyout/document_details/shared/hooks/url/expandable_flyout_state_from_event_meta';
+import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
+import {
+  expandableFlyoutStateRightPanelOnly,
+  resolveFlyoutUrlParam,
+} from '../../../flyout/shared/utils/expandable_flyout_url_state';
 
 export interface ResolveFlyoutParamsConfig {
   index: string;
@@ -22,12 +25,15 @@ export interface ResolveFlyoutParamsConfig {
 export const resolveFlyoutParams = (
   { index, alertId }: ResolveFlyoutParamsConfig,
   currentParamsString: string | null
-) => {
-  if (currentParamsString) {
-    return currentParamsString;
-  }
-
-  return encode(
-    expandableFlyoutStateFromEventMeta({ index, eventId: alertId, scopeId: 'alerts-page' })
+) =>
+  resolveFlyoutUrlParam(
+    currentParamsString,
+    expandableFlyoutStateRightPanelOnly({
+      id: DocumentDetailsRightPanelKey,
+      params: {
+        id: alertId,
+        indexName: index,
+        scopeId: 'alerts-page',
+      },
+    })
   );
-};
