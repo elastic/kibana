@@ -63,12 +63,11 @@ describe('CloudLinks', () => {
     setCloudMock(createCloudMock());
     const { getByTestId } = renderCloudLinks();
 
-    expect(getByTestId('searchHomepageCloudLink-home')).toBeInTheDocument();
-    expect(getByTestId('searchHomepageCloudLink-elasticCloud')).toBeInTheDocument();
-    expect(getByTestId('searchHomepageCloudLink-organization')).toBeInTheDocument();
-
     await waitFor(() => {
+      expect(getByTestId('searchHomepageCloudLink-home')).toBeInTheDocument();
+      expect(getByTestId('searchHomepageCloudLink-elasticCloud')).toBeInTheDocument();
       expect(getByTestId('searchHomepageCloudLink-usage')).toBeInTheDocument();
+      expect(getByTestId('searchHomepageCloudLink-organization')).toBeInTheDocument();
     });
   });
 
@@ -76,18 +75,20 @@ describe('CloudLinks', () => {
     setCloudMock(createCloudMock());
     const { getByTestId } = renderCloudLinks();
 
-    expect(getByTestId('searchHomepageCloudLink-home')).toHaveAttribute(
-      'href',
-      'https://cloud.elastic.co'
-    );
-    expect(getByTestId('searchHomepageCloudLink-elasticCloud')).toHaveAttribute(
-      'href',
-      'https://cloud.elastic.co'
-    );
-    expect(getByTestId('searchHomepageCloudLink-organization')).toHaveAttribute(
-      'href',
-      'https://cloud.elastic.co/account/members'
-    );
+    await waitFor(() => {
+      expect(getByTestId('searchHomepageCloudLink-home')).toHaveAttribute(
+        'href',
+        'https://cloud.elastic.co'
+      );
+      expect(getByTestId('searchHomepageCloudLink-elasticCloud')).toHaveAttribute(
+        'href',
+        'https://cloud.elastic.co'
+      );
+      expect(getByTestId('searchHomepageCloudLink-organization')).toHaveAttribute(
+        'href',
+        'https://cloud.elastic.co/account/members'
+      );
+    });
 
     await waitFor(() => {
       expect(getByTestId('searchHomepageCloudLink-usage')).toHaveAttribute(

@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { CloudLinksPillStyle } from './cloud_links_styles';
@@ -24,6 +24,7 @@ export const CloudLinks = () => {
   } = useKibana();
 
   const [billingUrl, setBillingUrl] = useState<string>('');
+  const [isLoadingPrivilegedUrls, setIsLoadingPrivilegedUrls] = useState(true);
   useEffect(() => {
     cloud
       ?.getPrivilegedUrls()
@@ -32,7 +33,8 @@ export const CloudLinks = () => {
           setBillingUrl(urls.billingUrl);
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setIsLoadingPrivilegedUrls(false));
   }, [cloud]);
 
   const cloudLinks = useMemo(() => {
@@ -73,6 +75,10 @@ export const CloudLinks = () => {
 
   if (!cloud?.isCloudEnabled || !cloud?.baseUrl) {
     return null;
+  }
+
+  if (isLoadingPrivilegedUrls) {
+    return <EuiLoadingSpinner size="s" />;
   }
 
   return (
