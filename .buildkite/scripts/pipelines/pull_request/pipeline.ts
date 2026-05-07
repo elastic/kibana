@@ -644,12 +644,13 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     // Run Saved Objects checks conditionally
     if (
-      await doAnyChangesMatch([
+      !GITHUB_PR_LABELS.includes('ci:skip-so-check') &&
+      (await doAnyChangesMatch([
         /^packages\/kbn-check-saved-objects-cli\/current_fields.json/,
         /^packages\/kbn-check-saved-objects-cli\/current_mappings.json/,
         /^src\/core\/server\/integration_tests\/ci_checks\/saved_objects\/check_registered_types.test.ts/,
         /^\.buildkite\/pipelines\/pull_request\/check_saved_objects\.yml/,
-      ])
+      ]))
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml', cancelable)
@@ -669,6 +670,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/workflows_oom_testing.yml', cancelable)
       );
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:cps-test')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cps_testing.yml', cancelable));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
