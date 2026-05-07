@@ -44,7 +44,6 @@ export const FileDataVisualizer: FC<Props> = ({
 }) => {
   const { data, fileUpload, application, http, notifications, coreStart } = dependencies;
   const { autoAddInference, autoCreateDataView, indexSettings } = props ?? {};
-  const canCreateDataView = application.capabilities.indexPatterns.save === true;
 
   const createFileUploadManager = useCallback(
     (existingIndex?: string) => {
@@ -58,7 +57,7 @@ export const FileDataVisualizer: FC<Props> = ({
           capabilities: application.capabilities,
         },
         autoAddInference ?? null,
-        autoCreateDataView !== false && canCreateDataView,
+        autoCreateDataView,
         true,
         existingIndex ?? null,
         indexSettings,
@@ -68,7 +67,6 @@ export const FileDataVisualizer: FC<Props> = ({
     [
       autoAddInference,
       autoCreateDataView,
-      canCreateDataView,
       data,
       dependencies,
       fileUpload,

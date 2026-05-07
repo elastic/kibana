@@ -43,7 +43,6 @@ export const FileDataVisualizerLite: FC<Props> = ({
     onUploadComplete,
     location,
   } = props;
-  const canCreateDataView = application.capabilities.indexPatterns.save === true;
   const fileUploadManager = useMemo(
     () =>
       new FileUploadManager(
@@ -56,7 +55,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
           capabilities: application.capabilities,
         },
         autoAddInference ?? null,
-        autoCreateDataView !== false && canCreateDataView,
+        autoCreateDataView,
         true,
         existingIndex ?? null,
         indexSettings,
@@ -65,7 +64,6 @@ export const FileDataVisualizerLite: FC<Props> = ({
     [
       autoAddInference,
       autoCreateDataView,
-      canCreateDataView,
       data,
       dependencies.analytics,
       dependencies.http,
