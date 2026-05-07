@@ -394,7 +394,23 @@ const buildSystemPrompt = (convention: 'ecs' | 'otel', isWired: boolean): string
   const conventionGuide =
     convention === 'ecs'
       ? 'Use ECS field names: log.level, service.name, host.name, @timestamp, message'
-      : 'Use OTel field names: severity_text, resource.attributes.*, body.text, attributes.*';
+      : [
+          'Use OTel field names. Map common concepts to their canonical OTel paths:',
+          '  - IP addresses → attributes.source.ip / attributes.destination.ip',
+          '  - HTTP status → attributes.http.response.status_code',
+          '  - HTTP method → attributes.http.request.method_original',
+          '  - URL path → attributes.url.path',
+          '  - Response size → attributes.http.response.body.size',
+          '  - Service name → resource.attributes.service.name',
+          '  - Host name → resource.attributes.host.name',
+          '  - Process ID → resource.attributes.process.pid',
+          '  - User agent → resource.attributes.user_agent.original',
+          '  - User ID → attributes.user.id',
+          '  - Log level → severity_text',
+          '  - Raw message → body.text',
+          '  - Other custom fields → attributes.<domain>.<name>',
+          'When the user says "extract X", always use the canonical OTel path — do NOT use a bare name like attributes.ip or attributes.status_code.',
+        ].join('\n');
 
   const wiredConstraint = isWired
     ? '\n- This is a wired stream. Custom/extracted fields MUST go in attributes.*, body.structured.*, or resource.attributes.* — do NOT write to inherited ECS fields (log.level, message, etc.) directly.'
@@ -461,6 +477,7 @@ const buildSystemPrompt = (convention: 'ecs' | 'otel', isWired: boolean): string
     '- Use `where` for single-step inline conditions.',
     '- Use a `condition` block when multiple steps share the same condition.',
     '- Do NOT add `ignore_failure` to any processors. The system adds failure handling automatically after validation.',
+    '- When writing grok/dissect patterns, study the sample values in the Available fields list carefully. If `body.text` (or `message`) contains multiple log formats (e.g. nginx, syslog, app logs), write MULTIPLE grok patterns to match each format — do not write a single pattern that only matches one format.',
     `- Apply the change described to the current pipeline and return the COMPLETE result.${wiredConstraint}`,
   ].join('\n');
 };
@@ -479,7 +496,7 @@ const buildUserMessage = (
       }
       const truncatedSamples = f.sample_values.map((v) => {
         const s = String(v);
-        return s.length > 80 ? `"${s.slice(0, 77)}..."` : `"${s}"`;
+        return s.length > 120 ? `"${s.slice(0, 117)}..."` : `"${s}"`;
       });
       const distinctCount = f.distinct_count ?? f.sample_values.length;
       const plural = distinctCount !== 1 ? 's' : '';
