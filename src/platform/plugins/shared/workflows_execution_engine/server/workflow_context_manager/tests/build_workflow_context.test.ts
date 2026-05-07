@@ -544,7 +544,7 @@ describe('buildWorkflowContext', () => {
       expect(context.event).toBeDefined();
       expect(context.event?.spaceId).toBe('default');
       expect(context.event?.alerts).toHaveLength(1);
-      expect(context.event?.alerts?.[0]._id).toBe('alert-1');
+      expect((context.event?.alerts?.[0] as { _id: string })._id).toBe('alert-1');
       expect(context.event?.rule?.name).toBe('Test Rule');
       expect(context.event?.params).toEqual({ threshold: 10 });
     });
