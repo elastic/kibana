@@ -697,7 +697,7 @@ function UserSpaceConfigEditor({ formik }: { formik: ReturnType<typeof useUserPr
             <span id={rememberSelectedSpaceLabelId}>
               <FormattedMessage
                 id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceLabel"
-                defaultMessage="Remember selected space"
+                defaultMessage="Remember last selected space"
               />
             </span>
           </FormLabel>
@@ -706,11 +706,13 @@ function UserSpaceConfigEditor({ formik }: { formik: ReturnType<typeof useUserPr
       >
         <FormField
           label={
-            <EuiText id={rememberSelectedSpaceLabelId}>
-              <FormattedMessage
-                id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceLabel"
-                defaultMessage="Remember the last selected space for you when you log in."
-              />
+            <EuiText id={rememberSelectedSpaceLabelId} size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceSwitchDescription"
+                  defaultMessage="Kibana will redirect to last accessed space on login."
+                />
+              </p>
             </EuiText>
           }
           as={EuiSwitch}
@@ -1021,9 +1023,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       if (
         initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode ||
         initialValues.data?.userSettings.contrastMode !== values.data?.userSettings.contrastMode ||
-        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale ||
-        initialValues.data?.userSettings.rememberSelectedSpace !==
-          values.data?.userSettings.rememberSelectedSpace
+        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale
       ) {
         isRefreshRequired = true;
       }
