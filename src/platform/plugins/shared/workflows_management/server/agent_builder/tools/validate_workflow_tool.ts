@@ -8,7 +8,6 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { builtInStepDefinitions } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
@@ -99,17 +98,7 @@ If validation fails, fix the issues and re-validate until the YAML is valid.`,
       yaml: z.string().describe('The complete workflow YAML string to validate'),
     }),
     tags: ['workflows', 'yaml', 'validation'],
-    availability: {
-      handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        return isEnabled
-          ? { status: 'available' }
-          : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };
-      },
-      cacheMode: 'space',
-    },
+    experimental: true,
     handler: async ({ yaml }, { spaceId, request }) => {
       const result = await api.validateWorkflow(yaml, spaceId, request);
 
