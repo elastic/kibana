@@ -34,6 +34,7 @@ import {
 import type { EmbeddableConversationProps } from '@kbn/agent-builder-plugin/public';
 import type { HealthyMetricCardItem } from '@kbn/sigevents';
 import { OBSERVABILITY_SIGNIFICANT_EVENT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
 
@@ -105,9 +106,18 @@ export function SigeventsOverviewPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { services } = useKibana();
   const { agentBuilder } = services;
+  const { http } = services;
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const location = useLocation();
+
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.nightshiftLinkText', {
+        defaultMessage: 'Nightshift',
+      }),
+    },
+  ]);
 
   // Strip time range params from the URL — this page does not use a time range
   useEffect(() => {
@@ -375,6 +385,9 @@ export function SigeventsOverviewPage() {
         iconType: 'layers',
         iconBackground: euiTheme.colors.backgroundBaseSubdued,
         iconColor: euiTheme.colors.textParagraph,
+        href: http.basePath.prepend(
+          '/app/streams/_discovery/knowledge_indicators?kiSubtypes=service&kiTypes=entity&rangeFrom=now-15m&rangeTo=now'
+        ),
       },
       {
         id: 'entities',
@@ -385,6 +398,9 @@ export function SigeventsOverviewPage() {
         iconType: 'submodule',
         iconBackground: euiTheme.colors.backgroundBaseSubdued,
         iconColor: euiTheme.colors.textParagraph,
+        href: http.basePath.prepend(
+          '/app/streams/_discovery/knowledge_indicators?kiTypes=entity&rangeFrom=now-15m&rangeTo=now'
+        ),
       },
       {
         id: 'technologies',
@@ -395,6 +411,9 @@ export function SigeventsOverviewPage() {
         iconType: 'desktop',
         iconBackground: euiTheme.colors.backgroundBaseSubdued,
         iconColor: euiTheme.colors.textParagraph,
+        href: http.basePath.prepend(
+          '/app/streams/_discovery/knowledge_indicators?kiTypes=entity%2Ctechnology&rangeFrom=now-15m&rangeTo=now'
+        ),
       },
       {
         id: 'criticalSigEvents',
@@ -437,7 +456,7 @@ export function SigeventsOverviewPage() {
         iconColor: lowStyling.iconColor,
       },
     ];
-  }, [overviewData, euiTheme]);
+  }, [overviewData, euiTheme, http]);
 
   return (
     <ObservabilityPageTemplate
