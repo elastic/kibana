@@ -1051,11 +1051,11 @@ describe('dimension editor', () => {
       };
 
       const clickOnApplyColorToOption = async (option: ApplyColor) => {
-        const el = applyColorToOptions[option];
-        if (!el) {
+        const applyColorTo = applyColorToOptions[option];
+        if (!applyColorTo) {
           throw new Error(`Apply color to option ${option} not found`);
         }
-        await userEvent.click(el);
+        await userEvent.click(applyColorTo);
       };
 
       const colorModeGroup = screen.queryByRole('group', { name: /Mode/i });
@@ -1299,18 +1299,18 @@ describe('dimension editor', () => {
           expect(applyColorToOptions.background).toHaveAttribute('aria-pressed', 'true');
         });
 
-        it('should select the apply color to `None` when `applyColorTo` is unset', () => {
+        it('should select the apply color to `None` when `applyColorTo` is `none`', () => {
           const { applyColorToOptions, colorModeGroup, colorControls } =
             renderAdditionalSectionEditor({
               state: {
                 ...stateWOTrend,
                 showBar: false,
                 maxAccessor: undefined,
-                applyColorTo: undefined,
+                applyColorTo: 'none',
               },
             });
           expect(applyColorToOptions.none).toHaveAttribute('aria-pressed', 'true');
-          expect(colorModeGroup).not.toBeInTheDocument();
+          expect(colorModeGroup).toBeInTheDocument();
           expect(colorControls).not.toBeInTheDocument();
         });
 
@@ -1354,7 +1354,7 @@ describe('dimension editor', () => {
           expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: 'background' });
         });
 
-        it('should set `applyColorTo` to `undefined` when the apply color `None` is selected', async () => {
+        it('should set `applyColorTo` to `none` when the apply color `None` is selected', async () => {
           const mockState = {
             ...stateWOTrend,
             showBar: false,
@@ -1364,7 +1364,7 @@ describe('dimension editor', () => {
           const { clickOnApplyColorToOption } = renderAdditionalSectionEditor({ state: mockState });
           mockSetState.mockClear();
           await clickOnApplyColorToOption('none');
-          expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: undefined });
+          expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: 'none' });
         });
 
         it('should show help message when color mode static, supporting visualization is none, apply color to value', () => {

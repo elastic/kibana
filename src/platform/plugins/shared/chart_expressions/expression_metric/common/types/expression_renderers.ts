@@ -51,8 +51,9 @@ export interface MetricVisParam {
    * Only applies when the background chart is a panel.
    * - 'background': Applies the color to the metric's background area.
    * - 'value': Applies the color to the Primary Metric's value.
+   * - 'none': Does not apply the color to the metric.
    */
-  applyColorTo?: 'background' | 'value';
+  applyColorTo: 'background' | 'value' | 'none';
 }
 
 export interface VisParams {
