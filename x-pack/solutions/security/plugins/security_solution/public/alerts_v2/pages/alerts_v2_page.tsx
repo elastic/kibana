@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, type ChangeEvent } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiBadge,
@@ -138,10 +139,21 @@ export const AlertsV2Page = () => {
   const { openFlyout } = useExpandableFlyoutApi();
 
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-6h', to: 'now' });
+  const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWorkflowStatus, setSelectedWorkflowStatus] = useState<WorkflowStatus | undefined>();
   const [selectedTags, setSelectedTags] = useState<string[] | undefined>();
   const [selectedAssigneeUid, setSelectedAssigneeUid] = useState<string | undefined>();
+
+  useDebounce(
+    () => {
+      const trimmed = searchInput.trim();
+      setSearchQuery((prev) => (trimmed !== prev ? trimmed : prev));
+    },
+    300,
+    [searchInput]
+  );
+
   const filterState = useMemo<SecurityEpisodesFilterState>(
     () => ({
       queryString: searchQuery || null,
@@ -336,8 +348,8 @@ export const AlertsV2Page = () => {
     setTimeRange({ from: start, to: end });
   }, []);
 
-  const onSearchChange = useCallback((value: string) => {
-    setSearchQuery(value);
+  const onSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
   }, []);
 
   const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
@@ -407,8 +419,8 @@ export const AlertsV2Page = () => {
                 <EuiFieldSearch
                   compressed
                   placeholder={i18n.SEARCH_PLACEHOLDER}
-                  value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
+                  value={searchInput}
+                  onChange={onSearchChange}
                   isClearable
                   aria-label={i18n.SEARCH_PLACEHOLDER}
                   fullWidth

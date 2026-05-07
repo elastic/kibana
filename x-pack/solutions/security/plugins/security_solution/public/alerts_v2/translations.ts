@@ -18,7 +18,7 @@ export const ALERTS_V2_TABLE_ARIA_LABEL = i18n.translate(
 
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.alertsV2.searchPlaceholder',
-  { defaultMessage: 'Search alerts...' }
+  { defaultMessage: 'Search by field, e.g. rule.id:abc or data.host.name:server1' }
 );
 
 export const FILTER_ACTIVE = i18n.translate('xpack.securitySolution.alertsV2.filter.active', {
