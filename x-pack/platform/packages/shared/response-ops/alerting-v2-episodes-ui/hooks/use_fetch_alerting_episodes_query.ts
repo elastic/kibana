@@ -14,6 +14,7 @@ import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
 import {
   type AlertEpisode,
+  type AlertEpisodeEsqlRow,
   type EpisodesFilterState,
   type EpisodesSortState,
 } from '../queries/episodes_query';
@@ -49,7 +50,7 @@ export const useFetchAlertingEpisodesQuery = ({
 
   const queryKey = queryKeys.list(pageSize, filterState, sortState, timeRange ?? undefined);
 
-  const query = useQuery({
+  const query = useQuery<AlertEpisodeEsqlRow[], unknown, AlertEpisode[]>({
     enabled: dataView != null,
     queryKey,
     queryFn: ({ signal: abortSignal }) =>

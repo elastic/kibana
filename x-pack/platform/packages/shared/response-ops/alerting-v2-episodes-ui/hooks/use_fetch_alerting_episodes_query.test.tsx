@@ -155,7 +155,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
     fetchAlertingEpisodesMock.mockResolvedValue([
       {
         ...mockEpisodesData[0],
-        last_tags: 'solo' as unknown as string[],
+        last_tags: 'solo',
       },
     ]);
 
