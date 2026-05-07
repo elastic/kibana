@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -35,7 +35,7 @@ export function Onboarding() {
 
   const baseUrl = docLinks?.ELASTIC_WEBSITE_URL || 'https://www.elastic.co/';
 
-  const createAgentKey = async () => {
+  const createAgentKey = useCallback(async () => {
     try {
       setApiKeyLoading(true);
       const privileges: PrivilegeType[] = [PrivilegeType.EVENT];
@@ -64,14 +64,16 @@ export function Onboarding() {
     } finally {
       setApiKeyLoading(false);
     }
-  };
+  }, [callApmApi]);
 
-  const checkAgentStatus = async () => {
+  const checkAgentStatus = useCallback(async () => {
     try {
       setAgentStatusLoading(true);
       const agentStatusCheck = await callApmApi(
         'GET /internal/apm/observability_overview/has_data',
-        { signal: null }
+        {
+          signal: null,
+        }
       );
       setAgentStatus(agentStatusCheck.hasData);
     } catch (error) {
@@ -79,7 +81,7 @@ export function Onboarding() {
     } finally {
       setAgentStatusLoading(false);
     }
-  };
+  }, [callApmApi]);
 
   const instructionsExists = instructions.length > 0;
 
@@ -100,7 +102,16 @@ export function Onboarding() {
         createAgentKey
       )
     );
-  }, [agentApiKey, baseUrl, config, apiKeyLoading, agentStatus, agentStatusLoading]);
+  }, [
+    agentApiKey,
+    baseUrl,
+    config,
+    apiKeyLoading,
+    agentStatus,
+    agentStatusLoading,
+    checkAgentStatus,
+    createAgentKey,
+  ]);
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
   return (
