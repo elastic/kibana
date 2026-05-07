@@ -29,6 +29,26 @@ import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER } from '../fixtures/constants';
 import { postConverse, type ExecutionMode } from '../fixtures/converse_http';
 
+// Tool-result messages on the wire may be wrapped in a <tool_result> envelope and/or
+// a {response: "..."} layer added by inference-langchain when the inner content is
+// not valid JSON. Strip both so assertions can target the original {results: [...]} payload.
+const parseToolMessageContent = (raw: string): { results: [QueryResult, EsqlResults] } => {
+  let payload: unknown = raw;
+  try {
+    payload = JSON.parse(raw);
+  } catch {
+    // raw is not JSON — likely a bare envelope string, fall through.
+  }
+  if (typeof payload === 'object' && payload !== null && 'response' in payload) {
+    payload = (payload as { response: unknown }).response;
+  }
+  if (typeof payload === 'string') {
+    const stripped = payload.replace(/^<tool_result>|<\/tool_result>$/g, '');
+    return JSON.parse(stripped);
+  }
+  return payload as { results: [QueryResult, EsqlResults] };
+};
+
 const EXECUTION_MODES: ExecutionMode[] = ['local', 'task_manager'];
 
 apiTest.describe(
@@ -108,8 +128,8 @@ apiTest.describe(
           expect(handoverRequest).toBeDefined();
           const esqlToolCallMsg = handoverRequest!.messages[handoverRequest!.messages.length - 1]!;
           expect(esqlToolCallMsg.role).toBe('tool');
-          const toolCallContent = JSON.parse(String(esqlToolCallMsg.content));
-          const [queryResult, esqlResults] = toolCallContent.results as [QueryResult, EsqlResults];
+          const toolCallContent = parseToolMessageContent(String(esqlToolCallMsg.content));
+          const [queryResult, esqlResults] = toolCallContent.results;
 
           expect(queryResult.type).toBe('query');
           expect('esql' in queryResult.data ? queryResult.data.esql : '').toBe(MOCKED_ESQL_QUERY);
