@@ -334,7 +334,7 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
               isSelected={selectedLevel === 'error'}
               isToggle
               onClick={() => setSelectedLevel('error')}
-              color={selectedLevel === 'error' ? 'danger' : 'text'}
+              color={selectedLevel === 'error' && errorCount > 0 ? 'danger' : 'text'}
               withNext
               data-test-subj="errorPatternLevelToggle-error"
             >
@@ -347,7 +347,7 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
               isSelected={selectedLevel === 'warning'}
               isToggle
               onClick={() => setSelectedLevel('warning')}
-              color={selectedLevel === 'warning' ? 'warning' : 'text'}
+              color={selectedLevel === 'warning' && warningCount > 0 ? 'warning' : 'text'}
               data-test-subj="errorPatternLevelToggle-warning"
             >
               {i18n.translate('xpack.fleet.collectorDetail.errorPatterns.warningsToggle', {

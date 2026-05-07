@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { AGENT_LOG_INDEX_PATTERN, DATASET_VAR_NAME } from '../../../../../../../../common/constants';
+import {
+  AGENT_LOG_INDEX_PATTERN,
+  DATASET_VAR_NAME,
+} from '../../../../../../../../common/constants';
 
 import type { AgentLogsState } from './agent_logs';
 
