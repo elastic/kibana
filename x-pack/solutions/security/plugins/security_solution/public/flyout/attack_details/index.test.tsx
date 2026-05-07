@@ -16,8 +16,8 @@ import { useTabs } from './hooks/use_tabs';
 import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useKibana } from '../../common/lib/kibana';
 
-const mockFlyoutNavigation = jest.fn((props: unknown) => (
-  <div data-test-subj="flyoutNavigation">{JSON.stringify(props)}</div>
+const mockFlyoutNavigation = jest.fn((_props?: unknown) => (
+  <div data-test-subj="flyoutNavigation" />
 ));
 
 jest.mock('@kbn/expandable-flyout');
@@ -29,6 +29,9 @@ jest.mock('./content', () => ({ PanelContent: () => <div data-test-subj="panelCo
 jest.mock('./footer', () => ({ PanelFooter: () => <div data-test-subj="panelFooter" /> }));
 jest.mock('../shared/components/flyout_navigation', () => ({
   FlyoutNavigation: (props: unknown) => mockFlyoutNavigation(props),
+}));
+jest.mock('./components/header_actions', () => ({
+  AttackHeaderActions: () => <span data-test-subj="attackHeaderActionsMock" />,
 }));
 jest.mock('./header', () => ({
   PanelHeader: ({
@@ -98,7 +101,10 @@ describe('AttackDetailsPanel', () => {
     getByTestId('switchTabButton').click();
 
     expect(mockFlyoutNavigation.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ flyoutIsExpandable: true })
+      expect.objectContaining({
+        flyoutIsExpandable: true,
+        actions: expect.any(Object),
+      })
     );
     expect(openRightPanel).toHaveBeenCalledWith({
       id: AttackDetailsRightPanelKey,
