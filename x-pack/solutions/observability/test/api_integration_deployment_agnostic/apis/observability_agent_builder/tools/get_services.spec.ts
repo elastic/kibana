@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { timerange } from '@kbn/synthtrace-client';
+import moment from 'moment';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import {
   type ApmSynthtraceEsClient,
   type LogsSynthtraceEsClient,
@@ -19,6 +20,7 @@ import type { OtherResult } from '@kbn/agent-builder-common';
 import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
+import { createAndRunApmMlJobs } from '../utils/create_and_run_apm_ml_jobs';
 
 // APM-only services
 const APM_SERVICE_1 = 'apm-only-service';
@@ -322,6 +324,143 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(serviceNames).to.contain(APM_SERVICE_1);
         expect(serviceNames).to.not.contain(LOG_SERVICE_1);
+      });
+    });
+
+    describe('filtering by anomalySeverities with anomaly data', function () {
+      // ML lookback job + cleanup is slow
+      this.timeout(300_000);
+
+      const ANOMALOUS_SERVICE = 'anomalous-checkout';
+      const HEALTHY_SERVICE = 'healthy-cart';
+      const ML_TEST_ENVIRONMENT = 'production-anomaly-test';
+
+      const rangeStart = moment().subtract(2, 'days').valueOf();
+      const rangeEnd = moment().valueOf();
+      const spikeStart = moment().subtract(2, 'hours').valueOf();
+      const spikeEnd = moment().subtract(1, 'hour').valueOf();
+      const TEST_START_ISO = new Date(rangeStart).toISOString();
+      const TEST_END_ISO = new Date(rangeEnd).toISOString();
+
+      let anomalousServiceSeverity: string;
+
+      before(async () => {
+        const ml = getService('ml');
+        const es = getService('es');
+        const log = getService('log');
+
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await Promise.all([apmSynthtraceEsClient.clean(), ml.api.cleanMlIndices()]);
+        await ml.api.deleteAllAnomalyDetectionJobs();
+
+        const anomalousService = apm
+          .service({
+            name: ANOMALOUS_SERVICE,
+            environment: ML_TEST_ENVIRONMENT,
+            agentName: 'java',
+          })
+          .instance('a');
+        const healthyService = apm
+          .service({
+            name: HEALTHY_SERVICE,
+            environment: ML_TEST_ENVIRONMENT,
+            agentName: 'nodejs',
+          })
+          .instance('b');
+
+        const events = timerange(rangeStart, rangeEnd)
+          .interval('1m')
+          .rate(1)
+          .generator((timestamp) => {
+            const isInSpike = timestamp >= spikeStart && timestamp < spikeEnd;
+            return [
+              anomalousService
+                .transaction({ transactionName: 'GET /checkout' })
+                .timestamp(timestamp)
+                .duration(isInSpike ? 5000 : 100)
+                .outcome(isInSpike ? 'failure' : 'success'),
+              healthyService
+                .transaction({ transactionName: 'GET /cart' })
+                .timestamp(timestamp)
+                .duration(100)
+                .outcome('success'),
+            ];
+          });
+
+        await apmSynthtraceEsClient.index(events);
+
+        await createAndRunApmMlJobs({
+          es,
+          ml: ml.api,
+          environments: [ML_TEST_ENVIRONMENT],
+          logger: log,
+        });
+
+        // Capture ML's assigned severity for the anomalous service so the filter
+        // assertions don't hard-code a band (ML scoring varies run-to-run).
+        const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
+          id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
+          params: { start: TEST_START_ISO, end: TEST_END_ISO },
+        });
+        const anomalousResult = results[0].data.services.find(
+          (s) => s.serviceName === ANOMALOUS_SERVICE
+        );
+        anomalousServiceSeverity = anomalousResult?.anomalySeverity ?? 'unknown';
+      });
+
+      after(async () => {
+        const ml = getService('ml');
+        await Promise.all([apmSynthtraceEsClient.clean(), ml.api.cleanMlIndices()]);
+        await ml.api.deleteAllAnomalyDetectionJobs();
+      });
+
+      it('returns anomalyScore and anomalySeverity on the anomalous APM service', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
+          id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
+          params: { start: TEST_START_ISO, end: TEST_END_ISO },
+        });
+        const anomalousService = results[0].data.services.find(
+          (s) => s.serviceName === ANOMALOUS_SERVICE
+        );
+
+        expect(anomalousService).to.be.ok();
+        expect(anomalousService).to.have.property('anomalyScore');
+        expect(anomalousService).to.have.property('anomalySeverity');
+      });
+
+      it('assigns a non-low severity to the anomalous service', () => {
+        expect(['warning', 'minor', 'major', 'critical']).to.contain(anomalousServiceSeverity);
+      });
+
+      it('filters services by anomalySeverity', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
+          id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
+          params: {
+            start: TEST_START_ISO,
+            end: TEST_END_ISO,
+            anomalySeverities: [anomalousServiceSeverity],
+          },
+        });
+        const serviceNames = results[0].data.services.map((s) => s.serviceName);
+
+        expect(serviceNames).to.contain(ANOMALOUS_SERVICE);
+        expect(serviceNames).to.not.contain(HEALTHY_SERVICE);
+      });
+
+      it('emits anomalySeverity on every APM service (no field absence)', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
+          id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
+          params: { start: TEST_START_ISO, end: TEST_END_ISO },
+        });
+        const apmServices = results[0].data.services.filter((s) => s.latency !== undefined);
+
+        expect(apmServices.length).to.be.greaterThan(0);
+        for (const service of apmServices) {
+          expect(service).to.have.property('anomalySeverity');
+          expect(['critical', 'major', 'minor', 'warning', 'low', 'unknown']).to.contain(
+            service.anomalySeverity
+          );
+        }
       });
     });
 
