@@ -41,26 +41,6 @@ function isEditingFromDashboard(
   return isVizApp && hasOriginatingApp;
 }
 
-/**
- * Hard-coded entity-type sub-links for the entity-centric lab "Entities" panel.
- * Counts are mocked from the design — clicking any of these takes the user to
- * the Manage entity types page (filtered by category in a future iteration).
- */
-const ENTITY_CENTRIC_LAB_ENTITIES_PANEL_ITEMS: ReadonlyArray<{ id: string; title: string }> = [
-  { id: 'all', title: 'All entities (40)' },
-  { id: 'hosts', title: 'Hosts (200)' },
-  { id: 'kubernetes', title: 'Kubernetes (123)' },
-  { id: 'databases', title: 'Databases (12)' },
-  { id: 'services', title: 'Services (4)' },
-  { id: 'cloud', title: 'Cloud (8)' },
-  { id: 'apm-service', title: 'APM Service' },
-  { id: 'aws-ec2', title: 'AWS EC2 Instance' },
-  { id: 'aws-lambda', title: 'AWS Lambda function' },
-  { id: 'aws-s3', title: 'AWS S3 bucket' },
-  { id: 'middleware', title: 'Middleware (3)' },
-  { id: 'llms', title: 'LLMs (2)' },
-];
-
 function createNavTree({
   streamsAvailable,
   showAiAssistant,
@@ -126,11 +106,12 @@ function createNavTree({
             entityCentricLabEnabled
               ? {
                   // When the entity-centric lab is on, Streams becomes a
-                  // panel-opener that exposes (1) the existing All streams
-                  // entry, (2) an `Entities` group listing the mocked entity
-                  // types, and (3) a Manage entity types shortcut. The parent
-                  // node still navigates to /app/streams when clicked
-                  // directly (mirrors the Infrastructure pattern).
+                  // panel-opener that surfaces the existing `All streams`
+                  // entry alongside the prototype `Manage entity types`
+                  // shortcut. The parent still navigates to /app/streams
+                  // when clicked directly (mirrors the Infrastructure
+                  // pattern). Each child sits in its own group so the panel
+                  // renders a visual gap between them.
                   id: 'streams',
                   link: 'streams' as const,
                   icon: 'productStreamsWired',
@@ -160,19 +141,6 @@ function createNavTree({
                           },
                         },
                       ],
-                    },
-                    {
-                      id: 'streamsEntities',
-                      title: i18n.translate('xpack.observability.obltNav.streams.entities', {
-                        defaultMessage: 'Entities',
-                      }),
-                      // Each entry reuses the Manage entity types deep link;
-                      // the prototype page does not yet filter by category.
-                      children: ENTITY_CENTRIC_LAB_ENTITIES_PANEL_ITEMS.map((item) => ({
-                        id: `entityCentricLab-${item.id}`,
-                        title: item.title,
-                        link: 'streams:manageEntityTypes' as const,
-                      })),
                     },
                     {
                       children: [
