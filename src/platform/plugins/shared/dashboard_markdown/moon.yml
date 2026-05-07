@@ -35,6 +35,11 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/core-http-browser'
+  - '@kbn/expressions-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/core-lifecycle-browser'
+  - '@kbn/visualizations-common'
+  - '@kbn/react-kibana-context-render'
 tags:
   - plugin
   - prod

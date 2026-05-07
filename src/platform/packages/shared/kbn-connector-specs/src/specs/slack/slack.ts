@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import {
@@ -206,7 +206,7 @@ export const Slack: ConnectorSpec = {
   },
 
   // No additional configuration needed beyond OAuth credentials
-  schema: z.object({}),
+  schema: lazySchema(() => z.object({})),
 
   actions: {
     // https://api.slack.com/methods/assistant.search.context

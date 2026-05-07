@@ -84,6 +84,27 @@ describe('createEditTagsAction', () => {
     expect(onSuccess).toHaveBeenCalled();
   });
 
+  it('execute: passes last_tags into flyout when a single episode is selected', async () => {
+    const deps = makeDeps();
+    jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+
+    await createEditTagsAction(deps).execute({
+      episodes: [makeEpisode({ last_tags: ['existing', 'tags'] })],
+    });
+
+    expect(flyout.openTagsFlyout).toHaveBeenCalledWith(
+      deps.overlays,
+      deps.rendering,
+      ['existing', 'tags'],
+      {
+        http: deps.http,
+        expressions: deps.expressions,
+        queryClient: deps.queryClient,
+      }
+    );
+  });
+
   it('execute: error path calls notifications.toasts.addDanger', async () => {
     const deps = makeDeps();
     jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
