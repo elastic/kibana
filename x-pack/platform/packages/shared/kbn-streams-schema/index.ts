@@ -293,6 +293,8 @@ export type { StreamsOasDefinitions } from './src/oas_definitions';
 export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
 export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';
 
+export { type SeverityLevel, getSeverityLevel } from './src/severity';
+
 export {
   STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,

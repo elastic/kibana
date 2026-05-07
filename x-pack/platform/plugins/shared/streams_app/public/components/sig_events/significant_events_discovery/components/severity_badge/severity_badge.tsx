@@ -8,11 +8,10 @@
 import { EuiHealth, type EuiBadgeProps } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-
-type Severity = 'low' | 'medium' | 'high' | 'critical';
+import { type SeverityLevel, getSeverityLevel } from '@kbn/streams-schema';
 
 export const SIGNIFICANT_EVENT_SEVERITY: Record<
-  Severity,
+  SeverityLevel,
   { color: EuiBadgeProps['color']; label: string; defaultValue: number }
 > = {
   low: {
@@ -45,16 +44,7 @@ export const SIGNIFICANT_EVENT_SEVERITY: Record<
   },
 };
 
-export const scoreSeverity = (score: number): Severity => {
-  if (score < 40) {
-    return 'low';
-  } else if (score < 60) {
-    return 'medium';
-  } else if (score < 80) {
-    return 'high';
-  }
-  return 'critical';
-};
+export const scoreSeverity = (score: number): SeverityLevel => getSeverityLevel(score);
 
 export function SeverityBadge({ score }: { score?: number }) {
   if (!score) {

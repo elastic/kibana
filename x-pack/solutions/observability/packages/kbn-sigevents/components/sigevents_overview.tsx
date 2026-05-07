@@ -95,10 +95,10 @@ export function SigeventsOverview({
     color: ${euiTheme.colors.textHeading};
   `;
 
-  const successValueCss = css`
+  const subduedValueCss = css`
     font-size: ${euiTheme.size.base};
     font-weight: ${euiTheme.font.weight.semiBold};
-    color: ${euiTheme.colors.severity.success};
+    color: ${euiTheme.colors.textSubdued};
   `;
 
   const defaultHealthyMetrics: HealthyMetricCardItem[] = [
@@ -137,40 +137,40 @@ export function SigeventsOverview({
       label: i18n.translate('xpack.observability.sigeventsOverview.healthy.critical', {
         defaultMessage: 'Critical',
       }),
-      value: <span css={successValueCss}>0</span>,
-      iconType: 'checkInCircleFilled',
-      iconBackground: euiTheme.colors.backgroundLightSuccess,
-      iconColor: euiTheme.colors.severity.success,
+      value: <span css={subduedValueCss}>0</span>,
+      iconType: 'alert',
+      iconBackground: euiTheme.colors.backgroundBaseSubdued,
+      iconColor: euiTheme.colors.textSubdued,
     },
     {
       id: 'highSigEvents',
       label: i18n.translate('xpack.observability.sigeventsOverview.healthy.high', {
         defaultMessage: 'High',
       }),
-      value: <span css={successValueCss}>0</span>,
-      iconType: 'checkInCircleFilled',
-      iconBackground: euiTheme.colors.backgroundLightSuccess,
-      iconColor: euiTheme.colors.severity.success,
+      value: <span css={subduedValueCss}>0</span>,
+      iconType: 'sortUp',
+      iconBackground: euiTheme.colors.backgroundBaseSubdued,
+      iconColor: euiTheme.colors.textSubdued,
     },
     {
       id: 'mediumSigEvents',
       label: i18n.translate('xpack.observability.sigeventsOverview.healthy.medium', {
         defaultMessage: 'Medium',
       }),
-      value: <span css={successValueCss}>0</span>,
-      iconType: 'checkInCircleFilled',
-      iconBackground: euiTheme.colors.backgroundLightSuccess,
-      iconColor: euiTheme.colors.severity.success,
+      value: <span css={subduedValueCss}>0</span>,
+      iconType: 'dot',
+      iconBackground: euiTheme.colors.backgroundBaseSubdued,
+      iconColor: euiTheme.colors.textSubdued,
     },
     {
       id: 'lowSigEvents',
       label: i18n.translate('xpack.observability.sigeventsOverview.healthy.low', {
         defaultMessage: 'Low',
       }),
-      value: <span css={successValueCss}>0</span>,
-      iconType: 'checkInCircleFilled',
-      iconBackground: euiTheme.colors.backgroundLightSuccess,
-      iconColor: euiTheme.colors.severity.success,
+      value: <span css={subduedValueCss}>0</span>,
+      iconType: 'minusInCircle',
+      iconBackground: euiTheme.colors.backgroundBaseSubdued,
+      iconColor: euiTheme.colors.textSubdued,
     },
   ];
 

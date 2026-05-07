@@ -6,9 +6,13 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import React from 'react';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { action } from '@storybook/addon-actions';
 import type { EventDocument } from '../hooks/use_fetch_system_overview';
 import { SigeventsOverview } from './sigevents_overview';
+import type { HealthyMetricCardItem } from './sigevents_overview';
 import {
   makeAcknowledgedEvents,
   makePromotedEventsData,
@@ -52,15 +56,6 @@ export const Act0NoDetectionWorkflows: Story = {
   name: 'Act 0: No Detection Workflows',
   args: {
     state: 'healthy',
-    healthyMetrics: [
-      { id: 'services', label: 'Services', value: '0', iconType: 'layers' },
-      { id: 'entities', label: 'Entities', value: '0', iconType: 'submodule' },
-      { id: 'technologies', label: 'Technologies', value: '0', iconType: 'desktop' },
-      { id: 'criticalSigEvents', label: 'Critical', value: '0', iconType: 'checkInCircleFilled' },
-      { id: 'highSigEvents', label: 'High', value: '0', iconType: 'checkInCircleFilled' },
-      { id: 'mediumSigEvents', label: 'Medium', value: '0', iconType: 'checkInCircleFilled' },
-      { id: 'lowSigEvents', label: 'Low', value: '0', iconType: 'checkInCircleFilled' },
-    ],
     lowerPriorityEvents: [],
     impactedCards: [],
     onRemediate: action('onRemediate'),
@@ -74,25 +69,102 @@ export const Act0NoDetectionWorkflows: Story = {
 // service metrics — but no promoted/critical events.
 // ---------------------------------------------------------------------------
 
+function Act1Render() {
+  const { euiTheme } = useEuiTheme();
+
+  const bigValueCss = css`
+    font-size: ${euiTheme.size.base};
+    font-weight: ${euiTheme.font.weight.semiBold};
+    color: ${euiTheme.colors.textHeading};
+  `;
+
+  const primaryValueCss = css`
+    font-size: ${euiTheme.size.base};
+    font-weight: ${euiTheme.font.weight.semiBold};
+    color: ${euiTheme.colors.primary};
+  `;
+
+  const subduedValueCss = css`
+    font-size: ${euiTheme.size.base};
+    font-weight: ${euiTheme.font.weight.semiBold};
+    color: ${euiTheme.colors.textSubdued};
+  `;
+
+  const healthyMetrics: HealthyMetricCardItem[] = [
+    {
+      id: 'services',
+      label: 'Services',
+      value: <span css={bigValueCss}>3</span>,
+      iconType: 'layers',
+      iconBackground: euiTheme.colors.backgroundBaseSubdued,
+      iconColor: euiTheme.colors.textParagraph,
+    },
+    {
+      id: 'entities',
+      label: 'Entities',
+      value: <span css={bigValueCss}>5</span>,
+      iconType: 'submodule',
+      iconBackground: euiTheme.colors.backgroundBaseSubdued,
+      iconColor: euiTheme.colors.textParagraph,
+    },
+    {
+      id: 'technologies',
+      label: 'Technologies',
+      value: <span css={bigValueCss}>2</span>,
+      iconType: 'desktop',
+      iconBackground: euiTheme.colors.backgroundBaseSubdued,
+      iconColor: euiTheme.colors.textParagraph,
+    },
+    {
+      id: 'criticalSigEvents',
+      label: 'Critical',
+      value: <span css={subduedValueCss}>0</span>,
+      iconType: 'alert',
+      iconBackground: euiTheme.colors.backgroundBaseSubdued,
+      iconColor: euiTheme.colors.textSubdued,
+    },
+    {
+      id: 'highSigEvents',
+      label: 'High',
+      value: <span css={subduedValueCss}>0</span>,
+      iconType: 'sortUp',
+      iconBackground: euiTheme.colors.backgroundBaseSubdued,
+      iconColor: euiTheme.colors.textSubdued,
+    },
+    {
+      id: 'mediumSigEvents',
+      label: 'Medium',
+      value: <span css={primaryValueCss}>1</span>,
+      iconType: 'dot',
+      iconBackground: euiTheme.colors.backgroundLightPrimary,
+      iconColor: euiTheme.colors.primary,
+    },
+    {
+      id: 'lowSigEvents',
+      label: 'Low',
+      value: <span css={subduedValueCss}>1</span>,
+      iconType: 'minusInCircle',
+      iconBackground: euiTheme.colors.backgroundBaseSubdued,
+      iconColor: euiTheme.colors.textSubdued,
+    },
+  ];
+
+  return (
+    <SigeventsOverview
+      state="healthy"
+      healthyMetrics={healthyMetrics}
+      lowerPriorityEvents={acknowledgedEvents}
+      impactedCards={[]}
+      onRemediate={action('onRemediate')}
+      onRemediateEvent={action('onRemediateEvent')}
+      onViewDetails={action('onViewDetails')}
+    />
+  );
+}
+
 export const Act1WeKnowYourSystem: Story = {
   name: 'Act 1: We Know Your System',
-  args: {
-    state: 'healthy',
-    healthyMetrics: [
-      { id: 'services', label: 'Services', value: '3', iconType: 'layers' },
-      { id: 'entities', label: 'Entities', value: '5', iconType: 'submodule' },
-      { id: 'technologies', label: 'Technologies', value: '2', iconType: 'desktop' },
-      { id: 'criticalSigEvents', label: 'Critical', value: '0', iconType: 'checkInCircleFilled' },
-      { id: 'highSigEvents', label: 'High', value: '0', iconType: 'checkInCircleFilled' },
-      { id: 'mediumSigEvents', label: 'Medium', value: '1', iconType: 'warning' },
-      { id: 'lowSigEvents', label: 'Low', value: '1', iconType: 'eye' },
-    ],
-    lowerPriorityEvents: acknowledgedEvents,
-    impactedCards: [],
-    onRemediate: action('onRemediate'),
-    onRemediateEvent: action('onRemediateEvent'),
-    onViewDetails: action('onViewDetails'),
-  },
+  render: () => <Act1Render />,
 };
 
 // ---------------------------------------------------------------------------

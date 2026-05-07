@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getSeverityLevel } from '@kbn/streams-schema';
 import { TableTitle } from '../../../../stream_detail_systems/table_title';
 import { StreamLink } from '../links';
 import type { BaseRecord } from '../types';
@@ -36,11 +37,15 @@ export const ACTION_COLOR: Record<string, string> = {
   acknowledge: 'default',
 };
 
+const SEVERITY_COLOR: Record<string, string> = {
+  critical: 'danger',
+  high: 'warning',
+  medium: 'primary',
+  low: 'default',
+};
+
 export function criticalityColor(n: number): string {
-  if (n >= 76) return 'danger';
-  if (n >= 51) return 'warning';
-  if (n >= 31) return 'primary';
-  return 'default';
+  return SEVERITY_COLOR[getSeverityLevel(n)];
 }
 
 export function renderTimestamp(v?: string) {

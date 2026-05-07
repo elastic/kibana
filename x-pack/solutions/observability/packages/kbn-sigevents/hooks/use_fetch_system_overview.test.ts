@@ -67,13 +67,15 @@ function makeEsqlEventsResponse(docs: Array<Record<string, unknown>>) {
   return { columns, values };
 }
 
-function makeEsqlCountsResponse(counts: Array<{ count: number; impact: string; verdict: string }>) {
+function makeEsqlCountsResponse(
+  counts: Array<{ count: number; severity_band: string; verdict: string }>
+) {
   const columns = [
     { name: 'count', type: 'long' },
-    { name: 'impact', type: 'keyword' },
+    { name: 'severity_band', type: 'keyword' },
     { name: 'verdict', type: 'keyword' },
   ];
-  const values = counts.map((c) => [c.count, c.impact, c.verdict]);
+  const values = counts.map((c) => [c.count, c.severity_band, c.verdict]);
   return { columns, values };
 }
 
@@ -125,9 +127,9 @@ describe('useFetchSystemOverview', () => {
         // Counts query
         return of({
           rawResponse: makeEsqlCountsResponse([
-            { count: 1, impact: 'medium', verdict: 'acknowledged' },
-            { count: 1, impact: 'low', verdict: 'acknowledged' },
-            { count: 1, impact: 'low', verdict: 'demoted' },
+            { count: 1, severity_band: 'medium', verdict: 'acknowledged' },
+            { count: 1, severity_band: 'low', verdict: 'acknowledged' },
+            { count: 1, severity_band: 'low', verdict: 'demoted' },
           ]),
         });
       }
@@ -234,8 +236,8 @@ describe('useFetchSystemOverview', () => {
       if (params.query.includes('STATS')) {
         return of({
           rawResponse: makeEsqlCountsResponse([
-            { count: 5, impact: 'unknown_priority', verdict: 'promoted' },
-            { count: 2, impact: 'critical', verdict: 'promoted' },
+            { count: 5, severity_band: 'unknown_priority', verdict: 'promoted' },
+            { count: 2, severity_band: 'critical', verdict: 'promoted' },
           ]),
         });
       }

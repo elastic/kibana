@@ -6,6 +6,7 @@
  */
 
 import type { EuiBadgeProps } from '@elastic/eui';
+import { getSeverityLevel, type SeverityLevel } from '@kbn/streams-schema';
 import type { EventDocument } from '../hooks/use_fetch_system_overview';
 import type { SignificantEventDetailFields } from './significant_event_detail_body';
 
@@ -18,22 +19,19 @@ export interface SeverityInfo {
   state: 'critical' | 'warning' | 'healthy';
 }
 
+const SEVERITY_INFO: Record<SeverityLevel, SeverityInfo> = {
+  critical: { label: 'Critical', color: 'danger', badgeColor: 'danger', state: 'critical' },
+  high: { label: 'High', color: 'warning', badgeColor: 'warning', state: 'warning' },
+  medium: { label: 'Medium', color: 'primary', badgeColor: 'primary', state: 'warning' },
+  low: { label: 'Low', color: 'subdued', badgeColor: 'default', state: 'healthy' },
+};
+
 /**
  * Derives the severity band, badge color, and overall state from a 0-100 score.
  * Bands: Critical (80-100), High (60-79), Medium (40-59), Low (0-39).
  */
-export const getSeverityFromScore = (score: number): SeverityInfo => {
-  if (score >= 80) {
-    return { label: 'Critical', color: 'danger', badgeColor: 'danger', state: 'critical' };
-  }
-  if (score >= 60) {
-    return { label: 'High', color: 'warning', badgeColor: 'warning', state: 'warning' };
-  }
-  if (score >= 40) {
-    return { label: 'Medium', color: 'primary', badgeColor: 'primary', state: 'warning' };
-  }
-  return { label: 'Low', color: 'subdued', badgeColor: 'default', state: 'healthy' };
-};
+export const getSeverityFromScore = (score: number): SeverityInfo =>
+  SEVERITY_INFO[getSeverityLevel(score)];
 
 export const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 

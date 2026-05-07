@@ -323,50 +323,82 @@ export function SigeventsOverviewPage() {
       color: ${euiTheme.colors.textHeading};
     `;
 
-    const successValueCss = css`
-      font-size: ${euiTheme.size.base};
-      font-weight: ${euiTheme.font.weight.semiBold};
-      color: ${euiTheme.colors.severity.success};
-    `;
-
-    const accentValueCss = css`
-      font-size: ${euiTheme.size.base};
-      font-weight: ${euiTheme.font.weight.semiBold};
-      color: ${euiTheme.colors.textAccent};
-    `;
-
     const dangerValueCss = css`
       font-size: ${euiTheme.size.base};
       font-weight: ${euiTheme.font.weight.semiBold};
       color: ${euiTheme.colors.severity.danger};
     `;
 
+    const warningValueCss = css`
+      font-size: ${euiTheme.size.base};
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.severity.warning};
+    `;
+
+    const primaryValueCss = css`
+      font-size: ${euiTheme.size.base};
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.primary};
+    `;
+
+    const subduedValueCss = css`
+      font-size: ${euiTheme.size.base};
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.textSubdued};
+    `;
+
+    const SEVERITY_ICON_MAP = {
+      critical: 'alert',
+      high: 'sortUp',
+      medium: 'dot',
+      low: 'minusInCircle',
+    } as const;
+
     const getSigEventStyling = (
       count: number,
       priority: 'critical' | 'high' | 'medium' | 'low'
     ) => {
+      const iconType = SEVERITY_ICON_MAP[priority];
+
       if (count === 0) {
         return {
-          valueCss: successValueCss,
-          iconType: 'checkInCircleFilled' as const,
-          iconBackground: euiTheme.colors.backgroundLightSuccess,
-          iconColor: euiTheme.colors.severity.success,
+          valueCss: subduedValueCss,
+          iconType,
+          iconBackground: euiTheme.colors.backgroundBaseSubdued,
+          iconColor: euiTheme.colors.textSubdued,
         };
       }
-      if (priority === 'critical') {
-        return {
-          valueCss: dangerValueCss,
-          iconType: 'warning' as const,
-          iconBackground: euiTheme.colors.backgroundLightDanger,
-          iconColor: euiTheme.colors.severity.danger,
-        };
+
+      switch (priority) {
+        case 'critical':
+          return {
+            valueCss: dangerValueCss,
+            iconType,
+            iconBackground: euiTheme.colors.backgroundLightDanger,
+            iconColor: euiTheme.colors.severity.danger,
+          };
+        case 'high':
+          return {
+            valueCss: warningValueCss,
+            iconType,
+            iconBackground: euiTheme.colors.backgroundLightWarning,
+            iconColor: euiTheme.colors.severity.warning,
+          };
+        case 'medium':
+          return {
+            valueCss: primaryValueCss,
+            iconType,
+            iconBackground: euiTheme.colors.backgroundLightPrimary,
+            iconColor: euiTheme.colors.primary,
+          };
+        case 'low':
+          return {
+            valueCss: subduedValueCss,
+            iconType,
+            iconBackground: euiTheme.colors.backgroundBaseSubdued,
+            iconColor: euiTheme.colors.textSubdued,
+          };
       }
-      return {
-        valueCss: accentValueCss,
-        iconType: priority === 'low' ? 'eye' : 'warning',
-        iconBackground: euiTheme.colors.backgroundLightAccent,
-        iconColor: euiTheme.colors.textAccent,
-      };
     };
 
     const { sigEventsByPriority } = overviewData;

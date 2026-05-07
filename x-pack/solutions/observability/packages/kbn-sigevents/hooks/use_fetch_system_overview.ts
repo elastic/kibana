@@ -95,9 +95,12 @@ export function useFetchSystemOverview(): {
 | LIMIT 5
 | KEEP \`@timestamp\`, event_id, verdict_id, discovery_id, discovery_slug, verdict, title, summary, root_cause, rule_names, stream_names, criticality, impact, recommendations, recommended_action, last_reviewed_at`;
 
+      // Derive the severity band from the criticality score so counts match the
+      // table's getSeverityFromScore logic (Critical 80+, High 60-79, Medium 40-59, Low 0-39).
       const countsQuery = `FROM ${EVENTS_INDEX}
 | WHERE ${denyFilter}
-| STATS count = COUNT(*) BY impact, verdict`;
+| EVAL severity_band = CASE(criticality >= 80, "critical", criticality >= 60, "high", criticality >= 40, "medium", "low")
+| STATS count = COUNT(*) BY severity_band, verdict`;
 
       // Fetch KI features for entity and technology counts.
       // Gracefully degrade when Streams is disabled or the user lacks access.
@@ -145,17 +148,17 @@ export function useFetchSystemOverview(): {
       const countsRaw = countsResp.rawResponse;
       const countColumns = countsRaw.columns.map((c) => c.name);
       const countIdx = countColumns.indexOf('count');
-      const impactIdx = countColumns.indexOf('impact');
+      const bandIdx = countColumns.indexOf('severity_band');
       const verdictIdx = countColumns.indexOf('verdict');
 
       for (const row of countsRaw.values ?? []) {
         const typedRow = row as unknown[];
         const count = typedRow[countIdx] as number;
-        const impact = typedRow[impactIdx] as string;
+        const band = typedRow[bandIdx] as string;
         const verdict = typedRow[verdictIdx] as string;
 
-        if (impact in sigEventsByPriority) {
-          const priority = impact as SigEventPriority;
+        if (band in sigEventsByPriority) {
+          const priority = band as SigEventPriority;
           if (verdict === 'demoted') {
             sigEventsByPriority[priority].resolved += count;
           } else {
