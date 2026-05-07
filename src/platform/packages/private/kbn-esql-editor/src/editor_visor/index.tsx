@@ -36,6 +36,8 @@ export interface QuickSearchVisorProps {
   query: string;
   // Handling smaller space for the visor
   isSpaceReduced?: boolean;
+  // Whether the visor is rendered inside an inline editor (uses shorter placeholders)
+  editorIsInline?: boolean;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
 }
@@ -44,8 +46,16 @@ export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlacehol
   defaultMessage: 'Filter your data using KQL',
 });
 
+const searchPlaceholderShort = i18n.translate('esqlEditor.visor.searchPlaceholderShort', {
+  defaultMessage: 'Filter…',
+});
+
 const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
   defaultMessage: 'Describe the query you want in plain language',
+});
+
+const nlPlaceholderShort = i18n.translate('esqlEditor.visor.nlPlaceholderShort', {
+  defaultMessage: 'Ask in plain language',
 });
 
 const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip', {
@@ -55,6 +65,7 @@ const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip',
 export function QuickSearchVisor({
   query,
   isSpaceReduced,
+  editorIsInline,
   onUpdateAndSubmitQuery,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
@@ -202,7 +213,13 @@ export function QuickSearchVisor({
     return calculateWidthFromCharCount(labelLength, { maxWidth: maxComboBoxWidth });
   }, [selectedSources]);
 
-  const styles = visorStyles(euiThemeContext, comboBoxWidth, Boolean(isSpaceReduced), visorMode);
+  const styles = visorStyles(
+    euiThemeContext,
+    comboBoxWidth,
+    Boolean(isSpaceReduced),
+    visorMode,
+    Boolean(editorIsInline)
+  );
 
   if (!KQLComponent) {
     return null;
@@ -247,7 +264,7 @@ export function QuickSearchVisor({
                   }}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false} css={styles.separator} />
+              {!editorIsInline && <EuiFlexItem grow={false} css={styles.separator} />}
               <EuiFlexItem css={styles.searchWrapper}>
                 <div ref={kqlInputRef}>
                   <KQLComponent
@@ -261,7 +278,7 @@ export function QuickSearchVisor({
                       language: 'kuery',
                     }}
                     disableAutoFocus={true}
-                    placeholder={searchPlaceholder}
+                    placeholder={editorIsInline ? searchPlaceholderShort : searchPlaceholder}
                     onChange={(newQuery) => {
                       onKqlValueChange(newQuery.query as string);
                     }}
@@ -282,7 +299,7 @@ export function QuickSearchVisor({
               ) : (
                 <NLInput
                   value={nlValue}
-                  placeholder={nlPlaceholder}
+                  placeholder={editorIsInline ? nlPlaceholderShort : nlPlaceholder}
                   disabled={isNlLoading}
                   onChange={setNlValue}
                   onSubmit={onNlSubmit}

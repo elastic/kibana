@@ -25,7 +25,8 @@ export const visorStyles = (
   euiThemeContext: UseEuiTheme,
   comboBoxWidth: number,
   isSpaceReduced: boolean,
-  mode: VisorMode
+  mode: VisorMode,
+  editorIsInline: boolean
 ) => {
   const { euiTheme } = euiThemeContext;
   const fontSize = euiFontSizeFromScale('xs', euiTheme);
@@ -36,7 +37,7 @@ export const visorStyles = (
     visorContainer: css`
       background-color: ${euiTheme.colors.backgroundBasePlain};
       width: 100%;
-      height: calc(${euiTheme.size.xl} + ${VISOR_INNER_PADDING});
+      min-height: calc(${euiTheme.size.xl} + ${VISOR_INNER_PADDING});
     `,
     visorWrapper: css`
       width: 100%;
@@ -44,6 +45,7 @@ export const visorStyles = (
     visorBox: css`
       border: 1px solid ${euiTheme.colors.borderBaseSubdued};
       border-radius: ${borderRadius};
+      ${editorIsInline ? 'flex-wrap: wrap;' : ''}
     `,
     comboBoxWrapper: css`
       justify-content: center;
@@ -72,9 +74,14 @@ export const visorStyles = (
     searchWrapper: css`
       justify-content: center;
       padding-right: ${euiTheme.size.xs};
+      ${editorIsInline ? 'flex: 1 0 100%;' : ''}
+      min-width: 0;
+      ${editorIsInline
+        ? `border-top: 1px solid ${euiTheme.colors.borderBaseSubdued}; padding-right: 0;`
+        : ''}
 
       .euiFormControlLayout--group {
-        border-radius: ${borderRadius};
+        border-radius: ${editorIsInline ? '0' : borderRadius};
       }
       .euiFormControlLayout--group::after {
         border: none;
@@ -87,7 +94,7 @@ export const visorStyles = (
       }
 
       .kbnQueryBar__textarea {
-        border-radius: ${borderRadius} !important;
+        border-radius: ${editorIsInline ? '0' : borderRadius} !important;
         font-size: ${fontSize} !important;
         padding-left: ${euiTheme.size.s} !important;
         padding-top: ${euiTheme.size.s} !important;
