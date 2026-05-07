@@ -19,6 +19,5 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/zod",
     "@kbn/data-views-plugin",
-    "@kbn/monaco",
   ]
 }
