@@ -96,10 +96,10 @@ export function useFetchSystemOverview(): {
 | KEEP \`@timestamp\`, event_id, verdict_id, discovery_id, discovery_slug, verdict, title, summary, root_cause, rule_names, stream_names, criticality, impact, recommendations, recommended_action, last_reviewed_at`;
 
       // Derive the severity band from the criticality score so counts match the
-      // table's getSeverityFromScore logic (Critical 80+, High 60-79, Medium 40-59, Low 0-39).
+      // table's getSeverityFromScore logic (Critical 75+, High 60-74, Medium 40-59, Low 0-39).
       const countsQuery = `FROM ${EVENTS_INDEX}
 | WHERE ${denyFilter}
-| EVAL severity_band = CASE(criticality >= 80, "critical", criticality >= 60, "high", criticality >= 40, "medium", "low")
+| EVAL severity_band = CASE(criticality >= 75, "critical", criticality >= 60, "high", criticality >= 40, "medium", "low")
 | STATS count = COUNT(*) BY severity_band, verdict`;
 
       // Fetch KI features for entity and technology counts.

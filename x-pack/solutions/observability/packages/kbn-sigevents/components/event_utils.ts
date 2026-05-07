@@ -28,7 +28,7 @@ const SEVERITY_INFO: Record<SeverityLevel, SeverityInfo> = {
 
 /**
  * Derives the severity band, badge color, and overall state from a 0-100 score.
- * Bands: Critical (80-100), High (60-79), Medium (40-59), Low (0-39).
+ * Bands: Critical (75-100), High (60-74), Medium (40-59), Low (0-39).
  */
 export const getSeverityFromScore = (score: number): SeverityInfo =>
   SEVERITY_INFO[getSeverityLevel(score)];
