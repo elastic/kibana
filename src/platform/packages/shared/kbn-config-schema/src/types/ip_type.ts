@@ -29,13 +29,17 @@ export class IpType extends Type<string> {
     if (options.versions.includes('ipv6')) {
       parts.push(zIpv6());
     }
-    const union =
+    const core =
       parts.length === 1
         ? parts[0]!
         : zod.union(parts as [zod.ZodTypeAny, zod.ZodTypeAny, ...zod.ZodTypeAny[]]);
 
-    // `union` is ipv4|ipv6; Zod v4's `pipe` input/output generics are stricter than our union construction.
-    super(zod.string().pipe(union as any) as zod.ZodType<string>, options);
+    // Single-version IP schemas use the primitive directly so `z.toJSONSchema()` does not hit nested
+    // `pipe` edges that break Zod v4's JSON Schema processor; multi-version still pipes string → union.
+    const schema =
+      parts.length === 1 ? core : (zod.string().pipe(core as any) as zod.ZodType<string>);
+
+    super(schema, options);
     this.ipVersions = options.versions;
   }
 

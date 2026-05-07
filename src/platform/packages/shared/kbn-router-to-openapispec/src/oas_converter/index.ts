@@ -12,6 +12,7 @@ import type { KnownParameters, OpenAPIConverter } from '../type';
 import type { Env } from '../generate_oas';
 
 import { kbnConfigSchemaConverter } from './kbn_config_schema';
+import { createCtx, postProcessMutations } from './kbn_config_schema/post_process_mutations';
 import { zodConverter } from './zod';
 import { catchAllConverter } from './catch_all';
 
@@ -55,27 +56,94 @@ export class OasConverter {
 
   public convert(schema: unknown) {
     const unwrapped = this.#unwrapSchema(schema);
-    const { schema: oasSchema, shared } = this.#getConverter(unwrapped)!.convert(unwrapped, {
+    const converter = this.#getConverter(unwrapped)!;
+    const { schema: oasSchema, shared } = converter.convert(unwrapped, {
       env: this.#env,
       sharedSchemas: this.#sharedSchemas,
     });
+
+    if (converter === kbnConfigSchemaConverter) {
+      const ctx = createCtx({ sharedSchemas: this.#sharedSchemas, env: this.#env });
+      Object.entries(shared).forEach(([id, sharedSchema]) => {
+        postProcessMutations({ schema: sharedSchema, ctx });
+        ctx.addSharedSchema(id, sharedSchema);
+      });
+      postProcessMutations({ schema: oasSchema as OpenAPIV3.SchemaObject, ctx });
+      if (!('$ref' in (oasSchema as OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject))) {
+        const sourceDescription =
+          (unwrapped as { description?: unknown }).description ??
+          (
+            unwrapped as { getInternalSchema?: () => { description?: unknown } }
+          ).getInternalSchema?.().description ??
+          (unwrapped as { getSchema?: () => { description?: unknown } }).getSchema?.().description;
+        if (
+          (oasSchema as OpenAPIV3.SchemaObject).description === undefined &&
+          typeof sourceDescription === 'string' &&
+          sourceDescription.length > 0
+        ) {
+          (oasSchema as OpenAPIV3.SchemaObject).description = sourceDescription;
+        }
+      }
+    }
+
     this.#addComponents(shared);
     return oasSchema as OpenAPIV3.SchemaObject;
   }
 
   public convertPathParameters(schema: unknown, pathParameters: KnownParameters) {
     const unwrapped = this.#unwrapSchema(schema);
-    const { params, shared } = this.#getConverter(unwrapped).convertPathParameters(
-      unwrapped,
-      pathParameters
-    );
+    const opts = { env: this.#env, sharedSchemas: this.#sharedSchemas };
+    const converter = this.#getConverter(unwrapped);
+    const { params, shared } = converter.convertPathParameters(unwrapped, pathParameters, opts);
+    if (converter === kbnConfigSchemaConverter) {
+      const ctx = createCtx({ sharedSchemas: this.#sharedSchemas, env: this.#env });
+      Object.entries(shared).forEach(([id, sharedSchema]) => {
+        postProcessMutations({ schema: sharedSchema, ctx });
+        ctx.addSharedSchema(id, sharedSchema);
+      });
+      params.forEach((param) => {
+        if (!param.schema) {
+          return;
+        }
+        postProcessMutations({ schema: param.schema, ctx });
+        if (!('$ref' in param.schema)) {
+          const schemaDescription = (param.schema as OpenAPIV3.SchemaObject).description;
+          if (param.description === undefined && schemaDescription) {
+            param.description = schemaDescription;
+          }
+          delete (param.schema as OpenAPIV3.SchemaObject).description;
+        }
+      });
+    }
     this.#addComponents(shared);
     return params;
   }
 
   public convertQuery(schema: unknown) {
     const unwrapped = this.#unwrapSchema(schema);
-    const { query, shared } = this.#getConverter(unwrapped).convertQuery(unwrapped);
+    const opts = { env: this.#env, sharedSchemas: this.#sharedSchemas };
+    const converter = this.#getConverter(unwrapped);
+    const { query, shared } = converter.convertQuery(unwrapped, opts);
+    if (converter === kbnConfigSchemaConverter) {
+      const ctx = createCtx({ sharedSchemas: this.#sharedSchemas, env: this.#env });
+      Object.entries(shared).forEach(([id, sharedSchema]) => {
+        postProcessMutations({ schema: sharedSchema, ctx });
+        ctx.addSharedSchema(id, sharedSchema);
+      });
+      query.forEach((param) => {
+        if (!param.schema) {
+          return;
+        }
+        postProcessMutations({ schema: param.schema, ctx });
+        if (!('$ref' in param.schema)) {
+          const schemaDescription = (param.schema as OpenAPIV3.SchemaObject).description;
+          if (param.description === undefined && schemaDescription) {
+            param.description = schemaDescription;
+          }
+          delete (param.schema as OpenAPIV3.SchemaObject).description;
+        }
+      });
+    }
     this.#addComponents(shared);
     return query;
   }

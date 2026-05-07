@@ -29,7 +29,7 @@ export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
 
   constructor(keyType: Type<K>, valueType: Type<V>, options: RecordOfOptions<K, V> = {}) {
     const metaSchema = zod.any().meta({
-      [META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]: () => valueType.getSchema(),
+      [META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]: () => valueType.getInternalSchema(),
     });
 
     super(metaSchema, options);

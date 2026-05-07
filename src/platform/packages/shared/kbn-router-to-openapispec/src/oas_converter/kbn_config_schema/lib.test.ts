@@ -25,7 +25,7 @@ describe('convert', () => {
       schema: {
         additionalProperties: false,
         properties: {
-          any: { description: 'any type', nullable: true },
+          any: { description: 'any type', 'x-oas-any-type': true },
           array: {
             items: {
               additionalProperties: false,
@@ -65,24 +65,24 @@ describe('convert', () => {
             maximum: 1000,
             minimum: 1,
             type: 'number',
+            'x-oas-optional': true,
           },
+          neverType: { not: {} },
           record: {
-            additionalProperties: {
-              type: 'string',
-            },
+            additionalProperties: { type: 'string' },
             type: 'object',
           },
           string: {
-            maxLength: 10,
-            minLength: 1,
             type: 'string',
+            'x-oas-max-length': 10,
+            'x-oas-min-length': 1,
           },
           union: {
             anyOf: [
               {
                 description: 'Union string',
-                maxLength: 1,
                 type: 'string',
+                'x-oas-max-length': 1,
               },
               {
                 description: 'Union number',
@@ -104,6 +104,7 @@ describe('convert', () => {
           'string',
           'ipType',
           'literalType',
+          'neverType',
           'map',
           'record',
           'union',
@@ -124,15 +125,15 @@ describe('convert', () => {
             },
             required: ['foo'],
           },
-          type: 'array',
           title: 'myArray',
+          type: 'array',
         },
         myUnion: {
           anyOf: [
             {
               description: 'Union string',
-              maxLength: 1,
               type: 'string',
+              'x-oas-max-length': 1,
             },
             {
               description: 'Union number',
@@ -157,12 +158,10 @@ describe('convert', () => {
             $ref: '#/components/schemas/myId',
           },
         },
-        required: ['id'],
         type: 'object',
       },
       shared: {
         myId: {
-          title: 'myId',
           additionalProperties: false,
           properties: {
             a: {
@@ -170,6 +169,7 @@ describe('convert', () => {
             },
           },
           required: ['a'],
+          title: 'myId',
           type: 'object',
         },
       },
@@ -204,7 +204,7 @@ describe('convertPathParameters', () => {
   test('throws if known parameters not found', () => {
     expect(() =>
       convertPathParameters(schema.object({ b: schema.string() }), { a: { optional: false } })
-    ).toThrow(/Unknown parameter: b/);
+    ).toThrow(/Path expects key "a" from schema but it was not found/);
   });
 
   test('converting paths with nullables', () => {
@@ -228,7 +228,9 @@ describe('convertPathParameters', () => {
   });
 
   test('throws if properties cannot be exracted', () => {
-    expect(() => convertPathParameters(schema.string(), {})).toThrow(/expected to be an object/);
+    expect(() => convertPathParameters(schema.string(), {})).toThrow(
+      /Parameters schema must be an _object_ schema validator/
+    );
   });
 });
 
@@ -275,12 +277,14 @@ describe('convertQuery', () => {
     ).toEqual({
       query: [
         {
+          description: undefined,
           in: 'query',
           name: 'status',
           required: false,
           schema: {
             type: 'array',
             items: { type: 'string' },
+            'x-oas-optional': true,
           },
         },
       ],
@@ -306,9 +310,26 @@ describe('convertQuery', () => {
           in: 'query',
           name: 'status',
           required: false,
+          description: undefined,
           schema: {
-            type: 'array',
-            items: { type: 'string', enum: ['running', 'finished'] },
+            anyOf: [
+              {
+                anyOf: [
+                  { enum: ['running'], type: 'string' },
+                  { enum: ['finished'], type: 'string' },
+                ],
+              },
+              {
+                type: 'array',
+                items: {
+                  anyOf: [
+                    { enum: ['running'], type: 'string' },
+                    { enum: ['finished'], type: 'string' },
+                  ],
+                },
+              },
+            ],
+            'x-oas-optional': true,
           },
         },
       ],
@@ -322,7 +343,9 @@ describe('convertQuery', () => {
   });
 
   test('throws if properties cannot be exracted', () => {
-    expect(() => convertPathParameters(schema.string(), {})).toThrow(/expected to be an object/);
+    expect(() => convertQuery(schema.string())).toThrow(
+      /Query schema must be an _object_ schema validator/
+    );
   });
 });
 
@@ -350,13 +373,13 @@ describe('is', () => {
 
 test('isNullableObjectType', () => {
   const any = schema.any({});
-  expect(isNullableObjectType(any.getSchema().describe())).toBe(false);
+  expect(isNullableObjectType(any.getSchema())).toBe(false);
 
   const nullableAny = schema.nullable(any);
-  expect(isNullableObjectType(nullableAny.getSchema().describe())).toBe(false);
+  expect(isNullableObjectType(nullableAny.getSchema())).toBe(false);
 
   const nullableObject = schema.nullable(schema.object({}));
-  expect(isNullableObjectType(nullableObject.getSchema().describe())).toBe(true);
+  expect(isNullableObjectType(nullableObject.getSchema())).toBe(true);
 });
 
 test('getParamSchema from {pathVar*}', () => {

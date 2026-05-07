@@ -39,7 +39,11 @@ const populateRequiredFields = (schema: OpenAPIV3.SchemaObject): void => {
     }
   }
 
-  if (required.length > 0) schema.required = required;
+  if (required.length > 0) {
+    schema.required = required;
+  } else {
+    delete schema.required;
+  }
 };
 
 const removeNeverType = (schema: OpenAPIV3.SchemaObject): void => {

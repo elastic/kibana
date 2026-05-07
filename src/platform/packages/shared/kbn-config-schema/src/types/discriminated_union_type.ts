@@ -8,6 +8,7 @@
  */
 
 import typeDetect from 'type-detect';
+import type { z } from '@kbn/zod';
 import { z as zod } from '@kbn/zod';
 
 import { SchemaTypeError, ValidationError } from '../errors';
@@ -18,6 +19,10 @@ import { LiteralType } from './literal_type';
 import type { ObjectResultType, Props } from './object_type';
 import type { ObjectType } from './object_type';
 import { Type } from './type';
+import {
+  META_FIELD_X_OAS_DISCRIMINATOR,
+  META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE,
+} from '../oas_meta_fields';
 
 export type ObjectResultUnionType<T> = T extends Props ? ObjectResultType<T> : never;
 
@@ -83,6 +88,39 @@ export class DiscriminatedUnionType<
     this.unionTypes = types;
     this.unionOptions = options;
     this.fallback = fallback;
+  }
+
+  public getInternalSchema(): z.ZodType<T> {
+    const options = this.unionTypes.map((t) => t.getInternalSchema());
+    const fallbackIndex = this.fallback ? this.unionTypes.indexOf(this.fallback) : -1;
+    const firstLiteralIndex = this.unionTypes.findIndex((objectType) => {
+      const discriminatorSchema = objectType.getPropSchemas()[this.discriminator];
+      return discriminatorSchema instanceof LiteralType;
+    });
+
+    const taggedOptions = options.map((option, index) => {
+      const existingMeta = (zod.globalRegistry.get(option as z.ZodTypeAny) ?? {}) as Record<
+        string,
+        unknown
+      >;
+      const meta: Record<string, unknown> = { ...existingMeta };
+
+      if (index === firstLiteralIndex) {
+        meta[META_FIELD_X_OAS_DISCRIMINATOR] = this.discriminator;
+      }
+      if (index === fallbackIndex) {
+        meta[META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE] = true;
+      }
+
+      return Object.keys(meta).length > 0 ? option.meta(meta) : option;
+    });
+
+    if (this.fallback !== undefined) {
+      return zod.union(
+        taggedOptions as [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]]
+      ) as z.ZodType<T>;
+    }
+    return zod.discriminatedUnion(this.discriminator, taggedOptions as any) as z.ZodType<T>;
   }
 
   protected validateWithFrame(

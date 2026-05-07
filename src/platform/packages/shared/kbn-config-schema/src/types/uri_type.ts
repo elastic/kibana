@@ -20,36 +20,39 @@ export type URIOptions = TypeOptions<string> & {
 
 export class URIType extends Type<string> {
   constructor(options: URIOptions = {}) {
-    let base = zod.string().superRefine((val, ctx) => {
-      let url: URL;
-      try {
-        url = new URL(val);
-      } catch {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'value must be a valid URI (see RFC 3986).',
-          input: val,
-        } as $ZodRawIssue);
-        return;
-      }
-      // WHATWG URL accepts `[]` in query strings; legacy Joi rejected them (RFC 3986 parity tests).
-      if (url.search.includes('[') || url.search.includes(']')) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'value must be a valid URI (see RFC 3986).',
-          input: val,
-        } as $ZodRawIssue);
-        return;
-      }
-      // WHATWG allows arbitrarily long registered names; legacy Joi capped host length (see uri tests).
-      if (url.hostname.length > 255) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'value must be a valid URI (see RFC 3986).',
-          input: val,
-        } as $ZodRawIssue);
-      }
-    });
+    let base = zod
+      .string()
+      .meta({ format: 'uri' })
+      .superRefine((val, ctx) => {
+        let url: URL;
+        try {
+          url = new URL(val);
+        } catch {
+          ctx.addIssue({
+            code: 'custom',
+            message: 'value must be a valid URI (see RFC 3986).',
+            input: val,
+          } as $ZodRawIssue);
+          return;
+        }
+        // WHATWG URL accepts `[]` in query strings; legacy Joi rejected them (RFC 3986 parity tests).
+        if (url.search.includes('[') || url.search.includes(']')) {
+          ctx.addIssue({
+            code: 'custom',
+            message: 'value must be a valid URI (see RFC 3986).',
+            input: val,
+          } as $ZodRawIssue);
+          return;
+        }
+        // WHATWG allows arbitrarily long registered names; legacy Joi capped host length (see uri tests).
+        if (url.hostname.length > 255) {
+          ctx.addIssue({
+            code: 'custom',
+            message: 'value must be a valid URI (see RFC 3986).',
+            input: val,
+          } as $ZodRawIssue);
+        }
+      });
 
     if (options.scheme !== undefined) {
       const schemes = Array.isArray(options.scheme) ? options.scheme : [options.scheme];

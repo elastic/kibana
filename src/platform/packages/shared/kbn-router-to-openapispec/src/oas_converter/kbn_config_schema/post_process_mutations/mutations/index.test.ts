@@ -8,15 +8,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { metaFields } from '@kbn/config-schema';
 import { processAnyType, processMap, processRecord } from '.';
-import { joi2JsonInternal } from '../../parse';
 import { createCtx } from '../context';
+import type { OpenAPIV3 } from 'openapi-types';
 
 describe('processAnyType', () => {
   test('strips all keys from a plain any schema', () => {
     const obj: Record<string, unknown> = { type: 'any', 'x-oas-any-type': true };
     processAnyType(obj as any);
-    expect(obj).toEqual({});
+    expect(obj).toEqual({ nullable: true });
   });
 
   test('preserves description when present', () => {
@@ -26,7 +27,7 @@ describe('processAnyType', () => {
       description: 'accepts any value',
     };
     processAnyType(obj as any);
-    expect(obj).toEqual({ description: 'accepts any value' });
+    expect(obj).toEqual({ description: 'accepts any value', nullable: true });
   });
 
   test('preserves nullable when present', () => {
@@ -62,9 +63,13 @@ test.each([
   ],
 ])('%p parses any additional properties specified', (_, processFn, obj, refId) => {
   const ctx = createCtx();
-  const parsed = joi2JsonInternal(obj.getSchema());
+  const parsed = {
+    type: 'object',
+    [metaFields.META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]: () =>
+      schema.object({ a: schema.string() }, { meta: { id: refId } }).getInternalSchema(),
+  };
 
-  processFn(ctx, parsed);
+  processFn(ctx, parsed as OpenAPIV3.SchemaObject);
 
   expect(parsed).toEqual({
     type: 'object',

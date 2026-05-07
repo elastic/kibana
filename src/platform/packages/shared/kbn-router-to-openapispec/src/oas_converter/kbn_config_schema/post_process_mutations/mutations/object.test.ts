@@ -37,7 +37,7 @@ test.each([
     },
   ],
 ])('processObject %#', (input, result) => {
-  const parsed = joi2JsonInternal(input.getSchema());
+  const parsed = joi2JsonInternal(input.getInternalSchema());
   processObject(parsed);
   expect(parsed).toEqual(result);
 });

@@ -43,6 +43,15 @@ export class Lazy<T> extends Type<T> {
     }) as z.ZodType<T>;
   }
 
+  public override getInternalSchema(): z.ZodType<T> {
+    return zod.lazy(() => {
+      if (!this.bound) {
+        return zod.any();
+      }
+      return this.bound.getInternalSchema() as z.ZodType<T>;
+    }) as z.ZodType<T>;
+  }
+
   public override validate(
     value: unknown,
     context: Record<string, unknown> = {},

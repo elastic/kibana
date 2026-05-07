@@ -131,19 +131,54 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
   if (!route.validationSchemas) return responses;
   const fullConfig = getResponseValidation(route.validationSchemas);
 
+  const getSchemaDescription = (schema: unknown): string | undefined => {
+    if (!schema || typeof schema !== 'object') {
+      return undefined;
+    }
+    const source = schema as {
+      description?: unknown;
+      getInternalSchema?: () => { description?: unknown };
+      getSchema?: () => { description?: unknown };
+    };
+    if (typeof source.description === 'string') {
+      return source.description;
+    }
+    const internal = source.getInternalSchema?.();
+    if (internal && typeof internal.description === 'string') {
+      return internal.description;
+    }
+    const wrapped = source.getSchema?.();
+    if (wrapped && typeof wrapped.description === 'string') {
+      return wrapped.description;
+    }
+    return undefined;
+  };
+
   if (fullConfig) {
     const { unsafe, ...validationSchemas } = fullConfig;
     const contentType = extractContentType(route.options?.body);
     return Object.entries(validationSchemas).reduce<OpenAPIV3.ResponsesObject>(
       (acc, [statusCode, schema]) => {
-        const newContent = schema.body
+        const bodySchema = schema.body ? schema.body() : undefined;
+        const bodySchemaOas = schema.body ? converter.convert(bodySchema) : undefined;
+        const bodyDescription = getSchemaDescription(bodySchema);
+        if (
+          bodySchemaOas &&
+          !('$ref' in bodySchemaOas) &&
+          !bodySchemaOas.description &&
+          bodyDescription
+        ) {
+          bodySchemaOas.description = bodyDescription;
+        }
+
+        const newContent = bodySchemaOas
           ? {
               [getVersionedContentTypeString(
                 SERVERLESS_VERSION_2023_10_31,
                 'public',
                 schema.bodyContentType ? [schema.bodyContentType] : contentType
               )]: {
-                schema: converter.convert(schema.body()),
+                schema: bodySchemaOas,
               },
             }
           : undefined;

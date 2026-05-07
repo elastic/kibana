@@ -36,7 +36,21 @@ export class ArrayType<T> extends Type<T[]> {
   }
 
   public override getSchema(): z.ZodType<T[]> {
-    let base = zod.array(this.arrayType.getSchema());
+    let base = zod.array(this.arrayType.getInternalSchema());
+    if (this.arrayOptions.minSize !== undefined) {
+      base = base.min(this.arrayOptions.minSize);
+    }
+    if (this.arrayOptions.maxSize !== undefined) {
+      base = base.max(this.arrayOptions.maxSize);
+    }
+    if (this.arrayOptions.meta?.id) {
+      base = base.meta({ id: this.arrayOptions.meta.id });
+    }
+    return base as z.ZodType<T[]>;
+  }
+
+  public override getInternalSchema(): z.ZodType<T[]> {
+    let base = zod.array(this.arrayType.getInternalSchema());
     if (this.arrayOptions.minSize !== undefined) {
       base = base.min(this.arrayOptions.minSize);
     }

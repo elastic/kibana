@@ -57,6 +57,17 @@ export class NumberType extends Type<number> {
       });
     }
 
+    if (options.min !== undefined || options.max !== undefined) {
+      const metaNum: Record<string, unknown> = {};
+      if (options.min !== undefined) {
+        metaNum.minimum = options.min;
+      }
+      if (options.max !== undefined) {
+        metaNum.maximum = options.max;
+      }
+      core = core.meta(metaNum);
+    }
+
     super(core, options);
   }
 

@@ -30,7 +30,7 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
   constructor(keyType: Type<K>, valueType: Type<V>, options: MapOfOptions<K, V> = {}) {
     const defaultValue = options.defaultValue;
     const metaSchema = zod.any().meta({
-      [META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]: () => valueType.getSchema(),
+      [META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]: () => valueType.getInternalSchema(),
     });
 
     super(metaSchema, {

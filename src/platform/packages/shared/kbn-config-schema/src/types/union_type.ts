@@ -32,9 +32,9 @@ export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
   constructor(types: RTS, options?: UnionTypeOptions<T>) {
     let schema: z.ZodTypeAny;
     if (types.length === 1) {
-      schema = types[0].getSchema();
+      schema = types[0].getInternalSchema();
     } else {
-      const zodTypes = types.map((t) => t.getSchema()) as [
+      const zodTypes = types.map((t) => t.getInternalSchema()) as [
         z.ZodTypeAny,
         z.ZodTypeAny,
         ...z.ZodTypeAny[]

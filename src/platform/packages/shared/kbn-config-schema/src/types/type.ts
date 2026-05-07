@@ -117,6 +117,15 @@ export abstract class Type<V> {
     return this.internalSchema;
   }
 
+  /**
+   * Raw Zod schema without Joi-compat Proxy wrappers (e.g. on {@link ObjectType.getSchema}).
+   * Use when composing parent objects so nested metadata such as `meta.id` keeps registry
+   * identity for tooling (OpenAPI `$ref` generation).
+   */
+  public getInternalSchema(): z.ZodType<V> {
+    return this.internalSchema;
+  }
+
   public getSchemaStructure(): SchemaStructureEntry[] {
     return [{ path: [], type: this.structureTypeLabel() }];
   }

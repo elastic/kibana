@@ -97,7 +97,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     const { unknowns, ...typeOptions } = options;
     const shape: Record<string, z.ZodTypeAny> = {};
     for (const [key, value] of Object.entries(props)) {
-      shape[key] = value.getSchema();
+      shape[key] = value.getInternalSchema();
     }
 
     let objSchema = zod.object(shape);

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { z } from '@kbn/zod';
 import { z as zod } from '@kbn/zod';
 
 import { META_FIELD_X_OAS_OPTIONAL } from '../oas_meta_fields';
@@ -26,6 +27,13 @@ export class MaybeType<V> extends Type<V | undefined> {
       .getSchema()
       .optional()
       .meta({ [META_FIELD_X_OAS_OPTIONAL]: true });
+  }
+
+  public getInternalSchema(): z.ZodType<V | undefined> {
+    return this.maybeType
+      .getInternalSchema()
+      .optional()
+      .meta({ [META_FIELD_X_OAS_OPTIONAL]: true }) as z.ZodType<V | undefined>;
   }
 
   protected validateWithFrame(
