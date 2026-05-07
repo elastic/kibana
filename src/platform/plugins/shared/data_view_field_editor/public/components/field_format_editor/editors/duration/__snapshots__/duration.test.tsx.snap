@@ -99,7 +99,6 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
     />
   </EuiFormRow>
   <FormatEditorSamples
-    sampleType="text"
     samples={
       Array [
         Object {
@@ -199,7 +198,6 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     />
   </EuiFormRow>
   <FormatEditorSamples
-    sampleType="text"
     samples={
       Array [
         Object {
@@ -355,7 +353,6 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     />
   </EuiFormRow>
   <FormatEditorSamples
-    sampleType="text"
     samples={
       Array [
         Object {
