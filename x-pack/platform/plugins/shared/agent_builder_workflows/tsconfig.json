@@ -18,6 +18,17 @@
     "@kbn/zod",
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-tools-base",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/core-lifecycle-browser-mocks",
+    "@kbn/workflows-ui",
+    "@kbn/code-editor",
+    "@kbn/i18n",
+    "@kbn/kibana-react-plugin",
+    "@kbn/css-utils",
+    "@kbn/monaco",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-server",
+    "@kbn/workflows-yaml"
   ]
 }
