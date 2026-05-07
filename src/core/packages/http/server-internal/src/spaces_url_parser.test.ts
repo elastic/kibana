@@ -8,7 +8,7 @@
  */
 
 import { getSpaceIdFromPath } from './spaces_url_parser';
-import { DEFAULT_SPACE_ID } from '@kbn/core-http-server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 describe('getSpaceIdFromPath', () => {
   describe('without a serverBasePath defined', () => {

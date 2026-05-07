@@ -31,6 +31,3 @@ export type {
 } from './src/types';
 
 export { buildPath, isHttpFetchError } from './src/utils';
-
-export { DEFAULT_SPACE_ID } from './src/constants';
-export type { SpaceId } from '@kbn/core-spaces-common';

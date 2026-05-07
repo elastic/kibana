@@ -36,8 +36,7 @@ import type {
   RouteSecurity,
   RequestTiming,
 } from '@kbn/core-http-server';
-import type { SpaceId } from '@kbn/core-spaces-common';
-import { DEFAULT_SPACE_ID } from '@kbn/core-http-server';
+import { type SpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
