@@ -108,6 +108,9 @@ class TaskHandlerImpl implements TaskHandler {
           `Failed to update status for execution ${executionId}: ${statusError.message}`
         );
       }
+
+      // Even on failure the session must not stay stuck in active — reset it to idle.
+      await this.drainStandingSessionQueue(execution, executionId, fakeRequest);
     } finally {
       abortMonitor.stop();
     }

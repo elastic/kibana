@@ -808,6 +808,11 @@ export class SessionClientImpl implements SessionClient {
     try {
       const { executionId } = await executionService.executeAgent({
         request: this.request,
+        // Always schedule on Task Manager so the round runs with a fakeRequest
+        // that is not tied to any HTTP connection lifecycle. Without this, rounds
+        // triggered from live HTTP requests (e.g. the messages endpoint) are aborted
+        // the moment the HTTP response is sent and the connection is closed.
+        useTaskManager: true,
         mode: AgentExecutionMode.conversation,
         params: {
           conversationId,
