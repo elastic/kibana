@@ -37,8 +37,7 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../shared/hooks/use_default_flyout_properties';
-import { UserPanel } from '../../../flyout/entity_details/user_right';
-import { HostPanel } from '../../../flyout/entity_details/host_right';
+import { EntitiesDetails, HostEntityDetails, UserEntityDetails } from '../../entities';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -182,24 +181,17 @@ export const InsightsSection = memo(
             store,
             history,
             children: (
-              <UserPanel
-                contextID="UserEntityOverview"
-                scopeId=""
-                isPreviewMode={false}
-                userName={userName}
-                entityId={entityId}
-                hideNavigation
-              />
+              <UserEntityDetails hit={hit} scopeId="" userName={userName} entityId={entityId} />
             ),
           }),
           {
-            ...defaultFlyoutProperties,
+            ...defaultToolsFlyoutProperties,
             historyKey,
             session: 'start',
           }
         );
       },
-      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
+      [history, historyKey, hit, overlays, services, store]
     );
 
     const onShowHostDetails = useCallback(
@@ -210,25 +202,34 @@ export const InsightsSection = memo(
             store,
             history,
             children: (
-              <HostPanel
-                contextID="HostEntityOverview"
-                scopeId=""
-                isPreviewMode={false}
-                hostName={hostName}
-                entityId={entityId}
-                hideNavigation
-              />
+              <HostEntityDetails hit={hit} scopeId="" hostName={hostName} entityId={entityId} />
             ),
           }),
           {
-            ...defaultFlyoutProperties,
+            ...defaultToolsFlyoutProperties,
             historyKey,
             session: 'start',
           }
         );
       },
-      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
+      [history, historyKey, hit, overlays, services, store]
     );
+
+    const onShowEntitiesDetails = useCallback(() => {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: <EntitiesDetails hit={hit} scopeId="" />,
+        }),
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+        }
+      );
+    }, [history, historyKey, hit, overlays, services, store]);
 
     const onShowPrevalenceDetails = useCallback(() => {
       overlays.openSystemFlyout(
@@ -276,6 +277,7 @@ export const InsightsSection = memo(
           hit={hit}
           renderCellActions={renderCellActions}
           showIcon={false}
+          onShowEntitiesDetails={onShowEntitiesDetails}
           onShowUserDetails={onShowUserDetails}
           onShowHostDetails={onShowHostDetails}
         />

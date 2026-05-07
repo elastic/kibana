@@ -75,13 +75,22 @@ jest.mock('./threat_intelligence_overview', () => ({
 }));
 jest.mock('./entities_overview', () => ({
   EntitiesOverview: ({
+    onShowEntitiesDetails,
     onShowUserDetails,
     onShowHostDetails,
   }: {
+    onShowEntitiesDetails?: () => void;
     onShowUserDetails?: (params: { userName: string; entityId?: string }) => void;
     onShowHostDetails?: (params: { hostName: string; entityId?: string }) => void;
   }) => (
     <div data-test-subj="entitiesOverviewMock">
+      <button
+        type="button"
+        data-test-subj="entitiesOverviewMockDetailsButton"
+        onClick={onShowEntitiesDetails}
+      >
+        {'Show entities'}
+      </button>
       <button
         type="button"
         data-test-subj="entitiesOverviewMockUserButton"
@@ -99,11 +108,10 @@ jest.mock('./entities_overview', () => ({
     </div>
   ),
 }));
-jest.mock('../../../flyout/entity_details/user_right', () => ({
-  UserPanel: () => <div data-test-subj="userPanelMock" />,
-}));
-jest.mock('../../../flyout/entity_details/host_right', () => ({
-  HostPanel: () => <div data-test-subj="hostPanelMock" />,
+jest.mock('../../entities', () => ({
+  EntitiesDetails: () => <div data-test-subj="entitiesDetailsMock" />,
+  UserEntityDetails: () => <div data-test-subj="userEntityDetailsMock" />,
+  HostEntityDetails: () => <div data-test-subj="hostEntityDetailsMock" />,
 }));
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
@@ -256,6 +264,21 @@ describe('InsightsSection', () => {
     const { getByTestId } = renderInsightsSection();
 
     fireEvent.click(getByTestId('entitiesOverviewMockUserButton'));
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
+  });
+
+  it('opens a system flyout when clicking the entities overview header link', () => {
+    const { getByTestId } = renderInsightsSection();
+
+    fireEvent.click(getByTestId('entitiesOverviewMockDetailsButton'));
 
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
