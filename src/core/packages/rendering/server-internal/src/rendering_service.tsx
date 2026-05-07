@@ -9,15 +9,17 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { BehaviorSubject, firstValueFrom, of, map, catchError, take, timeout } from 'rxjs';
+import { BehaviorSubject, defer, firstValueFrom, of, map, catchError, take, timeout } from 'rxjs';
 import { i18n as i18nLib } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
+import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
 import {
   type DarkModeValue,
   type ThemeName,
@@ -71,7 +73,14 @@ export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
-  constructor(private readonly coreContext: CoreContext) {}
+  private readonly logger: Logger;
+  // Set in `start()`; render() may fire pre-start in theory (e.g. status page
+  // during boot), so the field is treated as possibly-undefined and the
+  // metadata falls back to empty values in that case.
+  private userStorageStart?: UserStorageServiceStart;
+  constructor(private readonly coreContext: CoreContext) {
+    this.logger = coreContext.logger.get('rendering');
+  }
 
   public async preboot({
     http,
@@ -140,7 +149,8 @@ export class RenderingService {
     };
   }
 
-  public start({ featureFlags }: RenderingStartDeps) {
+  public start({ featureFlags, userStorage }: RenderingStartDeps) {
+    this.userStorageStart = userStorage;
     featureFlags
       .getStringValue$<ThemeName>(DEFAULT_THEME_NAME_FEATURE_FLAG, DEFAULT_THEME_NAME)
       // Parse the input feature flag value to ensure it's of type ThemeName
@@ -187,6 +197,17 @@ export class RenderingService {
     const usingCdn = http.staticAssets.isUsingCdn();
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
+
+    // Kick off the user-storage fetch concurrently with the settings reads
+    // below. The browser uses these values to seed its local cache so the
+    // first paint reflects the user's customizations (e.g. side-nav order)
+    // without a flash of defaults. Skipped for anonymous pages because user
+    // storage requires a profile_uid, and bounded by a 50ms timeout so a
+    // slow ES read never blocks first paint — see clusterInfo below for
+    // the same pattern.
+    const userStorageValuesPromise: Promise<Record<string, unknown>> = isAnonymousPage
+      ? Promise.resolve({})
+      : this.fetchUserStorageValues(request);
 
     // Grouping all async HTTP requests to run them concurrently for performance reasons.
     const [
@@ -294,6 +315,8 @@ export class RenderingService {
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
 
+    const userStorageValues = await userStorageValuesPromise;
+
     const useRspack = isRspackModeEnabled();
     const uiPublicUrl = `${staticAssetsHrefBase}/ui`;
 
@@ -384,6 +407,7 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
+        userStorage: { values: userStorageValues },
       },
     };
 
@@ -391,6 +415,30 @@ export class RenderingService {
   }
 
   public async stop() {}
+
+  private async fetchUserStorageValues(request: KibanaRequest): Promise<Record<string, unknown>> {
+    const userStorage = this.userStorageStart;
+    if (!userStorage) return {};
+
+    const client = userStorage.asScoped(request);
+    if (!client) return {};
+
+    return firstValueFrom(
+      defer(() => client.getAll()).pipe(
+        timeout(50),
+        catchError((err) => {
+          // Expected for first-login (no SO yet) and for ES-slow scenarios.
+          // Log at debug to keep first-login from spamming warn-level logs.
+          this.logger.debug(
+            `Falling back to default userStorage values for render: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+          return of<Record<string, unknown>>({});
+        })
+      )
+    );
+  }
 }
 
 const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {

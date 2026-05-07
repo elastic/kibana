@@ -93,4 +93,13 @@ export interface InjectedMetadata {
     };
   };
   customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo' | 'pageTitle'>;
+  /**
+   * Per-user values pre-fetched on the server for keys registered with the
+   * user storage service. Empty on anonymous pages or when the request has
+   * no `profile_uid`. Browser code should treat the values as a snapshot at
+   * page load and fall back to registered defaults for missing keys.
+   */
+  userStorage: {
+    values: Record<string, unknown>;
+  };
 }

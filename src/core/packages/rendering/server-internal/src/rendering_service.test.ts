@@ -735,6 +735,100 @@ describe('RenderingService', () => {
     });
   });
 
+  describe('userStorage injection', () => {
+    const renderAndReadUserStorage = async (content: string) => {
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      return data.userStorage;
+    };
+
+    const buildUiSettings = () => ({
+      client: uiSettingsServiceMock.createClient(),
+      globalClient: uiSettingsServiceMock.createClient(),
+    });
+
+    it('injects values returned by userStorage.asScoped().getAll()', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const getAll = jest.fn().mockResolvedValue({ 'navigation:layout': { hidden: ['discover'] } });
+      const asScoped = jest.fn().mockReturnValue({ getAll });
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const content = await render(createKibanaRequest(), buildUiSettings());
+
+      expect(asScoped).toHaveBeenCalledTimes(1);
+      expect(getAll).toHaveBeenCalledTimes(1);
+      expect(await renderAndReadUserStorage(content)).toEqual({
+        values: { 'navigation:layout': { hidden: ['discover'] } },
+      });
+    });
+
+    it('injects empty values when start() was never called (no userStorageStart)', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const content = await render(createKibanaRequest(), buildUiSettings());
+
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+    });
+
+    it('injects empty values when asScoped() returns null (no profile_uid)', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const asScoped = jest.fn().mockReturnValue(null);
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const content = await render(createKibanaRequest(), buildUiSettings());
+
+      expect(asScoped).toHaveBeenCalledTimes(1);
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+    });
+
+    it('injects empty values for anonymous pages without consulting userStorage', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const asScoped = jest.fn();
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const content = await render(createKibanaRequest(), buildUiSettings(), {
+        isAnonymousPage: true,
+      });
+
+      expect(asScoped).not.toHaveBeenCalled();
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+    });
+
+    it('falls back to empty values when getAll() rejects', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const getAll = jest.fn().mockRejectedValue(new Error('ES exploded'));
+      const asScoped = jest.fn().mockReturnValue({ getAll });
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const content = await render(createKibanaRequest(), buildUiSettings());
+
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+    });
+
+    it('falls back to empty values when getAll() exceeds the timeout', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      // resolves after the 50ms render-time budget; the rendering path
+      // should not wait for it.
+      const getAll = jest
+        .fn()
+        .mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve({}), 5_000)));
+      const asScoped = jest.fn().mockReturnValue({ getAll });
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const renderPromise = render(createKibanaRequest(), buildUiSettings());
+      // advance past the 50ms timeout so RxJS' `timeout` operator fires.
+      await jest.advanceTimersByTimeAsync(60);
+      const content = await renderPromise;
+
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+    });
+  });
+
   describe('rspack mode metadata', () => {
     let rspackService: RenderingService;
 

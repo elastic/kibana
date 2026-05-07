@@ -26,6 +26,7 @@ import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { InternalI18nServicePreboot } from '@kbn/core-i18n-server-internal';
 import type { InternalFeatureFlagsSetup } from '@kbn/core-feature-flags-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
+import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -68,6 +69,12 @@ export interface RenderingSetupDeps {
 /** @internal */
 export interface RenderingStartDeps {
   featureFlags: FeatureFlagsStart;
+  /**
+   * Optional because `render()` defensively handles `userStorage` being
+   * absent (renders empty `userStorage.values` into the metadata, browser
+   * falls back to defaults). In practice `start()` always passes it.
+   */
+  userStorage?: UserStorageServiceStart;
 }
 
 /** @internal */
