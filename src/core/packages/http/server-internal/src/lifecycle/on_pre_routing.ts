@@ -10,7 +10,6 @@
 import type { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
 import type {
-  KibanaRequestState,
   OnPreRoutingToolkit,
   OnPreRoutingResultRewriteUrl,
   OnPreRoutingResultNext,
@@ -24,6 +23,7 @@ import {
   CoreKibanaRequest,
   lifecycleResponseFactory,
 } from '@kbn/core-http-router-server-internal';
+import { setRewrittenUrl } from '../rewrite_url';
 
 const preRoutingResult = {
   next(): OnPreRoutingResult {
@@ -68,14 +68,7 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
       }
 
       if (preRoutingResult.isRewriteUrl(result)) {
-        const appState = request.app as KibanaRequestState;
-        appState.rewrittenUrl = appState.rewrittenUrl ?? request.url;
-
-        const { url } = result;
-        request.setUrl(url);
-
-        // We should update raw request as well since it can be proxied to the old platform
-        request.raw.req.url = url;
+        setRewrittenUrl(request, result.url);
         return responseToolkit.continue;
       }
       throw new Error(

@@ -55,6 +55,7 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { type Attributes, metrics, ValueType } from '@opentelemetry/api';
 import { getSpaceUrlPrefix, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
+import { setRewrittenUrl } from './rewrite_url';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat } from './lifecycle/on_post_auth';
@@ -153,16 +154,6 @@ function stripConfiguredBasePath(
   }
   setRewrittenUrl(request, newUrl);
   return true;
-}
-
-/**
- * Records the original URL on the first rewrite of a request so handlers can
- * recover it later, and applies the new URL via Hapi's setUrl.
- */
-function setRewrittenUrl(request: Request, newUrl: string): void {
-  const app = request.app as KibanaRequestState;
-  app.rewrittenUrl = app.rewrittenUrl ?? request.url;
-  request.setUrl(newUrl);
 }
 
 /** @internal */
