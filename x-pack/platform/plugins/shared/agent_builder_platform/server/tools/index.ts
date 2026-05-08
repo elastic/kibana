@@ -23,9 +23,6 @@ import { generateEsqlTool } from './generate_esql';
 import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
-import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
-import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
-import { generateWorkflowTool } from './workflows/generate_workflow';
 
 export const registerTools = ({
   coreSetup,
@@ -49,14 +46,6 @@ export const registerTools = ({
     integrationKnowledgeTool(coreSetup),
     casesTool(coreSetup),
   ];
-
-  if (setupDeps.workflowsManagement) {
-    tools.push(
-      getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement }),
-      resumeWorkflowExecutionTool({ workflowsManagement: setupDeps.workflowsManagement }),
-      generateWorkflowTool({ workflowsManagement: setupDeps.workflowsManagement })
-    );
-  }
 
   tools.forEach((tool) => {
     agentBuilder.tools.register(tool);
