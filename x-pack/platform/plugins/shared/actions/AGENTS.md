@@ -33,3 +33,9 @@ This is the single most common source of review friction in connectors:
 ### Testing
 
 - The actions plugin provides the execution framework but not connector implementations. Platform tests that need a connector should stub or register a test connector type — never import a specific connector from stack_connectors or connector specs into platform-level tests.
+
+## Before Declaring Done
+
+After making changes, run these validation steps before reporting completion:
+- `node scripts/jest <path-to-changed-test-files>` — run affected unit tests
+- `node scripts/eslint --fix <changed-files>` — lint and auto-fix only changed files

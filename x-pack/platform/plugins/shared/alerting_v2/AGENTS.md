@@ -28,4 +28,10 @@ Key modules:
 
 - Use typed error classes (e.g., `isResponseError(error)` guard)
 - Return 404 when resources not found — don't throw generic errors
-- Use discriminated error types with clear messages
+
+## Before Declaring Done
+
+After making changes, run these validation steps before reporting completion:
+- `node scripts/jest <path-to-changed-test-files>` — run affected unit tests
+- `node scripts/eslint --fix <changed-files>` — lint and auto-fix only changed files
+- `node scripts/check_mappings_update --fix` — if you touched saved object schemas or mappings

@@ -17,9 +17,17 @@ Three main layers:
 - Changing HTTP methods or status codes requires API versioning
 - Internal APIs have more flexibility but still need migration paths
 
-### Security
+### Security and Audit
 
 - Platform test code cannot import from solution plugins (e.g., don't import securitySolution in platform tests)
 - Feature privileges are split between `rule` and `alert` entities
 - When checking authorization, distinguish between feature being disabled vs user lacking permission
 - Use `alerting:rule` and `alerting:alert` privilege strings correctly
+- Always include `name` in audit events using `SavedObjectsUtils.getName()` — missing names silently break audit log consumers
+
+## Before Declaring Done
+
+After making changes, run these validation steps before reporting completion:
+- `node scripts/jest <path-to-changed-test-files>` — run affected unit tests
+- `node scripts/eslint --fix <changed-files>` — lint and auto-fix only changed files
+- `node scripts/check_mappings_update --fix` — if you touched saved object schemas or mappings

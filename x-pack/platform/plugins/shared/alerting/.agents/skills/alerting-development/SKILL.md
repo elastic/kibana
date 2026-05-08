@@ -32,7 +32,6 @@ Methods on the rules client follow this pattern:
 ## Alerts Client
 
 The alerts client (`server/alerts_client/alerts_client.ts`) handles alert CRUD.
-- Always include audit events for state changes
 - Alert data uses index templates with field limits — be aware of `total_fields.limit`
 
 ## Index Templates
@@ -51,7 +50,10 @@ When updating index templates:
 
 ## Key Utilities
 
+Before creating new helpers, check whether one already exists:
+
 - `verifyAccessAndContext` — use for all route authorization
 - `transformRuleToRuleResponseV1` — standard rule-to-response mapping
 - `handleDisabledApiKeysError` — standard API key error handling
 - `validateInternalRuleType` — check if a rule type is internal before mutation
+- `countUsageOfPredefinedIds` — telemetry for predefined IDs

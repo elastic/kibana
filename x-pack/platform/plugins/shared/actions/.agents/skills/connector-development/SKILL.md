@@ -61,7 +61,13 @@ Connectors support multiple auth types (basic, bearer, header-based, SSL):
 
 ## Key Utilities
 
+Before creating new helpers, check whether one already exists:
+
 - `createConnectorTypeFromSpec()` — converts a `ConnectorSpec` to an `ActionType` for registration
 - `ActionsConfigurationUtilities` — shared config validation helpers
 - `SubActionConnector` / `CaseConnector` — base classes for sub-action connectors
 - `AuthFormFields` / `HeaderFields` — shared auth UI components in `stack_connectors/public/common/auth/`
+- `validateEmailAddresses` — email validation in actions config
+- `getWellKnownEmailService()` — well-known email service lookup route
+- `getConnectorType()` — factory pattern all connectors should follow
+- `buildHeaderRecords()` / `toHeaderArray()` — header serialization in `stack_connectors/public/common/`
