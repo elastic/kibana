@@ -1,8 +1,11 @@
 ---
 name: bug-reproduce
 description: >
-  Investigates and reproduces a Kibana Security Solution bug through browser automation.
-  Dispatched by the bug-fixer orchestrator — not triggered directly by users.
+  Step 1 of 2 for fixing a Kibana Security Solution bug. Investigates the ticket,
+  starts the environment, and reproduces the bug through the browser. Trigger when
+  the user mentions a bug number or asks to reproduce, investigate, or debug anything
+  in Security Solution. After this skill completes, run /bug-fix for Step 2.
+  Stateful (ECH) only — decline serverless bugs.
 ---
 
 # Bug Reproduce
@@ -202,5 +205,7 @@ investigation turns into implementation.
 - Bug reproduced → wait for the user to reply in the conversation, then set
   `user_acknowledged` to `yes`. This field must only be written after a real user reply —
   never pre-emptively. Writing it before the user responds is a protocol violation.
+  Once the user replies, end with: _"Reproduction confirmed. Run `/bug-fix` to proceed
+  to the fix phase."_
 - Could not reproduce → set `status` to `not_reproduced`, tell the user what you tried
   and observed, ask how to proceed. Do not signal completion.
