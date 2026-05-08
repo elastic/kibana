@@ -102,13 +102,26 @@ describe('ESQL routes', () => {
     expect(result.body).toHaveProperty('datasets');
     expect(Array.isArray(result.body.datasets)).toBe(true);
     result.body.datasets.forEach(
-      (dataset: { dataset_id: string; datasource: string; resource: string }) => {
-        expect(dataset).toHaveProperty('dataset_id');
-        expect(dataset).toHaveProperty('datasource');
+      (dataset: {
+        name: string;
+        data_source: string;
+        resource: string;
+        description?: string;
+        settings?: Record<string, unknown>;
+      }) => {
+        expect(dataset).toHaveProperty('name');
+        expect(dataset).toHaveProperty('data_source');
         expect(dataset).toHaveProperty('resource');
-        expect(typeof dataset.dataset_id).toBe('string');
-        expect(typeof dataset.datasource).toBe('string');
+        expect(typeof dataset.name).toBe('string');
+        expect(typeof dataset.data_source).toBe('string');
         expect(typeof dataset.resource).toBe('string');
+        if (dataset.description !== undefined) {
+          expect(typeof dataset.description).toBe('string');
+        }
+        if (dataset.settings !== undefined) {
+          expect(typeof dataset.settings).toBe('object');
+          expect(Array.isArray(dataset.settings)).toBe(false);
+        }
       }
     );
   });

@@ -52,9 +52,11 @@ export interface EsqlViewsResult {
 }
 
 export interface EsqlDataset {
-  dataset_id: string;
-  datasource: string;
+  name: string;
+  data_source: string;
   resource: string;
+  description?: string;
+  settings?: Record<string, unknown>;
 }
 
 export interface EsqlDatasetsResult {
