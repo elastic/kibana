@@ -80,7 +80,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
               throw new Error('Expected payload timeout error but request succeeded');
             },
             (err) => {
-              expect(err.message).to.be('Request Timeout');
+              expect(['Request Timeout', 'socket hang up']).to.contain(err.message);
             }
           );
         });

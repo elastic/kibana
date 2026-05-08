@@ -16,6 +16,7 @@ import type { HTTPVersion as FmwHTTPVersion, Instance as FmwInstance } from 'fin
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as nodePath from 'path';
+import { createBrotliCompress, createGzip, constants as zlibConstants } from 'zlib';
 import mime from 'mime-types';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { getServerListener } from '@kbn/server-http-tools';
@@ -62,7 +63,10 @@ import { KIBANA_HAPI_COMPAT_REQUEST, registerFastifyAuthentication } from './fas
 import { installHapiCompatibleJsonBodyParser } from './fastify/install_hapi_compatible_json_body_parser';
 import { installFastifyGlobalErrorHandler } from './fastify/fastify_global_error_handler';
 import { registerFastifyMultipartAndKibanaBodyHook } from './fastify/fastify_multipart_kibana_body';
-import { resolvePrecompressedStaticPath } from './fastify/precompressed_static_file';
+import {
+  orderPrecompressedEncodings,
+  resolvePrecompressedStaticPath,
+} from './fastify/precompressed_static_file';
 import { registerFastifyPayloadTimeoutPreParsing } from './fastify/register_fastify_payload_timeout_pre_parsing';
 import { isReplyCommitted } from './fastify/fastify_reply_utils';
 
@@ -889,18 +893,49 @@ export class FastifyHttpServer {
         );
         const fileStat = await fs.promises.stat(resolved.path);
         const contentType = mime.lookup(requested) || 'application/octet-stream';
+        const acceptedEncodings = orderPrecompressedEncodings(
+          typeof acceptEncoding === 'string' ? acceptEncoding : undefined
+        );
+        const compression = this.config?.compression;
+        const dynamicEncoding =
+          !resolved.contentEncoding && compression?.enabled
+            ? acceptedEncodings.find(
+                (enc) => enc === 'gzip' || (enc === 'br' && compression.brotli.enabled)
+              )
+            : undefined;
         reply
           .header('cache-control', 'must-revalidate')
           .header('vary', 'accept-encoding')
-          .header('content-type', mime.contentType(contentType) || contentType)
-          .header('content-length', String(fileStat.size));
-        if (resolved.contentEncoding) {
-          reply.header('content-encoding', resolved.contentEncoding);
+          .header('content-type', mime.contentType(contentType) || contentType);
+        if (resolved.contentEncoding || dynamicEncoding) {
+          reply.header('content-encoding', resolved.contentEncoding ?? dynamicEncoding);
+        }
+        if (dynamicEncoding) {
+          if (reply.hasHeader('content-length')) {
+            reply.removeHeader('content-length');
+          }
+        } else {
+          reply.header('content-length', String(fileStat.size));
         }
         // Stream from disk so a single Kibana process can serve large/many static
         // assets without buffering each file in memory. Fastify pipes Readable
         // streams natively and finalizes the reply when the stream ends.
-        return reply.send(fs.createReadStream(resolved.path));
+        const fileStream = fs.createReadStream(resolved.path);
+        if (dynamicEncoding === 'gzip') {
+          return reply.send(fileStream.pipe(createGzip()));
+        }
+        if (dynamicEncoding === 'br') {
+          return reply.send(
+            fileStream.pipe(
+              createBrotliCompress({
+                params: {
+                  [zlibConstants.BROTLI_PARAM_QUALITY]: compression?.brotli.quality ?? 3,
+                },
+              })
+            )
+          );
+        }
+        return reply.send(fileStream);
       } catch (err) {
         if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
           return reply

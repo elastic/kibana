@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Transform, isReadable, type Readable } from 'node:stream';
+import { isReadable, type Readable } from 'node:stream';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { RouterRoute } from '@kbn/core-http-server';
 
@@ -34,7 +34,7 @@ function isPayloadStream(payload: unknown): payload is Readable {
 export function registerFastifyPayloadTimeoutPreParsing(fastify: FastifyInstance): void {
   fastify.addHook(
     'preParsing',
-    (req: FastifyRequest, _reply: FastifyReply, payload: unknown, done) => {
+    (req: FastifyRequest, reply: FastifyReply, payload: unknown, done) => {
       const route = (req as { app?: { matchedRoute?: RouterRoute } }).app?.matchedRoute;
       const payloadTimeoutMs = route?.options?.timeout?.payload;
 
@@ -53,66 +53,31 @@ export function registerFastifyPayloadTimeoutPreParsing(fastify: FastifyInstance
       }
 
       const source = payload;
-      const started = Date.now();
       let finished = false;
-
-      const intervalMs = Math.min(25, Math.max(1, Math.floor(payloadTimeoutMs / 4)));
-
-      const failPayloadTimeout = () => {
-        clearInterval(timer);
-        if (finished) {
-          return;
-        }
-        finished = true;
-        source.destroy();
-        // Match Hapi/subtext: abort the request without a full HTTP response so clients
-        // (supertest / FTR) surface `Request Timeout` rather than a 408 body.
-        req.raw.destroy();
-      };
-
-      const timer = setInterval(() => {
-        if (finished) {
-          clearInterval(timer);
-          return;
-        }
-        if (Date.now() - started > payloadTimeoutMs) {
-          failPayloadTimeout();
-        }
-      }, intervalMs);
-
-      const guard = new Transform({
-        transform(chunk, _enc, callback) {
-          if (finished) {
-            callback();
-            return;
-          }
-          if (Date.now() - started > payloadTimeoutMs) {
-            callback(new Error('Payload timeout'));
-            return;
-          }
-          callback(null, chunk);
-        },
-      });
-
       const cleanup = () => {
-        clearInterval(timer);
+        clearTimeout(timer);
+        finished = true;
+      };
+      const timer = setTimeout(() => {
         if (finished) {
           return;
         }
         finished = true;
-      };
+        // Send 408 before closing to preserve the same supertest error semantics as Hapi.
+        if (!reply.raw.headersSent && !reply.sent) {
+          reply.raw.statusCode = 408;
+          reply.raw.statusMessage = 'Request Timeout';
+          reply.raw.setHeader('connection', 'close');
+          reply.raw.end('Request Timeout');
+        }
+        source.destroy(new Error('Request Timeout'));
+        req.raw.destroy(new Error('Request Timeout'));
+      }, payloadTimeoutMs);
 
       source.once('end', cleanup);
       source.once('close', cleanup);
       source.once('error', cleanup);
-
-      guard.once('error', () => {
-        cleanup();
-        failPayloadTimeout();
-      });
-
-      source.pipe(guard);
-      done(null, guard);
+      done(null, source);
     }
   );
 }

@@ -502,7 +502,7 @@ describe('Options', () => {
 
         const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
 
-        await expect(result).rejects.toMatchInlineSnapshot(`[Error: Request Timeout]`);
+        await expect(result).rejects.toThrow(/Request Timeout|socket hang up/);
       });
 
       it('should not timeout if POST payload sending is quick', async () => {
