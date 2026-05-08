@@ -20,8 +20,10 @@ import { ExpandableSection } from '../../shared/components/expandable_section';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
+import { GraphPreviewContainer } from './graph_preview_container';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../analyzer';
+import { Graph } from '../../graph';
 import { useSessionViewConfig } from '../../session_view/hooks/use_session_view_config';
 import { SessionView } from '../../session_view';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
@@ -97,6 +99,30 @@ export const VisualizationsSection = memo(
       [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
     );
 
+    const onShowGraph = useCallback(
+      () =>
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <Graph
+                hit={hit}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            ),
+          }),
+          {
+            ...defaultToolsFlyoutProperties,
+            historyKey,
+            session: 'start',
+          }
+        ),
+      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
+    );
+
     const onShowSessionView = useCallback(
       () =>
         overlays.openSystemFlyout(
@@ -156,6 +182,7 @@ export const VisualizationsSection = memo(
           shouldUseAncestor={false}
           showIcon={false}
         />
+        <GraphPreviewContainer hit={hit} onShowGraph={onShowGraph} />
       </ExpandableSection>
     );
   }

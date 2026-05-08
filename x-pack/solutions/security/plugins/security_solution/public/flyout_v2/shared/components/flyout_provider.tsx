@@ -12,6 +12,7 @@ import { Router } from '@kbn/shared-ux-router';
 import type { Store } from 'redux';
 import { Provider } from 'react-redux';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { EntityStoreEuidApiProvider } from '@kbn/entity-store/public';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { StartServices } from '../../../types';
@@ -56,7 +57,9 @@ export const flyoutProviders = ({
                 <UpsellingProvider upsellingService={services.upselling}>
                   <DiscoverInTimelineContextProvider>
                     <CaseProvider>
-                      <AssistantProvider>{flyoutContent}</AssistantProvider>
+                      <AssistantProvider>
+                        <EntityStoreEuidApiProvider>{flyoutContent}</EntityStoreEuidApiProvider>
+                      </AssistantProvider>
                     </CaseProvider>
                   </DiscoverInTimelineContextProvider>
                 </UpsellingProvider>
