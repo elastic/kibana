@@ -141,7 +141,7 @@ export function TipsAndResources() {
           {cards.map(({ icon, title, description, href }) => (
             <EuiFlexItem key={icon}>
               <EuiCard
-                icon={<EuiIcon size="xl" type={icon} />}
+                icon={<EuiIcon size="xl" type={icon} aria-hidden={true} />}
                 title={title}
                 description={description}
                 footer={

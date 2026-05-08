@@ -258,7 +258,7 @@ const AnomalyMessage = ({ anomaly }: { anomaly: TableItem }) => {
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
       <EuiFlexItem grow={false} component="span">
-        <EuiIcon type={icon} />
+        <EuiIcon type={icon} aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem component="span">
         {`${ratioMessage} ${message}`}
