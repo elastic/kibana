@@ -99,11 +99,6 @@ export interface EmbeddableConversationProps {
  */
 export interface OpenConversationSidebarOptions extends EmbeddableConversationProps {
   onClose?: () => void;
-  /**
-   * Conversation id to restore on open. The plugin persists it under the storage key
-   * derived from the resolved sidebar config (`sessionTag`/`agentId`)
-   */
-  conversationId?: string;
 }
 
 /**
