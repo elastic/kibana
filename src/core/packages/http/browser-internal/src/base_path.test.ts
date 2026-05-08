@@ -77,38 +77,18 @@ describe('BasePath', () => {
   });
 
   describe('spaceId', () => {
-    it('extracts the spaceId from basePath when no serverBasePath is provided', () => {
-      expect(new BasePath({ basePath: '/s/myspace' }).spaceId).toEqual('myspace');
-    });
-
-    it('extracts the spaceId from basePath after stripping serverBasePath', () => {
-      expect(
-        new BasePath({ basePath: '/kibana/s/myspace', serverBasePath: '/kibana' }).spaceId
-      ).toEqual('myspace');
-    });
-
-    it('defaults to "default" when basePath has no space prefix', () => {
-      expect(new BasePath({ basePath: '/kibana', serverBasePath: '/kibana' }).spaceId).toEqual(
-        'default'
+    it('uses the injected spaceId', () => {
+      expect(new BasePath({ basePath: '/s/myspace', spaceId: 'myspace' }).spaceId).toEqual(
+        'myspace'
       );
     });
 
-    it('defaults to "default" when basePath is empty', () => {
-      expect(new BasePath({ basePath: '' }).spaceId).toEqual('default');
+    it('defaults to "default" when spaceId is not provided', () => {
+      expect(new BasePath({ basePath: '/foo' }).spaceId).toEqual('default');
     });
 
-    it('ignores /s/<id> segments in the middle of the path', () => {
-      expect(new BasePath({ basePath: '/this/is/a/crazy/path/s/myspace' }).spaceId).toEqual(
-        'default'
-      );
-    });
-
-    it('does not match a path ending in /s without a space id', () => {
-      expect(new BasePath({ basePath: '/this/is/a/crazy/path/s' }).spaceId).toEqual('default');
-    });
-
-    it('returns "default" when the explicit space prefix is the default space', () => {
-      expect(new BasePath({ basePath: '/s/default' }).spaceId).toEqual('default');
+    it('validates the spaceId via asSpaceId', () => {
+      expect(() => new BasePath({ basePath: '/', spaceId: 'INVALID SPACE' })).toThrow();
     });
   });
 

@@ -39,6 +39,7 @@ export class HttpService implements CoreService<InternalHttpSetup, InternalHttpS
       serverBasePath: injectedMetadata.getServerBasePath(),
       publicBaseUrl: injectedMetadata.getPublicBaseUrl(),
       assetsHrefBase: injectedMetadata.getAssetsHrefBase(),
+      spaceId: injectedMetadata.getSpaceId(),
     });
     const staticAssets = new StaticAssets({
       assetsHrefBase: injectedMetadata.getAssetsHrefBase(),
