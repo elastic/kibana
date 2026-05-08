@@ -28,7 +28,6 @@ import {
   usageCollection,
 } from '../kibana_services';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from './registry';
-import { asyncForEach } from '../../../../../packages/shared/kbn-std';
 
 const runAddTelemetry = (
   parent: unknown,
@@ -54,7 +53,7 @@ export interface AddFromLibraryContentProps {
 
 export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps) => {
   const libraryTypes = useAddFromLibraryTypes();
-  console.log({ libraryTypes });
+
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
     async (
       id: SavedObjectCommon['id'],
@@ -94,13 +93,7 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
         defaultMessage: 'No matching objects found.',
       })}
       getExtraItems={async () => {
-        console.log('before');
-        // const test = await core.http.get(`/api/kibana/management/saved_objects/_find`, {
-        //   query: { type: 'markdown' },
-        // } as Record<string, any>);
-        // console.log('after', test);
-        // return test.savedObjects;
-        const getPromises = Object.values(libraryTypes)
+        const getPromises = libraryTypes
           .filter(({ getSavedObjects }) => Boolean(getSavedObjects))
           .map(({ getSavedObjects }) => getSavedObjects!());
         return (await Promise.all(getPromises)).flat();

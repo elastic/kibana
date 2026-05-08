@@ -150,7 +150,14 @@ class SavedObjectFinderUiClass extends React.Component<
       this.props.getExtraItems?.(),
     ]);
 
-    const savedObjects = [...response[0].hits, ...(response.length >= 2 ? response[1]! : [])]
+    const savedObjects = [
+      ...response[0].hits,
+      ...(response.length >= 2
+        ? response[1]!.filter(({ type }) => {
+            return visibleTypes ? visibleTypes.includes(type) : true;
+          })
+        : []),
+    ]
       .map((savedObject) => {
         const {
           attributes: { name, title, description },
