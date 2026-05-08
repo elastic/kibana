@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { getLatencyAggregationType } from '../../../../common/latency_aggregation_types';
@@ -22,7 +23,6 @@ import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useStateDebounced } from '../../../hooks/use_debounce';
 import { FETCH_STATUS, isPending, isSuccess, useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import type { TableSearchBar } from '../managed_table';
 import { ManagedTable } from '../managed_table';
@@ -359,7 +359,8 @@ function useTableData({
       shouldUseDurationSummary,
       start,
       transactionType,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
 
   const itemsToFetch = useMemo(() => renderedItems.map(({ name }) => name), [renderedItems]);
@@ -402,7 +403,7 @@ function useTableData({
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mainStatistics.requestId, itemsToFetch, offset, comparisonEnabled],
-    { preservePreviousData: false }
+    { preservePreviousData: false, useCallApmApiV2: true }
   );
 
   return {

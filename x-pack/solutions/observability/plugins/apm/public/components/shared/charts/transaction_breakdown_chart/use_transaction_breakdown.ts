@@ -65,7 +65,8 @@ export function useTransactionBreakdown({
       transactionType,
       transactionTypeStatus,
       transactionName,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
 
   return {
