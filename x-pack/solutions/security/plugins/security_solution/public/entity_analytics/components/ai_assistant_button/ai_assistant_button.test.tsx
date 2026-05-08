@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AiAssistantButton } from './ai_assistant_button';
+import type { AiAssistantButtonProps } from './ai_assistant_button';
 import { TestProviders } from '../../../common/mock';
 import type { EntityType } from '../../../../common/search_strategy';
 
@@ -57,7 +58,7 @@ describe('AiAssistantButton', () => {
     suggestedPrompt: 'Investigate the entity and suggest next steps.',
   };
 
-  const defaultProps = {
+  const defaultProps: AiAssistantButtonProps<EntityType> = {
     entityType: 'user' as EntityType,
     entityName: 'test-user',
     aiAssistantProps,
