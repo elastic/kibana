@@ -13,59 +13,8 @@ on:
     issues: write
     pull-requests: read
   steps:
-    - name: Check actor trust
-      id: check_actor_trust
-      uses: actions/github-script@v9
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const sender = context.payload.sender?.login ?? '';
-          if (!sender) {
-            core.setOutput('actor_trusted', 'false');
-            core.setOutput('actor_trusted_reason', 'Sender login missing from event payload.');
-            return;
-          }
-          if (sender === 'github-actions[bot]') {
-            core.setOutput('actor_trusted', 'true');
-            core.setOutput('actor_trusted_reason', 'github-actions[bot] is trusted.');
-            return;
-          }
-          const { data: senderPerm } = await github.rest.repos.getCollaboratorPermissionLevel({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            username: sender,
-          });
-          const senderTrusted = ['write', 'maintain', 'admin'].includes(senderPerm.permission);
-          if (!senderTrusted) {
-            core.setOutput('actor_trusted', 'false');
-            core.setOutput('actor_trusted_reason',
-              `Sender '${sender}' not trusted; permission '${senderPerm.permission}'.`);
-            return;
-          }
-
-          const issueAuthor = context.payload.issue?.user?.login ?? '';
-          if (!issueAuthor) {
-            core.setOutput('actor_trusted', 'false');
-            core.setOutput('actor_trusted_reason', 'Issue author login missing from payload.');
-            return;
-          }
-          const { data: authorPerm } = await github.rest.repos.getCollaboratorPermissionLevel({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            username: issueAuthor,
-          });
-          const authorTrusted = ['read', 'triage', 'write', 'maintain', 'admin'].includes(authorPerm.permission);
-          const trusted = senderTrusted && authorTrusted;
-          core.setOutput('actor_trusted', trusted ? 'true' : 'false');
-          core.setOutput('actor_trusted_reason',
-            trusted
-              ? `Sender '${sender}' (${senderPerm.permission}) and author '${issueAuthor}' (${authorPerm.permission}) trusted.`
-              : `Author '${issueAuthor}' not trusted; permission '${authorPerm.permission}'.`
-          );
-
     - name: Check duplicate PR
       id: check_duplicate_pr
-      if: steps.check_actor_trust.outputs.actor_trusted == 'true'
       uses: actions/github-script@v9
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -94,7 +43,6 @@ on:
 
 if: >-
   github.event.label.name == 'backlog-groom' &&
-  needs.pre_activation.outputs.actor_trusted == 'true' &&
   needs.pre_activation.outputs.duplicate_pr_found != 'true'
 steps:
   - uses: actions/setup-node@v4
@@ -112,8 +60,6 @@ permissions:
 jobs:
   pre-activation:
     outputs:
-      actor_trusted: ${{ steps.check_actor_trust.outputs.actor_trusted }}
-      actor_trusted_reason: ${{ steps.check_actor_trust.outputs.actor_trusted_reason }}
       duplicate_pr_found: ${{ steps.check_duplicate_pr.outputs.duplicate_pr_found }}
       duplicate_pr_url: ${{ steps.check_duplicate_pr.outputs.duplicate_pr_url }}
 engine:
