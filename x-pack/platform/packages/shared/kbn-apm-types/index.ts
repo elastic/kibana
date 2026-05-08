@@ -42,3 +42,5 @@ export type * from './src/service_map';
 export * from './src/latency_distribution_chart_types';
 export type * from './src/timeseries';
 export type * from './src/service_groups';
+export type * from './src/data_source';
+export type * from './src/time_range_metadata';

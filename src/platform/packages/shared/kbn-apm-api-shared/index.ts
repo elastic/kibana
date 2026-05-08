@@ -39,6 +39,7 @@ export type * from './src/routes/latency_distribution';
 export type * from './src/routes/metrics';
 export type * from './src/routes/profiling';
 export type * from './src/routes/service_groups';
+export type * from './src/routes/time_range_metadata';
 export {
   rangeRt,
   kueryRt,

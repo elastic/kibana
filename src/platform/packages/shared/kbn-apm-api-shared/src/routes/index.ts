@@ -30,6 +30,7 @@ import { latencyDistributionRouteDefinitions } from './latency_distribution';
 import { metricsRouteDefinitions } from './metrics';
 import { profilingRouteDefinitions } from './profiling';
 import { serviceGroupsRouteDefinitions } from './service_groups';
+import { timeRangeMetadataRouteDefinitions } from './time_range_metadata';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -57,6 +58,7 @@ export const routeDefinitions = {
   metrics: metricsRouteDefinitions,
   profiling: profilingRouteDefinitions,
   serviceGroups: serviceGroupsRouteDefinitions,
+  timeRangeMetadata: timeRangeMetadataRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;
