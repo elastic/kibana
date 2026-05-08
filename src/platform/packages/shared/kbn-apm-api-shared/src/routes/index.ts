@@ -18,6 +18,7 @@ import { assistantFunctionsRouteDefinitions } from './assistant_functions';
 import { correlationsRouteDefinitions } from './correlations';
 import { customDashboardsRouteDefinitions } from './custom_dashboards';
 import { dependenciesRouteDefinitions } from './dependencies';
+import { transactionsRouteDefinitions } from './transactions';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -33,6 +34,7 @@ export const routeDefinitions = {
   correlations: correlationsRouteDefinitions,
   customDashboards: customDashboardsRouteDefinitions,
   dependencies: dependenciesRouteDefinitions,
+  transactions: transactionsRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;

@@ -27,6 +27,16 @@ export type * from './src/routes/assistant_functions';
 export type * from './src/routes/correlations';
 export type * from './src/routes/custom_dashboards';
 export type * from './src/routes/dependencies';
+export type * from './src/routes/transactions';
+export {
+  rangeRt,
+  kueryRt,
+  probabilityRt,
+  offsetRt,
+  serviceTransactionDataSourceRt,
+  transactionDataSourceRt,
+  filtersRt,
+} from './src/default_api_types';
 export {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,

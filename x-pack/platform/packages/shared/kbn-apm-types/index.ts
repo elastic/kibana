@@ -26,3 +26,5 @@ export type * from './src/correlations';
 export * from './src/custom_dashboards';
 export * from './src/connections';
 export type * from './src/latency_distribution';
+export * from './src/document_type';
+export * from './src/rollup';
